@@ -1,0 +1,30 @@
+import * as brioche from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/m4-1.4.19.tar.xz",
+      hash: brioche.sha256Hash("63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96"),
+    });
+
+  return brioche.process({
+    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    args: [
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure --prefix=/
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `),
+    ],
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.processTemplate(stage2(), "/bin"),
+    }
+  }).cast("directory");
+});

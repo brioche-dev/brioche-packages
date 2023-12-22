@@ -1,0 +1,29 @@
+import * as brioche from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/zstd-1.5.5.tar.gz",
+      hash: brioche.sha256Hash("9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4"),
+    });
+
+  return brioche.process({
+    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    args: [
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        make prefix=/
+        make install prefix="$BRIOCHE_OUTPUT"
+      `),
+    ],
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.processTemplate(stage2(), "/bin"),
+    }
+  }).cast("directory");
+});

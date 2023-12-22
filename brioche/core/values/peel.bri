@@ -1,0 +1,53 @@
+import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
+import { type CastTo, type CastResult, cast } from "./cast.bri";
+import { Directory } from "./directory.bri";
+import { Proxy } from "./proxy.bri";
+import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny } from "./value.bri";
+
+export function peel(directory: AsyncLazy<Directory>, depth: number = 1): Peel {
+  return new Peel({
+    directory: new Proxy(directory),
+    depth,
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+interface PeelCtor {
+  directory: AsyncLazy<Directory>;
+  depth: number;
+  source?: runtime.Source;
+}
+
+export class Peel implements Lazy {
+  directory: AsyncLazy<Directory>;
+  depth: number;
+  source?: runtime.Source;
+
+  constructor(options: PeelCtor) {
+    this.directory = options.directory;
+    this.depth = options.depth;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<Value> {
+    const result = await runtime.resolve(await this.briocheSerialize());
+    return briocheDeserializeAny(result, this.source);
+  }
+
+  async briocheSerialize(): Promise<runtime.LazyPeel> {
+    const directory = await (await this.directory).briocheSerialize();
+    return {
+      type: "peel",
+      directory,
+      depth: this.depth,
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+
+  cast<T extends CastTo>(to: T): Lazy<CastResult<T>> {
+    return cast(this, to);
+  }
+}

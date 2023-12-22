@@ -1,0 +1,110 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "/toolchain/stage0";
+import binutils from "./1_01_binutils.bri";
+import gcc from "./1_02_gcc.bri";
+import linuxHeaders from "./1_03_linux_headers.bri";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
+      hash: brioche.sha256Hash("fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2"),
+    });
+  const sourcePatch = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
+      hash: brioche.sha256Hash("643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d"),
+    });
+
+
+  const briochePacked = brioche.setPermissions(
+    brioche.download({
+      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
+      hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
+    }),
+    {
+      executable: true,
+    },
+  );
+  const briochePacker = brioche.setPermissions(
+    brioche.download({
+      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packer",
+      hash: brioche.sha256Hash("c9b4ca9b59e65ce753c14e0629d40368f828bbaf0208c4e281c804f2038b18b6"),
+    }),
+    {
+      executable: true,
+    },
+  );
+
+  const stage1 = brioche.merge(binutils(), gcc(), linuxHeaders());
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source
+
+      mkdir "$BRIOCHE_OUTPUT/lib"
+
+      mkdir -p "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib"
+      ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib/"
+
+      case $(uname -m) in
+        i?86)
+          ln -sfv ld-linux.so.2 "$BRIOCHE_OUTPUT/lib/ld-lsb.so.3"
+          ;;
+        x86_64)
+          mkdir "$BRIOCHE_OUTPUT/lib64"
+          ln -sfv ../lib/ld-linux-x86-64.so.2 "$BRIOCHE_OUTPUT/lib64"
+          ln -sfv ../lib/ld-linux-x86-64.so.2 "$BRIOCHE_OUTPUT/lib64/ld-lsb-x86-64.so.3"
+          ;;
+      esac
+
+      patch -Np1 -i "$sourcePatch"
+
+      mkdir build
+      cd build
+
+      echo "rootsbindir=/sbin" > configparms
+
+      ../configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(../scripts/config.guess)" \
+        --enable-kernel=4.14 \
+        --with-headers="$stage1/usr/include" \
+        libc_cv_slibdir=/lib
+
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+
+      find "$BRIOCHE_OUTPUT/usr/bin" -type f -executable -print0 \\
+        | while IFS= read -r -d $'\\0' bin; do
+          # Skip shebang scripts
+          if head -n 1 "$bin" | grep -q "^#!"; then
+            continue
+          fi
+
+          "$packer" autowrap \
+            --packed-exec "$packed" \
+            --sysroot "$BRIOCHE_OUTPUT" \
+            -L "$BRIOCHE_OUTPUT/lib" \
+            -L "$BRIOCHE_OUTPUT/usr/lib" \
+            "$bin"
+        done
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      sourcePatch: brioche.processTemplate(sourcePatch),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1),
+      packer: brioche.processTemplate(briochePacker),
+      packed: brioche.processTemplate(briochePacked),
+    },
+  });
+});

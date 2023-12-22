@@ -1,0 +1,6 @@
+import * as brioche from "brioche";
+import { build } from "./build.bri";
+
+export default async () => {
+  return await build();
+};

@@ -1,0 +1,56 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "../stage0";
+import stage1 from "../stage1";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
+      hash: brioche.sha256Hash("6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar xf "$source" -C source --strip-components=1
+      cd source
+
+      sed -i s/mawk// configure
+
+      mkdir build
+      pushd build
+        ../configure
+        make -C include
+        make -C progs tic
+      popd
+
+      ./configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(./config.guess)" \
+        --mandir=/usr/share/man \
+        --with-manpage-format=normal \
+        --with-shared \
+        --without-normal \
+        --with-cxx-shared \
+        --without-debug \
+        --without-ada \
+        --disable-stripping \
+        --enable-widec
+
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT" TIC_PATH="$(pwd)/build/progs/tic"
+      echo "INPUT(-lncursesw)" > "$BRIOCHE_OUTPUT/usr/lib/libncurses.so"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1()),
+    }
+  });
+});

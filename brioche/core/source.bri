@@ -1,0 +1,20 @@
+const ops = (globalThis as any).Deno.core.ops;
+
+interface StackFrame {
+  fileName: string | null;
+  lineNumber: number | null;
+  columnNumber: number | null;
+}
+
+interface SourceOptions {
+  error?: Error;
+  depth?: number;
+}
+
+export function source(options: SourceOptions = {}): StackFrame[] {
+  const error = options.error ?? new Error();
+  const depthOffset = options.error == null ? 1 : 0;
+  const depth = (options.depth ?? 0) + depthOffset;
+  const frames: StackFrame[] = ops.op_brioche_stack_frames_from_exception(error);
+  return frames.slice(depth);
+}

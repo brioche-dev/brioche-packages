@@ -1,0 +1,81 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "/toolchain/stage0";
+import binutils from "./1_01_binutils.bri";
+import gcc from "./1_02_gcc.bri";
+import linuxHeaders from "./1_03_linux_headers.bri";
+import glibc from "./1_04_glibc.bri";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
+      hash: brioche.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
+    });
+
+  let stage1 = brioche.merge(
+    binutils(),
+    gcc(),
+    linuxHeaders(),
+    glibc(),
+  );
+
+  stage1 = wrapWithScript(stage1, {
+    paths: [
+      "usr/bin/x86_64-lfs-linux-gnu-gcc",
+    ],
+    renameSuffix: "-orig",
+    script: makeFile(`#!/usr/bin/env sh
+      sysroot=$(cd "$(dirname -- "$0")/../.." && pwd)
+      "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/usr/include" "$@"
+    `, true),
+  });
+
+  stage1 = await useBriocheLd(stage1, {
+    ldPaths: [
+      "usr/bin/x86_64-lfs-linux-gnu-ld",
+      "usr/bin/x86_64-lfs-linux-gnu-ld.bfd",
+      "usr/x86_64-lfs-linux-gnu/bin/ld",
+      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd"
+    ],
+    interpreterPaths: {
+      "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
+    },
+  });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source/build
+      tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source/build
+
+      export CFLAGS="--sysroot=$stage1 -isystem $stage1/usr/include"
+      export CXXFLAGS="$CFLAGS"
+      export LDFLAGS="--sysroot=$stage1"
+
+      ../libstdc++-v3/configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(../config.guess)" \
+        --disable-multilib \
+        --disable-nls \
+        --disable-libstdcxx-pch \
+        --with-gxx-include-dir="/$TARGET/include/c++/13.2.0"
+
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+
+      rm -v "$BRIOCHE_OUTPUT/usr/lib"/lib{stdc++,stdc++fs,supc++}.la
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1),
+    }
+  });
+});

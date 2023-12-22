@@ -1,0 +1,178 @@
+export async function resolveAll(values: []): Promise<[]>;
+export async function resolveAll(values: [LazyValue]): Promise<[CompleteValue]>;
+export async function resolveAll(values: [LazyValue, LazyValue]): Promise<[CompleteValue, CompleteValue]>;
+export async function resolveAll(values: LazyValue[]): Promise<CompleteValue[]>;
+export async function resolveAll(values: LazyValue[]): Promise<CompleteValue[]> {
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_resolve_all(values);
+  return result;
+}
+
+export async function resolve(values: LazyValue): Promise<CompleteValue> {
+  const [result] = await resolveAll([values]);
+  return result;
+}
+
+export async function createProxy(value: LazyValue): Promise<LazyProxy> {
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_create_proxy(value);
+  return result;
+}
+
+export type CompleteValue =
+  | CompleteFile
+  | CompleteSymlink
+  | CompleteDirectory;
+
+export type CompleteFile = WithMeta & {
+  type: "file",
+  data: BlobId,
+  executable: boolean,
+  resources: CompleteDirectoryContents,
+};
+
+export type CompleteSymlink = WithMeta & {
+  type: "symlink",
+  target: BString,
+};
+
+export type CompleteDirectory = WithMeta & { type: "directory" } & CompleteDirectoryContents;
+
+export type CompleteDirectoryContents = {
+  entries: Record<BString, CompleteValue>,
+};
+
+export type LazyValue =
+  | CompleteValue
+  | CompleteSymlink
+  | LazyDirectory
+  | LazyDownload
+  | LazyUnpack
+  | LazyProcess
+  | LazyCast
+  | LazyMerge
+  | LazyPeel
+  | LazyGet
+  | LazyRemove
+  | LazySetPermissions
+  | LazyProxy;
+
+export type LazyDirectory = WithMeta & {
+  type: "directory",
+  entries: Record<BString, LazyValue>,
+};
+
+export type LazyDownload = WithMeta & {
+  type: "download",
+  url: string,
+  hash: Hash,
+};
+
+export type LazyUnpack = WithMeta & {
+  type: "unpack",
+  file: LazyValue,
+  archive: ArchiveFormat,
+  compression?: CompressionFormat | null,
+};
+
+export type LazyProcess = WithMeta & {
+  type: "process",
+  command: ProcessTemplate,
+  args: ProcessTemplate[],
+  env: Record<BString, ProcessTemplate>,
+  workDir: LazyValue,
+  platform: Platform,
+};
+
+export type LazyCast = WithMeta & {
+  type: "cast",
+  value: LazyValue,
+  to: CompleteValue["type"],
+};
+
+export type LazyMerge = WithMeta & {
+  type: "merge",
+  directories: LazyValue[],
+};
+
+export type LazyPeel = WithMeta & {
+  type: "peel",
+  directory: LazyValue,
+  depth: number,
+};
+
+export type LazyGet = WithMeta & {
+  type: "get",
+  directory: LazyValue,
+  path: BString,
+};
+
+export type LazyRemove = WithMeta & {
+  type: "remove",
+  directory: LazyValue,
+  paths: BString[],
+};
+
+export type LazySetPermissions = WithMeta & {
+  type: "set_permissions",
+  file: LazyValue,
+  executable: boolean | null,
+};
+
+export type LazyProxy = WithMeta & {
+  type: "proxy",
+  hash: ValueHash,
+};
+
+export type ValueHash = string & {__valueHash: never};
+
+export type WithMeta = {
+  meta?: Meta,
+};
+
+export type Meta = {
+  source?: Source,
+}
+
+export type Source = StackFrame[];
+
+export type StackFrame = {
+  fileName?: string | null,
+  lineNumber?: number | null,
+  columnNumber?: number | null,
+}
+
+export type BlobId = string & {__blobId: never};
+
+export type BString = string & {__bString: never};
+
+export type HexString = string & {__hexString: never};
+
+export type Platform =
+  | "x86_64-linux";
+
+export type Hash =
+  | { type: "sha256", value: HexString };
+
+export type ArchiveFormat = "tar";
+
+export type CompressionFormat = "none" | "gzip" | "xz" | "zstd";
+
+export type ProcessTemplate = {
+  components: ProcessTemplateComponent[],
+};
+
+export type ProcessTemplateComponent =
+  | { type: "literal", value: BString }
+  | { type: "input", value: LazyValue }
+  | { type: "output_path" }
+  | { type: "resources_dir" }
+  | { type: "home_dir" }
+  | { type: "work_dir" }
+  | { type: "temp_dir" }
+
+export function isHex(s: string): s is HexString {
+  return /^([0-9a-fA-F]{2})*$/.test(s);
+}
+
+export function bstring(value: string): BString {
+  return encodeURIComponent(value) as BString;
+}

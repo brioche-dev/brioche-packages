@@ -1,0 +1,80 @@
+import * as brioche from "/core";
+
+interface UseBriocheLdOptions {
+  ldPaths: string[];
+  interpreterPaths: Record<string, string>;
+}
+
+export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseBriocheLdOptions): brioche.Lazy<brioche.Directory> {
+  const briocheLd = brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-ld",
+    hash: brioche.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
+  });
+  const briochePacked = brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
+    hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
+  });
+
+  for (const ldPath of options.ldPaths) {
+    const systemLd = brioche.get(dir, ldPath);
+
+    const ldDir = ldPath.split("/").slice(0, -1).join("/");
+    const ldParentDirComponents = ldDir.split("/").slice(0, -1);
+    const ldName = ldPath.split("/").at(-1);
+    const ldParentName = ldDir.split("/").at(-1);
+    brioche.assert(ldName != null && ldParentName != null);
+
+    const briocheLdPath = [...ldParentDirComponents, "libexec", "brioche-ld"].join("/");
+    let briocheLdDir: brioche.Lazy<brioche.Directory> = brioche.directory({
+      "ld": brioche.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
+      "brioche-packed": brioche.setPermissions(briochePacked, { executable: true }),
+    });
+
+    for (const [interpreterPath, interpreterTargetPath] of Object.entries(options.interpreterPaths)) {
+      const interpreterDir = interpreterPath.split("/").slice(0, -1).join("/");
+      const pathToBriocheLd = interpreterDir.split("/").map(() => "..").join("/");
+      const pathToRoot = briocheLdPath.split("/").map(() => "..").join("/");
+      const interpreterTarget = `${pathToBriocheLd}/${pathToRoot}/${interpreterTargetPath}`;
+      briocheLdDir = brioche.insert(briocheLdDir, interpreterPath, brioche.symlink({ target: interpreterTarget }));
+    };
+
+    dir = brioche.insert(dir, `${ldDir}/${ldName}-orig`, systemLd);
+    dir = brioche.insert(dir, ldPath, brioche.setPermissions(briocheLd, { executable: true }));
+    dir = brioche.insert(dir, briocheLdPath, briocheLdDir);
+  }
+
+  return dir;
+}
+
+interface WrapWithScriptOptions {
+  paths: string[];
+  renameSuffix: string;
+  script: brioche.AsyncLazy<brioche.File>;
+}
+
+export function wrapWithScript(dir: brioche.Lazy<brioche.Directory>, options: WrapWithScriptOptions): brioche.Lazy<brioche.Directory> {
+  for (const path of options.paths) {
+    const program = brioche.get(dir, path);
+
+    dir = brioche.insert(dir, path, options.script);
+    dir = brioche.insert(dir, `${path}${options.renameSuffix}`, program);
+  }
+
+  return dir;
+}
+
+export function makeFile(data: string, executable: boolean): brioche.Lazy<brioche.File> {
+  const file = brioche.process({
+    command: brioche.processTemplate("/usr/bin/env"),
+    args: [
+      brioche.processTemplate("sh"),
+      brioche.processTemplate("-c"),
+      brioche.processTemplate('echo "$DATA" > "$BRIOCHE_OUTPUT"'),
+    ],
+    env: {
+      DATA: brioche.processTemplate(data),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+    },
+  }).cast("file");
+  return brioche.setPermissions(file, { executable });
+}

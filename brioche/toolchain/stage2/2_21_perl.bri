@@ -1,0 +1,42 @@
+import * as brioche from "/core";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import toolchain from "./2_18_toolchain.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
+      hash: brioche.sha256Hash("eca551caec3bc549a4e590c0015003790bdd1a604ffe19cc78ee631d51f7072e"),
+    });
+
+  let perl = brioche.process({
+    command: brioche.processTemplate("/usr/bin/env"),
+    args: [
+      brioche.processTemplate("sh"),
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar xf "$source" --strip-components=1
+        sh Configure \
+          -des \
+          -Dprefix="/usr" \
+          -Duserelocatableinc
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `)
+    ],
+    env: {
+      PATH: brioche.processTemplate(toolchain(), "/bin"),
+      source: brioche.processTemplate(sourceArchive),
+    },
+  }).cast("directory");
+
+  // Mark the perl binary as executable
+  // TODO: Figure out why Perl isn't executable by default?
+  let perlBin = brioche.cast(brioche.get(perl, "usr/bin/perl"), "file");
+  perlBin = brioche.setPermissions(perlBin, { executable: true });
+  perl = brioche.insert(perl, "usr/bin/perl", perlBin);
+
+  return perl;
+});

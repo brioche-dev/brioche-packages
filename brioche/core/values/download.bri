@@ -1,0 +1,63 @@
+import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
+import { File } from "./file.bri";
+import { Hash } from "./hash.bri";
+import { Unpack } from "./unpack.bri";
+import { type Lazy } from "./value.bri";
+
+export interface DownloadOptions {
+  url: string;
+  hash: Hash;
+}
+
+export function download(opts: DownloadOptions): Download {
+  return new Download({
+    url: opts.url,
+    hash: opts.hash,
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+interface DownloadCtor {
+  url: string;
+  hash: Hash;
+  source?: runtime.Source;
+}
+
+export class Download implements Lazy<File> {
+  url: string;
+  hash: Hash;
+  source?: runtime.Source;
+
+  constructor(options: DownloadCtor) {
+    this.url = options.url;
+    this.hash = options.hash;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<File> {
+    const result = await runtime.resolve(this.briocheSerialize());
+    return File.briocheDeserialize(result, this.source);
+  }
+
+  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat: runtime.CompressionFormat = "none"): Unpack {
+    return new Unpack({
+      file: this.briocheSerialize(),
+      archiveFormat,
+      compressionFormat,
+      source: briocheSource({ depth: 1 }),
+    });
+  }
+
+  briocheSerialize(): runtime.LazyDownload {
+    return {
+      type: "download",
+      url: this.url,
+      hash: this.hash.briocheSerialize(),
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+}
+

@@ -1,0 +1,50 @@
+import * as brioche from "brioche";
+
+// Change this value to re-run all value resolutions
+const WATERMARK = "1";
+
+const NUM_PROCESSES = 100;
+const NUM_DOWNLOADS = 100;
+const SLEEP_DURATION = 1;
+
+const sleepProcess = async (n: string) => {
+  return brioche.process({
+    command: brioche.processTemplate("/usr/bin/env"),
+    args: [
+      brioche.processTemplate("sh"),
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        echo "[$n] Watermark: $WATERMARK"
+        echo "[$n] Sleeping $SLEEP_DURATION..."
+        sleep $SLEEP_DURATION
+        echo "[$n] Done"
+        echo "$n" >> "$BRIOCHE_OUTPUT"
+      `),
+    ],
+    env: {
+      PATH: brioche.processTemplate(brioche.stage2(), "/bin"),
+      SLEEP_DURATION: brioche.processTemplate(SLEEP_DURATION.toString()),
+      n: brioche.processTemplate(n),
+      WATERMARK: brioche.processTemplate(WATERMARK),
+    }
+  });
+};
+
+const download = async (n: string) => {
+  return brioche.download({
+    url: `https://gist.githubusercontent.com/kylewlacy/c0f1a43e2641686f377178880fcce6ae/raw/f48155695445aa218e558fba824b61cf718d5e55/lorem-ipsum.txt?n=${encodeURIComponent(n)}&watermark=${encodeURIComponent(WATERMARK)}`,
+    hash: brioche.sha256Hash("642e3f58cc2bcc0d12d2e1e21dd9ea131f058a98e23e9beac79881bb0a324d06"),
+  });
+};
+
+export default async () => {
+  const downloads = new Array(NUM_DOWNLOADS).fill(undefined).map((_, i) => [`download-${i}.txt`, download(i.toString())]);
+  const processes = new Array(NUM_PROCESSES).fill(undefined).map((_, i) => [`process-${i}.txt`, sleepProcess(i.toString())]);
+
+  return brioche.directory({
+    ...Object.fromEntries(downloads),
+    ...Object.fromEntries(processes),
+  });
+};

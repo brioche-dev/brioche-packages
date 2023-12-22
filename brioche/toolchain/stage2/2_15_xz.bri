@@ -1,0 +1,41 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "../stage0";
+import stage1 from "../stage1";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/xz-5.4.4.tar.xz",
+      hash: brioche.sha256Hash("705d0d96e94e1840e64dec75fc8d5832d34f6649833bec1ced9c3e08cf88132e"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source
+
+      ./configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(./build-aux/config.guess)" \
+        --disable-static \
+        --docdir=/usr/share/doc/xz-5.4.4
+
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+
+      rm "$BRIOCHE_OUTPUT/usr/lib/liblzma.la"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1()),
+    }
+  });
+});

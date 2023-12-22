@@ -1,0 +1,149 @@
+import * as brioche from "/core";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import { linuxHeaders, glibc, libstdcpp } from "../stage1";
+import m4 from "./2_01_m4.bri";
+import ncurses from "./2_02_ncurses.bri";
+import bash from "./2_03_bash.bri";
+import coreutils from "./2_04_coreutils.bri";
+import diffutils from "./2_05_diffutils.bri";
+import file from "./2_06_file.bri";
+import findutils from "./2_07_findutils.bri";
+import gawk from "./2_08_gawk.bri";
+import grep from "./2_09_grep.bri";
+import gzip from "./2_10_gzip.bri";
+import make from "./2_11_make.bri";
+import patch from "./2_12_patch.bri";
+import sed from "./2_13_sed.bri";
+import tar from "./2_14_tar.bri";
+import xz from "./2_15_xz.bri";
+import binutils from "./2_16_binutils.bri";
+import gcc from "./2_17_gcc.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  let toolchain = brioche.merge(
+    linuxHeaders(),
+    glibc(),
+    libstdcpp(),
+    m4(),
+    ncurses(),
+    bash(),
+    coreutils(),
+    diffutils(),
+    file(),
+    findutils(),
+    gawk(),
+    grep(),
+    gzip(),
+    make(),
+    patch(),
+    sed(),
+    tar(),
+    xz(),
+    binutils(),
+    gcc(),
+  );
+
+  toolchain = brioche.insert(toolchain, "bin", brioche.symlink({ target: "usr/bin" }));
+
+  toolchain = useBriocheLd(toolchain, {
+    ldPaths: [
+      "usr/bin/ld",
+      "usr/bin/ld.bfd",
+      "usr/x86_64-lfs-linux-gnu/bin/ld",
+      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
+    ],
+    interpreterPaths: {
+      "lib64/ld-linux-x86-64.so.2": "lib/ld-linux-x86-64.so.2",
+    },
+  });
+
+  toolchain = wrapWithScript(toolchain, {
+    paths: [
+      "usr/bin/x86_64-lfs-linux-gnu-c++",
+      "usr/bin/x86_64-lfs-linux-gnu-g++",
+      "usr/bin/x86_64-lfs-linux-gnu-gcc",
+      "usr/bin/x86_64-lfs-linux-gnu-gcc-13.2.0",
+      "usr/bin/c++",
+      "usr/bin/g++",
+      "usr/bin/gcc",
+    ],
+    renameSuffix: "-orig",
+    script: makeFile(`#!/usr/bin/env sh
+      # MIT license: https://stackoverflow.com/a/29835459
+      rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
+
+        target=$1 fname= targetDir= CDPATH=
+
+        # Try to make the execution environment as predictable as possible:
+        # All commands below are invoked via 'command', so we must make sure that 'command'
+        # itself is not redefined as an alias or shell function.
+        # (Note that command is too inconsistent across shells, so we don't use it.)
+        # 'command' is a *builtin* in bash, dash, ksh, zsh, and some platforms do not even have
+        # an external utility version of it (e.g, Ubuntu).
+        # 'command' bypasses aliases and shell functions and also finds builtins
+        # in bash, dash, and ksh. In zsh, option POSIX_BUILTINS must be turned on for that
+        # to happen.
+        { \\unalias command; \\unset -f command; } >/dev/null 2>&1
+        [ -n "$ZSH_VERSION" ] && options[POSIX_BUILTINS]=on # make zsh find *builtins* with 'command' too.
+
+        while :; do # Resolve potential symlinks until the ultimate target is found.
+            [ -L "$target" ] || [ -e "$target" ] || { command printf '%s\\n' "ERROR: '$target' does not exist." >&2; return 1; }
+            command cd "$(command dirname -- "$target")" # Change to target dir; necessary for correct resolution of target path.
+            fname=$(command basename -- "$target") # Extract filename.
+            [ "$fname" = '/' ] && fname='' # !! curiously, 'basename /' returns '/'
+            if [ -L "$fname" ]; then
+              # Extract [next] target path, which may be defined
+              # *relative* to the symlink's own directory.
+              # Note: We parse 'ls -l' output to find the symlink target
+              #       which is the only POSIX-compliant, albeit somewhat fragile, way.
+              target=$(command ls -l "$fname")
+              target=\${target#* -> }
+              continue # Resolve [next] symlink target.
+            fi
+            break # Ultimate target reached.
+        done
+        targetDir=$(command pwd -P) # Get canonical dir. path
+        # Output the ultimate target's canonical path.
+        # Note that we manually resolve paths ending in /. and /.. to make sure we have a normalized path.
+        if [ "$fname" = '.' ]; then
+          command printf '%s\\n' "\${targetDir%/}"
+        elif  [ "$fname" = '..' ]; then
+          # Caveat: something like /var/.. will resolve to /private (assuming /var@ -> /private/var), i.e. the '..' is applied
+          # AFTER canonicalization.
+          command printf '%s\\n' "$(command dirname -- "\${targetDir}")"
+        else
+          command printf '%s\\n' "\${targetDir%/}/$fname"
+        fi
+      )
+
+      script_dir=$(cd "$(dirname -- "$(rreadlink "$0")")" && pwd -P)
+      sysroot=$(cd "$script_dir/../.." && pwd -P)
+
+      include_system_headers=1
+      for arg in "$@"; do
+        if [ "$arg" = "-nostdinc" ]; then
+          include_system_headers=0
+          break
+        fi
+      done
+
+      if [ "$include_system_headers" -eq 1 ]; then
+        set -- \
+          -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0/x86_64-lfs-linux-gnu" \
+          -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0" \
+          -isystem "$sysroot/usr/include" \
+          "$@"
+      fi
+      set -- --sysroot="$sysroot" "$@"
+
+      "$(rreadlink "$0")-orig" "$@"
+    `, true),
+  });
+
+  const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];
+  for (const tool of prefixedTools) {
+    toolchain = brioche.insert(toolchain, `usr/bin/${tool}`, brioche.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
+  }
+
+  return toolchain;
+});

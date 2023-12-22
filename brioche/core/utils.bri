@@ -1,0 +1,134 @@
+export function assert(condition: boolean, message?: string): asserts condition {
+  if (!condition) {
+    throw new Error(message ?? "assert failed");
+  }
+}
+
+export function unreachable(never: never): never {
+  throw new Error(`reached unreachable code with value: ${never}`);
+}
+
+export type Awaitable<T> = T | Promise<T>;
+
+type Primitive =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined;
+
+export type Equatable =
+  | Primitive
+  | Equatable[]
+  | { [key: string]: Equatable }
+  | SerializeEquatable;
+
+export interface SerializeEquatable {
+  briocheSerialize: () => Equatable;
+}
+
+export function equal<T extends Equatable>(a: T, b: T): boolean {
+  if (!isEquatable(a) || !isEquatable(b)) {
+    throw new Error("Tried to compare values, but they could not be compared");
+  }
+
+  if (a === b) {
+    return true;
+  }
+
+  if (a == null || b == null) {
+    return false;
+  }
+
+  if (typeof a !== typeof b) {
+    return false;
+  }
+
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b)) {
+      return false;
+    }
+
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    return a.every((aValue, index) => {
+      const bValue = b[index];
+      return equal(aValue, bValue);
+    });
+  }
+
+  if (typeof a === "object" || typeof b === "object") {
+    if (typeof a !== "object" || typeof b !== "object") {
+      return false;
+    }
+
+    if (isSerializeEquatable(a) || isSerializeEquatable(b)) {
+      if (!isSerializeEquatable(a) || !isSerializeEquatable(b)) {
+        return false;
+      }
+
+      return equal(a.briocheSerialize(), b.briocheSerialize());
+    }
+
+    const aKeys = Object.keys(a).sort();
+    const bKeys = Object.keys(b).sort();
+
+    return aKeys.every((aKey, index) => {
+      const bKey = bKeys[index];
+      if (aKey !== bKey) {
+        return false;
+      }
+
+      const aValue = a[aKey];
+      const bValue = b[bKey];
+      return equal(aValue, bValue);
+    });
+  }
+
+  return false;
+}
+
+function isSerializeEquatable(value: unknown): value is SerializeEquatable {
+  return typeof value === "object"
+    && value != null
+    && "briocheSerialize" in value
+    && typeof value.briocheSerialize === "function";
+}
+
+export function isEquatable(value: unknown): value is Equatable {
+  switch (typeof value) {
+    case "boolean":
+    case "number":
+    case "string":
+    case "undefined":
+      return true;
+    case "object":
+      if (value == null) {
+        return true;
+      }
+
+      if (Array.isArray(value)) {
+        return value.every(isEquatable);
+      }
+
+      if (isSerializeEquatable(value)) {
+        return true;
+      }
+
+      return Object.entries(value).every(([key, value]) => typeof key === "string" && isEquatable(value));
+    default:
+      return false;
+  }
+}
+
+export function jsonSerialize(value: Equatable): string {
+  return JSON.stringify(value, (key, value) => {
+    if (isSerializeEquatable(value)) {
+      return value.briocheSerialize();
+    } else {
+      return value;
+    }
+  })
+}

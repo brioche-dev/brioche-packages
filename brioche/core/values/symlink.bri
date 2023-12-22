@@ -1,0 +1,48 @@
+import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
+import { assert } from "../utils.bri";
+import { type Lazy } from "./value.bri";
+import { valueType } from "./value_type.bri";
+
+export interface SymlinkOptions {
+  target: string;
+}
+
+export function symlink(opts: SymlinkOptions): Symlink {
+  return new Symlink({
+    target: runtime.bstring(opts.target),
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+interface SymlinkCtor {
+  target: runtime.BString;
+  source?: runtime.Source;
+}
+
+export class Symlink implements Lazy<Symlink> {
+  [valueType]: "symlink" = "symlink";
+  target: runtime.BString;
+  source?: runtime.Source;
+
+  constructor(options: SymlinkCtor) {
+    this.target = options.target;
+    this.source = options.source;
+  }
+
+  briocheSerialize(): runtime.CompleteSymlink {
+    return {
+      type: "symlink",
+      target: this.target,
+    };
+  }
+
+  static briocheDeserialize(value: runtime.CompleteValue, source: runtime.Source | undefined): Symlink {
+    assert(value.type === "symlink");
+    return new Symlink({ target: value.target, source });
+  }
+
+  resolve(): Symlink {
+    return this;
+  }
+}

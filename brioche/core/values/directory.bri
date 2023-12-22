@@ -1,0 +1,309 @@
+import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
+import { assert } from "../utils.bri";
+import { Proxy } from "./proxy.bri";
+import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny } from "./value.bri";
+import { valueType } from "./value_type.bri";
+
+export function directory(entries: Record<string, AsyncLazy>): LazyDirectory {
+  const bEntries: Record<runtime.BString, AsyncLazy> = {};
+  for (const [k, v] of Object.entries(entries)) {
+    bEntries[runtime.bstring(k)] = v;
+  }
+  return new LazyDirectory({
+    entries: bEntries,
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
+  return new Merge({
+    directories: directories.map((dir) => new Proxy(dir)),
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+export function get(directory: AsyncLazy<Directory>, path: string): Lazy {
+  return new Get({
+    directory: new Proxy(directory),
+    path: runtime.bstring(path),
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+export function insert(dir: AsyncLazy<Directory>, path: string, value: AsyncLazy): Lazy<Directory> {
+  const pathComponents = path.split("/");
+  const dirPathComponents = pathComponents.slice(0, -1);
+  const fileName = pathComponents.at(-1);
+  if (fileName == null || dirPathComponents.some((pathComponent) => pathComponent === "")) {
+    throw new Error(`invalid path: "${path}"`);
+  }
+
+  const directoryFromPath = dirPathComponents.reduceRight((acc, pathComponent) => directory({
+    [pathComponent]: acc,
+  }), directory({
+    [fileName]: value,
+  }));
+
+  return new Merge({
+    directories: [dir, directoryFromPath],
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+export function remove(directory: AsyncLazy<Directory>, ...paths: string[]): Lazy<Directory> {
+  return new Remove({
+    directory: new Proxy(directory),
+    paths: paths.map((path) => runtime.bstring(path)),
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+interface LazyDirectoryCtor {
+  entries: Record<runtime.BString, AsyncLazy>;
+  source?: runtime.Source;
+}
+
+export class LazyDirectory implements Lazy<Directory> {
+  entries: Record<runtime.BString, AsyncLazy>;
+  source?: runtime.Source;
+
+  constructor(options: LazyDirectoryCtor) {
+    this.entries = options.entries;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<Directory> {
+    const result = await runtime.resolve(await this.briocheSerialize());
+    return Directory.briocheDeserialize(result, briocheSource({ depth: 1 }));
+  }
+
+  async briocheSerialize(): Promise<runtime.LazyDirectory> {
+    const entries = await Promise.all(
+      Object.entries(this.entries)
+        .map(async ([k, v]): Promise<[runtime.BString, runtime.LazyValue]> => [k as runtime.BString, await (await v).briocheSerialize()]
+        ),
+    );
+    return {
+      type: "directory",
+      entries: Object.fromEntries(entries),
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+}
+
+interface DirectoryCtor {
+  entries: Record<runtime.BString, runtime.CompleteValue>;
+  source?: runtime.Source;
+}
+
+export class Directory implements Lazy<Directory> {
+  [valueType]: "directory" = "directory";
+  entries: Record<runtime.BString, runtime.CompleteValue>;
+  source?: runtime.Source;
+
+  constructor(options: DirectoryCtor) {
+    this.entries = options.entries;
+    this.source = options.source;
+  }
+
+  resolve(): Directory {
+    return this;
+  }
+
+  briocheSerialize(): runtime.CompleteDirectory {
+    return {
+      type: "directory",
+      entries: this.entries,
+      meta: {
+        source: this.source,
+      },
+    };
+  }
+
+  #tryGetWithDepth(sourceDepth: number, paths: string[]): Value | null {
+    const source = briocheSource({ depth: sourceDepth });
+    const parts = paths.flatMap(path => path.split("/"));
+    const displayPath = paths.join("/");
+    let current: Value = this;
+    for (const part of parts) {
+      if (part === "" || part === ".") {
+        continue;
+      }
+      if (part === "..") {
+        throw new Error(`unsupported path ${displayPath}`);
+      }
+      if (!(current instanceof Directory)) {
+        throw new Error(`path ${displayPath} descends into non-directory`);
+      }
+      const entry = current.entries[runtime.bstring(part)];
+      if (!entry) {
+        return null;
+      }
+      current = briocheDeserializeAny(entry, source);
+    }
+    return current;
+  }
+
+  tryGet(...paths: string[]): Value | null {
+    return this.#tryGetWithDepth(2, paths);
+  }
+
+  get(...paths: string[]): Value {
+    const displayPath = paths.join("/");
+    const result = this.#tryGetWithDepth(2, paths);
+    assert(result != null, `path ${displayPath} does not exist`);
+    return result;
+  }
+
+  insert(path: string, value: Value): Directory {
+    const source = briocheSource({ depth: 1 });
+    const [entryName, ...rest] = path.split("/").filter(part => part !== "");
+
+    if (entryName == null) {
+      throw new Error(`invalid path "${path}"`);
+    }
+
+    const entryKey = runtime.bstring(entryName);
+
+    if (rest.length === 0) {
+      return new Directory({
+        entries: {
+          ...this.entries,
+          [entryKey]: value.briocheSerialize()
+        },
+        source,
+      });
+    } else {
+      const currentEntry: runtime.CompleteValue = this.entries[entryKey] ?? {
+        type: "directory",
+        entries: {},
+      };
+      const currentEntryValue = briocheDeserializeAny(currentEntry, source);
+      assert(currentEntryValue instanceof Directory, `tried to descend into non-directory ${entryName}`);
+      const newEntry = currentEntryValue.insert(rest.join("/"), value);
+
+      return new Directory({
+        entries: {
+          ...this.entries,
+          [entryKey]: newEntry.briocheSerialize(),
+        },
+        source,
+      });
+    }
+  }
+
+  peel(): Lazy {
+    const keys = Object.keys(this.entries) as runtime.BString[];
+    assert(keys.length === 1, `expected directory to only have one entry, but had ${keys.length} entries`);
+    return briocheDeserializeAny(this.entries[keys[0]!]!, briocheSource({ depth: 1 }));
+  }
+
+  static briocheDeserialize(value: runtime.CompleteValue, source: runtime.Source | undefined): Directory {
+    assert(value.type === "directory");
+    return new Directory({ entries: value.entries, source });
+  }
+}
+
+interface MergeCtor {
+  directories: AsyncLazy<Directory>[];
+  source?: runtime.Source;
+}
+
+class Merge implements Lazy<Directory> {
+  directories: AsyncLazy<Directory>[];
+  source?: runtime.Source;
+
+  constructor(options: MergeCtor) {
+    this.directories = options.directories;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<Directory> {
+    const result = await runtime.resolve(await this.briocheSerialize());
+    return Directory.briocheDeserialize(result, this.source);
+  }
+
+  async briocheSerialize(): Promise<runtime.LazyMerge> {
+    const directories = await Promise.all(this.directories.map(async (dir) => (await dir).briocheSerialize()));
+    return {
+      type: "merge",
+      directories,
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+}
+
+interface GetCtor {
+  directory: AsyncLazy<Directory>;
+  path: runtime.BString;
+  source?: runtime.Source;
+}
+
+class Get implements Lazy {
+  directory: AsyncLazy<Directory>;
+  path: runtime.BString;
+  source?: runtime.Source;
+
+  constructor(options: GetCtor) {
+    this.directory = options.directory;
+    this.path = options.path;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<Value> {
+    const result = await runtime.resolve(await this.briocheSerialize());
+    return briocheDeserializeAny(result, this.source);
+  }
+
+  async briocheSerialize(): Promise<runtime.LazyGet> {
+    const directory = await (await this.directory).briocheSerialize();
+    return {
+      type: "get",
+      directory,
+      path: this.path,
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+}
+
+interface RemoveCtor {
+  directory: AsyncLazy<Directory>;
+  paths: runtime.BString[];
+  source?: runtime.Source;
+}
+
+class Remove implements Lazy<Directory> {
+  directory: AsyncLazy<Directory>;
+  paths: runtime.BString[];
+  source?: runtime.Source;
+
+  constructor(options: RemoveCtor) {
+    this.directory = options.directory;
+    this.paths = options.paths;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<Directory> {
+    const result = await runtime.resolve(await this.briocheSerialize());
+    return Directory.briocheDeserialize(result, this.source);
+  }
+
+  async briocheSerialize(): Promise<runtime.LazyRemove> {
+    const directory = await (await this.directory).briocheSerialize();
+    return {
+      type: "remove",
+      directory,
+      paths: this.paths,
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+}

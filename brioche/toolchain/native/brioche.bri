@@ -1,0 +1,42 @@
+import * as brioche from "/core";
+import glibc from "./glibc.bri";
+import zlib from "./zlib.bri";
+import bzip2 from "./bzip2.bri";
+import xz from "./xz.bri";
+import zstd from "./zstd.bri";
+import file from "./file.bri";
+import readline from "./readline.bri";
+import m4 from "./m4.bri";
+import bc from "./bc.bri";
+import flex from "./flex.bri";
+import binutils from "./binutils.bri";
+import gmp from "./gmp.bri";
+import mpfr from "./mpfr.bri";
+import mpc from "./mpc.bri";
+import attr from "./attr.bri";
+import acl from "./acl.bri";
+import libxcrypt from "./libxcrypt.bri";
+import gcc from "./gcc.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  return brioche.merge(
+    glibc(),
+    zlib(),
+    bzip2(),
+    xz(),
+    zstd(),
+    file(),
+    readline(),
+    m4(),
+    bc(),
+    flex(),
+    binutils(),
+    gmp(),
+    mpfr(),
+    mpc(),
+    attr(),
+    acl(),
+    libxcrypt(),
+    gcc(),
+  );
+});

@@ -1,0 +1,10 @@
+import * as brioche from "brioche";
+
+interface TestType {
+  foo: string;
+  bar: string;
+}
+
+export default () => {
+  throw new Error("default export exception");
+}

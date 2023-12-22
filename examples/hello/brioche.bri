@@ -1,0 +1,75 @@
+import * as brioche from "brioche";
+import foo from "foo";
+import { VALUE } from "./other.bri";
+
+export default async () => {
+  const unpacked = await brioche
+    .download({
+      url: "https://development-content.brioche.dev/musl.cc/2023-02-06/x86_64-linux-musl-native.tgz",
+      hash: brioche.sha256Hash("eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad"),
+    })
+    .unpack("tar", "gzip")
+    .resolve();
+  brioche.assert(unpacked instanceof brioche.Directory);
+
+  const utils = brioche
+    .download({
+      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
+      hash: brioche.sha256Hash("eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33"),
+    })
+    .unpack("tar", "zstd");
+
+  return brioche.directory({
+    "lorem ipsum.txt": brioche.download({
+      url: "https://gist.githubusercontent.com/kylewlacy/c0f1a43e2641686f377178880fcce6ae/raw/f48155695445aa218e558fba824b61cf718d5e55/lorem-ipsum.txt",
+      hash: brioche.sha256Hash("642e3f58cc2bcc0d12d2e1e21dd9ea131f058a98e23e9beac79881bb0a324d06"),
+    }),
+    "unpacked": brioche.download({
+      url: "https://development-content.brioche.dev/musl.cc/2023-02-06/x86_64-linux-musl-native.tgz",
+      hash: brioche.sha256Hash("eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad"),
+    }).unpack("tar", "gzip"),
+    "libsum.txt": brioche.symlink({ target: "lorem ipsum.txt" }),
+    "stdlib.h": unpacked.get("x86_64-linux-musl-native", "include", "stdlib.h"),
+    "hello.txt": brioche.process({
+      command: brioche.processTemplate("/usr/bin/env"),
+      args: [
+        brioche.processTemplate("sh"),
+        brioche.processTemplate("-c"),
+        brioche.processTemplate(`
+          set -euo pipefail
+          echo "Hello, $(whoami)!" >> $BRIOCHE_OUTPUT
+          id >> $BRIOCHE_OUTPUT
+          pwd >> $BRIOCHE_OUTPUT
+          ls -lah >> $BRIOCHE_OUTPUT
+          echo / >> $BRIOCHE_OUTPUT
+          ls -lah / >> $BRIOCHE_OUTPUT
+          echo $HOME >> $BRIOCHE_OUTPUT
+          ls $HOME >> $BRIOCHE_OUTPUT
+          echo $TMPDIR >> $BRIOCHE_OUTPUT
+          ls $TMPDIR >> $BRIOCHE_OUTPUT
+          echo $unpacked >> $BRIOCHE_OUTPUT
+          ls -lah $unpacked >> $BRIOCHE_OUTPUT
+          echo "/dev/null" >> $BRIOCHE_OUTPUT
+          cat /dev/null >> $BRIOCHE_OUTPUT
+          echo '------------' >> $BRIOCHE_OUTPUT
+
+          echo "Value: $VALUE" >> $BRIOCHE_OUTPUT
+          echo "foo: $(foo)" >> $BRIOCHE_OUTPUT
+          echo "Making temp..."
+          mkdir -p /tmp/brioche-test
+          echo "Hello from tempfile!" > /tmp/brioche-test/hello.txt
+          cat /tmp/brioche-test/hello.txt >> $BRIOCHE_OUTPUT
+        `)
+      ],
+      env: {
+        unpacked: brioche.processTemplate(unpacked),
+        BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+        PATH: brioche.processTemplate(utils, "/bin:", foo(), "/bin"),
+        VALUE: brioche.processTemplate(VALUE),
+      },
+      workDir: brioche.directory({
+        "workdircontents": brioche.directory({})
+      }),
+    }),
+  });
+};

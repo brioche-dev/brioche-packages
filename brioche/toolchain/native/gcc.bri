@@ -1,0 +1,91 @@
+import * as brioche from "/core";
+import { linuxHeaders } from "/toolchain/stage1";
+import stage2 from "/toolchain/stage2";
+import glibc from "./glibc.bri";
+import binutils from "./binutils.bri";
+import zlib from "./zlib.bri";
+import gmp from "./gmp.bri";
+import mpfr from "./mpfr.bri";
+import mpc from "./mpc.bri";
+import libxcrypt from "./libxcrypt.bri";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
+      hash: brioche.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
+    });
+
+  let buildSysroot = brioche.merge(
+    brioche.cast(brioche.get(linuxHeaders(), "usr"), "directory"),
+    glibc(),
+    binutils(),
+    libxcrypt(),
+    brioche.directory({
+      usr: brioche.directory({
+        lib: brioche.symlink({ target: "../lib" }),
+        lib64: brioche.symlink({ target: "../lib64" }),
+        include: brioche.symlink({ target: "../include" }),
+      })
+    })
+  );
+
+  // TODO: Enable NLS
+  return brioche.process({
+    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    args: [
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        case "$(uname -m)" in
+          x86_64 )
+            sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
+          ;;
+        esac
+
+        mkdir build
+        cd build
+
+        ../configure \
+          --prefix=/ \
+          --enable-languages=c,c++ \
+          --enable-default-pie \
+          --enable-default-ssp \
+          --disable-nls \
+          --disable-multilib \
+          --disable-bootstrap \
+          --disable-fixincludes \
+          --with-system-zlib \
+          --with-gmp="$gmp" \
+          --with-mpfr="$mpfr" \
+          --with-mpc="$mpc" \
+          --with-build-sysroot="$buildSysroot" \
+          CFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
+          CXXFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
+          LDFLAGS_FOR_TARGET="$LDFLAGS" \
+          CFLAGS_FOR_BUILD="$CPPFLAGS" \
+          CXXFLAGS_FOR_BUILD="$CPPFLAGS" \
+          CFLAGS="$CPPFLAGS" \
+          CXXFLAGS="$CPPFLAGS" \
+          LD="ld"
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `),
+    ],
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.processTemplate(buildSysroot, "/bin:", stage2(), "/bin"),
+      CPPFLAGS: brioche.processTemplate("-I", zlib(), "/include -I", gmp(), "/include -I", mpfr(), "/include -I", mpc(), "/include -isystem ", stage2(), "/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ", buildSysroot, "/include -isystem ", buildSysroot, "/usr/include"),
+      // TODO: Remove glibc as an explicit dependency
+      // TODO: Remove -lm as an explicit dependency
+      LDFLAGS: brioche.processTemplate("-L", zlib(), "/lib -L", gmp(), "/lib -L", mpfr(), "/lib -L", mpc(), "/lib -L", buildSysroot, "/lib -L", buildSysroot, "/lib64 -lm --sysroot=", buildSysroot),
+      buildSysroot: brioche.processTemplate(buildSysroot),
+      gmp: brioche.processTemplate(gmp()),
+      mpfr: brioche.processTemplate(mpfr()),
+      mpc: brioche.processTemplate(mpc()),
+    }
+  }).cast("directory");
+});

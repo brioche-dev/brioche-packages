@@ -1,0 +1,51 @@
+import * as runtime from "../runtime.bri";
+import { cast } from "./cast.bri";
+import { Directory } from "./directory.bri";
+import { type Peel, peel } from "./peel.bri";
+import { type Lazy, type Value, briocheDeserializeAny } from "./value.bri";
+
+interface UnpackCtor {
+  file: runtime.LazyValue;
+  archiveFormat: runtime.ArchiveFormat;
+  compressionFormat: runtime.CompressionFormat | null | undefined;
+  source?: runtime.Source;
+}
+
+export class Unpack implements Lazy<Directory> {
+  file: runtime.LazyValue;
+  archiveFormat: runtime.ArchiveFormat;
+  compressionFormat: runtime.CompressionFormat | null | undefined;
+  source?: runtime.Source;
+
+  constructor(options: UnpackCtor) {
+    this.file = options.file;
+    this.archiveFormat = options.archiveFormat;
+    this.compressionFormat = options.compressionFormat;
+    this.source = options.source;
+  }
+
+  peel(depth: number = 1): Peel {
+    return peel(this, depth);
+  }
+
+  peelDirectory(depth: number = 1): Lazy<Directory> {
+    return cast(this.peel(depth), "directory", { sourceDepth: 2 });
+  }
+
+  async resolve(): Promise<Directory> {
+    const result = await runtime.resolve(this.briocheSerialize());
+    return Directory.briocheDeserialize(result, this.source);
+  }
+
+  briocheSerialize(): runtime.LazyUnpack {
+    return {
+      type: "unpack",
+      file: this.file,
+      archive: this.archiveFormat,
+      compression: this.compressionFormat,
+      meta: {
+        source: this.source,
+      },
+    };
+  }
+}

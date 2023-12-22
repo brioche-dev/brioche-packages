@@ -1,0 +1,73 @@
+import * as runtime from "../runtime.bri";
+import { type Awaitable, unreachable } from "../utils.bri";
+import { File } from "./file.bri";
+import { Directory, LazyDirectory } from "./directory.bri";
+import { Symlink } from "./symlink.bri";
+import { Download } from "./download.bri";
+import { Unpack } from "./unpack.bri";
+import { Process } from "./process.bri";
+
+export type Value = File | Directory | Symlink;
+
+export type LazyValueSerialization<T extends Value> = runtime.WithMeta & (
+  T extends File ? (
+    | runtime.CompleteFile
+    | runtime.LazyDownload
+    | runtime.LazyProcess
+    | runtime.LazyCast
+    | runtime.LazyPeel
+    | runtime.LazyGet
+    | runtime.LazySetPermissions
+    | runtime.LazyProxy) :
+  T extends Directory ? (
+    | runtime.LazyDirectory
+    | runtime.LazyUnpack
+    | runtime.LazyProcess
+    | runtime.LazyCast
+    | runtime.LazyMerge
+    | runtime.LazyPeel
+    | runtime.LazyGet
+    | runtime.LazyRemove
+    | runtime.LazyProxy) :
+  T extends Symlink ? (
+    | runtime.CompleteSymlink
+    | runtime.LazyProcess
+    | runtime.LazyCast
+    | runtime.LazyPeel
+    | runtime.LazyGet
+    | runtime.LazyProxy) :
+  never
+);
+
+export interface Resolve<T extends Value = Value> {
+  resolve(): Awaitable<T>;
+}
+
+export interface Lazy<T extends Value = Value> extends Resolve<T> {
+  briocheSerialize(): Awaitable<LazyValueSerialization<T>>;
+}
+
+export type AsyncResolve<T extends Value = Value> = Awaitable<Resolve<T>>;
+
+export type AsyncLazy<T extends Value = Value> = Awaitable<Lazy<T>>;
+
+export async function asyncResolve<T extends Value>(value: AsyncResolve<T>): Promise<T> {
+  return (await value).resolve();
+}
+
+export async function asyncBriocheSerialize<T extends Value>(value: AsyncLazy<T>): Promise<LazyValueSerialization<T>> {
+  return (await value).briocheSerialize();
+}
+
+export function briocheDeserializeAny(value: runtime.CompleteValue, source: runtime.Source | undefined): Value {
+    switch (value.type) {
+      case "file":
+        return File.briocheDeserialize(value, source);
+      case "directory":
+        return Directory.briocheDeserialize(value, source);
+      case "symlink":
+        return Symlink.briocheDeserialize(value, source);
+      default:
+        return unreachable(value);
+    }
+  }

@@ -1,0 +1,14 @@
+import * as brioche from "brioche";
+
+interface TestType {
+  foo: string;
+  bar: string;
+}
+
+export default () => {
+  return {
+    briocheSerialize: () => {
+      throw new Error("briocheSerialize exception");
+    }
+  }
+}

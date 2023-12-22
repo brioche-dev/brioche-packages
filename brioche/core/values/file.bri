@@ -1,0 +1,119 @@
+import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
+import { assert } from "../utils.bri";
+import { Unpack } from "./unpack.bri";
+import { type AsyncLazy, type Lazy } from "./value.bri";
+import { valueType } from "./value_type.bri";
+
+interface Permissions {
+  executable: boolean;
+}
+
+export function setPermissions(file: AsyncLazy<File>, permissions: Partial<Permissions>): Lazy<File> {
+  return new SetPermissions({
+    file,
+    permissions,
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+export interface FileCtor {
+  source?: runtime.Source;
+  blobId: runtime.BlobId;
+  executable: boolean;
+  resources: runtime.CompleteDirectoryContents;
+}
+
+export class File implements Lazy<File> {
+  [valueType]: "file" = "file";
+  source?: runtime.Source;
+  blobId: runtime.BlobId;
+  executable: boolean;
+  resources: runtime.CompleteDirectoryContents;
+
+  constructor(options: FileCtor) {
+    this.source = options.source;
+    this.blobId = options.blobId;
+    this.executable = options.executable;
+    this.resources = options.resources;
+  }
+
+  resolve(): File {
+    return this;
+  }
+
+  withExecutablePermission(executable: boolean): File {
+    return new File({
+      source: briocheSource({ depth: 1 }),
+      blobId: this.blobId,
+      executable,
+      resources: this.resources
+    });
+  }
+
+  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat: runtime.CompressionFormat = "none"): Unpack {
+    return new Unpack({
+      file: this.briocheSerialize(),
+      archiveFormat,
+      compressionFormat,
+      source: briocheSource({ depth: 1 }),
+    });
+  }
+
+  briocheSerialize(): runtime.CompleteFile {
+    return {
+      type: "file",
+      data: this.blobId,
+      executable: this.executable,
+      resources: this.resources,
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+
+  static briocheDeserialize(value: runtime.CompleteValue, source: runtime.Source | undefined): File {
+    assert(value.type === "file");
+    return new File({
+      blobId: value.data,
+      executable: value.executable,
+      resources: value.resources,
+      source,
+    });
+  }
+}
+
+interface SetPermissionsCtor {
+  file: AsyncLazy<File>;
+  permissions: Partial<Permissions>;
+  source?: runtime.Source;
+}
+
+class SetPermissions implements Lazy<File> {
+  file: AsyncLazy<File>;
+  permissions: Partial<Permissions>;
+  source?: runtime.Source;
+
+  constructor(options: SetPermissionsCtor) {
+    this.file = options.file;
+    this.permissions = options.permissions;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<File> {
+    const result = await runtime.resolve(await this.briocheSerialize());
+    return File.briocheDeserialize(result, briocheSource({ depth: 1 }));
+  }
+
+  async briocheSerialize(): Promise<runtime.LazySetPermissions> {
+    const file = await (await this.file).briocheSerialize();
+    return {
+      type: "set_permissions",
+      file,
+      executable: this.permissions.executable ?? null,
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+}

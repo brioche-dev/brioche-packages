@@ -1,0 +1,62 @@
+import * as brioche from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
+      hash: brioche.sha256Hash("fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2"),
+    });
+  const sourcePatchFhs = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
+      hash: brioche.sha256Hash("643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d"),
+    });
+  const sourcePatchMemalign = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
+      hash: brioche.sha256Hash("3e4b4b15485c9767501151ccf1b33cf5ee912298fda899cd809277ece27e859c"),
+    });
+
+  return brioche.process({
+    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    args: [
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+        patch -Np1 -i "$sourcePatchFhs"
+        patch -Np1 -i "$sourcePatchMemalign"
+
+        mkdir build
+        cd build
+
+        echo "rootsbindir=/sbin" > configparms
+
+        export PYTHONHOME="$stage2/usr"
+        export M4=m4
+        export MAGIC="$stage2/usr/share/misc/magic"
+
+        ../configure \
+          --prefix=/ \
+          --enable-kernel=4.14 \
+          --enable-stack-protector=strong \
+          --with-headers="$stage2/usr/include" \
+          libc_cv_slibdir=/lib64
+
+        export BRIOCHE_LD_AUTOWRAP=false
+        make
+        sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `),
+    ],
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      sourcePatchFhs: brioche.processTemplate(sourcePatchFhs),
+      sourcePatchMemalign: brioche.processTemplate(sourcePatchMemalign),
+      PATH: brioche.processTemplate(stage2(), "/bin"),
+      stage2: brioche.processTemplate(stage2()),
+    }
+  }).cast("directory");
+});

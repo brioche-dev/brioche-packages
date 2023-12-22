@@ -1,0 +1,142 @@
+import { Awaitable } from "../utils.bri";
+import { source as briocheSource } from "../source.bri";
+import * as runtime from "../runtime.bri";
+import { type CastTo, type CastResult, cast } from "./cast.bri";
+import { type Directory, directory } from "./directory.bri";
+import { type AsyncLazy, type Lazy, type Value, briocheDeserializeAny } from "./value.bri";
+
+export interface ProcessOptions {
+  command: ProcessTemplate,
+  args?: ProcessTemplate[],
+  env?: Record<string, ProcessTemplate>,
+  workDir?: AsyncLazy<Directory>,
+}
+
+export function process(options: ProcessOptions): Process {
+  const env: Record<string, ProcessTemplate> = {
+    "BRIOCHE_OUTPUT": processTemplate(outputPath),
+    "BRIOCHE_PACK_RESOURCES_DIR": processTemplate(resourcesDir),
+    "HOME": processTemplate(homeDir),
+    "TMPDIR": processTemplate(tempDir),
+    ...options.env,
+  };
+
+  const bEnv: Record<runtime.BString, ProcessTemplate> = {};
+  for (const [k, v] of Object.entries(env)) {
+    bEnv[runtime.bstring(k)] = v;
+  }
+  return new Process({
+    command: options.command,
+    args: options.args ?? [],
+    env: bEnv,
+    workDir: options.workDir ?? directory({}),
+    platform: "x86_64-linux",
+    source: briocheSource({ depth: 1 }),
+  });
+}
+
+export function processTemplate(...components: Awaitable<ProcessTemplateComponent>[]): ProcessTemplate {
+  return new ProcessTemplate(...components);
+}
+
+interface ProcessCtor {
+  command: ProcessTemplate;
+  args: ProcessTemplate[];
+  env: Record<runtime.BString, ProcessTemplate>;
+  workDir: AsyncLazy<Directory>;
+  platform: runtime.Platform;
+  source?: runtime.Source;
+}
+
+export const outputPath: unique symbol = Symbol("outputPath");
+export const resourcesDir: unique symbol = Symbol("resourcesDir");
+export const homeDir: unique symbol = Symbol("homeDir");
+export const workDir: unique symbol = Symbol("workDir");
+export const tempDir: unique symbol = Symbol("tempDir");
+
+export class Process implements Lazy {
+  command: ProcessTemplate;
+  args: ProcessTemplate[];
+  env: Record<runtime.BString, ProcessTemplate>;
+  workDir: AsyncLazy<Directory>;
+  platform: runtime.Platform;
+  source?: runtime.Source;
+
+  constructor(options: ProcessCtor) {
+    this.command = options.command;
+    this.args = options.args;
+    this.env = options.env;
+    this.workDir = options.workDir;
+    this.platform = options.platform;
+    this.source = options.source;
+  }
+
+  async resolve(): Promise<Value> {
+    const result = await runtime.resolve(await this.briocheSerialize());
+    return briocheDeserializeAny(result, this.source);
+  }
+
+  async briocheSerialize(): Promise<runtime.LazyProcess> {
+    const command = await this.command.briocheSerialize();
+    const args = await Promise.all(this.args.map(arg => arg.briocheSerialize()));
+    const envEntries = await Promise.all(Object.entries(this.env).map(async ([k, v]): Promise<[string, runtime.ProcessTemplate]> => [k, await v.briocheSerialize()]));
+    const workDir = await (await this.workDir).briocheSerialize();
+    return {
+      type: "process",
+      command,
+      args,
+      env: Object.fromEntries(envEntries),
+      workDir,
+      platform: this.platform,
+      meta: {
+        source: this.source,
+      }
+    };
+  }
+
+  cast<T extends CastTo>(to: T): Lazy<CastResult<T>> {
+    return cast(this, to, { sourceDepth: 2 });
+  }
+}
+
+export type ProcessTemplateComponent =
+  | string
+  | Lazy
+  | typeof outputPath
+  | typeof resourcesDir
+  | typeof homeDir
+  | typeof workDir
+  | typeof tempDir;
+
+export class ProcessTemplate {
+  components: Awaitable<ProcessTemplateComponent>[];
+
+  constructor(...components: Awaitable<ProcessTemplateComponent>[]) {
+    this.components = components;
+  }
+
+  async briocheSerialize(): Promise<runtime.ProcessTemplate> {
+    const components = await Promise.all(this.components);
+    const runtimeComponents = await Promise.all(components.map(async (component): Promise<runtime.ProcessTemplateComponent> => {
+      if (typeof component === "string") {
+        return { type: "literal", value: runtime.bstring(component) };
+      } else if (component === outputPath) {
+        return { type: "output_path" };
+      } else if (component === resourcesDir) {
+        return { type: "resources_dir" };
+      } else if (component === homeDir) {
+        return { type: "home_dir" };
+      } else if (component === workDir) {
+        return { type: "work_dir" };
+      } else if (component === tempDir) {
+        return { type: "temp_dir" };
+      } else {
+        return { type: "input", value: await component.briocheSerialize() };
+      }
+    }));
+
+    return {
+      components: runtimeComponents,
+    };
+  }
+}

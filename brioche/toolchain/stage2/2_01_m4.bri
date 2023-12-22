@@ -1,0 +1,37 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "../stage0";
+import stage1 from "../stage1";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/m4-1.4.19.tar.xz",
+      hash: brioche.sha256Hash("63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar xf "$source" -C source --strip-components=1
+      cd source
+
+      ./configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(./build-aux/config.guess)"
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1()),
+    }
+  });
+});

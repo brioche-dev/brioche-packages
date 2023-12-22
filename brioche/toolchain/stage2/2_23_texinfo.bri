@@ -1,0 +1,32 @@
+import * as brioche from "/core";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import toolchain from "./2_18_toolchain.bri";
+import perl from "./2_21_perl.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/texinfo-7.0.3.tar.xz",
+      hash: brioche.sha256Hash("74b420d09d7f528e84f97aa330f0dd69a98a6053e7a4e01767eed115038807bf"),
+    });
+
+  return brioche.process({
+    command: brioche.processTemplate("/usr/bin/env"),
+    args: [
+      brioche.processTemplate("sh"),
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar xf "$source" --strip-components=1
+        ./configure --prefix=/usr
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `)
+    ],
+    env: {
+      PATH: brioche.processTemplate(toolchain(), "/bin:", perl(), "/usr/bin"),
+      source: brioche.processTemplate(sourceArchive),
+    },
+  }).cast("directory");
+});

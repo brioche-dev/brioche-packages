@@ -1,0 +1,45 @@
+import * as brioche from "/core";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import toolchain from "./2_18_toolchain.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/util-linux-2.39.1.tar.xz",
+      hash: brioche.sha256Hash("890ae8ff810247bd19e274df76e8371d202cda01ad277681b0ea88eeaa00286b"),
+    });
+
+  return brioche.process({
+    command: brioche.processTemplate("/usr/bin/env"),
+    args: [
+      brioche.processTemplate("sh"),
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        tar xf "$source" --strip-components=1
+        ./configure \
+            --libdir=/usr/lib \
+            --runstatedir=/run \
+            --bindir=/usr/bin \
+            --sbindir=/usr/sbin \
+            --docdir=/usr/share/doc/util-linux-2.39.1 \
+            --disable-chfn-chsh \
+            --disable-login \
+            --disable-nologin \
+            --disable-su \
+            --disable-setpriv \
+            --disable-runuser \
+            --disable-pylibmount \
+            --disable-wall \
+            --disable-mount \
+            --disable-static \
+            --without-python
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `)
+    ],
+    env: {
+      PATH: brioche.processTemplate(toolchain(), "/bin"),
+      source: brioche.processTemplate(sourceArchive),
+    },
+  }).cast("directory");
+});

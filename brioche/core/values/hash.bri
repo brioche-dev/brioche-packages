@@ -1,0 +1,25 @@
+import * as runtime from "../runtime.bri";
+import { assert } from "../utils.bri";
+
+export function sha256Hash(value: string): Sha256Hash {
+  assert(runtime.isHex(value));
+  return new Sha256Hash(value);
+}
+
+export type Hash = Sha256Hash;
+
+export class Sha256Hash {
+  hex: runtime.HexString;
+
+  constructor(value: runtime.HexString) {
+    assert(runtime.isHex(value));
+    this.hex = value;
+  }
+
+  briocheSerialize(): runtime.Hash {
+    return {
+      type: "sha256",
+      value: this.hex,
+    };
+  }
+}

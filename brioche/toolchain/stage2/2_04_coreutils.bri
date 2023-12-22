@@ -1,0 +1,45 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "../stage0";
+import stage1 from "../stage1";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/coreutils-9.3.tar.xz",
+      hash: brioche.sha256Hash("adbcfcfe899235b71e8768dcf07cd532520b7f54f9a8064843f8d199a904bbaa"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source
+
+      ./configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(./build-aux/config.guess)" \
+        --enable-install-program=hostname \
+        --enable-no-install-program=kill,uptime \
+        gl_cv_macro_MB_CUR_MAX_good=y
+
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+
+      mkdir -p "$BRIOCHE_OUTPUT/usr/sbin" "$BRIOCHE_OUTPUT/usr/share/man/man8"
+      mv "$BRIOCHE_OUTPUT/usr/bin/chroot" "$BRIOCHE_OUTPUT/usr/sbin/"
+      mv "$BRIOCHE_OUTPUT/usr/share/man/man1/chroot.1" "$BRIOCHE_OUTPUT/usr/share/man/man8/chroot.8"
+      sed -i 's/"1"/"8"/' "$BRIOCHE_OUTPUT/usr/share/man/man8/chroot.8"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1()),
+    }
+  });
+});

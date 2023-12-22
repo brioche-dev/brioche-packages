@@ -1,0 +1,35 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "/toolchain/stage0";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = await brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
+      hash: brioche.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source/build
+      tar xf "$source" -C source --strip-components=1
+      cd source/build
+      ../configure \
+        --prefix=/usr \
+        --target="$TARGET" \
+        --disable-nls \
+        --enable-gprofng=no \
+        --disable-werror
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+    }
+  });
+});

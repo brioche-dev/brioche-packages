@@ -1,0 +1,36 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "/toolchain/stage0";
+import binutils from "./1_01_binutils.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
+      hash: brioche.sha256Hash("cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source
+
+      make mrproper
+
+      mkdir -p "$BRIOCHE_OUTPUT/usr"
+
+      make headers
+      find usr/include -type f ! -name '*.h' -delete
+      cp -r usr/include "$BRIOCHE_OUTPUT/usr"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+    }
+  });
+});

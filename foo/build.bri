@@ -1,0 +1,27 @@
+import * as brioche from "brioche";
+
+export const build = () => {
+  const utils = brioche
+    .download({
+      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
+      hash: brioche.sha256Hash("eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33"),
+    })
+    .unpack("tar", "zstd");
+  return brioche.process({
+    command: brioche.processTemplate("/usr/bin/env"),
+    args: [
+      brioche.processTemplate("sh"),
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        mkdir -p $BRIOCHE_OUTPUT/bin
+        echo "#!/usr/bin/env sh" >> $BRIOCHE_OUTPUT/bin/foo
+        echo "echo 'Hello, world!'" >> $BRIOCHE_OUTPUT/bin/foo
+        chmod +x $BRIOCHE_OUTPUT/bin/foo
+      `)
+    ],
+    env: {
+      PATH: brioche.processTemplate(utils, "/bin"),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+    }
+  });
+};

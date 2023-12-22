@@ -1,0 +1,1 @@
+(Error as any).prepareStackTrace = (globalThis as any).Deno.core.prepareStackTrace;

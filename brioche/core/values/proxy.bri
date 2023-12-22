@@ -1,0 +1,62 @@
+import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
+import { type Equatable, assert, jsonSerialize } from "../utils.bri";
+import { type Value, type AsyncLazy, type Lazy, type LazyValueSerialization, briocheDeserializeAny } from "./value.bri";
+
+export function memo<Args extends Array<Equatable>, Ret extends Value>(
+  f: (...args: Args) => AsyncLazy<Ret>
+): (...args: Args) => Lazy<Ret> {
+  const proxies = new Map<string, Proxy<Ret>>();
+  return (...args: Args) => {
+    const key = jsonSerialize(args);
+    const memoizedProxy = proxies.get(key);
+    if (memoizedProxy != null) {
+      return memoizedProxy;
+    } else {
+      const proxy = new Proxy(f(...args));
+      proxies.set(key, proxy);
+      return proxy;
+    }
+  };
+}
+
+export class Proxy<T extends Value> implements Lazy<T> {
+  value: AsyncLazy<T>;
+  serialized?: Promise<runtime.LazyProxy>;
+  resolved?: T;
+
+  constructor(value: AsyncLazy<T>) {
+    this.value = value;
+  }
+
+  async proxy(): Promise<runtime.LazyProxy> {
+    if (this.serialized === undefined) {
+      this.serialized = (async () => {
+        const serialized = await (await this.value).briocheSerialize();
+        const proxy = await runtime.createProxy(serialized);
+        return {
+          ...proxy,
+          meta: serialized.meta,
+        };
+      })();
+    }
+
+    return await this.serialized;
+  }
+
+  async resolve(): Promise<T> {
+    if (this.resolved === undefined) {
+      const proxy = await this.proxy();
+      const resolved = await runtime.resolve(proxy);
+      this.resolved = briocheDeserializeAny(resolved, proxy.meta?.source) as T;
+    }
+
+    assert(this.resolved != null, "expected `resolve()` to return a value");
+    return this.resolved;
+  }
+
+  async briocheSerialize(): Promise<LazyValueSerialization<T>> {
+    const proxy = await this.proxy();
+    return proxy as unknown as LazyValueSerialization<T>;
+  }
+}

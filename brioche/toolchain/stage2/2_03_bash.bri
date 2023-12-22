@@ -1,0 +1,39 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "../stage0";
+import stage1 from "../stage1";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bash-5.2.15.tar.gz",
+      hash: brioche.sha256Hash("13720965b5f4fc3a0d4b61dd37e7565c741da9a5be24edc2ae00182fc1b3588c"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source
+
+      ./configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(./config.guess)" \
+        --without-bash-malloc
+
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+      ln -s bash "$BRIOCHE_OUTPUT/usr/bin/sh"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1()),
+    }
+  });
+});

@@ -1,0 +1,16 @@
+import * as brioche from "brioche";
+
+interface TestType {
+  foo: string;
+  bar: string;
+}
+
+export const value = brioche.memo((): brioche.Lazy => {
+  throw new Error("lazy memo exception");
+})
+
+export default () => {
+  const result = value();
+
+  return result;
+}

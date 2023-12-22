@@ -1,0 +1,60 @@
+import * as brioche from "/core";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import stage2 from "/toolchain/stage2";
+import flex from "./flex.bri";
+import zlib from "./zlib.bri";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
+      hash: brioche.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
+    });
+
+  let binutils = brioche.process({
+    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    args: [
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        mkdir build
+        cd build
+
+        ../configure \
+          --prefix="$BRIOCHE_OUTPUT" \
+          --enable-gold \
+          --enable-ld=default \
+          --enable-plugins \
+          --enable-shared \
+          --disable-werror \
+          --enable-64-bit-bfd \
+          --with-system-zlib
+
+        make tooldir="$BRIOCHE_OUTPUT"
+        make install tooldir="$BRIOCHE_OUTPUT"
+      `),
+    ],
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.processTemplate(stage2(), "/bin:", flex(), "/bin"),
+      CPPFLAGS: brioche.processTemplate("-I", zlib(), "/include"),
+      LDFLAGS: brioche.processTemplate("-L", zlib(), "/lib"),
+    },
+  }).cast("directory");
+
+  binutils = useBriocheLd(binutils, {
+    ldPaths: [
+      "bin/ld",
+      "bin/ld.bfd",
+      "bin/ld.gold",
+    ],
+    interpreterPaths: {
+      "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
+    },
+  });
+
+  return binutils;
+});

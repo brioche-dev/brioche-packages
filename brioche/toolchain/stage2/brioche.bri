@@ -1,0 +1,66 @@
+import * as brioche from "/core";
+import toolchain from "./2_18_toolchain.bri";
+import gettext from "./2_19_gettext.bri";
+import bison from "./2_20_bison.bri";
+import perl from "./2_21_perl.bri";
+import python from "./2_22_python.bri";
+import texinfo from "./2_23_texinfo.bri";
+import utilLinux from "./2_24_util_linux.bri";
+
+export { default as bash } from "./2_03_bash.bri";
+export { default as toolchain } from "./2_18_toolchain.bri";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const stage2 = brioche.merge(
+    toolchain(),
+    gettext(),
+    bison(),
+    perl(),
+    python(),
+    texinfo(),
+    utilLinux(),
+  );
+
+  return brioche.process({
+    command: brioche.processTemplate(toolchain(), "/bin/bash"),
+    args: [
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        cp -r "$stage2" "$BRIOCHE_OUTPUT"
+        find "$BRIOCHE_OUTPUT"/usr/bin -type f -executable -print0 \
+          | while IFS= read -r -d $'\\0' file; do
+            if [ "$(head -c 2 "$file")" == "#!" ]; then
+              awk '
+                {
+                  if (NR == 1 && $0 ~ /^#!/) {
+                    shebangInvocation = $0
+                    gsub(/^#! */, "", shebangInvocation)
+                    numShebangWords = split(shebangInvocation, shebangWords, / +/)
+                    if (numShebangWords == 1) {
+                      shebangCommand = shebangWords[1]
+                      numComponents = split(shebangCommand, shebangCommandComponents, "/")
+                      targetCommand = shebangCommandComponents[numComponents]
+                      gsub(" ", "", targetCommand)
+                      print "#!/usr/bin/env " targetCommand
+                    } else {
+                      print $0
+                    }
+                  } else {
+                    print $0
+                  }
+                }
+              ' "$file" > temp
+              chmod +x temp
+              mv temp "$file"
+            fi
+          done
+      `),
+    ],
+    env: {
+      PATH: brioche.processTemplate(stage2, "/bin"),
+      stage2: brioche.processTemplate(stage2),
+    },
+  }).cast("directory");
+});

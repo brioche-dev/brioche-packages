@@ -1,0 +1,157 @@
+import * as brioche from "/core";
+import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import { bootstrapRun } from "../stage0";
+import stage1 from "../stage1";
+import m4 from "./2_01_m4.bri";
+import ncurses from "./2_02_ncurses.bri";
+import bash from "./2_03_bash.bri";
+import coreutils from "./2_04_coreutils.bri";
+import diffutils from "./2_05_diffutils.bri";
+import file from "./2_06_file.bri";
+import findutils from "./2_07_findutils.bri";
+import gawk from "./2_08_gawk.bri";
+import grep from "./2_09_grep.bri";
+import gzip from "./2_10_gzip.bri";
+import make from "./2_11_make.bri";
+import patch from "./2_12_patch.bri";
+import sed from "./2_13_sed.bri";
+import tar from "./2_14_tar.bri";
+import xz from "./2_15_xz.bri";
+import binutils from "./2_16_binutils.bri";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
+      hash: brioche.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
+    });
+  const mpfrArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
+      hash: brioche.sha256Hash("06a378df13501248c1b2db5aa977a2c8126ae849a9d9b7be2546fb4a9c26d993"),
+    });
+  const gmpArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gmp-6.3.0.tar.xz",
+      hash: brioche.sha256Hash("a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"),
+    });
+  const mpcArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpc-1.3.1.tar.gz",
+      hash: brioche.sha256Hash("ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8"),
+    });
+
+  let stage2 = brioche.merge(
+    stage1(),
+    m4(),
+    ncurses(),
+    bash(),
+    coreutils(),
+    diffutils(),
+    file(),
+    findutils(),
+    gawk(),
+    grep(),
+    gzip(),
+    make(),
+    patch(),
+    sed(),
+    tar(),
+    xz(),
+    binutils(),
+  );
+
+  stage2 = useBriocheLd(stage2, {
+    ldPaths: [
+      "usr/bin/ld",
+      "usr/bin/ld.bfd",
+      "usr/x86_64-lfs-linux-gnu/bin/ld",
+      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
+    ],
+    interpreterPaths: {
+      "lib64/ld-linux-x86-64.so.2": "lib/ld-linux-x86-64.so.2",
+    },
+  });
+
+  const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];
+  for (const tool of prefixedTools) {
+    stage2 = brioche.insert(stage2, `usr/bin/${tool}`, brioche.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
+  }
+
+  // stage2 = brioche.insert(stage2, "usr/x86_64-lfs-linux-gnu/include", brioche.symlink({ target: "../include" }));
+  // const usrInclude = brioche.cast(brioche.get(stage2, "usr/include"), "directory");
+  // stage2 = brioche.insert(stage2, "usr/x86_64-lfs-linux-gnu/include", usrInclude);
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage2/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source
+
+      tar -xf "$mpfrArchive" --no-same-owner --no-same-permissions
+      mv mpfr-4.2.0 mpfr
+      tar -xf "$gmpArchive" --no-same-owner --no-same-permissions
+      mv gmp-6.3.0 gmp
+      tar -xf "$mpcArchive" --no-same-owner --no-same-permissions
+      mv mpc-1.3.1 mpc
+
+      case $(uname -m) in
+        x86_64)
+          sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+        ;;
+      esac
+
+      sed '/thread_header =/s/@.*@/gthr-posix.h/' \
+        -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
+
+      mkdir build
+      cd build
+
+      export CFLAGS="-isystem $stage2/usr/include"
+      export CXXFLAGS="-isystem $stage2/usr/include"
+
+      ../configure \
+        --build="$(../config.guess)" \
+        --host="$TARGET" \
+        --target="$TARGET" \
+        LDFLAGS_FOR_TARGET="-L$PWD/$TARGET/libgcc" \
+        CFLAGS_FOR_TARGET="-g -O2 -isystem $stage2/usr/include" \
+        CXXFLAGS_FOR_TARGET="-g -O2 -isystem $stage2/usr/include" \
+        CFLAGS_FOR_BUILD="-isystem $stage2/usr/include" \
+        CXXFLAGS_FOR_BUILD="-isystem $stage2/usr/include" \
+        CFLAGS="-isystem $stage2/usr/include" \
+        CXXFLAGS="-isystem $stage2/usr/include" \
+        --with-build-sysroot="$stage2" \
+        --prefix=/usr \
+        --enable-default-pie \
+        --enable-default-ssp \
+        --disable-nls \
+        --disable-multilib \
+        --disable-libatomic \
+        --disable-libgomp \
+        --disable-libquadmath \
+        --disable-libsanitizer \
+        --disable-libssp \
+        --disable-libvtv \
+        --enable-languages=c,c++
+
+      make
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+
+      ln -s gcc "$BRIOCHE_OUTPUT/usr/bin/cc"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      mpfrArchive: brioche.processTemplate(mpfrArchive),
+      gmpArchive: brioche.processTemplate(gmpArchive),
+      mpcArchive: brioche.processTemplate(mpcArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage2: brioche.processTemplate(stage2),
+    }
+  });
+});

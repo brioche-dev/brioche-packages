@@ -1,0 +1,38 @@
+import * as brioche from "/core";
+import stage2 from "/toolchain/stage2";
+import gmp from "./gmp.bri";
+import mpfr from "./mpfr.bri";
+
+export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpc-1.3.1.tar.gz",
+      hash: brioche.sha256Hash("ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8"),
+    });
+
+  const dependencies = brioche.merge(gmp(), mpfr());
+
+  return brioche.process({
+    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    args: [
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure \
+          --prefix=/ \
+          --disable-static
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `),
+    ],
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.processTemplate(stage2(), "/bin"),
+      CPPFLAGS: brioche.processTemplate("-I", gmp(), "/include -I", mpfr(), "/include"),
+      LDFLAGS: brioche.processTemplate("-L", gmp(), "/lib -L", mpfr(), "/lib"),
+    },
+  }).cast("directory");
+});

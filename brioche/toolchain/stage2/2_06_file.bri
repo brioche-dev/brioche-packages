@@ -1,0 +1,49 @@
+import * as brioche from "/core";
+import { bootstrapRun } from "../stage0";
+import stage1 from "../stage1";
+
+export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
+  const sourceArchive = brioche
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/file-5.45.tar.gz",
+      hash: brioche.sha256Hash("fc97f51029bb0e2c9f4e3bffefdaf678f0e039ee872b9de5c002a6d09c784d82"),
+    });
+
+  return bootstrapRun({
+    script: `
+      set -euo pipefail
+
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+
+      mkdir -p source
+      tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
+      cd source
+
+      mkdir build
+      pushd build
+        ../configure \
+          --disable-bzlib \
+          --disable-libseccomp \
+          --disable-xzlib \
+          --disable-zlib
+        make
+      popd
+
+      ./configure \
+        --prefix=/usr \
+        --host="$TARGET" \
+        --build="$(./build-aux/config.guess)"
+
+      make FILE_COMPILE="$(pwd)/build/src/file"
+      make install DESTDIR="$BRIOCHE_OUTPUT"
+
+      rm "$BRIOCHE_OUTPUT/usr/lib/libmagic.la"
+    `,
+    env: {
+      source: brioche.processTemplate(sourceArchive),
+      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      stage1: brioche.processTemplate(stage1()),
+    }
+  });
+});

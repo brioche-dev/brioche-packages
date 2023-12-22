@@ -1,0 +1,11 @@
+import * as brioche from "brioche";
+
+interface TestType {
+  foo: string;
+  bar: string;
+}
+
+throw new Error("top level exception");
+export default () => {
+  return brioche.directory({});
+}

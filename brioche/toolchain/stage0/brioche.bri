@@ -1,0 +1,155 @@
+import * as brioche from "/core";
+
+interface BootstrapRunOptions {
+  script: string,
+  env?: Record<string, brioche.ProcessTemplate>,
+  workDir?: brioche.AsyncLazy<brioche.Directory>,
+}
+
+export function bootstrapRun(options: BootstrapRunOptions): brioche.Lazy<brioche.Directory> {
+  const bootstrapRootfs = brioche
+    .download({
+      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd",
+      hash: brioche.sha256Hash("0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11"),
+    })
+    .unpack("tar", "zstd");
+
+  const busybox = brioche.download({
+    url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz",
+    hash: brioche.sha256Hash("e2e9ae181e115e155158cb9031687d943b0847d8058a4c28454194d835478be6"),
+  })
+  .unpack("tar", "xz");
+
+  const briocheLd = brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-ld",
+    hash: brioche.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
+  });
+  const briochePacked = brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
+    hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
+  });
+
+  const env = options.env ?? {};
+
+  return brioche.process({
+    command: brioche.processTemplate("/usr/bin/env"),
+    args: [
+      brioche.processTemplate("sh"),
+      brioche.processTemplate("-c"),
+      brioche.processTemplate(`
+        set -eu
+
+        "$BUSYBOX/bin/busybox" cp -r "$BOOTSTRAP_ROOTFS" ./rootfs
+        echo "$ENTER_BOOTSTRAP_SCRIPT" > enter.sh
+        "$BUSYBOX/bin/busybox" chmod +x enter.sh
+        echo "$RUN_BOOTSTRAP_SCRIPT" > rootfs/bootstrap.sh
+        "$BUSYBOX/bin/busybox" chmod +x rootfs/bootstrap.sh
+        "$BUSYBOX/bin/busybox" unshare -Umfr /usr/bin/env sh ./enter.sh
+      `),
+    ],
+    env: {
+      BUSYBOX: brioche.processTemplate(busybox),
+      ENTER_BOOTSTRAP_SCRIPT: brioche.processTemplate(`
+        set -eu
+
+        "$BUSYBOX/bin/busybox" mkdir -p "$BRIOCHE_OUTPUT"
+
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/hostfs"
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/proc"
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/sys"
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/dev"
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BUSYBOX"
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$HOME"
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
+        "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
+
+        "$BUSYBOX/bin/busybox" mount --rbind "$(pwd)/rootfs" "$(pwd)/rootfs"
+        "$BUSYBOX/bin/busybox" mount --rbind "/proc" "$(pwd)/rootfs/proc"
+        "$BUSYBOX/bin/busybox" mount --rbind "/sys" "$(pwd)/rootfs/sys"
+        "$BUSYBOX/bin/busybox" mount --rbind "/dev" "$(pwd)/rootfs/dev"
+        "$BUSYBOX/bin/busybox" mount --rbind "$BUSYBOX" "$(pwd)/rootfs/$BUSYBOX"
+        "$BUSYBOX/bin/busybox" mount --rbind "$HOME" "$(pwd)/rootfs/$HOME"
+        "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_OUTPUT" "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
+        "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_PACK_RESOURCES_DIR" "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
+
+        "$BUSYBOX/bin/busybox" mkdir -p "$HOME/.local/libexec/brioche-toolchain/bin" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64"
+        "$BUSYBOX/bin/busybox" cp "$BRIOCHE_LD" "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld"
+        "$BUSYBOX/bin/busybox" cp "$BRIOCHE_PACKED" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
+        "$BUSYBOX/bin/busybox" chmod +x "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
+        "$BUSYBOX/bin/busybox" ln -s "/usr/bin/ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/ld"
+        "$BUSYBOX/bin/busybox" ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64/"
+        "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/ld"
+        "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/x86_64-linux-gnu-ld"
+
+        export PATH="$HOME/.local/libexec/brioche-toolchain/bin\${PATH:+:$PATH}"
+
+        "$BUSYBOX/bin/busybox" pivot_root "$(pwd)/rootfs" "$(pwd)/rootfs/hostfs"
+        /bin/bash /bootstrap.sh
+      `),
+      RUN_BOOTSTRAP_SCRIPT: brioche.processTemplate(options.script),
+      BOOTSTRAP_ROOTFS: brioche.processTemplate(bootstrapRootfs),
+      BRIOCHE_LD: brioche.processTemplate(briocheLd),
+      BRIOCHE_PACKED: brioche.processTemplate(briochePacked),
+      ...options.env
+    },
+    workDir: options.workDir,
+  }).cast("directory");
+};
+
+export default async (): Promise<brioche.Lazy> => {
+  const utils = await brioche
+    .download({
+      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
+      hash: brioche.sha256Hash("eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33"),
+    })
+    .unpack("tar", "zstd");
+
+  const toolchain = await brioche
+    .download({
+      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd",
+      hash: brioche.sha256Hash("27416708f7ee8cd0c5d408010192705b40c914647fd0d80f00c2194795828cd6"),
+    })
+    .unpack("tar", "zstd");
+
+  const make = await brioche
+    .download({
+      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz",
+      hash: brioche.sha256Hash("f8a75f171c2c753bc86a331473812ddc24837d5e91b0b1c7af89d6a2aa6e8986"),
+    })
+    .unpack("tar", "xz");
+
+  const briocheLd = await brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-ld",
+    hash: brioche.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
+  }).resolve();
+  const briochePacked = await brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
+    hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
+  }).resolve();
+
+  const briochePack = await brioche.directory({
+    "x86_64-linux-musl": brioche.directory({
+      "bin": brioche.directory({
+        "brioche-ld": briocheLd.withExecutablePermission(true),
+      }),
+      "libexec": brioche.directory({
+        "brioche-ld": brioche.directory({
+          "ld": brioche.symlink({ target: "../../bin/system-ld" }),
+          "brioche-packed": briochePacked.withExecutablePermission(true),
+          "lib": brioche.directory({
+            "ld-musl-x86_64.so.1": brioche.symlink({ target: "../../../../lib/ld-musl-x86_64.so.1" }),
+          }),
+        }),
+      }),
+    }),
+  });
+
+  let stage0 = await brioche.merge(utils, toolchain, make, briochePack);
+
+  const systemLd = brioche.get(stage0, "x86_64-linux-musl/bin/ld");
+  stage0 = brioche.insert(stage0, "x86_64-linux-musl/bin/system-ld", systemLd);
+  stage0 = brioche.insert(stage0, "x86_64-linux-musl/bin/ld", brioche.symlink({ target: "brioche-ld" }));
+  stage0 = brioche.insert(stage0, "bin/ld", brioche.symlink({ target: "../x86_64-linux-musl/bin/ld" }));
+
+  return stage0;
+};
