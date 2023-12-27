@@ -60,14 +60,14 @@ export async function asyncBriocheSerialize<T extends Value>(value: AsyncLazy<T>
 }
 
 export function briocheDeserializeAny(value: runtime.CompleteValue, source: runtime.Source | undefined): Value {
-    switch (value.type) {
-      case "file":
-        return File.briocheDeserialize(value, source);
-      case "directory":
-        return Directory.briocheDeserialize(value, source);
-      case "symlink":
-        return Symlink.briocheDeserialize(value, source);
-      default:
-        return unreachable(value);
-    }
+  switch (value.type) {
+    case "file":
+      return File.briocheDeserialize(value, source);
+    case "directory":
+      return Directory.briocheDeserialize(value, source);
+    case "symlink":
+      return Symlink.briocheDeserialize(value, source);
+    default:
+      return unreachable(value);
   }
+}
