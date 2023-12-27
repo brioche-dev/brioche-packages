@@ -2,11 +2,11 @@ import * as brioche from "brioche";
 
 export default async (): Promise<brioche.Lazy> => {
   return brioche.process({
-    command: brioche.processTemplate("/usr/bin/env"),
+    command: "/usr/bin/env",
     args: [
-      brioche.processTemplate("sh"),
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "sh",
+      "-c",
+      `
         set -euo pipefail
 
         echo "#include <stdio.h>" >> test.c
@@ -21,13 +21,13 @@ export default async (): Promise<brioche.Lazy> => {
         chmod +x "$BRIOCHE_OUTPUT/test.sh"
 
         "$BRIOCHE_OUTPUT/test.sh" >> "$BRIOCHE_OUTPUT/test.txt"
-      `),
+      `,
     ],
     env: {
-      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
-      PATH: brioche.processTemplate(brioche.stage2(), "/bin"),
-      MAGIC: brioche.processTemplate(brioche.stage2(), "/usr/share/misc/magic"),
-      test_script: brioche.processTemplate(`#!/usr/bin/env bash
+      BRIOCHE_OUTPUT: brioche.outputPath,
+      PATH: brioche.tpl`${brioche.stage2()}/bin`,
+      MAGIC: brioche.tpl`${brioche.stage2()}/usr/share/misc/magic`,
+      test_script: `#!/usr/bin/env bash
         set -euo pipefail
 
         strings --version
@@ -47,7 +47,7 @@ export default async (): Promise<brioche.Lazy> => {
         sed --version
         tar --version
         xz --version
-      `),
+      `,
     }
   });
 }

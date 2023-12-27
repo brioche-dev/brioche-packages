@@ -22,10 +22,10 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
   );
 
   return brioche.process({
-    command: brioche.processTemplate(toolchain(), "/bin/bash"),
+    command: brioche.tpl`${toolchain()}/bin/bash`,
     args: [
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "-c",
+      `
         set -euo pipefail
 
         cp -r "$stage2" "$BRIOCHE_OUTPUT"
@@ -56,11 +56,11 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
               mv temp "$file"
             fi
           done
-      `),
+      `,
     ],
     env: {
-      PATH: brioche.processTemplate(stage2, "/bin"),
-      stage2: brioche.processTemplate(stage2),
+      PATH: brioche.tpl`${stage2}/bin`,
+      stage2,
     },
   }).cast("directory");
 });

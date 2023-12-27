@@ -10,10 +10,10 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     });
 
   let mpfr = brioche.process({
-    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    command: brioche.tpl`${stage2()}/bin/bash`,
     args: [
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "-c",
+      `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -29,31 +29,31 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
           --enable-thread-safe
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
-      `),
+      `,
     ],
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      PATH: brioche.processTemplate(stage2(), "/bin"),
-      CPPFLAGS: brioche.processTemplate("-I", gmp(), "/include"),
-      LDFLAGS: brioche.processTemplate("-L", gmp(), "/lib"),
+      source: sourceArchive,
+      PATH: brioche.tpl`${stage2()}/bin`,
+      CPPFLAGS: brioche.tpl`-I${gmp()}/include`,
+      LDFLAGS: brioche.tpl`-L${gmp()}/lib`,
     },
   }).cast("directory");
 
   // TODO: Use JS functions to do this conversion
   let libtoolArchive = brioche.get(mpfr, "lib/libmpfr.la");
   libtoolArchive = brioche.process({
-    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    command: brioche.tpl`${stage2()}/bin/bash`,
     args: [
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "-c",
+      `
         set -euo pipefail
 
         sed 's|//lib/libgmp.la|-lgmp|' "$libtoolArchive" > "$BRIOCHE_OUTPUT"
-      `),
+      `,
     ],
     env: {
-      PATH: brioche.processTemplate(stage2(), "/bin"),
-      libtoolArchive: brioche.processTemplate(libtoolArchive),
+      PATH: brioche.tpl`${stage2()}/bin`,
+      libtoolArchive,
     },
   }).cast("file");
 

@@ -10,11 +10,11 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     });
 
   let perl = brioche.process({
-    command: brioche.processTemplate("/usr/bin/env"),
+    command: "/usr/bin/env",
     args: [
-      brioche.processTemplate("sh"),
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "sh",
+      "-c",
+      `
         set -euo pipefail
 
         tar xf "$source" --strip-components=1
@@ -24,11 +24,11 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
           -Duserelocatableinc
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
-      `)
+      `,
     ],
     env: {
-      PATH: brioche.processTemplate(toolchain(), "/bin"),
-      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.tpl`${toolchain()}/bin`,
+      source: sourceArchive,
     },
   }).cast("directory");
 

@@ -10,11 +10,11 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     });
 
   return brioche.process({
-    command: brioche.processTemplate("/usr/bin/env"),
+    command: "/usr/bin/env",
     args: [
-      brioche.processTemplate("sh"),
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "sh",
+      "-c",
+      `
         tar xf "$source" --strip-components=1
         ./configure \
           --prefix=/usr \
@@ -22,11 +22,11 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
           --without-ensurepip
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
-      `)
+      `
     ],
     env: {
-      PATH: brioche.processTemplate(toolchain(), "/bin"),
-      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.tpl`${toolchain()}/bin`,
+      source: sourceArchive,
     },
   }).cast("directory");
 });

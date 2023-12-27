@@ -98,13 +98,13 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
         done
     `,
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      sourcePatch: brioche.processTemplate(sourcePatch),
-      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
-      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
-      stage1: brioche.processTemplate(stage1),
-      packer: brioche.processTemplate(briochePacker),
-      packed: brioche.processTemplate(briochePacked),
+      source: sourceArchive,
+      sourcePatch,
+      BRIOCHE_OUTPUT: brioche.outputPath,
+      TARGET: "x86_64-lfs-linux-gnu",
+      stage1,
+      packer: briochePacker,
+      packed: briochePacked,
     },
   });
 });

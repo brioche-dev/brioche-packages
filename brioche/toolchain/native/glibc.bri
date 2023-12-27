@@ -19,10 +19,10 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     });
 
   return brioche.process({
-    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    command: brioche.tpl`${stage2()}/bin/bash`,
     args: [
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "-c",
+      `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -49,14 +49,14 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
         make
         sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
         make install DESTDIR="$BRIOCHE_OUTPUT"
-      `),
+      `,
     ],
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      sourcePatchFhs: brioche.processTemplate(sourcePatchFhs),
-      sourcePatchMemalign: brioche.processTemplate(sourcePatchMemalign),
-      PATH: brioche.processTemplate(stage2(), "/bin"),
-      stage2: brioche.processTemplate(stage2()),
+      source: sourceArchive,
+      sourcePatchFhs,
+      sourcePatchMemalign,
+      PATH: brioche.tpl`${stage2()}/bin`,
+      stage2: stage2(),
     }
   }).cast("directory");
 });

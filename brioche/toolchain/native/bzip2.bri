@@ -14,10 +14,10 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     });
 
   return brioche.process({
-    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    command: brioche.tpl`${stage2()}/bin/bash`,
     args: [
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "-c",
+      `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -35,12 +35,12 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
         mkdir -p "$BRIOCHE_OUTPUT/lib"
         cp -a libbz2.so.* "$BRIOCHE_OUTPUT/lib"
         ln -s libbz2.so.1.0.8 "$BRIOCHE_OUTPUT/lib/libbz2.so"
-      `),
+      `,
     ],
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      sourcePatch: brioche.processTemplate(sourcePatch),
-      PATH: brioche.processTemplate(stage2(), "/bin"),
+      source: sourceArchive,
+      sourcePatch,
+      PATH: brioche.tpl`${stage2()}/bin`,
     }
   }).cast("directory");
 });

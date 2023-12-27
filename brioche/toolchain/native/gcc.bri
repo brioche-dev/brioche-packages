@@ -32,10 +32,10 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
 
   // TODO: Enable NLS
   return brioche.process({
-    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    command: brioche.tpl`${stage2()}/bin/bash`,
     args: [
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "-c",
+      `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -73,19 +73,19 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
           LD="ld"
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
-      `),
+      `,
     ],
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      PATH: brioche.processTemplate(buildSysroot, "/bin:", stage2(), "/bin"),
-      CPPFLAGS: brioche.processTemplate("-I", zlib(), "/include -I", gmp(), "/include -I", mpfr(), "/include -I", mpc(), "/include -isystem ", stage2(), "/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ", buildSysroot, "/include -isystem ", buildSysroot, "/usr/include"),
+      source: sourceArchive,
+      PATH: brioche.tpl`${buildSysroot}/bin:${stage2()}/bin`,
+      CPPFLAGS: brioche.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
       // TODO: Remove glibc as an explicit dependency
       // TODO: Remove -lm as an explicit dependency
-      LDFLAGS: brioche.processTemplate("-L", zlib(), "/lib -L", gmp(), "/lib -L", mpfr(), "/lib -L", mpc(), "/lib -L", buildSysroot, "/lib -L", buildSysroot, "/lib64 -lm --sysroot=", buildSysroot),
-      buildSysroot: brioche.processTemplate(buildSysroot),
-      gmp: brioche.processTemplate(gmp()),
-      mpfr: brioche.processTemplate(mpfr()),
-      mpc: brioche.processTemplate(mpc()),
+      LDFLAGS: brioche.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
+      buildSysroot,
+      gmp: gmp(),
+      mpfr: mpfr(),
+      mpc: mpc(),
     }
   }).cast("directory");
 });

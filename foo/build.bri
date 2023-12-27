@@ -8,20 +8,20 @@ export const build = () => {
     })
     .unpack("tar", "zstd");
   return brioche.process({
-    command: brioche.processTemplate("/usr/bin/env"),
+    command: "/usr/bin/env",
     args: [
-      brioche.processTemplate("sh"),
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "sh",
+      "-c",
+      `
         mkdir -p $BRIOCHE_OUTPUT/bin
         echo "#!/usr/bin/env sh" >> $BRIOCHE_OUTPUT/bin/foo
         echo "echo 'Hello, world!'" >> $BRIOCHE_OUTPUT/bin/foo
         chmod +x $BRIOCHE_OUTPUT/bin/foo
-      `)
+      `
     ],
     env: {
-      PATH: brioche.processTemplate(utils, "/bin"),
-      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
+      PATH: brioche.tpl`${utils}/bin`,
+      BRIOCHE_OUTPUT: brioche.outputPath,
     }
   });
 };

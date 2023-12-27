@@ -145,13 +145,13 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       ln -s gcc "$BRIOCHE_OUTPUT/usr/bin/cc"
     `,
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      mpfrArchive: brioche.processTemplate(mpfrArchive),
-      gmpArchive: brioche.processTemplate(gmpArchive),
-      mpcArchive: brioche.processTemplate(mpcArchive),
-      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
-      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
-      stage2: brioche.processTemplate(stage2),
+      source: sourceArchive,
+      mpfrArchive,
+      gmpArchive,
+      mpcArchive,
+      BRIOCHE_OUTPUT: brioche.outputPath,
+      TARGET: "x86_64-lfs-linux-gnu",
+      stage2,
     }
   });
 });

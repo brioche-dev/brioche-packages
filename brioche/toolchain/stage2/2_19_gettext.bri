@@ -10,11 +10,11 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     });
 
   return brioche.process({
-    command: brioche.processTemplate("/usr/bin/env"),
+    command: "/usr/bin/env",
     args: [
-      brioche.processTemplate("sh"),
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "sh",
+      "-c",
+      `
         set -euo pipefail
 
         tar xf "$source" --strip-components=1
@@ -22,12 +22,12 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
         make
         mkdir -p "$BRIOCHE_OUTPUT/usr/bin"
         cp gettext-tools/src/{msgfmt,msgmerge,xgettext} "$BRIOCHE_OUTPUT/usr/bin"
-      `)
+      `,
     ],
     env: {
-      PATH: brioche.processTemplate(toolchain(), "/bin"),
-      GCONV_PATH: brioche.processTemplate(toolchain(), "/usr/lib/gconv"),
-      source: brioche.processTemplate(sourceArchive),
+      PATH: brioche.tpl`${toolchain()}/bin`,
+      GCONV_PATH: brioche.tpl`${toolchain()}/usr/lib/gconv`,
+      source: sourceArchive,
     },
   }).cast("directory");
 });

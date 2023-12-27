@@ -27,9 +27,9 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       make install DESTDIR="$BRIOCHE_OUTPUT"
     `,
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
-      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
+      source: sourceArchive,
+      BRIOCHE_OUTPUT: brioche.outputPath,
+      TARGET: "x86_64-lfs-linux-gnu",
     }
   });
 });

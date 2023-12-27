@@ -8,10 +8,12 @@ export {
   process,
   processTemplate,
   outputPath,
+  tpl,
   type ProcessOptions,
   Process,
   ProcessTemplate,
   type ProcessTemplateComponent,
+  type ProcessTemplateLike,
 } from "./process.bri";
 export { memo } from "./proxy.bri";
 export { symlink, type SymlinkOptions, Symlink } from "./symlink.bri";

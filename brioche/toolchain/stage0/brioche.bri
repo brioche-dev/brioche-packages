@@ -2,7 +2,7 @@ import * as brioche from "/core";
 
 interface BootstrapRunOptions {
   script: string,
-  env?: Record<string, brioche.ProcessTemplate>,
+  env?: Record<string, brioche.ProcessTemplateLike>,
   workDir?: brioche.AsyncLazy<brioche.Directory>,
 }
 
@@ -32,11 +32,11 @@ export function bootstrapRun(options: BootstrapRunOptions): brioche.Lazy<brioche
   const env = options.env ?? {};
 
   return brioche.process({
-    command: brioche.processTemplate("/usr/bin/env"),
+    command: "/usr/bin/env",
     args: [
-      brioche.processTemplate("sh"),
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "sh",
+      "-c",
+      `
         set -eu
 
         "$BUSYBOX/bin/busybox" cp -r "$BOOTSTRAP_ROOTFS" ./rootfs
@@ -45,11 +45,11 @@ export function bootstrapRun(options: BootstrapRunOptions): brioche.Lazy<brioche
         echo "$RUN_BOOTSTRAP_SCRIPT" > rootfs/bootstrap.sh
         "$BUSYBOX/bin/busybox" chmod +x rootfs/bootstrap.sh
         "$BUSYBOX/bin/busybox" unshare -Umfr /usr/bin/env sh ./enter.sh
-      `),
+      `,
     ],
     env: {
-      BUSYBOX: brioche.processTemplate(busybox),
-      ENTER_BOOTSTRAP_SCRIPT: brioche.processTemplate(`
+      BUSYBOX: busybox,
+      ENTER_BOOTSTRAP_SCRIPT: `
         set -eu
 
         "$BUSYBOX/bin/busybox" mkdir -p "$BRIOCHE_OUTPUT"
@@ -85,11 +85,11 @@ export function bootstrapRun(options: BootstrapRunOptions): brioche.Lazy<brioche
 
         "$BUSYBOX/bin/busybox" pivot_root "$(pwd)/rootfs" "$(pwd)/rootfs/hostfs"
         /bin/bash /bootstrap.sh
-      `),
-      RUN_BOOTSTRAP_SCRIPT: brioche.processTemplate(options.script),
-      BOOTSTRAP_ROOTFS: brioche.processTemplate(bootstrapRootfs),
-      BRIOCHE_LD: brioche.processTemplate(briocheLd),
-      BRIOCHE_PACKED: brioche.processTemplate(briochePacked),
+      `,
+      RUN_BOOTSTRAP_SCRIPT: options.script,
+      BOOTSTRAP_ROOTFS: bootstrapRootfs,
+      BRIOCHE_LD: briocheLd,
+      BRIOCHE_PACKED: briochePacked,
       ...options.env
     },
     workDir: options.workDir,

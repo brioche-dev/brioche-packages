@@ -9,10 +9,10 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     });
 
   return brioche.process({
-    command: brioche.processTemplate(stage2(), "/bin/bash"),
+    command: brioche.tpl`${stage2()}/bin/bash`,
     args: [
-      brioche.processTemplate("-c"),
-      brioche.processTemplate(`
+      "-c",
+      `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -20,11 +20,11 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
         ./configure --prefix=/
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
-      `),
+      `,
     ],
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      PATH: brioche.processTemplate(stage2(), "/bin"),
+      source: sourceArchive,
+      PATH: brioche.tpl`${stage2()}/bin`,
     }
   }).cast("directory");
 });

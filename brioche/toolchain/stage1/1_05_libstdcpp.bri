@@ -72,10 +72,10 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       rm -v "$BRIOCHE_OUTPUT/usr/lib"/lib{stdc++,stdc++fs,supc++}.la
     `,
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
-      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
-      stage1: brioche.processTemplate(stage1),
+      source: sourceArchive,
+      BRIOCHE_OUTPUT: brioche.outputPath,
+      TARGET: "x86_64-lfs-linux-gnu",
+      stage1,
     }
   });
 });

@@ -31,11 +31,11 @@ export default async () => {
     "libsum.txt": brioche.symlink({ target: "lorem ipsum.txt" }),
     "stdlib.h": unpacked.get("x86_64-linux-musl-native", "include", "stdlib.h"),
     "hello.txt": brioche.process({
-      command: brioche.processTemplate("/usr/bin/env"),
+      command: "/usr/bin/env",
       args: [
-        brioche.processTemplate("sh"),
-        brioche.processTemplate("-c"),
-        brioche.processTemplate(`
+        "sh",
+        "-c",
+        `
           set -euo pipefail
           echo "Hello, $(whoami)!" >> $BRIOCHE_OUTPUT
           id >> $BRIOCHE_OUTPUT
@@ -59,13 +59,13 @@ export default async () => {
           mkdir -p /tmp/brioche-test
           echo "Hello from tempfile!" > /tmp/brioche-test/hello.txt
           cat /tmp/brioche-test/hello.txt >> $BRIOCHE_OUTPUT
-        `)
+        `,
       ],
       env: {
-        unpacked: brioche.processTemplate(unpacked),
-        BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
-        PATH: brioche.processTemplate(utils, "/bin:", foo(), "/bin"),
-        VALUE: brioche.processTemplate(VALUE),
+        unpacked,
+        BRIOCHE_OUTPUT: brioche.outputPath,
+        PATH: brioche.tpl`${utils}/bin:${foo()}/bin`,
+        VALUE,
       },
       workDir: brioche.directory({
         "workdircontents": brioche.directory({})

@@ -36,10 +36,10 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       sed -i 's/"1"/"8"/' "$BRIOCHE_OUTPUT/usr/share/man/man8/chroot.8"
     `,
     env: {
-      source: brioche.processTemplate(sourceArchive),
-      BRIOCHE_OUTPUT: brioche.processTemplate(brioche.outputPath),
-      TARGET: brioche.processTemplate("x86_64-lfs-linux-gnu"),
-      stage1: brioche.processTemplate(stage1()),
+      source: sourceArchive,
+      BRIOCHE_OUTPUT: brioche.outputPath,
+      TARGET: "x86_64-lfs-linux-gnu",
+      stage1: stage1(),
     }
   });
 });

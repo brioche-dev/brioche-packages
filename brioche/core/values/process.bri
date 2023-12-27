@@ -6,28 +6,28 @@ import { type Directory, directory } from "./directory.bri";
 import { type AsyncLazy, type Lazy, type Value, briocheDeserializeAny } from "./value.bri";
 
 export interface ProcessOptions {
-  command: ProcessTemplate,
-  args?: ProcessTemplate[],
-  env?: Record<string, ProcessTemplate>,
+  command: ProcessTemplateLike,
+  args?: ProcessTemplateLike[],
+  env?: Record<string, ProcessTemplateLike>,
   workDir?: AsyncLazy<Directory>,
 }
 
 export function process(options: ProcessOptions): Process {
-  const env: Record<string, ProcessTemplate> = {
-    "BRIOCHE_OUTPUT": processTemplate(outputPath),
-    "BRIOCHE_PACK_RESOURCES_DIR": processTemplate(resourcesDir),
-    "HOME": processTemplate(homeDir),
-    "TMPDIR": processTemplate(tempDir),
+  const env: Record<string, ProcessTemplateLike> = {
+    "BRIOCHE_OUTPUT": outputPath,
+    "BRIOCHE_PACK_RESOURCES_DIR": resourcesDir,
+    "HOME": homeDir,
+    "TMPDIR": tempDir,
     ...options.env,
   };
 
   const bEnv: Record<runtime.BString, ProcessTemplate> = {};
   for (const [k, v] of Object.entries(env)) {
-    bEnv[runtime.bstring(k)] = v;
+    bEnv[runtime.bstring(k)] = processTemplate(v);
   }
   return new Process({
-    command: options.command,
-    args: options.args ?? [],
+    command: processTemplate(options.command),
+    args: (options.args ?? []).map((arg) => processTemplate(arg)),
     env: bEnv,
     workDir: options.workDir ?? directory({}),
     platform: "x86_64-linux",
@@ -35,7 +35,20 @@ export function process(options: ProcessOptions): Process {
   });
 }
 
-export function processTemplate(...components: Awaitable<ProcessTemplateComponent>[]): ProcessTemplate {
+export function processTemplate(...components: ProcessTemplateLike[]): ProcessTemplate {
+  return new ProcessTemplate(...components);
+}
+
+export function tpl(strings: TemplateStringsArray, ...items: ProcessTemplateLike[]): ProcessTemplate {
+  const components = strings.flatMap((str, i): ProcessTemplateLike[] => {
+    const item = items[i];
+    if (item != null) {
+      return [str, item];
+    } else {
+      return [str];
+    }
+  });
+
   return new ProcessTemplate(...components);
 }
 
@@ -99,44 +112,53 @@ export class Process implements Lazy {
   }
 }
 
+export type ProcessTemplateLike = Awaitable<ProcessTemplateComponent>;
+
 export type ProcessTemplateComponent =
   | string
+  | ProcessTemplate
   | Lazy
   | typeof outputPath
   | typeof resourcesDir
   | typeof homeDir
   | typeof workDir
-  | typeof tempDir;
+  | typeof tempDir
+  | undefined;
 
 export class ProcessTemplate {
-  components: Awaitable<ProcessTemplateComponent>[];
+  components: ProcessTemplateLike[];
 
-  constructor(...components: Awaitable<ProcessTemplateComponent>[]) {
+  constructor(...components: ProcessTemplateLike[]) {
     this.components = components;
   }
 
   async briocheSerialize(): Promise<runtime.ProcessTemplate> {
     const components = await Promise.all(this.components);
-    const runtimeComponents = await Promise.all(components.map(async (component): Promise<runtime.ProcessTemplateComponent> => {
-      if (typeof component === "string") {
-        return { type: "literal", value: runtime.bstring(component) };
+    const runtimeComponents = await Promise.all(components.map(async (component): Promise<runtime.ProcessTemplateComponent[]> => {
+      if (component == null || component === "") {
+        return [];
+      } else if (typeof component === "string") {
+        return [{ type: "literal", value: runtime.bstring(component) }];
       } else if (component === outputPath) {
-        return { type: "output_path" };
+        return [{ type: "output_path" }];
       } else if (component === resourcesDir) {
-        return { type: "resources_dir" };
+        return [{ type: "resources_dir" }];
       } else if (component === homeDir) {
-        return { type: "home_dir" };
+        return [{ type: "home_dir" }];
       } else if (component === workDir) {
-        return { type: "work_dir" };
+        return [{ type: "work_dir" }];
       } else if (component === tempDir) {
-        return { type: "temp_dir" };
+        return [{ type: "temp_dir" }];
+      } else if (component instanceof ProcessTemplate) {
+        const serialized = await component.briocheSerialize();
+        return serialized.components;
       } else {
-        return { type: "input", value: await component.briocheSerialize() };
+        return [{ type: "input", value: await component.briocheSerialize() }];
       }
     }));
 
     return {
-      components: runtimeComponents,
+      components: runtimeComponents.flat(1),
     };
   }
 }
