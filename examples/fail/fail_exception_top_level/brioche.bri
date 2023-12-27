@@ -1,4 +1,4 @@
-import * as brioche from "brioche";
+import * as brioche from "std";
 
 interface TestType {
   foo: string;

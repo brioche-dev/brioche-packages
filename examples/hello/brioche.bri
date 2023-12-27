@@ -1,4 +1,4 @@
-import * as brioche from "brioche";
+import * as brioche from "std";
 import foo from "foo";
 import { VALUE } from "./other.bri";
 

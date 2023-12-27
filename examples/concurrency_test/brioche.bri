@@ -1,4 +1,4 @@
-import * as brioche from "brioche";
+import * as brioche from "std";
 
 // Change this value to re-run all value resolutions
 const WATERMARK = "1";
