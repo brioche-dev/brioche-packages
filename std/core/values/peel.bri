@@ -2,12 +2,12 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { type CastTo, type CastResult, cast } from "./cast.bri";
 import { Directory } from "./directory.bri";
-import { Proxy } from "./proxy.bri";
+import { createProxy } from "./proxy.bri";
 import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny } from "./value.bri";
 
 export function peel(directory: AsyncLazy<Directory>, depth: number = 1): Peel {
   return new Peel({
-    directory: new Proxy(directory),
+    directory: createProxy(directory),
     depth,
     source: briocheSource({ depth: 1 }),
   });

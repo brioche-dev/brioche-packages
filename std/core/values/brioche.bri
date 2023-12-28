@@ -1,5 +1,5 @@
 export { cast } from "./cast.bri";
-export { directory, merge, get, insert, remove, Directory, LazyDirectory } from "./directory.bri";
+export { directory, merge, get, insert, remove, Directory } from "./directory.bri";
 export { download, Download, type DownloadOptions } from "./download.bri";
 export { File, setPermissions } from "./file.bri";
 export { sha256Hash, type Hash, Sha256Hash } from "./hash.bri";
@@ -15,7 +15,7 @@ export {
   type ProcessTemplateComponent,
   type ProcessTemplateLike,
 } from "./process.bri";
-export { memo } from "./proxy.bri";
+export { memo, createProxy } from "./proxy.bri";
 export { symlink, type SymlinkOptions, Symlink } from "./symlink.bri";
 export { Unpack } from "./unpack.bri";
 export {
