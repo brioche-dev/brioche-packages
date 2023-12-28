@@ -50,19 +50,6 @@ export class File implements Lazy<File> {
     return this;
   }
 
-  withExecutablePermission(executable: boolean): File {
-    return new File({
-      source: briocheSource({ depth: 1 }),
-      blobId: this.blobId,
-      executable,
-      resources: this.resources
-    });
-  }
-
-  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat: runtime.CompressionFormat = "none"): Lazy<Directory> {
-    return unpack(this, archiveFormat, compressionFormat);
-  }
-
   briocheSerialize(): runtime.CompleteFile {
     return {
       type: "file",
@@ -87,4 +74,5 @@ export class File implements Lazy<File> {
 
   cast = lazyFileUtils.cast;
   withPermissions = lazyFileUtils.withPermissions;
+  unpack = lazyFileUtils.unpack;
 }

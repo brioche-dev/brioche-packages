@@ -130,89 +130,14 @@ export class Directory implements Lazy<Directory> {
     };
   }
 
-  #tryGetWithDepth(sourceDepth: number, paths: string[]): Value | null {
-    const source = briocheSource({ depth: sourceDepth });
-    const parts = paths.flatMap(path => path.split("/"));
-    const displayPath = paths.join("/");
-    let current: Value = this;
-    for (const part of parts) {
-      if (part === "" || part === ".") {
-        continue;
-      }
-      if (part === "..") {
-        throw new Error(`unsupported path ${displayPath}`);
-      }
-      if (!(current instanceof Directory)) {
-        throw new Error(`path ${displayPath} descends into non-directory`);
-      }
-      const entry = current.entries[runtime.bstring(part)];
-      if (!entry) {
-        return null;
-      }
-      current = briocheDeserializeAny(entry, source);
-    }
-    return current;
-  }
-
-  tryGet(...paths: string[]): Value | null {
-    return this.#tryGetWithDepth(2, paths);
-  }
-
-  get(...paths: string[]): Value {
-    const displayPath = paths.join("/");
-    const result = this.#tryGetWithDepth(2, paths);
-    assert(result != null, `path ${displayPath} does not exist`);
-    return result;
-  }
-
-  insert(path: string, value: Value): Directory {
-    const source = briocheSource({ depth: 1 });
-    const [entryName, ...rest] = path.split("/").filter(part => part !== "");
-
-    if (entryName == null) {
-      throw new Error(`invalid path "${path}"`);
-    }
-
-    const entryKey = runtime.bstring(entryName);
-
-    if (rest.length === 0) {
-      return new Directory({
-        entries: {
-          ...this.entries,
-          [entryKey]: value.briocheSerialize()
-        },
-        source,
-      });
-    } else {
-      const currentEntry: runtime.CompleteValue = this.entries[entryKey] ?? {
-        type: "directory",
-        entries: {},
-      };
-      const currentEntryValue = briocheDeserializeAny(currentEntry, source);
-      assert(currentEntryValue instanceof Directory, `tried to descend into non-directory ${entryName}`);
-      const newEntry = currentEntryValue.insert(rest.join("/"), value);
-
-      return new Directory({
-        entries: {
-          ...this.entries,
-          [entryKey]: newEntry.briocheSerialize(),
-        },
-        source,
-      });
-    }
-  }
-
-  peel(): Lazy {
-    const keys = Object.keys(this.entries) as runtime.BString[];
-    assert(keys.length === 1, `expected directory to only have one entry, but had ${keys.length} entries`);
-    return briocheDeserializeAny(this.entries[keys[0]!]!, briocheSource({ depth: 1 }));
-  }
-
   static briocheDeserialize(value: runtime.CompleteValue, source: runtime.Source | undefined): Directory {
     assert(value.type === "directory");
     return new Directory({ entries: value.entries, source });
   }
 
+  get = lazyDirectoryUtils.get;
+  insert = lazyDirectoryUtils.insert;
   remove = lazyDirectoryUtils.remove;
+  peel = lazyDirectoryUtils.peel;
   cast = lazyDirectoryUtils.cast;
 }
