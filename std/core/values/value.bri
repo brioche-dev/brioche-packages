@@ -2,8 +2,9 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { type Awaitable, unreachable } from "../utils.bri";
 import { File } from "./file.bri";
-import { Directory } from "./directory.bri";
+import { Directory, directory } from "./directory.bri";
 import { Symlink } from "./symlink.bri";
+import { createProxy } from "./proxy.bri";
 
 export type Value = File | Directory | Symlink;
 
@@ -222,29 +223,6 @@ export const lazyFileUtils: LazyFileUtils = {
   }
 };
 
-function directoryStructure(pathComponents: string[], value: runtime.LazyValue): runtime.LazyDirectory {
-  const [head, ...tail] = pathComponents;
-  if (head == null) {
-    throw new Error("path must not be empty");
-  }
-
-  if (tail.length === 0) {
-    return {
-      type: "directory",
-      entries: {
-        [runtime.bstring(head)]: value,
-      },
-    };
-  } else {
-    return {
-      type: "directory",
-      entries: {
-        [runtime.bstring(head)]: directoryStructure(tail, value),
-      },
-    };
-  }
-}
-
 export const lazyDirectoryUtils: LazyDirectoryUtils = {
   cast: lazyUtils.cast as LazyDirectoryUtils["cast"],
   get(this: Lazy<Directory>, path: string): Lazy<Value> {
@@ -262,25 +240,30 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
     });
   },
   insert(this: Lazy<Directory>, path: string, value: AsyncLazy<Value>): Lazy<Directory> {
+    const pathComponents = path.split("/");
+    const dirPathComponents = pathComponents.slice(0, -1);
+    const fileName = pathComponents.at(-1);
+    if (fileName == null || dirPathComponents.some((pathComponent) => pathComponent === "")) {
+      throw new Error(`invalid path: "${path}"`);
+    }
+
+    const directoryFromPath = dirPathComponents.reduceRight((acc, pathComponent) => directory({
+      [pathComponent]: acc,
+    }), directory({
+      [fileName]: value,
+    }));
+
+    const proxyDirectories = [this, directoryFromPath].map((dir) => createProxy(dir));
     return createLazy(["directory"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
-        const directory = await this.briocheSerialize();
-        const newValue = await (await value).briocheSerialize();
-
+        const serializedDirectories = await Promise.all(proxyDirectories.map(async (dir) => (await dir).briocheSerialize()));
         return {
           type: "merge",
-          directories: [
-            {
-              type: "remove",
-              directory,
-              paths: [runtime.bstring(path)],
-            },
-            directoryStructure(path.split("/"), newValue),
-          ],
+          directories: serializedDirectories,
           meta,
-        }
-      },
+        };
+      }
     });
   },
   remove(this: Lazy<Directory>, ...paths: string[]): Lazy<Directory> {
