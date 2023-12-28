@@ -17,24 +17,14 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     });
 
 
-  const briochePacked = brioche.setPermissions(
-    brioche.download({
-      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
-      hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
-    }),
-    {
-      executable: true,
-    },
-  );
-  const briochePacker = brioche.setPermissions(
-    brioche.download({
-      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packer",
-      hash: brioche.sha256Hash("c9b4ca9b59e65ce753c14e0629d40368f828bbaf0208c4e281c804f2038b18b6"),
-    }),
-    {
-      executable: true,
-    },
-  );
+  const briochePacked = brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
+    hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
+  }).withPermissions({ executable: true });
+  const briochePacker = brioche.download({
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packer",
+    hash: brioche.sha256Hash("c9b4ca9b59e65ce753c14e0629d40368f828bbaf0208c4e281c804f2038b18b6"),
+  }).withPermissions({ executable: true });
 
   const stage1 = brioche.merge(binutils(), gcc(), linuxHeaders());
 

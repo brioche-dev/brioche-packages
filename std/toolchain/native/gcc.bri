@@ -17,7 +17,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     });
 
   let buildSysroot = brioche.merge(
-    brioche.cast(brioche.get(linuxHeaders(), "usr"), "directory"),
+    linuxHeaders().get("usr").cast("directory"),
     glibc(),
     binutils(),
     libxcrypt(),

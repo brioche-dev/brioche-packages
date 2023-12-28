@@ -130,12 +130,12 @@ export default async (): Promise<brioche.Lazy> => {
   const briochePack = await brioche.directory({
     "x86_64-linux-musl": brioche.directory({
       "bin": brioche.directory({
-        "brioche-ld": briocheLd.withExecutablePermission(true),
+        "brioche-ld": briocheLd.withPermissions({ executable: true }),
       }),
       "libexec": brioche.directory({
         "brioche-ld": brioche.directory({
           "ld": brioche.symlink({ target: "../../bin/system-ld" }),
-          "brioche-packed": briochePacked.withExecutablePermission(true),
+          "brioche-packed": briochePacked.withPermissions({ executable: true }),
           "lib": brioche.directory({
             "ld-musl-x86_64.so.1": brioche.symlink({ target: "../../../../lib/ld-musl-x86_64.so.1" }),
           }),
@@ -146,10 +146,10 @@ export default async (): Promise<brioche.Lazy> => {
 
   let stage0 = await brioche.merge(utils, toolchain, make, briochePack);
 
-  const systemLd = brioche.get(stage0, "x86_64-linux-musl/bin/ld");
-  stage0 = brioche.insert(stage0, "x86_64-linux-musl/bin/system-ld", systemLd);
-  stage0 = brioche.insert(stage0, "x86_64-linux-musl/bin/ld", brioche.symlink({ target: "brioche-ld" }));
-  stage0 = brioche.insert(stage0, "bin/ld", brioche.symlink({ target: "../x86_64-linux-musl/bin/ld" }));
+  const systemLd = stage0.get("x86_64-linux-musl/bin/ld");
+  stage0 = stage0.insert("x86_64-linux-musl/bin/system-ld", systemLd);
+  stage0 = stage0.insert("x86_64-linux-musl/bin/ld", brioche.symlink({ target: "brioche-ld" }));
+  stage0 = stage0.insert("bin/ld", brioche.symlink({ target: "../x86_64-linux-musl/bin/ld" }));
 
   return stage0;
 };

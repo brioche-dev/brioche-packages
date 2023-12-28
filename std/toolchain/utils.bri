@@ -16,7 +16,7 @@ export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseB
   });
 
   for (const ldPath of options.ldPaths) {
-    const systemLd = brioche.get(dir, ldPath);
+    const systemLd = dir.get(ldPath);
 
     const ldDir = ldPath.split("/").slice(0, -1).join("/");
     const ldParentDirComponents = ldDir.split("/").slice(0, -1);
@@ -27,7 +27,7 @@ export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseB
     const briocheLdPath = [...ldParentDirComponents, "libexec", "brioche-ld"].join("/");
     let briocheLdDir: brioche.Lazy<brioche.Directory> = brioche.directory({
       "ld": brioche.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
-      "brioche-packed": brioche.setPermissions(briochePacked, { executable: true }),
+      "brioche-packed": briochePacked.withPermissions({ executable: true }),
     });
 
     for (const [interpreterPath, interpreterTargetPath] of Object.entries(options.interpreterPaths)) {
@@ -35,12 +35,12 @@ export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseB
       const pathToBriocheLd = interpreterDir.split("/").map(() => "..").join("/");
       const pathToRoot = briocheLdPath.split("/").map(() => "..").join("/");
       const interpreterTarget = `${pathToBriocheLd}/${pathToRoot}/${interpreterTargetPath}`;
-      briocheLdDir = brioche.insert(briocheLdDir, interpreterPath, brioche.symlink({ target: interpreterTarget }));
+      briocheLdDir = briocheLdDir.insert(interpreterPath, brioche.symlink({ target: interpreterTarget }));
     };
 
-    dir = brioche.insert(dir, `${ldDir}/${ldName}-orig`, systemLd);
-    dir = brioche.insert(dir, ldPath, brioche.setPermissions(briocheLd, { executable: true }));
-    dir = brioche.insert(dir, briocheLdPath, briocheLdDir);
+    dir = dir.insert(`${ldDir}/${ldName}-orig`, systemLd);
+    dir = dir.insert(ldPath, briocheLd.withPermissions({ executable: true }));
+    dir = dir.insert(briocheLdPath, briocheLdDir);
   }
 
   return dir;
@@ -54,10 +54,10 @@ interface WrapWithScriptOptions {
 
 export function wrapWithScript(dir: brioche.Lazy<brioche.Directory>, options: WrapWithScriptOptions): brioche.Lazy<brioche.Directory> {
   for (const path of options.paths) {
-    const program = brioche.get(dir, path);
+    const program = dir.get(path);
 
-    dir = brioche.insert(dir, path, options.script);
-    dir = brioche.insert(dir, `${path}${options.renameSuffix}`, program);
+    dir = dir.insert(path, options.script);
+    dir = dir.insert(`${path}${options.renameSuffix}`, program);
   }
 
   return dir;
@@ -76,5 +76,5 @@ export function makeFile(data: string, executable: boolean): brioche.Lazy<brioch
       BRIOCHE_OUTPUT: brioche.outputPath,
     },
   }).cast("file");
-  return brioche.setPermissions(file, { executable });
+  return file.withPermissions({ executable });
 }

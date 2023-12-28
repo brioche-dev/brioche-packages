@@ -34,9 +34,8 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
 
   // Mark the perl binary as executable
   // TODO: Figure out why Perl isn't executable by default?
-  let perlBin = brioche.cast(brioche.get(perl, "usr/bin/perl"), "file");
-  perlBin = brioche.setPermissions(perlBin, { executable: true });
-  perl = brioche.insert(perl, "usr/bin/perl", perlBin);
+  const perlBin = perl.get("usr/bin/perl").cast("file").withPermissions({ executable: true });
+  perl = perl.insert("usr/bin/perl", perlBin);
 
   return perl;
 });

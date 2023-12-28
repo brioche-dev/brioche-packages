@@ -43,7 +43,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     gcc(),
   );
 
-  toolchain = brioche.insert(toolchain, "bin", brioche.symlink({ target: "usr/bin" }));
+  toolchain = toolchain.insert("bin", brioche.symlink({ target: "usr/bin" }));
 
   toolchain = useBriocheLd(toolchain, {
     ldPaths: [
@@ -142,7 +142,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
 
   const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];
   for (const tool of prefixedTools) {
-    toolchain = brioche.insert(toolchain, `usr/bin/${tool}`, brioche.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
+    toolchain = toolchain.insert(`usr/bin/${tool}`, brioche.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
   }
 
   return toolchain;

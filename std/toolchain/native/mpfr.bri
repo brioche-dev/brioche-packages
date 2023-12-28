@@ -40,7 +40,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
   }).cast("directory");
 
   // TODO: Use JS functions to do this conversion
-  let libtoolArchive = brioche.get(mpfr, "lib/libmpfr.la");
+  let libtoolArchive = mpfr.get("lib/libmpfr.la");
   libtoolArchive = brioche.process({
     command: brioche.tpl`${stage2()}/bin/bash`,
     args: [
@@ -57,7 +57,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     },
   }).cast("file");
 
-  mpfr = brioche.insert(mpfr, "lib/libmpfr.la", libtoolArchive);
+  mpfr = mpfr.insert("lib/libmpfr.la", libtoolArchive);
 
   return mpfr;
 });

@@ -75,12 +75,12 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
 
   const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];
   for (const tool of prefixedTools) {
-    stage2 = brioche.insert(stage2, `usr/bin/${tool}`, brioche.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
+    stage2 = stage2.insert(`usr/bin/${tool}`, brioche.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
   }
 
-  // stage2 = brioche.insert(stage2, "usr/x86_64-lfs-linux-gnu/include", brioche.symlink({ target: "../include" }));
-  // const usrInclude = brioche.cast(brioche.get(stage2, "usr/include"), "directory");
-  // stage2 = brioche.insert(stage2, "usr/x86_64-lfs-linux-gnu/include", usrInclude);
+  // stage2 = stage2.insert("usr/x86_64-lfs-linux-gnu/include", brioche.symlink({ target: "../include" }));
+  // const usrInclude = stage2.get("usr/include").cast("directory");
+  // stage2 = stage2.insert("usr/x86_64-lfs-linux-gnu/include", usrInclude);
 
   return bootstrapRun({
     script: `

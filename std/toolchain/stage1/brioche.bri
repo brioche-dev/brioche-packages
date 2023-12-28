@@ -19,7 +19,7 @@ export default brioche.memo(() => {
     libstdcpp(),
   );
 
-  stage1 = brioche.insert(stage1, "bin", brioche.symlink({ target: "usr/bin" }));
+  stage1 = stage1.insert("bin", brioche.symlink({ target: "usr/bin" }));
 
   stage1 = useBriocheLd(stage1, {
     ldPaths: [
