@@ -3,7 +3,7 @@ import { source as briocheSource } from "../source.bri";
 import * as runtime from "../runtime.bri";
 import { type CastTo, type CastResult, cast } from "./cast.bri";
 import { type Directory, directory } from "./directory.bri";
-import { type AsyncLazy, type Lazy, type Value, briocheDeserializeAny, lazyUtils } from "./value.bri";
+import { type AsyncLazy, type Lazy, type Value, briocheDeserializeAny, createLazy } from "./value.bri";
 
 export interface ProcessOptions {
   command: ProcessTemplateLike,
@@ -12,7 +12,7 @@ export interface ProcessOptions {
   workDir?: AsyncLazy<Directory>,
 }
 
-export function process(options: ProcessOptions): Process {
+export function process(options: ProcessOptions): Lazy {
   const env: Record<string, ProcessTemplateLike> = {
     "BRIOCHE_OUTPUT": outputPath,
     "BRIOCHE_PACK_RESOURCES_DIR": resourcesDir,
@@ -25,14 +25,29 @@ export function process(options: ProcessOptions): Process {
   for (const [k, v] of Object.entries(env)) {
     bEnv[runtime.bstring(k)] = processTemplate(v);
   }
-  return new Process({
-    command: processTemplate(options.command),
-    args: (options.args ?? []).map((arg) => processTemplate(arg)),
-    env: bEnv,
-    workDir: options.workDir ?? directory({}),
-    platform: "x86_64-linux",
-    source: briocheSource({ depth: 1 }),
+
+  return createLazy(["file", "directory", "symlink"], {
+    sourceDepth: 1,
+    briocheSerialize: async (meta) => {
+      return {
+        type: "process",
+        command: await processTemplate(options.command).briocheSerialize(),
+        args: await Promise.all((options.args ?? []).map(async (arg) => await processTemplate(arg).briocheSerialize())),
+        env: Object.fromEntries(await Promise.all(Object.entries(env).map(async ([k, v]) => [k, await processTemplate(v).briocheSerialize()]))),
+        platform: "x86_64-linux",
+        workDir: await (await (options.workDir ?? directory({}))).briocheSerialize(),
+        meta,
+      }
+    },
   });
+  // return new Process({
+  //   command: processTemplate(options.command),
+  //   args: (options.args ?? []).map((arg) => processTemplate(arg)),
+  //   env: bEnv,
+  //   workDir: options.workDir ?? directory({}),
+  //   platform: "x86_64-linux",
+  //   source: briocheSource({ depth: 1 }),
+  // });
 }
 
 export function processTemplate(...components: ProcessTemplateLike[]): ProcessTemplate {
@@ -52,63 +67,11 @@ export function tpl(strings: TemplateStringsArray, ...items: ProcessTemplateLike
   return new ProcessTemplate(...components);
 }
 
-interface ProcessCtor {
-  command: ProcessTemplate;
-  args: ProcessTemplate[];
-  env: Record<runtime.BString, ProcessTemplate>;
-  workDir: AsyncLazy<Directory>;
-  platform: runtime.Platform;
-  source?: runtime.Source;
-}
-
 export const outputPath: unique symbol = Symbol("outputPath");
 export const resourcesDir: unique symbol = Symbol("resourcesDir");
 export const homeDir: unique symbol = Symbol("homeDir");
 export const workDir: unique symbol = Symbol("workDir");
 export const tempDir: unique symbol = Symbol("tempDir");
-
-export class Process implements Lazy {
-  command: ProcessTemplate;
-  args: ProcessTemplate[];
-  env: Record<runtime.BString, ProcessTemplate>;
-  workDir: AsyncLazy<Directory>;
-  platform: runtime.Platform;
-  source?: runtime.Source;
-
-  constructor(options: ProcessCtor) {
-    this.command = options.command;
-    this.args = options.args;
-    this.env = options.env;
-    this.workDir = options.workDir;
-    this.platform = options.platform;
-    this.source = options.source;
-  }
-
-  async resolve(): Promise<Value> {
-    const result = await runtime.resolve(await this.briocheSerialize());
-    return briocheDeserializeAny(result, this.source);
-  }
-
-  async briocheSerialize(): Promise<runtime.LazyProcess> {
-    const command = await this.command.briocheSerialize();
-    const args = await Promise.all(this.args.map(arg => arg.briocheSerialize()));
-    const envEntries = await Promise.all(Object.entries(this.env).map(async ([k, v]): Promise<[string, runtime.ProcessTemplate]> => [k, await v.briocheSerialize()]));
-    const workDir = await (await this.workDir).briocheSerialize();
-    return {
-      type: "process",
-      command,
-      args,
-      env: Object.fromEntries(envEntries),
-      workDir,
-      platform: this.platform,
-      meta: {
-        source: this.source,
-      }
-    };
-  }
-
-  cast = lazyUtils.cast;
-}
 
 export type ProcessTemplateLike = Awaitable<ProcessTemplateComponent>;
 

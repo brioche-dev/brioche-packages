@@ -4,9 +4,6 @@ import { type Awaitable, unreachable } from "../utils.bri";
 import { File } from "./file.bri";
 import { Directory } from "./directory.bri";
 import { Symlink } from "./symlink.bri";
-import { Download } from "./download.bri";
-import { Unpack } from "./unpack.bri";
-import { Process } from "./process.bri";
 
 export type Value = File | Directory | Symlink;
 

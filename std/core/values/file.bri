@@ -1,7 +1,8 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
-import { Unpack } from "./unpack.bri";
+import { type Directory } from "./directory.bri";
+import { unpack } from "./unpack.bri";
 import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
 
@@ -58,13 +59,8 @@ export class File implements Lazy<File> {
     });
   }
 
-  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat: runtime.CompressionFormat = "none"): Unpack {
-    return new Unpack({
-      file: this.briocheSerialize(),
-      archiveFormat,
-      compressionFormat,
-      source: briocheSource({ depth: 1 }),
-    });
+  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat: runtime.CompressionFormat = "none"): Lazy<Directory> {
+    return unpack(this, archiveFormat, compressionFormat);
   }
 
   briocheSerialize(): runtime.CompleteFile {

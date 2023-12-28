@@ -1,56 +1,18 @@
 import * as runtime from "../runtime.bri";
 import { cast } from "./cast.bri";
 import { Directory } from "./directory.bri";
-import { type Peel, peel } from "./peel.bri";
-import { type Lazy, type Value, briocheDeserializeAny, lazyDirectoryUtils } from "./value.bri";
+import { type File } from "./file.bri";
+import { type AsyncLazy, type Lazy, type Value, createLazy } from "./value.bri";
 
-interface UnpackCtor {
-  file: runtime.LazyValue;
-  archiveFormat: runtime.ArchiveFormat;
-  compressionFormat: runtime.CompressionFormat | null | undefined;
-  source?: runtime.Source;
-}
-
-export class Unpack implements Lazy<Directory> {
-  file: runtime.LazyValue;
-  archiveFormat: runtime.ArchiveFormat;
-  compressionFormat: runtime.CompressionFormat | null | undefined;
-  source?: runtime.Source;
-
-  constructor(options: UnpackCtor) {
-    this.file = options.file;
-    this.archiveFormat = options.archiveFormat;
-    this.compressionFormat = options.compressionFormat;
-    this.source = options.source;
-  }
-
-  peel(depth: number = 1): Peel {
-    return peel(this, depth);
-  }
-
-  peelDirectory(depth: number = 1): Lazy<Directory> {
-    return cast(this.peel(depth), "directory", { sourceDepth: 2 });
-  }
-
-  async resolve(): Promise<Directory> {
-    const result = await runtime.resolve(this.briocheSerialize());
-    return Directory.briocheDeserialize(result, this.source);
-  }
-
-  briocheSerialize(): runtime.LazyUnpack {
-    return {
+export function unpack(file: AsyncLazy<File>, archiveFormat: runtime.ArchiveFormat, compressionFormat: runtime.CompressionFormat = "none"): Lazy<Directory> {
+  return createLazy(["directory"], {
+    sourceDepth: 1,
+    briocheSerialize: async (meta) => ({
       type: "unpack",
-      file: this.file,
-      archive: this.archiveFormat,
-      compression: this.compressionFormat,
-      meta: {
-        source: this.source,
-      },
-    };
-  }
-
-  cast = lazyDirectoryUtils.cast;
-  get = lazyDirectoryUtils.get;
-  insert = lazyDirectoryUtils.insert;
-  remove = lazyDirectoryUtils.remove;
+      file: await (await file).briocheSerialize(),
+      archive: archiveFormat,
+      compression: compressionFormat,
+      meta,
+    }),
+  });
 }
