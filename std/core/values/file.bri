@@ -2,8 +2,12 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { type Directory } from "./directory.bri";
-import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./value.bri";
+import { type AsyncLazy, type Lazy, lazyFileUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
+
+export interface FilePermissions {
+  executable: boolean;
+}
 
 export interface FileCtor {
   source?: runtime.Source;

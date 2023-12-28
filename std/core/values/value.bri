@@ -1,12 +1,20 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { type Awaitable, unreachable } from "../utils.bri";
-import { File } from "./file.bri";
+import { File, type FilePermissions } from "./file.bri";
 import { Directory, directory } from "./directory.bri";
 import { Symlink } from "./symlink.bri";
 import { createProxy } from "./proxy.bri";
 
 export type Value = File | Directory | Symlink;
+
+export type ValueTypes = {
+  file: File,
+  directory: Directory,
+  symlink: Symlink,
+};
+
+export type ValueType<T extends Value> = T extends File ? "file" : T extends Directory ? "directory" : T extends Symlink ? "symlink" : never;
 
 export type LazyValueSerialization<T extends Value> = runtime.WithMeta & (
   T extends File ? (
@@ -38,58 +46,22 @@ export type LazyValueSerialization<T extends Value> = runtime.WithMeta & (
   never
 );
 
-export type Lazy<T extends Value = Value> = LazyCommon<T> & (
-  [T] extends [File] ? LazyFileUtils
-  : [T] extends [Directory] ? LazyDirectoryUtils
-  : [T] extends [Symlink] ? LazySymlinkUtils
-  : {}
-);
+// This symbol is used in `Lazy` so that `Lazy<Value>` doesn't simplify to
+// `LazyCommon<Value>` in TypeScript messages. This is mainly done for the LSP.
+const lazyMarker: unique symbol = Symbol("lazyMarker");
 
-interface LazyCommon<T extends Value> extends LazyUtils<T> {
-  resolve(): Awaitable<T>;
-  briocheSerialize(): Awaitable<LazyValueSerialization<T>>;
-}
-
-interface LazyUtils<T extends Value> {
-  cast(to: "file"): T extends File ? Lazy<File> : never;
-  cast(to: "directory"): T extends Directory ? Lazy<Directory> : never;
-  cast(to: "symlink"): T extends Symlink ? Lazy<Symlink> : never;
-}
-
-interface LazyFileUtils extends LazyUtils<File> {
-  withPermissions(permissions: Partial<Permissions>): Lazy<File>;
-  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat?: runtime.CompressionFormat): Lazy<Directory>;
-}
-
-interface LazyDirectoryUtils extends LazyUtils<Directory> {
-  get(...paths: string[]): Lazy<Value>;
-  insert(path: string, value: AsyncLazy<Value>): Lazy<Directory>;
-  remove(...paths: string[]): Lazy<Directory>;
-  peel(depth?: number): Lazy;
-}
-
-interface LazySymlinkUtils extends LazyUtils<Symlink> {}
-
-export interface Permissions {
-  executable: boolean;
-}
-
-// export interface Lazy<T extends Value = Value> extends Resolve<T> {
-//   briocheSerialize(): Awaitable<LazyValueSerialization<T>>;
-//   cast(to: "file"): T extends File ? Lazy<File> : never;
-//   cast(to: "directory"): T extends Directory ? Lazy<Directory> : never;
-//   cast(to: "symlink"): T extends Symlink ? Lazy<Symlink> : never;
-// }
+export type Lazy<T extends Value = Value> =
+  & {[lazyMarker]?: undefined}
+  & LazyCommon<T>
+  & (
+    [T] extends [File] ? LazyFileUtils
+    : [T] extends [Directory] ? LazyDirectoryUtils
+    : [T] extends [Symlink] ? LazySymlinkUtils
+    : T extends Value ? {}
+    : never
+  );
 
 export type AsyncLazy<T extends Value = Value> = Awaitable<Lazy<T>>;
-
-export async function asyncResolve<T extends Value>(value: AsyncLazy<T>): Promise<T> {
-  return (await value).resolve();
-}
-
-export async function asyncBriocheSerialize<T extends Value>(value: AsyncLazy<T>): Promise<LazyValueSerialization<T>> {
-  return (await value).briocheSerialize();
-}
 
 export function briocheDeserializeAny(value: runtime.CompleteValue, source: runtime.Source | undefined): Value {
   switch (value.type) {
@@ -116,7 +88,7 @@ export function lazy<T extends Value>(value: AsyncLazy<T>): Lazy<T> {
   });
 }
 
-export type LazyOptions<T extends Value> = {
+export type CreateLazyOptions<T extends Value> = {
   sourceDepth?: number;
 } & (
   | {
@@ -129,17 +101,10 @@ export type LazyOptions<T extends Value> = {
   }
 );
 
-export type ValueType<T extends Value> = T extends File ? "file" : T extends Directory ? "directory" : T extends Symlink ? "symlink" : never;
-
-type CastTo = "file" | "directory" | "symlink";
-
-type CastResult<T extends CastTo> =
-  T extends "file" ? File :
-  T extends "directory" ? Directory :
-  T extends "symlink" ? Symlink :
-  never;
-
-export function createLazy<T extends Value>(types: ValueType<T>[], opts: LazyOptions<T>): Lazy<T> {
+export function createLazy<T extends Value>(
+  types: ValueType<T>[],
+  opts: CreateLazyOptions<T>,
+): Lazy<T> {
   const source = briocheSource({ depth: (opts.sourceDepth ?? 0) + 1 });
   const meta = { source };
 
@@ -174,9 +139,32 @@ export function createLazy<T extends Value>(types: ValueType<T>[], opts: LazyOpt
   } as Lazy<T>;
 }
 
-export const lazyUtils = {
-  cast(this: Lazy, to: CastTo) {
-    return createLazy([to as any], {
+interface LazyCommon<T extends Value> extends LazyUtils<T> {
+  resolve(): Awaitable<T>;
+  briocheSerialize(): Awaitable<LazyValueSerialization<T>>;
+}
+
+interface LazyUtils<T extends Value> {
+  cast<To extends ValueType<T> & keyof ValueTypes>(to: To): Lazy<ValueTypes[To] & T>;
+}
+
+interface LazyFileUtils extends LazyUtils<File> {
+  withPermissions(permissions: Partial<FilePermissions>): Lazy<File>;
+  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat?: runtime.CompressionFormat): Lazy<Directory>;
+}
+
+interface LazyDirectoryUtils extends LazyUtils<Directory> {
+  get(...paths: string[]): Lazy<Value>;
+  insert(path: string, value: AsyncLazy<Value>): Lazy<Directory>;
+  remove(...paths: string[]): Lazy<Directory>;
+  peel(depth?: number): Lazy;
+}
+
+interface LazySymlinkUtils extends LazyUtils<Symlink> {}
+
+export const lazyUtils: LazyUtils<Value> = {
+  cast<To extends keyof ValueTypes>(this: Lazy, to: To): Lazy<ValueTypes[To]> {
+    return createLazy([to satisfies ValueType<Value> as ValueType<ValueTypes[To]>], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
         const value = await this.briocheSerialize();
@@ -185,14 +173,15 @@ export const lazyUtils = {
           value,
           to,
           meta,
-        };
+        } satisfies LazyValueSerialization<Value> as any;
       },
-    }) as any;
+    });
   }
 };
+
 export const lazyFileUtils: LazyFileUtils = {
-  cast: lazyUtils.cast as LazyFileUtils["cast"],
-  withPermissions(this: Lazy<File>, permissions: Partial<Permissions>): Lazy<File> {
+  ...lazyUtils,
+  withPermissions(this: Lazy<File>, permissions: Partial<FilePermissions>): Lazy<File> {
     return createLazy(["file"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
@@ -224,7 +213,7 @@ export const lazyFileUtils: LazyFileUtils = {
 };
 
 export const lazyDirectoryUtils: LazyDirectoryUtils = {
-  cast: lazyUtils.cast as LazyDirectoryUtils["cast"],
+  ...lazyUtils,
   get(this: Lazy<Directory>, path: string): Lazy<Value> {
     return createLazy(["file", "directory", "symlink"], {
       sourceDepth: 1,
@@ -296,5 +285,5 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
 };
 
 export const lazySymlinkUtils: LazySymlinkUtils = {
-  cast: lazyUtils.cast as LazySymlinkUtils["cast"],
+  ...lazyUtils,
 };

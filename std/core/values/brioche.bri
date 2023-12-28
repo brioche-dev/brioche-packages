@@ -18,10 +18,9 @@ export {
   type AsyncLazy,
   type Lazy,
   type LazyValueSerialization,
-  type LazyOptions,
   type Value,
   type ValueType,
-  asyncResolve,
+  type ValueTypes,
   createLazy,
   lazy,
 } from "./value.bri";
