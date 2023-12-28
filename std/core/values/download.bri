@@ -3,7 +3,7 @@ import { source as briocheSource } from "../source.bri";
 import { File } from "./file.bri";
 import { Hash } from "./hash.bri";
 import { Unpack } from "./unpack.bri";
-import { type Lazy } from "./value.bri";
+import { type Lazy, lazyFileUtils } from "./value.bri";
 
 export interface DownloadOptions {
   url: string;
@@ -59,5 +59,8 @@ export class Download implements Lazy<File> {
       }
     };
   }
+
+  cast = lazyFileUtils.cast;
+  withPermissions = lazyFileUtils.withPermissions;
 }
 

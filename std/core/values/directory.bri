@@ -2,7 +2,7 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { createProxy } from "./proxy.bri";
-import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny, createLazy } from "./value.bri";
+import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny, createLazy, lazyDirectoryUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
 
 export function directory(entries: Record<string, AsyncLazy>): Lazy<Directory> {
@@ -212,4 +212,7 @@ export class Directory implements Lazy<Directory> {
     assert(value.type === "directory");
     return new Directory({ entries: value.entries, source });
   }
+
+  remove = lazyDirectoryUtils.remove;
+  cast = lazyDirectoryUtils.cast;
 }

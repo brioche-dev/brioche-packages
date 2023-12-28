@@ -3,7 +3,7 @@ import { source as briocheSource } from "../source.bri";
 import * as runtime from "../runtime.bri";
 import { type CastTo, type CastResult, cast } from "./cast.bri";
 import { type Directory, directory } from "./directory.bri";
-import { type AsyncLazy, type Lazy, type Value, briocheDeserializeAny } from "./value.bri";
+import { type AsyncLazy, type Lazy, type Value, briocheDeserializeAny, lazyUtils } from "./value.bri";
 
 export interface ProcessOptions {
   command: ProcessTemplateLike,
@@ -107,9 +107,7 @@ export class Process implements Lazy {
     };
   }
 
-  cast<T extends CastTo>(to: T): Lazy<CastResult<T>> {
-    return cast(this, to, { sourceDepth: 2 });
-  }
+  cast = lazyUtils.cast;
 }
 
 export type ProcessTemplateLike = Awaitable<ProcessTemplateComponent>;

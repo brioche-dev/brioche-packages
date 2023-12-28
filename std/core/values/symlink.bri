@@ -1,7 +1,7 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
-import { type Lazy } from "./value.bri";
+import { type Lazy, lazySymlinkUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
 
 export interface SymlinkOptions {
@@ -45,4 +45,6 @@ export class Symlink implements Lazy<Symlink> {
   resolve(): Symlink {
     return this;
   }
+
+  cast = lazySymlinkUtils.cast;
 }

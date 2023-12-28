@@ -3,7 +3,7 @@ import { source as briocheSource } from "../source.bri";
 import { type CastTo, type CastResult, cast } from "./cast.bri";
 import { Directory } from "./directory.bri";
 import { createProxy } from "./proxy.bri";
-import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny } from "./value.bri";
+import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny, lazyUtils } from "./value.bri";
 
 export function peel(directory: AsyncLazy<Directory>, depth: number = 1): Peel {
   return new Peel({
@@ -47,7 +47,5 @@ export class Peel implements Lazy {
     };
   }
 
-  cast<T extends CastTo>(to: T): Lazy<CastResult<T>> {
-    return cast(this, to);
-  }
+  cast = lazyUtils.cast;
 }

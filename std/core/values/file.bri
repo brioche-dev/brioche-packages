@@ -2,7 +2,7 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { Unpack } from "./unpack.bri";
-import { type AsyncLazy, type Lazy, createLazy } from "./value.bri";
+import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
 
 interface Permissions {
@@ -88,4 +88,7 @@ export class File implements Lazy<File> {
       source,
     });
   }
+
+  cast = lazyFileUtils.cast;
+  withPermissions = lazyFileUtils.withPermissions;
 }

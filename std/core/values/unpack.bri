@@ -2,7 +2,7 @@ import * as runtime from "../runtime.bri";
 import { cast } from "./cast.bri";
 import { Directory } from "./directory.bri";
 import { type Peel, peel } from "./peel.bri";
-import { type Lazy, type Value, briocheDeserializeAny } from "./value.bri";
+import { type Lazy, type Value, briocheDeserializeAny, lazyDirectoryUtils } from "./value.bri";
 
 interface UnpackCtor {
   file: runtime.LazyValue;
@@ -48,4 +48,9 @@ export class Unpack implements Lazy<Directory> {
       },
     };
   }
+
+  cast = lazyDirectoryUtils.cast;
+  get = lazyDirectoryUtils.get;
+  insert = lazyDirectoryUtils.insert;
+  remove = lazyDirectoryUtils.remove;
 }

@@ -20,11 +20,9 @@ export { symlink, type SymlinkOptions, Symlink } from "./symlink.bri";
 export { Unpack } from "./unpack.bri";
 export {
   type AsyncLazy,
-  type AsyncResolve,
   type Lazy,
   type LazyValueSerialization,
   type LazyOptions,
-  type Resolve,
   type Value,
   type ValueType,
   asyncResolve,
