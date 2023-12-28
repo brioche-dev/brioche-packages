@@ -4,7 +4,7 @@ import * as runtime from "../runtime.bri";
 import { File } from "./file.bri";
 import { Symlink } from "./symlink.bri";
 import { Directory } from "./directory.bri";
-import { type Value, type Lazy, briocheDeserializeAny } from "./value.bri";
+import { type Value, type Lazy, type ValueType, type LazyValueSerialization, briocheDeserializeAny, createLazy } from "./value.bri";
 
 type LazyResult<T extends Lazy> = T extends Lazy<infer U> ? U : never;
 
@@ -21,47 +21,12 @@ interface CastOptions {
 }
 
 export function cast<V extends Lazy, T extends CastTo>(value: V, to: T, options: CastOptions = {}): Lazy<LazyResult<V> & CastResult<T>> {
-  const source = briocheSource({ depth: options.sourceDepth ?? 1 });
-  return new Cast({ value, to, source }) as unknown as Lazy<LazyResult<V> & CastResult<T>>;
-}
-
-interface CastCtor<T> {
-  value: Lazy,
-  to: T,
-  source?: runtime.Source,
-}
-
-export class Cast<T extends CastTo> implements Lazy<Value> {
-  value: Lazy;
-  to: T;
-  source?: runtime.Source;
-
-  constructor(options: CastCtor<T>) {
-    this.value = options.value;
-    this.to = options.to;
-    this.source = options.source;
-  }
-
-  async resolve(): Promise<CastResult<T>> {
-    const result = await runtime.resolve(await this.briocheSerialize());
-    switch (this.to) {
-      case "file":
-        return File.briocheDeserialize(result, this.source) as CastResult<T>;
-      case "directory":
-        return Directory.briocheDeserialize(result, this.source) as CastResult<T>;
-      case "symlink":
-        return Symlink.briocheDeserialize(result, this.source) as CastResult<T>;
-      default:
-        return unreachable(this.to);
-    }
-  }
-
-  // TODO: Can we get rid of `any` here?
-  async briocheSerialize(): Promise<runtime.LazyValue> {
-    return {
+  return createLazy([to as unknown as ValueType<LazyResult<V>>], {
+    sourceDepth: options.sourceDepth ?? 1,
+    briocheSerialize: async (meta) => ({
       type: "cast",
-      value: await this.value.briocheSerialize(),
-      to: this.to,
-    };
-  }
+      value: await value.briocheSerialize(),
+      to,
+    } as unknown as LazyValueSerialization<LazyResult<V> & CastResult<T>>),
+  }) as unknown as Lazy<LazyResult<V> & CastResult<T>>;
 }
