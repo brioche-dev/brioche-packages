@@ -103,6 +103,18 @@ export function briocheDeserializeAny(value: runtime.CompleteValue, source: runt
   }
 }
 
+export function lazy<T extends Value>(value: AsyncLazy<T>): Lazy<T> {
+  return createLazy<T>(["file", "directory", "symlink"] as ValueType<T>[], {
+    sourceDepth: 1,
+    briocheSerialize: async () => {
+      return (await value).briocheSerialize();
+    },
+    resolve: async () => {
+      return (await value).resolve();
+    },
+  });
+}
+
 export type LazyOptions<T extends Value> = {
   sourceDepth?: number;
 } & (

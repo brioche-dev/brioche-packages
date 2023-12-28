@@ -26,4 +26,5 @@ export {
   type ValueType,
   asyncResolve,
   createLazy,
+  lazy,
 } from "./value.bri";
