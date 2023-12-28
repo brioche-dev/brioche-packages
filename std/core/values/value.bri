@@ -1,4 +1,5 @@
 import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
 import { type Awaitable, unreachable } from "../utils.bri";
 import { File } from "./file.bri";
 import { Directory, LazyDirectory } from "./directory.bri";
@@ -70,4 +71,50 @@ export function briocheDeserializeAny(value: runtime.CompleteValue, source: runt
     default:
       return unreachable(value);
   }
+}
+
+export type LazyOptions<T extends Value> = {
+  sourceDepth?: number;
+} & (
+  | {
+    briocheSerialize?(meta: runtime.Meta): Awaitable<LazyValueSerialization<T>>;
+    resolve(meta: runtime.Meta): Awaitable<T>;
+  }
+  | {
+    briocheSerialize(meta: runtime.Meta): Awaitable<LazyValueSerialization<T>>;
+    resolve?(meta: runtime.Meta): Awaitable<T>;
+  }
+);
+
+export type ValueType<T extends Value> = T extends File ? "file" : T extends Directory ? "directory" : T extends Symlink ? "symlink" : never;
+
+export function createLazy<T extends Value>(types: ValueType<T>[], opts: LazyOptions<T>): Lazy<T> {
+  const source = briocheSource({ depth: (opts.sourceDepth ?? 0) + 1 });
+  const meta = { source };
+
+  const isFile = types.some(type => type === "file");
+  const isDirectory = types.some(type => type === "directory");
+  const isSymlink = types.some(type => type === "symlink");
+
+  return {
+    briocheSerialize: async () => {
+      if (opts.briocheSerialize) {
+        return opts.briocheSerialize(meta);
+      } else if (opts.resolve) {
+        return (await opts.resolve(meta)).briocheSerialize();
+      } else {
+        throw new Error("resolve or briocheSerialize is required");
+      }
+    },
+    resolve: async () => {
+      if (opts.resolve) {
+        return opts.resolve(meta);
+      } else if (opts.briocheSerialize) {
+        const result = await runtime.resolve(await opts.briocheSerialize(meta));
+        return briocheDeserializeAny(result, source);
+      } else {
+        throw new Error("resolve or briocheSerialize is required");
+      }
+    },
+  } as Lazy<T>;
 }
