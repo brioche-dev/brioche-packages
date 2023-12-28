@@ -2,28 +2,8 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { type Directory } from "./directory.bri";
-import { unpack } from "./unpack.bri";
 import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
-
-interface Permissions {
-  executable: boolean;
-}
-
-export function setPermissions(file: AsyncLazy<File>, permissions: Partial<Permissions>): Lazy<File> {
-  return createLazy(["file"], {
-    sourceDepth: 1,
-    briocheSerialize: async (meta) => {
-      const serializedFile = await (await file).briocheSerialize();
-      return {
-        type: "set_permissions",
-        file: serializedFile,
-        executable: permissions.executable ?? null,
-        meta,
-      };
-    },
-  });
-}
 
 export interface FileCtor {
   source?: runtime.Source;

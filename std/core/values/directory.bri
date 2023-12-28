@@ -43,64 +43,6 @@ export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
   });
 }
 
-export function get(directory: AsyncLazy<Directory>, path: string): Lazy {
-  const proxyDirectory = createProxy(directory);
-  return createLazy(["file", "directory", "symlink"], {
-    sourceDepth: 1,
-    briocheSerialize: async (meta) => ({
-      type: "get",
-      directory: await proxyDirectory.briocheSerialize(),
-      path: runtime.bstring(path),
-      meta,
-    }),
-  });
-}
-
-export function insert(dir: AsyncLazy<Directory>, path: string, value: AsyncLazy): Lazy<Directory> {
-  const pathComponents = path.split("/");
-  const dirPathComponents = pathComponents.slice(0, -1);
-  const fileName = pathComponents.at(-1);
-  if (fileName == null || dirPathComponents.some((pathComponent) => pathComponent === "")) {
-    throw new Error(`invalid path: "${path}"`);
-  }
-
-  const directoryFromPath = dirPathComponents.reduceRight((acc, pathComponent) => directory({
-    [pathComponent]: acc,
-  }), directory({
-    [fileName]: value,
-  }));
-
-
-  const proxyDirectories = [dir, directoryFromPath].map((dir) => createProxy(dir));
-  return createLazy(["directory"], {
-    sourceDepth: 1,
-    briocheSerialize: async (meta) => {
-      const serializedDirectories = await Promise.all(proxyDirectories.map(async (dir) => (await dir).briocheSerialize()));
-      return {
-        type: "merge",
-        directories: serializedDirectories,
-        meta,
-      };
-    }
-  });
-}
-
-export function remove(directory: AsyncLazy<Directory>, ...paths: string[]): Lazy<Directory> {
-  const proxyDirectory = createProxy(directory);
-  const runtimePaths = paths.map((path) => runtime.bstring(path));
-  return createLazy(["directory"], {
-    sourceDepth: 1,
-    briocheSerialize: async (meta) => {
-      return {
-        type: "remove",
-        directory: await proxyDirectory.briocheSerialize(),
-        paths: runtimePaths,
-        meta,
-      };
-    }
-  });
-}
-
 interface DirectoryCtor {
   entries: Record<runtime.BString, runtime.CompleteValue>;
   source?: runtime.Source;
