@@ -1,3 +1,5 @@
+import { unreachable } from "./utils.bri";
+
 export async function resolveAll(values: []): Promise<[]>;
 export async function resolveAll(values: [LazyValue]): Promise<[CompleteValue]>;
 export async function resolveAll(values: [LazyValue, LazyValue]): Promise<[CompleteValue, CompleteValue]>;
@@ -173,6 +175,27 @@ export function isHex(s: string): s is HexString {
   return /^([0-9a-fA-F]{2})*$/.test(s);
 }
 
-export function bstring(value: string): BString {
-  return encodeURIComponent(value) as BString;
+export function bstring(value: string | Uint8Array): BString {
+  if (typeof value === "string") {
+    return encodeURIComponent(value) as BString;
+  } else if (value instanceof Uint8Array) {
+    let encoded = "";
+    for (const byte of value) {
+      if (isUriComponentSafe(byte)) {
+        encoded += String.fromCharCode(byte);
+      } else {
+        encoded += "%" + byte.toString(16).padStart(2, "0");
+      }
+    }
+
+    return encoded as BString;
+  } else {
+    return unreachable(value);
+  }
+}
+
+
+const uriComponentSafeChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.!~*'()".split("").map(c => c.charCodeAt(0));
+function isUriComponentSafe(byte: number): boolean {
+  return uriComponentSafeChars.includes(byte);
 }
