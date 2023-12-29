@@ -4,7 +4,7 @@ import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
 import glibc from "./1_04_glibc.bri";
 import libstdcpp from "./1_05_libstdcpp.bri";
-import { makeFile, useBriocheLd, wrapWithScript } from "../utils.bri";
+import { useBriocheLd, wrapWithScript } from "../utils.bri";
 
 export { default as linuxHeaders } from "./1_03_linux_headers.bri";
 export { default as glibc } from "./1_04_glibc.bri";
@@ -39,11 +39,11 @@ export default std.memo(() => {
       "usr/bin/x86_64-lfs-linux-gnu-gcc",
     ],
     renameSuffix: "-orig",
-    script: makeFile(`#!/usr/bin/env sh
+    script: std.createFile(`#!/usr/bin/env sh
       script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
       sysroot=$(cd "$script_dir/../.." && pwd -P)
       "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0/x86_64-lfs-linux-gnu" -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0" -isystem "$sysroot/usr/include" "$@"
-    `, true),
+    `).withPermissions({ executable: true }),
   });
 
   return stage1;

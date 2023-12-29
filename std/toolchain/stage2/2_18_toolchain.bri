@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import { linuxHeaders, glibc, libstdcpp } from "../stage1";
 import m4 from "./2_01_m4.bri";
 import ncurses from "./2_02_ncurses.bri";
@@ -68,7 +68,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       "usr/bin/gcc",
     ],
     renameSuffix: "-orig",
-    script: makeFile(`#!/usr/bin/env sh
+    script: std.createFile(`#!/usr/bin/env sh
       # MIT license: https://stackoverflow.com/a/29835459
       rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
 
@@ -137,7 +137,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       set -- --sysroot="$sysroot" "$@"
 
       "$(rreadlink "$0")-orig" "$@"
-    `, true),
+    `).withPermissions({ executable: true }),
   });
 
   const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];

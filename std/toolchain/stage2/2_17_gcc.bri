@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 import m4 from "./2_01_m4.bri";

@@ -4,7 +4,7 @@ import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
 import glibc from "./1_04_glibc.bri";
-import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import { wrapWithScript, useBriocheLd } from "../utils.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   const sourceArchive = std
@@ -25,10 +25,10 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       "usr/bin/x86_64-lfs-linux-gnu-gcc",
     ],
     renameSuffix: "-orig",
-    script: makeFile(`#!/usr/bin/env sh
+    script: std.createFile(`#!/usr/bin/env sh
       sysroot=$(cd "$(dirname -- "$0")/../.." && pwd)
       "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/usr/include" "$@"
-    `, true),
+    `).withPermissions({ executable: true }),
   });
 
   stage1 = await useBriocheLd(stage1, {

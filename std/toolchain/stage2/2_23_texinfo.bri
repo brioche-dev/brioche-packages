@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
+import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 import perl from "./2_21_perl.bri";
 

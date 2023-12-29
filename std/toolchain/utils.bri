@@ -62,19 +62,3 @@ export function wrapWithScript(dir: std.Lazy<std.Directory>, options: WrapWithSc
 
   return dir;
 }
-
-export function makeFile(data: string, executable: boolean): std.Lazy<std.File> {
-  const file = std.process({
-    command: "/usr/bin/env",
-    args: [
-      "sh",
-      "-c",
-      'echo "$DATA" > "$BRIOCHE_OUTPUT"',
-    ],
-    env: {
-      DATA: data,
-      BRIOCHE_OUTPUT: std.outputPath,
-    },
-  }).cast("file");
-  return file.withPermissions({ executable });
-}
