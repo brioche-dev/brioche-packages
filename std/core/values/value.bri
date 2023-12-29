@@ -152,6 +152,8 @@ interface LazyUtils<T extends Value> {
 interface LazyFileUtils extends LazyUtils<File> {
   withPermissions(permissions: Partial<FilePermissions>): Lazy<File>;
   unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat?: runtime.CompressionFormat): Lazy<Directory>;
+  readBytes(): Promise<Uint8Array>;
+  read(): Promise<string>;
 }
 
 interface LazyDirectoryUtils extends LazyUtils<Directory> {
@@ -210,7 +212,16 @@ export const lazyFileUtils: LazyFileUtils = {
         }
       },
     });
-  }
+  },
+  async readBytes(this: Lazy<File>): Promise<Uint8Array> {
+    const resolved = await this.resolve();
+    const bstring = await runtime.readBlob(resolved.blobId);
+    return runtime.bstringToBytes(bstring);
+  },
+  async read(this: Lazy<File>): Promise<string> {
+    const bytes = await this.readBytes();
+    return runtime.utf8Decode(bytes);
+  },
 };
 
 export const lazyDirectoryUtils: LazyDirectoryUtils = {
