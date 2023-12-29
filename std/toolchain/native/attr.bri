@@ -1,15 +1,15 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/attr-2.5.1.tar.gz",
-      hash: brioche.sha256Hash("bae1c6949b258a0d68001367ce0c741cebdacdd3b62965d17e5eb23cd78adaf8"),
+      hash: std.sha256Hash("bae1c6949b258a0d68001367ce0c741cebdacdd3b62965d17e5eb23cd78adaf8"),
     });
 
-  return brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -26,7 +26,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     ],
     env: {
       source: sourceArchive,
-      PATH: brioche.tpl`${stage2()}/bin`,
+      PATH: std.tpl`${stage2()}/bin`,
     }
   }).cast("directory");
 });

@@ -1,4 +1,4 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { linuxHeaders } from "/toolchain/stage1";
 import stage2 from "/toolchain/stage2";
 import glibc from "./glibc.bri";
@@ -9,30 +9,30 @@ import mpfr from "./mpfr.bri";
 import mpc from "./mpc.bri";
 import libxcrypt from "./libxcrypt.bri";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-      hash: brioche.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
+      hash: std.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
     });
 
-  let buildSysroot = brioche.merge(
+  let buildSysroot = std.merge(
     linuxHeaders().get("usr").cast("directory"),
     glibc(),
     binutils(),
     libxcrypt(),
-    brioche.directory({
-      usr: brioche.directory({
-        lib: brioche.symlink({ target: "../lib" }),
-        lib64: brioche.symlink({ target: "../lib64" }),
-        include: brioche.symlink({ target: "../include" }),
+    std.directory({
+      usr: std.directory({
+        lib: std.symlink({ target: "../lib" }),
+        lib64: std.symlink({ target: "../lib64" }),
+        include: std.symlink({ target: "../include" }),
       })
     })
   );
 
   // TODO: Enable NLS
-  return brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -77,11 +77,11 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     ],
     env: {
       source: sourceArchive,
-      PATH: brioche.tpl`${buildSysroot}/bin:${stage2()}/bin`,
-      CPPFLAGS: brioche.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
+      PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
+      CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
       // TODO: Remove glibc as an explicit dependency
       // TODO: Remove -lm as an explicit dependency
-      LDFLAGS: brioche.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
+      LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
       buildSysroot,
       gmp: gmp(),
       mpfr: mpfr(),

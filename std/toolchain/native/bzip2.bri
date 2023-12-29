@@ -1,20 +1,20 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bzip2-1.0.8.tar.gz",
-      hash: brioche.sha256Hash("ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269"),
+      hash: std.sha256Hash("ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269"),
     });
-  const sourcePatch = brioche
+  const sourcePatch = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/bzip2-1.0.8-install_docs-1.patch",
-      hash: brioche.sha256Hash("35e3bbd9642af51fef2a8a83afba040d272da42d7e3a251d8e43255a7b496702"),
+      hash: std.sha256Hash("35e3bbd9642af51fef2a8a83afba040d272da42d7e3a251d8e43255a7b496702"),
     });
 
-  return brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -40,7 +40,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     env: {
       source: sourceArchive,
       sourcePatch,
-      PATH: brioche.tpl`${stage2()}/bin`,
+      PATH: std.tpl`${stage2()}/bin`,
     }
   }).cast("directory");
 });

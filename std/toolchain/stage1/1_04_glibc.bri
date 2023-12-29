@@ -1,32 +1,32 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
-      hash: brioche.sha256Hash("fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2"),
+      hash: std.sha256Hash("fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2"),
     });
-  const sourcePatch = brioche
+  const sourcePatch = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
-      hash: brioche.sha256Hash("643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d"),
+      hash: std.sha256Hash("643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d"),
     });
 
 
-  const briochePacked = brioche.download({
+  const briochePacked = std.download({
     url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
-    hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
+    hash: std.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
   }).withPermissions({ executable: true });
-  const briochePacker = brioche.download({
+  const briochePacker = std.download({
     url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packer",
-    hash: brioche.sha256Hash("c9b4ca9b59e65ce753c14e0629d40368f828bbaf0208c4e281c804f2038b18b6"),
+    hash: std.sha256Hash("c9b4ca9b59e65ce753c14e0629d40368f828bbaf0208c4e281c804f2038b18b6"),
   }).withPermissions({ executable: true });
 
-  const stage1 = brioche.merge(binutils(), gcc(), linuxHeaders());
+  const stage1 = std.merge(binutils(), gcc(), linuxHeaders());
 
   return bootstrapRun({
     script: `
@@ -90,7 +90,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     env: {
       source: sourceArchive,
       sourcePatch,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1,
       packer: briochePacker,

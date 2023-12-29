@@ -1,12 +1,12 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
-      hash: brioche.sha256Hash("cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674"),
+      hash: std.sha256Hash("cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674"),
     });
 
   return bootstrapRun({
@@ -29,7 +29,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
     }
   });

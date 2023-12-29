@@ -1,12 +1,12 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/make-4.4.1.tar.gz",
-      hash: brioche.sha256Hash("dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3"),
+      hash: std.sha256Hash("dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3"),
     });
 
   return bootstrapRun({
@@ -30,7 +30,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     }

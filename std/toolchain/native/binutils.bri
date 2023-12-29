@@ -1,18 +1,18 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
 import stage2 from "/toolchain/stage2";
 import flex from "./flex.bri";
 import zlib from "./zlib.bri";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
-      hash: brioche.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
+      hash: std.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
     });
 
-  let binutils = brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  let binutils = std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -39,9 +39,9 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     ],
     env: {
       source: sourceArchive,
-      PATH: brioche.tpl`${stage2()}/bin:${flex()}/bin`,
-      CPPFLAGS: brioche.tpl`-I${zlib()}/include`,
-      LDFLAGS: brioche.tpl`-L${zlib()}/lib`,
+      PATH: std.tpl`${stage2()}/bin:${flex()}/bin`,
+      CPPFLAGS: std.tpl`-I${zlib()}/include`,
+      LDFLAGS: std.tpl`-L${zlib()}/lib`,
     },
   }).cast("directory");
 

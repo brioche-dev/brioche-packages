@@ -1,4 +1,4 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
 import bzip2 from "./bzip2.bri";
@@ -18,8 +18,8 @@ import acl from "./acl.bri";
 import libxcrypt from "./libxcrypt.bri";
 import gcc from "./gcc.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  return brioche.merge(
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  return std.merge(
     glibc(),
     zlib(),
     bzip2(),

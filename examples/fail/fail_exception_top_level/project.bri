@@ -1,4 +1,4 @@
-import * as brioche from "std";
+import * as std from "std";
 
 export const project = {
   dependencies: {
@@ -13,5 +13,5 @@ interface TestType {
 
 throw new Error("top level exception");
 export default () => {
-  return brioche.directory();
+  return std.directory();
 }

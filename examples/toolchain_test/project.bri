@@ -1,4 +1,4 @@
-import * as brioche from "std";
+import * as std from "std";
 
 export const project = {
   dependencies: {
@@ -6,8 +6,8 @@ export const project = {
   },
 };
 
-export default async (): Promise<brioche.Lazy> => {
-  return brioche.process({
+export default async (): Promise<std.Lazy> => {
+  return std.process({
     command: "/usr/bin/env",
     args: [
       "sh",
@@ -30,9 +30,9 @@ export default async (): Promise<brioche.Lazy> => {
       `,
     ],
     env: {
-      BRIOCHE_OUTPUT: brioche.outputPath,
-      PATH: brioche.tpl`${brioche.stage2()}/bin`,
-      MAGIC: brioche.tpl`${brioche.stage2()}/usr/share/misc/magic`,
+      BRIOCHE_OUTPUT: std.outputPath,
+      PATH: std.tpl`${std.stage2()}/bin`,
+      MAGIC: std.tpl`${std.stage2()}/usr/share/misc/magic`,
       test_script: `#!/usr/bin/env bash
         set -euo pipefail
 

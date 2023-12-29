@@ -1,16 +1,16 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 import perl from "./2_21_perl.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/texinfo-7.0.3.tar.xz",
-      hash: brioche.sha256Hash("74b420d09d7f528e84f97aa330f0dd69a98a6053e7a4e01767eed115038807bf"),
+      hash: std.sha256Hash("74b420d09d7f528e84f97aa330f0dd69a98a6053e7a4e01767eed115038807bf"),
     });
 
-  return brioche.process({
+  return std.process({
     command: "/usr/bin/env",
     args: [
       "sh",
@@ -25,7 +25,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       `,
     ],
     env: {
-      PATH: brioche.tpl`${toolchain()}/bin:${perl()}/usr/bin`,
+      PATH: std.tpl`${toolchain()}/bin:${perl()}/usr/bin`,
       source: sourceArchive,
     },
   }).cast("directory");

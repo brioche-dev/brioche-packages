@@ -1,16 +1,16 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 import gmp from "./gmp.bri";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
-      hash: brioche.sha256Hash("06a378df13501248c1b2db5aa977a2c8126ae849a9d9b7be2546fb4a9c26d993"),
+      hash: std.sha256Hash("06a378df13501248c1b2db5aa977a2c8126ae849a9d9b7be2546fb4a9c26d993"),
     });
 
-  let mpfr = brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  let mpfr = std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -33,16 +33,16 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     ],
     env: {
       source: sourceArchive,
-      PATH: brioche.tpl`${stage2()}/bin`,
-      CPPFLAGS: brioche.tpl`-I${gmp()}/include`,
-      LDFLAGS: brioche.tpl`-L${gmp()}/lib`,
+      PATH: std.tpl`${stage2()}/bin`,
+      CPPFLAGS: std.tpl`-I${gmp()}/include`,
+      LDFLAGS: std.tpl`-L${gmp()}/lib`,
     },
   }).cast("directory");
 
   // TODO: Use JS functions to do this conversion
   let libtoolArchive = mpfr.get("lib/libmpfr.la");
-  libtoolArchive = brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  libtoolArchive = std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -52,7 +52,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
       `,
     ],
     env: {
-      PATH: brioche.tpl`${stage2()}/bin`,
+      PATH: std.tpl`${stage2()}/bin`,
       libtoolArchive,
     },
   }).cast("file");

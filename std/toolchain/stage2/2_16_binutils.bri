@@ -1,13 +1,13 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { useBriocheLd } from "../utils.bri";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = await brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = await std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
-      hash: brioche.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
+      hash: std.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
     });
 
   return bootstrapRun({
@@ -42,7 +42,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     }

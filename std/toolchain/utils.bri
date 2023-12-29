@@ -1,18 +1,18 @@
-import * as brioche from "/core";
+import * as std from "/core";
 
 interface UseBriocheLdOptions {
   ldPaths: string[];
   interpreterPaths: Record<string, string>;
 }
 
-export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseBriocheLdOptions): brioche.Lazy<brioche.Directory> {
-  const briocheLd = brioche.download({
+export function useBriocheLd(dir: std.Lazy<std.Directory>, options: UseBriocheLdOptions): std.Lazy<std.Directory> {
+  const briocheLd = std.download({
     url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-ld",
-    hash: brioche.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
+    hash: std.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
   });
-  const briochePacked = brioche.download({
+  const briochePacked = std.download({
     url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
-    hash: brioche.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
+    hash: std.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
   });
 
   for (const ldPath of options.ldPaths) {
@@ -22,11 +22,11 @@ export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseB
     const ldParentDirComponents = ldDir.split("/").slice(0, -1);
     const ldName = ldPath.split("/").at(-1);
     const ldParentName = ldDir.split("/").at(-1);
-    brioche.assert(ldName != null && ldParentName != null);
+    std.assert(ldName != null && ldParentName != null);
 
     const briocheLdPath = [...ldParentDirComponents, "libexec", "brioche-ld"].join("/");
-    let briocheLdDir: brioche.Lazy<brioche.Directory> = brioche.directory({
-      "ld": brioche.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
+    let briocheLdDir: std.Lazy<std.Directory> = std.directory({
+      "ld": std.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
       "brioche-packed": briochePacked.withPermissions({ executable: true }),
     });
 
@@ -35,7 +35,7 @@ export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseB
       const pathToBriocheLd = interpreterDir.split("/").map(() => "..").join("/");
       const pathToRoot = briocheLdPath.split("/").map(() => "..").join("/");
       const interpreterTarget = `${pathToBriocheLd}/${pathToRoot}/${interpreterTargetPath}`;
-      briocheLdDir = briocheLdDir.insert(interpreterPath, brioche.symlink({ target: interpreterTarget }));
+      briocheLdDir = briocheLdDir.insert(interpreterPath, std.symlink({ target: interpreterTarget }));
     };
 
     dir = dir.insert(`${ldDir}/${ldName}-orig`, systemLd);
@@ -49,10 +49,10 @@ export function useBriocheLd(dir: brioche.Lazy<brioche.Directory>, options: UseB
 interface WrapWithScriptOptions {
   paths: string[];
   renameSuffix: string;
-  script: brioche.AsyncLazy<brioche.File>;
+  script: std.AsyncLazy<std.File>;
 }
 
-export function wrapWithScript(dir: brioche.Lazy<brioche.Directory>, options: WrapWithScriptOptions): brioche.Lazy<brioche.Directory> {
+export function wrapWithScript(dir: std.Lazy<std.Directory>, options: WrapWithScriptOptions): std.Lazy<std.Directory> {
   for (const path of options.paths) {
     const program = dir.get(path);
 
@@ -63,8 +63,8 @@ export function wrapWithScript(dir: brioche.Lazy<brioche.Directory>, options: Wr
   return dir;
 }
 
-export function makeFile(data: string, executable: boolean): brioche.Lazy<brioche.File> {
-  const file = brioche.process({
+export function makeFile(data: string, executable: boolean): std.Lazy<std.File> {
+  const file = std.process({
     command: "/usr/bin/env",
     args: [
       "sh",
@@ -73,7 +73,7 @@ export function makeFile(data: string, executable: boolean): brioche.Lazy<brioch
     ],
     env: {
       DATA: data,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
     },
   }).cast("file");
   return file.withPermissions({ executable });

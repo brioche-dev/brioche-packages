@@ -1,15 +1,15 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/util-linux-2.39.1.tar.xz",
-      hash: brioche.sha256Hash("890ae8ff810247bd19e274df76e8371d202cda01ad277681b0ea88eeaa00286b"),
+      hash: std.sha256Hash("890ae8ff810247bd19e274df76e8371d202cda01ad277681b0ea88eeaa00286b"),
     });
 
-  return brioche.process({
+  return std.process({
     command: "/usr/bin/env",
     args: [
       "sh",
@@ -38,7 +38,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       `,
     ],
     env: {
-      PATH: brioche.tpl`${toolchain()}/bin`,
+      PATH: std.tpl`${toolchain()}/bin`,
       source: sourceArchive,
     },
   }).cast("directory");

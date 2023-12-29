@@ -1,12 +1,12 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
-      hash: brioche.sha256Hash("6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"),
+      hash: std.sha256Hash("6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"),
     });
 
   return bootstrapRun({
@@ -48,7 +48,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     }

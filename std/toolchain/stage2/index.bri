@@ -1,4 +1,4 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import toolchain from "./2_18_toolchain.bri";
 import gettext from "./2_19_gettext.bri";
 import bison from "./2_20_bison.bri";
@@ -10,8 +10,8 @@ import utilLinux from "./2_24_util_linux.bri";
 export { default as bash } from "./2_03_bash.bri";
 export { default as toolchain } from "./2_18_toolchain.bri";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const stage2 = brioche.merge(
+export default std.memo((): std.Lazy<std.Directory> => {
+  const stage2 = std.merge(
     toolchain(),
     gettext(),
     bison(),
@@ -21,8 +21,8 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     utilLinux(),
   );
 
-  return brioche.process({
-    command: brioche.tpl`${toolchain()}/bin/bash`,
+  return std.process({
+    command: std.tpl`${toolchain()}/bin/bash`,
     args: [
       "-c",
       `
@@ -59,7 +59,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
       `,
     ],
     env: {
-      PATH: brioche.tpl`${stage2}/bin`,
+      PATH: std.tpl`${stage2}/bin`,
       stage2,
     },
   }).cast("directory");

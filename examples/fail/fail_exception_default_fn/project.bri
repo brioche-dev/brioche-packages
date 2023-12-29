@@ -1,4 +1,4 @@
-import * as brioche from "std";
+import * as std from "std";
 
 export const project = {
   dependencies: {

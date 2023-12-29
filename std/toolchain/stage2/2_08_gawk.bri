@@ -1,12 +1,12 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gawk-5.2.2.tar.xz",
-      hash: brioche.sha256Hash("3c1fce1446b4cbee1cd273bd7ec64bc87d89f61537471cd3e05e33a965a250e9"),
+      hash: std.sha256Hash("3c1fce1446b4cbee1cd273bd7ec64bc87d89f61537471cd3e05e33a965a250e9"),
     });
 
   return bootstrapRun({
@@ -31,7 +31,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     }

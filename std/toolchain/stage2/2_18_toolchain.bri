@@ -1,4 +1,4 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
 import { linuxHeaders, glibc, libstdcpp } from "../stage1";
 import m4 from "./2_01_m4.bri";
@@ -19,8 +19,8 @@ import xz from "./2_15_xz.bri";
 import binutils from "./2_16_binutils.bri";
 import gcc from "./2_17_gcc.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  let toolchain = brioche.merge(
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  let toolchain = std.merge(
     linuxHeaders(),
     glibc(),
     libstdcpp(),
@@ -43,7 +43,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     gcc(),
   );
 
-  toolchain = toolchain.insert("bin", brioche.symlink({ target: "usr/bin" }));
+  toolchain = toolchain.insert("bin", std.symlink({ target: "usr/bin" }));
 
   toolchain = useBriocheLd(toolchain, {
     ldPaths: [
@@ -142,7 +142,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
 
   const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];
   for (const tool of prefixedTools) {
-    toolchain = toolchain.insert(`usr/bin/${tool}`, brioche.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
+    toolchain = toolchain.insert(`usr/bin/${tool}`, std.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
   }
 
   return toolchain;

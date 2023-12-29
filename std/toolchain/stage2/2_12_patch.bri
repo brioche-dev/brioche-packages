@@ -1,12 +1,12 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/patch-2.7.6.tar.xz",
-      hash: brioche.sha256Hash("ac610bda97abe0d9f6b7c963255a11dcb196c25e337c61f94e4778d632f1d8fd"),
+      hash: std.sha256Hash("ac610bda97abe0d9f6b7c963255a11dcb196c25e337c61f94e4778d632f1d8fd"),
     });
 
   return bootstrapRun({
@@ -29,7 +29,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     }

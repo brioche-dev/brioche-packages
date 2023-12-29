@@ -1,4 +1,4 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
@@ -6,14 +6,14 @@ import linuxHeaders from "./1_03_linux_headers.bri";
 import glibc from "./1_04_glibc.bri";
 import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-      hash: brioche.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
+      hash: std.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
     });
 
-  let stage1 = brioche.merge(
+  let stage1 = std.merge(
     binutils(),
     gcc(),
     linuxHeaders(),
@@ -73,7 +73,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1,
     }

@@ -1,4 +1,4 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
@@ -10,8 +10,8 @@ export { default as linuxHeaders } from "./1_03_linux_headers.bri";
 export { default as glibc } from "./1_04_glibc.bri";
 export { default as libstdcpp } from "./1_05_libstdcpp.bri";
 
-export default brioche.memo(() => {
-  let stage1 = brioche.merge(
+export default std.memo(() => {
+  let stage1 = std.merge(
     binutils(),
     gcc(),
     linuxHeaders(),
@@ -19,7 +19,7 @@ export default brioche.memo(() => {
     libstdcpp(),
   );
 
-  stage1 = stage1.insert("bin", brioche.symlink({ target: "usr/bin" }));
+  stage1 = stage1.insert("bin", std.symlink({ target: "usr/bin" }));
 
   stage1 = useBriocheLd(stage1, {
     ldPaths: [

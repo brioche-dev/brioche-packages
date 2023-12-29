@@ -1,12 +1,12 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/findutils-4.9.0.tar.xz",
-      hash: brioche.sha256Hash("a2bfb8c09d436770edc59f50fa483e785b161a3b7b9d547573cb08065fd462fe"),
+      hash: std.sha256Hash("a2bfb8c09d436770edc59f50fa483e785b161a3b7b9d547573cb08065fd462fe"),
     });
 
   return bootstrapRun({
@@ -30,7 +30,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
     `,
     env: {
       source: sourceArchive,
-      BRIOCHE_OUTPUT: brioche.outputPath,
+      BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     }

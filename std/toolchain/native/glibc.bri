@@ -1,25 +1,25 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
-      hash: brioche.sha256Hash("fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2"),
+      hash: std.sha256Hash("fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2"),
     });
-  const sourcePatchFhs = brioche
+  const sourcePatchFhs = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
-      hash: brioche.sha256Hash("643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d"),
+      hash: std.sha256Hash("643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d"),
     });
-  const sourcePatchMemalign = brioche
+  const sourcePatchMemalign = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
-      hash: brioche.sha256Hash("3e4b4b15485c9767501151ccf1b33cf5ee912298fda899cd809277ece27e859c"),
+      hash: std.sha256Hash("3e4b4b15485c9767501151ccf1b33cf5ee912298fda899cd809277ece27e859c"),
     });
 
-  return brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -55,7 +55,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
       source: sourceArchive,
       sourcePatchFhs,
       sourcePatchMemalign,
-      PATH: brioche.tpl`${stage2()}/bin`,
+      PATH: std.tpl`${stage2()}/bin`,
       stage2: stage2(),
     }
   }).cast("directory");

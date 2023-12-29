@@ -1,4 +1,4 @@
-import * as brioche from "std";
+import * as std from "std";
 
 export const project = {
   dependencies: {
@@ -11,7 +11,7 @@ interface TestType {
   bar: string;
 }
 
-export const value = brioche.memo((): brioche.Lazy => {
+export const value = std.memo((): std.Lazy => {
   throw new Error("lazy memo exception");
 })
 

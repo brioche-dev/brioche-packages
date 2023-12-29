@@ -1,15 +1,15 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gmp-6.3.0.tar.xz",
-      hash: brioche.sha256Hash("a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"),
+      hash: std.sha256Hash("a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"),
     });
 
-  return brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -28,7 +28,7 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     ],
     env: {
       source: sourceArchive,
-      PATH: brioche.tpl`${stage2()}/bin`,
+      PATH: std.tpl`${stage2()}/bin`,
     }
   }).cast("directory");
 });

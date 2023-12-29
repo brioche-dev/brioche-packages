@@ -1,16 +1,16 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 import attr from "./attr.bri";
 
-export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
-  const sourceArchive = brioche
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/acl-2.3.1.tar.xz",
-      hash: brioche.sha256Hash("c0234042e17f11306c23c038b08e5e070edb7be44bef6697fb8734dcff1c66b1"),
+      hash: std.sha256Hash("c0234042e17f11306c23c038b08e5e070edb7be44bef6697fb8734dcff1c66b1"),
     });
 
-  return brioche.process({
-    command: brioche.tpl`${stage2()}/bin/bash`,
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
       `
@@ -27,9 +27,9 @@ export default brioche.memo((): brioche.Lazy<brioche.Directory> => {
     ],
     env: {
       source: sourceArchive,
-      PATH: brioche.tpl`${stage2()}/bin`,
-      CPPFLAGS: brioche.tpl`-I${attr()}/include`,
-      LDFLAGS: brioche.tpl`-L${attr()}/lib`,
+      PATH: std.tpl`${stage2()}/bin`,
+      CPPFLAGS: std.tpl`-I${attr()}/include`,
+      LDFLAGS: std.tpl`-L${attr()}/lib`,
     }
   }).cast("directory");
 });

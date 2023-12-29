@@ -1,15 +1,15 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bison-3.8.2.tar.xz",
-      hash: brioche.sha256Hash("9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2"),
+      hash: std.sha256Hash("9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2"),
     });
 
-  return brioche.process({
+  return std.process({
     command: "/usr/bin/env",
     args: [
       "sh",
@@ -27,7 +27,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       `,
     ],
     env: {
-      PATH: brioche.tpl`${toolchain()}/bin`,
+      PATH: std.tpl`${toolchain()}/bin`,
       source: sourceArchive,
     },
   }).cast("directory");

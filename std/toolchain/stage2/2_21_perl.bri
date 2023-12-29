@@ -1,15 +1,15 @@
-import * as brioche from "/core";
+import * as std from "/core";
 import { wrapWithScript, makeFile, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
-export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> => {
-  const sourceArchive = brioche
+export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  const sourceArchive = std
     .download({
       url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
-      hash: brioche.sha256Hash("eca551caec3bc549a4e590c0015003790bdd1a604ffe19cc78ee631d51f7072e"),
+      hash: std.sha256Hash("eca551caec3bc549a4e590c0015003790bdd1a604ffe19cc78ee631d51f7072e"),
     });
 
-  let perl = brioche.process({
+  let perl = std.process({
     command: "/usr/bin/env",
     args: [
       "sh",
@@ -27,7 +27,7 @@ export default brioche.memo(async (): Promise<brioche.Lazy<brioche.Directory>> =
       `,
     ],
     env: {
-      PATH: brioche.tpl`${toolchain()}/bin`,
+      PATH: std.tpl`${toolchain()}/bin`,
       source: sourceArchive,
     },
   }).cast("directory");
