@@ -89,6 +89,25 @@ export function lazy<T extends Value>(value: AsyncLazy<T>): Lazy<T> {
   });
 }
 
+export function lazyFn<T extends Value>(f: () => AsyncLazy<T>): Lazy<T> {
+  let result: Lazy<T> | undefined;
+  return createLazy<T>(["file", "directory", "symlink"] as ValueType<T>[], {
+    sourceDepth: 1,
+    briocheSerialize: async () => {
+      if (result == null) {
+        result = await (await f());
+      }
+      return result.briocheSerialize();
+    },
+    resolve: async () => {
+      if (result == null) {
+        result = await (await f());
+      }
+      return result.resolve();
+    },
+  });
+}
+
 export type CreateLazyOptions<T extends Value> = {
   sourceDepth?: number;
 } & (

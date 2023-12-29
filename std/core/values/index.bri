@@ -23,4 +23,5 @@ export {
   type ValueTypes,
   createLazy,
   lazy,
+  lazyFn,
 } from "./value.bri";
