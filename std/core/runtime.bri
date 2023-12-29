@@ -19,6 +19,33 @@ export async function createProxy(value: LazyValue): Promise<LazyProxy> {
   return result;
 }
 
+export async function readBlob(blobId: BlobId): Promise<BString> {
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_read_blob(blobId);
+  return result;
+}
+
+export function utf8Encode(string: string): Uint8Array {
+  const result = (globalThis as any).Deno.core.ops.op_brioche_utf8_encode(string);
+  return result;
+}
+
+export function utf8Decode(bytes: Uint8Array): string {
+  const result = (globalThis as any).Deno.core.ops.op_brioche_utf8_decode(bytes);
+  return result;
+}
+
+export function urlEncode(value: Uint8Array | string): string {
+  const bytes = typeof value === "string" ? utf8Encode(value) : value;
+  const result = (globalThis as any).Deno.core.ops.op_brioche_url_encode(bytes);
+  return result;
+}
+
+export function urlDecode(value: Uint8Array | string): Uint8Array {
+  const bytes = typeof value === "string" ? utf8Encode(value) : value;
+  const result = (globalThis as any).Deno.core.ops.op_brioche_url_decode(bytes);
+  return result;
+}
+
 export type CompleteValue =
   | CompleteFile
   | CompleteSymlink
