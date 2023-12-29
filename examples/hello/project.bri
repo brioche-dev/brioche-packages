@@ -2,6 +2,13 @@ import * as brioche from "std";
 import foo from "foo";
 import { VALUE } from "./other.bri";
 
+export const project = {
+  dependencies: {
+    std: "*",
+    foo: "*",
+  }
+};
+
 export default async () => {
   const unpacked = await brioche
     .download({

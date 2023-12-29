@@ -1,2 +1,4 @@
 export * from "./core";
 export * from "./toolchain";
+
+export const project = {};

@@ -1,6 +1,12 @@
 import * as brioche from "std";
 import { build } from "./build.bri";
 
+export const project = {
+  dependencies: {
+    std: { path: "../std" },
+  },
+};
+
 export default async () => {
   return await build();
 };

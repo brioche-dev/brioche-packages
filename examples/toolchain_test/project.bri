@@ -1,5 +1,11 @@
 import * as brioche from "std";
 
+export const project = {
+  dependencies: {
+    std: "*",
+  },
+};
+
 export default async (): Promise<brioche.Lazy> => {
   return brioche.process({
     command: "/usr/bin/env",
