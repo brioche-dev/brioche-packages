@@ -1,9 +1,27 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
-import { type Directory } from "./directory.bri";
-import { type AsyncLazy, type Lazy, lazyFileUtils } from "./value.bri";
+import { type Directory, directory } from "./directory.bri";
+import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
+
+export function createFile(data: string | Uint8Array): Lazy<File> {
+  const serializedData = runtime.bstring(data);
+  return createLazy(["file"], {
+    sourceDepth: 1,
+    briocheSerialize: async (meta) => {
+      return {
+        type: "create_file",
+        data: serializedData,
+        executable: false,
+        resources: {
+          type: "directory",
+          entries: {},
+        },
+      };
+    },
+  });
+}
 
 export interface FilePermissions {
   executable: boolean;
