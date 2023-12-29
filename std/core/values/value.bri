@@ -21,6 +21,7 @@ export type LazyValueSerialization<T extends Value> = runtime.WithMeta & (
     | runtime.CompleteFile
     | runtime.LazyDownload
     | runtime.LazyProcess
+    | runtime.LazyCreateFile
     | runtime.LazyCast
     | runtime.LazyPeel
     | runtime.LazyGet

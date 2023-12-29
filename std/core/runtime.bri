@@ -44,11 +44,11 @@ export type CompleteDirectoryContents = {
 
 export type LazyValue =
   | CompleteValue
-  | CompleteSymlink
   | LazyDirectory
   | LazyDownload
   | LazyUnpack
   | LazyProcess
+  | LazyCreateFile
   | LazyCast
   | LazyMerge
   | LazyPeel
@@ -82,6 +82,13 @@ export type LazyProcess = WithMeta & {
   env: Record<BString, ProcessTemplate>,
   workDir: LazyValue,
   platform: Platform,
+};
+
+export type LazyCreateFile = WithMeta & {
+  type: "create_file",
+  data: BString,
+  executable: boolean,
+  resources: LazyValue,
 };
 
 export type LazyCast = WithMeta & {
