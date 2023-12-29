@@ -68,7 +68,8 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       "usr/bin/gcc",
     ],
     renameSuffix: "-orig",
-    script: std.createFile(`#!/usr/bin/env sh
+    script: std.createFile(std.indoc`
+      #!/usr/bin/env sh
       # MIT license: https://stackoverflow.com/a/29835459
       rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
 

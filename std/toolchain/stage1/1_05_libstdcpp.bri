@@ -25,7 +25,8 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       "usr/bin/x86_64-lfs-linux-gnu-gcc",
     ],
     renameSuffix: "-orig",
-    script: std.createFile(`#!/usr/bin/env sh
+    script: std.createFile(std.indoc`
+      #!/usr/bin/env sh
       sysroot=$(cd "$(dirname -- "$0")/../.." && pwd)
       "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/usr/include" "$@"
     `).withPermissions({ executable: true }),

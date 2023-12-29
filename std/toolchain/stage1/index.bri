@@ -39,7 +39,8 @@ export default std.memo(() => {
       "usr/bin/x86_64-lfs-linux-gnu-gcc",
     ],
     renameSuffix: "-orig",
-    script: std.createFile(`#!/usr/bin/env sh
+    script: std.createFile(std.indoc`
+      #!/usr/bin/env sh
       script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
       sysroot=$(cd "$script_dir/../.." && pwd -P)
       "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0/x86_64-lfs-linux-gnu" -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0" -isystem "$sysroot/usr/include" "$@"
