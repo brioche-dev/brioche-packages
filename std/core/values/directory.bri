@@ -5,7 +5,7 @@ import { createProxy } from "./proxy.bri";
 import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny, createLazy, lazyDirectoryUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
 
-export function directory(entries: Record<string, AsyncLazy>): Lazy<Directory> {
+export function directory(entries: Record<string, AsyncLazy> = {}): Lazy<Directory> {
   const bEntries: Record<runtime.BString, AsyncLazy> = {};
   for (const [k, v] of Object.entries(entries)) {
     bEntries[runtime.bstring(k)] = v;

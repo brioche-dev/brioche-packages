@@ -75,7 +75,7 @@ export default async () => {
         VALUE,
       },
       workDir: brioche.directory({
-        "workdircontents": brioche.directory({})
+        "workdircontents": brioche.directory()
       }),
     }),
   });

@@ -34,19 +34,11 @@ export function process(options: ProcessOptions): Lazy {
         args: await Promise.all((options.args ?? []).map(async (arg) => await processTemplate(arg).briocheSerialize())),
         env: Object.fromEntries(await Promise.all(Object.entries(env).map(async ([k, v]) => [k, await processTemplate(v).briocheSerialize()]))),
         platform: "x86_64-linux",
-        workDir: await (await (options.workDir ?? directory({}))).briocheSerialize(),
+        workDir: await (await (options.workDir ?? directory())).briocheSerialize(),
         meta,
       }
     },
   });
-  // return new Process({
-  //   command: processTemplate(options.command),
-  //   args: (options.args ?? []).map((arg) => processTemplate(arg)),
-  //   env: bEnv,
-  //   workDir: options.workDir ?? directory({}),
-  //   platform: "x86_64-linux",
-  //   source: briocheSource({ depth: 1 }),
-  // });
 }
 
 export function processTemplate(...components: ProcessTemplateLike[]): ProcessTemplate {
