@@ -210,26 +210,14 @@ export function isHex(s: string): s is HexString {
 }
 
 export function bstring(value: string | Uint8Array): BString {
-  if (typeof value === "string") {
-    return encodeURIComponent(value) as BString;
-  } else if (value instanceof Uint8Array) {
-    let encoded = "";
-    for (const byte of value) {
-      if (isUriComponentSafe(byte)) {
-        encoded += String.fromCharCode(byte);
-      } else {
-        encoded += "%" + byte.toString(16).padStart(2, "0");
-      }
-    }
-
-    return encoded as BString;
-  } else {
-    return unreachable(value);
-  }
+  return urlEncode(value) as BString;
 }
 
+export function bstringToBytes(value: BString): Uint8Array {
+  return urlDecode(value);
+}
 
-const uriComponentSafeChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.!~*'()".split("").map(c => c.charCodeAt(0));
-function isUriComponentSafe(byte: number): boolean {
-  return uriComponentSafeChars.includes(byte);
+export function bstringToString(value: BString): string {
+  const bytes = bstringToBytes(value);
+  return utf8Decode(bytes);
 }
