@@ -1,4 +1,5 @@
 import * as std from "/core";
+import { packTools } from "/pack_tools.bri";
 
 interface BootstrapRunOptions {
   script: string,
@@ -20,14 +21,8 @@ export function bootstrapRun(options: BootstrapRunOptions): std.Lazy<std.Directo
   })
   .unpack("tar", "xz");
 
-  const briocheLd = std.download({
-    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-ld",
-    hash: std.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
-  });
-  const briochePacked = std.download({
-    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
-    hash: std.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
-  });
+  const briocheLd = packTools().get("brioche-ld");
+  const briochePacked = packTools().get("brioche-packed-userland-exec");
 
   const env = options.env ?? {};
 
@@ -97,45 +92,39 @@ export function bootstrapRun(options: BootstrapRunOptions): std.Lazy<std.Directo
 };
 
 export default async (): Promise<std.Lazy> => {
-  const utils = await std
+  const utils = std
     .download({
       url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
       hash: std.sha256Hash("eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33"),
     })
     .unpack("tar", "zstd");
 
-  const toolchain = await std
+  const toolchain = std
     .download({
       url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd",
       hash: std.sha256Hash("27416708f7ee8cd0c5d408010192705b40c914647fd0d80f00c2194795828cd6"),
     })
     .unpack("tar", "zstd");
 
-  const make = await std
+  const make = std
     .download({
       url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz",
       hash: std.sha256Hash("f8a75f171c2c753bc86a331473812ddc24837d5e91b0b1c7af89d6a2aa6e8986"),
     })
     .unpack("tar", "xz");
 
-  const briocheLd = await std.download({
-    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-ld",
-    hash: std.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
-  }).resolve();
-  const briochePacked = await std.download({
-    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
-    hash: std.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
-  }).resolve();
+  const briocheLd = packTools().get("brioche-ld");
+  const briochePacked = packTools().get("brioche-packed-userland-exec");
 
-  const briochePack = await std.directory({
+  const briochePack = std.directory({
     "x86_64-linux-musl": std.directory({
       "bin": std.directory({
-        "brioche-ld": briocheLd.withPermissions({ executable: true }),
+        "brioche-ld": briocheLd,
       }),
       "libexec": std.directory({
         "brioche-ld": std.directory({
           "ld": std.symlink({ target: "../../bin/system-ld" }),
-          "brioche-packed": briochePacked.withPermissions({ executable: true }),
+          "brioche-packed": briochePacked,
           "lib": std.directory({
             "ld-musl-x86_64.so.1": std.symlink({ target: "../../../../lib/ld-musl-x86_64.so.1" }),
           }),
@@ -144,7 +133,7 @@ export default async (): Promise<std.Lazy> => {
     }),
   });
 
-  let stage0 = await std.merge(utils, toolchain, make, briochePack);
+  let stage0 = std.merge(utils, toolchain, make, briochePack);
 
   const systemLd = stage0.get("x86_64-linux-musl/bin/ld");
   stage0 = stage0.insert("x86_64-linux-musl/bin/system-ld", systemLd);

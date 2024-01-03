@@ -1,4 +1,5 @@
 import * as std from "/core";
+import { packTools } from "/pack_tools.bri";
 
 interface UseBriocheLdOptions {
   ldPaths: string[];
@@ -6,14 +7,8 @@ interface UseBriocheLdOptions {
 }
 
 export function useBriocheLd(dir: std.Lazy<std.Directory>, options: UseBriocheLdOptions): std.Lazy<std.Directory> {
-  const briocheLd = std.download({
-    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-ld",
-    hash: std.sha256Hash("c504b122afac50bacf479217d9d2ad6363a3ec4f41861db028ff4899034b75c4"),
-  });
-  const briochePacked = std.download({
-    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-pack/004166700c378bbcd77fb7fefcd05a0c14fc3cef/x86_64-unknown-linux-musl/brioche-packed-userland-exec",
-    hash: std.sha256Hash("4749179afacb19f611360e63b95e74c183c3e01e8104c0275d912d0e1725b154"),
-  });
+  const briocheLd = packTools().get("brioche-ld");
+  const briochePacked = packTools().get("brioche-packed-userland-exec");
 
   for (const ldPath of options.ldPaths) {
     const systemLd = dir.get(ldPath);
@@ -27,7 +22,7 @@ export function useBriocheLd(dir: std.Lazy<std.Directory>, options: UseBriocheLd
     const briocheLdPath = [...ldParentDirComponents, "libexec", "brioche-ld"].join("/");
     let briocheLdDir: std.Lazy<std.Directory> = std.directory({
       "ld": std.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
-      "brioche-packed": briochePacked.withPermissions({ executable: true }),
+      "brioche-packed": briochePacked,
     });
 
     for (const [interpreterPath, interpreterTargetPath] of Object.entries(options.interpreterPaths)) {
@@ -39,7 +34,7 @@ export function useBriocheLd(dir: std.Lazy<std.Directory>, options: UseBriocheLd
     };
 
     dir = dir.insert(`${ldDir}/${ldName}-orig`, systemLd);
-    dir = dir.insert(ldPath, briocheLd.withPermissions({ executable: true }));
+    dir = dir.insert(ldPath, briocheLd);
     dir = dir.insert(briocheLdPath, briocheLdDir);
   }
 
