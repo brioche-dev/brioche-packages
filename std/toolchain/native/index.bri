@@ -56,6 +56,7 @@ import texinfo from "./texinfo.bri";
 import manDb from "./man_db.bri";
 import procpsNg from "./procps_ng.bri";
 import utilLinux from "./util_linux.bri";
+import linuxHeaders from "./linux_headers.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   return std.merge(
@@ -116,5 +117,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
     manDb(),
     procpsNg(),
     utilLinux(),
+    linuxHeaders(),
   );
 });
