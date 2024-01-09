@@ -42,6 +42,20 @@ import libffi from "./libffi.bri";
 import python from "./python.bri";
 import pythonFlitCore from "./python_flit_core.bri";
 import pythonWheel from "./python_wheel.bri";
+import coreutils from "./coreutils.bri";
+import diffutils from "./diffutils.bri";
+import gawk from "./gawk.bri";
+import findutils from "./findutils.bri";
+import groff from "./groff.bri";
+import gzip from "./gzip.bri";
+import libpipeline from "./libpipeline.bri";
+import make from "./make.bri";
+import patch from "./patch.bri";
+import tar from "./tar.bri";
+import texinfo from "./texinfo.bri";
+import manDb from "./man_db.bri";
+import procpsNg from "./procps_ng.bri";
+import utilLinux from "./util_linux.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   return std.merge(
@@ -88,5 +102,19 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
     python(),
     pythonFlitCore(),
     pythonWheel(),
+    coreutils(),
+    diffutils(),
+    gawk(),
+    findutils(),
+    groff(),
+    gzip(),
+    libpipeline(),
+    make(),
+    patch(),
+    tar(),
+    texinfo(),
+    manDb(),
+    procpsNg(),
+    utilLinux(),
   );
 });

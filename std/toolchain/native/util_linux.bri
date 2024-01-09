@@ -1,0 +1,48 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/util-linux-2.39.1.tar.xz",
+      hash: std.sha256Hash("890ae8ff810247bd19e274df76e8371d202cda01ad277681b0ea88eeaa00286b"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure \
+          --bindir=/bin \
+          --libdir=/lib \
+          --runstatedir=/run \
+          --sbindir=/bin \
+          --disable-chfn-chsh \
+          --disable-login \
+          --disable-nologin \
+          --disable-su \
+          --disable-setpriv \
+          --disable-runuser \
+          --disable-pylibmount \
+          --disable-static \
+          --without-python \
+          --without-systemd \
+          --without-systemdsystemunitdir \
+          --disable-makeinstall-chown \
+          --disable-makeinstall-setuid \
+          ADJTIME_PATH=/var/lib/hwclock/adjtime
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${stage2()}/bin`,
+    },
+  }).cast("directory");
+});
