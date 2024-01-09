@@ -1,0 +1,30 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/sed-4.9.tar.xz",
+      hash: std.sha256Hash("6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure --prefix=/
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${stage2()}/bin`,
+    },
+  }).cast("directory");
+});

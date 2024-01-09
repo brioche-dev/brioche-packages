@@ -17,6 +17,31 @@ import attr from "./attr.bri";
 import acl from "./acl.bri";
 import libxcrypt from "./libxcrypt.bri";
 import gcc from "./gcc.bri";
+import pkgconf from "./pkgconf.bri";
+import ncurses from "./ncurses.bri";
+import sed from "./sed.bri";
+import psmisc from "./psmisc.bri";
+import gettext from "./gettext.bri";
+import bison from "./bison.bri";
+import grep from "./grep.bri";
+import bash from "./bash.bri";
+import libtool from "./libtool.bri";
+import gdbm from "./gdbm.bri";
+import gperf from "./gperf.bri";
+import expat from "./expat.bri";
+import inetutils from "./inetutils.bri";
+import less from "./less.bri";
+import perl from "./perl.bri";
+import perlXmlParser from "./perl_xml_parser.bri";
+import intltool from "./intltool.bri";
+import autoconf from "./autoconf.bri";
+import automake from "./automake.bri";
+import openssl from "./openssl.bri";
+import libelf from "./libelf.bri";
+import libffi from "./libffi.bri";
+import python from "./python.bri";
+import pythonFlitCore from "./python_flit_core.bri";
+import pythonWheel from "./python_wheel.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   return std.merge(
@@ -38,5 +63,30 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
     acl(),
     libxcrypt(),
     gcc(),
+    pkgconf(),
+    ncurses(),
+    sed(),
+    psmisc(),
+    gettext(),
+    bison(),
+    grep(),
+    bash(),
+    libtool(),
+    gdbm(),
+    gperf(),
+    expat(),
+    inetutils(),
+    less(),
+    perl(),
+    perlXmlParser(),
+    intltool(),
+    autoconf(),
+    automake(),
+    openssl(),
+    libelf(),
+    libffi(),
+    python(),
+    pythonFlitCore(),
+    pythonWheel(),
   );
 });

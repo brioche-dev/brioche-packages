@@ -1,0 +1,32 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/grep-3.11.tar.xz",
+      hash: std.sha256Hash("1db2aedde89d0dea42b16d9528f894c8d15dae4e190b59aecc78f5a951276eab"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        sed -i "s/echo/#echo/" src/egrep.sh
+
+        ./configure --prefix=/
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${stage2()}/bin`,
+    },
+  }).cast("directory");
+});

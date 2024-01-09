@@ -1,0 +1,49 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+import zlib from "./zlib.bri";
+import bzip2 from "./bzip2.bri";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
+      hash: std.sha256Hash("eca551caec3bc549a4e590c0015003790bdd1a604ffe19cc78ee631d51f7072e"),
+    });
+
+  let perl = std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        sh Configure \
+          -des \
+          -Dprefix=/ \
+          -Duserelocatableinc \
+          -Dusethreads \
+          -Dlocincpth="$zlib/include $bzip2/include" \
+          -Dloclibpth="$zlib/lib $bzip2/lib"
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${stage2()}/bin`,
+      zlib: zlib(),
+      bzip2: bzip2(),
+      BUILD_ZLIB: "FALSE",
+      BUILD_BZIP2: "0",
+    },
+  }).cast("directory");
+
+  // Mark the perl binary as executable
+  // TODO: Figure out why Perl isn't executable by default?
+  const perlBin = perl.get("bin/perl").cast("file").withPermissions({ executable: true });
+  perl = perl.insert("bin/perl", perlBin);
+
+  return perl;
+});

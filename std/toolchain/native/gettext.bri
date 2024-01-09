@@ -1,0 +1,33 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gettext-0.22.tar.xz",
+      hash: std.sha256Hash("0e60393a47061567b46875b249b7d2788b092d6457d656145bb0e7e6a3e26d93"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure \
+          --prefix=/ \
+          --disable-static
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+        chmod +x "$BRIOCHE_OUTPUT"/lib/preloadable_libintl.so
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${stage2()}/bin`,
+    },
+  }).cast("directory");
+});

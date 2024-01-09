@@ -1,0 +1,42 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+import m4 from "./m4.bri";
+import autoconf from "./autoconf.bri";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/automake-1.16.5.tar.xz",
+      hash: std.sha256Hash("f01d58cd6d9d77fbdca9eb4bbd5ead1988228fdb73d6f7a201f5f8d6b118b469"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure --prefix=/
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+
+        # Fix shebangs
+        sed -i 's|^#![[:space:]]*.*/bin/\\([^[:space:]]*\\)|#! /usr/bin/env \\1|' "$BRIOCHE_OUTPUT"/bin/*
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${autoconf()}/bin:${stage2()}/bin`,
+      // TODO: Move these variables into `autoconf()`
+      M4: std.tpl`${m4()}/bin/m4`,
+      AUTOM4TE: std.tpl`${autoconf()}/bin/autom4te`,
+      trailer_m4: std.tpl`${autoconf()}/share/autoconf/autoconf/trailer.m4`,
+      PERL5LIB: std.tpl`${autoconf()}/share/autoconf`,
+      autom4te_perllibdir: std.tpl`${autoconf()}/share/autoconf`,
+      AC_MACRODIR: std.tpl`${autoconf()}/share/autoconf`,
+    },
+  }).cast("directory");
+});

@@ -1,0 +1,33 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/libffi-3.4.4.tar.gz",
+      hash: std.sha256Hash("d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure \
+          --prefix=/ \
+          --disable-static \
+          --with-gcc-arch=x86-64
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${stage2()}/bin`,
+    },
+  }).cast("directory");
+});

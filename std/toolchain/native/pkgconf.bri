@@ -1,0 +1,34 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/pkgconf-2.0.1.tar.xz",
+      hash: std.sha256Hash("3238af7473740844e5159dd8fb6540603e3fbcebf60beb3c8a426cdca2e29c51"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        ./configure \
+          --prefix=/ \
+          --disable-static
+        make
+        make install DESTDIR="$BRIOCHE_OUTPUT"
+
+        ln -sv pkgconf "$BRIOCHE_OUTPUT/bin/pkg-config"
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${stage2()}/bin`,
+    },
+  }).cast("directory");
+});

@@ -1,0 +1,38 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+import perl from "./perl.bri";
+import expat from "./expat.bri";
+
+export default std.memo((): std.Lazy<std.Directory> => {
+  const sourceArchive = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/XML-Parser-2.46.tar.gz",
+      hash: std.sha256Hash("d331332491c51cccfb4cb94ffc44f9cd73378e618498d4a37df9e043661c515d"),
+    });
+
+  return std.process({
+    command: std.tpl`${stage2()}/bin/bash`,
+    args: [
+      "-c",
+      `
+        set -euo pipefail
+
+        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+        perl Makefile.PL \
+          EXPATLIBPATH="$expat/lib" \
+          EXPATINCPATH="$expat/include" \
+          PREFIX="$BRIOCHE_OUTPUT"
+        make
+        make test
+        make install
+      `,
+    ],
+    env: {
+      source: sourceArchive,
+      PATH: std.tpl`${perl()}/bin:${stage2()}/bin`,
+      expat: expat(),
+      WATERMARK: "1",
+    },
+  }).cast("directory");
+});
