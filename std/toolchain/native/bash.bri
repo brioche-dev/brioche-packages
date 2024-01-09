@@ -8,7 +8,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
       hash: std.sha256Hash("13720965b5f4fc3a0d4b61dd37e7565c741da9a5be24edc2ae00182fc1b3588c"),
     });
 
-  return std.process({
+  let bash = std.process({
     command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
@@ -30,4 +30,8 @@ export default std.memo((): std.Lazy<std.Directory> => {
       PATH: std.tpl`${stage2()}/bin`,
     },
   }).cast("directory");
+
+  bash = bash.insert("bin/sh", std.symlink({ target: "bash" }));
+
+  return bash;
 });
