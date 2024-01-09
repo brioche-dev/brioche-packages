@@ -30,7 +30,9 @@ export default std.memo((): std.Lazy<std.Directory> => {
           --enable-libdebuginfod=dummy
         make
         make -C libelf install DESTDIR="$BRIOCHE_OUTPUT"
-        install -vm644 config/libelf.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig
+
+        mkdir -p "$BRIOCHE_OUTPUT"/lib/pkgconfig
+        install -vm644 config/libelf.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig/
         rm "$BRIOCHE_OUTPUT"/lib/libelf.a
       `,
     ],
