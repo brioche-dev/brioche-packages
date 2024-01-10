@@ -18,7 +18,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
       hash: std.sha256Hash("3e4b4b15485c9767501151ccf1b33cf5ee912298fda899cd809277ece27e859c"),
     });
 
-  return std.process({
+  let glibc = std.process({
     command: std.tpl`${stage2()}/bin/bash`,
     args: [
       "-c",
@@ -43,7 +43,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
           --enable-kernel=4.14 \
           --enable-stack-protector=strong \
           --with-headers="$stage2/usr/include" \
-          libc_cv_slibdir=/lib64
+          libc_cv_slibdir=/lib
 
         export BRIOCHE_LD_AUTOWRAP=false
         make
@@ -59,4 +59,10 @@ export default std.memo((): std.Lazy<std.Directory> => {
       stage2: stage2(),
     }
   }).cast("directory");
+
+  glibc = glibc.insert("lib64", std.directory({
+    "ld-linux-x86-64.so.2": std.symlink({ target: "../lib/ld-linux-x86-64.so.2" }),
+  }));
+
+  return glibc;
 });
