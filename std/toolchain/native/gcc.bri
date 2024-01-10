@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { linuxHeaders } from "/toolchain/stage1";
+import linuxHeaders from "./linux_headers.bri";
 import stage2 from "/toolchain/stage2";
 import glibc from "./glibc.bri";
 import binutils from "./binutils.bri";
@@ -17,7 +17,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
     });
 
   let buildSysroot = std.merge(
-    linuxHeaders().get("usr").cast("directory"),
+    linuxHeaders(),
     glibc(),
     binutils(),
     libxcrypt(),
@@ -79,8 +79,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
       source: sourceArchive,
       PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
       CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
-      // TODO: Remove glibc as an explicit dependency
-      // TODO: Remove -lm as an explicit dependency
       LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
       buildSysroot,
       gmp: gmp(),

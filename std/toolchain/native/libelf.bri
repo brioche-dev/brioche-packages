@@ -39,9 +39,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
     env: {
       source: sourceArchive,
       PATH: std.tpl`${temporaryToolchain()}/bin:${bzip2()}/bin:${stage2()}/bin`,
-      // TODO: Figure out why libc.so.6 can't be found without manually
-      // including the temporary toolchain's lib dir
-      LDFLAGS: std.tpl`-L${zlib()}/lib -L${temporaryToolchain()}/lib64 -L${temporaryToolchain()}/lib`,
+      LDFLAGS: std.tpl`-L${zlib()}/lib`,
       CPPFLAGS: std.tpl`-I${zlib()}/include`,
     },
   }).cast("directory");

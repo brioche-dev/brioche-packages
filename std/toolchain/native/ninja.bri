@@ -51,9 +51,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
       PYTHONHOME: python(),
       // TODO: Remove this
       LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
-      // TODO: Figure out why libm.so.6 can't be found without manually
-      // including the temporary toolchain's lib dir
-      LDFLAGS: std.tpl`-L${temporaryToolchain()}/lib64 -L${temporaryToolchain()}/lib`,
     },
   }).cast("directory");
 });
