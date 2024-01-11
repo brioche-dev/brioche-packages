@@ -15,8 +15,6 @@ export default async (): Promise<std.Lazy> => {
       `
         set -euo pipefail
 
-        echo "#include <stdio.h>" >> test.c
-        echo "int main() { printf(\\"Hello world!\\n\\"); }" >> test.c
         mkdir -p "$BRIOCHE_OUTPUT/bin"
         gcc \
           -o "$BRIOCHE_OUTPUT/bin/test" \
@@ -29,10 +27,20 @@ export default async (): Promise<std.Lazy> => {
         "$BRIOCHE_OUTPUT/test.sh" >> "$BRIOCHE_OUTPUT/test.txt"
       `,
     ],
+    workDir: std.directory({
+      "test.c": std.createFile(std.indoc`
+        #include <stdio.h>
+
+        int main() {
+          printf("Hello world!\\n");
+        }
+      `),
+    }),
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      PATH: std.tpl`${std.stage2()}/bin`,
-      MAGIC: std.tpl`${std.stage2()}/usr/share/misc/magic`,
+      toolchain: std.native(),
+      PATH: std.tpl`${std.native()}/bin`,
+      MAGIC: std.tpl`${std.native()}/share/misc/magic`,
       test_script: `#!/usr/bin/env bash
         set -euo pipefail
 
