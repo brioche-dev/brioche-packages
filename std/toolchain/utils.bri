@@ -47,7 +47,12 @@ interface WrapWithScriptOptions {
   script: std.AsyncLazy<std.File>;
 }
 
-export function wrapWithScript(dir: std.Lazy<std.Directory>, options: WrapWithScriptOptions): std.Lazy<std.Directory> {
+export function wrapWithScript(
+  directory: std.AsyncLazy<std.Directory>,
+  options: WrapWithScriptOptions,
+): std.Lazy<std.Directory> {
+  let dir = std.lazy(directory);
+
   for (const path of options.paths) {
     const program = dir.get(path);
 
