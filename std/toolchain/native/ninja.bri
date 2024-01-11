@@ -30,6 +30,13 @@ export default std.memo((): std.Lazy<std.Directory> => {
     libffi(),
   );
 
+  const toolchain = std.merge(
+    glibc(),
+    binutils(),
+    gcc(),
+    linuxHeaders(),
+  );
+
   return std.process({
     command: std.tpl`${stage2()}/bin/bash`,
     args: [
@@ -47,7 +54,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
     ],
     env: {
       source: sourceArchive,
-      PATH: std.tpl`${python()}/bin:${temporaryToolchain()}/bin:${stage2()}/bin`,
+      PATH: std.tpl`${python()}/bin:${toolchain}/bin:${stage2()}/bin`,
       PYTHONHOME: python(),
       // TODO: Remove this
       LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
