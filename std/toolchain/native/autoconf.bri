@@ -40,7 +40,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
   autoconf = wrapWithScript(autoconf, {
     paths: ["bin/autoupdate", "bin/autom4te"],
     renameSuffix: "-orig",
-    script: std.createFile(std.indoc`
+    script: std.file(std.indoc`
       #!/usr/bin/env sh
       script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
       top_dir=$(cd "$script_dir/.." && pwd -P)

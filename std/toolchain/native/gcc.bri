@@ -133,7 +133,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
 });
 
 function ccWrapper(): std.Lazy<std.File> {
-  return std.createFile(std.indoc`
+  return std.file(std.indoc`
     #!/usr/bin/env sh
     # MIT license: https://stackoverflow.com/a/29835459
     rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
@@ -199,7 +199,7 @@ function cc1Wrapper(systemHeaders: string[]): std.Lazy<std.File> {
 
   const systemHeaderArgs = systemHeaders.map(header => `-isystem "${header}"`).join(" ");
 
-  return std.createFile(std.indoc`
+  return std.file(std.indoc`
     #!/usr/bin/env sh
     # MIT license: https://stackoverflow.com/a/29835459
     rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.

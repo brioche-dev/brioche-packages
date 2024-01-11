@@ -1,71 +1,16 @@
 import * as std from "/core";
-import { wrapWithScript, useBriocheLd } from "../utils.bri";
-import { linuxHeaders, glibc, libstdcpp } from "../stage1";
-import m4 from "./2_01_m4.bri";
-import ncurses from "./2_02_ncurses.bri";
-import bash from "./2_03_bash.bri";
-import coreutils from "./2_04_coreutils.bri";
-import diffutils from "./2_05_diffutils.bri";
-import file from "./2_06_file.bri";
-import findutils from "./2_07_findutils.bri";
-import gawk from "./2_08_gawk.bri";
-import grep from "./2_09_grep.bri";
-import gzip from "./2_10_gzip.bri";
-import make from "./2_11_make.bri";
-import patch from "./2_12_patch.bri";
-import sed from "./2_13_sed.bri";
-import tar from "./2_14_tar.bri";
-import xz from "./2_15_xz.bri";
-import binutils from "./2_16_binutils.bri";
-import gcc from "./2_17_gcc.bri";
+import { wrapWithScript } from "../utils.bri";
 
-export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  let toolchain = std.merge(
-    linuxHeaders(),
-    glibc(),
-    libstdcpp(),
-    m4(),
-    ncurses(),
-    bash(),
-    coreutils(),
-    diffutils(),
-    file(),
-    findutils(),
-    gawk(),
-    grep(),
-    gzip(),
-    make(),
-    patch(),
-    sed(),
-    tar(),
-    xz(),
-    binutils(),
-    gcc(),
-  );
-
-  toolchain = toolchain.insert("bin", std.symlink({ target: "usr/bin" }));
-
-  toolchain = useBriocheLd(toolchain, {
-    ldPaths: [
-      "usr/bin/ld",
-      "usr/bin/ld.bfd",
-      "usr/x86_64-lfs-linux-gnu/bin/ld",
-      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
-    ],
-    interpreterPaths: {
-      "lib64/ld-linux-x86-64.so.2": "lib/ld-linux-x86-64.so.2",
-    },
-  });
-
-  toolchain = wrapWithScript(toolchain, {
+export function createToolchain(...tools: std.AsyncLazy<std.Directory>[]): std.Lazy<std.Directory> {
+  return wrapWithScript(std.merge(...tools), {
     paths: [
-      "usr/bin/x86_64-lfs-linux-gnu-c++",
-      "usr/bin/x86_64-lfs-linux-gnu-g++",
-      "usr/bin/x86_64-lfs-linux-gnu-gcc",
-      "usr/bin/x86_64-lfs-linux-gnu-gcc-13.2.0",
-      "usr/bin/c++",
-      "usr/bin/g++",
-      "usr/bin/gcc",
+      "bin/x86_64-pc-linux-gnu-c++",
+      "bin/x86_64-pc-linux-gnu-g++",
+      "bin/x86_64-pc-linux-gnu-gcc",
+      "bin/x86_64-pc-linux-gnu-gcc-13.2.0",
+      "bin/c++",
+      "bin/g++",
+      "bin/gcc",
     ],
     renameSuffix: "-orig",
     script: std.file(std.indoc`
@@ -118,7 +63,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       )
 
       script_dir=$(cd "$(dirname -- "$(rreadlink "$0")")" && pwd -P)
-      sysroot=$(cd "$script_dir/../.." && pwd -P)
+      sysroot=$(cd "$script_dir/.." && pwd -P)
 
       include_system_headers=1
       for arg in "$@"; do
@@ -130,9 +75,9 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
 
       if [ "$include_system_headers" -eq 1 ]; then
         set -- \
-          -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0/x86_64-lfs-linux-gnu" \
-          -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0" \
-          -isystem "$sysroot/usr/include" \
+          -isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include" \
+          -isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed" \
+          -isystem "$sysroot/include" \
           "$@"
       fi
       set -- --sysroot="$sysroot" "$@"
@@ -140,11 +85,15 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       "$(rreadlink "$0")-orig" "$@"
     `).withPermissions({ executable: true }),
   });
+}
 
-  const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];
-  for (const tool of prefixedTools) {
-    toolchain = toolchain.insert(`usr/bin/${tool}`, std.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
-  }
-
-  return toolchain;
-});
+/*
+        set -- \
+-isystem "$sysroot/include/c++/13.2.0" \
+-isystem "$sysroot/include/c++/13.2.0/backward" \
+-isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include" \
+-isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed" \
+-isystem "$sysroot/include/c++/13.2.0/x86_64-pc-linux-gnu" \
+-isystem "$sysroot/include" \
+"$@"
+*/

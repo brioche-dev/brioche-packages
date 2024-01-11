@@ -5,7 +5,7 @@ import { type Directory, directory } from "./directory.bri";
 import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./value.bri";
 import { valueType } from "./value_type.bri";
 
-export function createFile(data: string | Uint8Array): Lazy<File> {
+export function file(data: string | Uint8Array): Lazy<File> {
   const serializedData = runtime.bstring(data);
   return createLazy(["file"], {
     sourceDepth: 1,

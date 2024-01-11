@@ -77,7 +77,7 @@ function temporaryToolchain(): std.Lazy<std.Directory> {
       "bin/gcc",
     ],
     renameSuffix: "-orig",
-    script: std.createFile(std.indoc`
+    script: std.file(std.indoc`
       #!/usr/bin/env sh
       # MIT license: https://stackoverflow.com/a/29835459
       rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.

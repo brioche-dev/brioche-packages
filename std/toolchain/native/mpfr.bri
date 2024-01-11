@@ -46,7 +46,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
       /\/\/lib\/libgmp\.la/g,
       "-lgmp",
     );
-    return std.createFile(libtoolArchiveContents);
+    return std.file(libtoolArchiveContents);
   });
 
   mpfr = mpfr.insert("lib/libmpfr.la", newLibtoolArchive);

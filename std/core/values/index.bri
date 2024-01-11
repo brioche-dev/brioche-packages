@@ -1,6 +1,6 @@
 export { directory, merge, Directory } from "./directory.bri";
 export { download, type DownloadOptions } from "./download.bri";
-export { File, createFile } from "./file.bri";
+export { File, file } from "./file.bri";
 export { sha256Hash, type Hash, Sha256Hash } from "./hash.bri";
 export {
   process,

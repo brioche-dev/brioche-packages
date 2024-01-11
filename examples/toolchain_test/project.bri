@@ -28,7 +28,7 @@ export default async (): Promise<std.Lazy> => {
       `,
     ],
     workDir: std.directory({
-      "test.c": std.createFile(std.indoc`
+      "test.c": std.file(std.indoc`
         #include <stdio.h>
 
         int main() {

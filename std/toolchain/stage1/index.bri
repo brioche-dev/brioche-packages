@@ -39,7 +39,7 @@ export default std.memo(() => {
       "usr/bin/x86_64-lfs-linux-gnu-gcc",
     ],
     renameSuffix: "-orig",
-    script: std.createFile(std.indoc`
+    script: std.file(std.indoc`
       #!/usr/bin/env sh
       script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
       sysroot=$(cd "$script_dir/../.." && pwd -P)
