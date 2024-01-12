@@ -105,7 +105,7 @@ export class ProcessTemplate {
         const serialized = await component.briocheSerialize();
         return serialized.components;
       } else {
-        return [{ type: "input", value: await component.briocheSerialize() }];
+        return [{ type: "input", artifact: await component.briocheSerialize() }];
       }
     }));
 

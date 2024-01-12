@@ -189,10 +189,10 @@ export const lazyUtils: LazyUtils<Value> = {
     return createLazy([to satisfies ValueType<Value> as ValueType<ValueTypes[To]>], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
-        const value = await this.briocheSerialize();
+        const artifact = await this.briocheSerialize();
         return {
           type: "cast",
-          value,
+          artifact,
           to,
           meta,
         } satisfies LazyValueSerialization<Value> as any;

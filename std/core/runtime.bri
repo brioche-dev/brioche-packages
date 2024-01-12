@@ -120,7 +120,7 @@ export type LazyCreateFile = WithMeta & {
 
 export type LazyCast = WithMeta & {
   type: "cast",
-  value: LazyValue,
+  artifact: LazyValue,
   to: CompleteValue["type"],
 };
 
@@ -198,7 +198,7 @@ export type ProcessTemplate = {
 
 export type ProcessTemplateComponent =
   | { type: "literal", value: BString }
-  | { type: "input", value: LazyValue }
+  | { type: "input", artifact: LazyValue }
   | { type: "output_path" }
   | { type: "resources_dir" }
   | { type: "home_dir" }
