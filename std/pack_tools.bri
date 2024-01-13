@@ -2,7 +2,7 @@ import * as std from "/core";
 
 export function packTools(): std.Lazy<std.Directory> {
   return std.download({
-    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche/commits/f16cb5af7337ac35c75d0728c4c090421f321894/x86_64-linux/brioche-pack.tar.zstd",
-    hash: std.sha256Hash("03ad2980d3fe102d1026c02cbb537a13217b6add51ba3a7f07f354a1ab751dc0"),
+    url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche/commits/2b2c62754247c7a5707faae1e664c1607765a548/x86_64-linux/brioche-pack.tar.zstd",
+    hash: std.sha256Hash("191fde9807ee4d9a81d3db4c666f1a265d0cdcbde2c580eabaa37e0712f0a240"),
   }).unpack("tar", "zstd");
 }
