@@ -2,8 +2,8 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { type Directory, directory } from "./directory.bri";
-import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./value.bri";
-import { valueType } from "./value_type.bri";
+import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./artifact.bri";
+import { artifactType } from "./artifact_type.bri";
 
 export function file(data: string | Uint8Array): Lazy<File> {
   const serializedData = runtime.bstring(data);
@@ -35,7 +35,7 @@ export interface FileCtor {
 }
 
 export class File implements Lazy<File> {
-  [valueType]: "file" = "file";
+  [artifactType]: "file" = "file";
   source?: runtime.Source;
   blobId: runtime.BlobId;
   executable: boolean;
@@ -64,12 +64,12 @@ export class File implements Lazy<File> {
     };
   }
 
-  static briocheDeserialize(value: runtime.CompleteValue, source: runtime.Source | undefined): File {
-    assert(value.type === "file");
+  static briocheDeserialize(artifact: runtime.CompleteArtifact, source: runtime.Source | undefined): File {
+    assert(artifact.type === "file");
     return new File({
-      blobId: value.data,
-      executable: value.executable,
-      resources: value.resources,
+      blobId: artifact.data,
+      executable: artifact.executable,
+      resources: artifact.resources,
       source,
     });
   }

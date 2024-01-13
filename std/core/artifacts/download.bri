@@ -2,7 +2,7 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { File } from "./file.bri";
 import { Hash } from "./hash.bri";
-import { type Lazy, createLazy } from "./value.bri";
+import { type Lazy, createLazy } from "./artifact.bri";
 
 export interface DownloadOptions {
   url: string;

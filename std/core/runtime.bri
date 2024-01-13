@@ -1,21 +1,21 @@
 import { unreachable } from "./utils.bri";
 
-export async function resolveAll(values: []): Promise<[]>;
-export async function resolveAll(values: [LazyValue]): Promise<[CompleteValue]>;
-export async function resolveAll(values: [LazyValue, LazyValue]): Promise<[CompleteValue, CompleteValue]>;
-export async function resolveAll(values: LazyValue[]): Promise<CompleteValue[]>;
-export async function resolveAll(values: LazyValue[]): Promise<CompleteValue[]> {
-  const result = await (globalThis as any).Deno.core.ops.op_brioche_resolve_all(values);
+export async function resolveAll(artifacts: []): Promise<[]>;
+export async function resolveAll(artifacts: [LazyArtifact]): Promise<[CompleteArtifact]>;
+export async function resolveAll(artifacts: [LazyArtifact, LazyArtifact]): Promise<[CompleteArtifact, CompleteArtifact]>;
+export async function resolveAll(artifacts: LazyArtifact[]): Promise<CompleteArtifact[]>;
+export async function resolveAll(artifacts: LazyArtifact[]): Promise<CompleteArtifact[]> {
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_resolve_all(artifacts);
   return result;
 }
 
-export async function resolve(values: LazyValue): Promise<CompleteValue> {
-  const [result] = await resolveAll([values]);
+export async function resolve(artifact: LazyArtifact): Promise<CompleteArtifact> {
+  const [result] = await resolveAll([artifact]);
   return result;
 }
 
-export async function createProxy(value: LazyValue): Promise<LazyProxy> {
-  const result = await (globalThis as any).Deno.core.ops.op_brioche_create_proxy(value);
+export async function createProxy(artifact: LazyArtifact): Promise<LazyProxy> {
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_create_proxy(artifact);
   return result;
 }
 
@@ -46,7 +46,7 @@ export function urlDecode(value: Uint8Array | string): Uint8Array {
   return result;
 }
 
-export type CompleteValue =
+export type CompleteArtifact =
   | CompleteFile
   | CompleteSymlink
   | CompleteDirectory;
@@ -66,11 +66,11 @@ export type CompleteSymlink = WithMeta & {
 export type CompleteDirectory = WithMeta & { type: "directory" } & CompleteDirectoryContents;
 
 export type CompleteDirectoryContents = {
-  entries: Record<BString, CompleteValue>,
+  entries: Record<BString, CompleteArtifact>,
 };
 
-export type LazyValue =
-  | CompleteValue
+export type LazyArtifact =
+  | CompleteArtifact
   | LazyDirectory
   | LazyDownload
   | LazyUnpack
@@ -86,7 +86,7 @@ export type LazyValue =
 
 export type LazyDirectory = WithMeta & {
   type: "directory",
-  entries: Record<BString, LazyValue>,
+  entries: Record<BString, LazyArtifact>,
 };
 
 export type LazyDownload = WithMeta & {
@@ -97,7 +97,7 @@ export type LazyDownload = WithMeta & {
 
 export type LazyUnpack = WithMeta & {
   type: "unpack",
-  file: LazyValue,
+  file: LazyArtifact,
   archive: ArchiveFormat,
   compression?: CompressionFormat | null,
 };
@@ -107,7 +107,7 @@ export type LazyProcess = WithMeta & {
   command: ProcessTemplate,
   args: ProcessTemplate[],
   env: Record<BString, ProcessTemplate>,
-  workDir: LazyValue,
+  workDir: LazyArtifact,
   platform: Platform,
 };
 
@@ -115,50 +115,50 @@ export type LazyCreateFile = WithMeta & {
   type: "create_file",
   data: BString,
   executable: boolean,
-  resources: LazyValue,
+  resources: LazyArtifact,
 };
 
 export type LazyCast = WithMeta & {
   type: "cast",
-  artifact: LazyValue,
-  to: CompleteValue["type"],
+  artifact: LazyArtifact,
+  to: CompleteArtifact["type"],
 };
 
 export type LazyMerge = WithMeta & {
   type: "merge",
-  directories: LazyValue[],
+  directories: LazyArtifact[],
 };
 
 export type LazyPeel = WithMeta & {
   type: "peel",
-  directory: LazyValue,
+  directory: LazyArtifact,
   depth: number,
 };
 
 export type LazyGet = WithMeta & {
   type: "get",
-  directory: LazyValue,
+  directory: LazyArtifact,
   path: BString,
 };
 
 export type LazyRemove = WithMeta & {
   type: "remove",
-  directory: LazyValue,
+  directory: LazyArtifact,
   paths: BString[],
 };
 
 export type LazySetPermissions = WithMeta & {
   type: "set_permissions",
-  file: LazyValue,
+  file: LazyArtifact,
   executable: boolean | null,
 };
 
 export type LazyProxy = WithMeta & {
   type: "proxy",
-  hash: ValueHash,
+  hash: ArtifactHash,
 };
 
-export type ValueHash = string & {__valueHash: never};
+export type ArtifactHash = string & {__artifactHash: never};
 
 export type WithMeta = {
   meta?: Meta,
@@ -198,7 +198,7 @@ export type ProcessTemplate = {
 
 export type ProcessTemplateComponent =
   | { type: "literal", value: BString }
-  | { type: "input", artifact: LazyValue }
+  | { type: "input", artifact: LazyArtifact }
   | { type: "output_path" }
   | { type: "resources_dir" }
   | { type: "home_dir" }

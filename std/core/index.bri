@@ -1,4 +1,4 @@
-export * from "./values";
+export * from "./artifacts";
 export { source } from "./source.bri";
 export { assert, unreachable, indoc, type Awaitable } from "./utils.bri";
 export { utf8Encode, utf8Decode, urlEncode, urlDecode, bstring, bstringToBytes, bstringToString, type BString } from "./runtime.bri";

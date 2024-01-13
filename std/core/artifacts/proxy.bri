@@ -1,9 +1,9 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { type Equatable, assert, jsonSerialize } from "../utils.bri";
-import { type Value, type AsyncLazy, type Lazy, type LazyValueSerialization, type ValueType, briocheDeserializeAny, createLazy } from "./value.bri";
+import { type Artifact, type AsyncLazy, type Lazy, type LazyArtifactSerialization, type ArtifactType, briocheDeserializeAny, createLazy } from "./artifact.bri";
 
-export function memo<Args extends Array<Equatable>, Ret extends Value>(
+export function memo<Args extends Array<Equatable>, Ret extends Artifact>(
   f: (...args: Args) => AsyncLazy<Ret>
 ): (...args: Args) => Lazy<Ret> {
   const proxies = new Map<string, Lazy<Ret>>();
@@ -20,18 +20,18 @@ export function memo<Args extends Array<Equatable>, Ret extends Value>(
   };
 }
 
-export function createProxy<T extends Value>(value: AsyncLazy<T>): Lazy<T> {
+export function createProxy<T extends Artifact>(artifact: AsyncLazy<T>): Lazy<T> {
   let serialized: Promise<runtime.LazyProxy> | undefined;
   let resolved: T | undefined;
 
   const serializeProxy = async (): Promise<runtime.LazyProxy> => {
     if (serialized === undefined) {
       serialized = (async () => {
-        const serializedValue = await (await value).briocheSerialize();
-        const proxy = await runtime.createProxy(serializedValue);
+        const serializedArtifact = await (await artifact).briocheSerialize();
+        const proxy = await runtime.createProxy(serializedArtifact);
         return {
           ...proxy,
-          meta: serializedValue.meta,
+          meta: serializedArtifact.meta,
         };
       })();
     }
@@ -39,17 +39,17 @@ export function createProxy<T extends Value>(value: AsyncLazy<T>): Lazy<T> {
     return await serialized;
   };
 
-  return createLazy(["file", "directory", "symlink"] as ValueType<T>[], {
+  return createLazy(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,
     briocheSerialize: async () => {
       const proxy = await serializeProxy() as unknown;
-      return proxy as unknown as LazyValueSerialization<T>;
+      return proxy as unknown as LazyArtifactSerialization<T>;
     },
     resolve: async () => {
       if (resolved === undefined) {
         const proxy = await serializeProxy();
-        const resolvedValue = await runtime.resolve(proxy);
-        resolved = briocheDeserializeAny(resolvedValue, proxy.meta?.source) as T;
+        const resolvedArtifact = await runtime.resolve(proxy);
+        resolved = briocheDeserializeAny(resolvedArtifact, proxy.meta?.source) as T;
       }
 
       assert(resolved != null, "expected `resolve()` to return a value");

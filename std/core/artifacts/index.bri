@@ -17,11 +17,11 @@ export { symlink, type SymlinkOptions, Symlink } from "./symlink.bri";
 export {
   type AsyncLazy,
   type Lazy,
-  type LazyValueSerialization,
-  type Value,
-  type ValueType,
-  type ValueTypes,
+  type LazyArtifactSerialization,
+  type Artifact,
+  type ArtifactType,
+  type ArtifactTypes,
   createLazy,
   lazy,
   lazyFn,
-} from "./value.bri";
+} from "./artifact.bri";

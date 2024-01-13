@@ -6,17 +6,21 @@ import { Directory, directory } from "./directory.bri";
 import { Symlink } from "./symlink.bri";
 import { createProxy } from "./proxy.bri";
 
-export type Value = File | Directory | Symlink;
+export type Artifact = File | Directory | Symlink;
 
-export type ValueTypes = {
+export type ArtifactTypes = {
   file: File,
   directory: Directory,
   symlink: Symlink,
 };
 
-export type ValueType<T extends Value> = T extends File ? "file" : T extends Directory ? "directory" : T extends Symlink ? "symlink" : never;
+export type ArtifactType<T extends Artifact> =
+  T extends File ? "file"
+  : T extends Directory ? "directory"
+  : T extends Symlink ? "symlink"
+  : never;
 
-export type LazyValueSerialization<T extends Value> = runtime.WithMeta & (
+export type LazyArtifactSerialization<T extends Artifact> = runtime.WithMeta & (
   T extends File ? (
     | runtime.CompleteFile
     | runtime.LazyDownload
@@ -47,51 +51,51 @@ export type LazyValueSerialization<T extends Value> = runtime.WithMeta & (
   never
 );
 
-// This symbol is used in `Lazy` so that `Lazy<Value>` doesn't simplify to
-// `LazyCommon<Value>` in TypeScript messages. This is mainly done for the LSP.
+// This symbol is used in `Lazy` so that `Lazy<Artifact>` doesn't simplify to
+// `LazyCommon<Artifact>` in TypeScript messages. This is mainly done for the LSP.
 const lazyMarker: unique symbol = Symbol("lazyMarker");
 
-export type Lazy<T extends Value = Value> =
+export type Lazy<T extends Artifact = Artifact> =
   & {[lazyMarker]?: undefined}
   & LazyCommon<T>
   & (
     [T] extends [File] ? LazyFileUtils
     : [T] extends [Directory] ? LazyDirectoryUtils
     : [T] extends [Symlink] ? LazySymlinkUtils
-    : T extends Value ? {}
+    : T extends Artifact ? {}
     : never
   );
 
-export type AsyncLazy<T extends Value = Value> = Awaitable<Lazy<T>>;
+export type AsyncLazy<T extends Artifact = Artifact> = Awaitable<Lazy<T>>;
 
-export function briocheDeserializeAny(value: runtime.CompleteValue, source: runtime.Source | undefined): Value {
-  switch (value.type) {
+export function briocheDeserializeAny(artifact: runtime.CompleteArtifact, source: runtime.Source | undefined): Artifact {
+  switch (artifact.type) {
     case "file":
-      return File.briocheDeserialize(value, source);
+      return File.briocheDeserialize(artifact, source);
     case "directory":
-      return Directory.briocheDeserialize(value, source);
+      return Directory.briocheDeserialize(artifact, source);
     case "symlink":
-      return Symlink.briocheDeserialize(value, source);
+      return Symlink.briocheDeserialize(artifact, source);
     default:
-      return unreachable(value);
+      return unreachable(artifact);
   }
 }
 
-export function lazy<T extends Value>(value: AsyncLazy<T>): Lazy<T> {
-  return createLazy<T>(["file", "directory", "symlink"] as ValueType<T>[], {
+export function lazy<T extends Artifact>(artifact: AsyncLazy<T>): Lazy<T> {
+  return createLazy<T>(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,
     briocheSerialize: async () => {
-      return (await value).briocheSerialize();
+      return (await artifact).briocheSerialize();
     },
     resolve: async () => {
-      return (await value).resolve();
+      return (await artifact).resolve();
     },
   });
 }
 
-export function lazyFn<T extends Value>(f: () => AsyncLazy<T>): Lazy<T> {
+export function lazyFn<T extends Artifact>(f: () => AsyncLazy<T>): Lazy<T> {
   let result: Lazy<T> | undefined;
-  return createLazy<T>(["file", "directory", "symlink"] as ValueType<T>[], {
+  return createLazy<T>(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,
     briocheSerialize: async () => {
       if (result == null) {
@@ -108,21 +112,21 @@ export function lazyFn<T extends Value>(f: () => AsyncLazy<T>): Lazy<T> {
   });
 }
 
-export type CreateLazyOptions<T extends Value> = {
+export type CreateLazyOptions<T extends Artifact> = {
   sourceDepth?: number;
 } & (
   | {
-    briocheSerialize?(meta: runtime.Meta): Awaitable<LazyValueSerialization<T>>;
+    briocheSerialize?(meta: runtime.Meta): Awaitable<LazyArtifactSerialization<T>>;
     resolve(meta: runtime.Meta): Awaitable<T>;
   }
   | {
-    briocheSerialize(meta: runtime.Meta): Awaitable<LazyValueSerialization<T>>;
+    briocheSerialize(meta: runtime.Meta): Awaitable<LazyArtifactSerialization<T>>;
     resolve?(meta: runtime.Meta): Awaitable<T>;
   }
 );
 
-export function createLazy<T extends Value>(
-  types: ValueType<T>[],
+export function createLazy<T extends Artifact>(
+  types: ArtifactType<T>[],
   opts: CreateLazyOptions<T>,
 ): Lazy<T> {
   const source = briocheSource({ depth: (opts.sourceDepth ?? 0) + 1 });
@@ -159,13 +163,13 @@ export function createLazy<T extends Value>(
   } as Lazy<T>;
 }
 
-interface LazyCommon<T extends Value> extends LazyUtils<T> {
+interface LazyCommon<T extends Artifact> extends LazyUtils<T> {
   resolve(): Awaitable<T>;
-  briocheSerialize(): Awaitable<LazyValueSerialization<T>>;
+  briocheSerialize(): Awaitable<LazyArtifactSerialization<T>>;
 }
 
-interface LazyUtils<T extends Value> {
-  cast<To extends ValueType<T> & keyof ValueTypes>(to: To): Lazy<ValueTypes[To] & T>;
+interface LazyUtils<T extends Artifact> {
+  cast<To extends ArtifactType<T> & keyof ArtifactTypes>(to: To): Lazy<ArtifactTypes[To] & T>;
 }
 
 interface LazyFileUtils extends LazyUtils<File> {
@@ -176,17 +180,17 @@ interface LazyFileUtils extends LazyUtils<File> {
 }
 
 interface LazyDirectoryUtils extends LazyUtils<Directory> {
-  get(...paths: string[]): Lazy<Value>;
-  insert(path: string, value: AsyncLazy<Value>): Lazy<Directory>;
+  get(...paths: string[]): Lazy<Artifact>;
+  insert(path: string, artifact: AsyncLazy<Artifact>): Lazy<Directory>;
   remove(...paths: string[]): Lazy<Directory>;
   peel(depth?: number): Lazy;
 }
 
 interface LazySymlinkUtils extends LazyUtils<Symlink> {}
 
-export const lazyUtils: LazyUtils<Value> = {
-  cast<To extends keyof ValueTypes>(this: Lazy, to: To): Lazy<ValueTypes[To]> {
-    return createLazy([to satisfies ValueType<Value> as ValueType<ValueTypes[To]>], {
+export const lazyUtils: LazyUtils<Artifact> = {
+  cast<To extends keyof ArtifactTypes>(this: Lazy, to: To): Lazy<ArtifactTypes[To]> {
+    return createLazy([to satisfies ArtifactType<Artifact> as ArtifactType<ArtifactTypes[To]>], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
         const artifact = await this.briocheSerialize();
@@ -195,7 +199,7 @@ export const lazyUtils: LazyUtils<Value> = {
           artifact,
           to,
           meta,
-        } satisfies LazyValueSerialization<Value> as any;
+        } satisfies LazyArtifactSerialization<Artifact> as any;
       },
     });
   }
@@ -245,7 +249,7 @@ export const lazyFileUtils: LazyFileUtils = {
 
 export const lazyDirectoryUtils: LazyDirectoryUtils = {
   ...lazyUtils,
-  get(this: Lazy<Directory>, path: string): Lazy<Value> {
+  get(this: Lazy<Directory>, path: string): Lazy<Artifact> {
     return createLazy(["file", "directory", "symlink"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
@@ -259,7 +263,7 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
       },
     });
   },
-  insert(this: Lazy<Directory>, path: string, value: AsyncLazy<Value>): Lazy<Directory> {
+  insert(this: Lazy<Directory>, path: string, artifact: AsyncLazy<Artifact>): Lazy<Directory> {
     const pathComponents = path.split("/");
     const dirPathComponents = pathComponents.slice(0, -1);
     const fileName = pathComponents.at(-1);
@@ -270,7 +274,7 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
     const directoryFromPath = dirPathComponents.reduceRight((acc, pathComponent) => directory({
       [pathComponent]: acc,
     }), directory({
-      [fileName]: value,
+      [fileName]: artifact,
     }));
 
     const proxyDirectories = [this, directoryFromPath].map((dir) => createProxy(dir));

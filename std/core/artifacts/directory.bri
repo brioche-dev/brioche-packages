@@ -2,8 +2,8 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { createProxy } from "./proxy.bri";
-import { type Value, type AsyncLazy, type Lazy, briocheDeserializeAny, createLazy, lazyDirectoryUtils } from "./value.bri";
-import { valueType } from "./value_type.bri";
+import { type Artifact, type AsyncLazy, type Lazy, briocheDeserializeAny, createLazy, lazyDirectoryUtils } from "./artifact.bri";
+import { artifactType } from "./artifact_type.bri";
 
 export function directory(entries: Record<string, AsyncLazy> = {}): Lazy<Directory> {
   const bEntries: Record<runtime.BString, AsyncLazy> = {};
@@ -16,7 +16,7 @@ export function directory(entries: Record<string, AsyncLazy> = {}): Lazy<Directo
     briocheSerialize: async (meta) => {
       const entries = await Promise.all(
         Object.entries(bEntries)
-          .map(async ([k, v]): Promise<[runtime.BString, runtime.LazyValue]> => [k as runtime.BString, await (await v).briocheSerialize()]
+          .map(async ([k, v]): Promise<[runtime.BString, runtime.LazyArtifact]> => [k as runtime.BString, await (await v).briocheSerialize()]
           ),
       );
       return {
@@ -44,13 +44,13 @@ export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
 }
 
 interface DirectoryCtor {
-  entries: Record<runtime.BString, runtime.CompleteValue>;
+  entries: Record<runtime.BString, runtime.CompleteArtifact>;
   source?: runtime.Source;
 }
 
 export class Directory implements Lazy<Directory> {
-  [valueType]: "directory" = "directory";
-  entries: Record<runtime.BString, runtime.CompleteValue>;
+  [artifactType]: "directory" = "directory";
+  entries: Record<runtime.BString, runtime.CompleteArtifact>;
   source?: runtime.Source;
 
   constructor(options: DirectoryCtor) {
@@ -72,9 +72,9 @@ export class Directory implements Lazy<Directory> {
     };
   }
 
-  static briocheDeserialize(value: runtime.CompleteValue, source: runtime.Source | undefined): Directory {
-    assert(value.type === "directory");
-    return new Directory({ entries: value.entries, source });
+  static briocheDeserialize(artifact: runtime.CompleteArtifact, source: runtime.Source | undefined): Directory {
+    assert(artifact.type === "directory");
+    return new Directory({ entries: artifact.entries, source });
   }
 
   get = lazyDirectoryUtils.get;
