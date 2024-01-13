@@ -1,4 +1,4 @@
-import { Awaitable } from "../utils.bri";
+import { Awaitable, mixin } from "../utils.bri";
 import { source as briocheSource } from "../source.bri";
 import * as runtime from "../runtime.bri";
 import { type Directory, directory } from "./directory.bri";
@@ -11,7 +11,13 @@ export interface ProcessOptions {
   workDir?: AsyncLazy<Directory>,
 }
 
-export function process(options: ProcessOptions): Lazy {
+export type Process = Lazy & ProcessUtils;
+
+export interface ProcessUtils {
+  env(key: string, value: ProcessTemplateLike): Process;
+}
+
+export function process(options: ProcessOptions): Process {
   const env: Record<string, ProcessTemplateLike> = {
     "BRIOCHE_OUTPUT": outputPath,
     "BRIOCHE_PACK_RESOURCES_DIR": resourcesDir,
@@ -25,7 +31,7 @@ export function process(options: ProcessOptions): Lazy {
     bEnv[runtime.bstring(k)] = processTemplate(v);
   }
 
-  return createLazy(["file", "directory", "symlink"], {
+  const artifact = createLazy(["file", "directory", "symlink"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       return {
@@ -39,6 +45,18 @@ export function process(options: ProcessOptions): Lazy {
       }
     },
   });
+
+  return mixin(artifact, {
+    env(this: Process, key: string, value: ProcessTemplateLike): Process {
+      return process({
+        ...options,
+        env: {
+          ...options.env,
+          [key]: value,
+        }
+      });
+    },
+  } satisfies ProcessUtils);
 }
 
 export function processTemplate(...components: ProcessTemplateLike[]): ProcessTemplate {

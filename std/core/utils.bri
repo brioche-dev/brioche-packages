@@ -165,3 +165,7 @@ export function indoc(strings: TemplateStringsArray, ...values: string[]): strin
 
   return lines.map(line => line.slice(minIndentation)).join("\n");
 }
+
+export function mixin<T extends {}, U extends {}>(base: T, mixin: U): T & U {
+  return {...base, ...mixin};
+}
