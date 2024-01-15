@@ -3,18 +3,20 @@ import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
-      hash: std.sha256Hash("eca551caec3bc549a4e590c0015003790bdd1a604ffe19cc78ee631d51f7072e"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
+    hash: std.sha256Hash(
+      "eca551caec3bc549a4e590c0015003790bdd1a604ffe19cc78ee631d51f7072e",
+    ),
+  });
 
-  let perl = std.process({
-    command: "/usr/bin/env",
-    args: [
-      "sh",
-      "-c",
-      `
+  let perl = std
+    .process({
+      command: "/usr/bin/env",
+      args: [
+        "sh",
+        "-c",
+        `
         set -euo pipefail
 
         tar xf "$source" --strip-components=1
@@ -25,16 +27,20 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      PATH: std.tpl`${toolchain()}/bin`,
-      source: sourceArchive,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        PATH: std.tpl`${toolchain()}/bin`,
+        source: sourceArchive,
+      },
+    })
+    .cast("directory");
 
   // Mark the perl binary as executable
   // TODO: Figure out why Perl isn't executable by default?
-  const perlBin = perl.get("usr/bin/perl").cast("file").withPermissions({ executable: true });
+  const perlBin = perl
+    .get("usr/bin/perl")
+    .cast("file")
+    .withPermissions({ executable: true });
   perl = perl.insert("usr/bin/perl", perlBin);
 
   return perl;

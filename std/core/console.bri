@@ -58,8 +58,9 @@ export function display(value: unknown): string {
         const items = value.map(display);
         return `[${items}]`;
       } else {
-        const entries = Object.entries(value)
-          .map(([key, value]) => `${JSON.stringify(key)}: ${display(value)}`);
+        const entries = Object.entries(value).map(
+          ([key, value]) => `${JSON.stringify(key)}: ${display(value)}`,
+        );
         return `{${entries.join(", ")}}`;
       }
   }

@@ -9,66 +9,75 @@ import { createProxy } from "./proxy.bri";
 export type Artifact = File | Directory | Symlink;
 
 export type ArtifactTypes = {
-  file: File,
-  directory: Directory,
-  symlink: Symlink,
+  file: File;
+  directory: Directory;
+  symlink: Symlink;
 };
 
-export type ArtifactType<T extends Artifact> =
-  T extends File ? "file"
-  : T extends Directory ? "directory"
-  : T extends Symlink ? "symlink"
-  : never;
+export type ArtifactType<T extends Artifact> = T extends File
+  ? "file"
+  : T extends Directory
+    ? "directory"
+    : T extends Symlink
+      ? "symlink"
+      : never;
 
-export type LazyArtifactSerialization<T extends Artifact> = runtime.WithMeta & (
-  T extends File ? (
-    | runtime.CompleteFile
-    | runtime.LazyDownload
-    | runtime.LazyProcess
-    | runtime.LazyCreateFile
-    | runtime.LazyCast
-    | runtime.LazyPeel
-    | runtime.LazyGet
-    | runtime.LazySetPermissions
-    | runtime.LazyProxy) :
-  T extends Directory ? (
-    | runtime.LazyDirectory
-    | runtime.LazyUnpack
-    | runtime.LazyProcess
-    | runtime.LazyCast
-    | runtime.LazyMerge
-    | runtime.LazyPeel
-    | runtime.LazyGet
-    | runtime.LazyRemove
-    | runtime.LazyProxy) :
-  T extends Symlink ? (
-    | runtime.CompleteSymlink
-    | runtime.LazyProcess
-    | runtime.LazyCast
-    | runtime.LazyPeel
-    | runtime.LazyGet
-    | runtime.LazyProxy) :
-  never
-);
+export type LazyArtifactSerialization<T extends Artifact> = runtime.WithMeta &
+  (T extends File
+    ?
+        | runtime.CompleteFile
+        | runtime.LazyDownload
+        | runtime.LazyProcess
+        | runtime.LazyCreateFile
+        | runtime.LazyCast
+        | runtime.LazyPeel
+        | runtime.LazyGet
+        | runtime.LazySetPermissions
+        | runtime.LazyProxy
+    : T extends Directory
+      ?
+          | runtime.LazyDirectory
+          | runtime.LazyUnpack
+          | runtime.LazyProcess
+          | runtime.LazyCast
+          | runtime.LazyMerge
+          | runtime.LazyPeel
+          | runtime.LazyGet
+          | runtime.LazyRemove
+          | runtime.LazyProxy
+      : T extends Symlink
+        ?
+            | runtime.CompleteSymlink
+            | runtime.LazyProcess
+            | runtime.LazyCast
+            | runtime.LazyPeel
+            | runtime.LazyGet
+            | runtime.LazyProxy
+        : never);
 
 // This symbol is used in `Lazy` so that `Lazy<Artifact>` doesn't simplify to
 // `LazyCommon<Artifact>` in TypeScript messages. This is mainly done for the LSP.
 const lazyMarker: unique symbol = Symbol("lazyMarker");
 
-export type Lazy<T extends Artifact = Artifact> =
-  & {[lazyMarker]?: undefined}
-  & LazyCommon<T>
-  & (
-    [T] extends [File] ? LazyFileUtils
-    : [T] extends [Directory] ? LazyDirectoryUtils
-    : [T] extends [Symlink] ? LazySymlinkUtils
-    : T extends Artifact ? {}
-    : never
-  );
+export type Lazy<T extends Artifact = Artifact> = {
+  [lazyMarker]?: undefined;
+} & LazyCommon<T> &
+  ([T] extends [File]
+    ? LazyFileUtils
+    : [T] extends [Directory]
+      ? LazyDirectoryUtils
+      : [T] extends [Symlink]
+        ? LazySymlinkUtils
+        : T extends Artifact
+          ? {}
+          : never);
 
 export type AsyncLazy<T extends Artifact = Artifact> = Awaitable<Lazy<T>>;
 
-export function briocheDeserializeAny(artifact: runtime.CompleteArtifact, source: runtime.Source | undefined): Artifact {
+export function briocheDeserializeAny(
+  artifact: runtime.CompleteArtifact,
+  source: runtime.Source | undefined,
+): Artifact {
   switch (artifact.type) {
     case "file":
       return File.briocheDeserialize(artifact, source);
@@ -99,13 +108,13 @@ export function lazyFn<T extends Artifact>(f: () => AsyncLazy<T>): Lazy<T> {
     sourceDepth: 1,
     briocheSerialize: async () => {
       if (result == null) {
-        result = await (await f());
+        result = await await f();
       }
       return result.briocheSerialize();
     },
     resolve: async () => {
       if (result == null) {
-        result = await (await f());
+        result = await await f();
       }
       return result.resolve();
     },
@@ -116,13 +125,17 @@ export type CreateLazyOptions<T extends Artifact> = {
   sourceDepth?: number;
 } & (
   | {
-    briocheSerialize?(meta: runtime.Meta): Awaitable<LazyArtifactSerialization<T>>;
-    resolve(meta: runtime.Meta): Awaitable<T>;
-  }
+      briocheSerialize?(
+        meta: runtime.Meta,
+      ): Awaitable<LazyArtifactSerialization<T>>;
+      resolve(meta: runtime.Meta): Awaitable<T>;
+    }
   | {
-    briocheSerialize(meta: runtime.Meta): Awaitable<LazyArtifactSerialization<T>>;
-    resolve?(meta: runtime.Meta): Awaitable<T>;
-  }
+      briocheSerialize(
+        meta: runtime.Meta,
+      ): Awaitable<LazyArtifactSerialization<T>>;
+      resolve?(meta: runtime.Meta): Awaitable<T>;
+    }
 );
 
 export function createLazy<T extends Artifact>(
@@ -132,9 +145,9 @@ export function createLazy<T extends Artifact>(
   const source = briocheSource({ depth: (opts.sourceDepth ?? 0) + 1 });
   const meta = { source };
 
-  const isFile = types.some(type => type === "file");
-  const isDirectory = types.some(type => type === "directory");
-  const isSymlink = types.some(type => type === "symlink");
+  const isFile = types.some((type) => type === "file");
+  const isDirectory = types.some((type) => type === "directory");
+  const isSymlink = types.some((type) => type === "symlink");
 
   return {
     briocheSerialize: async () => {
@@ -169,12 +182,17 @@ interface LazyCommon<T extends Artifact> extends LazyUtils<T> {
 }
 
 interface LazyUtils<T extends Artifact> {
-  cast<To extends ArtifactType<T> & keyof ArtifactTypes>(to: To): Lazy<ArtifactTypes[To] & T>;
+  cast<To extends ArtifactType<T> & keyof ArtifactTypes>(
+    to: To,
+  ): Lazy<ArtifactTypes[To] & T>;
 }
 
 interface LazyFileUtils extends LazyUtils<File> {
   withPermissions(permissions: Partial<FilePermissions>): Lazy<File>;
-  unpack(archiveFormat: runtime.ArchiveFormat, compressionFormat?: runtime.CompressionFormat): Lazy<Directory>;
+  unpack(
+    archiveFormat: runtime.ArchiveFormat,
+    compressionFormat?: runtime.CompressionFormat,
+  ): Lazy<Directory>;
   readBytes(): Promise<Uint8Array>;
   read(): Promise<string>;
 }
@@ -189,25 +207,34 @@ interface LazyDirectoryUtils extends LazyUtils<Directory> {
 interface LazySymlinkUtils extends LazyUtils<Symlink> {}
 
 export const lazyUtils: LazyUtils<Artifact> = {
-  cast<To extends keyof ArtifactTypes>(this: Lazy, to: To): Lazy<ArtifactTypes[To]> {
-    return createLazy([to satisfies ArtifactType<Artifact> as ArtifactType<ArtifactTypes[To]>], {
-      sourceDepth: 1,
-      briocheSerialize: async (meta) => {
-        const artifact = await this.briocheSerialize();
-        return {
-          type: "cast",
-          artifact,
-          to,
-          meta,
-        } satisfies LazyArtifactSerialization<Artifact> as any;
+  cast<To extends keyof ArtifactTypes>(
+    this: Lazy,
+    to: To,
+  ): Lazy<ArtifactTypes[To]> {
+    return createLazy(
+      [to satisfies ArtifactType<Artifact> as ArtifactType<ArtifactTypes[To]>],
+      {
+        sourceDepth: 1,
+        briocheSerialize: async (meta) => {
+          const artifact = await this.briocheSerialize();
+          return {
+            type: "cast",
+            artifact,
+            to,
+            meta,
+          } satisfies LazyArtifactSerialization<Artifact> as any;
+        },
       },
-    });
-  }
+    );
+  },
 };
 
 export const lazyFileUtils: LazyFileUtils = {
   ...lazyUtils,
-  withPermissions(this: Lazy<File>, permissions: Partial<FilePermissions>): Lazy<File> {
+  withPermissions(
+    this: Lazy<File>,
+    permissions: Partial<FilePermissions>,
+  ): Lazy<File> {
     return createLazy(["file"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
@@ -217,11 +244,15 @@ export const lazyFileUtils: LazyFileUtils = {
           file,
           executable: permissions.executable ?? null,
           meta,
-        }
+        };
       },
     });
   },
-  unpack(this: Lazy<File>, archiveFormat: runtime.ArchiveFormat, compressionFormat?: runtime.CompressionFormat): Lazy<Directory> {
+  unpack(
+    this: Lazy<File>,
+    archiveFormat: runtime.ArchiveFormat,
+    compressionFormat?: runtime.CompressionFormat,
+  ): Lazy<Directory> {
     return createLazy(["directory"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
@@ -232,7 +263,7 @@ export const lazyFileUtils: LazyFileUtils = {
           archive: archiveFormat,
           compression: compressionFormat,
           meta,
-        }
+        };
       },
     });
   },
@@ -259,35 +290,50 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
           directory,
           path: runtime.bstring(path),
           meta,
-        }
+        };
       },
     });
   },
-  insert(this: Lazy<Directory>, path: string, artifact: AsyncLazy<Artifact>): Lazy<Directory> {
+  insert(
+    this: Lazy<Directory>,
+    path: string,
+    artifact: AsyncLazy<Artifact>,
+  ): Lazy<Directory> {
     const pathComponents = path.split("/");
     const dirPathComponents = pathComponents.slice(0, -1);
     const fileName = pathComponents.at(-1);
-    if (fileName == null || dirPathComponents.some((pathComponent) => pathComponent === "")) {
+    if (
+      fileName == null ||
+      dirPathComponents.some((pathComponent) => pathComponent === "")
+    ) {
       throw new Error(`invalid path: "${path}"`);
     }
 
-    const directoryFromPath = dirPathComponents.reduceRight((acc, pathComponent) => directory({
-      [pathComponent]: acc,
-    }), directory({
-      [fileName]: artifact,
-    }));
+    const directoryFromPath = dirPathComponents.reduceRight(
+      (acc, pathComponent) =>
+        directory({
+          [pathComponent]: acc,
+        }),
+      directory({
+        [fileName]: artifact,
+      }),
+    );
 
-    const proxyDirectories = [this, directoryFromPath].map((dir) => createProxy(dir));
+    const proxyDirectories = [this, directoryFromPath].map((dir) =>
+      createProxy(dir),
+    );
     return createLazy(["directory"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
-        const serializedDirectories = await Promise.all(proxyDirectories.map(async (dir) => (await dir).briocheSerialize()));
+        const serializedDirectories = await Promise.all(
+          proxyDirectories.map(async (dir) => (await dir).briocheSerialize()),
+        );
         return {
           type: "merge",
           directories: serializedDirectories,
           meta,
         };
-      }
+      },
     });
   },
   remove(this: Lazy<Directory>, ...paths: string[]): Lazy<Directory> {
@@ -300,7 +346,7 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
           directory,
           paths: paths.map(runtime.bstring),
           meta,
-        }
+        };
       },
     });
   },
@@ -316,7 +362,7 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
         };
       },
     });
-  }
+  },
 };
 
 export const lazySymlinkUtils: LazySymlinkUtils = {

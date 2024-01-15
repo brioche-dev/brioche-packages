@@ -2,10 +2,19 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { createProxy } from "./proxy.bri";
-import { type Artifact, type AsyncLazy, type Lazy, briocheDeserializeAny, createLazy, lazyDirectoryUtils } from "./artifact.bri";
+import {
+  type Artifact,
+  type AsyncLazy,
+  type Lazy,
+  briocheDeserializeAny,
+  createLazy,
+  lazyDirectoryUtils,
+} from "./artifact.bri";
 import { artifactType } from "./artifact_type.bri";
 
-export function directory(entries: Record<string, AsyncLazy> = {}): Lazy<Directory> {
+export function directory(
+  entries: Record<string, AsyncLazy> = {},
+): Lazy<Directory> {
   const bEntries: Record<runtime.BString, AsyncLazy> = {};
   for (const [k, v] of Object.entries(entries)) {
     bEntries[runtime.bstring(k)] = v;
@@ -15,9 +24,12 @@ export function directory(entries: Record<string, AsyncLazy> = {}): Lazy<Directo
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       const entries = await Promise.all(
-        Object.entries(bEntries)
-          .map(async ([k, v]): Promise<[runtime.BString, runtime.LazyArtifact]> => [k as runtime.BString, await (await v).briocheSerialize()]
-          ),
+        Object.entries(bEntries).map(
+          async ([k, v]): Promise<[runtime.BString, runtime.LazyArtifact]> => [
+            k as runtime.BString,
+            await (await v).briocheSerialize(),
+          ],
+        ),
       );
       return {
         type: "directory",
@@ -33,13 +45,15 @@ export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
   return createLazy(["directory"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
-      const serializedDirectories = await Promise.all(proxyDirectories.map(async (dir) => (await dir).briocheSerialize()));
+      const serializedDirectories = await Promise.all(
+        proxyDirectories.map(async (dir) => (await dir).briocheSerialize()),
+      );
       return {
         type: "merge",
         directories: serializedDirectories,
         meta,
       };
-    }
+    },
   });
 }
 
@@ -72,7 +86,10 @@ export class Directory implements Lazy<Directory> {
     };
   }
 
-  static briocheDeserialize(artifact: runtime.CompleteArtifact, source: runtime.Source | undefined): Directory {
+  static briocheDeserialize(
+    artifact: runtime.CompleteArtifact,
+    source: runtime.Source | undefined,
+  ): Directory {
     assert(artifact.type === "directory");
     return new Directory({ entries: artifact.entries, source });
   }

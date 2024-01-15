@@ -26,7 +26,7 @@ export default std.memo(() => {
       "usr/bin/x86_64-lfs-linux-gnu-ld",
       "usr/bin/x86_64-lfs-linux-gnu-ld.bfd",
       "usr/x86_64-lfs-linux-gnu/bin/ld",
-      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd"
+      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
     ],
     interpreterPaths: {
       "lib64/ld-linux-x86-64.so.2": "lib/ld-linux-x86-64.so.2",
@@ -39,12 +39,14 @@ export default std.memo(() => {
       "usr/bin/x86_64-lfs-linux-gnu-gcc",
     ],
     renameSuffix: "-orig",
-    script: std.file(std.indoc`
+    script: std
+      .file(std.indoc`
       #!/usr/bin/env sh
       script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
       sysroot=$(cd "$script_dir/../.." && pwd -P)
       "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0/x86_64-lfs-linux-gnu" -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0" -isystem "$sysroot/usr/include" "$@"
-    `).withPermissions({ executable: true }),
+    `)
+      .withPermissions({ executable: true }),
   });
 
   return stage1;

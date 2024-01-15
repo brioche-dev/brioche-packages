@@ -2,11 +2,12 @@ import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = await std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
-      hash: std.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
-    });
+  const sourceArchive = await std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
+    hash: std.sha256Hash(
+      "ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450",
+    ),
+  });
 
   return bootstrapRun({
     script: `
@@ -30,6 +31,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
-    }
+    },
   });
 });

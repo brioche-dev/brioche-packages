@@ -2,17 +2,19 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gmp-6.3.0.tar.xz",
-      hash: std.sha256Hash("a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gmp-6.3.0.tar.xz",
+    hash: std.sha256Hash(
+      "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
+    ),
+  });
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -25,10 +27,11 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin`,
-    }
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+    })
+    .cast("directory");
 });

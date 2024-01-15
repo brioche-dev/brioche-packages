@@ -3,11 +3,12 @@ import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/diffutils-3.10.tar.xz",
-      hash: std.sha256Hash("90e5e93cc724e4ebe12ede80df1634063c7a855692685919bfe60b556c9bd09e"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/diffutils-3.10.tar.xz",
+    hash: std.sha256Hash(
+      "90e5e93cc724e4ebe12ede80df1634063c7a855692685919bfe60b556c9bd09e",
+    ),
+  });
 
   return bootstrapRun({
     script: `
@@ -32,6 +33,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
-    }
+    },
   });
 });

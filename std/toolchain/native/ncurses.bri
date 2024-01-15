@@ -2,17 +2,19 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
-      hash: std.sha256Hash("6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
+    hash: std.sha256Hash(
+      "6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159",
+    ),
+  });
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -39,10 +41,11 @@ export default std.memo((): std.Lazy<std.Directory> => {
         echo "INPUT(-lncursesw)" > "$BRIOCHE_OUTPUT"/lib/libcursesw.so
         ln -sf libncurses.so "$BRIOCHE_OUTPUT"/lib/libcurses.so
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+    })
+    .cast("directory");
 });

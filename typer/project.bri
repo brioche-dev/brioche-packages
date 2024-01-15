@@ -1,7 +1,7 @@
 /**
  * A small library for parsing and validating arbitrary JavaScript values. Takes
  * heavy influence from the Zod and Runtypes TypeScript libraries.
-*/
+ */
 
 export const project = {};
 
@@ -12,25 +12,26 @@ const objectKeysSymbol: unique symbol = Symbol("objectKeys");
 const literalSymbol: unique symbol = Symbol("literal");
 
 export type ChildError = {
-  path?: string | number,
-  error: CheckResultError,
+  path?: string | number;
+  error: CheckResultError;
 };
 
-export type CheckResult<T> =
-  | { result: "matches", value: T }
-  | CheckResultError;
+export type CheckResult<T> = { result: "matches"; value: T } | CheckResultError;
 
-export type CheckResultError =
-  { result: "mismatch", message: string, children?: ChildError[] };
+export type CheckResultError = {
+  result: "mismatch";
+  message: string;
+  children?: ChildError[];
+};
 
 type JsTypeofs = {
-  "string": string,
-  "number": number,
-  "boolean": boolean,
-  "symbol": symbol,
-  "undefined": undefined,
-  "object": object,
-  "function": (...args: unknown[]) => unknown,
+  string: string;
+  number: number;
+  boolean: boolean;
+  symbol: symbol;
+  undefined: undefined;
+  object: object;
+  function: (...args: unknown[]) => unknown;
 };
 
 export interface Checker<T> {
@@ -45,27 +46,37 @@ export interface LiteralChecker<T> extends Checker<T> {
   [literalSymbol]: T;
 }
 
-export type Type<T extends Checker<unknown>> = T extends Checker<infer U> ? U : never;
+export type Type<T extends Checker<unknown>> = T extends Checker<infer U>
+  ? U
+  : never;
 
 function createChecker<T>(f: (value: unknown) => CheckResult<T>): Checker<T> {
   return {
     [checkSymbol](value: unknown): CheckResult<T> {
       return f(value);
-    }
+    },
   };
 }
 
-function createPrimitiveChecker<T extends keyof JsTypeofs>(type: T): Checker<JsTypeofs[T]> {
+function createPrimitiveChecker<T extends keyof JsTypeofs>(
+  type: T,
+): Checker<JsTypeofs[T]> {
   return createChecker((value) => {
     if (typeof value === type) {
       return { result: "matches", value: value as JsTypeofs[T] };
     } else {
-      return { result: "mismatch", message: `expected type ${type}, was ${typeof value}` };
+      return {
+        result: "mismatch",
+        message: `expected type ${type}, was ${typeof value}`,
+      };
     }
   });
 }
 
-export function tryParse<T>(checker: Checker<T>, value: unknown): CheckResult<T> {
+export function tryParse<T>(
+  checker: Checker<T>,
+  value: unknown,
+): CheckResult<T> {
   return checker[checkSymbol](value);
 }
 
@@ -79,7 +90,10 @@ export function parse<T>(checker: Checker<T>, value: unknown): T {
   }
 }
 
-export function tryParseJson<T>(checker: Checker<T>, json: string): CheckResult<T> {
+export function tryParseJson<T>(
+  checker: Checker<T>,
+  json: string,
+): CheckResult<T> {
   let value: unknown;
   try {
     value = JSON.parse(json);
@@ -101,7 +115,7 @@ export function parseJson<T>(checker: Checker<T>, json: string): T {
 }
 
 export function check<T>(checker: Checker<T>, value: unknown): value is T {
-  return tryParse(checker, value).result === "matches"
+  return tryParse(checker, value).result === "matches";
 }
 
 export function unknown(): Checker<unknown> {
@@ -140,14 +154,19 @@ export function undefined_(): Checker<undefined> {
   });
 }
 
-export function literal<T extends string | number | boolean | null | undefined>(value: T): LiteralChecker<T> {
+export function literal<T extends string | number | boolean | null | undefined>(
+  value: T,
+): LiteralChecker<T> {
   return {
     [literalSymbol]: value,
     [checkSymbol]: (actual) => {
       if (actual === value) {
         return { result: "matches", value };
       } else {
-        return { result: "mismatch", message: `expected ${value}, was ${actual}` };
+        return {
+          result: "mismatch",
+          message: `expected ${value}, was ${actual}`,
+        };
       }
     },
   };
@@ -165,10 +184,12 @@ export function array<T>(checker: Checker<T>): Checker<T[]> {
       if (result.result === "matches") {
         return [];
       } else {
-        return [{
-          path: index,
-          error: result,
-        }];
+        return [
+          {
+            path: index,
+            error: result,
+          },
+        ];
       }
     });
 
@@ -184,14 +205,19 @@ export function array<T>(checker: Checker<T>): Checker<T[]> {
   });
 }
 
-export function tuple<Ts extends unknown[]>(...checkers: { [K in keyof Ts]: Checker<Ts[K]> }): Checker<Ts> {
+export function tuple<Ts extends unknown[]>(
+  ...checkers: { [K in keyof Ts]: Checker<Ts[K]> }
+): Checker<Ts> {
   return createChecker((value) => {
     if (!Array.isArray(value)) {
       return { result: "mismatch", message: "expected an array" };
     }
 
     if (value.length < checkers.length) {
-      return { result: "mismatch", message: `expected at least ${checkers.length} items, got ${value.length}` };
+      return {
+        result: "mismatch",
+        message: `expected at least ${checkers.length} items, got ${value.length}`,
+      };
     }
 
     const childErrors = value.flatMap((item, index): ChildError[] => {
@@ -205,10 +231,12 @@ export function tuple<Ts extends unknown[]>(...checkers: { [K in keyof Ts]: Chec
       if (result.result === "matches") {
         return [];
       } else {
-        return [{
-          path: index,
-          error: result,
-        }];
+        return [
+          {
+            path: index,
+            error: result,
+          },
+        ];
       }
     });
 
@@ -224,7 +252,9 @@ export function tuple<Ts extends unknown[]>(...checkers: { [K in keyof Ts]: Chec
   });
 }
 
-export function object<T extends {}>(checkers: { [K in keyof T]: Checker<T[K]> }): ObjectChecker<T> {
+export function object<T extends {}>(
+  checkers: { [K in keyof T]: Checker<T[K]> },
+): ObjectChecker<T> {
   return {
     [objectKeysSymbol]: checkers,
     [checkSymbol]: (value) => {
@@ -232,18 +262,24 @@ export function object<T extends {}>(checkers: { [K in keyof T]: Checker<T[K]> }
         return { result: "mismatch", message: "expected an object" };
       }
 
-      const childErrors = Object.entries(checkers).flatMap(([key, checker]): ChildError[] => {
-        const result = (checker as Checker<unknown>)[checkSymbol]((value as any)[key]);
+      const childErrors = Object.entries(checkers).flatMap(
+        ([key, checker]): ChildError[] => {
+          const result = (checker as Checker<unknown>)[checkSymbol](
+            (value as any)[key],
+          );
 
-        if (result.result === "matches") {
-          return [];
-        } else {
-          return [{
-            path: key,
-            error: result,
-          }];
-        }
-      });
+          if (result.result === "matches") {
+            return [];
+          } else {
+            return [
+              {
+                path: key,
+                error: result,
+              },
+            ];
+          }
+        },
+      );
 
       if (childErrors.length === 0) {
         return { result: "matches", value: value as T };
@@ -258,23 +294,30 @@ export function object<T extends {}>(checkers: { [K in keyof T]: Checker<T[K]> }
   };
 }
 
-export function union<Ts extends unknown[]>(...checkers: { [K in keyof Ts]: Checker<Ts[K]> }): Checker<Ts[number]> {
+export function union<Ts extends unknown[]>(
+  ...checkers: { [K in keyof Ts]: Checker<Ts[K]> }
+): Checker<Ts[number]> {
   return createChecker((value) => {
     const results = checkers.map((checker) => checker[checkSymbol](value));
-    const matched = results.flatMap((result) => result.result === "matches" ? [result] : []).at(0);
+    const matched = results
+      .flatMap((result) => (result.result === "matches" ? [result] : []))
+      .at(0);
 
     if (matched != null) {
       return {
-        result: "matches", value: matched.value
+        result: "matches",
+        value: matched.value,
       };
     } else {
       const childErrors = results.flatMap((result): ChildError[] => {
         if (result.result === "matches") {
           return [];
         } else {
-          return [{
-            error: result,
-          }];
+          return [
+            {
+              error: result,
+            },
+          ];
         }
       });
 
@@ -287,68 +330,96 @@ export function union<Ts extends unknown[]>(...checkers: { [K in keyof Ts]: Chec
   });
 }
 
-type ArrayIntersection<Ts extends unknown[]> =
-  Ts extends [infer T] ? T
-  : Ts extends [infer T, ...infer Rest] ? (T & ArrayIntersection<Rest>)
-  : never;
+type ArrayIntersection<Ts extends unknown[]> = Ts extends [infer T]
+  ? T
+  : Ts extends [infer T, ...infer Rest]
+    ? T & ArrayIntersection<Rest>
+    : never;
 
-export function intersection<Ts extends unknown[]>(...checkers: { [K in keyof Ts]: Checker<Ts[K]> }): Checker<ArrayIntersection<Ts>> {
+export function intersection<Ts extends unknown[]>(
+  ...checkers: { [K in keyof Ts]: Checker<Ts[K]> }
+): Checker<ArrayIntersection<Ts>> {
   return createChecker<ArrayIntersection<Ts>>((value) => {
     const results = checkers.map((checker) => checker[checkSymbol](value));
-    const childErrors = results.flatMap((result) => result.result === "mismatch" ? [{error: result}] : []);
+    const childErrors = results.flatMap((result) =>
+      result.result === "mismatch" ? [{ error: result }] : [],
+    );
 
     if (childErrors.length > 0) {
       return {
         result: "mismatch",
         message: "expected value to match all intersection types",
         children: childErrors,
-      }
+      };
     } else {
       return {
         result: "matches",
         value: value as ArrayIntersection<Ts>,
-      }
+      };
     }
   });
 }
 
-export function discriminatedUnion<K extends keyof Ts[number], Ts extends unknown[]>(
-  key: K,
-  checkers: { [K in keyof Ts]: Checker<Ts[K]> },
-): Checker<Ts[number]> {
-  let discriminatorCheckers: Map<string | number | symbol, Checker<Ts[number]>> = new Map(checkers.map((checker, index) => {
-    if (!(objectKeysSymbol in checker)) {
-      throw new Error(`all checkers in a discriminatedUnion must be object checkers (checker ${index} is not)`);
-    }
+export function discriminatedUnion<
+  K extends keyof Ts[number],
+  Ts extends unknown[],
+>(key: K, checkers: { [K in keyof Ts]: Checker<Ts[K]> }): Checker<Ts[number]> {
+  let discriminatorCheckers: Map<
+    string | number | symbol,
+    Checker<Ts[number]>
+  > = new Map(
+    checkers.map((checker, index) => {
+      if (!(objectKeysSymbol in checker)) {
+        throw new Error(
+          `all checkers in a discriminatedUnion must be object checkers (checker ${index} is not)`,
+        );
+      }
 
-    const keys = (checker as ObjectChecker<Ts[number]>)[objectKeysSymbol];
+      const keys = (checker as ObjectChecker<Ts[number]>)[objectKeysSymbol];
 
-    const keyChecker = keys[key];
-    if (keyChecker == null) {
-      throw new Error(`key ${String(key)} not found in discriminatedUnion checker ${index}`);
-    }
+      const keyChecker = keys[key];
+      if (keyChecker == null) {
+        throw new Error(
+          `key ${String(key)} not found in discriminatedUnion checker ${index}`,
+        );
+      }
 
-    if (!(literalSymbol in keyChecker)) {
-      throw new Error(`key ${String(key)} in discriminatedUnion checker ${index} must be a literal`);
-    }
+      if (!(literalSymbol in keyChecker)) {
+        throw new Error(
+          `key ${String(
+            key,
+          )} in discriminatedUnion checker ${index} must be a literal`,
+        );
+      }
 
-    const literalValue = (keyChecker as LiteralChecker<Ts[number][K]>)[literalSymbol];
+      const literalValue = (keyChecker as LiteralChecker<Ts[number][K]>)[
+        literalSymbol
+      ];
 
-    return [literalValue, checker];
-  }));
+      return [literalValue, checker];
+    }),
+  );
   return createChecker((value) => {
     if (typeof value !== "object" || value === null || Array.isArray(value)) {
       return { result: "mismatch", message: "expected an object" };
     }
 
     if (!(key in value)) {
-      return { result: "mismatch", message: `expected object to have property \`${String(key)}\`` };
+      return {
+        result: "mismatch",
+        message: `expected object to have property \`${String(key)}\``,
+      };
     }
 
     const discriminator: string | number | symbol = (value as any)[key];
     const discriminatorChecker = discriminatorCheckers.get(discriminator);
     if (discriminatorChecker === undefined) {
-      return { result: "mismatch", message: `unexpected discriminator \`${String(key)}\` value \`${String(discriminator)}\``};
+      return {
+        result: "mismatch",
+        message: `unexpected discriminator \`${String(key)}\` value \`${String(
+          discriminator,
+        )}\``,
+      };
     }
 
     return discriminatorChecker[checkSymbol](value);
@@ -356,11 +427,14 @@ export function discriminatedUnion<K extends keyof Ts[number], Ts extends unknow
 }
 
 interface ErrorLine {
-  indent: number,
-  line: string,
+  indent: number;
+  line: string;
 }
 
-function summarizeError(error: CheckResultError, path: (string | number)[]): string {
+function summarizeError(
+  error: CheckResultError,
+  path: (string | number)[],
+): string {
   const pathError = displayPath(path);
 
   const childErrors = error.children ?? [];
@@ -379,16 +453,18 @@ function summarizeError(error: CheckResultError, path: (string | number)[]): str
 
 function displayPath(path: (string | number)[]): string | undefined {
   if (path.length === 0) {
-    return
+    return;
   }
 
-  const pathMessage = path.map((part) => {
-    if (typeof part === "string") {
-      return `.${part}`;
-    } else {
-      return `[${part}]`;
-    }
-  }).join("");
+  const pathMessage = path
+    .map((part) => {
+      if (typeof part === "string") {
+        return `.${part}`;
+      } else {
+        return `[${part}]`;
+      }
+    })
+    .join("");
 
   return `at ${pathMessage}`;
 }

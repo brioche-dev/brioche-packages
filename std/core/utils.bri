@@ -1,4 +1,7 @@
-export function assert(condition: boolean, message?: string): asserts condition {
+export function assert(
+  condition: boolean,
+  message?: string,
+): asserts condition {
   if (!condition) {
     throw new Error(message ?? "assert failed");
   }
@@ -10,12 +13,7 @@ export function unreachable(never: never): never {
 
 export type Awaitable<T> = T | Promise<T>;
 
-type Primitive =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined;
+type Primitive = string | number | boolean | null | undefined;
 
 export type Equatable =
   | Primitive
@@ -91,10 +89,12 @@ export function equal<T extends Equatable>(a: T, b: T): boolean {
 }
 
 function isSerializeEquatable(value: unknown): value is SerializeEquatable {
-  return typeof value === "object"
-    && value != null
-    && "briocheSerialize" in value
-    && typeof value.briocheSerialize === "function";
+  return (
+    typeof value === "object" &&
+    value != null &&
+    "briocheSerialize" in value &&
+    typeof value.briocheSerialize === "function"
+  );
 }
 
 export function isEquatable(value: unknown): value is Equatable {
@@ -117,7 +117,9 @@ export function isEquatable(value: unknown): value is Equatable {
         return true;
       }
 
-      return Object.entries(value).every(([key, value]) => typeof key === "string" && isEquatable(value));
+      return Object.entries(value).every(
+        ([key, value]) => typeof key === "string" && isEquatable(value),
+      );
     default:
       return false;
   }
@@ -130,18 +132,23 @@ export function jsonSerialize(value: Equatable): string {
     } else {
       return value;
     }
-  })
+  });
 }
 
-export function indoc(strings: TemplateStringsArray, ...values: string[]): string {
-  let string = strings.flatMap((str, i): string[] => {
-    const value = values[i];
-    if (value != null) {
-      return [str, value];
-    } else {
-      return [str];
-    }
-  }).join("");
+export function indoc(
+  strings: TemplateStringsArray,
+  ...values: string[]
+): string {
+  let string = strings
+    .flatMap((str, i): string[] => {
+      const value = values[i];
+      if (value != null) {
+        return [str, value];
+      } else {
+        return [str];
+      }
+    })
+    .join("");
 
   let lines = string.split("\n");
 
@@ -163,9 +170,9 @@ export function indoc(strings: TemplateStringsArray, ...values: string[]): strin
     return Math.min(minIndentation, indentation);
   }, Infinity);
 
-  return lines.map(line => line.slice(minIndentation)).join("\n");
+  return lines.map((line) => line.slice(minIndentation)).join("\n");
 }
 
 export function mixin<T extends {}, U extends {}>(base: T, mixin: U): T & U {
-  return {...base, ...mixin};
+  return { ...base, ...mixin };
 }

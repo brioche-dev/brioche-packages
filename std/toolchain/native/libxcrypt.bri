@@ -2,17 +2,19 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/libxcrypt-4.4.36.tar.xz",
-      hash: std.sha256Hash("e5e1f4caee0a01de2aee26e3138807d6d3ca2b8e67287966d1fefd65e1fd8943"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/libxcrypt-4.4.36.tar.xz",
+    hash: std.sha256Hash(
+      "e5e1f4caee0a01de2aee26e3138807d6d3ca2b8e67287966d1fefd65e1fd8943",
+    ),
+  });
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -26,10 +28,11 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin`,
-    }
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+    })
+    .cast("directory");
 });

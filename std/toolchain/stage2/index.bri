@@ -21,11 +21,12 @@ export default std.memo((): std.Lazy<std.Directory> => {
     utilLinux(),
   );
 
-  return std.process({
-    command: std.tpl`${toolchain()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${toolchain()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         cp -r "$stage2" "$BRIOCHE_OUTPUT"
@@ -57,10 +58,11 @@ export default std.memo((): std.Lazy<std.Directory> => {
             fi
           done
       `,
-    ],
-    env: {
-      PATH: std.tpl`${stage2}/bin`,
-      stage2,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        PATH: std.tpl`${stage2}/bin`,
+        stage2,
+      },
+    })
+    .cast("directory");
 });

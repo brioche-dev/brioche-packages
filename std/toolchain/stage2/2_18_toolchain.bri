@@ -68,7 +68,8 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       "usr/bin/gcc",
     ],
     renameSuffix: "-orig",
-    script: std.file(std.indoc`
+    script: std
+      .file(std.indoc`
       #!/usr/bin/env sh
       # MIT license: https://stackoverflow.com/a/29835459
       rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
@@ -138,12 +139,16 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       set -- --sysroot="$sysroot" "$@"
 
       "$(rreadlink "$0")-orig" "$@"
-    `).withPermissions({ executable: true }),
+    `)
+      .withPermissions({ executable: true }),
   });
 
   const prefixedTools = ["gcc", "gcc-orig", "g++", "g++-orig"];
   for (const tool of prefixedTools) {
-    toolchain = toolchain.insert(`usr/bin/${tool}`, std.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }));
+    toolchain = toolchain.insert(
+      `usr/bin/${tool}`,
+      std.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }),
+    );
   }
 
   return toolchain;

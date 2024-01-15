@@ -1,36 +1,56 @@
 import { unreachable } from "./utils.bri";
 
 export async function resolveAll(artifacts: []): Promise<[]>;
-export async function resolveAll(artifacts: [LazyArtifact]): Promise<[CompleteArtifact]>;
-export async function resolveAll(artifacts: [LazyArtifact, LazyArtifact]): Promise<[CompleteArtifact, CompleteArtifact]>;
-export async function resolveAll(artifacts: LazyArtifact[]): Promise<CompleteArtifact[]>;
-export async function resolveAll(artifacts: LazyArtifact[]): Promise<CompleteArtifact[]> {
-  const result = await (globalThis as any).Deno.core.ops.op_brioche_resolve_all(artifacts);
+export async function resolveAll(
+  artifacts: [LazyArtifact],
+): Promise<[CompleteArtifact]>;
+export async function resolveAll(
+  artifacts: [LazyArtifact, LazyArtifact],
+): Promise<[CompleteArtifact, CompleteArtifact]>;
+export async function resolveAll(
+  artifacts: LazyArtifact[],
+): Promise<CompleteArtifact[]>;
+export async function resolveAll(
+  artifacts: LazyArtifact[],
+): Promise<CompleteArtifact[]> {
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_resolve_all(
+    artifacts,
+  );
   return result;
 }
 
-export async function resolve(artifact: LazyArtifact): Promise<CompleteArtifact> {
+export async function resolve(
+  artifact: LazyArtifact,
+): Promise<CompleteArtifact> {
   const [result] = await resolveAll([artifact]);
   return result;
 }
 
 export async function createProxy(artifact: LazyArtifact): Promise<LazyProxy> {
-  const result = await (globalThis as any).Deno.core.ops.op_brioche_create_proxy(artifact);
+  const result = await (
+    globalThis as any
+  ).Deno.core.ops.op_brioche_create_proxy(artifact);
   return result;
 }
 
 export async function readBlob(blobId: BlobId): Promise<BString> {
-  const result = await (globalThis as any).Deno.core.ops.op_brioche_read_blob(blobId);
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_read_blob(
+    blobId,
+  );
   return result;
 }
 
 export function utf8Encode(string: string): Uint8Array {
-  const result = (globalThis as any).Deno.core.ops.op_brioche_utf8_encode(string);
+  const result = (globalThis as any).Deno.core.ops.op_brioche_utf8_encode(
+    string,
+  );
   return result;
 }
 
 export function utf8Decode(bytes: Uint8Array): string {
-  const result = (globalThis as any).Deno.core.ops.op_brioche_utf8_decode(bytes);
+  const result = (globalThis as any).Deno.core.ops.op_brioche_utf8_decode(
+    bytes,
+  );
   return result;
 }
 
@@ -52,21 +72,23 @@ export type CompleteArtifact =
   | CompleteDirectory;
 
 export type CompleteFile = WithMeta & {
-  type: "file",
-  data: BlobId,
-  executable: boolean,
-  resources: CompleteDirectoryContents,
+  type: "file";
+  data: BlobId;
+  executable: boolean;
+  resources: CompleteDirectoryContents;
 };
 
 export type CompleteSymlink = WithMeta & {
-  type: "symlink",
-  target: BString,
+  type: "symlink";
+  target: BString;
 };
 
-export type CompleteDirectory = WithMeta & { type: "directory" } & CompleteDirectoryContents;
+export type CompleteDirectory = WithMeta & {
+  type: "directory";
+} & CompleteDirectoryContents;
 
 export type CompleteDirectoryContents = {
-  entries: Record<BString, CompleteArtifact>,
+  entries: Record<BString, CompleteArtifact>;
 };
 
 export type LazyArtifact =
@@ -85,125 +107,123 @@ export type LazyArtifact =
   | LazyProxy;
 
 export type LazyDirectory = WithMeta & {
-  type: "directory",
-  entries: Record<BString, LazyArtifact>,
+  type: "directory";
+  entries: Record<BString, LazyArtifact>;
 };
 
 export type LazyDownload = WithMeta & {
-  type: "download",
-  url: string,
-  hash: Hash,
+  type: "download";
+  url: string;
+  hash: Hash;
 };
 
 export type LazyUnpack = WithMeta & {
-  type: "unpack",
-  file: LazyArtifact,
-  archive: ArchiveFormat,
-  compression?: CompressionFormat | null,
+  type: "unpack";
+  file: LazyArtifact;
+  archive: ArchiveFormat;
+  compression?: CompressionFormat | null;
 };
 
 export type LazyProcess = WithMeta & {
-  type: "process",
-  command: ProcessTemplate,
-  args: ProcessTemplate[],
-  env: Record<BString, ProcessTemplate>,
-  workDir: LazyArtifact,
-  platform: Platform,
+  type: "process";
+  command: ProcessTemplate;
+  args: ProcessTemplate[];
+  env: Record<BString, ProcessTemplate>;
+  workDir: LazyArtifact;
+  platform: Platform;
 };
 
 export type LazyCreateFile = WithMeta & {
-  type: "create_file",
-  data: BString,
-  executable: boolean,
-  resources: LazyArtifact,
+  type: "create_file";
+  data: BString;
+  executable: boolean;
+  resources: LazyArtifact;
 };
 
 export type LazyCast = WithMeta & {
-  type: "cast",
-  artifact: LazyArtifact,
-  to: CompleteArtifact["type"],
+  type: "cast";
+  artifact: LazyArtifact;
+  to: CompleteArtifact["type"];
 };
 
 export type LazyMerge = WithMeta & {
-  type: "merge",
-  directories: LazyArtifact[],
+  type: "merge";
+  directories: LazyArtifact[];
 };
 
 export type LazyPeel = WithMeta & {
-  type: "peel",
-  directory: LazyArtifact,
-  depth: number,
+  type: "peel";
+  directory: LazyArtifact;
+  depth: number;
 };
 
 export type LazyGet = WithMeta & {
-  type: "get",
-  directory: LazyArtifact,
-  path: BString,
+  type: "get";
+  directory: LazyArtifact;
+  path: BString;
 };
 
 export type LazyRemove = WithMeta & {
-  type: "remove",
-  directory: LazyArtifact,
-  paths: BString[],
+  type: "remove";
+  directory: LazyArtifact;
+  paths: BString[];
 };
 
 export type LazySetPermissions = WithMeta & {
-  type: "set_permissions",
-  file: LazyArtifact,
-  executable: boolean | null,
+  type: "set_permissions";
+  file: LazyArtifact;
+  executable: boolean | null;
 };
 
 export type LazyProxy = WithMeta & {
-  type: "proxy",
-  hash: ArtifactHash,
+  type: "proxy";
+  hash: ArtifactHash;
 };
 
-export type ArtifactHash = string & {__artifactHash: never};
+export type ArtifactHash = string & { __artifactHash: never };
 
 export type WithMeta = {
-  meta?: Meta,
+  meta?: Meta;
 };
 
 export type Meta = {
-  source?: Source,
-}
+  source?: Source;
+};
 
 export type Source = StackFrame[];
 
 export type StackFrame = {
-  fileName?: string | null,
-  lineNumber?: number | null,
-  columnNumber?: number | null,
-}
+  fileName?: string | null;
+  lineNumber?: number | null;
+  columnNumber?: number | null;
+};
 
-export type BlobId = string & {__blobId: never};
+export type BlobId = string & { __blobId: never };
 
-export type BString = string & {__bString: never};
+export type BString = string & { __bString: never };
 
-export type HexString = string & {__hexString: never};
+export type HexString = string & { __hexString: never };
 
-export type Platform =
-  | "x86_64-linux";
+export type Platform = "x86_64-linux";
 
-export type Hash =
-  | { type: "sha256", value: HexString };
+export type Hash = { type: "sha256"; value: HexString };
 
 export type ArchiveFormat = "tar";
 
 export type CompressionFormat = "none" | "gzip" | "xz" | "zstd";
 
 export type ProcessTemplate = {
-  components: ProcessTemplateComponent[],
+  components: ProcessTemplateComponent[];
 };
 
 export type ProcessTemplateComponent =
-  | { type: "literal", value: BString }
-  | { type: "input", artifact: LazyArtifact }
+  | { type: "literal"; value: BString }
+  | { type: "input"; artifact: LazyArtifact }
   | { type: "output_path" }
   | { type: "resources_dir" }
   | { type: "home_dir" }
   | { type: "work_dir" }
-  | { type: "temp_dir" }
+  | { type: "temp_dir" };
 
 export function isHex(s: string): s is HexString {
   return /^([0-9a-fA-F]{2})*$/.test(s);

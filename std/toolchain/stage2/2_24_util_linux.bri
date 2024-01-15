@@ -3,18 +3,20 @@ import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/util-linux-2.39.1.tar.xz",
-      hash: std.sha256Hash("890ae8ff810247bd19e274df76e8371d202cda01ad277681b0ea88eeaa00286b"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/util-linux-2.39.1.tar.xz",
+    hash: std.sha256Hash(
+      "890ae8ff810247bd19e274df76e8371d202cda01ad277681b0ea88eeaa00286b",
+    ),
+  });
 
-  return std.process({
-    command: "/usr/bin/env",
-    args: [
-      "sh",
-      "-c",
-      `
+  return std
+    .process({
+      command: "/usr/bin/env",
+      args: [
+        "sh",
+        "-c",
+        `
         tar xf "$source" --strip-components=1
         ./configure \
             --libdir=/usr/lib \
@@ -36,10 +38,11 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      PATH: std.tpl`${toolchain()}/bin`,
-      source: sourceArchive,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        PATH: std.tpl`${toolchain()}/bin`,
+        source: sourceArchive,
+      },
+    })
+    .cast("directory");
 });

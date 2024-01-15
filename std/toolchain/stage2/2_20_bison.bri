@@ -3,18 +3,20 @@ import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bison-3.8.2.tar.xz",
-      hash: std.sha256Hash("9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bison-3.8.2.tar.xz",
+    hash: std.sha256Hash(
+      "9bba0214ccf7f1079c5d59210045227bcf619519840ebfa80cd3849cff5a5bf2",
+    ),
+  });
 
-  return std.process({
-    command: "/usr/bin/env",
-    args: [
-      "sh",
-      "-c",
-      `
+  return std
+    .process({
+      command: "/usr/bin/env",
+      args: [
+        "sh",
+        "-c",
+        `
         set -euo pipefail
 
         tar xf "$source" --strip-components=1
@@ -25,10 +27,11 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      PATH: std.tpl`${toolchain()}/bin`,
-      source: sourceArchive,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        PATH: std.tpl`${toolchain()}/bin`,
+        source: sourceArchive,
+      },
+    })
+    .cast("directory");
 });

@@ -3,17 +3,19 @@ import stage2 from "/toolchain/stage2";
 import gmp from "./gmp.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
-      hash: std.sha256Hash("06a378df13501248c1b2db5aa977a2c8126ae849a9d9b7be2546fb4a9c26d993"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
+    hash: std.sha256Hash(
+      "06a378df13501248c1b2db5aa977a2c8126ae849a9d9b7be2546fb4a9c26d993",
+    ),
+  });
 
-  let mpfr = std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  let mpfr = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -30,14 +32,15 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin`,
-      CPPFLAGS: std.tpl`-I${gmp()}/include`,
-      LDFLAGS: std.tpl`-L${gmp()}/lib`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+        CPPFLAGS: std.tpl`-I${gmp()}/include`,
+        LDFLAGS: std.tpl`-L${gmp()}/lib`,
+      },
+    })
+    .cast("directory");
 
   const libtoolArchive = mpfr.get("lib/libmpfr.la").cast("file");
   const newLibtoolArchive = std.lazyFn(async () => {

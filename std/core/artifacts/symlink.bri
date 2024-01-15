@@ -37,7 +37,10 @@ export class Symlink implements Lazy<Symlink> {
     };
   }
 
-  static briocheDeserialize(artifact: runtime.CompleteArtifact, source: runtime.Source | undefined): Symlink {
+  static briocheDeserialize(
+    artifact: runtime.CompleteArtifact,
+    source: runtime.Source | undefined,
+  ): Symlink {
     assert(artifact.type === "symlink");
     return new Symlink({ target: artifact.target, source });
   }

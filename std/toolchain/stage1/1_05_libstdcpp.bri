@@ -7,29 +7,25 @@ import glibc from "./1_04_glibc.bri";
 import { wrapWithScript, useBriocheLd } from "../utils.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-      hash: std.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
+    hash: std.sha256Hash(
+      "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da",
+    ),
+  });
 
-  let stage1 = std.merge(
-    binutils(),
-    gcc(),
-    linuxHeaders(),
-    glibc(),
-  );
+  let stage1 = std.merge(binutils(), gcc(), linuxHeaders(), glibc());
 
   stage1 = wrapWithScript(stage1, {
-    paths: [
-      "usr/bin/x86_64-lfs-linux-gnu-gcc",
-    ],
+    paths: ["usr/bin/x86_64-lfs-linux-gnu-gcc"],
     renameSuffix: "-orig",
-    script: std.file(std.indoc`
+    script: std
+      .file(std.indoc`
       #!/usr/bin/env sh
       sysroot=$(cd "$(dirname -- "$0")/../.." && pwd)
       "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/usr/include" "$@"
-    `).withPermissions({ executable: true }),
+    `)
+      .withPermissions({ executable: true }),
   });
 
   stage1 = await useBriocheLd(stage1, {
@@ -37,7 +33,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       "usr/bin/x86_64-lfs-linux-gnu-ld",
       "usr/bin/x86_64-lfs-linux-gnu-ld.bfd",
       "usr/x86_64-lfs-linux-gnu/bin/ld",
-      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd"
+      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
     ],
     interpreterPaths: {
       "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
@@ -77,6 +73,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1,
-    }
+    },
   });
 });

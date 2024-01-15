@@ -2,27 +2,31 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
-      hash: std.sha256Hash("fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2"),
-    });
-  const sourcePatchFhs = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
-      hash: std.sha256Hash("643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d"),
-    });
-  const sourcePatchMemalign = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
-      hash: std.sha256Hash("3e4b4b15485c9767501151ccf1b33cf5ee912298fda899cd809277ece27e859c"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
+    hash: std.sha256Hash(
+      "fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2",
+    ),
+  });
+  const sourcePatchFhs = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
+    hash: std.sha256Hash(
+      "643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d",
+    ),
+  });
+  const sourcePatchMemalign = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
+    hash: std.sha256Hash(
+      "3e4b4b15485c9767501151ccf1b33cf5ee912298fda899cd809277ece27e859c",
+    ),
+  });
 
-  let glibc = std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  let glibc = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -50,19 +54,25 @@ export default std.memo((): std.Lazy<std.Directory> => {
         sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      sourcePatchFhs,
-      sourcePatchMemalign,
-      PATH: std.tpl`${stage2()}/bin`,
-      stage2: stage2(),
-    }
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        sourcePatchFhs,
+        sourcePatchMemalign,
+        PATH: std.tpl`${stage2()}/bin`,
+        stage2: stage2(),
+      },
+    })
+    .cast("directory");
 
-  glibc = glibc.insert("lib64", std.directory({
-    "ld-linux-x86-64.so.2": std.symlink({ target: "../lib/ld-linux-x86-64.so.2" }),
-  }));
+  glibc = glibc.insert(
+    "lib64",
+    std.directory({
+      "ld-linux-x86-64.so.2": std.symlink({
+        target: "../lib/ld-linux-x86-64.so.2",
+      }),
+    }),
+  );
 
   return glibc;
 });

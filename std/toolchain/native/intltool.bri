@@ -5,19 +5,21 @@ import perlXmlParser from "./perl_xml_parser.bri";
 import expat from "./expat.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/intltool-0.51.0.tar.gz",
-      hash: std.sha256Hash("67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/intltool-0.51.0.tar.gz",
+    hash: std.sha256Hash(
+      "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd",
+    ),
+  });
 
   let perlDep = std.merge(perl(), perlXmlParser());
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -30,13 +32,14 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${perlDep}/bin:${stage2()}/bin`,
-      // expat is dynamically loaded by the Perl XML::Parser module
-      // TODO: Handle this in the `perl()` function somehow
-      LD_LIBRARY_PATH: std.tpl`${expat()}/lib`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${perlDep}/bin:${stage2()}/bin`,
+        // expat is dynamically loaded by the Perl XML::Parser module
+        // TODO: Handle this in the `perl()` function somehow
+        LD_LIBRARY_PATH: std.tpl`${expat()}/lib`,
+      },
+    })
+    .cast("directory");
 });

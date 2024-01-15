@@ -15,6 +15,7 @@ export function source(options: SourceOptions = {}): StackFrame[] {
   const error = options.error ?? new Error();
   const depthOffset = options.error == null ? 1 : 0;
   const depth = (options.depth ?? 0) + depthOffset;
-  const frames: StackFrame[] = ops.op_brioche_stack_frames_from_exception(error);
+  const frames: StackFrame[] =
+    ops.op_brioche_stack_frames_from_exception(error);
   return frames.slice(depth);
 }

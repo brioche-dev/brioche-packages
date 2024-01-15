@@ -11,11 +11,12 @@ import mpc from "./mpc.bri";
 import libxcrypt from "./libxcrypt.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-      hash: std.sha256Hash("e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
+    hash: std.sha256Hash(
+      "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da",
+    ),
+  });
 
   let buildSysroot = std.merge(
     linuxHeaders(),
@@ -27,16 +28,17 @@ export default std.memo((): std.Lazy<std.Directory> => {
         lib: std.symlink({ target: "../lib" }),
         lib64: std.symlink({ target: "../lib64" }),
         include: std.symlink({ target: "../include" }),
-      })
-    })
+      }),
+    }),
   );
 
   // TODO: Enable NLS
-  let gcc = std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  let gcc = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -75,18 +77,19 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
-      CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
-      LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
-      buildSysroot,
-      gmp: gmp(),
-      mpfr: mpfr(),
-      mpc: mpc(),
-    }
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
+        CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
+        LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
+        buildSysroot,
+        gmp: gmp(),
+        mpfr: mpfr(),
+        mpc: mpc(),
+      },
+    })
+    .cast("directory");
 
   gcc = wrapWithScript(gcc, {
     paths: [
@@ -103,9 +106,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
   });
 
   gcc = wrapWithScript(gcc, {
-    paths: [
-      "libexec/gcc/x86_64-pc-linux-gnu/13.2.0/cc1",
-    ],
+    paths: ["libexec/gcc/x86_64-pc-linux-gnu/13.2.0/cc1"],
     renameSuffix: "-orig",
     script: cc1Wrapper([
       "$sysroot/libexec/gcc/x86_64-pc-linux-gnu/13.2.0/include",
@@ -115,9 +116,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
   });
 
   gcc = wrapWithScript(gcc, {
-    paths: [
-      "libexec/gcc/x86_64-pc-linux-gnu/13.2.0/cc1plus",
-    ],
+    paths: ["libexec/gcc/x86_64-pc-linux-gnu/13.2.0/cc1plus"],
     renameSuffix: "-orig",
     script: cc1Wrapper([
       "$sysroot/include/c++/13.2.0",
@@ -133,7 +132,8 @@ export default std.memo((): std.Lazy<std.Directory> => {
 });
 
 function ccWrapper(): std.Lazy<std.File> {
-  return std.file(std.indoc`
+  return std
+    .file(std.indoc`
     #!/usr/bin/env sh
     # MIT license: https://stackoverflow.com/a/29835459
     rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
@@ -188,18 +188,21 @@ function ccWrapper(): std.Lazy<std.File> {
     set -- --sysroot="$sysroot" "$@"
 
     "$(rreadlink "$0")-orig" "$@"
-  `).withPermissions({ executable: true });
+  `)
+    .withPermissions({ executable: true });
 }
-
 
 function cc1Wrapper(systemHeaders: string[]): std.Lazy<std.File> {
   // Ensure we can safely interpolate the system header paths in the shell script
   const systemHeaderRegex = /^[a-zA-Z0-9_\+\-\.\/\$]+$/;
-  std.assert(systemHeaders.every(header => systemHeaderRegex.test(header)));
+  std.assert(systemHeaders.every((header) => systemHeaderRegex.test(header)));
 
-  const systemHeaderArgs = systemHeaders.map(header => `-isystem "${header}"`).join(" ");
+  const systemHeaderArgs = systemHeaders
+    .map((header) => `-isystem "${header}"`)
+    .join(" ");
 
-  return std.file(std.indoc`
+  return std
+    .file(std.indoc`
     #!/usr/bin/env sh
     # MIT license: https://stackoverflow.com/a/29835459
     rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
@@ -264,5 +267,6 @@ function cc1Wrapper(systemHeaders: string[]): std.Lazy<std.File> {
     fi
 
     "$(rreadlink "$0")-orig" "$@"
-  `).withPermissions({ executable: true });
+  `)
+    .withPermissions({ executable: true });
 }

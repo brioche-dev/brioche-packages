@@ -4,7 +4,9 @@ export const build = () => {
   const utils = std
     .download({
       url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
-      hash: std.sha256Hash("eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33"),
+      hash: std.sha256Hash(
+        "eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33",
+      ),
     })
     .unpack("tar", "zstd");
   return std.process({
@@ -17,11 +19,11 @@ export const build = () => {
         echo "#!/usr/bin/env sh" >> $BRIOCHE_OUTPUT/bin/foo
         echo "echo 'Hello, world!'" >> $BRIOCHE_OUTPUT/bin/foo
         chmod +x $BRIOCHE_OUTPUT/bin/foo
-      `
+      `,
     ],
     env: {
       PATH: std.tpl`${utils}/bin`,
       BRIOCHE_OUTPUT: std.outputPath,
-    }
+    },
   });
 };

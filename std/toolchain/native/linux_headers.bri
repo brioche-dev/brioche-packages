@@ -2,17 +2,19 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
-      hash: std.sha256Hash("cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
+    hash: std.sha256Hash(
+      "cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674",
+    ),
+  });
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -25,10 +27,11 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
         find usr/include -type f ! -name '*.h' -delete
         cp -r usr/include "$BRIOCHE_OUTPUT/include"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin`,
-    }
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+    })
+    .cast("directory");
 });

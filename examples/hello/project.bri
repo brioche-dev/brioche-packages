@@ -6,14 +6,16 @@ export const project = {
   dependencies: {
     std: "*",
     foo: "*",
-  }
+  },
 };
 
 export default async () => {
   const unpacked = await std
     .download({
       url: "https://development-content.brioche.dev/musl.cc/2023-02-06/x86_64-linux-musl-native.tgz",
-      hash: std.sha256Hash("eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad"),
+      hash: std.sha256Hash(
+        "eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad",
+      ),
     })
     .unpack("tar", "gzip")
     .resolve();
@@ -22,19 +24,27 @@ export default async () => {
   const utils = std
     .download({
       url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
-      hash: std.sha256Hash("eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33"),
+      hash: std.sha256Hash(
+        "eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33",
+      ),
     })
     .unpack("tar", "zstd");
 
   return std.directory({
     "lorem ipsum.txt": std.download({
       url: "https://gist.githubusercontent.com/kylewlacy/c0f1a43e2641686f377178880fcce6ae/raw/f48155695445aa218e558fba824b61cf718d5e55/lorem-ipsum.txt",
-      hash: std.sha256Hash("642e3f58cc2bcc0d12d2e1e21dd9ea131f058a98e23e9beac79881bb0a324d06"),
+      hash: std.sha256Hash(
+        "642e3f58cc2bcc0d12d2e1e21dd9ea131f058a98e23e9beac79881bb0a324d06",
+      ),
     }),
-    "unpacked": std.download({
-      url: "https://development-content.brioche.dev/musl.cc/2023-02-06/x86_64-linux-musl-native.tgz",
-      hash: std.sha256Hash("eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad"),
-    }).unpack("tar", "gzip"),
+    unpacked: std
+      .download({
+        url: "https://development-content.brioche.dev/musl.cc/2023-02-06/x86_64-linux-musl-native.tgz",
+        hash: std.sha256Hash(
+          "eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad",
+        ),
+      })
+      .unpack("tar", "gzip"),
     "libsum.txt": std.symlink({ target: "lorem ipsum.txt" }),
     "stdlib.h": unpacked.get("x86_64-linux-musl-native", "include", "stdlib.h"),
     "hello.txt": std.process({
@@ -75,7 +85,7 @@ export default async () => {
         VALUE,
       },
       workDir: std.directory({
-        "workdircontents": std.directory()
+        workdircontents: std.directory(),
       }),
     }),
   });

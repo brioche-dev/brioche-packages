@@ -14,11 +14,12 @@ import libffi from "./libffi.bri";
 import { wrapWithScript } from "../utils.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ninja-1.11.1.tar.gz",
-      hash: std.sha256Hash("31747ae633213f1eda3842686f83c2aa1412e0f5691d1c14dbbcc67fe7400cea"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ninja-1.11.1.tar.gz",
+    hash: std.sha256Hash(
+      "31747ae633213f1eda3842686f83c2aa1412e0f5691d1c14dbbcc67fe7400cea",
+    ),
+  });
 
   // TODO: Remove this!
   const dependencies = std.merge(
@@ -30,18 +31,14 @@ export default std.memo((): std.Lazy<std.Directory> => {
     libffi(),
   );
 
-  const toolchain = std.merge(
-    glibc(),
-    binutils(),
-    gcc(),
-    linuxHeaders(),
-  );
+  const toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -51,17 +48,17 @@ export default std.memo((): std.Lazy<std.Directory> => {
         mkdir -p "$BRIOCHE_OUTPUT"/bin
         install -vm755 ninja "$BRIOCHE_OUTPUT"/bin
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${python()}/bin:${toolchain}/bin:${stage2()}/bin`,
-      PYTHONHOME: python(),
-      // TODO: Remove this
-      LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${python()}/bin:${toolchain}/bin:${stage2()}/bin`,
+        PYTHONHOME: python(),
+        // TODO: Remove this
+        LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
+      },
+    })
+    .cast("directory");
 });
-
 
 function temporaryToolchain(): std.Lazy<std.Directory> {
   let toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());
@@ -77,7 +74,8 @@ function temporaryToolchain(): std.Lazy<std.Directory> {
       "bin/gcc",
     ],
     renameSuffix: "-orig",
-    script: std.file(std.indoc`
+    script: std
+      .file(std.indoc`
       #!/usr/bin/env sh
       # MIT license: https://stackoverflow.com/a/29835459
       rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
@@ -147,7 +145,8 @@ function temporaryToolchain(): std.Lazy<std.Directory> {
       set -- --sysroot="$sysroot" "$@"
 
       "$(rreadlink "$0")-orig" "$@"
-    `).withPermissions({ executable: true }),
+    `)
+      .withPermissions({ executable: true }),
   });
 
   return toolchain;

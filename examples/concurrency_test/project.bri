@@ -34,20 +34,28 @@ const sleepProcess = async (n: string) => {
       SLEEP_DURATION: SLEEP_DURATION.toString(),
       n,
       WATERMARK,
-    }
+    },
   });
 };
 
 const download = async (n: string) => {
   return std.download({
-    url: `https://gist.githubusercontent.com/kylewlacy/c0f1a43e2641686f377178880fcce6ae/raw/f48155695445aa218e558fba824b61cf718d5e55/lorem-ipsum.txt?n=${encodeURIComponent(n)}&watermark=${encodeURIComponent(WATERMARK)}`,
-    hash: std.sha256Hash("642e3f58cc2bcc0d12d2e1e21dd9ea131f058a98e23e9beac79881bb0a324d06"),
+    url: `https://gist.githubusercontent.com/kylewlacy/c0f1a43e2641686f377178880fcce6ae/raw/f48155695445aa218e558fba824b61cf718d5e55/lorem-ipsum.txt?n=${encodeURIComponent(
+      n,
+    )}&watermark=${encodeURIComponent(WATERMARK)}`,
+    hash: std.sha256Hash(
+      "642e3f58cc2bcc0d12d2e1e21dd9ea131f058a98e23e9beac79881bb0a324d06",
+    ),
   });
 };
 
 export default async () => {
-  const downloads = new Array(NUM_DOWNLOADS).fill(undefined).map((_, i) => [`download-${i}.txt`, download(i.toString())]);
-  const processes = new Array(NUM_PROCESSES).fill(undefined).map((_, i) => [`process-${i}.txt`, sleepProcess(i.toString())]);
+  const downloads = new Array(NUM_DOWNLOADS)
+    .fill(undefined)
+    .map((_, i) => [`download-${i}.txt`, download(i.toString())]);
+  const processes = new Array(NUM_PROCESSES)
+    .fill(undefined)
+    .map((_, i) => [`process-${i}.txt`, sleepProcess(i.toString())]);
 
   return std.directory({
     ...Object.fromEntries(downloads),

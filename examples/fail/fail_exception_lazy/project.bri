@@ -13,10 +13,10 @@ interface TestType {
 
 export const value = std.memo((): std.Lazy => {
   throw new Error("lazy memo exception");
-})
+});
 
 export default () => {
   const result = value();
 
   return result;
-}
+};

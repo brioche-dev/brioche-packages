@@ -15,6 +15,6 @@ export default () => {
   return {
     briocheSerialize: () => {
       throw new Error("briocheSerialize exception");
-    }
-  }
-}
+    },
+  };
+};

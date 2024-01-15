@@ -3,17 +3,19 @@ import { wrapWithScript } from "../utils.bri";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/autoconf-2.71.tar.xz",
-      hash: std.sha256Hash("f14c83cfebcc9427f2c3cea7258bd90df972d92eb26752da4ddad81c87a0faa4"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/autoconf-2.71.tar.xz",
+    hash: std.sha256Hash(
+      "f14c83cfebcc9427f2c3cea7258bd90df972d92eb26752da4ddad81c87a0faa4",
+    ),
+  });
 
-  let autoconf = std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  let autoconf = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -30,22 +32,25 @@ export default std.memo((): std.Lazy<std.Directory> => {
         sed -i 's|^#![[:space:]]*.*/bin/\\([^[:space:]]*\\)|#! /usr/bin/env \\1|' "$BRIOCHE_OUTPUT"/bin/*
         sed -i 's|[^[:space:]]*/bin/perl|perl|g' "$BRIOCHE_OUTPUT"/bin/*
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+    })
+    .cast("directory");
 
   autoconf = wrapWithScript(autoconf, {
     paths: ["bin/autoupdate", "bin/autom4te"],
     renameSuffix: "-orig",
-    script: std.file(std.indoc`
+    script: std
+      .file(std.indoc`
       #!/usr/bin/env sh
       script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
       top_dir=$(cd "$script_dir/.." && pwd -P)
       "$0-orig" --prepend-include="$top_dir/share/autoconf" "$@"
-    `).withPermissions({ executable: true })
+    `)
+      .withPermissions({ executable: true }),
   });
 
   return autoconf;

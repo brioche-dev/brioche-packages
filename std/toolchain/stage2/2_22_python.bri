@@ -3,18 +3,20 @@ import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
-      hash: std.sha256Hash("2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
+    hash: std.sha256Hash(
+      "2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6",
+    ),
+  });
 
-  return std.process({
-    command: "/usr/bin/env",
-    args: [
-      "sh",
-      "-c",
-      `
+  return std
+    .process({
+      command: "/usr/bin/env",
+      args: [
+        "sh",
+        "-c",
+        `
         tar xf "$source" --strip-components=1
         ./configure \
           --prefix=/usr \
@@ -22,11 +24,12 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
           --without-ensurepip
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
-      `
-    ],
-    env: {
-      PATH: std.tpl`${toolchain()}/bin`,
-      source: sourceArchive,
-    },
-  }).cast("directory");
+      `,
+      ],
+      env: {
+        PATH: std.tpl`${toolchain()}/bin`,
+        source: sourceArchive,
+      },
+    })
+    .cast("directory");
 });

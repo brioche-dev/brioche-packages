@@ -2,7 +2,12 @@ import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { type Directory, directory } from "./directory.bri";
-import { type AsyncLazy, type Lazy, createLazy, lazyFileUtils } from "./artifact.bri";
+import {
+  type AsyncLazy,
+  type Lazy,
+  createLazy,
+  lazyFileUtils,
+} from "./artifact.bri";
 import { artifactType } from "./artifact_type.bri";
 
 export function file(data: string | Uint8Array): Lazy<File> {
@@ -60,11 +65,14 @@ export class File implements Lazy<File> {
       resources: this.resources,
       meta: {
         source: this.source,
-      }
+      },
     };
   }
 
-  static briocheDeserialize(artifact: runtime.CompleteArtifact, source: runtime.Source | undefined): File {
+  static briocheDeserialize(
+    artifact: runtime.CompleteArtifact,
+    source: runtime.Source | undefined,
+  ): File {
     assert(artifact.type === "file");
     return new File({
       blobId: artifact.data,

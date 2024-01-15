@@ -20,5 +20,3 @@ export function download(opts: DownloadOptions): Lazy<File> {
     }),
   });
 }
-
-

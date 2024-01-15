@@ -3,11 +3,12 @@ import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gawk-5.2.2.tar.xz",
-      hash: std.sha256Hash("3c1fce1446b4cbee1cd273bd7ec64bc87d89f61537471cd3e05e33a965a250e9"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gawk-5.2.2.tar.xz",
+    hash: std.sha256Hash(
+      "3c1fce1446b4cbee1cd273bd7ec64bc87d89f61537471cd3e05e33a965a250e9",
+    ),
+  });
 
   return bootstrapRun({
     script: `
@@ -34,6 +35,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
-    }
+    },
   });
 });

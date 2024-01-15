@@ -3,11 +3,12 @@ import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
-      hash: std.sha256Hash("cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
+    hash: std.sha256Hash(
+      "cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674",
+    ),
+  });
 
   return bootstrapRun({
     script: `
@@ -31,6 +32,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
-    }
+    },
   });
 });

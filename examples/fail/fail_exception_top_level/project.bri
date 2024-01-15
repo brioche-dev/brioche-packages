@@ -14,4 +14,4 @@ interface TestType {
 throw new Error("top level exception");
 export default () => {
   return std.directory();
-}
+};

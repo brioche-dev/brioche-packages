@@ -5,17 +5,19 @@ import flex from "./flex.bri";
 import zlib from "./zlib.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
-      hash: std.sha256Hash("ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
+    hash: std.sha256Hash(
+      "ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450",
+    ),
+  });
 
-  let binutils = std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  let binutils = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -36,21 +38,18 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make tooldir="$BRIOCHE_OUTPUT"
         make install tooldir="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin:${flex()}/bin`,
-      CPPFLAGS: std.tpl`-I${zlib()}/include`,
-      LDFLAGS: std.tpl`-L${zlib()}/lib`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin:${flex()}/bin`,
+        CPPFLAGS: std.tpl`-I${zlib()}/include`,
+        LDFLAGS: std.tpl`-L${zlib()}/lib`,
+      },
+    })
+    .cast("directory");
 
   binutils = useBriocheLd(binutils, {
-    ldPaths: [
-      "bin/ld",
-      "bin/ld.bfd",
-      "bin/ld.gold",
-    ],
+    ldPaths: ["bin/ld", "bin/ld.bfd", "bin/ld.gold"],
     interpreterPaths: {
       "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
     },

@@ -9,11 +9,12 @@ import bzip2 from "./bzip2.bri";
 import libffi from "./libffi.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
-      hash: std.sha256Hash("2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
+    hash: std.sha256Hash(
+      "2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6",
+    ),
+  });
 
   const dependencies = std.merge(
     zlib(),
@@ -24,11 +25,12 @@ export default std.memo((): std.Lazy<std.Directory> => {
     libffi(),
   );
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -42,22 +44,23 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make
         make install
       `,
-    ],
-    env: {
-      // TODO: Clean up these env vars
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin`,
-      LDFLAGS: std.tpl`-L${dependencies}/lib -lz`,
-      CPPFLAGS: std.tpl`-I${dependencies}/include`,
-      ZLIB_LIBS: std.tpl`-L${dependencies}/lib -lz`,
-      ZLIB_CFLAGS: std.tpl`-I${dependencies}/include`,
-      GBDM_LIBS: std.tpl`-L${dependencies}/lib -lgdbm`,
-      GBDM_CFLAGS: std.tpl`-I${dependencies}/include`,
-      BZIP2_LIBS: std.tpl`-L${dependencies}/lib -lbz2`,
-      BZIP2_CFLAGS: std.tpl`-I${dependencies}/include`,
-      LIBCRYPT_LIBS: std.tpl`-L${dependencies}/lib`,
-      LIBCRYPT_CFLAGS: std.tpl`-I${dependencies}/include`,
-      LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        // TODO: Clean up these env vars
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+        LDFLAGS: std.tpl`-L${dependencies}/lib -lz`,
+        CPPFLAGS: std.tpl`-I${dependencies}/include`,
+        ZLIB_LIBS: std.tpl`-L${dependencies}/lib -lz`,
+        ZLIB_CFLAGS: std.tpl`-I${dependencies}/include`,
+        GBDM_LIBS: std.tpl`-L${dependencies}/lib -lgdbm`,
+        GBDM_CFLAGS: std.tpl`-I${dependencies}/include`,
+        BZIP2_LIBS: std.tpl`-L${dependencies}/lib -lbz2`,
+        BZIP2_CFLAGS: std.tpl`-I${dependencies}/include`,
+        LIBCRYPT_LIBS: std.tpl`-L${dependencies}/lib`,
+        LIBCRYPT_CFLAGS: std.tpl`-I${dependencies}/include`,
+        LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
+      },
+    })
+    .cast("directory");
 });

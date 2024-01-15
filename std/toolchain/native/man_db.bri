@@ -5,17 +5,19 @@ import libpipeline from "./libpipeline.bri";
 import groff from "./groff.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/man-db-2.11.2.tar.xz",
-      hash: std.sha256Hash("cffa1ee4e974be78646c46508e6dd2f37e7c589aaab2938cc1064f058fef9f8d"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/man-db-2.11.2.tar.xz",
+    hash: std.sha256Hash(
+      "cffa1ee4e974be78646c46508e6dd2f37e7c589aaab2938cc1064f058fef9f8d",
+    ),
+  });
 
-  return std.process({
-    command: std.tpl`${stage2()}/bin/bash`,
-    args: [
-      "-c",
-      `
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
         set -euo pipefail
 
         tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
@@ -29,17 +31,18 @@ export default std.memo((): std.Lazy<std.Directory> => {
         make
         make install DESTDIR="$BRIOCHE_OUTPUT"
       `,
-    ],
-    env: {
-      source: sourceArchive,
-      PATH: std.tpl`${stage2()}/bin:${groff()}/bin`,
-      MAGIC: std.tpl`${stage2()}/usr/share/misc/magic`,
-      libpipeline_CFLAGS: std.tpl`-I${libpipeline()}/include`,
-      libpipeline_LIBS: std.tpl`-L${libpipeline()}/lib -lpipeline`,
-      CFLAGS: std.tpl`-I${gdbm()}/include`,
-      LDFLAGS: std.tpl`-L${gdbm()}/lib -lgdbm`,
-      GROFF_FONT_PATH: std.tpl`${groff()}/share/groff/current/font`,
-      GROFF_TMAC_PATH: std.tpl`${groff()}/share/groff/current/tmac`,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin:${groff()}/bin`,
+        MAGIC: std.tpl`${stage2()}/usr/share/misc/magic`,
+        libpipeline_CFLAGS: std.tpl`-I${libpipeline()}/include`,
+        libpipeline_LIBS: std.tpl`-L${libpipeline()}/lib -lpipeline`,
+        CFLAGS: std.tpl`-I${gdbm()}/include`,
+        LDFLAGS: std.tpl`-L${gdbm()}/lib -lgdbm`,
+        GROFF_FONT_PATH: std.tpl`${groff()}/share/groff/current/font`,
+        GROFF_TMAC_PATH: std.tpl`${groff()}/share/groff/current/tmac`,
+      },
+    })
+    .cast("directory");
 });

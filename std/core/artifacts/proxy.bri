@@ -1,10 +1,18 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { type Equatable, assert, jsonSerialize } from "../utils.bri";
-import { type Artifact, type AsyncLazy, type Lazy, type LazyArtifactSerialization, type ArtifactType, briocheDeserializeAny, createLazy } from "./artifact.bri";
+import {
+  type Artifact,
+  type AsyncLazy,
+  type Lazy,
+  type LazyArtifactSerialization,
+  type ArtifactType,
+  briocheDeserializeAny,
+  createLazy,
+} from "./artifact.bri";
 
 export function memo<Args extends Array<Equatable>, Ret extends Artifact>(
-  f: (...args: Args) => AsyncLazy<Ret>
+  f: (...args: Args) => AsyncLazy<Ret>,
 ): (...args: Args) => Lazy<Ret> {
   const proxies = new Map<string, Lazy<Ret>>();
   return (...args: Args) => {
@@ -20,7 +28,9 @@ export function memo<Args extends Array<Equatable>, Ret extends Artifact>(
   };
 }
 
-export function createProxy<T extends Artifact>(artifact: AsyncLazy<T>): Lazy<T> {
+export function createProxy<T extends Artifact>(
+  artifact: AsyncLazy<T>,
+): Lazy<T> {
   let serialized: Promise<runtime.LazyProxy> | undefined;
   let resolved: T | undefined;
 
@@ -42,14 +52,17 @@ export function createProxy<T extends Artifact>(artifact: AsyncLazy<T>): Lazy<T>
   return createLazy(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,
     briocheSerialize: async () => {
-      const proxy = await serializeProxy() as unknown;
+      const proxy = (await serializeProxy()) as unknown;
       return proxy as unknown as LazyArtifactSerialization<T>;
     },
     resolve: async () => {
       if (resolved === undefined) {
         const proxy = await serializeProxy();
         const resolvedArtifact = await runtime.resolve(proxy);
-        resolved = briocheDeserializeAny(resolvedArtifact, proxy.meta?.source) as T;
+        resolved = briocheDeserializeAny(
+          resolvedArtifact,
+          proxy.meta?.source,
+        ) as T;
       }
 
       assert(resolved != null, "expected `resolve()` to return a value");

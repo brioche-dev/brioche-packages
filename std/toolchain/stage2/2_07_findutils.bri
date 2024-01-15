@@ -3,11 +3,12 @@ import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/findutils-4.9.0.tar.xz",
-      hash: std.sha256Hash("a2bfb8c09d436770edc59f50fa483e785b161a3b7b9d547573cb08065fd462fe"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/findutils-4.9.0.tar.xz",
+    hash: std.sha256Hash(
+      "a2bfb8c09d436770edc59f50fa483e785b161a3b7b9d547573cb08065fd462fe",
+    ),
+  });
 
   return bootstrapRun({
     script: `
@@ -33,6 +34,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
-    }
+    },
   });
 });

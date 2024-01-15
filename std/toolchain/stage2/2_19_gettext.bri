@@ -3,18 +3,20 @@ import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std
-    .download({
-      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gettext-0.22.tar.xz",
-      hash: std.sha256Hash("0e60393a47061567b46875b249b7d2788b092d6457d656145bb0e7e6a3e26d93"),
-    });
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gettext-0.22.tar.xz",
+    hash: std.sha256Hash(
+      "0e60393a47061567b46875b249b7d2788b092d6457d656145bb0e7e6a3e26d93",
+    ),
+  });
 
-  return std.process({
-    command: "/usr/bin/env",
-    args: [
-      "sh",
-      "-c",
-      `
+  return std
+    .process({
+      command: "/usr/bin/env",
+      args: [
+        "sh",
+        "-c",
+        `
         set -euo pipefail
 
         tar xf "$source" --strip-components=1
@@ -23,11 +25,12 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
         mkdir -p "$BRIOCHE_OUTPUT/usr/bin"
         cp gettext-tools/src/{msgfmt,msgmerge,xgettext} "$BRIOCHE_OUTPUT/usr/bin"
       `,
-    ],
-    env: {
-      PATH: std.tpl`${toolchain()}/bin`,
-      GCONV_PATH: std.tpl`${toolchain()}/usr/lib/gconv`,
-      source: sourceArchive,
-    },
-  }).cast("directory");
+      ],
+      env: {
+        PATH: std.tpl`${toolchain()}/bin`,
+        GCONV_PATH: std.tpl`${toolchain()}/usr/lib/gconv`,
+        source: sourceArchive,
+      },
+    })
+    .cast("directory");
 });

@@ -6,7 +6,10 @@ interface UseBriocheLdOptions {
   interpreterPaths: Record<string, string>;
 }
 
-export function useBriocheLd(dir: std.Lazy<std.Directory>, options: UseBriocheLdOptions): std.Lazy<std.Directory> {
+export function useBriocheLd(
+  dir: std.Lazy<std.Directory>,
+  options: UseBriocheLdOptions,
+): std.Lazy<std.Directory> {
   const briocheLd = packTools().get("brioche-ld");
   const briochePacked = packTools().get("brioche-packed-userland-exec");
 
@@ -19,19 +22,34 @@ export function useBriocheLd(dir: std.Lazy<std.Directory>, options: UseBriocheLd
     const ldParentName = ldDir.split("/").at(-1);
     std.assert(ldName != null && ldParentName != null);
 
-    const briocheLdPath = [...ldParentDirComponents, "libexec", "brioche-ld"].join("/");
+    const briocheLdPath = [
+      ...ldParentDirComponents,
+      "libexec",
+      "brioche-ld",
+    ].join("/");
     let briocheLdDir: std.Lazy<std.Directory> = std.directory({
-      "ld": std.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
+      ld: std.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
       "brioche-packed": briochePacked,
     });
 
-    for (const [interpreterPath, interpreterTargetPath] of Object.entries(options.interpreterPaths)) {
+    for (const [interpreterPath, interpreterTargetPath] of Object.entries(
+      options.interpreterPaths,
+    )) {
       const interpreterDir = interpreterPath.split("/").slice(0, -1).join("/");
-      const pathToBriocheLd = interpreterDir.split("/").map(() => "..").join("/");
-      const pathToRoot = briocheLdPath.split("/").map(() => "..").join("/");
+      const pathToBriocheLd = interpreterDir
+        .split("/")
+        .map(() => "..")
+        .join("/");
+      const pathToRoot = briocheLdPath
+        .split("/")
+        .map(() => "..")
+        .join("/");
       const interpreterTarget = `${pathToBriocheLd}/${pathToRoot}/${interpreterTargetPath}`;
-      briocheLdDir = briocheLdDir.insert(interpreterPath, std.symlink({ target: interpreterTarget }));
-    };
+      briocheLdDir = briocheLdDir.insert(
+        interpreterPath,
+        std.symlink({ target: interpreterTarget }),
+      );
+    }
 
     dir = dir.insert(`${ldDir}/${ldName}-orig`, systemLd);
     dir = dir.insert(ldPath, briocheLd);

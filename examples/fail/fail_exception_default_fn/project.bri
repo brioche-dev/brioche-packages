@@ -13,4 +13,4 @@ interface TestType {
 
 export default () => {
   throw new Error("default export exception");
-}
+};
