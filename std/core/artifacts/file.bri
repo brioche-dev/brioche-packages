@@ -1,13 +1,6 @@
 import * as runtime from "../runtime.bri";
-import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
-import { type Directory, directory } from "./directory.bri";
-import {
-  type AsyncLazy,
-  type Lazy,
-  createLazy,
-  lazyFileUtils,
-} from "./artifact.bri";
+import { type Lazy, createLazy, lazyFileUtils } from "./artifact.bri";
 import { artifactType } from "./artifact_type.bri";
 
 export function file(data: string | Uint8Array): Lazy<File> {
@@ -23,6 +16,7 @@ export function file(data: string | Uint8Array): Lazy<File> {
           type: "directory",
           entries: {},
         },
+        meta,
       };
     },
   });

@@ -1,5 +1,3 @@
-import { unreachable } from "./utils.bri";
-
 export async function resolveAll(artifacts: []): Promise<[]>;
 export async function resolveAll(
   artifacts: [LazyArtifact],

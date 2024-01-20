@@ -1,7 +1,6 @@
 import * as std from "/core";
 import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
-import { wrapWithScript, useBriocheLd } from "../utils.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   const sourceArchive = std.download({

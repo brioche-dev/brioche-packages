@@ -6,12 +6,9 @@ export const project = {
   },
 };
 
-interface TestType {
-  foo: string;
-  bar: string;
-}
-
 throw new Error("top level exception");
+
+// eslint-disable-next-line
 export default () => {
   return std.directory();
 };

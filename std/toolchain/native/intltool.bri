@@ -12,7 +12,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
     ),
   });
 
-  let perlDep = std.merge(perl(), perlXmlParser());
+  const perlDep = std.merge(perl(), perlXmlParser());
 
   return std
     .process({

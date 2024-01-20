@@ -31,8 +31,6 @@ export function bootstrapRun(
   const briocheLd = packTools().get("brioche-ld");
   const briochePacked = packTools().get("brioche-packed-userland-exec");
 
-  const env = options.env ?? {};
-
   return std
     .process({
       command: "/usr/bin/env",

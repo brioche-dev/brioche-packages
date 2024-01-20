@@ -6,7 +6,6 @@ import linuxHeaders from "./linux_headers.bri";
 import gcc from "./gcc.bri";
 import bzip2 from "./bzip2.bri";
 import zlib from "./zlib.bri";
-import { wrapWithScript } from "../utils.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
   const toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());

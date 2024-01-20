@@ -1,5 +1,4 @@
 import * as runtime from "../runtime.bri";
-import { source as briocheSource } from "../source.bri";
 import { type Equatable, assert, jsonSerialize } from "../utils.bri";
 import {
   type Artifact,
@@ -11,7 +10,7 @@ import {
   createLazy,
 } from "./artifact.bri";
 
-export function memo<Args extends Array<Equatable>, Ret extends Artifact>(
+export function memo<Args extends Equatable[], Ret extends Artifact>(
   f: (...args: Args) => AsyncLazy<Ret>,
 ): (...args: Args) => Lazy<Ret> {
   const proxies = new Map<string, Lazy<Ret>>();
@@ -53,7 +52,7 @@ export function createProxy<T extends Artifact>(
     sourceDepth: 1,
     briocheSerialize: async () => {
       const proxy = (await serializeProxy()) as unknown;
-      return proxy as unknown as LazyArtifactSerialization<T>;
+      return proxy as LazyArtifactSerialization<T>;
     },
     resolve: async () => {
       if (resolved === undefined) {
@@ -65,6 +64,7 @@ export function createProxy<T extends Artifact>(
         ) as T;
       }
 
+      /* eslint-disable-next-line */
       assert(resolved != null, "expected `resolve()` to return a value");
       return resolved;
     },

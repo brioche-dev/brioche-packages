@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { wrapWithScript, useBriocheLd } from "../utils.bri";
+import { useBriocheLd } from "../utils.bri";
 import stage2 from "/toolchain/stage2";
 import flex from "./flex.bri";
 import zlib from "./zlib.bri";

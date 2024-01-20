@@ -8,7 +8,8 @@ export function assert(
 }
 
 export function unreachable(never: never): never {
-  throw new Error(`reached unreachable code with value: ${never}`);
+  const value: any = never;
+  throw new Error(`reached unreachable code with value: ${value}`);
 }
 
 export type Awaitable<T> = T | Promise<T>;
@@ -126,7 +127,7 @@ export function isEquatable(value: unknown): value is Equatable {
 }
 
 export function jsonSerialize(value: Equatable): string {
-  return JSON.stringify(value, (key, value) => {
+  return JSON.stringify(value, (_key, value) => {
     if (isSerializeEquatable(value)) {
       return value.briocheSerialize();
     } else {
@@ -139,7 +140,7 @@ export function indoc(
   strings: TemplateStringsArray,
   ...values: string[]
 ): string {
-  let string = strings
+  const string = strings
     .flatMap((str, i): string[] => {
       const value = values[i];
       if (value != null) {
@@ -173,6 +174,9 @@ export function indoc(
   return lines.map((line) => line.slice(minIndentation)).join("\n");
 }
 
-export function mixin<T extends {}, U extends {}>(base: T, mixin: U): T & U {
+export function mixin<T extends object, U extends object>(
+  base: T,
+  mixin: U,
+): T & U {
   return { ...base, ...mixin };
 }

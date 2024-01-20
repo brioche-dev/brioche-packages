@@ -1,5 +1,4 @@
 import * as std from "/core";
-import { wrapWithScript } from "../utils.bri";
 import stage2 from "/toolchain/stage2";
 import zlib from "./zlib.bri";
 import expat from "./expat.bri";

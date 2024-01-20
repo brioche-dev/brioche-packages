@@ -98,7 +98,10 @@ export function tryParseJson<T>(
   try {
     value = JSON.parse(json);
   } catch (error) {
-    return { result: "mismatch", message: `failed to parse JSON: ${error}` };
+    return {
+      result: "mismatch",
+      message: `failed to parse JSON: ${error as any}`,
+    };
   }
 
   return tryParse(checker, value);
@@ -165,7 +168,7 @@ export function literal<T extends string | number | boolean | null | undefined>(
       } else {
         return {
           result: "mismatch",
-          message: `expected ${value}, was ${actual}`,
+          message: `expected ${value}, was ${actual as any}`,
         };
       }
     },
@@ -252,7 +255,7 @@ export function tuple<Ts extends unknown[]>(
   });
 }
 
-export function object<T extends {}>(
+export function object<T extends object>(
   checkers: { [K in keyof T]: Checker<T[K]> },
 ): ObjectChecker<T> {
   return {
@@ -364,7 +367,7 @@ export function discriminatedUnion<
   K extends keyof Ts[number],
   Ts extends unknown[],
 >(key: K, checkers: { [K in keyof Ts]: Checker<Ts[K]> }): Checker<Ts[number]> {
-  let discriminatorCheckers: Map<
+  const discriminatorCheckers: Map<
     string | number | symbol,
     Checker<Ts[number]>
   > = new Map(
@@ -378,7 +381,7 @@ export function discriminatedUnion<
       const keys = (checker as ObjectChecker<Ts[number]>)[objectKeysSymbol];
 
       const keyChecker = keys[key];
-      if (keyChecker == null) {
+      if ((keyChecker as any) == null) {
         throw new Error(
           `key ${String(key)} not found in discriminatedUnion checker ${index}`,
         );
@@ -396,7 +399,7 @@ export function discriminatedUnion<
         literalSymbol
       ];
 
-      return [literalValue, checker];
+      return [literalValue as string | number | symbol, checker];
     }),
   );
   return createChecker((value) => {
@@ -424,11 +427,6 @@ export function discriminatedUnion<
 
     return discriminatorChecker[checkSymbol](value);
   });
-}
-
-interface ErrorLine {
-  indent: number;
-  line: string;
 }
 
 function summarizeError(

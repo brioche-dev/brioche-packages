@@ -69,7 +69,7 @@ export type Lazy<T extends Artifact = Artifact> = {
       : [T] extends [Symlink]
         ? LazySymlinkUtils
         : T extends Artifact
-          ? {}
+          ? object
           : never);
 
 export type AsyncLazy<T extends Artifact = Artifact> = Awaitable<Lazy<T>>;
@@ -108,13 +108,13 @@ export function lazyFn<T extends Artifact>(f: () => AsyncLazy<T>): Lazy<T> {
     sourceDepth: 1,
     briocheSerialize: async () => {
       if (result == null) {
-        result = await await f();
+        result = await f();
       }
       return result.briocheSerialize();
     },
     resolve: async () => {
       if (result == null) {
-        result = await await f();
+        result = await f();
       }
       return result.resolve();
     },
@@ -151,18 +151,18 @@ export function createLazy<T extends Artifact>(
 
   return {
     briocheSerialize: async () => {
-      if (opts.briocheSerialize) {
+      if (opts.briocheSerialize != null) {
         return opts.briocheSerialize(meta);
-      } else if (opts.resolve) {
+      } else if (opts.resolve != null) {
         return (await opts.resolve(meta)).briocheSerialize();
       } else {
         throw new Error("resolve or briocheSerialize is required");
       }
     },
     resolve: async () => {
-      if (opts.resolve) {
+      if (opts.resolve != null) {
         return opts.resolve(meta);
-      } else if (opts.briocheSerialize) {
+      } else if (opts.briocheSerialize != null) {
         const result = await runtime.resolve(await opts.briocheSerialize(meta));
         return briocheDeserializeAny(result, source);
       } else {
@@ -173,7 +173,7 @@ export function createLazy<T extends Artifact>(
     ...(isFile ? lazyFileUtils : {}),
     ...(isDirectory ? lazyDirectoryUtils : {}),
     ...(isSymlink ? lazySymlinkUtils : {}),
-  } as Lazy<T>;
+  } as unknown as Lazy<T>;
 }
 
 interface LazyCommon<T extends Artifact> extends LazyUtils<T> {
@@ -326,7 +326,7 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
         const serializedDirectories = await Promise.all(
-          proxyDirectories.map(async (dir) => (await dir).briocheSerialize()),
+          proxyDirectories.map(async (dir) => dir.briocheSerialize()),
         );
         return {
           type: "merge",

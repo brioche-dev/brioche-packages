@@ -56,7 +56,7 @@ export function display(value: unknown): string {
         return value.toISOString();
       } else if (Array.isArray(value)) {
         const items = value.map(display);
-        return `[${items}]`;
+        return `[${items.join(", ")}]`;
       } else {
         const entries = Object.entries(value).map(
           ([key, value]) => `${JSON.stringify(key)}: ${display(value)}`,

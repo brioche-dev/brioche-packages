@@ -1,12 +1,9 @@
 import * as runtime from "../runtime.bri";
-import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { createProxy } from "./proxy.bri";
 import {
-  type Artifact,
   type AsyncLazy,
   type Lazy,
-  briocheDeserializeAny,
   createLazy,
   lazyDirectoryUtils,
 } from "./artifact.bri";
@@ -46,7 +43,7 @@ export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       const serializedDirectories = await Promise.all(
-        proxyDirectories.map(async (dir) => (await dir).briocheSerialize()),
+        proxyDirectories.map(async (dir) => dir.briocheSerialize()),
       );
       return {
         type: "merge",

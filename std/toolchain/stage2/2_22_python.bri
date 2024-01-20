@@ -1,5 +1,4 @@
 import * as std from "/core";
-import { wrapWithScript, useBriocheLd } from "../utils.bri";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {

@@ -28,7 +28,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       .withPermissions({ executable: true }),
   });
 
-  stage1 = await useBriocheLd(stage1, {
+  stage1 = useBriocheLd(stage1, {
     ldPaths: [
       "usr/bin/x86_64-lfs-linux-gnu-ld",
       "usr/bin/x86_64-lfs-linux-gnu-ld.bfd",

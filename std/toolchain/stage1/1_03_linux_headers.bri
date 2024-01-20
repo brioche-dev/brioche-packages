@@ -1,6 +1,5 @@
 import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
-import binutils from "./1_01_binutils.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   const sourceArchive = std.download({
