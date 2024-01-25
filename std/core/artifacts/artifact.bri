@@ -4,6 +4,7 @@ import { type Awaitable, unreachable } from "../utils.bri";
 import { File, type FilePermissions } from "./file.bri";
 import { Directory } from "./directory.bri";
 import { Symlink } from "./symlink.bri";
+import { createProxy } from "./proxy.bri";
 
 export type Artifact = File | Directory | Symlink;
 
@@ -298,14 +299,17 @@ export const lazyDirectoryUtils: LazyDirectoryUtils = {
     path: string,
     artifact: AsyncLazy<Artifact>,
   ): Lazy<Directory> {
+    const proxyDirectory = createProxy(this);
+    const proxyArtifact = createProxy(artifact);
+
     return createLazy(["directory"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
-        const directory = await this.briocheSerialize();
-        const serializedArtifact = await (await artifact).briocheSerialize();
+        const serializedDirectory = await proxyDirectory.briocheSerialize();
+        const serializedArtifact = await proxyArtifact.briocheSerialize();
         return {
           type: "insert",
-          directory,
+          directory: serializedDirectory,
           path: runtime.bstring(path),
           artifact: serializedArtifact,
           meta,
