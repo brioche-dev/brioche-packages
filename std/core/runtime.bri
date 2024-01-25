@@ -100,7 +100,7 @@ export type LazyArtifact =
   | LazyMerge
   | LazyPeel
   | LazyGet
-  | LazyRemove
+  | LazyInsert
   | LazySetPermissions
   | LazyProxy;
 
@@ -161,10 +161,11 @@ export type LazyGet = WithMeta & {
   path: BString;
 };
 
-export type LazyRemove = WithMeta & {
-  type: "remove";
+export type LazyInsert = WithMeta & {
+  type: "insert";
   directory: LazyArtifact;
-  paths: BString[];
+  path: BString;
+  artifact?: LazyArtifact | null | undefined;
 };
 
 export type LazySetPermissions = WithMeta & {
