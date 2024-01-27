@@ -36,9 +36,10 @@ export type LazyArtifactSerialization<T extends Artifact> = runtime.WithMeta &
         | runtime.LazyProxy
     : T extends Directory
       ?
-          | runtime.LazyDirectory
+          | runtime.CompleteDirectory
           | runtime.LazyUnpack
           | runtime.LazyProcess
+          | runtime.LazyCreateDirectory
           | runtime.LazyCast
           | runtime.LazyMerge
           | runtime.LazyPeel
