@@ -3,14 +3,14 @@ import { assert } from "../utils.bri";
 import { type Lazy, createLazy, lazyFileUtils } from "./artifact.bri";
 import { artifactType } from "./artifact_type.bri";
 
-export function file(data: string | Uint8Array): Lazy<File> {
-  const serializedData = runtime.bstring(data);
+export function file(content: string | Uint8Array): Lazy<File> {
+  const serializedContent = runtime.bstring(content);
   return createLazy(["file"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       return {
         type: "create_file",
-        data: serializedData,
+        content: serializedContent,
         executable: false,
         resources: {
           type: "directory",
@@ -28,7 +28,7 @@ export interface FilePermissions {
 
 export interface FileCtor {
   source?: runtime.Source;
-  blobId: runtime.BlobId;
+  contentBlob: runtime.BlobId;
   executable: boolean;
   resources: runtime.CompleteDirectoryContents;
 }
@@ -36,13 +36,13 @@ export interface FileCtor {
 export class File implements Lazy<File> {
   [artifactType]: "file" = "file";
   source?: runtime.Source;
-  blobId: runtime.BlobId;
+  contentBlob: runtime.BlobId;
   executable: boolean;
   resources: runtime.CompleteDirectoryContents;
 
   constructor(options: FileCtor) {
     this.source = options.source;
-    this.blobId = options.blobId;
+    this.contentBlob = options.contentBlob;
     this.executable = options.executable;
     this.resources = options.resources;
   }
@@ -54,7 +54,7 @@ export class File implements Lazy<File> {
   briocheSerialize(): runtime.CompleteFile {
     return {
       type: "file",
-      data: this.blobId,
+      contentBlob: this.contentBlob,
       executable: this.executable,
       resources: this.resources,
       meta: {
@@ -69,7 +69,7 @@ export class File implements Lazy<File> {
   ): File {
     assert(artifact.type === "file");
     return new File({
-      blobId: artifact.data,
+      contentBlob: artifact.contentBlob,
       executable: artifact.executable,
       resources: artifact.resources,
       source,

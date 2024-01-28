@@ -71,7 +71,7 @@ export type CompleteArtifact =
 
 export type CompleteFile = WithMeta & {
   type: "file";
-  data: BlobId;
+  contentBlob: BlobId;
   executable: boolean;
   resources: CompleteDirectoryContents;
 };
@@ -86,16 +86,16 @@ export type CompleteDirectory = WithMeta & {
 } & CompleteDirectoryContents;
 
 export type CompleteDirectoryContents = {
-  entries: Record<BString, CompleteArtifact>;
+  listingBlob?: BlobId;
 };
 
 export type LazyArtifact =
   | CompleteArtifact
-  | LazyDirectory
   | LazyDownload
   | LazyUnpack
   | LazyProcess
   | LazyCreateFile
+  | LazyCreateDirectory
   | LazyCast
   | LazyMerge
   | LazyPeel
@@ -104,8 +104,8 @@ export type LazyArtifact =
   | LazySetPermissions
   | LazyProxy;
 
-export type LazyDirectory = WithMeta & {
-  type: "directory";
+export type LazyCreateDirectory = WithMeta & {
+  type: "create_directory";
   entries: Record<BString, LazyArtifact>;
 };
 
@@ -133,7 +133,7 @@ export type LazyProcess = WithMeta & {
 
 export type LazyCreateFile = WithMeta & {
   type: "create_file";
-  data: BString;
+  content: BString;
   executable: boolean;
   resources: LazyArtifact;
 };

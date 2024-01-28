@@ -29,7 +29,7 @@ export function directory(
         ),
       );
       return {
-        type: "directory",
+        type: "create_directory",
         entries: Object.fromEntries(entries),
         meta,
       };
@@ -55,17 +55,17 @@ export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
 }
 
 interface DirectoryCtor {
-  entries: Record<runtime.BString, runtime.CompleteArtifact>;
+  listingBlob?: runtime.BlobId;
   source?: runtime.Source;
 }
 
 export class Directory implements Lazy<Directory> {
   [artifactType]: "directory" = "directory";
-  entries: Record<runtime.BString, runtime.CompleteArtifact>;
+  listingBlob?: runtime.BlobId;
   source?: runtime.Source;
 
   constructor(options: DirectoryCtor) {
-    this.entries = options.entries;
+    this.listingBlob = options.listingBlob;
     this.source = options.source;
   }
 
@@ -76,7 +76,7 @@ export class Directory implements Lazy<Directory> {
   briocheSerialize(): runtime.CompleteDirectory {
     return {
       type: "directory",
-      entries: this.entries,
+      listingBlob: this.listingBlob,
       meta: {
         source: this.source,
       },
@@ -88,7 +88,7 @@ export class Directory implements Lazy<Directory> {
     source: runtime.Source | undefined,
   ): Directory {
     assert(artifact.type === "directory");
-    return new Directory({ entries: artifact.entries, source });
+    return new Directory({ listingBlob: artifact.listingBlob, source });
   }
 
   get = lazyDirectoryUtils.get;

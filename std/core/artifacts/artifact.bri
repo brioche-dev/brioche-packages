@@ -36,9 +36,10 @@ export type LazyArtifactSerialization<T extends Artifact> = runtime.WithMeta &
         | runtime.LazyProxy
     : T extends Directory
       ?
-          | runtime.LazyDirectory
+          | runtime.CompleteDirectory
           | runtime.LazyUnpack
           | runtime.LazyProcess
+          | runtime.LazyCreateDirectory
           | runtime.LazyCast
           | runtime.LazyMerge
           | runtime.LazyPeel
@@ -269,7 +270,7 @@ export const lazyFileUtils: LazyFileUtils = {
   },
   async readBytes(this: Lazy<File>): Promise<Uint8Array> {
     const resolved = await this.resolve();
-    const bstring = await runtime.readBlob(resolved.blobId);
+    const bstring = await runtime.readBlob(resolved.contentBlob);
     return runtime.bstringToBytes(bstring);
   },
   async read(this: Lazy<File>): Promise<string> {
