@@ -52,15 +52,19 @@ export function utf8Decode(bytes: Uint8Array): string {
   return result;
 }
 
-export function urlEncode(value: Uint8Array | string): string {
+export function tickEncode(value: Uint8Array | string): string {
   const bytes = typeof value === "string" ? utf8Encode(value) : value;
-  const result = (globalThis as any).Deno.core.ops.op_brioche_url_encode(bytes);
+  const result = (globalThis as any).Deno.core.ops.op_brioche_tick_encode(
+    bytes,
+  );
   return result;
 }
 
-export function urlDecode(value: Uint8Array | string): Uint8Array {
+export function tickDecode(value: Uint8Array | string): Uint8Array {
   const bytes = typeof value === "string" ? utf8Encode(value) : value;
-  const result = (globalThis as any).Deno.core.ops.op_brioche_url_decode(bytes);
+  const result = (globalThis as any).Deno.core.ops.op_brioche_tick_decode(
+    bytes,
+  );
   return result;
 }
 
@@ -229,11 +233,11 @@ export function isHex(s: string): s is HexString {
 }
 
 export function bstring(value: string | Uint8Array): BString {
-  return urlEncode(value) as BString;
+  return tickEncode(value) as BString;
 }
 
 export function bstringToBytes(value: BString): Uint8Array {
-  return urlDecode(value);
+  return tickDecode(value);
 }
 
 export function bstringToString(value: BString): string {
