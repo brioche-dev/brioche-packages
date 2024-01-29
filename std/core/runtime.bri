@@ -77,7 +77,7 @@ export type CompleteFile = WithMeta & {
   type: "file";
   contentBlob: BlobId;
   executable: boolean;
-  resources: CompleteDirectoryContents;
+  resources: CompleteDirectory;
 };
 
 export type CompleteSymlink = WithMeta & {
@@ -87,9 +87,6 @@ export type CompleteSymlink = WithMeta & {
 
 export type CompleteDirectory = WithMeta & {
   type: "directory";
-} & CompleteDirectoryContents;
-
-export type CompleteDirectoryContents = {
   listingBlob?: BlobId;
 };
 

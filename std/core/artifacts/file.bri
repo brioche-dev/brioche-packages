@@ -30,7 +30,7 @@ export interface FileCtor {
   source?: runtime.Source;
   contentBlob: runtime.BlobId;
   executable: boolean;
-  resources: runtime.CompleteDirectoryContents;
+  resources: runtime.CompleteDirectory;
 }
 
 export class File implements Lazy<File> {
@@ -38,7 +38,7 @@ export class File implements Lazy<File> {
   source?: runtime.Source;
   contentBlob: runtime.BlobId;
   executable: boolean;
-  resources: runtime.CompleteDirectoryContents;
+  resources: runtime.CompleteDirectory;
 
   constructor(options: FileCtor) {
     this.source = options.source;
