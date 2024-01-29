@@ -16,25 +16,25 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./config \
-          --prefix=/ \
-          --openssldir=/etc/ssl \
-          --libdir=lib \
-          -L"$zlib/lib" \
-          -I"$zlib/include" \
-          shared \
-          zlib
+          ./config \
+            --prefix=/ \
+            --openssldir=/etc/ssl \
+            --libdir=lib \
+            -L"$zlib/lib" \
+            -I"$zlib/include" \
+            shared \
+            zlib
 
-        make
+          make
 
-        sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
-        make install DESTDIR="$BRIOCHE_OUTPUT" MANSUFFIX=ssl
-      `,
+          sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+          make install DESTDIR="$BRIOCHE_OUTPUT" MANSUFFIX=ssl
+        `,
       ],
       env: {
         source: sourceArchive,

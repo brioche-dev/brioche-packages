@@ -21,10 +21,10 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
     renameSuffix: "-orig",
     script: std
       .file(std.indoc`
-      #!/usr/bin/env sh
-      sysroot=$(cd "$(dirname -- "$0")/../.." && pwd)
-      "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/usr/include" "$@"
-    `)
+        #!/usr/bin/env sh
+        sysroot=$(cd "$(dirname -- "$0")/../.." && pwd)
+        "$0-orig" --sysroot="$sysroot" -isystem "$sysroot/usr/include" "$@"
+      `)
       .withPermissions({ executable: true }),
   });
 
@@ -41,7 +41,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   });
 
   return bootstrapRun({
-    script: `
+    script: std.indoc`
       set -euo pipefail
 
       export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"

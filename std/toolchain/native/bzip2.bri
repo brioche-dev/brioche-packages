@@ -20,25 +20,25 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        patch -Np1 -i "$sourcePatch"
-        sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
-        sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+          patch -Np1 -i "$sourcePatch"
+          sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
+          sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
 
-        make -f Makefile-libbz2_so
-        make clean
+          make -f Makefile-libbz2_so
+          make clean
 
-        make
-        make PREFIX="$BRIOCHE_OUTPUT" install
+          make
+          make PREFIX="$BRIOCHE_OUTPUT" install
 
-        mkdir -p "$BRIOCHE_OUTPUT/lib"
-        cp -a libbz2.so.* "$BRIOCHE_OUTPUT/lib"
-        ln -s libbz2.so.1.0.8 "$BRIOCHE_OUTPUT/lib/libbz2.so"
-      `,
+          mkdir -p "$BRIOCHE_OUTPUT/lib"
+          cp -a libbz2.so.* "$BRIOCHE_OUTPUT/lib"
+          ln -s libbz2.so.1.0.8 "$BRIOCHE_OUTPUT/lib/libbz2.so"
+        `,
       ],
       env: {
         source: sourceArchive,

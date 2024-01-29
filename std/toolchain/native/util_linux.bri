@@ -14,33 +14,33 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./configure \
-          --bindir=/bin \
-          --libdir=/lib \
-          --runstatedir=/run \
-          --sbindir=/bin \
-          --disable-chfn-chsh \
-          --disable-login \
-          --disable-nologin \
-          --disable-su \
-          --disable-setpriv \
-          --disable-runuser \
-          --disable-pylibmount \
-          --disable-static \
-          --without-python \
-          --without-systemd \
-          --without-systemdsystemunitdir \
-          --disable-makeinstall-chown \
-          --disable-makeinstall-setuid \
-          ADJTIME_PATH=/var/lib/hwclock/adjtime
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
-      `,
+          ./configure \
+            --bindir=/bin \
+            --libdir=/lib \
+            --runstatedir=/run \
+            --sbindir=/bin \
+            --disable-chfn-chsh \
+            --disable-login \
+            --disable-nologin \
+            --disable-su \
+            --disable-setpriv \
+            --disable-runuser \
+            --disable-pylibmount \
+            --disable-static \
+            --without-python \
+            --without-systemd \
+            --without-systemdsystemunitdir \
+            --disable-makeinstall-chown \
+            --disable-makeinstall-setuid \
+            ADJTIME_PATH=/var/lib/hwclock/adjtime
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
+        `,
       ],
       env: {
         source: sourceArchive,

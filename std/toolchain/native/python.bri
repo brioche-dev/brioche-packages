@@ -29,20 +29,20 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./configure \
-          --prefix="$BRIOCHE_OUTPUT" \
-          --enable-shared \
-          --with-system-expat \
-          --with-system-ffi \
-          --enable-optimizations
-        make
-        make install
-      `,
+          ./configure \
+            --prefix="$BRIOCHE_OUTPUT" \
+            --enable-shared \
+            --with-system-expat \
+            --with-system-ffi \
+            --enable-optimizations
+          make
+          make install
+        `,
       ],
       env: {
         // TODO: Clean up these env vars

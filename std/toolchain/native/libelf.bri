@@ -22,22 +22,22 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./configure \
-          --prefix=/ \
-          --disable-debuginfod \
-          --enable-libdebuginfod=dummy
-        make
-        make -C libelf install DESTDIR="$BRIOCHE_OUTPUT"
+          ./configure \
+            --prefix=/ \
+            --disable-debuginfod \
+            --enable-libdebuginfod=dummy
+          make
+          make -C libelf install DESTDIR="$BRIOCHE_OUTPUT"
 
-        mkdir -p "$BRIOCHE_OUTPUT"/lib/pkgconfig
-        install -vm644 config/libelf.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig/
-        rm "$BRIOCHE_OUTPUT"/lib/libelf.a
-      `,
+          mkdir -p "$BRIOCHE_OUTPUT"/lib/pkgconfig
+          install -vm644 config/libelf.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig/
+          rm "$BRIOCHE_OUTPUT"/lib/libelf.a
+        `,
       ],
       env: {
         source: sourceArchive,

@@ -16,19 +16,19 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        perl Makefile.PL \
-          EXPATLIBPATH="$expat/lib" \
-          EXPATINCPATH="$expat/include" \
-          PREFIX="$BRIOCHE_OUTPUT"
-        make
-        make test
-        make install
-      `,
+          perl Makefile.PL \
+            EXPATLIBPATH="$expat/lib" \
+            EXPATINCPATH="$expat/include" \
+            PREFIX="$BRIOCHE_OUTPUT"
+          make
+          make test
+          make install
+        `,
       ],
       env: {
         source: sourceArchive,

@@ -90,7 +90,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   // stage2 = stage2.insert("usr/x86_64-lfs-linux-gnu/include", usrInclude);
 
   return bootstrapRun({
-    script: `
+    script: std.indoc`
       set -euo pipefail
 
       export PATH="$stage2/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"

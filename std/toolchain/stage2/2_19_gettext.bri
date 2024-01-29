@@ -15,15 +15,15 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       args: [
         "sh",
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar xf "$source" --strip-components=1
-        ./configure --disable-shared
-        make
-        mkdir -p "$BRIOCHE_OUTPUT/usr/bin"
-        cp gettext-tools/src/{msgfmt,msgmerge,xgettext} "$BRIOCHE_OUTPUT/usr/bin"
-      `,
+          tar xf "$source" --strip-components=1
+          ./configure --disable-shared
+          make
+          mkdir -p "$BRIOCHE_OUTPUT/usr/bin"
+          cp gettext-tools/src/{msgfmt,msgmerge,xgettext} "$BRIOCHE_OUTPUT/usr/bin"
+        `,
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin`,

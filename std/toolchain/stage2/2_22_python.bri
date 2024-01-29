@@ -15,15 +15,15 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       args: [
         "sh",
         "-c",
-        `
-        tar xf "$source" --strip-components=1
-        ./configure \
-          --prefix=/usr \
-          --enable-shared \
-          --without-ensurepip
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
-      `,
+        std.indoc`
+          tar xf "$source" --strip-components=1
+          ./configure \
+            --prefix=/usr \
+            --enable-shared \
+            --without-ensurepip
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
+        `,
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin`,

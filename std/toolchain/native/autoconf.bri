@@ -15,23 +15,23 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        sed -e 's/SECONDS|/&SHLVL|/' \
-          -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \
-          -i.orig tests/local.at
+          sed -e 's/SECONDS|/&SHLVL|/' \
+            -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \
+            -i.orig tests/local.at
 
-        ./configure --prefix=/
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
+          ./configure --prefix=/
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
 
-        # Replace absolute paths to perl with plain program name, and fix shebangs
-        sed -i 's|^#![[:space:]]*.*/bin/\\([^[:space:]]*\\)|#! /usr/bin/env \\1|' "$BRIOCHE_OUTPUT"/bin/*
-        sed -i 's|[^[:space:]]*/bin/perl|perl|g' "$BRIOCHE_OUTPUT"/bin/*
-      `,
+          # Replace absolute paths to perl with plain program name, and fix shebangs
+          sed -i 's|^#![[:space:]]*.*/bin/\\([^[:space:]]*\\)|#! /usr/bin/env \\1|' "$BRIOCHE_OUTPUT"/bin/*
+          sed -i 's|[^[:space:]]*/bin/perl|perl|g' "$BRIOCHE_OUTPUT"/bin/*
+        `,
       ],
       env: {
         source: sourceArchive,
@@ -45,11 +45,11 @@ export default std.memo((): std.Lazy<std.Directory> => {
     renameSuffix: "-orig",
     script: std
       .file(std.indoc`
-      #!/usr/bin/env sh
-      script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
-      top_dir=$(cd "$script_dir/.." && pwd -P)
-      "$0-orig" --prepend-include="$top_dir/share/autoconf" "$@"
-    `)
+        #!/usr/bin/env sh
+        script_dir=$(cd "$(dirname -- "$0")" && pwd -P)
+        top_dir=$(cd "$script_dir/.." && pwd -P)
+        "$0-orig" --prepend-include="$top_dir/share/autoconf" "$@"
+      `)
       .withPermissions({ executable: true }),
   });
 

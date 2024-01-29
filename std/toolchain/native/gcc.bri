@@ -38,45 +38,45 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        case "$(uname -m)" in
-          x86_64 )
-            sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
-          ;;
-        esac
+          case "$(uname -m)" in
+            x86_64 )
+              sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
+            ;;
+          esac
 
-        mkdir build
-        cd build
+          mkdir build
+          cd build
 
-        ../configure \
-          --prefix=/ \
-          --enable-languages=c,c++ \
-          --enable-default-pie \
-          --enable-default-ssp \
-          --disable-nls \
-          --disable-multilib \
-          --disable-bootstrap \
-          --disable-fixincludes \
-          --with-system-zlib \
-          --with-gmp="$gmp" \
-          --with-mpfr="$mpfr" \
-          --with-mpc="$mpc" \
-          --with-build-sysroot="$buildSysroot" \
-          CFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
-          CXXFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
-          LDFLAGS_FOR_TARGET="$LDFLAGS" \
-          CFLAGS_FOR_BUILD="$CPPFLAGS" \
-          CXXFLAGS_FOR_BUILD="$CPPFLAGS" \
-          CFLAGS="$CPPFLAGS" \
-          CXXFLAGS="$CPPFLAGS" \
-          LD="ld"
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
-      `,
+          ../configure \
+            --prefix=/ \
+            --enable-languages=c,c++ \
+            --enable-default-pie \
+            --enable-default-ssp \
+            --disable-nls \
+            --disable-multilib \
+            --disable-bootstrap \
+            --disable-fixincludes \
+            --with-system-zlib \
+            --with-gmp="$gmp" \
+            --with-mpfr="$mpfr" \
+            --with-mpc="$mpc" \
+            --with-build-sysroot="$buildSysroot" \
+            CFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
+            CXXFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
+            LDFLAGS_FOR_TARGET="$LDFLAGS" \
+            CFLAGS_FOR_BUILD="$CPPFLAGS" \
+            CXXFLAGS_FOR_BUILD="$CPPFLAGS" \
+            CFLAGS="$CPPFLAGS" \
+            CXXFLAGS="$CPPFLAGS" \
+            LD="ld"
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
+        `,
       ],
       env: {
         source: sourceArchive,

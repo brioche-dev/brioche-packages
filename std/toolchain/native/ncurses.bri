@@ -14,33 +14,33 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./configure \
-          --prefix=/ \
-          --with-shared \
-          --without-debug \
-          --without-normal \
-          --with-cxx-shared \
-          --enable-pc-files \
-          --enable-widec \
-          --with-pkg-config-libdir=/lib/pkgconfig
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
+          ./configure \
+            --prefix=/ \
+            --with-shared \
+            --without-debug \
+            --without-normal \
+            --with-cxx-shared \
+            --enable-pc-files \
+            --enable-widec \
+            --with-pkg-config-libdir=/lib/pkgconfig
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
 
-        for lib in ncurses form panel menu ; do
-          rm -f "$BRIOCHE_OUTPUT"/lib/lib\${lib}.so
-          echo "INPUT(-l\${lib}w)" > "$BRIOCHE_OUTPUT"/lib/lib\${lib}.so
-          ln -sf \${lib}w.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig/\${lib}.pc
-        done
+          for lib in ncurses form panel menu ; do
+            rm -f "$BRIOCHE_OUTPUT"/lib/lib\${lib}.so
+            echo "INPUT(-l\${lib}w)" > "$BRIOCHE_OUTPUT"/lib/lib\${lib}.so
+            ln -sf \${lib}w.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig/\${lib}.pc
+          done
 
-        rm -f "$BRIOCHE_OUTPUT"/lib/libcursesw.so
-        echo "INPUT(-lncursesw)" > "$BRIOCHE_OUTPUT"/lib/libcursesw.so
-        ln -sf libncurses.so "$BRIOCHE_OUTPUT"/lib/libcurses.so
-      `,
+          rm -f "$BRIOCHE_OUTPUT"/lib/libcursesw.so
+          echo "INPUT(-lncursesw)" > "$BRIOCHE_OUTPUT"/lib/libcursesw.so
+          ln -sf libncurses.so "$BRIOCHE_OUTPUT"/lib/libcurses.so
+        `,
       ],
       env: {
         source: sourceArchive,

@@ -26,34 +26,34 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-        patch -Np1 -i "$sourcePatchFhs"
-        patch -Np1 -i "$sourcePatchMemalign"
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          patch -Np1 -i "$sourcePatchFhs"
+          patch -Np1 -i "$sourcePatchMemalign"
 
-        mkdir build
-        cd build
+          mkdir build
+          cd build
 
-        echo "rootsbindir=/sbin" > configparms
+          echo "rootsbindir=/sbin" > configparms
 
-        export PYTHONHOME="$stage2/usr"
-        export M4=m4
-        export MAGIC="$stage2/usr/share/misc/magic"
+          export PYTHONHOME="$stage2/usr"
+          export M4=m4
+          export MAGIC="$stage2/usr/share/misc/magic"
 
-        ../configure \
-          --prefix=/ \
-          --enable-kernel=4.14 \
-          --enable-stack-protector=strong \
-          --with-headers="$stage2/usr/include" \
-          libc_cv_slibdir=/lib
+          ../configure \
+            --prefix=/ \
+            --enable-kernel=4.14 \
+            --enable-stack-protector=strong \
+            --with-headers="$stage2/usr/include" \
+            libc_cv_slibdir=/lib
 
-        export BRIOCHE_LD_AUTOWRAP=false
-        make
-        sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
-        make install DESTDIR="$BRIOCHE_OUTPUT"
-      `,
+          export BRIOCHE_LD_AUTOWRAP=false
+          make
+          sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
+          make install DESTDIR="$BRIOCHE_OUTPUT"
+        `,
       ],
       env: {
         source: sourceArchive,
