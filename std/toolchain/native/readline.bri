@@ -20,22 +20,22 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        sed -i '/MV.*old/d' Makefile.in
-        sed -i '/{OLDSUFF}/c:' support/shlib-install
+          sed -i '/MV.*old/d' Makefile.in
+          sed -i '/{OLDSUFF}/c:' support/shlib-install
 
-        patch -Np1 -i "$sourcePatch"
+          patch -Np1 -i "$sourcePatch"
 
-        ./configure \
-          --prefix=/ \
-          --with-curses
-        make SHLIB_LIBS="-lncursesw"
-        make install SHLIB_LIBS="-lncursesw" DESTDIR="$BRIOCHE_OUTPUT"
-      `,
+          ./configure \
+            --prefix=/ \
+            --with-curses
+          make SHLIB_LIBS="-lncursesw"
+          make install SHLIB_LIBS="-lncursesw" DESTDIR="$BRIOCHE_OUTPUT"
+        `,
       ],
       env: {
         source: sourceArchive,

@@ -31,7 +31,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   const stage1 = binutils();
 
   return bootstrapRun({
-    script: `
+    script: std.indoc`
       set -euo pipefail
 
       export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"

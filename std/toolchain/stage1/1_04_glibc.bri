@@ -25,7 +25,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
   const stage1 = std.merge(binutils(), gcc(), linuxHeaders());
 
   return bootstrapRun({
-    script: `
+    script: std.indoc`
       set -euo pipefail
 
       export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"

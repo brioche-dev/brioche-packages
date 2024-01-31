@@ -4,8 +4,8 @@ export { assert, unreachable, indoc, type Awaitable } from "./utils.bri";
 export {
   utf8Encode,
   utf8Decode,
-  urlEncode,
-  urlDecode,
+  tickEncode,
+  tickDecode,
   bstring,
   bstringToBytes,
   bstringToString,

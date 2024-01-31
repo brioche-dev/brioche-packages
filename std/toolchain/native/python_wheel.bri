@@ -32,23 +32,23 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        python3 -m venv "$BRIOCHE_OUTPUT"
+          python3 -m venv "$BRIOCHE_OUTPUT"
 
-        "$BRIOCHE_OUTPUT/bin/pip3" wheel \
-          -w dist \
-          --no-build-isolation \
-          --no-deps \
-          "$PWD"
-        "$BRIOCHE_OUTPUT/bin/pip3" install \
-          --no-index \
-          --find-links=dist \
-          wheel
-      `,
+          "$BRIOCHE_OUTPUT/bin/pip3" wheel \
+            -w dist \
+            --no-build-isolation \
+            --no-deps \
+            "$PWD"
+          "$BRIOCHE_OUTPUT/bin/pip3" install \
+            --no-index \
+            --find-links=dist \
+            wheel
+        `,
       ],
       env: {
         source: sourceArchive,

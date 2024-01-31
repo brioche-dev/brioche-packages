@@ -26,38 +26,38 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${toolchain()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        cp -r "$stage2" "$BRIOCHE_OUTPUT"
-        find "$BRIOCHE_OUTPUT"/usr/bin -type f -executable -print0 \
-          | while IFS= read -r -d $'\\0' file; do
-            if [ "$(head -c 2 "$file")" == "#!" ]; then
-              awk '
-                {
-                  if (NR == 1 && $0 ~ /^#!/) {
-                    shebangInvocation = $0
-                    gsub(/^#! */, "", shebangInvocation)
-                    numShebangWords = split(shebangInvocation, shebangWords, / +/)
-                    if (numShebangWords == 1) {
-                      shebangCommand = shebangWords[1]
-                      numComponents = split(shebangCommand, shebangCommandComponents, "/")
-                      targetCommand = shebangCommandComponents[numComponents]
-                      gsub(" ", "", targetCommand)
-                      print "#!/usr/bin/env " targetCommand
+          cp -r "$stage2" "$BRIOCHE_OUTPUT"
+          find "$BRIOCHE_OUTPUT"/usr/bin -type f -executable -print0 \
+            | while IFS= read -r -d $'\\0' file; do
+              if [ "$(head -c 2 "$file")" == "#!" ]; then
+                awk '
+                  {
+                    if (NR == 1 && $0 ~ /^#!/) {
+                      shebangInvocation = $0
+                      gsub(/^#! */, "", shebangInvocation)
+                      numShebangWords = split(shebangInvocation, shebangWords, / +/)
+                      if (numShebangWords == 1) {
+                        shebangCommand = shebangWords[1]
+                        numComponents = split(shebangCommand, shebangCommandComponents, "/")
+                        targetCommand = shebangCommandComponents[numComponents]
+                        gsub(" ", "", targetCommand)
+                        print "#!/usr/bin/env " targetCommand
+                      } else {
+                        print $0
+                      }
                     } else {
                       print $0
                     }
-                  } else {
-                    print $0
                   }
-                }
-              ' "$file" > temp
-              chmod +x temp
-              mv temp "$file"
-            fi
-          done
-      `,
+                ' "$file" > temp
+                chmod +x temp
+                mv temp "$file"
+              fi
+            done
+        `,
       ],
       env: {
         PATH: std.tpl`${stage2}/bin`,

@@ -14,16 +14,16 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./configure --prefix=/
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
-        rm -f "$BRIOCHE_OUTPUT"/lib/libltdl.a
-      `,
+          ./configure --prefix=/
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
+          rm -f "$BRIOCHE_OUTPUT"/lib/libltdl.a
+        `,
       ],
       env: {
         source: sourceArchive,

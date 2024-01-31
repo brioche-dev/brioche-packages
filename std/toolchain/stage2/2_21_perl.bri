@@ -15,17 +15,17 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       args: [
         "sh",
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar xf "$source" --strip-components=1
-        sh Configure \
-          -des \
-          -Dprefix="/usr" \
-          -Duserelocatableinc
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
-      `,
+          tar xf "$source" --strip-components=1
+          sh Configure \
+            -des \
+            -Dprefix="/usr" \
+            -Duserelocatableinc
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
+        `,
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin`,

@@ -14,18 +14,18 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./configure --prefix=/
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
+          ./configure --prefix=/
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
 
-        ln -s flex "$BRIOCHE_OUTPUT/bin/lex"
-        ln -s flex.1 "$BRIOCHE_OUTPUT/share/man/man1/lex.1"
-      `,
+          ln -s flex "$BRIOCHE_OUTPUT/bin/lex"
+          ln -s flex.1 "$BRIOCHE_OUTPUT/share/man/man1/lex.1"
+        `,
       ],
       env: {
         source: sourceArchive,

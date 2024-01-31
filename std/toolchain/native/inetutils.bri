@@ -14,28 +14,28 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        ./configure \
-          --prefix=/ \
-          --bindir=/bin \
-          --localstatedir=/var \
-          --disable-logger \
-          --disable-whois \
-          --disable-rcp \
-          --disable-rexec \
-          --disable-rlogin \
-          --disable-rsh \
-          --disable-servers
-        make
-        make install DESTDIR="$BRIOCHE_OUTPUT"
+          ./configure \
+            --prefix=/ \
+            --bindir=/bin \
+            --localstatedir=/var \
+            --disable-logger \
+            --disable-whois \
+            --disable-rcp \
+            --disable-rexec \
+            --disable-rlogin \
+            --disable-rsh \
+            --disable-servers
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
 
-        mkdir -p "$BRIOCHE_OUTPUT/sbin"
-        ln -s "../bin/ifconfig" "$BRIOCHE_OUTPUT/sbin/ifconfig"
-      `,
+          mkdir -p "$BRIOCHE_OUTPUT/sbin"
+          ln -s "../bin/ifconfig" "$BRIOCHE_OUTPUT/sbin/ifconfig"
+        `,
       ],
       env: {
         source: sourceArchive,

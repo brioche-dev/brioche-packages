@@ -17,27 +17,27 @@ export default std.memo((): std.Lazy<std.Directory> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        mkdir build
-        cd build
+          mkdir build
+          cd build
 
-        ../configure \
-          --prefix="$BRIOCHE_OUTPUT" \
-          --enable-gold \
-          --enable-ld=default \
-          --enable-plugins \
-          --enable-shared \
-          --disable-werror \
-          --enable-64-bit-bfd \
-          --with-system-zlib
+          ../configure \
+            --prefix="$BRIOCHE_OUTPUT" \
+            --enable-gold \
+            --enable-ld=default \
+            --enable-plugins \
+            --enable-shared \
+            --disable-werror \
+            --enable-64-bit-bfd \
+            --with-system-zlib
 
-        make tooldir="$BRIOCHE_OUTPUT"
-        make install tooldir="$BRIOCHE_OUTPUT"
-      `,
+          make tooldir="$BRIOCHE_OUTPUT"
+          make install tooldir="$BRIOCHE_OUTPUT"
+        `,
       ],
       env: {
         source: sourceArchive,

@@ -14,19 +14,19 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
-        `
-        set -euo pipefail
+        std.indoc`
+          set -euo pipefail
 
-        tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-        make mrproper
+          make mrproper
 
-        mkdir -p "$BRIOCHE_OUTPUT"
+          mkdir -p "$BRIOCHE_OUTPUT"
 
-        make headers
-        find usr/include -type f ! -name '*.h' -delete
-        cp -r usr/include "$BRIOCHE_OUTPUT/include"
-      `,
+          make headers
+          find usr/include -type f ! -name '*.h' -delete
+          cp -r usr/include "$BRIOCHE_OUTPUT/include"
+        `,
       ],
       env: {
         source: sourceArchive,

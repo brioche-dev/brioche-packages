@@ -10,7 +10,7 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   });
 
   return bootstrapRun({
-    script: `
+    script: std.indoc`
       set -euo pipefail
 
       export PATH="/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
