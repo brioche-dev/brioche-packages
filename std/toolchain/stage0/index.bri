@@ -4,7 +4,6 @@ import { packTools } from "/pack_tools.bri";
 interface BootstrapRunOptions {
   script: string;
   env?: Record<string, std.ProcessTemplateLike>;
-  workDir?: std.AsyncLazy<std.Directory>;
 }
 
 export function bootstrapRun(
@@ -31,69 +30,68 @@ export function bootstrapRun(
   const briocheLd = packTools().get("brioche-ld");
   const briochePacked = packTools().get("brioche-packed-userland-exec");
 
+  const bootstrapScript = std
+    .file(options.script)
+    .withPermissions({ executable: true });
+
+  const enterBootstrapChrootScript = std
+    .file(std.indoc`
+      #!/usr/bin/env sh
+      set -eu
+
+      "$BUSYBOX/bin/busybox" mkdir -p "$BRIOCHE_OUTPUT"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/hostfs"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/proc"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/sys"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/dev"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BUSYBOX"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$HOME"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
+
+      "$BUSYBOX/bin/busybox" mount --rbind "$(pwd)/rootfs" "$(pwd)/rootfs"
+      "$BUSYBOX/bin/busybox" mount --rbind "/proc" "$(pwd)/rootfs/proc"
+      "$BUSYBOX/bin/busybox" mount --rbind "/sys" "$(pwd)/rootfs/sys"
+      "$BUSYBOX/bin/busybox" mount --rbind "/dev" "$(pwd)/rootfs/dev"
+      "$BUSYBOX/bin/busybox" mount --rbind "$BUSYBOX" "$(pwd)/rootfs/$BUSYBOX"
+      "$BUSYBOX/bin/busybox" mount --rbind "$HOME" "$(pwd)/rootfs/$HOME"
+      "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_OUTPUT" "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
+      "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_PACK_RESOURCES_DIR" "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
+
+      "$BUSYBOX/bin/busybox" mkdir -p "$HOME/.local/libexec/brioche-toolchain/bin" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64"
+      "$BUSYBOX/bin/busybox" cp "$BRIOCHE_LD" "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld"
+      "$BUSYBOX/bin/busybox" cp "$BRIOCHE_PACKED" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
+      "$BUSYBOX/bin/busybox" chmod +x "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
+      "$BUSYBOX/bin/busybox" ln -s "/usr/bin/ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/ld"
+      "$BUSYBOX/bin/busybox" ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64/"
+      "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/ld"
+      "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/x86_64-linux-gnu-ld"
+
+      export PATH="$HOME/.local/libexec/brioche-toolchain/bin\${PATH:+:$PATH}"
+
+      "$BUSYBOX/bin/busybox" pivot_root "$(pwd)/rootfs" "$(pwd)/rootfs/hostfs"
+      /bin/bash /bootstrap.sh
+    `)
+    .withPermissions({ executable: true });
+
   return std
     .process({
-      command: "/usr/bin/env",
-      args: [
-        "sh",
-        "-c",
-        std.indoc`
-          set -eu
-
-          "$BUSYBOX/bin/busybox" cp -r "$BOOTSTRAP_ROOTFS" ./rootfs
-          echo "$ENTER_BOOTSTRAP_SCRIPT" > enter.sh
-          "$BUSYBOX/bin/busybox" chmod +x enter.sh
-          echo "$RUN_BOOTSTRAP_SCRIPT" > rootfs/bootstrap.sh
-          "$BUSYBOX/bin/busybox" chmod +x rootfs/bootstrap.sh
-          "$BUSYBOX/bin/busybox" unshare -Umfr /usr/bin/env sh ./enter.sh
-        `,
-      ],
+      command: std.tpl`${busybox}/bin/busybox`,
+      args: ["unshare", "-Umfr", enterBootstrapChrootScript],
       env: {
         BUSYBOX: busybox,
-        ENTER_BOOTSTRAP_SCRIPT: std.indoc`
-          set -eu
-
-          "$BUSYBOX/bin/busybox" mkdir -p "$BRIOCHE_OUTPUT"
-
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/hostfs"
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/proc"
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/sys"
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/dev"
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BUSYBOX"
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$HOME"
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
-          "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
-
-          "$BUSYBOX/bin/busybox" mount --rbind "$(pwd)/rootfs" "$(pwd)/rootfs"
-          "$BUSYBOX/bin/busybox" mount --rbind "/proc" "$(pwd)/rootfs/proc"
-          "$BUSYBOX/bin/busybox" mount --rbind "/sys" "$(pwd)/rootfs/sys"
-          "$BUSYBOX/bin/busybox" mount --rbind "/dev" "$(pwd)/rootfs/dev"
-          "$BUSYBOX/bin/busybox" mount --rbind "$BUSYBOX" "$(pwd)/rootfs/$BUSYBOX"
-          "$BUSYBOX/bin/busybox" mount --rbind "$HOME" "$(pwd)/rootfs/$HOME"
-          "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_OUTPUT" "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
-          "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_PACK_RESOURCES_DIR" "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
-
-          "$BUSYBOX/bin/busybox" mkdir -p "$HOME/.local/libexec/brioche-toolchain/bin" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64"
-          "$BUSYBOX/bin/busybox" cp "$BRIOCHE_LD" "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld"
-          "$BUSYBOX/bin/busybox" cp "$BRIOCHE_PACKED" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
-          "$BUSYBOX/bin/busybox" chmod +x "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
-          "$BUSYBOX/bin/busybox" ln -s "/usr/bin/ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/ld"
-          "$BUSYBOX/bin/busybox" ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64/"
-          "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/ld"
-          "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/x86_64-linux-gnu-ld"
-
-          export PATH="$HOME/.local/libexec/brioche-toolchain/bin\${PATH:+:$PATH}"
-
-          "$BUSYBOX/bin/busybox" pivot_root "$(pwd)/rootfs" "$(pwd)/rootfs/hostfs"
-          /bin/bash /bootstrap.sh
-        `,
-        RUN_BOOTSTRAP_SCRIPT: options.script,
-        BOOTSTRAP_ROOTFS: bootstrapRootfs,
         BRIOCHE_LD: briocheLd,
         BRIOCHE_PACKED: briochePacked,
         ...options.env,
       },
-      workDir: options.workDir,
+      workDir: std.directory({
+        rootfs: std.merge(
+          bootstrapRootfs,
+          std.directory({
+            "bootstrap.sh": bootstrapScript,
+          }),
+        ),
+      }),
     })
     .cast("directory");
 }
