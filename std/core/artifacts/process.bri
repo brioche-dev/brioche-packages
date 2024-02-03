@@ -8,6 +8,7 @@ export interface ProcessOptions {
   args?: ProcessTemplateLike[];
   env?: Record<string, ProcessTemplateLike>;
   workDir?: AsyncLazy<Directory>;
+  outputScaffold?: AsyncLazy | null;
 }
 
 export type Process = Lazy & ProcessUtils;
@@ -53,6 +54,10 @@ export function process(options: ProcessOptions): Process {
         workDir: await (
           await (options.workDir ?? directory())
         ).briocheSerialize(),
+        outputScaffold:
+          options.outputScaffold != null
+            ? await (await options.outputScaffold).briocheSerialize()
+            : null,
         meta,
       };
     },
