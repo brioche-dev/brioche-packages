@@ -177,7 +177,7 @@ export type LazySetPermissions = WithMeta & {
 
 export type LazyProxy = WithMeta & {
   type: "proxy";
-  hash: ArtifactHash;
+  blob: BlobId;
 };
 
 export type ArtifactHash = string & { __artifactHash: never };
