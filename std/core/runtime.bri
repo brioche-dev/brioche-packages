@@ -129,6 +129,7 @@ export type LazyProcess = WithMeta & {
   args: ProcessTemplate[];
   env: Record<BString, ProcessTemplate>;
   workDir: LazyArtifact;
+  outputScaffold?: LazyArtifact | null;
   platform: Platform;
 };
 
