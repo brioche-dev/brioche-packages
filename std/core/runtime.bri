@@ -129,6 +129,7 @@ export type LazyProcess = WithMeta & {
   args: ProcessTemplate[];
   env: Record<BString, ProcessTemplate>;
   workDir: LazyArtifact;
+  outputScaffold?: LazyArtifact | null;
   platform: Platform;
 };
 
@@ -177,7 +178,7 @@ export type LazySetPermissions = WithMeta & {
 
 export type LazyProxy = WithMeta & {
   type: "proxy";
-  hash: ArtifactHash;
+  blob: BlobId;
 };
 
 export type ArtifactHash = string & { __artifactHash: never };
