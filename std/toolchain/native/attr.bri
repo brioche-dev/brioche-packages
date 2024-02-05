@@ -2,12 +2,16 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/attr-2.5.1.tar.gz",
-    hash: std.sha256Hash(
-      "bae1c6949b258a0d68001367ce0c741cebdacdd3b62965d17e5eb23cd78adaf8",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/attr-2.5.1.tar.gz",
+      hash: std.sha256Hash(
+        "bae1c6949b258a0d68001367ce0c741cebdacdd3b62965d17e5eb23cd78adaf8",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
 
   return std
     .process({
@@ -17,8 +21,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             -prefix=/ \
             --disable-static
@@ -27,9 +29,9 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .cast("directory");
 });

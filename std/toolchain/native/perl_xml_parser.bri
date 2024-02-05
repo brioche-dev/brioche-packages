@@ -4,12 +4,16 @@ import perl from "./perl.bri";
 import expat from "./expat.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/XML-Parser-2.46.tar.gz",
-    hash: std.sha256Hash(
-      "d331332491c51cccfb4cb94ffc44f9cd73378e618498d4a37df9e043661c515d",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/XML-Parser-2.46.tar.gz",
+      hash: std.sha256Hash(
+        "d331332491c51cccfb4cb94ffc44f9cd73378e618498d4a37df9e043661c515d",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
 
   return std
     .process({
@@ -18,8 +22,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         "-c",
         std.indoc`
           set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
           perl Makefile.PL \
             EXPATLIBPATH="$expat/lib" \
@@ -31,11 +33,10 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${perl()}/bin:${stage2()}/bin`,
         expat: expat(),
-        WATERMARK: "1",
       },
+      workDir: source,
     })
     .cast("directory");
 });

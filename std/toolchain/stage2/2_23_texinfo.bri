@@ -3,12 +3,16 @@ import toolchain from "./2_18_toolchain.bri";
 import perl from "./2_21_perl.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/texinfo-7.0.3.tar.xz",
-    hash: std.sha256Hash(
-      "74b420d09d7f528e84f97aa330f0dd69a98a6053e7a4e01767eed115038807bf",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/texinfo-7.0.3.tar.xz",
+      hash: std.sha256Hash(
+        "74b420d09d7f528e84f97aa330f0dd69a98a6053e7a4e01767eed115038807bf",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
   return std
     .process({
@@ -19,7 +23,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
         std.indoc`
           set -euo pipefail
 
-          tar xf "$source" --strip-components=1
           ./configure --prefix=/usr
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -27,8 +30,8 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin:${perl()}/usr/bin`,
-        source: sourceArchive,
       },
+      workDir: source,
     })
     .cast("directory");
 });

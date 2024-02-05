@@ -4,14 +4,18 @@ import m4 from "./m4.bri";
 import autoconf from "./autoconf.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/automake-1.16.5.tar.xz",
-    hash: std.sha256Hash(
-      "f01d58cd6d9d77fbdca9eb4bbd5ead1988228fdb73d6f7a201f5f8d6b118b469",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/automake-1.16.5.tar.xz",
+      hash: std.sha256Hash(
+        "f01d58cd6d9d77fbdca9eb4bbd5ead1988228fdb73d6f7a201f5f8d6b118b469",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
-  return std
+  let automake = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
@@ -19,18 +23,12 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure --prefix=/
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
-
-          # Fix shebangs
-          sed -i 's|^#![[:space:]]*.*/bin/\\([^[:space:]]*\\)|#! /usr/bin/env \\1|' "$BRIOCHE_OUTPUT"/bin/*
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${autoconf()}/bin:${stage2()}/bin`,
         // TODO: Move these variables into `autoconf()`
         M4: std.tpl`${m4()}/bin/m4`,
@@ -40,6 +38,28 @@ export default std.memo((): std.Lazy<std.Directory> => {
         autom4te_perllibdir: std.tpl`${autoconf()}/share/autoconf`,
         AC_MACRODIR: std.tpl`${autoconf()}/share/autoconf`,
       },
+      workDir: source,
     })
     .cast("directory");
+
+  // Fix shebangs
+  automake = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
+
+          sed -i 's|^#![[:space:]]*.*/bin/\\([^[:space:]]*\\)|#! /usr/bin/env \\1|' "$BRIOCHE_OUTPUT"/bin/*
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: automake,
+    })
+    .cast("directory");
+
+  return automake;
 });

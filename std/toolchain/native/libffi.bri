@@ -2,12 +2,16 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/libffi-3.4.4.tar.gz",
-    hash: std.sha256Hash(
-      "d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/libffi-3.4.4.tar.gz",
+      hash: std.sha256Hash(
+        "d66c56ad259a82cf2a9dfc408b32bf5da52371500b84745f7fb8b645712df676",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
 
   return std
     .process({
@@ -16,8 +20,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         "-c",
         std.indoc`
           set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
           ./configure \
             --prefix=/ \
@@ -28,9 +30,9 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .cast("directory");
 });

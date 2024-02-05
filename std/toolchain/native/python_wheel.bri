@@ -10,12 +10,16 @@ import libffi from "./libffi.bri";
 import pythonFlitCore from "./python_flit_core.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/wheel-0.41.1.tar.gz",
-    hash: std.sha256Hash(
-      "12b911f083e876e10c595779709f8a88a59f45aacc646492a67fe9ef796c1b47",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/wheel-0.41.1.tar.gz",
+      hash: std.sha256Hash(
+        "12b911f083e876e10c595779709f8a88a59f45aacc646492a67fe9ef796c1b47",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
 
   // TODO: Remove this!
   const dependencies = std.merge(
@@ -35,8 +39,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           python3 -m venv "$BRIOCHE_OUTPUT"
 
           "$BRIOCHE_OUTPUT/bin/pip3" wheel \
@@ -51,13 +53,13 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${python()}/bin:${stage2()}/bin`,
         PYTHONHOME: python(),
         PYTHONPATH: std.tpl`${pythonFlitCore()}/lib/python3.11/site-packages`,
         // TODO: Remove this
         LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
       },
+      workDir: source,
     })
     .cast("directory");
 

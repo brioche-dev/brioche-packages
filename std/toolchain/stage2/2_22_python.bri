@@ -2,12 +2,16 @@ import * as std from "/core";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
-    hash: std.sha256Hash(
-      "2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
+      hash: std.sha256Hash(
+        "2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
   return std
     .process({
@@ -16,7 +20,6 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
         "sh",
         "-c",
         std.indoc`
-          tar xf "$source" --strip-components=1
           ./configure \
             --prefix=/usr \
             --enable-shared \
@@ -27,8 +30,8 @@ export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin`,
-        source: sourceArchive,
       },
+      workDir: source,
     })
     .cast("directory");
 });

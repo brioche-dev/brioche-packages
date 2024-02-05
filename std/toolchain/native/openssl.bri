@@ -3,12 +3,16 @@ import stage2 from "/toolchain/stage2";
 import zlib from "./zlib.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/openssl-3.1.2.tar.gz",
-    hash: std.sha256Hash(
-      "a0ce69b8b97ea6a35b96875235aa453b966ba3cba8af2de23657d8b6767d6539",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/openssl-3.1.2.tar.gz",
+      hash: std.sha256Hash(
+        "a0ce69b8b97ea6a35b96875235aa453b966ba3cba8af2de23657d8b6767d6539",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
 
   // TODO: Fix dynamic linking with zlib (`zlib-dynamic` option instead of `zlib`)
   return std
@@ -18,8 +22,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         "-c",
         std.indoc`
           set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
           ./config \
             --prefix=/ \
@@ -37,10 +39,10 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
         zlib: zlib(),
       },
+      workDir: source,
     })
     .cast("directory");
 });

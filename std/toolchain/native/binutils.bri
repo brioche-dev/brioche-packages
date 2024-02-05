@@ -5,12 +5,16 @@ import flex from "./flex.bri";
 import zlib from "./zlib.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
-    hash: std.sha256Hash(
-      "ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
+      hash: std.sha256Hash(
+        "ae9a5789e23459e59606e6714723f2d3ffc31c03174191ef0d015bdf06007450",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
   let binutils = std
     .process({
@@ -19,8 +23,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         "-c",
         std.indoc`
           set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
           mkdir build
           cd build
@@ -40,11 +42,11 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin:${flex()}/bin`,
         CPPFLAGS: std.tpl`-I${zlib()}/include`,
         LDFLAGS: std.tpl`-L${zlib()}/lib`,
       },
+      workDir: source,
     })
     .cast("directory");
 

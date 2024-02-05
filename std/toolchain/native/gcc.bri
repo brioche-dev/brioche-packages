@@ -11,12 +11,40 @@ import mpc from "./mpc.bri";
 import libxcrypt from "./libxcrypt.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-    hash: std.sha256Hash(
-      "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da",
-    ),
-  });
+  let source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
+      hash: std.sha256Hash(
+        "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
+
+  // Use `lib` instead of `lib64` for libraries on x86_64
+  // TODO: We should be able to do this without using a process
+  source = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
+
+          case "$(uname -m)" in
+            x86_64 )
+              sed -e '/m64=/s/lib64/lib/' -i "$BRIOCHE_OUTPUT/gcc/config/i386/t-linux64"
+            ;;
+          esac
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: source,
+    })
+    .cast("directory");
 
   const buildSysroot = std.merge(
     linuxHeaders(),
@@ -40,14 +68,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         "-c",
         std.indoc`
           set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
-          case "$(uname -m)" in
-            x86_64 )
-              sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
-            ;;
-          esac
 
           mkdir build
           cd build
@@ -79,7 +99,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
         CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
         LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
@@ -88,6 +107,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
         mpfr: mpfr(),
         mpc: mpc(),
       },
+      workDir: source,
     })
     .cast("directory");
 

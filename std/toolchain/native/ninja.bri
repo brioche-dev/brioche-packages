@@ -13,12 +13,16 @@ import bzip2 from "./bzip2.bri";
 import libffi from "./libffi.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ninja-1.11.1.tar.gz",
-    hash: std.sha256Hash(
-      "31747ae633213f1eda3842686f83c2aa1412e0f5691d1c14dbbcc67fe7400cea",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ninja-1.11.1.tar.gz",
+      hash: std.sha256Hash(
+        "31747ae633213f1eda3842686f83c2aa1412e0f5691d1c14dbbcc67fe7400cea",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
 
   // TODO: Remove this!
   const dependencies = std.merge(
@@ -40,8 +44,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           python3 configure.py --bootstrap
 
           mkdir -p "$BRIOCHE_OUTPUT"/bin
@@ -49,12 +51,12 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${python()}/bin:${toolchain}/bin:${stage2()}/bin`,
         PYTHONHOME: python(),
         // TODO: Remove this
         LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
       },
+      workDir: source,
     })
     .cast("directory");
 });

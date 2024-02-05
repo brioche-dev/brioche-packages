@@ -2,12 +2,6 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bzip2-1.0.8.tar.gz",
-    hash: std.sha256Hash(
-      "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
-    ),
-  });
   const sourcePatch = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/bzip2-1.0.8-install_docs-1.patch",
     hash: std.sha256Hash(
@@ -15,7 +9,17 @@ export default std.memo((): std.Lazy<std.Directory> => {
     ),
   });
 
-  return std
+  let source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bzip2-1.0.8.tar.gz",
+      hash: std.sha256Hash(
+        "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
+  source = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
@@ -23,11 +27,28 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          cd "$BRIOCHE_OUTPUT"
 
           patch -Np1 -i "$sourcePatch"
           sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
           sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+        sourcePatch,
+      },
+      outputScaffold: source,
+    })
+    .cast("directory");
+
+  let bzip2 = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
 
           make -f Makefile-libbz2_so
           make clean
@@ -35,16 +56,22 @@ export default std.memo((): std.Lazy<std.Directory> => {
           make
           make PREFIX="$BRIOCHE_OUTPUT" install
 
-          mkdir -p "$BRIOCHE_OUTPUT/lib"
           cp -a libbz2.so.* "$BRIOCHE_OUTPUT/lib"
           ln -s libbz2.so.1.0.8 "$BRIOCHE_OUTPUT/lib/libbz2.so"
         `,
       ],
       env: {
-        source: sourceArchive,
         sourcePatch,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
+      outputScaffold: std.directory({ lib: std.directory() }),
     })
     .cast("directory");
+  bzip2 = bzip2.insert(
+    "lib/libbz2.so",
+    std.symlink({ target: "libbz2.so.1.0.8" }),
+  );
+
+  return bzip2;
 });

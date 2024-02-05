@@ -2,14 +2,18 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gettext-0.22.tar.xz",
-    hash: std.sha256Hash(
-      "0e60393a47061567b46875b249b7d2788b092d6457d656145bb0e7e6a3e26d93",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gettext-0.22.tar.xz",
+      hash: std.sha256Hash(
+        "0e60393a47061567b46875b249b7d2788b092d6457d656145bb0e7e6a3e26d93",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
-  return std
+  let gettext = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
@@ -17,20 +21,28 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --disable-static
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
-          chmod +x "$BRIOCHE_OUTPUT"/lib/preloadable_libintl.so
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .cast("directory");
+
+  // Change `lib/preloadable_libintl.so` to be executable
+  gettext = gettext.insert(
+    "lib/preloadable_libintl.so",
+    gettext
+      .get("lib/preloadable_libintl.so")
+      .cast("file")
+      .withPermissions({ executable: true }),
+  );
+
+  return gettext;
 });

@@ -9,12 +9,16 @@ import bzip2 from "./bzip2.bri";
 import libffi from "./libffi.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/flit_core-3.9.0.tar.gz",
-    hash: std.sha256Hash(
-      "72ad266176c4a3fcfab5f2930d76896059851240570ce9a98733b658cb786eba",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/flit_core-3.9.0.tar.gz",
+      hash: std.sha256Hash(
+        "72ad266176c4a3fcfab5f2930d76896059851240570ce9a98733b658cb786eba",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
 
   // TODO: Remove this!
   const dependencies = std.merge(
@@ -34,8 +38,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           python3 -m venv "$BRIOCHE_OUTPUT"
 
           "$BRIOCHE_OUTPUT/bin/pip3" wheel \
@@ -50,12 +52,12 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${python()}/bin:${stage2()}/bin`,
         PYTHONHOME: python(),
         // TODO: Remove this
         LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
       },
+      workDir: source,
     })
     .cast("directory");
 

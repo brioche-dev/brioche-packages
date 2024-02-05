@@ -10,6 +10,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
     ),
   });
 
+  // TODO: Figure out why build fails when using `.unpack()`
   let autoconf = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
@@ -18,7 +19,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          tar -xf "$sourceArchive" --strip-components=1 --no-same-owner --no-same-permissions
 
           sed -e 's/SECONDS|/&SHLVL|/' \
             -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \
@@ -27,16 +28,32 @@ export default std.memo((): std.Lazy<std.Directory> => {
           ./configure --prefix=/
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+        sourceArchive,
+      },
+    })
+    .cast("directory");
 
-          # Replace absolute paths to perl with plain program name, and fix shebangs
+  // Replace absolute paths to Perl with plain program name, and fix shebangs
+  autoconf = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
+
           sed -i 's|^#![[:space:]]*.*/bin/\\([^[:space:]]*\\)|#! /usr/bin/env \\1|' "$BRIOCHE_OUTPUT"/bin/*
           sed -i 's|[^[:space:]]*/bin/perl|perl|g' "$BRIOCHE_OUTPUT"/bin/*
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      outputScaffold: autoconf,
     })
     .cast("directory");
 

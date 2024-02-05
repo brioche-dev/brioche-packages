@@ -10,14 +10,18 @@ import zlib from "./zlib.bri";
 export default std.memo((): std.Lazy<std.Directory> => {
   const toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());
 
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/elfutils-0.189.tar.bz2",
-    hash: std.sha256Hash(
-      "39bd8f1a338e2b7cd4abc3ff11a0eddc6e690f69578a57478d8179b4148708c8",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/elfutils-0.189.tar.bz2",
+      hash: std.sha256Hash(
+        "39bd8f1a338e2b7cd4abc3ff11a0eddc6e690f69578a57478d8179b4148708c8",
+      ),
+    })
+    .unpack("tar", "bzip2")
+    .peel()
+    .cast("directory");
 
-  return std
+  let libelf = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
@@ -25,26 +29,30 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --disable-debuginfod \
             --enable-libdebuginfod=dummy
           make
           make -C libelf install DESTDIR="$BRIOCHE_OUTPUT"
-
-          mkdir -p "$BRIOCHE_OUTPUT"/lib/pkgconfig
           install -vm644 config/libelf.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig/
-          rm "$BRIOCHE_OUTPUT"/lib/libelf.a
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${toolchain}/bin:${bzip2()}/bin:${stage2()}/bin`,
         LDFLAGS: std.tpl`-L${zlib()}/lib`,
         CPPFLAGS: std.tpl`-I${zlib()}/include`,
       },
+      workDir: source,
+      outputScaffold: std.directory({
+        lib: std.directory({
+          pkgconfig: std.directory(),
+        }),
+      }),
     })
     .cast("directory");
+
+  libelf = libelf.remove("lib/libelf.a");
+
+  return libelf;
 });

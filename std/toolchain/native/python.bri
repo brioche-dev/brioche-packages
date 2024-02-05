@@ -8,12 +8,16 @@ import bzip2 from "./bzip2.bri";
 import libffi from "./libffi.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
-    hash: std.sha256Hash(
-      "2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
+      hash: std.sha256Hash(
+        "2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
   const dependencies = std.merge(
     zlib(),
@@ -32,8 +36,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix="$BRIOCHE_OUTPUT" \
             --enable-shared \
@@ -46,7 +48,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
       ],
       env: {
         // TODO: Clean up these env vars
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
         LDFLAGS: std.tpl`-L${dependencies}/lib -lz`,
         CPPFLAGS: std.tpl`-I${dependencies}/include`,
@@ -60,6 +61,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
         LIBCRYPT_CFLAGS: std.tpl`-I${dependencies}/include`,
         LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
       },
+      workDir: source,
     })
     .cast("directory");
 });

@@ -2,18 +2,46 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/readline-8.2.tar.gz",
-    hash: std.sha256Hash(
-      "3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35",
-    ),
-  });
   const sourcePatch = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/readline-8.2-upstream_fix-1.patch",
     hash: std.sha256Hash(
       "2d6478185dcce0d8fe6ac02e7872fba8b91429f41627ddfc2e322e5338e36a53",
     ),
   });
+
+  let source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/readline-8.2.tar.gz",
+      hash: std.sha256Hash(
+        "3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35",
+      ),
+    })
+    .unpack("tar", "gzip")
+    .peel()
+    .cast("directory");
+  source = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+        set -euo pipefail
+
+        cd "$BRIOCHE_OUTPUT"
+
+        sed -i '/MV.*old/d' Makefile.in
+        sed -i '/{OLDSUFF}/c:' support/shlib-install
+
+        patch -Np1 -i "$sourcePatch"
+      `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+        sourcePatch,
+      },
+      outputScaffold: source,
+    })
+    .cast("directory");
 
   return std
     .process({
@@ -23,13 +51,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
-          sed -i '/MV.*old/d' Makefile.in
-          sed -i '/{OLDSUFF}/c:' support/shlib-install
-
-          patch -Np1 -i "$sourcePatch"
-
           ./configure \
             --prefix=/ \
             --with-curses
@@ -38,10 +59,9 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
-        sourcePatch,
       },
+      workDir: source,
     })
     .cast("directory");
 });

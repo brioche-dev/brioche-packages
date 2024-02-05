@@ -5,12 +5,16 @@ import libpipeline from "./libpipeline.bri";
 import groff from "./groff.bri";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/man-db-2.11.2.tar.xz",
-    hash: std.sha256Hash(
-      "cffa1ee4e974be78646c46508e6dd2f37e7c589aaab2938cc1064f058fef9f8d",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/man-db-2.11.2.tar.xz",
+      hash: std.sha256Hash(
+        "cffa1ee4e974be78646c46508e6dd2f37e7c589aaab2938cc1064f058fef9f8d",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
   return std
     .process({
@@ -19,8 +23,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         "-c",
         std.indoc`
           set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
           ./configure \
             --prefix=/ \
@@ -33,7 +35,6 @@ export default std.memo((): std.Lazy<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin:${groff()}/bin`,
         MAGIC: std.tpl`${stage2()}/usr/share/misc/magic`,
         libpipeline_CFLAGS: std.tpl`-I${libpipeline()}/include`,
@@ -43,6 +44,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
         GROFF_FONT_PATH: std.tpl`${groff()}/share/groff/current/font`,
         GROFF_TMAC_PATH: std.tpl`${groff()}/share/groff/current/tmac`,
       },
+      workDir: source,
     })
     .cast("directory");
 });

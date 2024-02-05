@@ -2,22 +2,24 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/inetutils-2.4.tar.xz",
-    hash: std.sha256Hash(
-      "1789d6b1b1a57dfe2a7ab7b533ee9f5dfd9cbf5b59bb1bb3c2612ed08d0f68b2",
-    ),
-  });
+  const source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/inetutils-2.4.tar.xz",
+      hash: std.sha256Hash(
+        "1789d6b1b1a57dfe2a7ab7b533ee9f5dfd9cbf5b59bb1bb3c2612ed08d0f68b2",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
 
-  return std
+  let inetutils = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
         "-c",
         std.indoc`
           set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
           ./configure \
             --prefix=/ \
@@ -32,15 +34,23 @@ export default std.memo((): std.Lazy<std.Directory> => {
             --disable-servers
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
-
-          mkdir -p "$BRIOCHE_OUTPUT/sbin"
-          ln -s "../bin/ifconfig" "$BRIOCHE_OUTPUT/sbin/ifconfig"
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .cast("directory");
+
+  inetutils = std.merge(
+    inetutils,
+    std.directory({
+      sbin: std.directory({
+        ifconfig: std.symlink({ target: "../bin/ifconfig" }),
+      }),
+    }),
+  );
+
+  return inetutils;
 });

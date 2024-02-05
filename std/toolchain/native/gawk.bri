@@ -2,12 +2,25 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Lazy<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gawk-5.2.2.tar.xz",
-    hash: std.sha256Hash(
-      "3c1fce1446b4cbee1cd273bd7ec64bc87d89f61537471cd3e05e33a965a250e9",
-    ),
-  });
+  let source = std
+    .download({
+      url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gawk-5.2.2.tar.xz",
+      hash: std.sha256Hash(
+        "3c1fce1446b4cbee1cd273bd7ec64bc87d89f61537471cd3e05e33a965a250e9",
+      ),
+    })
+    .unpack("tar", "xz")
+    .peel()
+    .cast("directory");
+
+  // Ensure some extras don't get installed
+  source = std
+    .process({
+      command: std.tpl`${stage2()}/bin/sed`,
+      args: ["-i", "s/extras//", std.tpl`${std.outputPath}/Makefile.in`],
+      outputScaffold: source,
+    })
+    .cast("directory");
 
   return std
     .process({
@@ -17,19 +30,15 @@ export default std.memo((): std.Lazy<std.Directory> => {
         std.indoc`
           set -euo pipefail
 
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
-          sed -i 's/extras//' Makefile.in
-
           ./configure --prefix=/
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .cast("directory");
 });
