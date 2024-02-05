@@ -211,7 +211,7 @@ export type Hash = { type: "sha256"; value: HexString };
 
 export type ArchiveFormat = "tar";
 
-export type CompressionFormat = "none" | "gzip" | "xz" | "zstd";
+export type CompressionFormat = "none" | "bzip2" | "gzip" | "xz" | "zstd";
 
 export type ProcessTemplate = {
   components: ProcessTemplateComponent[];
