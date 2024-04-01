@@ -2,7 +2,7 @@ import { build } from "./build.bri";
 
 export const project = {
   dependencies: {
-    std: { path: "../std" },
+    std: "*",
   },
 };
 
