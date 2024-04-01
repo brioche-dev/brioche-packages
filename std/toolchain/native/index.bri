@@ -59,6 +59,31 @@ import manDb from "./man_db.bri";
 import procpsNg from "./procps_ng.bri";
 import utilLinux from "./util_linux.bri";
 
+export { bash };
+
+export const tools = std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+  return std.merge(
+    zlib(),
+    bzip2(),
+    xz(),
+    zstd(),
+    file(),
+    bc(),
+    binutils(),
+    sed(),
+    grep(),
+    bash(),
+    coreutils(),
+    diffutils(),
+    gawk(),
+    findutils(),
+    gzip(),
+    make(),
+    patch(),
+    tar(),
+  );
+});
+
 export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   return std.merge(
     linuxHeaders(),

@@ -10,7 +10,14 @@
  * can be found in `LICENSE-LFS.md`.
  */
 
+import * as std from "/core";
+import nativeToolchain from "./native";
+
 export { default as stage0 } from "./stage0";
 export { default as stage1 } from "./stage1";
 export { default as stage2 } from "./stage2";
-export { default as native } from "./native";
+export { default as native, bash, tools } from "./native";
+
+export function toolchain(): std.Lazy<std.Directory> {
+  return nativeToolchain();
+}
