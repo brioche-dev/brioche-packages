@@ -1,4 +1,7 @@
 export * from "./core";
 export * from "./toolchain";
 
-export const project = {};
+export const project = {
+  name: "std",
+  version: "0.0.0",
+};

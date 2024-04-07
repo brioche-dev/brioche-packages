@@ -3,7 +3,10 @@
  * heavy influence from the Zod and Runtypes TypeScript libraries.
  */
 
-export const project = {};
+export const project = {
+  name: "typer",
+  version: "0.0.0",
+};
 
 const checkSymbol: unique symbol = Symbol("check");
 
