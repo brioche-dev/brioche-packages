@@ -4,8 +4,35 @@ on:
   - push
 
 jobs:
+  build:
+    name: Build packages
+    runs-on: proxmox-runner-set
+    steps:
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Brioche
+        run: |
+          mkdir -p ~/.local/bin
+          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
+          chmod +x ~/.local/bin/brioche
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Build projects
+        run: |
+          for project in projects/*; do
+            echo "::group::$project"
+            brioche build -p "$project" --check --sync
+            echo "::endgroup::"
+          done
+        env:
+          BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
+
   publish:
     name: Publish packages
+    needs: [build]
     if: github.repository == 'brioche-dev/brioche-packages' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     steps:
