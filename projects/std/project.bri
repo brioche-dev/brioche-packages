@@ -1,3 +1,5 @@
+import { toolchain } from "./toolchain";
+
 export * from "./core";
 export * from "./toolchain";
 
@@ -5,3 +7,11 @@ export const project = {
   name: "std",
   version: "0.0.0",
 };
+
+// NOTE: This default export is a workaround so that `brioche build -p ./std`
+// will build the toolchain. This will be removed once we support building
+// other exports more easily. The `never` type is used to discourage external
+// use.
+export default function (): never {
+  return toolchain() as never;
+}
