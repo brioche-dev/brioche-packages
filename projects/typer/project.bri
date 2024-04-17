@@ -469,3 +469,17 @@ function displayPath(path: (string | number)[]): string | undefined {
 
   return `at ${pathMessage}`;
 }
+
+// HACK: This default export is a workaround so that `brioche build -p ./typer`
+// will not error out, which is used in CI/CD. This will be removed
+// eventually.
+export default function (): never {
+  return {
+    briocheSerialize: () => {
+      return {
+        type: "directory",
+        entries: {},
+      };
+    },
+  } as any as never;
+}
