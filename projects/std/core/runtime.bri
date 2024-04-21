@@ -31,9 +31,9 @@ export async function createProxy(artifact: LazyArtifact): Promise<LazyProxy> {
   return result;
 }
 
-export async function readBlob(blobId: BlobId): Promise<BString> {
+export async function readBlob(blobHash: BlobHash): Promise<BString> {
   const result = await (globalThis as any).Deno.core.ops.op_brioche_read_blob(
-    blobId,
+    blobHash,
   );
   return result;
 }
@@ -75,7 +75,7 @@ export type CompleteArtifact =
 
 export type CompleteFile = WithMeta & {
   type: "file";
-  contentBlob: BlobId;
+  contentBlob: BlobHash;
   executable: boolean;
   resources: CompleteDirectory;
 };
@@ -87,7 +87,7 @@ export type CompleteSymlink = WithMeta & {
 
 export type CompleteDirectory = WithMeta & {
   type: "directory";
-  listingBlob?: BlobId;
+  listingBlob?: BlobHash;
 };
 
 export type LazyArtifact =
@@ -178,7 +178,7 @@ export type LazySetPermissions = WithMeta & {
 
 export type LazyProxy = WithMeta & {
   type: "proxy";
-  blob: BlobId;
+  blob: BlobHash;
 };
 
 export type ArtifactHash = string & { __artifactHash: never };
@@ -199,7 +199,7 @@ export type StackFrame = {
   columnNumber?: number | null;
 };
 
-export type BlobId = string & { __blobId: never };
+export type BlobHash = string & { __blobHash: never };
 
 export type BString = string & { __bString: never };
 

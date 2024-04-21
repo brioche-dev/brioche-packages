@@ -28,7 +28,7 @@ export interface FilePermissions {
 
 export interface FileCtor {
   source?: runtime.Source;
-  contentBlob: runtime.BlobId;
+  contentBlob: runtime.BlobHash;
   executable: boolean;
   resources: runtime.CompleteDirectory;
 }
@@ -36,7 +36,7 @@ export interface FileCtor {
 export class File implements Lazy<File> {
   [artifactType]: "file" = "file";
   source?: runtime.Source;
-  contentBlob: runtime.BlobId;
+  contentBlob: runtime.BlobHash;
   executable: boolean;
   resources: runtime.CompleteDirectory;
 
