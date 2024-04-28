@@ -7,7 +7,7 @@ import gcc from "./gcc.bri";
 import bzip2 from "./bzip2.bri";
 import zlib from "./zlib.bri";
 
-export default std.memo((): std.Lazy<std.Directory> => {
+export default std.memo((): std.Recipe<std.Directory> => {
   const toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());
 
   const sourceArchive = std.download({

@@ -1,7 +1,7 @@
 import * as std from "/core";
 import toolchain from "./2_18_toolchain.bri";
 
-export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
     hash: std.sha256Hash(

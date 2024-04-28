@@ -1,17 +1,17 @@
 import { Awaitable, mixin } from "../utils.bri";
 import * as runtime from "../runtime.bri";
 import { type Directory, directory } from "./directory.bri";
-import { type AsyncLazy, type Lazy, createLazy } from "./artifact.bri";
+import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
 
 export interface ProcessOptions {
   command: ProcessTemplateLike;
   args?: ProcessTemplateLike[];
   env?: Record<string, ProcessTemplateLike>;
-  workDir?: AsyncLazy<Directory>;
-  outputScaffold?: AsyncLazy | null;
+  workDir?: AsyncRecipe<Directory>;
+  outputScaffold?: AsyncRecipe | null;
 }
 
-export type Process = Lazy & ProcessUtils;
+export type Process = Recipe & ProcessUtils;
 
 export interface ProcessUtils {
   env(key: string, value: ProcessTemplateLike): Process;
@@ -31,7 +31,7 @@ export function process(options: ProcessOptions): Process {
     bEnv[runtime.bstring(k)] = processTemplate(v);
   }
 
-  const artifact = createLazy(["file", "directory", "symlink"], {
+  const recipe = createRecipe(["file", "directory", "symlink"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       return {
@@ -63,7 +63,7 @@ export function process(options: ProcessOptions): Process {
     },
   });
 
-  return mixin(artifact, {
+  return mixin(recipe, {
     env(this: Process, key: string, value: ProcessTemplateLike): Process {
       return process({
         ...options,
@@ -109,7 +109,7 @@ export type ProcessTemplateLike = Awaitable<ProcessTemplateComponent>;
 export type ProcessTemplateComponent =
   | string
   | ProcessTemplate
-  | Lazy
+  | Recipe
   | typeof outputPath
   | typeof resourcesDir
   | typeof homeDir
@@ -149,7 +149,7 @@ export class ProcessTemplate {
             return serialized.components;
           } else {
             return [
-              { type: "input", artifact: await component.briocheSerialize() },
+              { type: "input", recipe: await component.briocheSerialize() },
             ];
           }
         },

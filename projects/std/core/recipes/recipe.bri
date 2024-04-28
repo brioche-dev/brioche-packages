@@ -1,0 +1,357 @@
+import * as runtime from "../runtime.bri";
+import { source as briocheSource } from "../source.bri";
+import { type Awaitable, unreachable } from "../utils.bri";
+import { File, type FilePermissions } from "./file.bri";
+import { Directory } from "./directory.bri";
+import { Symlink } from "./symlink.bri";
+import { createProxy } from "./proxy.bri";
+
+export type Artifact = File | Directory | Symlink;
+
+export type ArtifactTypes = {
+  file: File;
+  directory: Directory;
+  symlink: Symlink;
+};
+
+export type ArtifactType<T extends Artifact> = T extends File
+  ? "file"
+  : T extends Directory
+    ? "directory"
+    : T extends Symlink
+      ? "symlink"
+      : never;
+
+export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
+  (T extends File
+    ?
+        | runtime.File
+        | runtime.DownloadRecipe
+        | runtime.ProcessRecipe
+        | runtime.CreateFileRecipe
+        | runtime.CastRecipe
+        | runtime.PeelRecipe
+        | runtime.GetRecipe
+        | runtime.SetPermissionsRecipe
+        | runtime.ProxyRecipe
+    : T extends Directory
+      ?
+          | runtime.Directory
+          | runtime.UnpackRecipe
+          | runtime.ProcessRecipe
+          | runtime.CreateDirectoryRecipe
+          | runtime.CastRecipe
+          | runtime.MergeRecipe
+          | runtime.PeelRecipe
+          | runtime.GetRecipe
+          | runtime.InsertRecipe
+          | runtime.ProxyRecipe
+      : T extends Symlink
+        ?
+            | runtime.Symlink
+            | runtime.ProcessRecipe
+            | runtime.CastRecipe
+            | runtime.PeelRecipe
+            | runtime.GetRecipe
+            | runtime.ProxyRecipe
+        : never);
+
+// This symbol is used in `Recipe` so that `Recipe<Artifact>` doesn't simplify
+// to `RecipeCommon<Artifact>` in TypeScript messages. This is mainly done for the LSP.
+const recipeMarker: unique symbol = Symbol("recipeMarker");
+
+export type Recipe<T extends Artifact = Artifact> = {
+  [recipeMarker]?: undefined;
+} & RecipeCommon<T> &
+  ([T] extends [File]
+    ? FileRecipeUtils
+    : [T] extends [Directory]
+      ? DirectoryRecipeUtils
+      : [T] extends [Symlink]
+        ? SymlinkRecipeUtils
+        : T extends Artifact
+          ? object
+          : never);
+
+export type AsyncRecipe<T extends Artifact = Artifact> = Awaitable<Recipe<T>>;
+
+export function briocheDeserializeAny(
+  artifact: runtime.Artifact,
+  source: runtime.Source | undefined,
+): Artifact {
+  switch (artifact.type) {
+    case "file":
+      return File.briocheDeserialize(artifact, source);
+    case "directory":
+      return Directory.briocheDeserialize(artifact, source);
+    case "symlink":
+      return Symlink.briocheDeserialize(artifact, source);
+    default:
+      return unreachable(artifact);
+  }
+}
+
+export function recipe<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
+  return createRecipe<T>(
+    ["file", "directory", "symlink"] as ArtifactType<T>[],
+    {
+      sourceDepth: 1,
+      briocheSerialize: async () => {
+        return (await recipe).briocheSerialize();
+      },
+      bake: async () => {
+        return (await recipe).bake();
+      },
+    },
+  );
+}
+
+export function recipeFn<T extends Artifact>(
+  f: () => AsyncRecipe<T>,
+): Recipe<T> {
+  let result: Recipe<T> | undefined;
+  return createRecipe<T>(
+    ["file", "directory", "symlink"] as ArtifactType<T>[],
+    {
+      sourceDepth: 1,
+      briocheSerialize: async () => {
+        if (result == null) {
+          result = await f();
+        }
+        return result.briocheSerialize();
+      },
+      bake: async () => {
+        if (result == null) {
+          result = await f();
+        }
+        return result.bake();
+      },
+    },
+  );
+}
+
+export type CreateRecipeOptions<T extends Artifact> = {
+  sourceDepth?: number;
+} & (
+  | {
+      briocheSerialize?(meta: runtime.Meta): Awaitable<RecipeSerialization<T>>;
+      bake(meta: runtime.Meta): Awaitable<T>;
+    }
+  | {
+      briocheSerialize(meta: runtime.Meta): Awaitable<RecipeSerialization<T>>;
+      bake?(meta: runtime.Meta): Awaitable<T>;
+    }
+);
+
+export function createRecipe<T extends Artifact>(
+  types: ArtifactType<T>[],
+  opts: CreateRecipeOptions<T>,
+): Recipe<T> {
+  const source = briocheSource({ depth: (opts.sourceDepth ?? 0) + 1 });
+  const meta = { source };
+
+  const isFile = types.some((type) => type === "file");
+  const isDirectory = types.some((type) => type === "directory");
+  const isSymlink = types.some((type) => type === "symlink");
+
+  return {
+    briocheSerialize: async () => {
+      if (opts.briocheSerialize != null) {
+        return opts.briocheSerialize(meta);
+      } else if (opts.bake != null) {
+        return (await opts.bake(meta)).briocheSerialize();
+      } else {
+        throw new Error("bake or briocheSerialize is required");
+      }
+    },
+    bake: async () => {
+      if (opts.bake != null) {
+        return opts.bake(meta);
+      } else if (opts.briocheSerialize != null) {
+        const result = await runtime.bake(await opts.briocheSerialize(meta));
+        return briocheDeserializeAny(result, source);
+      } else {
+        throw new Error("bake or briocheSerialize is required");
+      }
+    },
+    ...recipeUtils,
+    ...(isFile ? fileRecipeUtils : {}),
+    ...(isDirectory ? directoryRecipeUtils : {}),
+    ...(isSymlink ? symlinkRecipeUtils : {}),
+  } as unknown as Recipe<T>;
+}
+
+interface RecipeCommon<T extends Artifact> extends RecipeUtils<T> {
+  bake(): Awaitable<T>;
+  briocheSerialize(): Awaitable<RecipeSerialization<T>>;
+}
+
+interface RecipeUtils<T extends Artifact> {
+  cast<To extends ArtifactType<T> & keyof ArtifactTypes>(
+    to: To,
+  ): Recipe<ArtifactTypes[To] & T>;
+}
+
+interface FileRecipeUtils extends RecipeUtils<File> {
+  withPermissions(permissions: Partial<FilePermissions>): Recipe<File>;
+  unpack(
+    archiveFormat: runtime.ArchiveFormat,
+    compressionFormat?: runtime.CompressionFormat,
+  ): Recipe<Directory>;
+  readBytes(): Promise<Uint8Array>;
+  read(): Promise<string>;
+}
+
+interface DirectoryRecipeUtils extends RecipeUtils<Directory> {
+  get(...paths: string[]): Recipe<Artifact>;
+  insert(path: string, recipe: AsyncRecipe<Artifact>): Recipe<Directory>;
+  remove(path: string): Recipe<Directory>;
+  peel(depth?: number): Recipe;
+}
+
+interface SymlinkRecipeUtils extends RecipeUtils<Symlink> {}
+
+export const recipeUtils: RecipeUtils<Artifact> = {
+  cast<To extends keyof ArtifactTypes>(
+    this: Recipe,
+    to: To,
+  ): Recipe<ArtifactTypes[To]> {
+    return createRecipe(
+      [to satisfies ArtifactType<Artifact> as ArtifactType<ArtifactTypes[To]>],
+      {
+        sourceDepth: 1,
+        briocheSerialize: async (meta) => {
+          const recipe = await this.briocheSerialize();
+          return {
+            type: "cast",
+            recipe,
+            to,
+            meta,
+          } satisfies RecipeSerialization<Artifact> as any;
+        },
+      },
+    );
+  },
+};
+
+export const fileRecipeUtils: FileRecipeUtils = {
+  ...recipeUtils,
+  withPermissions(
+    this: Recipe<File>,
+    permissions: Partial<FilePermissions>,
+  ): Recipe<File> {
+    return createRecipe(["file"], {
+      sourceDepth: 1,
+      briocheSerialize: async (meta) => {
+        const file = await this.briocheSerialize();
+        return {
+          type: "set_permissions",
+          file,
+          executable: permissions.executable ?? null,
+          meta,
+        };
+      },
+    });
+  },
+  unpack(
+    this: Recipe<File>,
+    archiveFormat: runtime.ArchiveFormat,
+    compressionFormat?: runtime.CompressionFormat,
+  ): Recipe<Directory> {
+    return createRecipe(["directory"], {
+      sourceDepth: 1,
+      briocheSerialize: async (meta) => {
+        const file = await this.briocheSerialize();
+        return {
+          type: "unpack",
+          file,
+          archive: archiveFormat,
+          compression: compressionFormat,
+          meta,
+        };
+      },
+    });
+  },
+  async readBytes(this: Recipe<File>): Promise<Uint8Array> {
+    const artifact = await this.bake();
+    const bstring = await runtime.readBlob(artifact.contentBlob);
+    return runtime.bstringToBytes(bstring);
+  },
+  async read(this: Recipe<File>): Promise<string> {
+    const bytes = await this.readBytes();
+    return runtime.utf8Decode(bytes);
+  },
+};
+
+export const directoryRecipeUtils: DirectoryRecipeUtils = {
+  ...recipeUtils,
+  get(this: Recipe<Directory>, path: string): Recipe<Artifact> {
+    return createRecipe(["file", "directory", "symlink"], {
+      sourceDepth: 1,
+      briocheSerialize: async (meta) => {
+        const directory = await this.briocheSerialize();
+        return {
+          type: "get",
+          directory,
+          path: runtime.bstring(path),
+          meta,
+        };
+      },
+    });
+  },
+  insert(
+    this: Recipe<Directory>,
+    path: string,
+    recipe: AsyncRecipe<Artifact>,
+  ): Recipe<Directory> {
+    const proxyDirectory = createProxy(this);
+    const proxyRecipe = createProxy(recipe);
+
+    return createRecipe(["directory"], {
+      sourceDepth: 1,
+      briocheSerialize: async (meta) => {
+        const serializedDirectory = await proxyDirectory.briocheSerialize();
+        const serializedRecipe = await proxyRecipe.briocheSerialize();
+        return {
+          type: "insert",
+          directory: serializedDirectory,
+          path: runtime.bstring(path),
+          recipe: serializedRecipe,
+          meta,
+        };
+      },
+    });
+  },
+  remove(this: Recipe<Directory>, path: string): Recipe<Directory> {
+    return createRecipe(["directory"], {
+      sourceDepth: 1,
+      briocheSerialize: async (meta) => {
+        const directory = await this.briocheSerialize();
+        return {
+          type: "insert",
+          directory,
+          path: runtime.bstring(path),
+          recipe: null,
+          meta,
+        };
+      },
+    });
+  },
+  peel(this: Recipe<Directory>, depth: number = 1): Recipe {
+    return createRecipe(["file", "directory", "symlink"], {
+      sourceDepth: 1,
+      briocheSerialize: async (meta) => {
+        return {
+          type: "peel",
+          directory: await this.briocheSerialize(),
+          depth,
+          meta,
+        };
+      },
+    });
+  },
+};
+
+export const symlinkRecipeUtils: SymlinkRecipeUtils = {
+  ...recipeUtils,
+};

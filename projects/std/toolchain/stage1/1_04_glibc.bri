@@ -5,7 +5,7 @@ import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
 
-export default std.memo((): std.Lazy<std.Directory> => {
+export default std.memo((): std.Recipe<std.Directory> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
     hash: std.sha256Hash(

@@ -1,14 +1,14 @@
 import { File } from "./file.bri";
 import { Hash } from "./hash.bri";
-import { type Lazy, createLazy } from "./artifact.bri";
+import { type Recipe, createRecipe } from "./recipe.bri";
 
 export interface DownloadOptions {
   url: string;
   hash: Hash;
 }
 
-export function download(opts: DownloadOptions): Lazy<File> {
-  return createLazy(["file"], {
+export function download(opts: DownloadOptions): Recipe<File> {
+  return createRecipe(["file"], {
     sourceDepth: 1,
     briocheSerialize: (meta) => ({
       type: "download",

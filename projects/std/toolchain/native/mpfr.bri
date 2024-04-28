@@ -2,7 +2,7 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 import gmp from "./gmp.bri";
 
-export default std.memo((): std.Lazy<std.Directory> => {
+export default std.memo((): std.Recipe<std.Directory> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
     hash: std.sha256Hash(
@@ -43,7 +43,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
     .cast("directory");
 
   const libtoolArchive = mpfr.get("lib/libmpfr.la").cast("file");
-  const newLibtoolArchive = std.lazyFn(async () => {
+  const newLibtoolArchive = std.recipeFn(async () => {
     let libtoolArchiveContents = await libtoolArchive.read();
     libtoolArchiveContents = libtoolArchiveContents.replace(
       /\/\/lib\/libgmp\.la/g,

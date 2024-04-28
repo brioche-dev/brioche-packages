@@ -18,6 +18,6 @@ export { default as stage1 } from "./stage1";
 export { default as stage2 } from "./stage2";
 export { default as native, bash, tools } from "./native";
 
-export function toolchain(): std.Lazy<std.Directory> {
+export function toolchain(): std.Recipe<std.Directory> {
   return nativeToolchain();
 }

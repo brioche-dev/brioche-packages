@@ -8,7 +8,7 @@ interface BootstrapRunOptions {
 
 export function bootstrapRun(
   options: BootstrapRunOptions,
-): std.Lazy<std.Directory> {
+): std.Recipe<std.Directory> {
   const bootstrapRootfs = std
     .download({
       url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd",
@@ -96,7 +96,7 @@ export function bootstrapRun(
     .cast("directory");
 }
 
-export default async (): Promise<std.Lazy> => {
+export default async (): Promise<std.Recipe> => {
   const utils = std
     .download({
       url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",

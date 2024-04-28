@@ -1,0 +1,69 @@
+import * as runtime from "../runtime.bri";
+import { type Equatable, assert, jsonSerialize } from "../utils.bri";
+import {
+  type Artifact,
+  type AsyncRecipe,
+  type Recipe,
+  type RecipeSerialization,
+  type ArtifactType,
+  briocheDeserializeAny,
+  createRecipe,
+} from "./recipe.bri";
+
+export function memo<Args extends Equatable[], Ret extends Artifact>(
+  f: (...args: Args) => AsyncRecipe<Ret>,
+): (...args: Args) => Recipe<Ret> {
+  const proxies = new Map<string, Recipe<Ret>>();
+  return (...args: Args) => {
+    const key = jsonSerialize(args);
+    const memoizedProxy = proxies.get(key);
+    if (memoizedProxy != null) {
+      return memoizedProxy;
+    } else {
+      const proxy = createProxy(f(...args));
+      proxies.set(key, proxy);
+      return proxy;
+    }
+  };
+}
+
+export function createProxy<T extends Artifact>(
+  recipe: AsyncRecipe<T>,
+): Recipe<T> {
+  let serialized: Promise<runtime.ProxyRecipe> | undefined;
+  let baked: T | undefined;
+
+  const serializeProxy = async (): Promise<runtime.ProxyRecipe> => {
+    if (serialized === undefined) {
+      serialized = (async () => {
+        const serializedRecipe = await (await recipe).briocheSerialize();
+        const proxy = await runtime.createProxy(serializedRecipe);
+        return {
+          ...proxy,
+          meta: serializedRecipe.meta,
+        };
+      })();
+    }
+
+    return await serialized;
+  };
+
+  return createRecipe(["file", "directory", "symlink"] as ArtifactType<T>[], {
+    sourceDepth: 1,
+    briocheSerialize: async () => {
+      const proxy = (await serializeProxy()) as unknown;
+      return proxy as RecipeSerialization<T>;
+    },
+    bake: async () => {
+      if (baked === undefined) {
+        const proxy = await serializeProxy();
+        const bakedArtifact = await runtime.bake(proxy);
+        baked = briocheDeserializeAny(bakedArtifact, proxy.meta?.source) as T;
+      }
+
+      /* eslint-disable-next-line */
+      assert(baked != null, "expected `bake()` to return a value");
+      return baked;
+    },
+  });
+}
