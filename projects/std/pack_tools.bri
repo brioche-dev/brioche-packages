@@ -1,6 +1,6 @@
 import * as std from "/core";
 
-export function packTools(): std.Lazy<std.Directory> {
+export function packTools(): std.Recipe<std.Directory> {
   return std
     .download({
       url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche/commits/2b2c62754247c7a5707faae1e664c1607765a548/x86_64-linux/brioche-pack.tar.zstd",

@@ -1,7 +1,9 @@
 import * as std from "/core";
 import { wrapWithScript } from "../utils.bri";
 
-export function createToolchain(...tools: std.AsyncLazy<std.Directory>[]): std.Lazy<std.Directory> {
+export function createToolchain(
+  ...tools: std.AsyncRecipe<std.Directory>[]
+): std.Recipe<std.Directory> {
   return wrapWithScript(std.merge(...tools), {
     paths: [
       "bin/x86_64-pc-linux-gnu-c++",
@@ -13,7 +15,8 @@ export function createToolchain(...tools: std.AsyncLazy<std.Directory>[]): std.L
       "bin/gcc",
     ],
     renameSuffix: "-orig",
-    script: std.file(std.indoc`
+    script: std
+      .file(std.indoc`
       #!/usr/bin/env sh
       # MIT license: https://stackoverflow.com/a/29835459
       rreadlink() ( # Execute the function in a *subshell* to localize variables and the effect of 'cd'.
@@ -83,7 +86,8 @@ export function createToolchain(...tools: std.AsyncLazy<std.Directory>[]): std.L
       set -- --sysroot="$sysroot" "$@"
 
       "$(rreadlink "$0")-orig" "$@"
-    `).withPermissions({ executable: true }),
+    `)
+      .withPermissions({ executable: true }),
   });
 }
 

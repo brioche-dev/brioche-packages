@@ -10,7 +10,7 @@ import mpfr from "./mpfr.bri";
 import mpc from "./mpc.bri";
 import libxcrypt from "./libxcrypt.bri";
 
-export default std.memo((): std.Lazy<std.Directory> => {
+export default std.memo((): std.Recipe<std.Directory> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
     hash: std.sha256Hash(
@@ -131,7 +131,7 @@ export default std.memo((): std.Lazy<std.Directory> => {
   return gcc;
 });
 
-function ccWrapper(): std.Lazy<std.File> {
+function ccWrapper(): std.Recipe<std.File> {
   return std
     .file(std.indoc`
     #!/usr/bin/env sh
@@ -192,7 +192,7 @@ function ccWrapper(): std.Lazy<std.File> {
     .withPermissions({ executable: true });
 }
 
-function cc1Wrapper(systemHeaders: string[]): std.Lazy<std.File> {
+function cc1Wrapper(systemHeaders: string[]): std.Recipe<std.File> {
   // Ensure we can safely interpolate the system header paths in the shell script
   const systemHeaderRegex = /^[a-zA-Z0-9_\+\-\.\/\$]+$/;
   std.assert(systemHeaders.every((header) => systemHeaderRegex.test(header)));

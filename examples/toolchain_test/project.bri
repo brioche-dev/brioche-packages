@@ -6,7 +6,7 @@ export const project = {
   },
 };
 
-export default async (): Promise<std.Lazy> => {
+export default async (): Promise<std.Recipe> => {
   return std.process({
     command: "/usr/bin/env",
     args: [

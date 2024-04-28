@@ -2,7 +2,7 @@ import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 
-export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
     hash: std.sha256Hash(

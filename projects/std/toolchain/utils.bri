@@ -7,9 +7,9 @@ interface UseBriocheLdOptions {
 }
 
 export function useBriocheLd(
-  dir: std.Lazy<std.Directory>,
+  dir: std.Recipe<std.Directory>,
   options: UseBriocheLdOptions,
-): std.Lazy<std.Directory> {
+): std.Recipe<std.Directory> {
   const briocheLd = packTools().get("brioche-ld");
   const briochePacked = packTools().get("brioche-packed-userland-exec");
 
@@ -27,7 +27,7 @@ export function useBriocheLd(
       "libexec",
       "brioche-ld",
     ].join("/");
-    let briocheLdDir: std.Lazy<std.Directory> = std.directory({
+    let briocheLdDir: std.Recipe<std.Directory> = std.directory({
       ld: std.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
       "brioche-packed": briochePacked,
     });
@@ -62,14 +62,14 @@ export function useBriocheLd(
 interface WrapWithScriptOptions {
   paths: string[];
   renameSuffix: string;
-  script: std.AsyncLazy<std.File>;
+  script: std.AsyncRecipe<std.File>;
 }
 
 export function wrapWithScript(
-  directory: std.AsyncLazy<std.Directory>,
+  directory: std.AsyncRecipe<std.Directory>,
   options: WrapWithScriptOptions,
-): std.Lazy<std.Directory> {
-  let dir = std.lazy(directory);
+): std.Recipe<std.Directory> {
+  let dir = std.recipe(directory);
 
   for (const path of options.paths) {
     const program = dir.get(path);

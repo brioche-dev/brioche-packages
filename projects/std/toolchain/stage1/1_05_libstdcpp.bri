@@ -6,7 +6,7 @@ import linuxHeaders from "./1_03_linux_headers.bri";
 import glibc from "./1_04_glibc.bri";
 import { wrapWithScript, useBriocheLd } from "../utils.bri";
 
-export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
     hash: std.sha256Hash(

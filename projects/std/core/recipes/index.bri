@@ -15,13 +15,13 @@ export {
 export { memo, createProxy } from "./proxy.bri";
 export { symlink, type SymlinkOptions, Symlink } from "./symlink.bri";
 export {
-  type AsyncLazy,
-  type Lazy,
-  type LazyArtifactSerialization,
+  type AsyncRecipe,
+  type Recipe,
+  type RecipeSerialization,
   type Artifact,
   type ArtifactType,
   type ArtifactTypes,
-  createLazy,
-  lazy,
-  lazyFn,
-} from "./artifact.bri";
+  createRecipe,
+  recipe,
+  recipeFn,
+} from "./recipe.bri";
