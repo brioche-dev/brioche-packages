@@ -1,11 +1,11 @@
 import * as runtime from "../runtime.bri";
 import { assert } from "../utils.bri";
-import { type Lazy, createLazy, lazyFileUtils } from "./artifact.bri";
+import { type Recipe, createRecipe, fileRecipeUtils } from "./recipe.bri";
 import { artifactType } from "./artifact_type.bri";
 
-export function file(content: string | Uint8Array): Lazy<File> {
+export function file(content: string | Uint8Array): Recipe<File> {
   const serializedContent = runtime.bstring(content);
-  return createLazy(["file"], {
+  return createRecipe(["file"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       return {
@@ -28,17 +28,17 @@ export interface FilePermissions {
 
 export interface FileCtor {
   source?: runtime.Source;
-  contentBlob: runtime.BlobId;
+  contentBlob: runtime.BlobHash;
   executable: boolean;
-  resources: runtime.CompleteDirectory;
+  resources: runtime.Directory;
 }
 
-export class File implements Lazy<File> {
+export class File implements Recipe<File> {
   [artifactType]: "file" = "file";
   source?: runtime.Source;
-  contentBlob: runtime.BlobId;
+  contentBlob: runtime.BlobHash;
   executable: boolean;
-  resources: runtime.CompleteDirectory;
+  resources: runtime.Directory;
 
   constructor(options: FileCtor) {
     this.source = options.source;
@@ -47,11 +47,11 @@ export class File implements Lazy<File> {
     this.resources = options.resources;
   }
 
-  resolve(): File {
+  bake(): File {
     return this;
   }
 
-  briocheSerialize(): runtime.CompleteFile {
+  briocheSerialize(): runtime.File {
     return {
       type: "file",
       contentBlob: this.contentBlob,
@@ -64,7 +64,7 @@ export class File implements Lazy<File> {
   }
 
   static briocheDeserialize(
-    artifact: runtime.CompleteArtifact,
+    artifact: runtime.Artifact,
     source: runtime.Source | undefined,
   ): File {
     assert(artifact.type === "file");
@@ -76,9 +76,9 @@ export class File implements Lazy<File> {
     });
   }
 
-  cast = lazyFileUtils.cast;
-  withPermissions = lazyFileUtils.withPermissions;
-  unpack = lazyFileUtils.unpack;
-  readBytes = lazyFileUtils.readBytes;
-  read = lazyFileUtils.read;
+  cast = fileRecipeUtils.cast;
+  withPermissions = fileRecipeUtils.withPermissions;
+  unpack = fileRecipeUtils.unpack;
+  readBytes = fileRecipeUtils.readBytes;
+  read = fileRecipeUtils.read;
 }

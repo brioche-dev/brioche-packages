@@ -1,7 +1,7 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
-import { type Lazy, lazySymlinkUtils } from "./artifact.bri";
+import { type Recipe, symlinkRecipeUtils } from "./recipe.bri";
 import { artifactType } from "./artifact_type.bri";
 
 export interface SymlinkOptions {
@@ -20,7 +20,7 @@ interface SymlinkCtor {
   source?: runtime.Source;
 }
 
-export class Symlink implements Lazy<Symlink> {
+export class Symlink implements Recipe<Symlink> {
   [artifactType]: "symlink" = "symlink";
   target: runtime.BString;
   source?: runtime.Source;
@@ -30,7 +30,7 @@ export class Symlink implements Lazy<Symlink> {
     this.source = options.source;
   }
 
-  briocheSerialize(): runtime.CompleteSymlink {
+  briocheSerialize(): runtime.Symlink {
     return {
       type: "symlink",
       target: this.target,
@@ -38,16 +38,16 @@ export class Symlink implements Lazy<Symlink> {
   }
 
   static briocheDeserialize(
-    artifact: runtime.CompleteArtifact,
+    artifact: runtime.Artifact,
     source: runtime.Source | undefined,
   ): Symlink {
     assert(artifact.type === "symlink");
     return new Symlink({ target: artifact.target, source });
   }
 
-  resolve(): Symlink {
+  bake(): Symlink {
     return this;
   }
 
-  cast = lazySymlinkUtils.cast;
+  cast = symlinkRecipeUtils.cast;
 }

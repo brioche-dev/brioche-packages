@@ -1,4 +1,4 @@
-export * from "./artifacts";
+export * from "./recipes";
 export { source } from "./source.bri";
 export { assert, unreachable, indoc, type Awaitable } from "./utils.bri";
 export {

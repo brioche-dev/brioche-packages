@@ -10,7 +10,7 @@ import utilLinux from "./2_24_util_linux.bri";
 export { default as bash } from "./2_03_bash.bri";
 export { default as toolchain } from "./2_18_toolchain.bri";
 
-export default std.memo((): std.Lazy<std.Directory> => {
+export default std.memo((): std.Recipe<std.Directory> => {
   const stage2 = std.merge(
     toolchain(),
     gettext(),

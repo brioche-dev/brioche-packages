@@ -4,7 +4,7 @@ import perl from "./perl.bri";
 import perlXmlParser from "./perl_xml_parser.bri";
 import expat from "./expat.bri";
 
-export default std.memo((): std.Lazy<std.Directory> => {
+export default std.memo((): std.Recipe<std.Directory> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/intltool-0.51.0.tar.gz",
     hash: std.sha256Hash(

@@ -2,27 +2,27 @@ import * as runtime from "../runtime.bri";
 import { assert } from "../utils.bri";
 import { createProxy } from "./proxy.bri";
 import {
-  type AsyncLazy,
-  type Lazy,
-  createLazy,
-  lazyDirectoryUtils,
-} from "./artifact.bri";
+  type AsyncRecipe,
+  type Recipe,
+  createRecipe,
+  directoryRecipeUtils,
+} from "./recipe.bri";
 import { artifactType } from "./artifact_type.bri";
 
 export function directory(
-  entries: Record<string, AsyncLazy> = {},
-): Lazy<Directory> {
-  const bEntries: Record<runtime.BString, AsyncLazy> = {};
+  entries: Record<string, AsyncRecipe> = {},
+): Recipe<Directory> {
+  const bEntries: Record<runtime.BString, AsyncRecipe> = {};
   for (const [k, v] of Object.entries(entries)) {
     bEntries[runtime.bstring(k)] = v;
   }
 
-  return createLazy(["directory"], {
+  return createRecipe(["directory"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       const entries = await Promise.all(
         Object.entries(bEntries).map(
-          async ([k, v]): Promise<[runtime.BString, runtime.LazyArtifact]> => [
+          async ([k, v]): Promise<[runtime.BString, runtime.Recipe]> => [
             k as runtime.BString,
             await (await v).briocheSerialize(),
           ],
@@ -37,9 +37,11 @@ export function directory(
   });
 }
 
-export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
+export function merge(
+  ...directories: AsyncRecipe<Directory>[]
+): Recipe<Directory> {
   const proxyDirectories = directories.map((dir) => createProxy(dir));
-  return createLazy(["directory"], {
+  return createRecipe(["directory"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       const serializedDirectories = await Promise.all(
@@ -55,28 +57,28 @@ export function merge(...directories: AsyncLazy<Directory>[]): Lazy<Directory> {
 }
 
 interface DirectoryCtor {
-  listingBlob?: runtime.BlobId;
+  entries: Record<runtime.BString, runtime.RecipeHash>;
   source?: runtime.Source;
 }
 
-export class Directory implements Lazy<Directory> {
+export class Directory implements Recipe<Directory> {
   [artifactType]: "directory" = "directory";
-  listingBlob?: runtime.BlobId;
+  entries: Record<runtime.BString, runtime.RecipeHash>;
   source?: runtime.Source;
 
   constructor(options: DirectoryCtor) {
-    this.listingBlob = options.listingBlob;
+    this.entries = options.entries;
     this.source = options.source;
   }
 
-  resolve(): Directory {
+  bake(): Directory {
     return this;
   }
 
-  briocheSerialize(): runtime.CompleteDirectory {
+  briocheSerialize(): runtime.Directory {
     return {
       type: "directory",
-      listingBlob: this.listingBlob,
+      entries: this.entries,
       meta: {
         source: this.source,
       },
@@ -84,16 +86,16 @@ export class Directory implements Lazy<Directory> {
   }
 
   static briocheDeserialize(
-    artifact: runtime.CompleteArtifact,
+    artifact: runtime.Artifact,
     source: runtime.Source | undefined,
   ): Directory {
     assert(artifact.type === "directory");
-    return new Directory({ listingBlob: artifact.listingBlob, source });
+    return new Directory({ entries: artifact.entries, source });
   }
 
-  get = lazyDirectoryUtils.get;
-  insert = lazyDirectoryUtils.insert;
-  remove = lazyDirectoryUtils.remove;
-  peel = lazyDirectoryUtils.peel;
-  cast = lazyDirectoryUtils.cast;
+  get = directoryRecipeUtils.get;
+  insert = directoryRecipeUtils.insert;
+  remove = directoryRecipeUtils.remove;
+  peel = directoryRecipeUtils.peel;
+  cast = directoryRecipeUtils.cast;
 }

@@ -1,39 +1,31 @@
-export async function resolveAll(artifacts: []): Promise<[]>;
-export async function resolveAll(
-  artifacts: [LazyArtifact],
-): Promise<[CompleteArtifact]>;
-export async function resolveAll(
-  artifacts: [LazyArtifact, LazyArtifact],
-): Promise<[CompleteArtifact, CompleteArtifact]>;
-export async function resolveAll(
-  artifacts: LazyArtifact[],
-): Promise<CompleteArtifact[]>;
-export async function resolveAll(
-  artifacts: LazyArtifact[],
-): Promise<CompleteArtifact[]> {
-  const result = await (globalThis as any).Deno.core.ops.op_brioche_resolve_all(
-    artifacts,
+export async function bakeAll(recipes: []): Promise<[]>;
+export async function bakeAll(recipes: [Recipe]): Promise<[Artifact]>;
+export async function bakeAll(
+  recipes: [Recipe, Recipe],
+): Promise<[Artifact, Artifact]>;
+export async function bakeAll(recipes: Recipe[]): Promise<Artifact[]>;
+export async function bakeAll(recipes: Recipe[]): Promise<Artifact[]> {
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_bake_all(
+    recipes,
   );
   return result;
 }
 
-export async function resolve(
-  artifact: LazyArtifact,
-): Promise<CompleteArtifact> {
-  const [result] = await resolveAll([artifact]);
+export async function bake(recipe: Recipe): Promise<Artifact> {
+  const [result] = await bakeAll([recipe]);
   return result;
 }
 
-export async function createProxy(artifact: LazyArtifact): Promise<LazyProxy> {
+export async function createProxy(recipe: Recipe): Promise<ProxyRecipe> {
   const result = await (
     globalThis as any
-  ).Deno.core.ops.op_brioche_create_proxy(artifact);
+  ).Deno.core.ops.op_brioche_create_proxy(recipe);
   return result;
 }
 
-export async function readBlob(blobId: BlobId): Promise<BString> {
+export async function readBlob(blobHash: BlobHash): Promise<BString> {
   const result = await (globalThis as any).Deno.core.ops.op_brioche_read_blob(
-    blobId,
+    blobHash,
   );
   return result;
 }
@@ -68,120 +60,117 @@ export function tickDecode(value: Uint8Array | string): Uint8Array {
   return result;
 }
 
-export type CompleteArtifact =
-  | CompleteFile
-  | CompleteSymlink
-  | CompleteDirectory;
+export type Artifact = File | Symlink | Directory;
 
-export type CompleteFile = WithMeta & {
+export type File = WithMeta & {
   type: "file";
-  contentBlob: BlobId;
+  contentBlob: BlobHash;
   executable: boolean;
-  resources: CompleteDirectory;
+  resources: Directory;
 };
 
-export type CompleteSymlink = WithMeta & {
+export type Symlink = WithMeta & {
   type: "symlink";
   target: BString;
 };
 
-export type CompleteDirectory = WithMeta & {
+export type Directory = WithMeta & {
   type: "directory";
-  listingBlob?: BlobId;
+  entries: Record<BString, RecipeHash>;
 };
 
-export type LazyArtifact =
-  | CompleteArtifact
-  | LazyDownload
-  | LazyUnpack
-  | LazyProcess
-  | LazyCreateFile
-  | LazyCreateDirectory
-  | LazyCast
-  | LazyMerge
-  | LazyPeel
-  | LazyGet
-  | LazyInsert
-  | LazySetPermissions
-  | LazyProxy;
+export type Recipe =
+  | Artifact
+  | DownloadRecipe
+  | UnpackRecipe
+  | ProcessRecipe
+  | CreateFileRecipe
+  | CreateDirectoryRecipe
+  | CastRecipe
+  | MergeRecipe
+  | PeelRecipe
+  | GetRecipe
+  | InsertRecipe
+  | SetPermissionsRecipe
+  | ProxyRecipe;
 
-export type LazyCreateDirectory = WithMeta & {
+export type CreateDirectoryRecipe = WithMeta & {
   type: "create_directory";
-  entries: Record<BString, LazyArtifact>;
+  entries: Record<BString, Recipe>;
 };
 
-export type LazyDownload = WithMeta & {
+export type DownloadRecipe = WithMeta & {
   type: "download";
   url: string;
   hash: Hash;
 };
 
-export type LazyUnpack = WithMeta & {
+export type UnpackRecipe = WithMeta & {
   type: "unpack";
-  file: LazyArtifact;
+  file: Recipe;
   archive: ArchiveFormat;
   compression?: CompressionFormat | null;
 };
 
-export type LazyProcess = WithMeta & {
+export type ProcessRecipe = WithMeta & {
   type: "process";
   command: ProcessTemplate;
   args: ProcessTemplate[];
   env: Record<BString, ProcessTemplate>;
-  workDir: LazyArtifact;
-  outputScaffold?: LazyArtifact | null;
+  workDir: Recipe;
+  outputScaffold?: Recipe | null;
   platform: Platform;
 };
 
-export type LazyCreateFile = WithMeta & {
+export type CreateFileRecipe = WithMeta & {
   type: "create_file";
   content: BString;
   executable: boolean;
-  resources: LazyArtifact;
+  resources: Recipe;
 };
 
-export type LazyCast = WithMeta & {
+export type CastRecipe = WithMeta & {
   type: "cast";
-  artifact: LazyArtifact;
-  to: CompleteArtifact["type"];
+  recipe: Recipe;
+  to: Artifact["type"];
 };
 
-export type LazyMerge = WithMeta & {
+export type MergeRecipe = WithMeta & {
   type: "merge";
-  directories: LazyArtifact[];
+  directories: Recipe[];
 };
 
-export type LazyPeel = WithMeta & {
+export type PeelRecipe = WithMeta & {
   type: "peel";
-  directory: LazyArtifact;
+  directory: Recipe;
   depth: number;
 };
 
-export type LazyGet = WithMeta & {
+export type GetRecipe = WithMeta & {
   type: "get";
-  directory: LazyArtifact;
+  directory: Recipe;
   path: BString;
 };
 
-export type LazyInsert = WithMeta & {
+export type InsertRecipe = WithMeta & {
   type: "insert";
-  directory: LazyArtifact;
+  directory: Recipe;
   path: BString;
-  artifact?: LazyArtifact | null | undefined;
+  recipe?: Recipe | null | undefined;
 };
 
-export type LazySetPermissions = WithMeta & {
+export type SetPermissionsRecipe = WithMeta & {
   type: "set_permissions";
-  file: LazyArtifact;
+  file: Recipe;
   executable: boolean | null;
 };
 
-export type LazyProxy = WithMeta & {
+export type ProxyRecipe = WithMeta & {
   type: "proxy";
-  blob: BlobId;
+  recipe: RecipeHash;
 };
 
-export type ArtifactHash = string & { __artifactHash: never };
+export type RecipeHash = string & { __recipeHash: never };
 
 export type WithMeta = {
   meta?: Meta;
@@ -199,7 +188,7 @@ export type StackFrame = {
   columnNumber?: number | null;
 };
 
-export type BlobId = string & { __blobId: never };
+export type BlobHash = string & { __blobHash: never };
 
 export type BString = string & { __bString: never };
 
@@ -219,7 +208,7 @@ export type ProcessTemplate = {
 
 export type ProcessTemplateComponent =
   | { type: "literal"; value: BString }
-  | { type: "input"; artifact: LazyArtifact }
+  | { type: "input"; recipe: Recipe }
   | { type: "output_path" }
   | { type: "resources_dir" }
   | { type: "home_dir" }

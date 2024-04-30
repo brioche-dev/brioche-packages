@@ -19,7 +19,7 @@ import xz from "./2_15_xz.bri";
 import binutils from "./2_16_binutils.bri";
 import gcc from "./2_17_gcc.bri";
 
-export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   let toolchain = std.merge(
     linuxHeaders(),
     glibc(),

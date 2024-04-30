@@ -1,7 +1,7 @@
 import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
-export default std.memo((): std.Lazy<std.Directory> => {
+export default std.memo((): std.Recipe<std.Directory> => {
   const sourceArchive = std.download({
     url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/attr-2.5.1.tar.gz",
     hash: std.sha256Hash(

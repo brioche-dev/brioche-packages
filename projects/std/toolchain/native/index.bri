@@ -61,7 +61,7 @@ import utilLinux from "./util_linux.bri";
 
 export { bash };
 
-export const tools = std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   return std.merge(
     zlib(),
     bzip2(),
@@ -84,7 +84,7 @@ export const tools = std.memo(async (): Promise<std.Lazy<std.Directory>> => {
   );
 });
 
-export default std.memo(async (): Promise<std.Lazy<std.Directory>> => {
+export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   return std.merge(
     linuxHeaders(),
     glibc(),
