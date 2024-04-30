@@ -5,7 +5,7 @@ import { VALUE } from "./other.bri";
 export const project = {
   dependencies: {
     std: "*",
-    foo: "*",
+    foo: { path: "../foo" },
   },
 };
 
@@ -18,7 +18,7 @@ export default async () => {
       ),
     })
     .unpack("tar", "gzip")
-    .resolve();
+    .bake();
   std.assert(unpacked instanceof std.Directory);
 
   const utils = std
