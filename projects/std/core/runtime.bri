@@ -92,7 +92,8 @@ export type Recipe =
   | GetRecipe
   | InsertRecipe
   | SetPermissionsRecipe
-  | ProxyRecipe;
+  | ProxyRecipe
+  | SyncRecipe;
 
 export type CreateDirectoryRecipe = WithMeta & {
   type: "create_directory";
@@ -168,6 +169,11 @@ export type SetPermissionsRecipe = WithMeta & {
 export type ProxyRecipe = WithMeta & {
   type: "proxy";
   recipe: RecipeHash;
+};
+
+export type SyncRecipe = WithMeta & {
+  type: "sync";
+  recipe: Recipe;
 };
 
 export type RecipeHash = string & { __recipeHash: never };

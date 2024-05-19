@@ -34,6 +34,7 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
         | runtime.GetRecipe
         | runtime.SetPermissionsRecipe
         | runtime.ProxyRecipe
+        | runtime.SyncRecipe
     : T extends Directory
       ?
           | runtime.Directory
@@ -46,6 +47,7 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
           | runtime.GetRecipe
           | runtime.InsertRecipe
           | runtime.ProxyRecipe
+          | runtime.SyncRecipe
       : T extends Symlink
         ?
             | runtime.Symlink
@@ -54,6 +56,7 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
             | runtime.PeelRecipe
             | runtime.GetRecipe
             | runtime.ProxyRecipe
+            | runtime.SyncRecipe
         : never);
 
 // This symbol is used in `Recipe` so that `Recipe<Artifact>` doesn't simplify

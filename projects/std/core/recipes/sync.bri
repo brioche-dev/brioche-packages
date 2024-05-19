@@ -1,0 +1,22 @@
+import {
+  type Artifact,
+  type ArtifactType,
+  type AsyncRecipe,
+  type Recipe,
+  type RecipeSerialization,
+  createRecipe,
+} from "./recipe.bri";
+
+export function sync<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
+  return createRecipe(["file", "directory", "symlink"] as ArtifactType<T>[], {
+    sourceDepth: 1,
+    briocheSerialize: async (meta) => {
+      const serializedRecipe = await (await recipe).briocheSerialize();
+      return {
+        meta,
+        type: "sync",
+        recipe: serializedRecipe,
+      } satisfies RecipeSerialization<Artifact> as any as RecipeSerialization<T>;
+    },
+  });
+}
