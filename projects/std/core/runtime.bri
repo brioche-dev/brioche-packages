@@ -82,7 +82,7 @@ export type Directory = WithMeta & {
 export type Recipe =
   | Artifact
   | DownloadRecipe
-  | UnpackRecipe
+  | UnarchiveRecipe
   | ProcessRecipe
   | CreateFileRecipe
   | CreateDirectoryRecipe
@@ -92,7 +92,8 @@ export type Recipe =
   | GetRecipe
   | InsertRecipe
   | SetPermissionsRecipe
-  | ProxyRecipe;
+  | ProxyRecipe
+  | SyncRecipe;
 
 export type CreateDirectoryRecipe = WithMeta & {
   type: "create_directory";
@@ -105,8 +106,8 @@ export type DownloadRecipe = WithMeta & {
   hash: Hash;
 };
 
-export type UnpackRecipe = WithMeta & {
-  type: "unpack";
+export type UnarchiveRecipe = WithMeta & {
+  type: "unarchive";
   file: Recipe;
   archive: ArchiveFormat;
   compression?: CompressionFormat | null;
@@ -168,6 +169,11 @@ export type SetPermissionsRecipe = WithMeta & {
 export type ProxyRecipe = WithMeta & {
   type: "proxy";
   recipe: RecipeHash;
+};
+
+export type SyncRecipe = WithMeta & {
+  type: "sync";
+  recipe: Recipe;
 };
 
 export type RecipeHash = string & { __recipeHash: never };

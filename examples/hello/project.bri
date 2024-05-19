@@ -10,16 +10,16 @@ export const project = {
 };
 
 export default async () => {
-  const unpacked = await std
+  const unarchived = await std
     .download({
       url: "https://development-content.brioche.dev/musl.cc/2023-02-06/x86_64-linux-musl-native.tgz",
       hash: std.sha256Hash(
         "eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad",
       ),
     })
-    .unpack("tar", "gzip")
+    .unarchive("tar", "gzip")
     .bake();
-  std.assert(unpacked instanceof std.Directory);
+  std.assert(unarchived instanceof std.Directory);
 
   const utils = std
     .download({
@@ -28,7 +28,7 @@ export default async () => {
         "eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33",
       ),
     })
-    .unpack("tar", "zstd");
+    .unarchive("tar", "zstd");
 
   return std.directory({
     "lorem ipsum.txt": std.download({
@@ -37,16 +37,20 @@ export default async () => {
         "642e3f58cc2bcc0d12d2e1e21dd9ea131f058a98e23e9beac79881bb0a324d06",
       ),
     }),
-    unpacked: std
+    unarchived: std
       .download({
         url: "https://development-content.brioche.dev/musl.cc/2023-02-06/x86_64-linux-musl-native.tgz",
         hash: std.sha256Hash(
           "eb1db6f0f3c2bdbdbfb993d7ef7e2eeef82ac1259f6a6e1757c33a97dbcef3ad",
         ),
       })
-      .unpack("tar", "gzip"),
+      .unarchive("tar", "gzip"),
     "libsum.txt": std.symlink({ target: "lorem ipsum.txt" }),
-    "stdlib.h": unpacked.get("x86_64-linux-musl-native", "include", "stdlib.h"),
+    "stdlib.h": unarchived.get(
+      "x86_64-linux-musl-native",
+      "include",
+      "stdlib.h",
+    ),
     "hello.txt": std.process({
       command: "/usr/bin/env",
       args: [
@@ -64,8 +68,8 @@ export default async () => {
           ls $HOME >> $BRIOCHE_OUTPUT
           echo $TMPDIR >> $BRIOCHE_OUTPUT
           ls $TMPDIR >> $BRIOCHE_OUTPUT
-          echo $unpacked >> $BRIOCHE_OUTPUT
-          ls -lah $unpacked >> $BRIOCHE_OUTPUT
+          echo $unarchived >> $BRIOCHE_OUTPUT
+          ls -lah $unarchived >> $BRIOCHE_OUTPUT
           echo "/dev/null" >> $BRIOCHE_OUTPUT
           cat /dev/null >> $BRIOCHE_OUTPUT
           echo '------------' >> $BRIOCHE_OUTPUT
@@ -79,7 +83,7 @@ export default async () => {
         `,
       ],
       env: {
-        unpacked,
+        unarchived,
         BRIOCHE_OUTPUT: std.outputPath,
         PATH: std.tpl`${utils}/bin:${foo()}/bin`,
         VALUE,

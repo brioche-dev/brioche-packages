@@ -62,7 +62,7 @@ import utilLinux from "./util_linux.bri";
 export { bash };
 
 export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  return std.merge(
+  const tools = std.merge(
     zlib(),
     bzip2(),
     xz(),
@@ -82,22 +82,18 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     patch(),
     tar(),
   );
+
+  return std.sync(tools);
 });
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  return std.merge(
+  const toolchain = std.merge(
+    tools(),
     linuxHeaders(),
     glibc(),
-    zlib(),
-    bzip2(),
-    xz(),
-    zstd(),
-    file(),
     readline(),
     m4(),
-    bc(),
     flex(),
-    binutils(),
     gmp(),
     mpfr(),
     mpc(),
@@ -107,12 +103,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     gcc(),
     pkgconf(),
     ncurses(),
-    sed(),
     psmisc(),
     gettext(),
     bison(),
-    grep(),
-    bash(),
     libtool(),
     gdbm(),
     gperf(),
@@ -131,19 +124,13 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     pythonFlitCore(),
     pythonWheel(),
     ninja(),
-    coreutils(),
-    diffutils(),
-    gawk(),
-    findutils(),
     groff(),
-    gzip(),
     libpipeline(),
-    make(),
-    patch(),
-    tar(),
     texinfo(),
     manDb(),
     procpsNg(),
     utilLinux(),
   );
+
+  return std.sync(toolchain);
 });

@@ -16,7 +16,7 @@ export function bootstrapRun(
         "0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11",
       ),
     })
-    .unpack("tar", "zstd");
+    .unarchive("tar", "zstd");
 
   const busybox = std
     .download({
@@ -25,7 +25,7 @@ export function bootstrapRun(
         "e2e9ae181e115e155158cb9031687d943b0847d8058a4c28454194d835478be6",
       ),
     })
-    .unpack("tar", "xz");
+    .unarchive("tar", "xz");
 
   const briocheLd = packTools().get("brioche-ld");
   const briochePacked = packTools().get("brioche-packed-userland-exec");
@@ -104,7 +104,7 @@ export default async (): Promise<std.Recipe> => {
         "eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33",
       ),
     })
-    .unpack("tar", "zstd");
+    .unarchive("tar", "zstd");
 
   const toolchain = std
     .download({
@@ -113,7 +113,7 @@ export default async (): Promise<std.Recipe> => {
         "27416708f7ee8cd0c5d408010192705b40c914647fd0d80f00c2194795828cd6",
       ),
     })
-    .unpack("tar", "zstd");
+    .unarchive("tar", "zstd");
 
   const make = std
     .download({
@@ -122,7 +122,7 @@ export default async (): Promise<std.Recipe> => {
         "f8a75f171c2c753bc86a331473812ddc24837d5e91b0b1c7af89d6a2aa6e8986",
       ),
     })
-    .unpack("tar", "xz");
+    .unarchive("tar", "xz");
 
   const briocheLd = packTools().get("brioche-ld");
   const briochePacked = packTools().get("brioche-packed-userland-exec");

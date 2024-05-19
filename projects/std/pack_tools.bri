@@ -8,5 +8,5 @@ export function packTools(): std.Recipe<std.Directory> {
         "191fde9807ee4d9a81d3db4c666f1a265d0cdcbde2c580eabaa37e0712f0a240",
       ),
     })
-    .unpack("tar", "zstd");
+    .unarchive("tar", "zstd");
 }

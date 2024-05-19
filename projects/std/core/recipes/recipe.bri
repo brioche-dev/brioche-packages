@@ -34,10 +34,11 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
         | runtime.GetRecipe
         | runtime.SetPermissionsRecipe
         | runtime.ProxyRecipe
+        | runtime.SyncRecipe
     : T extends Directory
       ?
           | runtime.Directory
-          | runtime.UnpackRecipe
+          | runtime.UnarchiveRecipe
           | runtime.ProcessRecipe
           | runtime.CreateDirectoryRecipe
           | runtime.CastRecipe
@@ -46,6 +47,7 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
           | runtime.GetRecipe
           | runtime.InsertRecipe
           | runtime.ProxyRecipe
+          | runtime.SyncRecipe
       : T extends Symlink
         ?
             | runtime.Symlink
@@ -54,6 +56,7 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
             | runtime.PeelRecipe
             | runtime.GetRecipe
             | runtime.ProxyRecipe
+            | runtime.SyncRecipe
         : never);
 
 // This symbol is used in `Recipe` so that `Recipe<Artifact>` doesn't simplify
@@ -194,7 +197,7 @@ interface RecipeUtils<T extends Artifact> {
 
 interface FileRecipeUtils extends RecipeUtils<File> {
   withPermissions(permissions: Partial<FilePermissions>): Recipe<File>;
-  unpack(
+  unarchive(
     archiveFormat: runtime.ArchiveFormat,
     compressionFormat?: runtime.CompressionFormat,
   ): Recipe<Directory>;
@@ -253,7 +256,7 @@ export const fileRecipeUtils: FileRecipeUtils = {
       },
     });
   },
-  unpack(
+  unarchive(
     this: Recipe<File>,
     archiveFormat: runtime.ArchiveFormat,
     compressionFormat?: runtime.CompressionFormat,
@@ -263,7 +266,7 @@ export const fileRecipeUtils: FileRecipeUtils = {
       briocheSerialize: async (meta) => {
         const file = await this.briocheSerialize();
         return {
-          type: "unpack",
+          type: "unarchive",
           file,
           archive: archiveFormat,
           compression: compressionFormat,
