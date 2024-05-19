@@ -8,7 +8,7 @@ export const build = () => {
         "eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33",
       ),
     })
-    .unpack("tar", "zstd");
+    .unarchive("tar", "zstd");
   return std.process({
     command: "/usr/bin/env",
     args: [

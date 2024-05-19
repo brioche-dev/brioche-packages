@@ -38,7 +38,7 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
     : T extends Directory
       ?
           | runtime.Directory
-          | runtime.UnpackRecipe
+          | runtime.UnarchiveRecipe
           | runtime.ProcessRecipe
           | runtime.CreateDirectoryRecipe
           | runtime.CastRecipe
@@ -197,7 +197,7 @@ interface RecipeUtils<T extends Artifact> {
 
 interface FileRecipeUtils extends RecipeUtils<File> {
   withPermissions(permissions: Partial<FilePermissions>): Recipe<File>;
-  unpack(
+  unarchive(
     archiveFormat: runtime.ArchiveFormat,
     compressionFormat?: runtime.CompressionFormat,
   ): Recipe<Directory>;
@@ -256,7 +256,7 @@ export const fileRecipeUtils: FileRecipeUtils = {
       },
     });
   },
-  unpack(
+  unarchive(
     this: Recipe<File>,
     archiveFormat: runtime.ArchiveFormat,
     compressionFormat?: runtime.CompressionFormat,
@@ -266,7 +266,7 @@ export const fileRecipeUtils: FileRecipeUtils = {
       briocheSerialize: async (meta) => {
         const file = await this.briocheSerialize();
         return {
-          type: "unpack",
+          type: "unarchive",
           file,
           archive: archiveFormat,
           compression: compressionFormat,

@@ -82,7 +82,7 @@ export type Directory = WithMeta & {
 export type Recipe =
   | Artifact
   | DownloadRecipe
-  | UnpackRecipe
+  | UnarchiveRecipe
   | ProcessRecipe
   | CreateFileRecipe
   | CreateDirectoryRecipe
@@ -106,8 +106,8 @@ export type DownloadRecipe = WithMeta & {
   hash: Hash;
 };
 
-export type UnpackRecipe = WithMeta & {
-  type: "unpack";
+export type UnarchiveRecipe = WithMeta & {
+  type: "unarchive";
   file: Recipe;
   archive: ArchiveFormat;
   compression?: CompressionFormat | null;
