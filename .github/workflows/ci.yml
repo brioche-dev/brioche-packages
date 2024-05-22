@@ -30,6 +30,7 @@ jobs:
   build:
     name: Build packages
     needs: [check]
+    if: github.repository == 'brioche-dev/brioche-packages' && github.ref == 'refs/heads/main'
     runs-on: proxmox-runner-set
     steps:
       - name: Install system packages
