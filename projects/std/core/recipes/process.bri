@@ -3,13 +3,13 @@ import * as runtime from "../runtime.bri";
 import { type Directory, directory } from "./directory.bri";
 import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
 
-export interface ProcessOptions {
+export type ProcessOptions = {
   command: ProcessTemplateLike;
   args?: ProcessTemplateLike[];
   env?: Record<string, ProcessTemplateLike>;
   workDir?: AsyncRecipe<Directory>;
   outputScaffold?: AsyncRecipe | null;
-}
+} & ({ unsafe?: false } | { unsafe: true; networking?: boolean });
 
 export type Process = Recipe & ProcessUtils;
 
@@ -58,6 +58,8 @@ export function process(options: ProcessOptions): Process {
           options.outputScaffold != null
             ? await (await options.outputScaffold).briocheSerialize()
             : null,
+        unsafe: options.unsafe,
+        networking: options.unsafe === true ? options.networking : undefined,
         meta,
       };
     },

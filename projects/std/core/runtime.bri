@@ -121,6 +121,8 @@ export type ProcessRecipe = WithMeta & {
   workDir: Recipe;
   outputScaffold?: Recipe | null;
   platform: Platform;
+  unsafe?: boolean;
+  networking?: boolean;
 };
 
 export type CreateFileRecipe = WithMeta & {
