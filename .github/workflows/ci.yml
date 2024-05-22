@@ -7,8 +7,29 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
+  check:
+    name: Check packages
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Brioche
+        run: |
+          mkdir -p ~/.local/bin
+          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
+          chmod +x ~/.local/bin/brioche
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Check projects
+        run: |
+          for project in projects/*; do
+            echo "::group::$project"
+            brioche check -p "$project"
+            echo "::endgroup::"
+          done
+
   build:
     name: Build packages
+    needs: [check]
     runs-on: proxmox-runner-set
     steps:
       - name: Install system packages
