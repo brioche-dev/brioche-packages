@@ -1,3 +1,4 @@
+import type { BriocheGlobal } from "./core/global.bri";
 import { toolchain } from "./toolchain";
 
 export * from "./core";
@@ -7,6 +8,10 @@ export const project = {
   name: "std",
   version: "0.0.0",
 };
+
+declare global {
+  const Brioche: BriocheGlobal;
+}
 
 // NOTE: This default export is a workaround so that `brioche build -p ./std`
 // will build the toolchain. This will be removed once we support building

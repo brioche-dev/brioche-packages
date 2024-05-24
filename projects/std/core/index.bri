@@ -13,3 +13,4 @@ export {
 } from "./runtime.bri";
 
 import "./console.bri";
+import "./global.bri";
