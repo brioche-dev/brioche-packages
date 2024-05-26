@@ -7,6 +7,7 @@ export type ProcessOptions = {
   command: ProcessTemplateLike;
   args?: ProcessTemplateLike[];
   env?: Record<string, ProcessTemplateLike>;
+  dependencies?: AsyncRecipe<Directory>[];
   workDir?: AsyncRecipe<Directory>;
   outputScaffold?: AsyncRecipe | null;
 } & ({ unsafe?: false } | { unsafe: true; networking?: boolean });
@@ -48,6 +49,11 @@ export function process(options: ProcessOptions): Process {
               k,
               await processTemplate(v).briocheSerialize(),
             ]),
+          ),
+        ),
+        dependencies: await Promise.all(
+          (options.dependencies ?? []).map(
+            async (dep) => await (await dep).briocheSerialize(),
           ),
         ),
         platform: "x86_64-linux",
