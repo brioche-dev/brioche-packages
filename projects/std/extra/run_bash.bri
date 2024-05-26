@@ -1,0 +1,14 @@
+import * as std from "/core";
+import { tools } from "/toolchain";
+
+export function runBash(
+  strings: TemplateStringsArray,
+  ...values: string[]
+): std.Process {
+  const script = std.indoc(strings, ...values);
+  return std.process({
+    command: std.tpl`${tools()}/bin/bash`,
+    args: ["-e", "-u", "-o", "pipefail", "-c", script],
+    dependencies: [tools()],
+  });
+}

@@ -2,6 +2,7 @@ import type { BriocheGlobal } from "./core/global.bri";
 import { toolchain } from "./toolchain";
 
 export * from "./core";
+export * from "./extra";
 export * from "./toolchain";
 
 export const project = {
