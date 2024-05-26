@@ -10,12 +10,20 @@ export type ProcessOptions = {
   dependencies?: AsyncRecipe<Directory>[];
   workDir?: AsyncRecipe<Directory>;
   outputScaffold?: AsyncRecipe | null;
-} & ({ unsafe?: false } | { unsafe: true; networking?: boolean });
+} & ProcessUnsafeOptions;
+
+export type ProcessUnsafeOptions =
+  | { unsafe?: false }
+  | { unsafe: true; networking?: boolean };
 
 export type Process = Recipe & ProcessUtils;
 
 export interface ProcessUtils {
   env(key: string, value: ProcessTemplateLike): Process;
+  dependencies(...dependencies: AsyncRecipe<Directory>[]): Process;
+  workDir(workDir: AsyncRecipe<Directory>): Process;
+  outputScaffold(outputScaffold: AsyncRecipe): Process;
+  unsafe(unsafeOptions: ProcessUnsafeOptions): Process;
 }
 
 export function process(options: ProcessOptions): Process {
@@ -79,6 +87,33 @@ export function process(options: ProcessOptions): Process {
           ...options.env,
           [key]: value,
         },
+      });
+    },
+    dependencies(
+      this: Process,
+      ...dependencies: AsyncRecipe<Directory>[]
+    ): Process {
+      return process({
+        ...options,
+        dependencies: [...dependencies, ...(options.dependencies ?? [])],
+      });
+    },
+    workDir(this: Process, workDir: AsyncRecipe<Directory>): Process {
+      return process({
+        ...options,
+        workDir,
+      });
+    },
+    outputScaffold(this: Process, outputScaffold: AsyncRecipe): Process {
+      return process({
+        ...options,
+        outputScaffold,
+      });
+    },
+    unsafe(this: Process, unsafeOptions: ProcessUnsafeOptions): Process {
+      return process({
+        ...options,
+        ...unsafeOptions,
       });
     },
   } satisfies ProcessUtils);
