@@ -1,0 +1,11 @@
+import * as std from "/core";
+
+export function setRun(
+  recipe: std.AsyncRecipe<std.Directory>,
+  run: string,
+): std.Recipe<std.Directory> {
+  let result = std.recipe(recipe);
+  result = result.insert("brioche-run", std.symlink({ target: run }));
+
+  return result;
+}
