@@ -219,7 +219,8 @@ export type ProcessTemplateComponent =
   | { type: "literal"; value: BString }
   | { type: "input"; recipe: Recipe }
   | { type: "output_path" }
-  | { type: "resources_dir" }
+  | { type: "resource_dir" }
+  | { type: "input_resource_dirs" }
   | { type: "home_dir" }
   | { type: "work_dir" }
   | { type: "temp_dir" };

@@ -29,7 +29,8 @@ export interface ProcessUtils {
 export function process(options: ProcessOptions): Process {
   const env: Record<string, ProcessTemplateLike> = {
     BRIOCHE_OUTPUT: outputPath,
-    BRIOCHE_PACK_RESOURCES_DIR: resourcesDir,
+    BRIOCHE_RESOURCE_DIR: resourceDir,
+    BRIOCHE_INPUT_RESOURCE_DIRS: inputResourceDirs,
     HOME: homeDir,
     TMPDIR: tempDir,
     ...options.env,
@@ -142,7 +143,8 @@ export function tpl(
 }
 
 export const outputPath: unique symbol = Symbol("outputPath");
-export const resourcesDir: unique symbol = Symbol("resourcesDir");
+export const resourceDir: unique symbol = Symbol("resourceDir");
+export const inputResourceDirs: unique symbol = Symbol("inputResourceDirs");
 export const homeDir: unique symbol = Symbol("homeDir");
 export const workDir: unique symbol = Symbol("workDir");
 export const tempDir: unique symbol = Symbol("tempDir");
@@ -154,7 +156,8 @@ export type ProcessTemplateComponent =
   | ProcessTemplate
   | Recipe
   | typeof outputPath
-  | typeof resourcesDir
+  | typeof resourceDir
+  | typeof inputResourceDirs
   | typeof homeDir
   | typeof workDir
   | typeof tempDir
@@ -179,8 +182,10 @@ export class ProcessTemplate {
             return [{ type: "literal", value: runtime.bstring(component) }];
           } else if (component === outputPath) {
             return [{ type: "output_path" }];
-          } else if (component === resourcesDir) {
-            return [{ type: "resources_dir" }];
+          } else if (component === resourceDir) {
+            return [{ type: "resource_dir" }];
+          } else if (component === inputResourceDirs) {
+            return [{ type: "input_resource_dirs" }];
           } else if (component === homeDir) {
             return [{ type: "home_dir" }];
           } else if (component === workDir) {
