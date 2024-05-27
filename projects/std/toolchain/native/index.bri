@@ -1,4 +1,5 @@
 import * as std from "/core";
+import { setEnv } from "/extra";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
@@ -87,7 +88,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 });
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const toolchain = std.merge(
+  let toolchain = std.merge(
     tools(),
     linuxHeaders(),
     glibc(),
@@ -131,6 +132,10 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     procpsNg(),
     utilLinux(),
   );
+  toolchain = setEnv(toolchain, {
+    LIBRARY_PATH: { path: "lib" },
+    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+  });
 
   return std.sync(toolchain);
 });
