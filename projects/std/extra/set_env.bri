@@ -1,0 +1,22 @@
+import * as std from "/core";
+
+export type EnvValues = Record<string, EnvValue>;
+
+export type EnvValue = { path: string };
+
+export function setEnv(
+  recipe: std.AsyncRecipe<std.Directory>,
+  env: EnvValues,
+): std.Recipe<std.Directory> {
+  let result = std.recipe(recipe);
+  for (const [key, value] of Object.entries(env)) {
+    const escapedPath = value.path
+      .replaceAll("_", "__")
+      .replaceAll(/[\/\.]/g, "_");
+    result = result.insert(
+      `brioche-env.d/env/${key}/${escapedPath}`,
+      std.symlink({ target: `../../../${value.path}` }),
+    );
+  }
+  return result;
+}
