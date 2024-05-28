@@ -1,0 +1,35 @@
+import * as std from "std";
+
+export const project = {
+  name: "curl",
+  version: "8.8.0",
+};
+
+const source = std
+  .download({
+    url: `https://curl.se/download/curl-${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "77c0e1cd35ab5b45b659645a93b46d660224d0024f1185e8a95cdb27ae3d787d",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel()
+  .cast("directory");
+
+export default (): std.Recipe<std.Directory> => {
+  const curl = std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-openssl \\
+      --without-ca-bundle \\
+      --without-ca-path \\
+      --with-ca-fallback
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .cast("directory");
+
+  return std.withRunnableLink(curl, "bin/curl");
+};
