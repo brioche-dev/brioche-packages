@@ -63,7 +63,7 @@ import utilLinux from "./util_linux.bri";
 export { bash };
 
 export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const tools = std.merge(
+  let tools = std.merge(
     zlib(),
     bzip2(),
     xz(),
@@ -83,12 +83,16 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     patch(),
     tar(),
   );
+  tools = setEnv(tools, {
+    LIBRARY_PATH: { path: "lib" },
+    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+  });
 
   return std.sync(tools);
 });
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  let toolchain = std.merge(
+  const toolchain = std.merge(
     tools(),
     linuxHeaders(),
     glibc(),
@@ -132,10 +136,6 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     procpsNg(),
     utilLinux(),
   );
-  toolchain = setEnv(toolchain, {
-    LIBRARY_PATH: { path: "lib" },
-    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
-  });
 
   return std.sync(toolchain);
 });
