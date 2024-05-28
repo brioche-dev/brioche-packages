@@ -47,7 +47,7 @@ export function bootstrapRun(
       "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BUSYBOX"
       "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$HOME"
       "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
-      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
+      "$BUSYBOX/bin/busybox" mkdir -p "$(pwd)/rootfs/$BRIOCHE_RESOURCE_DIR"
 
       "$BUSYBOX/bin/busybox" mount --rbind "$(pwd)/rootfs" "$(pwd)/rootfs"
       "$BUSYBOX/bin/busybox" mount --rbind "/proc" "$(pwd)/rootfs/proc"
@@ -56,7 +56,7 @@ export function bootstrapRun(
       "$BUSYBOX/bin/busybox" mount --rbind "$BUSYBOX" "$(pwd)/rootfs/$BUSYBOX"
       "$BUSYBOX/bin/busybox" mount --rbind "$HOME" "$(pwd)/rootfs/$HOME"
       "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_OUTPUT" "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
-      "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_PACK_RESOURCES_DIR" "$(pwd)/rootfs/$BRIOCHE_PACK_RESOURCES_DIR"
+      "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_RESOURCE_DIR" "$(pwd)/rootfs/$BRIOCHE_RESOURCE_DIR"
 
       "$BUSYBOX/bin/busybox" mkdir -p "$HOME/.local/libexec/brioche-toolchain/bin" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64"
       "$BUSYBOX/bin/busybox" cp "$BRIOCHE_LD" "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld"
