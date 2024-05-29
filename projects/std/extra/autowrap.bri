@@ -1,0 +1,44 @@
+import * as std from "/core";
+import { toolchain } from "/toolchain";
+import { packTools } from "/pack_tools.bri";
+
+export interface AutowrapOptions {
+  executables: string[];
+  libraries?: std.ProcessTemplateLike[];
+  sysroot?: std.AsyncRecipe<std.Directory>;
+}
+
+export function autowrap(
+  recipe: std.AsyncRecipe<std.Directory>,
+  options: AutowrapOptions,
+): std.Recipe<std.Directory> {
+  const sysroot = options.sysroot ?? toolchain();
+  const libArgs = (options.libraries ?? []).flatMap(
+    (lib): std.ProcessTemplateLike[] => ["--lib-dir", lib],
+  );
+
+  let result = std.recipe(recipe);
+  for (const executable of options.executables) {
+    const wrappedExecutable = std
+      .process({
+        command: std.tpl`${packTools()}/bin/brioche-packer`,
+        args: [
+          "autowrap",
+          "--packed-exec",
+          std.tpl`${packTools()}/bin/brioche-packed-exec`,
+          "--sysroot",
+          sysroot,
+          "--lib-dir",
+          std.tpl`${sysroot}/lib`,
+          ...libArgs,
+          std.tpl`${std.outputPath}/${executable}`,
+        ],
+      })
+      .outputScaffold(recipe)
+      .cast("directory")
+      .get(executable);
+    result = result.insert(executable, wrappedExecutable);
+  }
+
+  return result;
+}
