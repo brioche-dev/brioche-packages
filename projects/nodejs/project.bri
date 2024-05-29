@@ -1,0 +1,25 @@
+import * as std from "std";
+
+export const project = {
+  name: "nodejs",
+  version: "20.14.0",
+};
+
+export default (): std.Recipe<std.Directory> => {
+  let node = std
+    .download({
+      url: "https://nodejs.org/dist/v20.14.0/node-v20.14.0-linux-x64.tar.xz",
+      hash: std.sha256Hash(
+        "fedf8fa73b6f51c4ffcc5da8f86cd1ed381bc9dceae0829832c7d683a78b8e36",
+      ),
+    })
+    .unarchive("tar", "xz")
+    .peel()
+    .cast("directory");
+
+  node = std.autowrap(node, {
+    executables: ["bin/node"],
+  });
+
+  return std.withRunnableLink(node, "bin/node");
+};
