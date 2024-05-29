@@ -1,0 +1,33 @@
+import * as std from "/core";
+import stage2 from "/toolchain/stage2";
+
+export default std.memo((): std.Recipe<std.Directory> => {
+  const sourceArchive = std.download({
+    url: "https://development-content.brioche.dev/ftp.gnu.org/gnu/which/which-2.21.tar.gz",
+    hash: std.sha256Hash(
+      "f4a245b94124b377d8b49646bf421f9155d36aa7614b6ebf83705d3ffc76eaad",
+    ),
+  });
+
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
+
+          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+
+          ./configure --prefix=/
+          make
+          make install DESTDIR="$BRIOCHE_OUTPUT"
+        `,
+      ],
+      env: {
+        source: sourceArchive,
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+    })
+    .cast("directory");
+});

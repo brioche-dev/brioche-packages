@@ -59,6 +59,7 @@ import texinfo from "./texinfo.bri";
 import manDb from "./man_db.bri";
 import procpsNg from "./procps_ng.bri";
 import utilLinux from "./util_linux.bri";
+import which from "./which.bri";
 
 export { bash };
 
@@ -82,6 +83,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     make(),
     patch(),
     tar(),
+    which(),
   );
   tools = setEnv(tools, {
     LIBRARY_PATH: { path: "lib" },
