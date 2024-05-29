@@ -37,7 +37,7 @@ import {
 } from "./util.bri";
 import { TomlError } from "./error.bri";
 
-let KEY_PART_RE = /^[a-zA-Z0-9-_]+[ \t]*$/;
+const KEY_PART_RE = /^[a-zA-Z0-9-_]+[ \t]*$/;
 
 export function parseKey(
   str: string,
@@ -45,7 +45,7 @@ export function parseKey(
   end = "=",
 ): [string[], number] {
   let dot = ptr - 1;
-  let parsed = [];
+  const parsed = [];
 
   let endPtr = str.indexOf(end, ptr);
   if (endPtr < 0) {
@@ -56,7 +56,7 @@ export function parseKey(
   }
 
   do {
-    let c = str[(ptr = ++dot)];
+    const c = str[(ptr = ++dot)];
 
     // If it's whitespace, ignore
     if (c !== " " && c !== "\t") {
@@ -69,7 +69,7 @@ export function parseKey(
           });
         }
 
-        let eos = getStringEnd(str, ptr);
+        const eos = getStringEnd(str, ptr);
         if (eos < 0) {
           throw new TomlError("unfinished string encountered", {
             toml: str,
@@ -78,9 +78,9 @@ export function parseKey(
         }
 
         dot = str.indexOf(".", eos);
-        let strEnd = str.slice(eos, dot < 0 || dot > endPtr ? endPtr : dot);
+        const strEnd = str.slice(eos, dot < 0 || dot > endPtr ? endPtr : dot);
 
-        let newLine = indexOfNewline(strEnd);
+        const newLine = indexOfNewline(strEnd);
         if (newLine > -1) {
           throw new TomlError("newlines are not allowed in keys", {
             toml: str,
@@ -88,7 +88,7 @@ export function parseKey(
           });
         }
 
-        if (strEnd.trimStart()) {
+        if (strEnd.trimStart() !== "") {
           throw new TomlError("found extra tokens after the string part", {
             toml: str,
             ptr: eos,
@@ -112,7 +112,7 @@ export function parseKey(
       } else {
         // Normal raw key part consumption and validation
         dot = str.indexOf(".", ptr);
-        let part = str.slice(ptr, dot < 0 || dot > endPtr ? endPtr : dot);
+        const part = str.slice(ptr, dot < 0 || dot > endPtr ? endPtr : dot);
         if (!KEY_PART_RE.test(part)) {
           throw new TomlError(
             "only letter, numbers, dashes and underscores are allowed in keys",
@@ -127,7 +127,7 @@ export function parseKey(
       }
     }
     // Until there's no more dot
-  } while (dot + 1 && dot < endPtr);
+  } while (dot + 1 !== 0 && dot < endPtr);
 
   return [parsed, skipVoid(str, endPtr + 1, true, true)];
 }
@@ -136,13 +136,13 @@ export function parseInlineTable(
   str: string,
   ptr: number,
 ): [Record<string, TomlPrimitive>, number] {
-  let res: Record<string, TomlPrimitive> = {};
-  let seen = new Set();
+  const res: Record<string, TomlPrimitive> = {};
+  const seen = new Set();
   let c: string;
   let comma = 0;
 
   ptr++;
-  while ((c = str[ptr++]!) !== "}" && c) {
+  while ((c = str[ptr++] as string) !== "}" && c !== "") {
     if (c === "\n") {
       throw new TomlError("newlines are not allowed in inline tables", {
         toml: str,
@@ -159,15 +159,15 @@ export function parseInlineTable(
         ptr: ptr - 1,
       });
     } else if (c !== " " && c !== "\t") {
-      let k: string;
+      let k: string | undefined = undefined;
       let t: any = res;
       let hasOwn = false;
 
-      let [key, keyEndPtr] = parseKey(str, ptr - 1);
+      const [key, keyEndPtr] = parseKey(str, ptr - 1);
       for (let i = 0; i < key.length; i++) {
-        if (i) t = hasOwn! ? t[k!] : (t[k!] = {});
+        if (i !== 0) t = hasOwn ? t[k as string] : (t[k as string] = {});
 
-        k = key[i]!;
+        k = key[i] as string;
         if (
           (hasOwn = Object.hasOwn(t, k)) &&
           (typeof t[k] !== "object" || seen.has(t[k]))
@@ -194,23 +194,23 @@ export function parseInlineTable(
         });
       }
 
-      let [value, valueEndPtr] = extractValue(str, keyEndPtr, "}");
+      const [value, valueEndPtr] = extractValue(str, keyEndPtr, "}");
       seen.add(value);
 
-      t[k!] = value;
+      t[k as string] = value;
       ptr = valueEndPtr;
       comma = str[ptr - 1] === "," ? ptr - 1 : 0;
     }
   }
 
-  if (comma) {
+  if (comma !== 0) {
     throw new TomlError("trailing commas are not allowed in inline tables", {
       toml: str,
       ptr: comma,
     });
   }
 
-  if (!c) {
+  if (c === "") {
     throw new TomlError("unfinished table encountered", {
       toml: str,
       ptr: ptr,
@@ -224,11 +224,11 @@ export function parseArray(
   str: string,
   ptr: number,
 ): [TomlPrimitive[], number] {
-  let res: TomlPrimitive[] = [];
+  const res: TomlPrimitive[] = [];
   let c;
 
   ptr++;
-  while ((c = str[ptr++]) !== "]" && c) {
+  while ((c = str[ptr++]) !== "]" && c != null && c !== "") {
     if (c === ",") {
       throw new TomlError("expected value, found comma", {
         toml: str,
@@ -236,13 +236,13 @@ export function parseArray(
       });
     } else if (c === "#") ptr = skipComment(str, ptr);
     else if (c !== " " && c !== "\t" && c !== "\n" && c !== "\r") {
-      let e = extractValue(str, ptr - 1, "]");
+      const e = extractValue(str, ptr - 1, "]");
       res.push(e[0]);
       ptr = e[1];
     }
   }
 
-  if (!c) {
+  if (c == null || c === "") {
     throw new TomlError("unfinished array encountered", {
       toml: str,
       ptr: ptr,

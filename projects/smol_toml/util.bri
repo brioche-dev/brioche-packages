@@ -45,7 +45,7 @@ export function indexOfNewline(str: string, start = 0, end = str.length) {
 
 export function skipComment(str: string, ptr: number) {
   for (let i = ptr; i < str.length; i++) {
-    let c = str[i]!;
+    const c = str[i] as string;
     if (c === "\n") return i;
 
     if (c === "\r" && str[i + 1] === "\n") return i + 1;
@@ -72,11 +72,12 @@ export function skipVoid(
   while (
     (c = str[ptr]) === " " ||
     c === "\t" ||
-    (!banNewLines && (c === "\n" || (c === "\r" && str[ptr + 1] === "\n")))
+    (banNewLines !== true &&
+      (c === "\n" || (c === "\r" && str[ptr + 1] === "\n")))
   )
     ptr++;
 
-  return banComments || c !== "#"
+  return banComments === true || c !== "#"
     ? ptr
     : skipVoid(str, skipComment(str, ptr), banNewLines);
 }
@@ -88,13 +89,13 @@ export function skipUntil(
   end?: string,
   banNewLines: boolean = false,
 ) {
-  if (!end) {
+  if (end == null || end === "") {
     ptr = indexOfNewline(str, ptr);
     return ptr < 0 ? str.length : ptr;
   }
 
   for (let i = ptr; i < str.length; i++) {
-    let c = str[i];
+    const c = str[i];
     if (c === "#") {
       i = indexOfNewline(str, i);
     } else if (c === sep) {
@@ -116,8 +117,8 @@ export function skipUntil(
 }
 
 export function getStringEnd(str: string, seek: number) {
-  let first = str[seek]!;
-  let target =
+  const first = str[seek] as string;
+  const target =
     first === str[seek + 1] && str[seek + 1] === str[seek + 2]
       ? str.slice(seek, seek + 3)
       : first;

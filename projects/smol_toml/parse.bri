@@ -50,14 +50,14 @@ function peekTable(
 ): PeekResult {
   let t: any = table;
   let m = meta;
-  let k: string;
+  let k: string | undefined = undefined;
   let hasOwn = false;
   let state: MetaState;
 
   for (let i = 0; i < key.length; i++) {
-    if (i) {
-      t = hasOwn! ? t[k!] : (t[k!] = {});
-      m = (state = m[k!]!).c;
+    if (i !== 0) {
+      t = hasOwn ? t[k as string] : (t[k as string] = {});
+      m = (state = m[k as string] as MetaState).c;
 
       if (
         type === Type.DOTTED &&
@@ -67,14 +67,18 @@ function peekTable(
       }
 
       if (state.t === Type.ARRAY) {
-        let l = t.length - 1;
+        const l = t.length - 1;
         t = t[l];
-        m = m[l]!.c;
+        m = (m[l] as MetaState).c;
       }
     }
 
-    k = key[i]!;
-    if ((hasOwn = Object.hasOwn(t, k)) && m[k]?.t === Type.DOTTED && m[k]?.d) {
+    k = key[i] as string;
+    if (
+      (hasOwn = Object.hasOwn(t, k)) &&
+      m[k]?.t === Type.DOTTED &&
+      m[k]?.d === true
+    ) {
       return null;
     }
 
@@ -101,7 +105,7 @@ function peekTable(
     }
   }
 
-  state = m[k!]!;
+  state = m[k as string] as MetaState;
   if (
     state.t !== type &&
     !(type === Type.EXPLICIT && state.t === Type.ARRAY_DOTTED)
@@ -113,10 +117,10 @@ function peekTable(
   if (type === Type.ARRAY) {
     if (!state.d) {
       state.d = true;
-      t[k!] = [];
+      t[k as string] = [];
     }
 
-    t[k!].push((t = {}));
+    t[k as string].push((t = {}));
     state.c[state.i++] = state = { t: Type.EXPLICIT, d: false, i: 0, c: {} };
   }
 
@@ -127,25 +131,25 @@ function peekTable(
 
   state.d = true;
   if (type === Type.EXPLICIT) {
-    t = hasOwn ? t[k!] : (t[k!] = {});
+    t = hasOwn ? t[k as string] : (t[k as string] = {});
   } else if (type === Type.DOTTED && hasOwn) {
     return null;
   }
 
-  return [k!, t, state.c];
+  return [k as string, t, state.c];
 }
 
 export function parse(toml: string): Record<string, TomlPrimitive> {
-  let res = {};
-  let meta = {};
+  const res = {};
+  const meta = {};
 
   let tbl = res;
   let m = meta;
 
   for (let ptr = skipVoid(toml, 0); ptr < toml.length; ) {
     if (toml[ptr] === "[") {
-      let isTableArray = toml[++ptr] === "[";
-      let k = parseKey(toml, (ptr += +isTableArray), "]");
+      const isTableArray = toml[++ptr] === "[";
+      const k = parseKey(toml, (ptr += +isTableArray), "]");
 
       if (isTableArray) {
         if (toml[k[1] - 1] !== "]") {
@@ -158,13 +162,13 @@ export function parse(toml: string): Record<string, TomlPrimitive> {
         k[1]++;
       }
 
-      let p = peekTable(
+      const p = peekTable(
         k[0],
         res,
         meta,
         isTableArray ? Type.ARRAY : Type.EXPLICIT,
       );
-      if (!p) {
+      if (p == null) {
         throw new TomlError(
           "trying to redefine an already defined table or value",
           {
@@ -178,9 +182,9 @@ export function parse(toml: string): Record<string, TomlPrimitive> {
       tbl = p[1];
       ptr = k[1];
     } else {
-      let k = parseKey(toml, ptr);
-      let p = peekTable(k[0], tbl, m, Type.DOTTED);
-      if (!p) {
+      const k = parseKey(toml, ptr);
+      const p = peekTable(k[0], tbl, m, Type.DOTTED);
+      if (p == null) {
         throw new TomlError(
           "trying to redefine an already defined table or value",
           {
@@ -190,13 +194,13 @@ export function parse(toml: string): Record<string, TomlPrimitive> {
         );
       }
 
-      let v = extractValue(toml, k[1]);
+      const v = extractValue(toml, k[1]);
       p[1][p[0]] = v[0];
       ptr = v[1];
     }
 
     ptr = skipVoid(toml, ptr, true);
-    if (toml[ptr] && toml[ptr] !== "\n" && toml[ptr] !== "\r") {
+    if (toml[ptr] != null && toml[ptr] !== "\n" && toml[ptr] !== "\r") {
       throw new TomlError(
         "each key-value declaration must be followed by an end-of-line",
         {

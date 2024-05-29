@@ -30,12 +30,13 @@ import { skipVoid } from "./util.bri";
 import { TomlDate } from "./date.bri";
 import { TomlError } from "./error.bri";
 
-let INT_REGEX = /^((0x[0-9a-fA-F](_?[0-9a-fA-F])*)|(([+-]|0[ob])?\d(_?\d)*))$/;
-let FLOAT_REGEX = /^[+-]?\d(_?\d)*(\.\d(_?\d)*)?([eE][+-]?\d(_?\d)*)?$/;
-let LEADING_ZERO = /^[+-]?0[0-9_]/;
-let ESCAPE_REGEX = /^[0-9a-f]{4,8}$/i;
+const INT_REGEX =
+  /^((0x[0-9a-fA-F](_?[0-9a-fA-F])*)|(([+-]|0[ob])?\d(_?\d)*))$/;
+const FLOAT_REGEX = /^[+-]?\d(_?\d)*(\.\d(_?\d)*)?([eE][+-]?\d(_?\d)*)?$/;
+const LEADING_ZERO = /^[+-]?0[0-9_]/;
+const ESCAPE_REGEX = /^[0-9a-f]{4,8}$/i;
 
-let ESC_MAP = {
+const ESC_MAP = {
   b: "\b",
   t: "\t",
   n: "\n",
@@ -46,8 +47,8 @@ let ESC_MAP = {
 };
 
 export function parseString(str: string, ptr = 0, endPtr = str.length): string {
-  let isLiteral = str[ptr] === "'";
-  let isMultiline = str[ptr++] === str[ptr] && str[ptr] === str[ptr + 1];
+  const isLiteral = str[ptr] === "'";
+  const isMultiline = str[ptr++] === str[ptr] && str[ptr] === str[ptr + 1];
 
   if (isMultiline) {
     endPtr -= 2;
@@ -60,7 +61,7 @@ export function parseString(str: string, ptr = 0, endPtr = str.length): string {
   let parsed = "";
   let sliceStart = ptr;
   while (ptr < endPtr - 1) {
-    let c = str[ptr++]!;
+    const c = str[ptr++] as string;
     if (c === "\n" || (c === "\r" && str[ptr] === "\n")) {
       if (!isMultiline) {
         throw new TomlError("newlines are not allowed in strings", {
@@ -75,11 +76,11 @@ export function parseString(str: string, ptr = 0, endPtr = str.length): string {
       });
     }
 
-    if (isEscape) {
+    if (isEscape === true) {
       isEscape = false;
       if (c === "u" || c === "U") {
         // Unicode escape
-        let code = str.slice(ptr, (ptr += c === "u" ? 4 : 8));
+        const code = str.slice(ptr, (ptr += c === "u" ? 4 : 8));
         if (!ESCAPE_REGEX.test(code)) {
           throw new TomlError("invalid unicode escape", {
             toml: str,
@@ -156,7 +157,7 @@ export function parseValue(
       });
     }
 
-    let numeric = +value.replace(/_/g, "");
+    const numeric = +value.replace(/_/g, "");
     if (isNaN(numeric)) {
       throw new TomlError("invalid number", {
         toml: toml,
@@ -174,7 +175,7 @@ export function parseValue(
     return numeric;
   }
 
-  let date = new TomlDate(value);
+  const date = new TomlDate(value);
   if (!date.isValid()) {
     throw new TomlError("invalid value", {
       toml: toml,

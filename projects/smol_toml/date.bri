@@ -31,7 +31,7 @@
 
 type Offset = string | null;
 
-let DATE_TIME_RE =
+const DATE_TIME_RE =
   /^(\d{4}-\d{2}-\d{2})?[T ]?(?:(\d{2}):\d{2}:\d{2}(?:\.\d+)?)?(Z|[-+]\d{2}:\d{2})?$/i;
 
 export class TomlDate extends Date {
@@ -45,21 +45,21 @@ export class TomlDate extends Date {
     let offset: Offset = "Z";
 
     if (typeof date === "string") {
-      let match = date.match(DATE_TIME_RE);
-      if (match) {
-        if (!match[1]) {
+      const match = date.match(DATE_TIME_RE);
+      if (match != null) {
+        if (match[1] == null || match[1] === "") {
           hasDate = false;
           date = `0000-01-01T${date}`;
         }
 
-        hasTime = !!match[2];
+        hasTime = match[2] != null && match[2] !== "";
         // Do not allow rollover hours
-        if (match[2] && +match[2] > 23) {
+        if (match[2] != null && match[2] !== "" && +match[2] > 23) {
           date = "";
         } else {
-          offset = match[3] || null;
+          offset = match[3] != null && match[3] !== "" ? match[3] : null;
           date = date.toUpperCase();
-          if (!offset && hasTime) date += "Z";
+          if (offset == null && hasTime) date += "Z";
         }
       } else {
         date = "";
@@ -79,7 +79,12 @@ export class TomlDate extends Date {
   }
 
   isLocal() {
-    return !this.#hasDate || !this.#hasTime || !this.#offset;
+    return (
+      !this.#hasDate ||
+      !this.#hasTime ||
+      this.#offset == null ||
+      this.#offset === ""
+    );
   }
 
   isDate() {
@@ -95,7 +100,7 @@ export class TomlDate extends Date {
   }
 
   override toISOString() {
-    let iso = super.toISOString();
+    const iso = super.toISOString();
 
     // Local Date
     if (this.isDate()) return iso.slice(0, 10);
@@ -113,33 +118,33 @@ export class TomlDate extends Date {
     // Instead of using a "modified" date and "Z", we restore the representation "as authored"
 
     let offset = +this.#offset.slice(1, 3) * 60 + +this.#offset.slice(4, 6);
-    offset = this.#offset[0] === "-" ? offset : -offset;
+    offset = this.#offset.startsWith("-") ? offset : -offset;
 
-    let offsetDate = new Date(this.getTime() - offset * 60e3);
+    const offsetDate = new Date(this.getTime() - offset * 60e3);
     return offsetDate.toISOString().slice(0, -1) + this.#offset;
   }
 
   static wrapAsOffsetDateTime(jsDate: Date, offset = "Z") {
-    let date = new TomlDate(jsDate);
+    const date = new TomlDate(jsDate);
     date.#offset = offset;
     return date;
   }
 
   static wrapAsLocalDateTime(jsDate: Date) {
-    let date = new TomlDate(jsDate);
+    const date = new TomlDate(jsDate);
     date.#offset = null;
     return date;
   }
 
   static wrapAsLocalDate(jsDate: Date) {
-    let date = new TomlDate(jsDate);
+    const date = new TomlDate(jsDate);
     date.#hasTime = false;
     date.#offset = null;
     return date;
   }
 
   static wrapAsLocalTime(jsDate: Date) {
-    let date = new TomlDate(jsDate);
+    const date = new TomlDate(jsDate);
     date.#hasDate = false;
     date.#offset = null;
     return date;

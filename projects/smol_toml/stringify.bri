@@ -29,7 +29,7 @@
 const BARE_KEY = /^[a-z0-9-_]+$/i;
 
 function extendedTypeOf(obj: any) {
-  let type = typeof obj;
+  const type = typeof obj;
   if (type === "object") {
     if (Array.isArray(obj)) return "array";
     if (obj instanceof Date) return "date";
@@ -39,11 +39,11 @@ function extendedTypeOf(obj: any) {
 }
 
 function isArrayOfTables(obj: any[]) {
-  for (let i = 0; i < obj.length; i++) {
-    if (extendedTypeOf(obj[i]) !== "object") return false;
+  for (const element of obj) {
+    if (extendedTypeOf(element) !== "object") return false;
   }
 
-  return obj.length != 0;
+  return obj.length !== 0;
 }
 
 function formatString(s: string) {
@@ -84,13 +84,13 @@ function stringifyValue(val: any, type = extendedTypeOf(val)) {
 }
 
 function stringifyInlineTable(obj: any) {
-  let keys = Object.keys(obj);
+  const keys = Object.keys(obj);
   if (keys.length === 0) return "{}";
 
   let res = "{ ";
   for (let i = 0; i < keys.length; i++) {
-    let k = keys[i]!;
-    if (i) res += ", ";
+    const k = keys[i] as string;
+    if (i !== 0) res += ", ";
 
     res += BARE_KEY.test(k) ? k : formatString(k);
     res += " = ";
@@ -105,7 +105,7 @@ function stringifyArray(array: any[]) {
 
   let res = "[ ";
   for (let i = 0; i < array.length; i++) {
-    if (i) res += ", ";
+    if (i !== 0) res += ", ";
     if (array[i] === null || array[i] === void 0) {
       throw new TypeError("arrays cannot contain null or undefined values");
     }
@@ -118,9 +118,9 @@ function stringifyArray(array: any[]) {
 
 function stringifyArrayTable(array: any[], key: string) {
   let res = "";
-  for (let i = 0; i < array.length; i++) {
+  for (const element of array) {
     res += `[[${key}]]\n`;
-    res += stringifyTable(array[i], key);
+    res += stringifyTable(element, key);
     res += "\n\n";
   }
 
@@ -131,24 +131,23 @@ function stringifyTable(obj: any, prefix = "") {
   let preamble = "";
   let tables = "";
 
-  let keys = Object.keys(obj);
-  for (let i = 0; i < keys.length; i++) {
-    let k = keys[i]!;
+  const keys = Object.keys(obj);
+  for (const k of keys) {
     if (obj[k] !== null && obj[k] !== void 0) {
-      let type = extendedTypeOf(obj[k]);
+      const type = extendedTypeOf(obj[k]);
       if (type === "symbol" || type === "function") {
         throw new TypeError(`cannot serialize values of type '${type}'`);
       }
 
-      let key = BARE_KEY.test(k) ? k : formatString(k);
+      const key = BARE_KEY.test(k) ? k : formatString(k);
 
       if (type === "array" && isArrayOfTables(obj[k])) {
         tables += stringifyArrayTable(
           obj[k],
-          prefix ? `${prefix}.${key}` : key,
+          prefix !== "" ? `${prefix}.${key}` : key,
         );
       } else if (type === "object") {
-        let tblKey = prefix ? `${prefix}.${key}` : key;
+        const tblKey = prefix !== "" ? `${prefix}.${key}` : key;
         tables += `[${tblKey}]\n`;
         tables += stringifyTable(obj[k], tblKey);
         tables += "\n\n";

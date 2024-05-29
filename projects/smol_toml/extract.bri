@@ -46,7 +46,7 @@ function sliceAndTrimEndOf(
 ): [string, number] {
   let value = str.slice(startPtr, endPtr);
 
-  let commentIdx = value.indexOf("#");
+  const commentIdx = value.indexOf("#");
   if (commentIdx > -1) {
     // The call to skipComment allows to "validate" the comment
     // (absence of control characters)
@@ -54,10 +54,10 @@ function sliceAndTrimEndOf(
     value = value.slice(0, commentIdx);
   }
 
-  let trimmed = value.trimEnd();
+  const trimmed = value.trimEnd();
 
-  if (!allowNewLines) {
-    let newlineIdx = value.indexOf("\n", trimmed.length);
+  if (allowNewLines !== true) {
+    const newlineIdx = value.indexOf("\n", trimmed.length);
     if (newlineIdx > -1) {
       throw new TomlError("newlines are not allowed in inline tables", {
         toml: str,
@@ -74,14 +74,14 @@ export function extractValue(
   ptr: number,
   end?: string,
 ): [TomlPrimitive, number] {
-  let c = str[ptr];
+  const c = str[ptr];
   if (c === "[" || c === "{") {
-    let [value, endPtr] =
+    const [value, endPtr] =
       c === "[" ? parseArray(str, ptr) : parseInlineTable(str, ptr);
 
-    let newPtr = skipUntil(str, endPtr, ",", end);
+    const newPtr = skipUntil(str, endPtr, ",", end);
     if (end === "}") {
-      let nextNewLine = indexOfNewline(str, endPtr, newPtr);
+      const nextNewLine = indexOfNewline(str, endPtr, newPtr);
       if (nextNewLine > -1) {
         throw new TomlError("newlines are not allowed in inline tables", {
           toml: str,
@@ -96,12 +96,13 @@ export function extractValue(
   let endPtr;
   if (c === '"' || c === "'") {
     endPtr = getStringEnd(str, ptr);
-    let parsed = parseString(str, ptr, endPtr);
-    if (end) {
+    const parsed = parseString(str, ptr, endPtr);
+    if (end != null && end !== "") {
       endPtr = skipVoid(str, endPtr, end !== "]");
 
       if (
-        str[endPtr] &&
+        str[endPtr] != null &&
+        str[endPtr] !== "" &&
         str[endPtr] !== "," &&
         str[endPtr] !== end &&
         str[endPtr] !== "\n" &&
@@ -120,13 +121,13 @@ export function extractValue(
   }
 
   endPtr = skipUntil(str, ptr, ",", end);
-  let slice = sliceAndTrimEndOf(
+  const slice = sliceAndTrimEndOf(
     str,
     ptr,
     endPtr - +(str[endPtr - 1] === ","),
     end === "]",
   );
-  if (!slice[0]) {
+  if ((slice[0] as unknown) == null) {
     throw new TomlError(
       "incomplete key-value declaration: no value specified",
       {
@@ -136,7 +137,7 @@ export function extractValue(
     );
   }
 
-  if (end && slice[1] > -1) {
+  if (end != null && end !== "" && slice[1] > -1) {
     endPtr = skipVoid(str, ptr + slice[1]);
     endPtr += +(str[endPtr] === ",");
   }
