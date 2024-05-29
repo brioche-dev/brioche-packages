@@ -300,6 +300,50 @@ export function object<T extends object>(
   };
 }
 
+export function record<K extends string | number | symbol, V>(
+  keyChecker: Checker<K>,
+  valueChecker: Checker<V>,
+): Checker<Record<K, V>> {
+  return createChecker((value) => {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      return { result: "mismatch", message: "expected an object" };
+    }
+
+    const childErrors = Object.entries(value).flatMap(
+      ([key, value]): ChildError[] => {
+        const results = [];
+        const keyResult = keyChecker[checkSymbol](key);
+        const valueResult = valueChecker[checkSymbol](value);
+
+        if (keyResult.result === "mismatch") {
+          results.push({
+            path: key,
+            error: keyResult,
+          });
+        }
+        if (valueResult.result === "mismatch") {
+          results.push({
+            path: key,
+            error: valueResult,
+          });
+        }
+
+        return results;
+      },
+    );
+
+    if (childErrors.length === 0) {
+      return { result: "matches", value: value as Record<K, V> };
+    } else {
+      return {
+        result: "mismatch",
+        message: "one or more record entries did not match",
+        children: childErrors,
+      };
+    }
+  });
+}
+
 export function union<Ts extends unknown[]>(
   ...checkers: { [K in keyof Ts]: Checker<Ts[K]> }
 ): Checker<Ts[number]> {
