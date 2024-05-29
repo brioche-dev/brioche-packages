@@ -60,6 +60,7 @@ import manDb from "./man_db.bri";
 import procpsNg from "./procps_ng.bri";
 import utilLinux from "./util_linux.bri";
 import which from "./which.bri";
+import patchelf from "./patchelf.bri";
 
 export { bash };
 
@@ -138,6 +139,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     manDb(),
     procpsNg(),
     utilLinux(),
+    patchelf(),
   );
 
   return std.sync(toolchain);
