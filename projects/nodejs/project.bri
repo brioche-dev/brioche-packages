@@ -5,7 +5,7 @@ export const project = {
   version: "20.14.0",
 };
 
-export default (): std.Recipe<std.Directory> => {
+function nodejs(): std.Recipe<std.Directory> {
   let node = std
     .download({
       url: "https://nodejs.org/dist/v20.14.0/node-v20.14.0-linux-x64.tar.xz",
@@ -22,4 +22,18 @@ export default (): std.Recipe<std.Directory> => {
   });
 
   return std.withRunnableLink(node, "bin/node");
-};
+}
+export default nodejs;
+
+export function npmInstall(
+  pkg: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    npm clean-install
+  `
+    .dependencies(nodejs())
+    .outputScaffold(pkg)
+    .unsafe({ networking: true })
+    .cast("directory");
+}
