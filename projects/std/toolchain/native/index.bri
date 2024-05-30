@@ -96,7 +96,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 });
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const toolchain = std.merge(
+  let toolchain = std.merge(
     tools(),
     linuxHeaders(),
     glibc(),
@@ -141,6 +141,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     utilLinux(),
     patchelf(),
   );
+  toolchain = toolchain.insert("bin/cc", std.symlink({ target: "gcc" }));
 
   return std.sync(toolchain);
 });
