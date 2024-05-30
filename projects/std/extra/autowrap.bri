@@ -6,6 +6,9 @@ export interface AutowrapOptions {
   executables: string[];
   libraries?: std.ProcessTemplateLike[];
   sysroot?: std.AsyncRecipe<std.Directory>;
+  skipUnknownLibraries?: boolean;
+  skipLibraries?: string[];
+  runtimeLibraryDirs?: string[];
 }
 
 export function autowrap(
@@ -16,9 +19,15 @@ export function autowrap(
   const libArgs = (options.libraries ?? []).flatMap(
     (lib): std.ProcessTemplateLike[] => ["--lib-dir", lib],
   );
+  const runtimeLibArgs = (options.runtimeLibraryDirs ?? []).flatMap(
+    (lib): std.ProcessTemplateLike[] => ["--runtime-lib-dir", lib],
+  );
+  const skipLibArgs = (options.skipLibraries ?? []).flatMap(
+    (lib): std.ProcessTemplateLike[] => ["--skip-lib", lib],
+  );
 
   let result = std.recipe(recipe);
-  for (const executable of options.executables) {
+  for (const executablePath of options.executables) {
     const wrappedExecutable = std
       .process({
         command: std.tpl`${packTools()}/bin/brioche-packer`,
@@ -31,13 +40,19 @@ export function autowrap(
           "--lib-dir",
           std.tpl`${sysroot}/lib`,
           ...libArgs,
-          std.tpl`${std.outputPath}/${executable}`,
+          ...(options.skipUnknownLibraries === true
+            ? ["--skip-unknown-libs"]
+            : []),
+          ...skipLibArgs,
+          ...runtimeLibArgs,
+          "--",
+          std.tpl`${std.outputPath}/${executablePath}`,
         ],
       })
       .outputScaffold(recipe)
       .cast("directory")
-      .get(executable);
-    result = result.insert(executable, wrappedExecutable);
+      .get(executablePath);
+    result = result.insert(executablePath, wrappedExecutable);
   }
 
   return result;
