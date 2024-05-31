@@ -10,8 +10,8 @@ export function useBriocheLd(
   dir: std.Recipe<std.Directory>,
   options: UseBriocheLdOptions,
 ): std.Recipe<std.Directory> {
-  const briocheLd = packTools().get("brioche-ld");
-  const briochePacked = packTools().get("brioche-packed-userland-exec");
+  const briocheLd = packTools().get("bin/brioche-ld");
+  const briochePacked = packTools().get("bin/brioche-packed-exec");
 
   for (const ldPath of options.ldPaths) {
     const systemLd = dir.get(ldPath);

@@ -6,6 +6,8 @@ export {
   process,
   processTemplate,
   outputPath,
+  workDir,
+  homeDir,
   tpl,
   type Process,
   type ProcessOptions,

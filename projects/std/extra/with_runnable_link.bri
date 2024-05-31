@@ -1,0 +1,11 @@
+import * as std from "/core";
+
+export function withRunnableLink(
+  recipe: std.AsyncRecipe<std.Directory>,
+  runPath: string,
+): std.Recipe<std.Directory> {
+  let result = std.recipe(recipe);
+  result = result.insert("brioche-run", std.symlink({ target: runPath }));
+
+  return result;
+}

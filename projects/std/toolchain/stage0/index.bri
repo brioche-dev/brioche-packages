@@ -27,8 +27,8 @@ export function bootstrapRun(
     })
     .unarchive("tar", "xz");
 
-  const briocheLd = packTools().get("brioche-ld");
-  const briochePacked = packTools().get("brioche-packed-userland-exec");
+  const briocheLd = packTools().get("bin/brioche-ld");
+  const briochePacked = packTools().get("bin/brioche-packed-exec");
 
   const bootstrapScript = std
     .file(options.script)
@@ -124,8 +124,8 @@ export default async (): Promise<std.Recipe> => {
     })
     .unarchive("tar", "xz");
 
-  const briocheLd = packTools().get("brioche-ld");
-  const briochePacked = packTools().get("brioche-packed-userland-exec");
+  const briocheLd = packTools().get("bin/brioche-ld");
+  const briochePacked = packTools().get("bin/brioche-packed-exec");
 
   const briochePack = std.directory({
     "x86_64-linux-musl": std.directory({

@@ -14,16 +14,20 @@ export type ProcessOptions = {
 
 export type ProcessUnsafeOptions =
   | { unsafe?: false }
-  | { unsafe: true; networking?: boolean };
+  | ({ unsafe: true } & ProcessUnsafe);
+
+export interface ProcessUnsafe {
+  networking?: boolean;
+}
 
 export type Process = Recipe & ProcessUtils;
 
 export interface ProcessUtils {
-  env(key: string, value: ProcessTemplateLike): Process;
+  env(values: Record<string, ProcessTemplateLike>): Process;
   dependencies(...dependencies: AsyncRecipe<Directory>[]): Process;
   workDir(workDir: AsyncRecipe<Directory>): Process;
   outputScaffold(outputScaffold: AsyncRecipe): Process;
-  unsafe(unsafeOptions: ProcessUnsafeOptions): Process;
+  unsafe(unsafeOptions: ProcessUnsafe): Process;
 }
 
 export function process(options: ProcessOptions): Process {
@@ -81,12 +85,12 @@ export function process(options: ProcessOptions): Process {
   });
 
   return mixin(recipe, {
-    env(this: Process, key: string, value: ProcessTemplateLike): Process {
+    env(this: Process, values: Record<string, ProcessTemplateLike>): Process {
       return process({
         ...options,
         env: {
           ...options.env,
-          [key]: value,
+          ...values,
         },
       });
     },
@@ -111,9 +115,10 @@ export function process(options: ProcessOptions): Process {
         outputScaffold,
       });
     },
-    unsafe(this: Process, unsafeOptions: ProcessUnsafeOptions): Process {
+    unsafe(this: Process, unsafeOptions: ProcessUnsafe): Process {
       return process({
         ...options,
+        unsafe: true,
         ...unsafeOptions,
       });
     },

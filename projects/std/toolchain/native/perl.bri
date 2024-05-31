@@ -11,7 +11,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
     ),
   });
 
-  let perl = std
+  return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
@@ -23,13 +23,13 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
           sh Configure \
             -des \
-            -Dprefix=/ \
+            -Dprefix="$BRIOCHE_OUTPUT" \
             -Duserelocatableinc \
             -Dusethreads \
             -Dlocincpth="$zlib/include $bzip2/include" \
             -Dloclibpth="$zlib/lib $bzip2/lib"
           make
-          make install DESTDIR="$BRIOCHE_OUTPUT"
+          make install
         `,
       ],
       env: {
@@ -42,14 +42,4 @@ export default std.memo((): std.Recipe<std.Directory> => {
       },
     })
     .cast("directory");
-
-  // Mark the perl binary as executable
-  // TODO: Figure out why Perl isn't executable by default?
-  const perlBin = perl
-    .get("bin/perl")
-    .cast("file")
-    .withPermissions({ executable: true });
-  perl = perl.insert("bin/perl", perlBin);
-
-  return perl;
 });

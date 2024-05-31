@@ -3,9 +3,9 @@ import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
   const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bc-6.6.0.tar.xz",
+    url: "https://development-content.brioche.dev/ftp.gnu.org/gnu/which/which-2.21.tar.gz",
     hash: std.sha256Hash(
-      "309ef0faebf149376aa69446a496fac13c3ff483a100a51d9c67cea1a73b2906",
+      "f4a245b94124b377d8b49646bf421f9155d36aa7614b6ebf83705d3ffc76eaad",
     ),
   });
 
@@ -19,12 +19,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
           tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
 
-          CC=gcc ./configure \\
-            --prefix=/ \\
-            --disable-nls \\
-            -G \\
-            -O3 \\
-            -r
+          ./configure --prefix=/
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
         `,

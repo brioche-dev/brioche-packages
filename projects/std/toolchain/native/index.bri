@@ -1,4 +1,5 @@
 import * as std from "/core";
+import { setEnv } from "/extra";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
@@ -58,11 +59,13 @@ import texinfo from "./texinfo.bri";
 import manDb from "./man_db.bri";
 import procpsNg from "./procps_ng.bri";
 import utilLinux from "./util_linux.bri";
+import which from "./which.bri";
+import patchelf from "./patchelf.bri";
 
 export { bash };
 
 export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const tools = std.merge(
+  let tools = std.merge(
     zlib(),
     bzip2(),
     xz(),
@@ -81,13 +84,19 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     make(),
     patch(),
     tar(),
+    which(),
   );
+  tools = setEnv(tools, {
+    LIBRARY_PATH: { path: "lib" },
+    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+    MAGIC: { path: "share/misc/magic.mgc" },
+  });
 
   return std.sync(tools);
 });
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const toolchain = std.merge(
+  let toolchain = std.merge(
     tools(),
     linuxHeaders(),
     glibc(),
@@ -130,7 +139,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     manDb(),
     procpsNg(),
     utilLinux(),
+    patchelf(),
   );
+  toolchain = toolchain.insert("bin/cc", std.symlink({ target: "gcc" }));
 
   return std.sync(toolchain);
 });

@@ -1,0 +1,61 @@
+import * as std from "/core";
+
+export function runtimeUtils(): std.Recipe<std.Directory> {
+  return std
+    .download({
+      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fc48540924428944e30a4901c2fff2135abf5342/x86_64-linux/brioche-runtime-utils.tar.zstd",
+      hash: std.sha256Hash(
+        "c1ea132ed08abd7f719a698cdc32e2444e6f5ca0792c7737d42a41771a04cfa7",
+      ),
+    })
+    .unarchive("tar", "zstd");
+}
+
+interface RunnableData {
+  command: RunnableTemplate;
+  args: RunnableTemplate[];
+  env: Record<string, RunnableTemplate>;
+}
+
+export function makeRunnableExecutable(
+  data: RunnableData,
+): std.Recipe<std.File> {
+  return std
+    .process({
+      command: runtimeUtils().get("bin/runnable"),
+      args: [
+        "make-runnable",
+        "--runnable",
+        runtimeUtils().get("bin/start-runnable"),
+        "--output",
+        std.outputPath,
+        "--runnable-data",
+        JSON.stringify(data),
+      ],
+    })
+    .cast("file");
+}
+
+// function template(template: RunnableTemplate): RunnableTemplateJson {
+//   return {
+//     components: [template].flat().map((component) => {
+//       if (Array.isArray(component)) {
+//         throw new Error("Expected template to be flattened");
+//       }
+
+//       if (typeof component === "string") {
+//         return { type: "literal", value: std.tickEncode(component) };
+//       } else {
+//         return { type: "relative_path", path: std.tickEncode(component.path) };
+//       }
+//     }),
+//   };
+// }
+
+export interface RunnableTemplate {
+  components: RunnableTemplateComponent[];
+}
+
+export type RunnableTemplateComponent =
+  | { type: "literal"; value: std.BString }
+  | { type: "relative_path"; path: std.BString };
