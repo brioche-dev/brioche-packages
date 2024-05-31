@@ -1,5 +1,5 @@
 export * from "./autowrap.bri";
 export * from "./run_bash.bri";
-export * from "./runnable_bash_script.bri";
+export * from "./bash_runnable.bri";
 export * from "./set_env.bri";
 export * from "./set_run.bri";

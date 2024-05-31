@@ -5,23 +5,20 @@ import {
   makeRunnableExecutable,
 } from "/runnable_tools.bri";
 
-export type RunnableBashScript = std.Recipe<std.Directory> &
-  RunnableBashScriptUtils;
+export type BashRunnable = std.Recipe<std.Directory> & BashRunnableUtils;
 
-export interface RunnableBashScriptUtils {
-  root(recipe: std.AsyncRecipe<std.Directory>): RunnableBashScript;
-  env(values: Record<string, RunnableTemplateValue>): RunnableBashScript;
-  dependencies(
-    ...dependencies: std.AsyncRecipe<std.Directory>[]
-  ): RunnableBashScript;
+export interface BashRunnableUtils {
+  root(recipe: std.AsyncRecipe<std.Directory>): BashRunnable;
+  env(values: Record<string, RunnableTemplateValue>): BashRunnable;
+  dependencies(...dependencies: std.AsyncRecipe<std.Directory>[]): BashRunnable;
 }
 
-export function runnableBashScript(
+export function bashRunnable(
   strings: TemplateStringsArray,
   ...values: string[]
-): RunnableBashScript {
+): BashRunnable {
   const script = std.indoc(strings, ...values);
-  return makeRunnableBashScript({
+  return makeBashRunnable({
     script,
     root: std.directory(),
     env: {
@@ -31,16 +28,14 @@ export function runnableBashScript(
   });
 }
 
-interface RunnableBashScriptOptions {
+interface BashRunnableOptions {
   script: string;
   root: std.AsyncRecipe<std.Directory>;
   env: Record<string, RunnableTemplateValue>;
   dependencies: std.AsyncRecipe<std.Directory>[];
 }
 
-function makeRunnableBashScript(
-  options: RunnableBashScriptOptions,
-): RunnableBashScript {
+function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
   let recipe = options.root;
   let n = 0;
   let command: RunnableTemplate = { components: [] };
@@ -97,8 +92,8 @@ function makeRunnableBashScript(
   recipe = recipe.insert("brioche-run", runnable);
 
   return std.mixin(recipe, {
-    env(values: Record<string, RunnableTemplateValue>): RunnableBashScript {
-      return makeRunnableBashScript({
+    env(values: Record<string, RunnableTemplateValue>): BashRunnable {
+      return makeBashRunnable({
         ...options,
         env: { ...options.env, ...values },
       });
@@ -106,15 +101,15 @@ function makeRunnableBashScript(
 
     dependencies(
       ...dependencies: std.AsyncRecipe<std.Directory>[]
-    ): RunnableBashScript {
-      return makeRunnableBashScript({
+    ): BashRunnable {
+      return makeBashRunnable({
         ...options,
         dependencies: [...options.dependencies, ...dependencies],
       });
     },
 
-    root(recipe: std.AsyncRecipe<std.Directory>): RunnableBashScript {
-      return makeRunnableBashScript({
+    root(recipe: std.AsyncRecipe<std.Directory>): BashRunnable {
+      return makeBashRunnable({
         ...options,
         root: recipe,
       });
