@@ -30,7 +30,7 @@ jobs:
   build:
     name: Build packages
     needs: [check]
-    if: github.repository == 'brioche-dev/brioche-packages' && ( github.ref == 'refs/heads/main' || github.ref == 'refs/heads/prebuild' )
+    if: github.repository == 'brioche-dev/brioche-packages' && github.ref == 'refs/heads/wip/debug-publishing'
     runs-on: proxmox-runner-set
     steps:
       - name: Install system packages
@@ -58,7 +58,7 @@ jobs:
   publish:
     name: Publish packages
     needs: [build]
-    if: github.repository == 'brioche-dev/brioche-packages' && github.ref == 'refs/heads/main'
+    if: github.repository == 'brioche-dev/brioche-packages' && github.ref == 'refs/heads/wip/debug-publishing'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -73,6 +73,8 @@ jobs:
         run: |
           for project in projects/*; do
             echo "::group::$project"
+            export BRIOCHE_LOG_OUTPUT="/dev/stderr"
+            export BRIOCHE_LOG_DEBUG='[]=debug'
             brioche publish -p "$project"
             echo "::endgroup::"
           done
