@@ -9,6 +9,7 @@ export type RunnableBashScript = std.Recipe<std.Directory> &
   RunnableBashScriptUtils;
 
 export interface RunnableBashScriptUtils {
+  root(recipe: std.AsyncRecipe<std.Directory>): RunnableBashScript;
   env(values: Record<string, RunnableTemplateValue>): RunnableBashScript;
   dependencies(
     ...dependencies: std.AsyncRecipe<std.Directory>[]
@@ -22,8 +23,9 @@ export function runnableBashScript(
   const script = std.indoc(strings, ...values);
   return makeRunnableBashScript({
     script,
+    root: std.directory(),
     env: {
-      artifact: { relativePath: "." },
+      root: { relativePath: "." },
     },
     dependencies: [],
   });
@@ -31,6 +33,7 @@ export function runnableBashScript(
 
 interface RunnableBashScriptOptions {
   script: string;
+  root: std.AsyncRecipe<std.Directory>;
   env: Record<string, RunnableTemplateValue>;
   dependencies: std.AsyncRecipe<std.Directory>[];
 }
@@ -38,7 +41,7 @@ interface RunnableBashScriptOptions {
 function makeRunnableBashScript(
   options: RunnableBashScriptOptions,
 ): RunnableBashScript {
-  let recipe = std.directory();
+  let recipe = options.root;
   let n = 0;
   let command: RunnableTemplate = { components: [] };
   [command, recipe, n] = buildTemplate([tools().get("bin/bash")], recipe, n);
@@ -96,9 +99,8 @@ function makeRunnableBashScript(
   return std.mixin(recipe, {
     env(values: Record<string, RunnableTemplateValue>): RunnableBashScript {
       return makeRunnableBashScript({
-        script: options.script,
+        ...options,
         env: { ...options.env, ...values },
-        dependencies: options.dependencies,
       });
     },
 
@@ -106,9 +108,15 @@ function makeRunnableBashScript(
       ...dependencies: std.AsyncRecipe<std.Directory>[]
     ): RunnableBashScript {
       return makeRunnableBashScript({
-        script: options.script,
-        env: options.env,
+        ...options,
         dependencies: [...options.dependencies, ...dependencies],
+      });
+    },
+
+    root(recipe: std.AsyncRecipe<std.Directory>): RunnableBashScript {
+      return makeRunnableBashScript({
+        ...options,
+        root: recipe,
       });
     },
   });
@@ -123,27 +131,29 @@ type RunnableTemplateValue =
 
 function buildTemplate(
   template: RunnableTemplateValue,
-  recipe: std.Recipe<std.Directory>,
+  recipe: std.AsyncRecipe<std.Directory>,
   n: number,
 ): [RunnableTemplate, std.Recipe<std.Directory>, number] {
+  let recipeValue = std.recipe(recipe);
+
   if (template == null || template === "") {
-    return [{ components: [] }, recipe, n];
+    return [{ components: [] }, recipeValue, n];
   } else if (typeof template === "string") {
     return [
       { components: [{ type: "literal", value: std.bstring(template) }] },
-      recipe,
+      recipeValue,
       n,
     ];
   } else if (Array.isArray(template)) {
     const resultComponents = [];
     for (const component of template) {
       let result: RunnableTemplate;
-      [result, recipe, n] = buildTemplate(component, recipe, n);
+      [result, recipeValue, n] = buildTemplate(component, recipeValue, n);
 
       resultComponents.push(...result.components);
     }
 
-    return [{ components: resultComponents }, recipe, n];
+    return [{ components: resultComponents }, recipeValue, n];
   } else if ("relativePath" in template) {
     return [
       {
@@ -151,11 +161,11 @@ function buildTemplate(
           { type: "relative_path", path: std.bstring(template.relativePath) },
         ],
       },
-      recipe,
+      recipeValue,
       n,
     ];
   } else {
-    recipe = recipe.insert(`brioche-run.d/recipe-${n}`, template);
+    recipeValue = recipeValue.insert(`brioche-run.d/recipe-${n}`, template);
     return [
       {
         components: [
@@ -165,7 +175,7 @@ function buildTemplate(
           },
         ],
       },
-      recipe,
+      recipeValue,
       n + 1,
     ];
   }
