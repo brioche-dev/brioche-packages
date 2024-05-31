@@ -3,12 +3,15 @@ import { runBash } from "./run_bash.bri";
 
 interface OciContainerImageOptions {
   recipe: std.AsyncRecipe<std.Directory>;
+  entrypoint?: string[];
 }
 
 export function ociContainerImage(
   options: OciContainerImageOptions,
 ): std.Recipe<std.File> {
   return std.recipeFn(async (): Promise<std.Recipe<std.File>> => {
+    const entrypoint = options.entrypoint ?? ["/brioche-run"];
+
     let imageDir = std.directory();
 
     imageDir = imageDir.insert(
@@ -37,7 +40,7 @@ export function ociContainerImage(
           architecture: "amd64",
           os: "linux",
           config: {
-            Entrypoint: ["/brioche-run"],
+            Entrypoint: entrypoint,
           },
           rootfs: {
             type: "layers",
