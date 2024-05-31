@@ -1,0 +1,177 @@
+import * as std from "/core";
+import { runBash } from "./run_bash.bri";
+
+interface OciContainerImageOptions {
+  recipe: std.AsyncRecipe<std.Directory>;
+  entrypoint?: string[];
+}
+
+export function ociContainerImage(
+  options: OciContainerImageOptions,
+): std.Recipe<std.File> {
+  return std.recipeFn(async (): Promise<std.Recipe<std.File>> => {
+    const entrypoint = options.entrypoint ?? ["/brioche-run"];
+
+    let imageDir = std.directory();
+
+    imageDir = imageDir.insert(
+      "oci-layout",
+      std.file(
+        JSON.stringify({
+          imageLayoutVersion: "1.0.0",
+        }),
+      ),
+    );
+
+    const layerTar = tar(expandResources(options.recipe));
+    const [diffId] = await describeBlob(layerTar);
+
+    const layerTarGzip = gzip(layerTar);
+    let layerDigest = "";
+    let layerSize = 0;
+    [imageDir, layerDigest, layerSize] = await addBlob(imageDir, layerTarGzip);
+
+    let configDigest: string = "";
+    let configSize: number = 0;
+    [imageDir, configDigest, configSize] = await addBlob(
+      imageDir,
+      std.file(
+        JSON.stringify({
+          architecture: "amd64",
+          os: "linux",
+          config: {
+            Entrypoint: entrypoint,
+          },
+          rootfs: {
+            type: "layers",
+            diff_ids: [diffId],
+          },
+        }),
+      ),
+    );
+
+    let manifestDigest = "";
+    let manifestSize = 0;
+    [imageDir, manifestDigest, manifestSize] = await addBlob(
+      imageDir,
+      std.file(
+        JSON.stringify({
+          schemaVersion: 2,
+          mediaType: "application/vnd.oci.image.manifest.v1+json",
+          config: {
+            mediaType: "application/vnd.oci.image.config.v1+json",
+            digest: configDigest,
+            size: configSize,
+          },
+          layers: [
+            {
+              mediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
+              digest: layerDigest,
+              size: layerSize,
+            },
+          ],
+        }),
+      ),
+    );
+
+    imageDir = imageDir.insert(
+      "index.json",
+      std.file(
+        JSON.stringify({
+          schemaVersion: 2,
+          mediaType: "application/vnd.oci.image.index.v1+json",
+          manifests: [
+            {
+              mediaType: "application/vnd.oci.image.manifest.v1+json",
+              size: manifestSize,
+              digest: manifestDigest,
+              platform: {
+                architecture: "amd64",
+                os: "linux",
+              },
+            },
+          ],
+        }),
+      ),
+    );
+
+    return tar(imageDir);
+  });
+}
+
+async function addBlob(
+  imageDir: std.Recipe<std.Directory>,
+  blob: std.Recipe<std.File>,
+): Promise<[std.Recipe<std.Directory>, string, number]> {
+  const [digest, size] = await describeBlob(blob);
+  imageDir = imageDir.insert(`blobs/sha256/${digest}`, blob);
+  return [imageDir, `sha256:${digest}`, size];
+}
+
+async function describeBlob(
+  file: std.AsyncRecipe<std.File>,
+): Promise<[string, number]> {
+  const description = await runBash`
+    sha256sum < "$file" > "$BRIOCHE_OUTPUT"
+    wc -c < "$file" >> "$BRIOCHE_OUTPUT"
+  `
+    .env({ file })
+    .cast("file")
+    .read();
+  const [sha256sum, size] = description.split("\n");
+  if (sha256sum == null || size == null) {
+    throw new Error(`Invalid output from commands: ${description}`);
+  }
+
+  const [shaHash] = sha256sum.split(" ");
+  if (shaHash == null || !/^[0-9a-f]{64}$/.test(shaHash)) {
+    throw new Error(`Invalid sha256sum: ${sha256sum}`);
+  }
+
+  return [shaHash, parseInt(size)];
+}
+
+function expandResources(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return runBash`
+    if [ -d "$BRIOCHE_RESOURCE_DIR" -a -n "$(ls -A "$BRIOCHE_RESOURCE_DIR")" ]; then
+      mkdir -p "$BRIOCHE_OUTPUT"/brioche-resources.d/
+      cp \\
+        -dr \\
+        --no-preserve=mode,ownership,timestamps \\
+        "$BRIOCHE_RESOURCE_DIR"/* "$BRIOCHE_OUTPUT"/brioche-resources.d/
+    fi
+
+    oldifs="$IFS"
+    IFS=":"
+    for resource_dir in $BRIOCHE_INPUT_RESOURCE_DIRS; do
+      if [ -d "$resource_dir" -a -n "$(ls -A "$resource_dir")" ]; then
+        mkdir -p "$BRIOCHE_OUTPUT"/brioche-resources.d/
+        cp \\
+          -dr \\
+          --no-preserve=mode,ownership,timestamps \\
+          "$resource_dir"/* "$BRIOCHE_OUTPUT"/brioche-resources.d/
+      fi
+    done
+    IFS="$oldifs"
+  `
+    .outputScaffold(recipe)
+    .cast("directory");
+}
+
+function tar(recipe: std.AsyncRecipe<std.Directory>): std.Recipe<std.File> {
+  return runBash`
+    tar -cf "$BRIOCHE_OUTPUT" -C "$recipe" .
+  `
+    .env({ recipe })
+    .cast("file");
+}
+
+function gzip(file: std.AsyncRecipe<std.File>): std.Recipe<std.File> {
+  return runBash`
+    gzip -c "$file" > "$BRIOCHE_OUTPUT"
+  `
+    .env({ file })
+    .cast("file");
+}
