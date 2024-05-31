@@ -74,7 +74,7 @@ jobs:
           for project in projects/*; do
             echo "::group::$project"
             export BRIOCHE_LOG_OUTPUT="/dev/stderr"
-            export BRIOCHE_LOG_DEBUG='[]=debug'
+            # export BRIOCHE_LOG_DEBUG='[]=debug'
             brioche publish -p "$project"
             echo "::endgroup::"
           done
