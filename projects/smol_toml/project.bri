@@ -6,7 +6,7 @@
 
 export * from "./index.bri";
 
-export const projcet = {
+export const project = {
   name: "smol_toml",
   version: "1.2.0",
 };
