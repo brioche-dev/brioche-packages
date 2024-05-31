@@ -1,6 +1,7 @@
 import * as std from "std";
 import * as TOML from "smol_toml";
 import * as t from "typer";
+import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
@@ -28,7 +29,7 @@ const Manifest = t.object({
   profiles: t.record(t.string(), t.array(t.string())),
 });
 
-export default async (): Promise<std.Recipe<std.Directory>> => {
+async function rust(): Promise<std.Recipe<std.Directory>> {
   const manifestToml = await std
     .download({
       url: "https://static.rust-lang.org/dist/channel-rust-1.78.0.toml",
@@ -103,4 +104,84 @@ export default async (): Promise<std.Recipe<std.Directory>> => {
     libraries: [std.tpl`${std.outputPath}/lib`],
   });
   return result;
-};
+}
+export default rust;
+
+export interface CargoInstallOptions {
+  crate: std.AsyncRecipe<std.Directory>;
+  toolchain?: std.AsyncRecipe<std.Directory>;
+  profile?: string;
+}
+
+export function cargoBuild(options: CargoInstallOptions) {
+  const toolchain = options.toolchain ?? std.toolchain();
+
+  // Create a skeleton crate so we have enough information to vendor the
+  // dependencies
+  const skeletonCrate = createSkeletonCrate(options.crate);
+
+  // Vendor the dependencies with network access and save the Cargo config.toml
+  // file, so the vendored dependencies are used
+  const vendoredSkeletonCrate = std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    mkdir -p .cargo
+    cargo vendor --locked >> .cargo/config.toml
+  `
+    .dependencies(rust(), caCertificates())
+    .outputScaffold(skeletonCrate)
+    .unsafe({ networking: true })
+    .cast("directory");
+
+  // Combine the original crate with the vendored dependencies
+  const crate = std.merge(vendoredSkeletonCrate, options.crate);
+
+  // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
+  return std.runBash`
+    cargo install --path . --frozen
+  `
+    .dependencies(rust(), toolchain)
+    .env({
+      CARGO_INSTALL_ROOT: std.outputPath,
+      PATH: std.tpl`${std.outputPath}/bin`,
+    })
+    .workDir(crate)
+    .cast("directory");
+}
+
+/**
+ * Create a "skeleton crate" for a Rust crate. This is a crate that has
+ * the minimal set of files needed for Cargo to consider it a valid crate,
+ * namely so we can vendor dependencies. Without doing this, we would need
+ * to re-vendor the crates any time the source code changes!
+ */
+export function createSkeletonCrate(
+  crate: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  const recipe = std.runBash`
+    cargo chef prepare --recipe-path "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust(), cargoChef())
+    .workDir(crate)
+    .cast("file");
+  return std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    cargo chef cook --recipe-path "$recipe" --no-build
+  `
+    .dependencies(rust(), cargoChef())
+    .env({ recipe })
+    .outputScaffold(std.directory())
+    .cast("directory");
+}
+
+function cargoChef(): std.Recipe<std.Directory> {
+  const pkg = std.download({
+    url: "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
+    hash: std.sha256Hash(
+      "91b518df5c8b02775026875f3aadef1946464354db1ca0758e4912249578f0bc",
+    ),
+  });
+
+  return std.directory({
+    bin: pkg.unarchive("tar", "gzip"),
+  });
+}
