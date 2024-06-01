@@ -36,22 +36,6 @@ export function makeRunnableExecutable(
     .cast("file");
 }
 
-// function template(template: RunnableTemplate): RunnableTemplateJson {
-//   return {
-//     components: [template].flat().map((component) => {
-//       if (Array.isArray(component)) {
-//         throw new Error("Expected template to be flattened");
-//       }
-
-//       if (typeof component === "string") {
-//         return { type: "literal", value: std.tickEncode(component) };
-//       } else {
-//         return { type: "relative_path", path: std.tickEncode(component.path) };
-//       }
-//     }),
-//   };
-// }
-
 export interface RunnableTemplate {
   components: RunnableTemplateComponent[];
 }
