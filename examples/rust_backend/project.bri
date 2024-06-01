@@ -1,0 +1,15 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export default function server() {
+  return cargoBuild({
+    crate: Brioche.glob("src", "Cargo.*"),
+    runnable: "bin/rust_backend",
+  });
+}
+
+export function container() {
+  return std.ociContainerImage({
+    recipe: server(),
+  });
+}
