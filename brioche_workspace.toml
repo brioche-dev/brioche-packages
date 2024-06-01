@@ -1,1 +1,1 @@
-members = ["projects/*"]
+members = ["packages/*"]

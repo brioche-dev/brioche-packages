@@ -21,7 +21,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Check projects
         run: |
-          for project in projects/*; do
+          for project in packages/*; do
             echo "::group::$project"
             brioche check -p "$project"
             echo "::endgroup::"
@@ -47,7 +47,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Build projects
         run: |
-          for project in projects/*; do
+          for project in packages/*; do
             echo "::group::$project"
             brioche build -p "$project" --check --sync
             echo "::endgroup::"
@@ -71,7 +71,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Publish projects
         run: |
-          for project in projects/*; do
+          for project in packages/*; do
             echo "::group::$project"
             brioche publish -p "$project"
             echo "::endgroup::"
