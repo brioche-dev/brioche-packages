@@ -134,7 +134,13 @@ export function cargoBuild(options: CargoBuildOptions) {
     .cast("directory");
 
   // Combine the original crate with the vendored dependencies
-  const crate = std.merge(vendoredSkeletonCrate, options.crate);
+  let crate = std.merge(vendoredSkeletonCrate, options.crate);
+
+  // Copy the updated Cargo config.toml file into the crate
+  crate = crate.insert(
+    ".cargo/config.toml",
+    vendoredSkeletonCrate.get(".cargo/config.toml"),
+  );
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
