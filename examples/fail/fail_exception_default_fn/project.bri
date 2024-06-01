@@ -1,9 +1,0 @@
-export const project = {
-  dependencies: {
-    std: "*",
-  },
-};
-
-export default () => {
-  throw new Error("default export exception");
-};
