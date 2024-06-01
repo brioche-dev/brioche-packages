@@ -25,15 +25,19 @@ function nodejs(): std.Recipe<std.Directory> {
 }
 export default nodejs;
 
+interface NpmInstallOptions {
+  npmPackage: std.AsyncRecipe<std.Directory>;
+}
+
 export function npmInstall(
-  pkg: std.AsyncRecipe<std.Directory>,
+  options: NpmInstallOptions,
 ): std.Recipe<std.Directory> {
   return std.runBash`
     cd "$BRIOCHE_OUTPUT"
     npm clean-install
   `
     .dependencies(nodejs())
-    .outputScaffold(pkg)
+    .outputScaffold(options.npmPackage)
     .unsafe({ networking: true })
     .cast("directory");
 }
