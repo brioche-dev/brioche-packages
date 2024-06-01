@@ -1,0 +1,25 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "miniserve",
+  version: "0.27.1",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/svenstaro/miniserve/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "b65580574ca624072b1a94d59ebf201ab664eacacb46a5043ef7b81ebb538f80",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel()
+  .cast("directory");
+
+export default () => {
+  return cargoBuild({
+    crate,
+    runnable: "bin/miniserve",
+  });
+};
