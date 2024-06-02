@@ -5,7 +5,6 @@
 
 export const project = {
   name: "typer",
-  version: "0.0.0",
 };
 
 const checkSymbol: unique symbol = Symbol("check");

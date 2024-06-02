@@ -7,7 +7,6 @@ export * from "./toolchain";
 
 export const project = {
   name: "std",
-  version: "0.0.0",
 };
 
 declare global {
