@@ -5,6 +5,12 @@ export const project = {
   version: "20.14.0",
 };
 
+/**
+ * The main Node.js recipe. Returns a recipe containing the following:
+ *
+ * - `bin/node`
+ * - `bin/npm`
+ */
 function nodejs(): std.Recipe<std.Directory> {
   let node = std
     .download({
@@ -29,6 +35,33 @@ interface NpmInstallOptions {
   npmPackage: std.AsyncRecipe<std.Directory>;
 }
 
+/**
+ * Install the dependencies from an NPM package. Returns a recipe containing
+ * everything from the package, plus a `node_modules` directory.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ * import nodejs, { npmInstall } from "nodejs";
+ *
+ * export default () => {
+ *   // Get all the files for the NPM package
+ *   let npmPackage = Brioche.glob("src", "package.lock", "package.json");
+ *
+ *   // Install the dependencies
+ *   npmPackage = npmInstall({ npmPackage });
+ *
+ *   // Run the build script and save the output from `dist/`
+ *   return std.runBash`
+ *     npm run build
+ *     mv dist "$BRIOCHE_OUTPUT"
+ *   `
+ *     .workDir(npmPackage)
+ *     .dependencies(nodejs());
+ * };
+ * ```
+ */
 export function npmInstall(
   options: NpmInstallOptions,
 ): std.Recipe<std.Directory> {

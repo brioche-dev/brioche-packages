@@ -1,5 +1,34 @@
 import * as std from "/core";
 
+/**
+ * Returns a new recipe that has a symlink used when the recipe is
+ * run with `brioche run` or when the recipe is put into an OCI container
+ * image.
+ *
+ * This will add a symlink from `brioche-run` to the specified path, which
+ * is used by `brioche run` to determine the executable to run.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ *
+ * export default () => {
+ *   // Build a C program from the `src` directory
+ *   let program = std.runBash`
+ *     mkdir -p "$BRIOCHE_OUTPUT/bin"
+ *     gcc -o "$BRIOCHE_OUTPUT/bin/hello" src/hello.c
+ *   `
+ *     .workDir(Brioche.glob("src"))
+ *     .dependencies(std.toolchain());
+ *
+ *   // Add a symlink so that `brioche run` will run `bin/hello`
+ *   program = std.withRunnableLink(program, "bin/hello");
+ *
+ *   return program;
+ * };
+ * ```
+ */
 export function withRunnableLink(
   recipe: std.AsyncRecipe<std.Directory>,
   runPath: string,

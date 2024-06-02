@@ -1,6 +1,10 @@
 import * as runtime from "../runtime.bri";
 import { assert } from "../utils.bri";
 
+/**
+ * Represents an expected SHA-256 hash. Should be a hex-encoded
+ * string of 64 characters.
+ */
 export function sha256Hash(value: string): Sha256Hash {
   assert(runtime.isHex(value));
   return new Sha256Hash(value);

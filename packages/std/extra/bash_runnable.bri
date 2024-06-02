@@ -8,11 +8,50 @@ import {
 export type BashRunnable = std.Recipe<std.Directory> & BashRunnableUtils;
 
 export interface BashRunnableUtils {
+  /**
+   * Merge a recipe into the root of the returned recipe. This is useful for
+   * wrapping another recipe so that you can call `brioche run` on it. In
+   * the Bash script, you can get the path to the recipe root with the
+   * `$root` environment variable.
+   */
   root(recipe: std.AsyncRecipe<std.Directory>): BashRunnable;
+
+  /**
+   * Set environment variables when the Bash script gets run.
+   */
   env(values: Record<string, RunnableTemplateValue>): BashRunnable;
+
+  /**
+   * Include additonal dependencies when the Bash script gets run. This
+   * will set the `$PATH` environment variable.
+   */
   dependencies(...dependencies: std.AsyncRecipe<std.Directory>[]): BashRunnable;
 }
 
+/**
+ * Build a Bash script into a self-contained runnable recipe. This does not
+ * run the Bash script, but allows it to be run outside of Brioche, such
+ * as by calling `brioche run` or by putting it into an OCI container image.
+ *
+ * The Bash script will be called with the `-e`, `-u`, and `-o pipefail`
+ * settings. Extra arguments are accessible through `$@`, just like a normal
+ * Bash script.
+ *
+ * See also `std.runBash` to run a Bash script while baking!
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ *
+ * // Running `brioche run` will print "Hello, world!"
+ * export default () => {
+ *   return std.bashRunnable`
+ *     echo "Hello, world!"
+ *   `;
+ * }
+ * ```
+ */
 export function bashRunnable(
   strings: TemplateStringsArray,
   ...values: string[]

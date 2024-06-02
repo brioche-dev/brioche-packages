@@ -10,6 +10,10 @@ import {
   createRecipe,
 } from "./recipe.bri";
 
+/**
+ * Memoize a function that returns a recipe. The return value will be
+ * converted to a proxy automatically (see `std.createProxy()`).
+ */
 export function memo<Args extends Equatable[], Ret extends Artifact>(
   f: (...args: Args) => AsyncRecipe<Ret>,
 ): (...args: Args) => Recipe<Ret> {
@@ -27,6 +31,14 @@ export function memo<Args extends Equatable[], Ret extends Artifact>(
   };
 }
 
+/**
+ * Convert a recipe into a proxy. When baked, the proxy will bake the
+ * inner recipe.
+ *
+ * This is used as an internal optimization for cases where a recipe
+ * is repeated a lot in a build script, and effectively caches the
+ * recipe's serialization.
+ */
 export function createProxy<T extends Artifact>(
   recipe: AsyncRecipe<T>,
 ): Recipe<T> {

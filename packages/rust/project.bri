@@ -29,6 +29,14 @@ const Manifest = t.object({
   profiles: t.record(t.string(), t.array(t.string())),
 });
 
+/**
+ * The main Rust recipe. Returns a recipe containing the following:
+ *
+ * - `bin/rustc`
+ * - `bin/cargo`
+ *
+ * ...among other binaries.
+ */
 async function rust(): Promise<std.Recipe<std.Directory>> {
   const manifestToml = await std
     .download({
@@ -112,9 +120,30 @@ export interface CargoBuildOptions {
   runnable?: string;
 }
 
+/**
+ * Build a Cargo crate. Defaults to the release profile. Calls
+ * `cargo install` internally, and returns the contents of `$CARGO_INSTALL_ROOT`
+ *
+ * ## Options
+ *
+ * - `crate`: The crate to build.
+ * - `runnable`: Optionally set a path to the binary to run
+ *   by default (e.g. `bin/foo`).
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import { cargoBuild } from "rust";
+ *
+ * export default () => {
+ *   return cargoBuild({
+ *     crate: Brioche.glob("src", "Cargo.*"),
+ *     runnable: "bin/hello",
+ *   });
+ * };
+ * ```
+ */
 export function cargoBuild(options: CargoBuildOptions) {
-  const toolchain = options.toolchain ?? std.toolchain();
-
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
   const skeletonCrate = createSkeletonCrate(options.crate);

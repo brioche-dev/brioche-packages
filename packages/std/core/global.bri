@@ -7,8 +7,78 @@ import {
 import { source } from "./source.bri";
 
 export interface BriocheGlobal {
+  /**
+   * Include a file from the filesystem. The path is relative to the
+   * current Brioche module, and cannot go outside the project root.
+   *
+   * ## Example
+   *
+   * ```
+   * project/
+   * ├── project.bri
+   * └── file.txt
+   * ```
+   *
+   * ```typescript
+   * // project.bri
+   *
+   * // Returns a file recipe with the contents of `file.txt`
+   * const file = Brioche.includeFile("file.txt");
+   * ```
+   */
   includeFile(path: string): Recipe<File>;
+
+  /**
+   * Include a directory from the filesystem. The path is relative to the
+   * current Brioche module, and cannot go outside the project root.
+   *
+   * ## Example
+   *
+   * ```
+   * project/
+   * ├── project.bri
+   * └── src/
+   *    ├── fizz.txt
+   *    └── buzz.txt
+   * ```
+   *
+   * ```typescript
+   * // project.bri
+   *
+   * // Returns a directory containing `fizz.txt` and `buzz.txt`
+   * const file = Brioche.includeDirectory("src");
+   * ```
+   */
   includeDirectory(path: string): Recipe<Directory>;
+
+  /**
+   * Include multiple files from the filesystem using a glob pattern. The
+   * returned directory structure preserves the relative paths of the files,
+   * relative to the current Brioche module. The glob pattern will not
+   * match any paths if it tries going outside the current module directory.
+   *
+   * ## Example
+   *
+   * ```
+   * project/
+   * ├── project.bri
+   * ├── hello.txt
+   * └── src/
+   *    ├── foo.txt
+   *    └── secretfile.env
+   * ```
+   *
+   * ```typescript
+   * // project.bri
+   *
+   * // Returns a directory with this structure:
+   * // .
+   * // ├── hello.txt
+   * // └── src/
+   * //    └── foo.txt
+   * const file = Brioche.glob("hello.txt, src/*.txt")
+   * ```
+   */
   glob(...patterns: string[]): Recipe<Directory>;
 }
 

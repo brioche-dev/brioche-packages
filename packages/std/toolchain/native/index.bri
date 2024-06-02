@@ -64,6 +64,9 @@ import patchelf from "./patchelf.bri";
 
 export { bash };
 
+/**
+ * Returns a set of common Unix-style utilities
+ */
 export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   let tools = std.merge(
     zlib(),

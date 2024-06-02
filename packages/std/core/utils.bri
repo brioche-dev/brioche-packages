@@ -1,3 +1,6 @@
+/**
+ * Throws an exception if a condition is not met.
+ */
 export function assert(
   condition: boolean,
   message?: string,
@@ -7,6 +10,28 @@ export function assert(
   }
 }
 
+/**
+ * Used as a type-checked assertion that a codepath is unreachable, such
+ * as for pattern matching. Throws an error if called.
+ *
+ * ## Example
+ *
+ * ```ts
+ * type Fizzbuzz = "fizz" | "buzz";
+ *
+ * function fizzOrBuzz(value: Fizzbuzz): string {
+ *   switch (value) {
+ *     case "fizz":
+ *       return "fizz!";
+ *     case "buzz":
+ *       return "buzz!";
+ *     default:
+ *       // This branch can never be reached
+ *       // (if a new variant is added, this will become a type error)
+ *       return unreachable(value);
+ * }
+ * ```
+ */
 export function unreachable(never: never): never {
   const value: any = never;
   throw new Error(`reached unreachable code with value: ${value}`);
@@ -26,6 +51,10 @@ export interface SerializeEquatable {
   briocheSerialize: () => Equatable;
 }
 
+/**
+ * Perform a deep-equality check between two values. This also works
+ * with types that have a `.briocheSerialize()` method.
+ */
 export function equal<T extends Equatable>(a: T, b: T): boolean {
   if (!isEquatable(a) || !isEquatable(b)) {
     throw new Error("Tried to compare values, but they could not be compared");
@@ -126,6 +155,10 @@ export function isEquatable(value: unknown): value is Equatable {
   }
 }
 
+/**
+ * Serialize a value as JSON. If the value implements `.briocheSerialize()`,
+ * then that will be used for serialization.
+ */
 export function jsonSerialize(value: Equatable): string {
   return JSON.stringify(value, (_key, value) => {
     if (isSerializeEquatable(value)) {
@@ -136,6 +169,33 @@ export function jsonSerialize(value: Equatable): string {
   });
 }
 
+/**
+ * A template function that strips extra indentation from a string, useful
+ * for including multiline strings, such as shell scripts or patch files.
+ *
+ * The first and last lines are removed if they are empty, and the level
+ * of indentation is determined by the line with the smallest indentation.
+ *
+ * ## Example
+ *
+ * ```
+ * const script = std.indoc`
+ *   #!/bin/bash
+ *   if [ -f "file.txt" ]; then
+ *     echo "file exists"
+ *   fi
+ * `;
+ * ```
+ *
+ * `script` will contain the following string:
+ *
+ * ```
+ * #!/bin/bash
+ * if [ -f "file.txt" ]; then
+ *   echo "file exists"
+ * fi
+ * ```
+ */
 export function indoc(
   strings: TemplateStringsArray,
   ...values: string[]
@@ -174,6 +234,11 @@ export function indoc(
   return lines.map((line) => line.slice(minIndentation)).join("\n");
 }
 
+/**
+ * Create a "mixin" by merging an object with some extra utilities along
+ * with it. This is useful for custom recipe subtypes that provide additional
+ * helper methods (see `std.process()` for an example).
+ */
 export function mixin<T extends object, U extends object>(
   base: T,
   mixin: U,
