@@ -11,6 +11,11 @@ export interface AutowrapOptions {
   runtimeLibraryDirs?: string[];
 }
 
+/**
+ * Automatically wrap dynamic executables so that their dynamic dependencies
+ * get loaded correctly when they are run inside and outside of Brioche. This
+ * is useful for packaging executables built from outside of Brioche.
+ */
 export function autowrap(
   recipe: std.AsyncRecipe<std.Directory>,
   options: AutowrapOptions,

@@ -1,6 +1,39 @@
 import * as std from "/core";
 import { tools } from "/toolchain";
 
+/**
+ * Create a process recipe that runs the provided Bash script when baked. The
+ * Bash script should create the path `$BRIOCHE_OUTPUT`, which will be used
+ * as the output of the recipe.
+ *
+ * This funtion returns `std.Process`, which can be used for passing in
+ * extra dependencies or environment variables using `.dependencies()`
+ * or `.env()`, respectively, along with other process options.
+ *
+ * See also `std.bashRunnable,` which will return a recipe that packages
+ * up a Bash script that can be run outside of Brioche.
+ *
+ * ## Example
+ *
+ * ``` typescript
+ * import * as std from "std";
+ *
+ * // Running `brioche build -o output` will create a directory `output`
+ * // with the file `hello.txt`. The result is cached, so the script won't
+ * // re-run unless the script changes or its inputs change.
+ * export default () => {
+ *   const file = std.file("Hello, world!");
+ *
+ *   // Return a recipe that will call the script, with `$file` set to
+ *   // the absolute path of the file above
+ *   return std.runBash`
+ *     mkdir -p "$BRIOCHE_OUTPUT"
+ *     cp "$file" > "$BRIOCHE_OUTPUT/hello.txt"
+ *   `
+ *     .env({ file });
+ * }
+ * ```
+ */
 export function runBash(
   strings: TemplateStringsArray,
   ...values: string[]

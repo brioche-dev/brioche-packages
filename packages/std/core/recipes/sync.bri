@@ -7,6 +7,11 @@ import {
   createRecipe,
 } from "./recipe.bri";
 
+/**
+ * Wrap a recipe, making it so it can be synced to the registry. Only a subset
+ * of recipes get synced normally, so this allows explicitly syncing a
+ * recipe that would otherwise not be synced.
+ */
 export function sync<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
   return createRecipe(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,

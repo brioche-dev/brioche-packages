@@ -23,13 +23,72 @@ export interface ProcessUnsafe {
 export type Process = Recipe & ProcessUtils;
 
 export interface ProcessUtils {
+  /**
+   * Returns a new process with more environment variables set.
+   */
   env(values: Record<string, ProcessTemplateLike>): Process;
+
+  /**
+   * Returns a new process with more dependencies added. The new
+   * dependencies take precedence over the old ones.
+   */
   dependencies(...dependencies: AsyncRecipe<Directory>[]): Process;
+
+  /**
+   * Returns a new process with a different working directory.
+   */
   workDir(workDir: AsyncRecipe<Directory>): Process;
+
+  /**
+   * Returns a new process with a different output scaffold.
+   */
   outputScaffold(outputScaffold: AsyncRecipe): Process;
+
+  /**
+   * Returns a new process with unsafe options set.
+   */
   unsafe(unsafeOptions: ProcessUnsafe): Process;
 }
 
+/**
+ * Create a recipe that will run a process, returning the contents that
+ * the process writes to the path `$BRIOCHE_OUTPUT`. The process can
+ * write a file, directory, or symlink to this path.
+ *
+ * Most options can be passed as a string literal, or as a template using
+ * the template function `std.tpl`. Recipes in the template will be
+ * expanded to an absolute path when the process runs.
+ *
+ * ## Options
+ *
+ * These options can be passed when calling `std.process()`, or can be
+ * set by calling methods on another process recipe (these methods are
+ * **immutable**, so make sure to assign the result to a variable!)
+ *
+ * - `command`: The command to run. Should either be a template, or a
+ *   string referencing a command from `dependencies`.
+ * - `args`: An array of arguments to pass to the command.
+ * - `env`: An object containing environment variables to set for the process.
+ * - `dependencies`: An array of dependencies to call the process with.
+ *   Dependencies will be merged into the process's environment.
+ * - `workDir`: Set to a directory recipe that will be copied into the
+ *   process's starting working directory.
+ * - `outputScaffold`: Set to a recipe that will be be used to initialize
+ *   `$BRIOCHE_OUTPUT`, which the process can then manipulate.
+ * - `unsafe`: Set to `true` to use unsafe options. You must take extra
+ *   care to ensure that running the process is hermetic when using these
+ *   options! The following options are available:
+ *   - `networking`: Set to `true` to allow the process to access the network.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * // Call Bash and write "Hello world!" to the output path
+ * std.process({
+ *   command: std.tpl`${std.tools()}/bin/bash`,
+ *   args: ["-c", 'echo "Hello world!" > "$BRIOCHE_OUTPUT"'],
+ * });
+ */
 export function process(options: ProcessOptions): Process {
   const env: Record<string, ProcessTemplateLike> = {
     BRIOCHE_OUTPUT: outputPath,
@@ -131,6 +190,11 @@ export function processTemplate(
   return new ProcessTemplate(...components);
 }
 
+/**
+ * Create a process template, which can be used to include recipe paths
+ * or other pre-defined values for the command, arguments, or environment
+ * variables for a process.
+ */
 export function tpl(
   strings: TemplateStringsArray,
   ...items: ProcessTemplateLike[]
@@ -147,11 +211,42 @@ export function tpl(
   return new ProcessTemplate(...components);
 }
 
+/**
+ * Expands to the path where the process should write its output. Equivalent
+ * to the default environment variable `$BRIOCHE_OUTPUT`.
+ */
 export const outputPath: unique symbol = Symbol("outputPath");
+
+/**
+ * Expands to the directory where the process can write resources to that
+ * can then be referenced by files in the process's output. Equivalent
+ * to the default environment variable `$BRIOCHE_RESOURCE_DIR`.
+ */
 export const resourceDir: unique symbol = Symbol("resourceDir");
+
+/**
+ * Expands to a `:`-delimited list of directories where the process can find
+ * resources from its inputs. These directories are normally read-only.
+ * Equivalent to the default environment variable `$BRIOCHE_INPUT_RESOURCE_DIRS`.
+ */
 export const inputResourceDirs: unique symbol = Symbol("inputResourceDirs");
+
+/**
+ * Expands to the home directory when the process runs. Equivalent to the
+ * default environment variable `$HOME`.
+ */
 export const homeDir: unique symbol = Symbol("homeDir");
+
+/**
+ * Expands to the the "work directory" of the process. This is the directory
+ * a process starts in by default (which is usually `$HOME/work`).
+ */
 export const workDir: unique symbol = Symbol("workDir");
+
+/**
+ * Expands to the temporary directory where the process can write temporary
+ * files. Equivalent to the default environment variable `$TMPDIR`.
+ */
 export const tempDir: unique symbol = Symbol("tempDir");
 
 export type ProcessTemplateLike = Awaitable<ProcessTemplateComponent>;

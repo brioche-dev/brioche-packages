@@ -8,6 +8,13 @@ export interface SymlinkOptions {
   target: string;
 }
 
+/**
+ * Create a new symlink pointing at a provided path.
+ *
+ * ## Options
+ *
+ * - `target`: The target path of the symlink.
+ */
 export function symlink(opts: SymlinkOptions): Symlink {
   return new Symlink({
     target: runtime.bstring(opts.target),

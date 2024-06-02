@@ -9,6 +9,20 @@ import {
 } from "./recipe.bri";
 import { artifactType } from "./artifact_type.bri";
 
+/**
+ * Constructs a new directory. Takes an object argument, where each key
+ * is a filename and each value is a recipe
+ *
+ * ## Example
+ *
+ * ```typescript
+ * std.directory({
+ *   "hello": std.directory({
+ *     "world.txt": std.file("Hello, world!"),
+ *   }),
+ * });
+ * ```
+ */
 export function directory(
   entries: Record<string, AsyncRecipe> = {},
 ): Recipe<Directory> {
@@ -37,6 +51,10 @@ export function directory(
   });
 }
 
+/**
+ * Perform a deep merge of two or more directories. The rightmost directory
+ * takes precedence.
+ */
 export function merge(
   ...directories: AsyncRecipe<Directory>[]
 ): Recipe<Directory> {

@@ -1,3 +1,28 @@
+/**
+ * The `std` package is the standard library for Brioche, containing many
+ * core types and functions, plus some important utilities used by most
+ * Brioche projects. It also includes the definitions for several important
+ * global functions, including `console.log` and `Brioche.glob`.
+ *
+ * Most Brioche projects will import the standard library like this:
+ *
+ * ```typescript
+ * import * as std from "std";
+ * ```
+ *
+ * Internally, the `std` package is broken up into 3 major sections:
+ *
+ * - `core`: Core types and functions, including recipes and standalone
+ *   utilities.
+ * - `toolchain`: A bootstrapped toolchain with a set of standard Unix-like
+ *   tools. This includes builds for `gcc`, `bash`, and others. This module
+ *   defines the `std.tools()` and `std.toolchain()` exports.
+ * - `extra`: Additional high-level types and functions, which usually depend
+ *   on the toolchain. This includes the `std.runBash()` export.
+ *
+ * @packageDocumentation
+ */
+
 import type { BriocheGlobal } from "./core/global.bri";
 import { toolchain } from "./toolchain";
 

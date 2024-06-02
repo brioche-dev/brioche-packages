@@ -4,6 +4,26 @@ export type EnvValues = Record<string, EnvValue | EnvValue[]>;
 
 export type EnvValue = { path: string };
 
+/**
+ * Returns a new recipe with some environment variables. These environment
+ * variables will be set when the recipe is included as a dependency for a
+ * procss recipe.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * let myLibrary = std.runBash`
+ *   mkdir -p "$BRIOCHE_OUTPUT/lib"
+ *   # ... build a library ...
+ * `;
+ *
+ * // When myLibrary gets included as a dependency, `$LIBRARY_PATH`
+ * // will get set to the absolute path of the `lib` directory
+ * myLibrary = std.setEnv(myLibrary, {
+ *   LIBRARY_PATH: { path: "lib" },
+ * });
+ * ```
+ */
 export function setEnv(
   recipe: std.AsyncRecipe<std.Directory>,
   env: EnvValues,

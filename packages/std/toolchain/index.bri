@@ -18,6 +18,12 @@ export { default as stage1 } from "./stage1";
 export { default as stage2 } from "./stage2";
 export { default as native, bash, tools } from "./native";
 
+/**
+ * A recipe containing a full C toolchain, including a C compiler, linker,
+ * libc, Make, and other common utilities. The toolchain also contains
+ * everything from `std.tools()`, including a shell and common Unix-style
+ * utilities.
+ */
 export function toolchain(): std.Recipe<std.Directory> {
   return nativeToolchain();
 }

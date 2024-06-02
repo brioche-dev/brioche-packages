@@ -6,6 +6,16 @@ interface OciContainerImageOptions {
   entrypoint?: string[];
 }
 
+/**
+ * Create an OCI container image from a recipe. The recipe
+ * will be included as a layer in the image.
+ *
+ * ## Options
+ *
+ * - `recipe`: The recipe to use as the image layer.
+ * - `entrypoint`: The entrypoint to use for the image.
+ *   Defaults to `["/brioche-run"]`.
+ */
 export function ociContainerImage(
   options: OciContainerImageOptions,
 ): std.Recipe<std.File> {

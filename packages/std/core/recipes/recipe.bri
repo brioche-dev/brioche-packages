@@ -63,6 +63,12 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
 // to `RecipeCommon<Artifact>` in TypeScript messages. This is mainly done for the LSP.
 const recipeMarker: unique symbol = Symbol("recipeMarker");
 
+/**
+ * A "recipe" is a type that describes how to create an artifact in Brioche.
+ * When you call `brioche build`, the returned recipe is "baked" to produce
+ * an output artifact. Recipes are lazy and won't do anything until `.bake()`
+ * is called on them.
+ */
 export type Recipe<T extends Artifact = Artifact> = {
   [recipeMarker]?: undefined;
 } & RecipeCommon<T> &
@@ -76,6 +82,11 @@ export type Recipe<T extends Artifact = Artifact> = {
           ? object
           : never);
 
+/**
+ * A recipe that may be wrapped in a promise. An `AsyncRecipe` can be converted
+ * to a `Recipe` using the `std.recipe()` function, even when not in
+ * an async function.
+ */
 export type AsyncRecipe<T extends Artifact = Artifact> = Awaitable<Recipe<T>>;
 
 export function briocheDeserializeAny(
@@ -94,6 +105,11 @@ export function briocheDeserializeAny(
   }
 }
 
+/**
+ * Create a recipe from an `AsyncRecipe`. This function itself is not async,
+ * meaning it can even be called from a synchronous function. Under the hood,
+ * this will defer the async call until the recipe is baked (or serialized).
+ */
 export function recipe<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
   return createRecipe<T>(
     ["file", "directory", "symlink"] as ArtifactType<T>[],
@@ -109,6 +125,12 @@ export function recipe<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
   );
 }
 
+/**
+ * Create a recipe from a function that returns an `AsyncRecipe`. This function
+ * itself is not async, meaning it can even be called from a synchronous
+ * function. Under the hood, this will defer the function call until the
+ * recipe is baked (or serialized).
+ */
 export function recipeFn<T extends Artifact>(
   f: () => AsyncRecipe<T>,
 ): Recipe<T> {
@@ -146,6 +168,13 @@ export type CreateRecipeOptions<T extends Artifact> = {
     }
 );
 
+/**
+ * Create a new recipe by providing either a list of possible output types,
+ * plus either a `bake` method or a `briocheSerialize` method. The returned
+ * recipe can be used interchangeably with other, normal recipes.
+ *
+ * > **Note**: Providing only a `.bake()` function can be really inefficient!
+ */
 export function createRecipe<T extends Artifact>(
   types: ArtifactType<T>[],
   opts: CreateRecipeOptions<T>,
@@ -185,30 +214,116 @@ export function createRecipe<T extends Artifact>(
 }
 
 interface RecipeCommon<T extends Artifact> extends RecipeUtils<T> {
+  /**
+   * Bake a recipe, returning a promise that will contain the resulting
+   * artifact. Normally, you won't need to call this function yourself, as
+   * you can instead return a recipe directly, where the runtime will
+   * automatically bake it.
+   */
   bake(): Awaitable<T>;
+
+  /**
+   * Serialize a recipe to a plain JSON-style object for the Brioche runtime
+   * to handle. This is useful for wrapping another recipe, avoiding the need
+   * to call `.bake()` when implementing custom recipes.
+   */
   briocheSerialize(): Awaitable<RecipeSerialization<T>>;
 }
 
 interface RecipeUtils<T extends Artifact> {
+  /**
+   * Cast a recipe to a more specific type. This is useful for cases like
+   * `std.process()`, where the output type is not known until runtime. The
+   * cast will be validated when the recipe is baked.
+   *
+   * ## Example
+   *
+   * ```typescript
+   *
+   * ```typescript
+   * // We know this Bash scirpt will output a file, so call `.cast("file")`
+   * // to convert it to a `Recipe<File>`. We can then call file-specific
+   * // methods on the recipe.
+   * std.runBash`
+   *  echo "hi" > "$BRIOCHE_OUTPUT"
+   * `.cast("file");
+   * ```
+   */
   cast<To extends ArtifactType<T> & keyof ArtifactTypes>(
     to: To,
   ): Recipe<ArtifactTypes[To] & T>;
 }
 
 interface FileRecipeUtils extends RecipeUtils<File> {
+  /**
+   * Returns a new file with the given permissions set.
+   *
+   * ## Example
+   *
+   * ```typescript
+   * // Create a shell script and mark it as executable
+   * std.file(std.indoc`
+   *   #!/usr/bin/env bash
+   *   echo "Hello, world!"
+   * `).withPermissions({ executable: true });
+   * ```
+   */
   withPermissions(permissions: Partial<FilePermissions>): Recipe<File>;
+
+  /**
+   * Unarchive a (possibly compressed) archive file, returning a directory.
+   *
+   * ## Example
+   *
+   * ```typescript
+   * Brioche.includeFile("archive.tar.gz").unarchive("tar", "gzip");
+   * ```
+   */
   unarchive(
     archiveFormat: runtime.ArchiveFormat,
     compressionFormat?: runtime.CompressionFormat,
   ): Recipe<Directory>;
+
+  /**
+   * Read the contents of the file into a `Uint8Array`.
+   */
   readBytes(): Promise<Uint8Array>;
+
+  /**
+   * Read the contents of the file as a string. The file must be
+   * UTF-8 encoded.
+   */
   read(): Promise<string>;
 }
 
 interface DirectoryRecipeUtils extends RecipeUtils<Directory> {
+  /**
+   * Get a file, directory, or symlink from a directory by path.
+   */
   get(...paths: string[]): Recipe<Artifact>;
+
+  /**
+   * Return a new directory with the given recipe inserted at the provided
+   * path. If the directory already contains a file at the path, it will be
+   * replaced. If the path descends into a non-directory, baking the recipe
+   * will fail.
+   */
   insert(path: string, recipe: AsyncRecipe<Artifact>): Recipe<Directory>;
+
+  /**
+   * Return a new directory with the given recipe removed at the provided
+   * path. If the directory does not contain a file at the path, then the
+   * directory will be returned unchanged. If the path descends into a
+   * non-directory, baking the recipe will fail.
+   */
   remove(path: string): Recipe<Directory>;
+
+  /**
+   * Peel a directory, which removes an outer layer of the directory. Baking
+   * will fail if the directory does not contain exactly one item.
+   *
+   * Passing `depth` will repeat the peeling process multiple times (default: 1)
+   */
   peel(depth?: number): Recipe;
 }
 

@@ -3,6 +3,15 @@ import { assert } from "../utils.bri";
 import { type Recipe, createRecipe, fileRecipeUtils } from "./recipe.bri";
 import { artifactType } from "./artifact_type.bri";
 
+/**
+ * Create a new file, which contains the provided content.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * std.file("Hello, world!");
+ * ```
+ */
 export function file(content: string | Uint8Array): Recipe<File> {
   const serializedContent = runtime.bstring(content);
   return createRecipe(["file"], {
