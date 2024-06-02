@@ -1,0 +1,49 @@
+import * as std from "std";
+
+export const project = {
+  name: "jq",
+  version: "1.7.1",
+};
+
+const source = std
+  .download({
+    url: `https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "478c9ca129fd2e3443fe27314b455e211e0d8c60bc8ff7df703873deeee580c2",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel(1)
+  .cast("directory");
+
+export default function (): std.Recipe<std.Directory> {
+  const jq = std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-oniguruma=builtin
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .env(autotoolsEnv())
+    .cast("directory");
+  return std.withRunnableLink(jq, "bin/jq");
+}
+
+// HACK: This should be removed once `std.toolchain()` properly sets
+// these variables for autotools
+function autotoolsEnv(): Record<string, std.ProcessTemplateLike> {
+  return {
+    M4: std.tpl`${std.toolchain()}/bin/m4`,
+    AUTOM4TE: std.tpl`${std.toolchain()}/bin/autom4te`,
+    trailer_m4: std.tpl`${std.toolchain()}/share/autoconf/autoconf/trailer.m4`,
+    PERL5LIB: std.tpl`${std.toolchain()}/share/autoconf:${std.toolchain()}/share/automake-1.16`,
+    autom4te_perllibdir: std.tpl`${std.toolchain()}/share/autoconf`,
+    AC_MACRODIR: std.tpl`${std.toolchain()}/share/autoconf`,
+    ACLOCAL_AUTOMAKE_DIR: std.tpl`${std.toolchain()}/share/aclocal-1.16`,
+    AUTOMAKE_UNINSTALLED: "1",
+    AUTOCONF: std.tpl`${std.toolchain()}/bin/autoconf`,
+    AUTOMAKE_LIBDIR: std.tpl`${std.toolchain()}/share/automake-1.16`,
+  };
+}
