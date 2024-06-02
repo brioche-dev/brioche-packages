@@ -107,13 +107,14 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
 }
 export default rust;
 
-export interface CargoInstallOptions {
+export interface CargoBuildOptions {
   crate: std.AsyncRecipe<std.Directory>;
   toolchain?: std.AsyncRecipe<std.Directory>;
   profile?: string;
+  runnable?: string;
 }
 
-export function cargoBuild(options: CargoInstallOptions) {
+export function cargoBuild(options: CargoBuildOptions) {
   const toolchain = options.toolchain ?? std.toolchain();
 
   // Create a skeleton crate so we have enough information to vendor the
@@ -133,10 +134,16 @@ export function cargoBuild(options: CargoInstallOptions) {
     .cast("directory");
 
   // Combine the original crate with the vendored dependencies
-  const crate = std.merge(vendoredSkeletonCrate, options.crate);
+  let crate = std.merge(vendoredSkeletonCrate, options.crate);
+
+  // Copy the updated Cargo config.toml file into the crate
+  crate = crate.insert(
+    ".cargo/config.toml",
+    vendoredSkeletonCrate.get(".cargo/config.toml"),
+  );
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
-  return std.runBash`
+  let buildResult = std.runBash`
     cargo install --path . --frozen
   `
     .dependencies(rust(), toolchain)
@@ -146,6 +153,13 @@ export function cargoBuild(options: CargoInstallOptions) {
     })
     .workDir(crate)
     .cast("directory");
+
+  // Add a runnable link if set in the options
+  if (options.runnable != null) {
+    buildResult = std.withRunnableLink(buildResult, options.runnable);
+  }
+
+  return buildResult;
 }
 
 /**

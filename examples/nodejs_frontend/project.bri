@@ -1,0 +1,45 @@
+import * as std from "std";
+import nodejs, { npmInstall } from "nodejs";
+import miniserve from "miniserve";
+
+// Build the static site into a plain directory
+export function staticSite(): std.Recipe<std.Directory> {
+  // Get all the files needed for the build
+  let npmPackage = Brioche.glob(
+    "public",
+    "src",
+    ".eslintrc.cjs",
+    "index.html",
+    "package*.json",
+    "tsconfig*.json",
+    "vite.config.ts",
+  );
+
+  // Install the NPM dependencies
+  npmPackage = npmInstall({ npmPackage });
+
+  // Run the build script, then save the output from the `dist/` directory
+  return std.runBash`
+    npm run build
+    mv dist "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nodejs())
+    .workDir(npmPackage)
+    .env({
+      // NOTE: Rollup needs a dynamic library provided by the toolchain.
+      // Setting `$LD_LIBRARY_PATH` allows Node.js to find this library.
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain()}/lib`,
+    })
+    .cast("directory");
+}
+
+// Build the static site and serve it
+export default () => {
+  // This script gets called when using `brioche run`. This will serve
+  // the static site locally using miniserve
+  return std.bashRunnable`
+    miniserve --spa --index index.html -- "$root"
+  `
+    .dependencies(miniserve())
+    .root(staticSite());
+};
