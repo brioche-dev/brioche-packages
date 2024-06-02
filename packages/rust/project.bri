@@ -110,7 +110,6 @@ export default rust;
 export interface CargoBuildOptions {
   crate: std.AsyncRecipe<std.Directory>;
   toolchain?: std.AsyncRecipe<std.Directory>;
-  profile?: string;
   runnable?: string;
 }
 
