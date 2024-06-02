@@ -42,17 +42,25 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .cast("directory");
 
-  const libtoolArchive = mpfr.get("lib/libmpfr.la").cast("file");
-  const newLibtoolArchive = std.recipeFn(async () => {
-    let libtoolArchiveContents = await libtoolArchive.read();
-    libtoolArchiveContents = libtoolArchiveContents.replace(
-      /\/\/lib\/libgmp\.la/g,
-      "-lgmp",
-    );
-    return std.file(libtoolArchiveContents);
-  });
+  let libtoolArchive = mpfr.get("lib/libmpfr.la");
+  libtoolArchive = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        `
+          set -euo pipefail
+          sed 's|//lib/libgmp.la|-lgmp|' "$libtoolArchive" > "$BRIOCHE_OUTPUT"
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+        libtoolArchive,
+      },
+    })
+    .cast("file");
 
-  mpfr = mpfr.insert("lib/libmpfr.la", newLibtoolArchive);
+  mpfr = mpfr.insert("lib/libmpfr.la", libtoolArchive);
 
   return mpfr;
 });
