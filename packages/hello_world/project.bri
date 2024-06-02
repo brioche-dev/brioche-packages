@@ -1,0 +1,15 @@
+import * as std from "std";
+
+export const project = {
+  name: "hello_world",
+};
+
+export default () => {
+  return std.runBash`
+    mkdir -p "$BRIOCHE_OUTPUT/bin"
+    gcc src/main.c -o "$BRIOCHE_OUTPUT/bin/hello-world"
+    ln -s bin/hello-world "$BRIOCHE_OUTPUT/brioche-run"
+  `
+    .workDir(Brioche.glob("src"))
+    .dependencies(std.toolchain());
+};
