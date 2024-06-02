@@ -109,7 +109,6 @@ export default rust;
 
 export interface CargoBuildOptions {
   crate: std.AsyncRecipe<std.Directory>;
-  toolchain?: std.AsyncRecipe<std.Directory>;
   runnable?: string;
 }
 
@@ -145,7 +144,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   let buildResult = std.runBash`
     cargo install --path . --frozen
   `
-    .dependencies(rust(), toolchain)
+    .dependencies(rust(), std.toolchain())
     .env({
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
