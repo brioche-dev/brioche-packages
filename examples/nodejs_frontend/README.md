@@ -2,6 +2,8 @@
 
 A small project that uses Vite + Node.js to built a React-based SPA.
 
+See [`project.bri`](./project.bri) for the Brioche build definition.
+
 ## Usage
 
 - Output the static site with `brioche build -p ./examples/nodejs_frontend -e staticSite -o dist`. This will give you a directory that can be uploaded to a static site host, like GitHub Pages or an S3-compatible host.

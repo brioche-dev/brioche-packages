@@ -2,6 +2,8 @@
 
 A small Rust example project that starts a server with [Axum](https://github.com/tokio-rs/axum)
 
+See [`project.bri`](./project.bri) for the Brioche build definition.
+
 ## Usage
 
 - Start the server by running `brioche run -p ./examples/rust_backend`. listens on `http://localhost:8000`
