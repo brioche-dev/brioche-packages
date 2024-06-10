@@ -18,6 +18,7 @@ export {
 export { memo, createProxy } from "./proxy.bri";
 export { symlink, type SymlinkOptions, Symlink } from "./symlink.bri";
 export { sync } from "./sync.bri";
+export { collectReferences } from "./collect_references.bri";
 export {
   type AsyncRecipe,
   type Recipe,
