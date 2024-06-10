@@ -1,3 +1,16 @@
+function getBriocheVersion(): string {
+  const { op_brioche_version } = (globalThis as any).Deno.core.ops;
+
+  // TODO: Remove this check once v0.1.0 is deprecated! Brioche v0.1.0 was
+  // the only version that did not have this op
+  if (op_brioche_version === undefined) {
+    return "0.1.0";
+  }
+  return op_brioche_version();
+}
+
+export const BRIOCHE_VERSION = getBriocheVersion();
+
 export async function bakeAll(recipes: []): Promise<[]>;
 export async function bakeAll(recipes: [Recipe]): Promise<[Artifact]>;
 export async function bakeAll(
@@ -92,6 +105,7 @@ export type Recipe =
   | GetRecipe
   | InsertRecipe
   | SetPermissionsRecipe
+  | CollectReferencesRecipe
   | ProxyRecipe
   | SyncRecipe;
 
@@ -167,6 +181,11 @@ export type SetPermissionsRecipe = WithMeta & {
   type: "set_permissions";
   file: Recipe;
   executable: boolean | null;
+};
+
+export type CollectReferencesRecipe = WithMeta & {
+  type: "collect_references";
+  recipe: Recipe;
 };
 
 export type ProxyRecipe = WithMeta & {

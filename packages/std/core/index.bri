@@ -2,6 +2,7 @@ export * from "./recipes";
 export { source } from "./source.bri";
 export { assert, unreachable, indoc, mixin, type Awaitable } from "./utils.bri";
 export {
+  BRIOCHE_VERSION,
   utf8Encode,
   utf8Decode,
   tickEncode,
