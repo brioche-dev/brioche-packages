@@ -6,13 +6,33 @@ declare global {
 
 interface Console {
   log: (...args: unknown[]) => void;
+  debug: (...args: unknown[]) => void;
+  info: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
 }
 
 const console = {
-  log: (...args: unknown[]) => {
-    ops.op_brioche_console("log", displayAll(...args).join(" "));
+  log(...args: unknown[]) {
+    logLevel("log", ...args);
+  },
+  debug(...args: unknown[]) {
+    logLevel("debug", ...args);
+  },
+  info(...args: unknown[]) {
+    logLevel("info", ...args);
+  },
+  warn(...args: unknown[]) {
+    logLevel("warn", ...args);
+  },
+  error(...args: unknown[]) {
+    logLevel("error", ...args);
   },
 } satisfies Console;
+
+function logLevel(level: string, ...args: unknown[]) {
+  ops.op_brioche_console(level, displayAll(...args).join(" "));
+}
 
 export function displayAll(...values: unknown[]): string[] {
   if (values.length === 0) {

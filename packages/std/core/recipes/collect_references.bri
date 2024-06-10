@@ -1,0 +1,33 @@
+import { BRIOCHE_VERSION } from "../runtime.bri";
+import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
+import type { Directory } from "./directory.bri";
+
+/**
+ * Collect all the references within a recipe into a top-level directory
+ * named `brioche-resources.d`. This mirrors the output structure you get
+ * when running `brioche build -o <output_dir>`, and is useful for making
+ * an archive of a recipe.
+ */
+export function collectReferences(
+  recipe: AsyncRecipe<Directory>,
+): Recipe<Directory> {
+  return createRecipe(["directory"], {
+    sourceDepth: 1,
+    briocheSerialize: async (meta) => {
+      // TODO: Use a proper semver check
+      // TODO: Remove once support for v0.1.0 has been dropped
+      if (BRIOCHE_VERSION === "0.1.0") {
+        throw new Error(
+          "std.collectReferences is not supported in v0.1.0, please run `brioche self-update` to update Brioche!",
+        );
+      }
+
+      const serializedRecipe = await (await recipe).briocheSerialize();
+      return {
+        meta,
+        type: "collect_references",
+        recipe: serializedRecipe,
+      };
+    },
+  });
+}

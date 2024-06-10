@@ -33,7 +33,7 @@ export function ociContainerImage(
       ),
     );
 
-    const layerTar = tar(expandResources(options.recipe));
+    const layerTar = tar(collectReferences(options.recipe));
     const [diffId] = await describeBlob(layerTar);
 
     const layerTarGzip = gzip(layerTar);
@@ -141,9 +141,18 @@ async function describeBlob(
   return [shaHash, parseInt(size)];
 }
 
-function expandResources(
+// TODO: Remove once Brioche v0.1.0 is no longer supported
+function collectReferences(
   recipe: std.AsyncRecipe<std.Directory>,
 ): std.Recipe<std.Directory> {
+  // TODO: Use proper semver comparison
+  if (std.BRIOCHE_VERSION !== "0.1.0") {
+    return std.collectReferences(recipe);
+  }
+
+  console.warn(
+    "Using fallback to collect references from artifact, container will be much larger than it should be! Run `brioche self-update` to upgrade to the latest version of Brioche",
+  );
   return runBash`
     if [ -d "$BRIOCHE_RESOURCE_DIR" -a -n "$(ls -A "$BRIOCHE_RESOURCE_DIR")" ]; then
       mkdir -p "$BRIOCHE_OUTPUT"/brioche-resources.d/
