@@ -1,0 +1,19 @@
+import * as std from "std";
+
+export const project = {
+  name: "go",
+  version: "1.22.4",
+};
+
+export default function () {
+  return std
+    .download({
+      url: `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
+      hash: std.sha256Hash(
+        "ba79d4526102575196273416239cca418a651e049c2b099f3159db85e7bade7d",
+      ),
+    })
+    .unarchive("tar", "gzip")
+    .peel()
+    .cast("directory");
+}
