@@ -6,7 +6,7 @@ export const project = {
 };
 
 export default function () {
-  return std
+  const goRoot = std
     .download({
       url: `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
       hash: std.sha256Hash(
@@ -16,4 +16,18 @@ export default function () {
     .unarchive("tar", "gzip")
     .peel()
     .cast("directory");
+
+  let go = std.directory({
+    go: goRoot,
+    bin: std.directory({
+      go: std.symlink({ target: "../go/bin/go" }),
+      gofmt: std.symlink({ target: "../go/bin/gofmt" }),
+    }),
+  });
+  go = std.setEnv(go, {
+    GOROOT: { path: "go" },
+  });
+  go = std.withRunnableLink(go, "go/bin/go");
+
+  return go;
 }
