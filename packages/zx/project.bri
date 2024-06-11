@@ -51,3 +51,29 @@ function zx() {
   return exe;
 }
 export default zx;
+
+export function runZx(
+  strings: TemplateStringsArray,
+  ...values: string[]
+): std.Process;
+export function runZx(f: () => std.Awaitable<void>): std.Process;
+export function runZx(
+  functionOrStrings: TemplateStringsArray | (() => std.Awaitable<void>),
+  ...values: string[]
+): std.Process {
+  let script: string;
+
+  if (typeof functionOrStrings === "function") {
+    script = `(${functionOrStrings.toString()})()`;
+  } else if (Array.isArray(functionOrStrings)) {
+    script = std.indoc(functionOrStrings, ...values);
+  } else {
+    throw new Error("invalid argument");
+  }
+
+  return std.process({
+    command: std.tpl`${zx()}/bin/zx`,
+    args: ["-e", script],
+    dependencies: [nodejs(), std.tools()],
+  });
+}
