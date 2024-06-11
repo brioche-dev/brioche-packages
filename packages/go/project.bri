@@ -1,11 +1,12 @@
 import * as std from "std";
+import caCertificates from "ca_certificates";
 
 export const project = {
   name: "go",
   version: "1.22.4",
 };
 
-export default function () {
+export function go(): std.Recipe<std.Directory> {
   const goRoot = std
     .download({
       url: `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
@@ -30,4 +31,53 @@ export default function () {
   go = std.withRunnableLink(go, "go/bin/go");
 
   return go;
+}
+export default go;
+
+interface GoBuildOptions {
+  goModule: std.AsyncRecipe<std.Directory>;
+  runnable?: string;
+}
+
+export async function goInstall(
+  options: GoBuildOptions,
+): Promise<std.Recipe<std.Directory>> {
+  const modules = goModDownload(options.goModule);
+
+  let buildResult = std.runBash`
+    go install
+  `
+    .workDir(options.goModule)
+    .dependencies(go())
+    .env({
+      GOMODCACHE: modules,
+      GOBIN: std.tpl`${std.outputPath}/bin`,
+    })
+    .cast("directory");
+
+  if (options.runnable != null) {
+    buildResult = std.withRunnableLink(buildResult, options.runnable);
+  }
+
+  return buildResult;
+}
+
+async function goModDownload(
+  goModule: std.AsyncRecipe<std.Directory>,
+): Promise<std.Recipe<std.Directory>> {
+  const goModuleDir = await goModule;
+
+  return std.runBash`
+    go mod download all
+  `
+    .workDir(
+      std.directory({
+        "go.mod": goModuleDir.get("go.mod"),
+        "go.sum": goModuleDir.get("go.sum"),
+      }),
+    )
+    .dependencies(go(), caCertificates())
+    .env({ GOMODCACHE: std.outputPath })
+    .unsafe({ networking: true })
+    .cast("directory");
 }
