@@ -1,0 +1,53 @@
+import * as std from "std";
+import nodejs, { npmInstall } from "nodejs";
+
+export const project = {
+  name: "zx",
+  version: "8.1.2",
+};
+
+const source = std
+  .download({
+    url: `https://github.com/google/zx/archive/refs/tags/${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "1fdb7baa3cfc7e6cbef8c991b9a75959362c061c9596b6a5164e7d5145971ca0",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel(1)
+  .cast("directory");
+
+function zx() {
+  const npmPackageBuild = npmInstall({
+    npmPackage: source,
+  });
+
+  const buildOutput = std.runBash`
+    npm run build
+    mv build "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nodejs())
+    .workDir(npmPackageBuild)
+    .cast("directory");
+
+  // Only include the build output and package.json. zx (currently) has
+  // no runtime dependencies, so there's no need to include any deps
+  const npmPackage = std.directory({
+    build: buildOutput,
+    "package.json": source.get("package.json"),
+    "package-lock.json": source.get("package-lock.json"),
+  });
+
+  // TODO: Don't use a `bashRunnable` for this, we should wrap node directly
+  let exe: std.Recipe<std.Directory> = std.bashRunnable`
+    node "$root"/build/cli.cjs "$@"
+  `
+    .root(npmPackage)
+    .dependencies(nodejs(), std.tools());
+
+  // TODO: We should swap it so the symlink is `brioche-run` and the runnable
+  // is placed in `bin/zx`
+  exe = exe.insert("bin/zx", std.symlink({ target: "../brioche-run" }));
+  return exe;
+}
+export default zx;
