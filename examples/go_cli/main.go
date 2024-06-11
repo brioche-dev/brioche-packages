@@ -10,13 +10,7 @@ import (
 
 func main() {
 	wait := flag.Duration("wait", time.Second, "duration to wait")
-	// help := flag.Bool("help", false, "show usage")
 	flag.Parse()
-
-	// if help != nil && *help {
-	// 	flag.Usage()
-	// 	return
-	// }
 
 	if wait == nil {
 		flag.Usage()
