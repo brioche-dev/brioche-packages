@@ -64,7 +64,7 @@ export function runZx(
   let script: string;
 
   if (typeof functionOrStrings === "function") {
-    script = `(${functionOrStrings.toString()})()`;
+    script = `await (${functionOrStrings.toString()})()`;
   } else if (Array.isArray(functionOrStrings)) {
     script = std.indoc(functionOrStrings, ...values);
   } else {
