@@ -6,6 +6,18 @@ export const project = {
   version: "1.22.4",
 };
 
+/**
+ * The Go programming language.
+ *
+ * Returns a recipe containing the standard Go tools, including:
+ *
+ * - `go/bin/go`
+ * - `go/bin/gofmt`
+ * - `bin/go` (symlink to `go/bin/go`)
+ * - `bin/gofmt` (symlink to `go/bin/gofmt`)
+ *
+ * The directory `go` is intended to be used as the `$GOROOT` env var.
+ */
 export function go(): std.Recipe<std.Directory> {
   const goRoot = std
     .download({
@@ -39,6 +51,30 @@ interface GoBuildOptions {
   runnable?: string;
 }
 
+/**
+ * Build a Go module. Calls `go install` in the module directory, and
+ * returns a recipe with the results stored in the `bin/` directory.
+ *
+ * ## Options
+ *
+ * - `goModule`: The Go module to build. Shuld include `go.mod`, as well as
+ *   `go.sum` if external dependencies are needed.
+ * - `runnable`: Optionally set a path to the binary to run
+ *   by default (e.g. `bin/foo`).
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import { goInstall } from "go";
+ *
+ * export default function {
+ *   return goInstall({
+ *     goModule: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *     runnable: "bin/hello",
+ *   });
+ * };
+ * ```
+ */
 export async function goInstall(
   options: GoBuildOptions,
 ): Promise<std.Recipe<std.Directory>> {
