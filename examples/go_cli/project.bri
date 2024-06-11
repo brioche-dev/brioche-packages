@@ -1,0 +1,8 @@
+import { goInstall } from "go";
+
+export default function () {
+  return goInstall({
+    goModule: Brioche.glob("**/*.go", "go.mod", "go.sum"),
+    runnable: "bin/go_cli",
+  });
+}
