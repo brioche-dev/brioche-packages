@@ -1,0 +1,58 @@
+import * as std from "std";
+import uuid from "ossp_uuid";
+
+export const project = {
+  name: "python",
+  version: "3.12.4",
+};
+
+/**
+ * The main Python recipe. Returns a recipe containing the following:
+ *
+ * - `bin/python`
+ * - `bin/pip`
+ */
+
+const source = std
+  .download({
+    url: `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
+    hash: std.sha256Hash(
+      "f6d419a6d8743ab26700801b4908d26d97e8b986e14f95de31b32de2b0e79554",
+    ),
+  })
+  .unarchive("tar", "xz")
+  .peel()
+  .cast("directory");
+
+export default function (): std.Recipe<std.Directory> {
+  let python = std.runBash`
+    ./configure \\
+      --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), uuid())
+    .env(autotoolsEnv())
+    .cast("directory");
+
+  python = python.insert("bin/python", std.symlink({ target: "python3" }));
+  return std.withRunnableLink(python, "bin/python");
+}
+
+// HACK: This should be removed once `std.toolchain()` properly sets
+// these variables for autotools
+function autotoolsEnv(): Record<string, std.ProcessTemplateLike> {
+  return {
+    M4: std.tpl`${std.toolchain()}/bin/m4`,
+    AUTOM4TE: std.tpl`${std.toolchain()}/bin/autom4te`,
+    trailer_m4: std.tpl`${std.toolchain()}/share/autoconf/autoconf/trailer.m4`,
+    PERL5LIB: std.tpl`${std.toolchain()}/share/autoconf:${std.toolchain()}/share/automake-1.16`,
+    autom4te_perllibdir: std.tpl`${std.toolchain()}/share/autoconf`,
+    AC_MACRODIR: std.tpl`${std.toolchain()}/share/autoconf`,
+    ACLOCAL_AUTOMAKE_DIR: std.tpl`${std.toolchain()}/share/aclocal-1.16`,
+    AUTOMAKE_UNINSTALLED: "1",
+    AUTOCONF: std.tpl`${std.toolchain()}/bin/autoconf`,
+    AUTOMAKE_LIBDIR: std.tpl`${std.toolchain()}/share/automake-1.16`,
+  };
+}
