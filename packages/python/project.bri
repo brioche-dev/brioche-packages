@@ -1,5 +1,4 @@
 import * as std from "std";
-import uuid from "ossp_uuid";
 
 export const project = {
   name: "python",
@@ -8,9 +7,9 @@ export const project = {
 
 /**
  * The main Python recipe. Returns a recipe containing the following:
- *
- * - `bin/python`
- * - `bin/pip`
+ * https://www.python.org/ftp/python/3.12.4/Python-3.12.4.tar.xz
+ * - `bin/python3`
+ * - `bin/pip3`
  */
 
 const source = std
@@ -25,18 +24,32 @@ const source = std
   .cast("directory");
 
 export default function (): std.Recipe<std.Directory> {
+  const toolchain = std.toolchain().insert(
+    "lib/libuuid.so",
+    std.symlink({
+      target: "libuuid.so.1.3.0",
+    }),
+  );
+
   let python = std.runBash`
     ./configure \\
-      --prefix=/
+      --prefix=/ \\
+      --enable-optimizations \\
+      --enable-ipv6 
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), uuid())
-    .env(autotoolsEnv())
+    .dependencies(toolchain)
+    .env({
+      ...autotoolsEnv(),
+      CPATH: std.tpl`${toolchain}/include/uuid`,
+      LD_LIBRARY_PATH: std.tpl`${toolchain}/lib`,
+    })
     .cast("directory");
 
   python = python.insert("bin/python", std.symlink({ target: "python3" }));
+  python = python.insert("bin/pip", std.symlink({ target: "pip3" }));
   return std.withRunnableLink(python, "bin/python");
 }
 
