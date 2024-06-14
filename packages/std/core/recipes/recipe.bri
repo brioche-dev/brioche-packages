@@ -60,19 +60,13 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
             | runtime.SyncRecipe
         : never);
 
-// This symbol is used in `Recipe` so that `Recipe<Artifact>` doesn't simplify
-// to `RecipeCommon<Artifact>` in TypeScript messages. This is mainly done for the LSP.
-const recipeMarker: unique symbol = Symbol("recipeMarker");
-
 /**
  * A "recipe" is a type that describes how to create an artifact in Brioche.
  * When you call `brioche build`, the returned recipe is "baked" to produce
  * an output artifact. Recipes are lazy and won't do anything until `.bake()`
  * is called on them.
  */
-export type Recipe<T extends Artifact = Artifact> = {
-  [recipeMarker]?: undefined;
-} & RecipeCommon<T> &
+export type Recipe<T extends Artifact = Artifact> = RecipeCommon<T> &
   ([T] extends [File]
     ? FileRecipeUtils
     : [T] extends [Directory]
