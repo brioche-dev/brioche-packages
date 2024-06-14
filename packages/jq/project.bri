@@ -13,7 +13,7 @@ const source = std
     ),
   })
   .unarchive("tar", "gzip")
-  .peel(1);
+  .peel();
 
 export default function (): std.Recipe<std.Directory> {
   const jq = std.runBash`
