@@ -89,7 +89,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         mpc: mpc(),
       },
     })
-    .cast("directory");
+    .toDirectory();
 
   gcc = wrapWithScript(gcc, {
     paths: [

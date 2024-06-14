@@ -55,7 +55,7 @@ export function autowrap(
         ],
       })
       .outputScaffold(recipe)
-      .cast("directory")
+      .toDirectory()
       .get(executablePath);
     result = result.insert(executablePath, wrappedExecutable);
   }

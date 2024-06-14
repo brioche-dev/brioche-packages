@@ -13,8 +13,7 @@ const source = std
     ),
   })
   .unarchive("tar", "gzip")
-  .peel(1)
-  .cast("directory");
+  .peel(1);
 
 export default function (): std.Recipe<std.Directory> {
   const jq = std.runBash`
@@ -27,7 +26,7 @@ export default function (): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain())
     .env(autotoolsEnv())
-    .cast("directory");
+    .toDirectory();
   return std.withRunnableLink(jq, "bin/jq");
 }
 

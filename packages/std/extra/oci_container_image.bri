@@ -126,7 +126,7 @@ async function describeBlob(
     wc -c < "$file" >> "$BRIOCHE_OUTPUT"
   `
     .env({ file })
-    .cast("file")
+    .toFile()
     .read();
   const [sha256sum, size] = description.split("\n");
   if (sha256sum == null || size == null) {
@@ -176,7 +176,7 @@ function collectReferences(
     IFS="$oldifs"
   `
     .outputScaffold(recipe)
-    .cast("directory");
+    .toDirectory();
 }
 
 function tar(recipe: std.AsyncRecipe<std.Directory>): std.Recipe<std.File> {
@@ -184,7 +184,7 @@ function tar(recipe: std.AsyncRecipe<std.Directory>): std.Recipe<std.File> {
     tar -cf "$BRIOCHE_OUTPUT" -C "$recipe" .
   `
     .env({ recipe })
-    .cast("file");
+    .toFile();
 }
 
 function gzip(file: std.AsyncRecipe<std.File>): std.Recipe<std.File> {
@@ -192,5 +192,5 @@ function gzip(file: std.AsyncRecipe<std.File>): std.Recipe<std.File> {
     gzip -c "$file" > "$BRIOCHE_OUTPUT"
   `
     .env({ file })
-    .cast("file");
+    .toFile();
 }

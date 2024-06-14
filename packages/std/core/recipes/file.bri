@@ -84,7 +84,6 @@ export class File implements Recipe<File> {
     });
   }
 
-  cast = fileRecipeUtils.cast;
   withPermissions = fileRecipeUtils.withPermissions;
   unarchive = fileRecipeUtils.unarchive;
   readBytes = fileRecipeUtils.readBytes;

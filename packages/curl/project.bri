@@ -13,8 +13,7 @@ const source = std
     ),
   })
   .unarchive("tar", "gzip")
-  .peel()
-  .cast("directory");
+  .peel();
 
 export default (): std.Recipe<std.Directory> => {
   const curl = std.runBash`
@@ -29,7 +28,7 @@ export default (): std.Recipe<std.Directory> => {
   `
     .workDir(source)
     .dependencies(std.toolchain())
-    .cast("directory");
+    .toDirectory();
 
   return std.withRunnableLink(curl, "bin/curl");
 };

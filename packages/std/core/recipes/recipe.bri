@@ -201,14 +201,13 @@ export function createRecipe<T extends Artifact>(
         throw new Error("bake or briocheSerialize is required");
       }
     },
-    ...recipeUtils,
     ...(isFile ? fileRecipeUtils : {}),
     ...(isDirectory ? directoryRecipeUtils : {}),
     ...(isSymlink ? symlinkRecipeUtils : {}),
   } as unknown as Recipe<T>;
 }
 
-interface RecipeCommon<T extends Artifact> extends RecipeUtils<T> {
+interface RecipeCommon<T extends Artifact> extends RecipeUtils {
   /**
    * Bake a recipe, returning a promise that will contain the resulting
    * artifact. Normally, you won't need to call this function yourself, as
@@ -225,31 +224,9 @@ interface RecipeCommon<T extends Artifact> extends RecipeUtils<T> {
   briocheSerialize(): Awaitable<RecipeSerialization<T>>;
 }
 
-interface RecipeUtils<T extends Artifact> {
-  /**
-   * Cast a recipe to a more specific type. This is useful for cases like
-   * `std.process()`, where the output type is not known until runtime. The
-   * cast will be validated when the recipe is baked.
-   *
-   * ## Example
-   *
-   * ```typescript
-   *
-   * ```typescript
-   * // We know this Bash scirpt will output a file, so call `.cast("file")`
-   * // to convert it to a `Recipe<File>`. We can then call file-specific
-   * // methods on the recipe.
-   * std.runBash`
-   *  echo "hi" > "$BRIOCHE_OUTPUT"
-   * `.cast("file");
-   * ```
-   */
-  cast<To extends ArtifactType<T> & keyof ArtifactTypes>(
-    to: To,
-  ): Recipe<ArtifactTypes[To] & T>;
-}
+interface RecipeUtils {}
 
-interface FileRecipeUtils extends RecipeUtils<File> {
+interface FileRecipeUtils extends RecipeUtils {
   /**
    * Returns a new file with the given permissions set.
    *
@@ -291,7 +268,7 @@ interface FileRecipeUtils extends RecipeUtils<File> {
   read(): Promise<string>;
 }
 
-interface DirectoryRecipeUtils extends RecipeUtils<Directory> {
+interface DirectoryRecipeUtils extends RecipeUtils {
   /**
    * Get a file, directory, or symlink from a directory by path.
    */
@@ -315,40 +292,16 @@ interface DirectoryRecipeUtils extends RecipeUtils<Directory> {
 
   /**
    * Peel a directory, which removes an outer layer of the directory. Baking
-   * will fail if the directory does not contain exactly one item.
+   * will fail if the directory does not contain exactly one inner directory.
    *
    * Passing `depth` will repeat the peeling process multiple times (default: 1)
    */
-  peel(depth?: number): Recipe;
+  peel(depth?: number): Recipe<Directory>;
 }
 
-interface SymlinkRecipeUtils extends RecipeUtils<Symlink> {}
-
-export const recipeUtils: RecipeUtils<Artifact> = {
-  cast<To extends keyof ArtifactTypes>(
-    this: Recipe,
-    to: To,
-  ): Recipe<ArtifactTypes[To]> {
-    return createRecipe(
-      [to satisfies ArtifactType<Artifact> as ArtifactType<ArtifactTypes[To]>],
-      {
-        sourceDepth: 1,
-        briocheSerialize: async (meta) => {
-          const recipe = await this.briocheSerialize();
-          return {
-            type: "cast",
-            recipe,
-            to,
-            meta,
-          } satisfies RecipeSerialization<Artifact> as any;
-        },
-      },
-    );
-  },
-};
+interface SymlinkRecipeUtils extends RecipeUtils {}
 
 export const fileRecipeUtils: FileRecipeUtils = {
-  ...recipeUtils,
   withPermissions(
     this: Recipe<File>,
     permissions: Partial<FilePermissions>,
@@ -397,7 +350,6 @@ export const fileRecipeUtils: FileRecipeUtils = {
 };
 
 export const directoryRecipeUtils: DirectoryRecipeUtils = {
-  ...recipeUtils,
   get(this: Recipe<Directory>, path: string): Recipe<Artifact> {
     return createRecipe(["file", "directory", "symlink"], {
       sourceDepth: 1,
@@ -450,21 +402,23 @@ export const directoryRecipeUtils: DirectoryRecipeUtils = {
       },
     });
   },
-  peel(this: Recipe<Directory>, depth: number = 1): Recipe {
-    return createRecipe(["file", "directory", "symlink"], {
+  peel(this: Recipe<Directory>, depth: number = 1): Recipe<Directory> {
+    return createRecipe(["directory"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
         return {
-          type: "peel",
-          directory: await this.briocheSerialize(),
-          depth,
-          meta,
+          type: "cast",
+          recipe: {
+            type: "peel",
+            directory: await this.briocheSerialize(),
+            depth,
+            meta,
+          },
+          to: "directory",
         };
       },
     });
   },
 };
 
-export const symlinkRecipeUtils: SymlinkRecipeUtils = {
-  ...recipeUtils,
-};
+export const symlinkRecipeUtils: SymlinkRecipeUtils = {};

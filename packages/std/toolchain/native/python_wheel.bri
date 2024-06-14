@@ -59,7 +59,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         LD_LIBRARY_PATH: std.tpl`${dependencies}/lib`,
       },
     })
-    .cast("directory");
+    .toDirectory();
 
   // Remove everything but the `lib/` directory. The rest is
   // virtualenv stuff we don't want to keep.

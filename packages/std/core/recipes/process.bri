@@ -1,7 +1,10 @@
 import { Awaitable, mixin } from "../utils.bri";
 import * as runtime from "../runtime.bri";
+import type { File } from "./file.bri";
 import { type Directory, directory } from "./directory.bri";
+import type { Symlink } from "./symlink.bri";
 import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
+import { castToFile, castToDirectory, castToSymlink } from "./cast.bri";
 
 export type ProcessOptions = {
   command: ProcessTemplateLike;
@@ -48,6 +51,24 @@ export interface ProcessUtils {
    * Returns a new process with unsafe options set.
    */
   unsafe(unsafeOptions: ProcessUnsafe): Process;
+
+  /**
+   * Cast the process's output to a file recipe. This will fail to bake if
+   * the process does not write a file to `$BRIOCHE_OUTPUT`.
+   */
+  toFile(): Recipe<File>;
+
+  /**
+   * Cast the process's output to a directory recipe. This will fail to bake
+   * if the process does not write a directory to `$BRIOCHE_OUTPUT`.
+   */
+  toDirectory(): Recipe<Directory>;
+
+  /**
+   * Cast the process's output to a symlink recipe. This will fail to bake
+   * if the process does not write a symlink to `$BRIOCHE_OUTPUT`.
+   */
+  toSymlink(): Recipe<Symlink>;
 }
 
 /**
@@ -181,6 +202,15 @@ export function process(options: ProcessOptions): Process {
         unsafe: true,
         ...unsafeOptions,
       });
+    },
+    toFile(this: Process): Recipe<File> {
+      return castToFile(this, { sourceDepth: 1 });
+    },
+    toDirectory(this: Process): Recipe<Directory> {
+      return castToDirectory(this, { sourceDepth: 1 });
+    },
+    toSymlink(this: Process): Recipe<Symlink> {
+      return castToSymlink(this, { sourceDepth: 1 });
     },
   } satisfies ProcessUtils);
 }

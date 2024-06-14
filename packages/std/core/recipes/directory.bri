@@ -114,5 +114,4 @@ export class Directory implements Recipe<Directory> {
   insert = directoryRecipeUtils.insert;
   remove = directoryRecipeUtils.remove;
   peel = directoryRecipeUtils.peel;
-  cast = directoryRecipeUtils.cast;
 }
