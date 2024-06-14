@@ -15,6 +15,14 @@ interface OciContainerImageOptions {
  * - `recipe`: The recipe to use as the image layer.
  * - `entrypoint`: The entrypoint to use for the image.
  *   Defaults to `["/brioche-run"]`.
+ *
+ * ## Notes
+ *
+ * The returned image matches the [OCI Image Layout Specification][oci-spec],
+ * and additionally has a manifest file following the [Docker Image Specification][docker-spec].
+ *
+ * [oci-spec]: https://github.com/opencontainers/image-spec/blob/dd33f727e2faea07432ef6f06d6f9afe73f3f519/image-layout.md
+ * [docker-spec]: https://github.com/moby/docker-image-spec/blob/main/spec.md
  */
 export function ociContainerImage(
   options: OciContainerImageOptions,
@@ -34,35 +42,40 @@ export function ociContainerImage(
     );
 
     const layerTar = tar(collectReferences(options.recipe));
-    const [diffId] = await describeBlob(layerTar);
+    const { sha256Digest: layerSha256Digest } = await describeBlob(layerTar);
+    const diffId = `sha256:${layerSha256Digest}`;
 
     const layerTarGzip = gzip(layerTar);
     let layerDigest = "";
     let layerSize = 0;
-    [imageDir, layerDigest, layerSize] = await addBlob(imageDir, layerTarGzip);
+    let layerPath = "";
+    [imageDir, { digest: layerDigest, size: layerSize, path: layerPath }] =
+      await addBlob(imageDir, layerTarGzip);
 
     let configDigest: string = "";
     let configSize: number = 0;
-    [imageDir, configDigest, configSize] = await addBlob(
-      imageDir,
-      std.file(
-        JSON.stringify({
-          architecture: "amd64",
-          os: "linux",
-          config: {
-            Entrypoint: entrypoint,
-          },
-          rootfs: {
-            type: "layers",
-            diff_ids: [diffId],
-          },
-        }),
-      ),
-    );
+    let configPath: string = "";
+    [imageDir, { digest: configDigest, size: configSize, path: configPath }] =
+      await addBlob(
+        imageDir,
+        std.file(
+          JSON.stringify({
+            architecture: "amd64",
+            os: "linux",
+            config: {
+              Entrypoint: entrypoint,
+            },
+            rootfs: {
+              type: "layers",
+              diff_ids: [diffId],
+            },
+          }),
+        ),
+      );
 
     let manifestDigest = "";
     let manifestSize = 0;
-    [imageDir, manifestDigest, manifestSize] = await addBlob(
+    [imageDir, { digest: manifestDigest, size: manifestSize }] = await addBlob(
       imageDir,
       std.file(
         JSON.stringify({
@@ -105,22 +118,47 @@ export function ociContainerImage(
       ),
     );
 
+    imageDir = imageDir.insert(
+      "manifest.json",
+      std.file(
+        JSON.stringify([
+          {
+            Config: configPath,
+            RepoTags: [],
+            Layers: [layerPath],
+          },
+        ]),
+      ),
+    );
+
     return tar(imageDir);
   });
+}
+
+interface AddBlobResult {
+  digest: string;
+  size: number;
+  path: string;
 }
 
 async function addBlob(
   imageDir: std.Recipe<std.Directory>,
   blob: std.Recipe<std.File>,
-): Promise<[std.Recipe<std.Directory>, string, number]> {
-  const [digest, size] = await describeBlob(blob);
-  imageDir = imageDir.insert(`blobs/sha256/${digest}`, blob);
-  return [imageDir, `sha256:${digest}`, size];
+): Promise<[std.Recipe<std.Directory>, AddBlobResult]> {
+  const { sha256Digest, size } = await describeBlob(blob);
+  const path = `blobs/sha256/${sha256Digest}`;
+  imageDir = imageDir.insert(path, blob);
+  return [imageDir, { digest: `sha256:${sha256Digest}`, size, path }];
+}
+
+interface DescribeBlobResult {
+  sha256Digest: string;
+  size: number;
 }
 
 async function describeBlob(
   file: std.AsyncRecipe<std.File>,
-): Promise<[string, number]> {
+): Promise<DescribeBlobResult> {
   const description = await runBash`
     sha256sum < "$file" > "$BRIOCHE_OUTPUT"
     wc -c < "$file" >> "$BRIOCHE_OUTPUT"
@@ -133,12 +171,12 @@ async function describeBlob(
     throw new Error(`Invalid output from commands: ${description}`);
   }
 
-  const [shaHash] = sha256sum.split(" ");
-  if (shaHash == null || !/^[0-9a-f]{64}$/.test(shaHash)) {
+  const [sha256Digest] = sha256sum.split(" ");
+  if (sha256Digest == null || !/^[0-9a-f]{64}$/.test(sha256Digest)) {
     throw new Error(`Invalid sha256sum: ${sha256sum}`);
   }
 
-  return [shaHash, parseInt(size)];
+  return { sha256Digest, size: parseInt(size) };
 }
 
 // TODO: Remove once Brioche v0.1.0 is no longer supported
