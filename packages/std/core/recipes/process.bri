@@ -340,6 +340,7 @@ export type ProcessTemplateComponent =
   | undefined;
 
 export class ProcessTemplate {
+  componentType: "processTemplate" = "processTemplate";
   components: ProcessTemplateLike[];
 
   constructor(...components: ProcessTemplateLike[]) {
@@ -368,7 +369,7 @@ export class ProcessTemplate {
             return [{ type: "work_dir" }];
           } else if (isProcessTemplateSymbol(component, "tempDir")) {
             return [{ type: "temp_dir" }];
-          } else if (component instanceof ProcessTemplate) {
+          } else if (isProcessTemplateInstance(component)) {
             const serialized = await component.briocheSerialize();
             return serialized.components;
           } else {
@@ -384,4 +385,15 @@ export class ProcessTemplate {
       components: runtimeComponents.flat(1),
     };
   }
+}
+
+function isProcessTemplateInstance(value: unknown): value is ProcessTemplate {
+  return (
+    typeof value === "object" &&
+    value != null &&
+    "componentType" in value &&
+    value.componentType === "processTemplate" &&
+    "briocheSerialize" in value &&
+    typeof value.briocheSerialize === "function"
+  );
 }
