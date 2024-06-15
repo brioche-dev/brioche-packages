@@ -40,11 +40,6 @@ import autoconf from "./autoconf.bri";
 import automake from "./automake.bri";
 import openssl from "./openssl.bri";
 import libelf from "./libelf.bri";
-import libffi from "./libffi.bri";
-import python from "./python.bri";
-import pythonFlitCore from "./python_flit_core.bri";
-import pythonWheel from "./python_wheel.bri";
-import ninja from "./ninja.bri";
 import coreutils from "./coreutils.bri";
 import diffutils from "./diffutils.bri";
 import gawk from "./gawk.bri";
@@ -131,11 +126,6 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     automake(),
     openssl(),
     libelf(),
-    libffi(),
-    python(),
-    pythonFlitCore(),
-    pythonWheel(),
-    ninja(),
     groff(),
     libpipeline(),
     texinfo(),
