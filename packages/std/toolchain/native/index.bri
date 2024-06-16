@@ -39,7 +39,6 @@ import perlXmlParser from "./perl_xml_parser.bri";
 import intltool from "./intltool.bri";
 import autoconf from "./autoconf.bri";
 import automake from "./automake.bri";
-import openssl from "./openssl.bri";
 import libelf from "./libelf.bri";
 import coreutils from "./coreutils.bri";
 import diffutils from "./diffutils.bri";
@@ -125,7 +124,6 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     intltool(),
     autoconf(),
     automake(),
-    openssl(),
     libelf(),
     groff(),
     libpipeline(),
