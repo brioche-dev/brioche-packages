@@ -86,6 +86,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   );
   tools = fixShebangs(tools);
   tools = setEnv(tools, {
+    CPATH: { path: "include" },
     LIBRARY_PATH: { path: "lib" },
     PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
     MAGIC: { path: "share/misc/magic.mgc" },
