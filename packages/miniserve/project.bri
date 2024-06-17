@@ -14,8 +14,7 @@ const crate = std
     ),
   })
   .unarchive("tar", "gzip")
-  .peel()
-  .cast("directory");
+  .peel();
 
 export default () => {
   return cargoBuild({

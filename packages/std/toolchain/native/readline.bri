@@ -43,5 +43,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         sourcePatch,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

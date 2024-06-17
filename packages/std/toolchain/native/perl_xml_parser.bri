@@ -37,5 +37,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         WATERMARK: "1",
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

@@ -41,5 +41,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         LD_LIBRARY_PATH: std.tpl`${expat()}/lib`,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

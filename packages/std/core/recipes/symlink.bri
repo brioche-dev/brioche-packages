@@ -1,8 +1,7 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
-import { type Recipe, symlinkRecipeUtils } from "./recipe.bri";
-import { artifactType } from "./artifact_type.bri";
+import type { Recipe } from "./recipe.bri";
 
 export interface SymlinkOptions {
   target: string;
@@ -28,7 +27,7 @@ interface SymlinkCtor {
 }
 
 export class Symlink implements Recipe<Symlink> {
-  [artifactType]: "symlink" = "symlink";
+  artifactType: "symlink" = "symlink";
   target: runtime.BString;
   source?: runtime.Source;
 
@@ -55,6 +54,4 @@ export class Symlink implements Recipe<Symlink> {
   bake(): Symlink {
     return this;
   }
-
-  cast = symlinkRecipeUtils.cast;
 }

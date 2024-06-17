@@ -1,15 +1,14 @@
 const ops = (globalThis as any).Deno.core.ops;
 
 declare global {
-  const console: Console;
-}
-
-interface Console {
-  log: (...args: unknown[]) => void;
-  debug: (...args: unknown[]) => void;
-  info: (...args: unknown[]) => void;
-  warn: (...args: unknown[]) => void;
-  error: (...args: unknown[]) => void;
+  // eslint-disable-next-line
+  namespace console {
+    function log(...args: unknown[]): void;
+    function debug(...args: unknown[]): void;
+    function info(...args: unknown[]): void;
+    function warn(...args: unknown[]): void;
+    function error(...args: unknown[]): void;
+  }
 }
 
 const console = {
@@ -28,7 +27,7 @@ const console = {
   error(...args: unknown[]) {
     logLevel("error", ...args);
   },
-} satisfies Console;
+} satisfies typeof globalThis.console;
 
 function logLevel(level: string, ...args: unknown[]) {
   ops.op_brioche_console(level, displayAll(...args).join(" "));

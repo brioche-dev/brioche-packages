@@ -1,5 +1,6 @@
 import * as std from "/core";
 import { setEnv } from "/extra";
+import stage2 from "/toolchain/stage2";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
@@ -38,13 +39,7 @@ import perlXmlParser from "./perl_xml_parser.bri";
 import intltool from "./intltool.bri";
 import autoconf from "./autoconf.bri";
 import automake from "./automake.bri";
-import openssl from "./openssl.bri";
 import libelf from "./libelf.bri";
-import libffi from "./libffi.bri";
-import python from "./python.bri";
-import pythonFlitCore from "./python_flit_core.bri";
-import pythonWheel from "./python_wheel.bri";
-import ninja from "./ninja.bri";
 import coreutils from "./coreutils.bri";
 import diffutils from "./diffutils.bri";
 import gawk from "./gawk.bri";
@@ -89,7 +84,9 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     tar(),
     which(),
   );
+  tools = fixShebangs(tools);
   tools = setEnv(tools, {
+    CPATH: { path: "include" },
     LIBRARY_PATH: { path: "lib" },
     PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
     MAGIC: { path: "share/misc/magic.mgc" },
@@ -99,8 +96,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 });
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  let toolchain = std.merge(
-    tools(),
+  let toolchainOnly = std.merge(
     linuxHeaders(),
     glibc(),
     readline(),
@@ -129,13 +125,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     intltool(),
     autoconf(),
     automake(),
-    openssl(),
     libelf(),
-    libffi(),
-    python(),
-    pythonFlitCore(),
-    pythonWheel(),
-    ninja(),
     groff(),
     libpipeline(),
     texinfo(),
@@ -144,7 +134,62 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     utilLinux(),
     patchelf(),
   );
-  toolchain = toolchain.insert("bin/cc", std.symlink({ target: "gcc" }));
+  toolchainOnly = fixShebangs(toolchainOnly);
+  toolchainOnly = toolchainOnly.insert(
+    "bin/cc",
+    std.symlink({ target: "gcc" }),
+  );
+  toolchainOnly = std.sync(toolchainOnly);
 
-  return std.sync(toolchain);
+  return std.merge(tools(), toolchainOnly);
 });
+
+function fixShebangs(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // TODO: Handle shebangs with wrapper scripts instead of just using
+  // `/usr/bin/env`. This currently duplicates the fix from stage 2
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
+
+          find "$BRIOCHE_OUTPUT"/bin -type f -executable -print0 \
+            | while IFS= read -r -d $'\\0' file; do
+              if [ "$(head -c 2 "$file")" == "#!" ]; then
+                awk '
+                  {
+                    if (NR == 1 && $0 ~ /^#!/) {
+                      shebangInvocation = $0
+                      gsub(/^#! */, "", shebangInvocation)
+                      numShebangWords = split(shebangInvocation, shebangWords, / +/)
+                      if (numShebangWords == 1) {
+                        shebangCommand = shebangWords[1]
+                        numComponents = split(shebangCommand, shebangCommandComponents, "/")
+                        targetCommand = shebangCommandComponents[numComponents]
+                        gsub(" ", "", targetCommand)
+                        print "#!/usr/bin/env " targetCommand
+                      } else {
+                        print $0
+                      }
+                    } else {
+                      print $0
+                    }
+                  }
+                ' "$file" > temp
+                chmod +x temp
+                mv temp "$file"
+              fi
+            done
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}

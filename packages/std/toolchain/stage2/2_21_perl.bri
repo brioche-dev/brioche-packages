@@ -32,14 +32,12 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         source: sourceArchive,
       },
     })
-    .cast("directory");
+    .toDirectory();
 
   // Mark the perl binary as executable
   // TODO: Figure out why Perl isn't executable by default?
-  const perlBin = perl
-    .get("usr/bin/perl")
-    .cast("file")
-    .withPermissions({ executable: true });
+  let perlBin = std.castToFile(perl.get("usr/bin/perl"));
+  perlBin = perlBin.withPermissions({ executable: true });
   perl = perl.insert("usr/bin/perl", perlBin);
 
   return perl;
