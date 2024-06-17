@@ -30,7 +30,7 @@ export function staticSite(): std.Recipe<std.Directory> {
       // Setting `$LD_LIBRARY_PATH` allows Node.js to find this library.
       LD_LIBRARY_PATH: std.tpl`${std.toolchain()}/lib`,
     })
-    .cast("directory");
+    .toDirectory();
 }
 
 // Build the static site and serve it

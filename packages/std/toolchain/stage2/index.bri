@@ -64,5 +64,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         stage2,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

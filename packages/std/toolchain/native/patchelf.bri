@@ -44,5 +44,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         AUTOMAKE_LIBDIR: std.tpl`${automake()}/share/automake-1.16`,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

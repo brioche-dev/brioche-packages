@@ -20,8 +20,7 @@ function nodejs(): std.Recipe<std.Directory> {
       ),
     })
     .unarchive("tar", "xz")
-    .peel()
-    .cast("directory");
+    .peel();
 
   node = std.autowrap(node, {
     executables: ["bin/node"],
@@ -72,5 +71,5 @@ export function npmInstall(
     .dependencies(nodejs())
     .outputScaffold(options.npmPackage)
     .unsafe({ networking: true })
-    .cast("directory");
+    .toDirectory();
 }

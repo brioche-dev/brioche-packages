@@ -85,10 +85,6 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     );
   }
 
-  // stage2 = stage2.insert("usr/x86_64-lfs-linux-gnu/include", brioche.symlink({ target: "../include" }));
-  // const usrInclude = stage2.get("usr/include").cast("directory");
-  // stage2 = stage2.insert("usr/x86_64-lfs-linux-gnu/include", usrInclude);
-
   return bootstrapRun({
     script: std.indoc`
       set -euo pipefail

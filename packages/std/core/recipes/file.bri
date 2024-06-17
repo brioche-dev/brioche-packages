@@ -1,7 +1,6 @@
 import * as runtime from "../runtime.bri";
 import { assert } from "../utils.bri";
 import { type Recipe, createRecipe, fileRecipeUtils } from "./recipe.bri";
-import { artifactType } from "./artifact_type.bri";
 
 /**
  * Create a new file, which contains the provided content.
@@ -43,7 +42,7 @@ export interface FileCtor {
 }
 
 export class File implements Recipe<File> {
-  [artifactType]: "file" = "file";
+  artifactType: "file" = "file";
   source?: runtime.Source;
   contentBlob: runtime.BlobHash;
   executable: boolean;
@@ -85,7 +84,6 @@ export class File implements Recipe<File> {
     });
   }
 
-  cast = fileRecipeUtils.cast;
   withPermissions = fileRecipeUtils.withPermissions;
   unarchive = fileRecipeUtils.unarchive;
   readBytes = fileRecipeUtils.readBytes;

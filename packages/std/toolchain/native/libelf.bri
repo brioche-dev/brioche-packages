@@ -46,5 +46,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         CPPFLAGS: std.tpl`-I${zlib()}/include`,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

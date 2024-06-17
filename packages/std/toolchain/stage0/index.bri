@@ -93,7 +93,7 @@ export function bootstrapRun(
         ),
       }),
     })
-    .cast("directory");
+    .toDirectory();
 }
 
 export default async (): Promise<std.Recipe> => {

@@ -31,5 +31,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         PATH: std.tpl`${stage2()}/bin`,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

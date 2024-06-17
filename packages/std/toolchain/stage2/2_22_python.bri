@@ -30,5 +30,5 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         source: sourceArchive,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

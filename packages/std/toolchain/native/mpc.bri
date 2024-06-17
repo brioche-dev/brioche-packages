@@ -35,5 +35,5 @@ export default std.memo((): std.Recipe<std.Directory> => {
         LDFLAGS: std.tpl`-L${gmp()}/lib -L${mpfr()}/lib`,
       },
     })
-    .cast("directory");
+    .toDirectory();
 });

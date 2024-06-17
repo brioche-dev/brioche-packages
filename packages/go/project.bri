@@ -27,8 +27,7 @@ export function go(): std.Recipe<std.Directory> {
       ),
     })
     .unarchive("tar", "gzip")
-    .peel()
-    .cast("directory");
+    .peel();
 
   let go = std.directory({
     go: goRoot,
@@ -89,7 +88,7 @@ export async function goInstall(
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
     })
-    .cast("directory");
+    .toDirectory();
 
   if (options.runnable != null) {
     buildResult = std.withRunnableLink(buildResult, options.runnable);
@@ -125,5 +124,5 @@ async function goModDownload(
     .dependencies(go(), caCertificates())
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
-    .cast("directory");
+    .toDirectory();
 }

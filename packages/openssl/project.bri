@@ -1,0 +1,44 @@
+import * as std from "std";
+
+export const project = {
+  name: "openssl",
+  version: "3.3.1",
+};
+
+const source = std
+  .download({
+    url: `https://github.com/openssl/openssl/releases/download/openssl-${project.version}/openssl-${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  let openssl = std.runBash`
+    ./config \\
+      --prefix=/ \\
+      --openssldir=/etc/ssl \\
+      --libdir=lib
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source)
+    .toDirectory();
+
+  openssl = std.withRunnableLink(openssl, "bin/openssl");
+  openssl = std.setEnv(openssl, {
+    LIBRARY_PATH: { path: "lib" },
+    CPATH: { path: "include" },
+  });
+
+  return std.withRunnableLink(openssl, "bin/openssl");
+}
+
+export function test() {
+  return std.runBash`
+    openssl version | tee "$BRIOCHE_OUTPUT"
+  `;
+}

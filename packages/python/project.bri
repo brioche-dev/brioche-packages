@@ -20,8 +20,7 @@ const source = std
     ),
   })
   .unarchive("tar", "xz")
-  .peel()
-  .cast("directory");
+  .peel();
 
 export default function (): std.Recipe<std.Directory> {
   const toolchain = std.toolchain().insert(
@@ -35,7 +34,7 @@ export default function (): std.Recipe<std.Directory> {
     ./configure \\
       --prefix=/ \\
       --enable-optimizations \\
-      --enable-ipv6 
+      --enable-ipv6
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -46,7 +45,7 @@ export default function (): std.Recipe<std.Directory> {
       CPATH: std.tpl`${toolchain}/include/uuid`,
       LD_LIBRARY_PATH: std.tpl`${toolchain}/lib`,
     })
-    .cast("directory");
+    .toDirectory();
 
   python = python.insert("bin/python", std.symlink({ target: "python3" }));
   python = python.insert("bin/pip", std.symlink({ target: "pip3" }));

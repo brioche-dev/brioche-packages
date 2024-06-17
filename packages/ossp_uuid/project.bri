@@ -13,8 +13,7 @@ const source = std
     ),
   })
   .unarchive("tar", "gzip")
-  .peel()
-  .cast("directory");
+  .peel();
 
 export default function (): std.Recipe<std.Directory> {
   let uuid = std.runBash`
@@ -22,13 +21,13 @@ export default function (): std.Recipe<std.Directory> {
       --prefix=/ \\
       --without-perl \\
       --without-php \\
-      --without-pgsql 
+      --without-pgsql
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain())
-    .cast("directory");
+    .toDirectory();
 
   uuid = std.setEnv(uuid, {
     PKG_CONFIG_PATH: { path: "lib/pkgconfig" },

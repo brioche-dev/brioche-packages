@@ -7,7 +7,6 @@ import {
   createRecipe,
   directoryRecipeUtils,
 } from "./recipe.bri";
-import { artifactType } from "./artifact_type.bri";
 
 /**
  * Constructs a new directory. Takes an object argument, where each key
@@ -80,7 +79,7 @@ interface DirectoryCtor {
 }
 
 export class Directory implements Recipe<Directory> {
-  [artifactType]: "directory" = "directory";
+  artifactType: "directory" = "directory";
   entries: Record<runtime.BString, runtime.RecipeHash>;
   source?: runtime.Source;
 
@@ -115,5 +114,4 @@ export class Directory implements Recipe<Directory> {
   insert = directoryRecipeUtils.insert;
   remove = directoryRecipeUtils.remove;
   peel = directoryRecipeUtils.peel;
-  cast = directoryRecipeUtils.cast;
 }

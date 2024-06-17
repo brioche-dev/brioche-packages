@@ -1,3 +1,4 @@
+export { castToFile, castToDirectory, castToSymlink } from "./cast.bri";
 export { directory, merge, Directory } from "./directory.bri";
 export { download, type DownloadOptions } from "./download.bri";
 export { File, file } from "./file.bri";

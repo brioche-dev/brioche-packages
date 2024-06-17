@@ -33,7 +33,7 @@ export function makeRunnableExecutable(
         JSON.stringify(data),
       ],
     })
-    .cast("file");
+    .toFile();
 }
 
 export interface RunnableTemplate {
