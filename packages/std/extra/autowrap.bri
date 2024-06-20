@@ -1,6 +1,6 @@
 import * as std from "/core";
 import { toolchain } from "/toolchain";
-import { packTools } from "/pack_tools.bri";
+import { runtimeUtils } from "/runnable_tools.bri";
 
 export interface AutowrapOptions {
   executables: string[];
@@ -35,11 +35,11 @@ export function autowrap(
   for (const executablePath of options.executables) {
     const wrappedExecutable = std
       .process({
-        command: std.tpl`${packTools()}/bin/brioche-packer`,
+        command: std.tpl`${runtimeUtils()}/bin/brioche-packer`,
         args: [
           "autowrap",
           "--packed-exec",
-          std.tpl`${packTools()}/bin/brioche-packed-exec`,
+          std.tpl`${runtimeUtils()}/bin/brioche-packed-exec`,
           "--sysroot",
           sysroot,
           "--lib-dir",
