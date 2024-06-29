@@ -1,5 +1,18 @@
 import * as std from "/core";
-import { packTools } from "/pack_tools.bri";
+
+// NOTE: This download is just like the `runtimeUtils()` export, except
+// it's pinned to a specific version. It should only be updated if the
+// tools used for building the toolchain should be upgraded
+export function runtimeUtils(): std.Recipe<std.Directory> {
+  return std
+    .download({
+      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/7daa97fd9dd2efe59e5f594ac05cddebd99caa44/x86_64-linux/brioche-runtime-utils.tar.zstd",
+      hash: std.sha256Hash(
+        "cfd83135da620ed4847badd572e4702d0d9152b5a39e886086ddaf600d2c10e8",
+      ),
+    })
+    .unarchive("tar", "zstd");
+}
 
 interface UseBriocheLdOptions {
   ldPaths: string[];
@@ -10,8 +23,8 @@ export function useBriocheLd(
   dir: std.Recipe<std.Directory>,
   options: UseBriocheLdOptions,
 ): std.Recipe<std.Directory> {
-  const briocheLd = packTools().get("bin/brioche-ld");
-  const briochePacked = packTools().get("bin/brioche-packed-exec");
+  const briocheLd = runtimeUtils().get("bin/brioche-ld");
+  const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");
 
   for (const ldPath of options.ldPaths) {
     const systemLd = dir.get(ldPath);

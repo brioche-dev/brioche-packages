@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { packTools } from "/pack_tools.bri";
+import { runtimeUtils } from "../utils.bri";
 import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
@@ -19,8 +19,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
     ),
   });
 
-  const briochePacked = packTools().get("bin/brioche-packed-exec");
-  const briochePacker = packTools().get("bin/brioche-packer");
+  const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");
+  const briochePacker = runtimeUtils().get("bin/brioche-packer");
 
   const stage1 = std.merge(binutils(), gcc(), linuxHeaders());
 

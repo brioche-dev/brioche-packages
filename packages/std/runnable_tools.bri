@@ -3,9 +3,9 @@ import * as std from "/core";
 export function runtimeUtils(): std.Recipe<std.Directory> {
   return std
     .download({
-      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fc48540924428944e30a4901c2fff2135abf5342/x86_64-linux/brioche-runtime-utils.tar.zstd",
+      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/7daa97fd9dd2efe59e5f594ac05cddebd99caa44/x86_64-linux/brioche-runtime-utils.tar.zstd",
       hash: std.sha256Hash(
-        "c1ea132ed08abd7f719a698cdc32e2444e6f5ca0792c7737d42a41771a04cfa7",
+        "cfd83135da620ed4847badd572e4702d0d9152b5a39e886086ddaf600d2c10e8",
       ),
     })
     .unarchive("tar", "zstd");
@@ -20,17 +20,41 @@ interface RunnableData {
 export function makeRunnableExecutable(
   data: RunnableData,
 ): std.Recipe<std.File> {
+  const metadata = {
+    command: data.command,
+    args: [
+      ...data.args.map((value) => ({
+        type: "arg",
+        value,
+      })),
+      { type: "rest" },
+    ],
+    env: Object.fromEntries(
+      Object.entries(data.env).map(([key, value]) => [
+        key,
+        { type: "set", value },
+      ]),
+    ),
+    clearEnv: false,
+  };
+  const pack = {
+    type: "metadata",
+    resourcePaths: [],
+    format: "application/vnd.brioche.runnable-v0.1.0+json",
+    metadata: std.tickEncode(JSON.stringify(metadata)),
+  };
+
   return std
     .process({
-      command: runtimeUtils().get("bin/runnable"),
+      command: runtimeUtils().get("bin/brioche-packer"),
       args: [
-        "make-runnable",
-        "--runnable",
-        runtimeUtils().get("bin/start-runnable"),
+        "pack",
+        "--packed",
+        runtimeUtils().get("bin/brioche-packed-plain-exec"),
         "--output",
         std.outputPath,
-        "--runnable-data",
-        JSON.stringify(data),
+        "--pack",
+        JSON.stringify(pack),
       ],
     })
     .toFile();
