@@ -1,0 +1,24 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "eza",
+  version: "0.18.20",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "f85a7c1a1859e4fb7913d9517bd5fd04714811562b631a71705077c5aceacd78",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return cargoBuild({
+    crate,
+    runnable: "bin/eza",
+  });
+};
