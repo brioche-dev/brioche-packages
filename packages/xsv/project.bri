@@ -1,0 +1,24 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "xsv",
+  version: "0.13.0",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/BurntSushi/xsv/archive/refs/tags/${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "2b75309b764c9f2f3fdc1dd31eeea5a74498f7da21ae757b3ffd6fd537ec5345",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return cargoBuild({
+    crate,
+    runnable: "bin/xsv",
+  });
+};
