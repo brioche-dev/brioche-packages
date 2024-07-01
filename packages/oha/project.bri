@@ -2,7 +2,7 @@ import * as std from "std";
 import { cargoBuild } from "rust";
 
 export const project = {
-  name: "dust",
+  name: "oha",
   version: "1.4.5",
 };
 
