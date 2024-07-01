@@ -1,0 +1,29 @@
+import * as std from "std";
+
+export const project = {
+  name: "pv",
+  version: "1.8.10",
+};
+
+const source = std
+  .download({
+    url: `https://www.ivarch.com/programs/sources/pv-${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "d4c90c17cfcd44aa96b98237731e4f811e071d4c2052a689d2d81e6671f571b1",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default (): std.Recipe<std.Directory> => {
+  const pv = std.runBash`
+    ./configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.withRunnableLink(pv, "bin/pv");
+};
