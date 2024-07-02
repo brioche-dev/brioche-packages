@@ -7,7 +7,7 @@ export const project = {
 
 const source = std
   .download({
-    url: `https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-${project.version}.tar.gz`,
+    url: `https://github.com/jqlang/jq/releases/download/jq-${project.version}/jq-${project.version}.tar.gz`,
     hash: std.sha256Hash(
       "478c9ca129fd2e3443fe27314b455e211e0d8c60bc8ff7df703873deeee580c2",
     ),
