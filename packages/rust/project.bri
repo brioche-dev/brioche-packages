@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.78.0",
+  version: "1.79.0",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -40,9 +40,9 @@ const Manifest = t.object({
 async function rust(): Promise<std.Recipe<std.Directory>> {
   const manifestToml = await std
     .download({
-      url: "https://static.rust-lang.org/dist/channel-rust-1.78.0.toml",
+      url: `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
       hash: std.sha256Hash(
-        "a29520b3a7245100b20f1701f56cb9d69aa177430f1875156f044a28f1a2c195",
+        "3608b3efa60fe074d8ef9186747d8ff803c4fc3108c7647f0e7f81c303b2cd95",
       ),
     })
     .read();
@@ -108,7 +108,7 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
     runtimeLibraryDirs: ["../lib"],
   });
   result = std.autowrap(result, {
-    executables: ["lib/librustc_driver-d6f66a8619a171d6.so"],
+    executables: ["lib/librustc_driver-1ccb730c51a3970e.so"],
     libraries: [std.tpl`${std.outputPath}/lib`],
   });
   return result;
