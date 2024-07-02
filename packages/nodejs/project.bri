@@ -14,7 +14,7 @@ export const project = {
 function nodejs(): std.Recipe<std.Directory> {
   let node = std
     .download({
-      url: "https://nodejs.org/dist/v20.14.0/node-v20.14.0-linux-x64.tar.xz",
+      url: `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
       hash: std.sha256Hash(
         "fedf8fa73b6f51c4ffcc5da8f86cd1ed381bc9dceae0829832c7d683a78b8e36",
       ),
