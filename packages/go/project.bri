@@ -56,7 +56,7 @@ interface GoBuildOptions {
  *
  * ## Options
  *
- * - `goModule`: The Go module to build. Shuld include `go.mod`, as well as
+ * - `goModule`: The Go module to build. Should include `go.mod`, as well as
  *   `go.sum` if external dependencies are needed.
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
