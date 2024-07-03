@@ -118,6 +118,7 @@ export default rust;
 export interface CargoBuildOptions {
   crate: std.AsyncRecipe<std.Directory>;
   runnable?: string;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
 }
 
 /**
@@ -129,16 +130,19 @@ export interface CargoBuildOptions {
  * - `crate`: The crate to build.
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
+ * - `dependencies`: Optionally add additional dependencies to the build.
  *
  * ## Example
  *
  * ```typescript
+ * import openssl from "openssl";
  * import { cargoBuild } from "rust";
  *
  * export default () => {
  *   return cargoBuild({
  *     crate: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",
+ *     dependencies: [openssl()],
  *   });
  * };
  * ```
@@ -175,7 +179,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   let buildResult = std.runBash`
     cargo install --path . --frozen
   `
-    .dependencies(rust(), std.toolchain())
+    .dependencies(rust(), std.toolchain(), ...(options.dependencies ?? []))
     .env({
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
