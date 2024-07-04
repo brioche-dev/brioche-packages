@@ -1,0 +1,24 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "bat",
+  version: "0.24.0",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/sharkdp/bat/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "907554a9eff239f256ee8fe05a922aad84febe4fe10a499def72a4557e9eedfb",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return cargoBuild({
+    crate,
+    runnable: "bin/bat",
+  });
+};
