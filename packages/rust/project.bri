@@ -157,6 +157,15 @@ export function cargoBuild(options: CargoBuildOptions) {
   const vendoredSkeletonCrate = std.runBash`
     cd "$BRIOCHE_OUTPUT"
     mkdir -p .cargo
+
+    # If the crate has a .cargo/config file, then move it to .cargo/config.toml
+    # Cargo prefers the config over config.toml, so we need to rename it
+    # to avoid any conflits. It will still need to be removed from the merged
+    # crate later too
+    if [ -f .cargo/config ]; then
+      mv .cargo/config .cargo/config.toml
+    fi
+
     # Always add a newline in case the file already exists and
     # doesn't end with a newline
     echo $'\n'"$(cargo vendor --locked)" >> .cargo/config.toml
@@ -174,6 +183,10 @@ export function cargoBuild(options: CargoBuildOptions) {
     ".cargo/config.toml",
     vendoredSkeletonCrate.get(".cargo/config.toml"),
   );
+
+  // Remove the conflicting `cargo/config` file if it existed in the original
+  // crate. It will have already been copied over to `.cargo/config.toml`
+  crate = crate.remove(".cargo/config");
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
