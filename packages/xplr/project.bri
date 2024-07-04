@@ -1,0 +1,24 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "xplr",
+  version: "0.21.9",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/sayanarijit/xplr/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "345400c2fb7046963b2e0fcca8802b6e523e0fb742d0d893cb7fd42f10072a55",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return cargoBuild({
+    crate,
+    runnable: "bin/xplr",
+  });
+};
