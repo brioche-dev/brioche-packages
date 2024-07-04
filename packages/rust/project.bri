@@ -160,7 +160,7 @@ export function cargoBuild(options: CargoBuildOptions) {
 
     # If the crate has a .cargo/config file, then move it to .cargo/config.toml
     # Cargo prefers the config over config.toml, so we need to rename it
-    # to avoid any conflits. It will still need to be removed from the merged
+    # to avoid any conflicts. It will still need to be removed from the merged
     # crate later too
     if [ -f .cargo/config ]; then
       mv .cargo/config .cargo/config.toml
