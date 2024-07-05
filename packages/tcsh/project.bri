@@ -16,7 +16,7 @@ const source = std
   .peel();
 
 export default function (): std.Recipe<std.Directory> {
-  let tcsh = std.runBash`
+  const tcsh = std.runBash`
     ./configure \\
       --prefix=/
     make
