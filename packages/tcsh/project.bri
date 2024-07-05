@@ -1,0 +1,30 @@
+import * as std from "std";
+
+export const project = {
+  name: "tcsh",
+  version: "6.24.13",
+};
+
+const source = std
+  .download({
+    url: `https://astron.com/pub/tcsh/tcsh-${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "1e927d52e9c85d162bf985f24d13c6ccede9beb880d86fec492ed15480a5c71a",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  const tcsh = std.runBash`
+    ./configure \\
+      --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source)
+    .toDirectory();
+
+  return std.withRunnableLink(tcsh, "bin/tcsh");
+}
