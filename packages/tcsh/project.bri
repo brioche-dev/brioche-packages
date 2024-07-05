@@ -26,5 +26,5 @@ export default function (): std.Recipe<std.Directory> {
     .workDir(source)
     .toDirectory();
 
-    return std.withRunnableLink(tcsh, "bin/tcsh");
+  return std.withRunnableLink(tcsh, "bin/tcsh");
 }
