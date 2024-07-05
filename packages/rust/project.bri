@@ -117,6 +117,7 @@ export default rust;
 
 export interface CargoBuildOptions {
   crate: std.AsyncRecipe<std.Directory>;
+  path?: string;
   runnable?: string;
   dependencies?: std.AsyncRecipe<std.Directory>[];
 }
@@ -128,6 +129,8 @@ export interface CargoBuildOptions {
  * ## Options
  *
  * - `crate`: The crate to build.
+ * - `path`: Optionally set a subpath to the crate to build. This is useful
+ *   when building a crate within a workspace.
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  * - `dependencies`: Optionally add additional dependencies to the build.
@@ -190,12 +193,13 @@ export function cargoBuild(options: CargoBuildOptions) {
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
-    cargo install --path . --frozen
+    cargo install --path "$crate_path" --frozen
   `
     .dependencies(rust(), std.toolchain(), ...(options.dependencies ?? []))
     .env({
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
+      crate_path: options.path ?? ".",
     })
     .workDir(crate)
     .toDirectory();
