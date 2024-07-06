@@ -15,7 +15,7 @@ const source = std
   .unarchive("tar", "gzip")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function openssl(): std.Recipe<std.Directory> {
   let openssl = std.runBash`
     ./config \\
       --prefix=/ \\
@@ -40,5 +40,5 @@ export default function (): std.Recipe<std.Directory> {
 export function test() {
   return std.runBash`
     openssl version | tee "$BRIOCHE_OUTPUT"
-  `;
+  `.dependencies(openssl());
 }
