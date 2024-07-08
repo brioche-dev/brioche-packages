@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "nodejs",
-  version: "20.14.0",
+  version: "20.15.1",
 };
 
 /**
@@ -16,7 +16,7 @@ function nodejs(): std.Recipe<std.Directory> {
     .download({
       url: `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
       hash: std.sha256Hash(
-        "fedf8fa73b6f51c4ffcc5da8f86cd1ed381bc9dceae0829832c7d683a78b8e36",
+        "26700f8d3e78112ad4a2618a9c8e2816e38a49ecf0213ece80e54c38cb02563f",
       ),
     })
     .unarchive("tar", "xz")
