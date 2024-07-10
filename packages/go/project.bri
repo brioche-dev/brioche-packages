@@ -100,18 +100,19 @@ export async function goInstall(
 
   let buildResult = std.runBash`
     # Run generate if requested
-    if [ "${options.buildParams?.generate}" = "true" ]; then
+    if [ "$go_generate" = "true" ]; then
       go generate ./...
     fi
 
-    go install -ldflags="$ldflags" $package_path
+    go install -ldflags="$ldflags" "$package_path"
   `
     .workDir(options.goModule)
     .dependencies(go())
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
-      ldflags: options.buildParams?.ldflags?.join(" ") ?? "",
+      go_generate: options.buildParams?.generate ?? false ? "true" : "false",
+      ldflags: ldflagsWrapper(options.buildParams?.ldflags ?? []),
       package_path: options.packagePath ?? ".",
     })
     .toDirectory();
@@ -151,4 +152,15 @@ async function goModDownload(
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
     .toDirectory();
+}
+
+/**
+ * Wrapper function to escape ldflags for use in a shell command.
+ * Escapes single quotes and double quotes.
+ *
+ * @param ldflags An array of ldflags to escape.
+ * @returns A string of escaped ldflags.
+ */
+function ldflagsWrapper(ldflags: string[]): string {
+  return ldflags.map((ldflag) => ldflag.replace(/['"]/g, "\\$&")).join(" ");
 }
