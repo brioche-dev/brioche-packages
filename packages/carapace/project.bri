@@ -1,0 +1,34 @@
+import * as std from "std";
+import { goInstall } from "go";
+
+export const project = {
+  name: "carapace",
+  version: "1.0.4",
+};
+
+const goModule = std
+  .download({
+    url: `https://github.com/rsteube/carapace-bin/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "745bf9cbbfc205ddc42c8a09b7a05534be792672ed9dc97bd670f74973438e1b",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return goInstall({
+    goModule,
+    buildParams: {
+      generate: true,
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `main.version=${project.version}`
+      ],
+    },
+    packagePath: "./cmd/carapace",
+    runnable: "bin/carapace",
+  });
+};
