@@ -45,8 +45,15 @@ export function go(): std.Recipe<std.Directory> {
 }
 export default go;
 
+interface GoBuildParameters {
+  generate?: boolean;
+  ldflags?: string[];
+}
+
 interface GoBuildOptions {
   goModule: std.AsyncRecipe<std.Directory>;
+  buildParams?: GoBuildParameters;
+  packagePath?: string;
   runnable?: string;
 }
 
@@ -58,6 +65,10 @@ interface GoBuildOptions {
  *
  * - `goModule`: The Go module to build. Should include `go.mod`, as well as
  *   `go.sum` if external dependencies are needed.
+ * - `buildParams`: Optional build parameters:
+ *   - `generate`: Run `go generate` before building.
+ *   - `ldflags`: An array of ldflags to pass to the `go install` command.
+ * - `packagePath`: Optionally set the package path to build (e.g. `./cmd/foo`).
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  *
@@ -69,6 +80,14 @@ interface GoBuildOptions {
  * export default function {
  *   return goInstall({
  *     goModule: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *     buildParams: {
+ *       generate: true,
+ *       ldflags: [
+ *         "-s",
+ *         "-w"
+ *       ],
+ *     },
+ *     packagePath: "./cmd/hello",
  *     runnable: "bin/hello",
  *   });
  * };
@@ -80,13 +99,20 @@ export async function goInstall(
   const modules = goModDownload(options.goModule);
 
   let buildResult = std.runBash`
-    go install
+    # Run generate if requested
+    if [ "${options.buildParams?.generate}" = "true" ]; then
+      go generate ./...
+    fi
+
+    go install -ldflags="$ldflags" $package_path
   `
     .workDir(options.goModule)
     .dependencies(go())
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
+      ldflags: options.buildParams?.ldflags?.join(" ") ?? "",
+      package_path: options.packagePath ?? ".",
     })
     .toDirectory();
 
