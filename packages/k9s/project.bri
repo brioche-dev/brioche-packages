@@ -24,10 +24,8 @@ export default () => {
       ldflags: [
         "-s",
         "-w",
-        "-X",
-        `github.com/derailed/k9s/cmd.version=${project.version}`,
-        "-X",
-        `github.com/derailed/k9s/cmd.commit=${gitCommit}`
+        `-X github.com/derailed/k9s/cmd.version=${project.version}`,
+        `-X github.com/derailed/k9s/cmd.commit=${gitCommit}`,
       ],
     },
     runnable: "bin/k9s",
