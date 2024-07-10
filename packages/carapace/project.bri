@@ -21,12 +21,7 @@ export default () => {
     goModule,
     buildParams: {
       generate: true,
-      ldflags: [
-        "-s",
-        "-w",
-        "-X",
-        `main.version=${project.version}`
-      ],
+      ldflags: ["-s", "-w", `-X main.version=${project.version}`],
     },
     packagePath: "./cmd/carapace",
     runnable: "bin/carapace",
