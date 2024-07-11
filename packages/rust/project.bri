@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.78.0",
+  version: "1.79.0",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -40,9 +40,9 @@ const Manifest = t.object({
 async function rust(): Promise<std.Recipe<std.Directory>> {
   const manifestToml = await std
     .download({
-      url: "https://static.rust-lang.org/dist/channel-rust-1.78.0.toml",
+      url: `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
       hash: std.sha256Hash(
-        "a29520b3a7245100b20f1701f56cb9d69aa177430f1875156f044a28f1a2c195",
+        "3608b3efa60fe074d8ef9186747d8ff803c4fc3108c7647f0e7f81c303b2cd95",
       ),
     })
     .read();
@@ -114,7 +114,9 @@ export default rust;
 
 export interface CargoBuildOptions {
   crate: std.AsyncRecipe<std.Directory>;
+  path?: string;
   runnable?: string;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
 }
 
 /**
@@ -124,18 +126,23 @@ export interface CargoBuildOptions {
  * ## Options
  *
  * - `crate`: The crate to build.
+ * - `path`: Optionally set a subpath to the crate to build. This is useful
+ *   when building a crate within a workspace.
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
+ * - `dependencies`: Optionally add additional dependencies to the build.
  *
  * ## Example
  *
  * ```typescript
+ * import openssl from "openssl";
  * import { cargoBuild } from "rust";
  *
  * export default () => {
  *   return cargoBuild({
  *     crate: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",
+ *     dependencies: [openssl()],
  *   });
  * };
  * ```
@@ -150,7 +157,18 @@ export function cargoBuild(options: CargoBuildOptions) {
   const vendoredSkeletonCrate = std.runBash`
     cd "$BRIOCHE_OUTPUT"
     mkdir -p .cargo
-    cargo vendor --locked >> .cargo/config.toml
+
+    # If the crate has a .cargo/config file, then move it to .cargo/config.toml
+    # Cargo prefers the config over config.toml, so we need to rename it
+    # to avoid any conflicts. It will still need to be removed from the merged
+    # crate later too
+    if [ -f .cargo/config ]; then
+      mv .cargo/config .cargo/config.toml
+    fi
+
+    # Always add a newline in case the file already exists and
+    # doesn't end with a newline
+    echo $'\n'"$(cargo vendor --locked)" >> .cargo/config.toml
   `
     .dependencies(rust(), caCertificates())
     .outputScaffold(skeletonCrate)
@@ -166,14 +184,19 @@ export function cargoBuild(options: CargoBuildOptions) {
     vendoredSkeletonCrate.get(".cargo/config.toml"),
   );
 
+  // Remove the conflicting `cargo/config` file if it existed in the original
+  // crate. It will have already been copied over to `.cargo/config.toml`
+  crate = crate.remove(".cargo/config");
+
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
-    cargo install --path . --frozen
+    cargo install --path "$crate_path" --frozen
   `
-    .dependencies(rust(), std.toolchain())
+    .dependencies(rust(), std.toolchain(), ...(options.dependencies ?? []))
     .env({
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
+      crate_path: options.path ?? ".",
     })
     .workDir(crate)
     .toDirectory();

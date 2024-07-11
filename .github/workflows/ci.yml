@@ -28,6 +28,7 @@ jobs:
           for project in packages/*; do
             echo "::group::$project"
             brioche check -p "$project"
+            brioche fmt -p "$project" --check
             echo "::endgroup::"
           done
 

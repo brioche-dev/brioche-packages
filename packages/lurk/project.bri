@@ -1,0 +1,24 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "lurk",
+  version: "0.3.5",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/JakWai01/lurk/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "ac2988dc82947133be7f2773548d01ccf6f5fb1d904212b226b87d938c16d6f7",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return cargoBuild({
+    crate,
+    runnable: "bin/lurk",
+  });
+};

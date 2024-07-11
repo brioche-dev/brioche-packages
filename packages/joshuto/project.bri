@@ -1,0 +1,24 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "joshuto",
+  version: "0.9.8",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/kamiyaa/joshuto/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "877d841b2e26d26d0f0f2e6f1dab3ea2fdda38c345abcd25085a3f659c24e013",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return cargoBuild({
+    crate,
+    runnable: "bin/joshuto",
+  });
+};
