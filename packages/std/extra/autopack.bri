@@ -1,0 +1,278 @@
+import * as std from "/core";
+import { toolchain } from "/toolchain";
+import { runtimeUtils } from "/runnable_tools.bri";
+
+export function autopack(
+  recipe: std.AsyncRecipe<std.Directory>,
+  options: AutopackOptions,
+): std.Recipe<std.Directory> {
+  const { config, variables } = buildConfig(options);
+
+  const variableArgs: std.ProcessTemplateLike[] = Object.entries(
+    variables,
+  ).flatMap(([name, value]) => {
+    switch (value.type) {
+      case "path":
+        return ["--var", std.tpl`${name}=path:${value.value}`];
+    }
+  });
+
+  return std
+    .process({
+      command: std.tpl`${runtimeUtils()}/bin/brioche-packer`,
+      args: [
+        "autopack",
+        std.outputPath,
+        "--config",
+        JSON.stringify(config),
+        ...variableArgs,
+      ],
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+export interface AutopackOptions {
+  paths?: string[];
+  globs?: string[];
+  linkDependencies?: std.AsyncRecipe[];
+  selfDependency?: boolean;
+  dynamicBinaryConfig?: DynamicBinaryConfig;
+  sharedLibraryConfig?: SharedLibraryConfig;
+  scriptConfig?: ScriptConfig;
+  rewrapConfig?: RewrapConfig;
+}
+
+interface DynamicBinaryConfig extends DynamicLinkingConfig {
+  enabled?: boolean;
+  extraRuntimeLibraryPaths?: string[];
+}
+
+interface SharedLibraryConfig extends DynamicLinkingConfig {
+  enabled?: boolean;
+}
+
+interface ScriptConfig {
+  enabled?: boolean;
+  env?: Record<string, EnvValueConfig>;
+}
+
+interface RewrapConfig {
+  enabled?: boolean;
+}
+
+interface DynamicLinkingConfig {
+  libraryPaths?: std.AsyncRecipe[];
+  skipLibraries?: string[];
+  extraLibraries?: string[];
+  skipUnknownLibraries?: boolean;
+}
+
+type EnvValueConfig =
+  | { type: "clear" }
+  | { type: "inherit" }
+  | { type: "set"; value: EnvValue }
+  | { type: "fallback"; value: EnvValue }
+  | { type: "prepend"; value: EnvValue; separator: string }
+  | { type: "append"; value: EnvValue; separator: string };
+
+type EnvValue = std.ProcessTemplateLike | { relativePath: string };
+
+function buildConfig(options: AutopackOptions): AutopackConfigResult {
+  const variables: Record<string, AutopackConfigVariable> = {};
+
+  let variableIndex = 0;
+  const addVar = (variable: {
+    name?: string;
+    value: std.AsyncRecipe;
+  }): TemplateVariable => {
+    const name = variable.name ?? `var${variableIndex++}`;
+    std.assert(!(name in variables), `duplicate variable name ${name}`);
+    variables[name] = { type: "path", value: variable.value };
+    return { variable: name };
+  };
+
+  const buildEnvValue = (value: EnvValue): EnvValueTemplateValue => {
+    if (typeof value === "object" && "relativePath" in value) {
+      return {
+        components: [
+          { type: "relative_path", path: std.bstring(value.relativePath) },
+        ],
+      };
+    } else {
+      const processTemplate = std.processTemplate(value);
+      return {
+        components: processTemplate.components.flatMap(
+          (component): EnvValueTemplateValueComponent[] => {
+            if (component == null || component === "") {
+              return [];
+            } else if (typeof component === "string") {
+              return [{ type: "literal", value: std.bstring(component) }];
+            } else if ("componentType" in component) {
+              throw new Error(
+                `cannot use component type in env value: ${component.componentType}`,
+              );
+            } else if (component instanceof Promise) {
+              throw new Error("cannot use promise in env value");
+            } else {
+              return [{ type: "variable", ...addVar({ value: component }) }];
+            }
+          },
+        ),
+      };
+    }
+  };
+
+  const dynamicBinaryPackedExecutable = addVar({
+    name: "dynamicBinaryPackedExecutable",
+    value: runtimeUtils().get("bin/brioche-packed-exec"),
+  });
+  const scriptPackedExecutable = addVar({
+    name: "scriptPackedExecutable",
+    value: runtimeUtils().get("bin/brioche-packed-plain-exec"),
+  });
+
+  const dynamicBinary =
+    options.dynamicBinaryConfig?.enabled !== false
+      ? ({
+          packedExecutable: dynamicBinaryPackedExecutable,
+          extraLibraries: options.dynamicBinaryConfig?.extraLibraries,
+          extraRuntimeLibraryPaths:
+            options.dynamicBinaryConfig?.extraRuntimeLibraryPaths,
+          libraryPaths: options.dynamicBinaryConfig?.libraryPaths?.map((path) =>
+            addVar({ value: path }),
+          ),
+          skipLibraries: options.dynamicBinaryConfig?.skipLibraries,
+          skipUnknownLibraries:
+            options.dynamicBinaryConfig?.skipUnknownLibraries,
+        } satisfies DynamicBinaryConfigTemplate)
+      : undefined;
+  const sharedLibrary =
+    options.sharedLibraryConfig?.enabled !== false
+      ? ({
+          libraryPaths: options.sharedLibraryConfig?.libraryPaths?.map((path) =>
+            addVar({ value: path }),
+          ),
+          skipLibraries: options.sharedLibraryConfig?.skipLibraries,
+          skipUnknownLibraries:
+            options.sharedLibraryConfig?.skipUnknownLibraries,
+        } satisfies SharedLibraryConfigTemplate)
+      : undefined;
+  const script =
+    options.scriptConfig?.enabled !== false
+      ? ({
+          packedExecutable: scriptPackedExecutable,
+          env: Object.fromEntries(
+            Object.entries(options.scriptConfig?.env ?? {}).map(
+              ([key, value]): [string, EnvValueTemplate] => {
+                switch (value.type) {
+                  case "clear":
+                  case "inherit":
+                    return [key, { type: value.type }];
+                  case "set":
+                  case "fallback":
+                    return [
+                      key,
+                      { type: value.type, value: buildEnvValue(value.value) },
+                    ];
+                  case "prepend":
+                  case "append":
+                    return [
+                      key,
+                      {
+                        type: value.type,
+                        value: buildEnvValue(value.value),
+                        separator: std.bstring(value.separator),
+                      },
+                    ];
+                }
+              },
+            ),
+          ),
+        } satisfies ScriptConfigTemplate)
+      : undefined;
+  const rewrap =
+    options.rewrapConfig?.enabled === true
+      ? ({} satisfies RewrapConfigTemplate)
+      : undefined;
+
+  const linkDependencies = [
+    ...(options.linkDependencies ?? []),
+    toolchain(),
+  ].map((dep) => addVar({ value: dep }));
+
+  const config = {
+    paths: options.paths,
+    globs: options.globs,
+    linkDependencies,
+    selfDependency: options.selfDependency,
+    dynamicBinary,
+    sharedLibrary,
+    script,
+    rewrap,
+  } satisfies AutopackConfigTemplate;
+  return { config, variables };
+}
+
+interface AutopackConfigResult {
+  config: AutopackConfigTemplate;
+  variables: Record<string, AutopackConfigVariable>;
+}
+
+interface AutopackConfigTemplate {
+  paths?: TemplatePath[];
+  globs?: string[];
+  quiet?: boolean;
+  linkDependencies?: TemplatePath[];
+  selfDependency?: boolean;
+  dynamicBinary?: DynamicBinaryConfigTemplate;
+  sharedLibrary?: SharedLibraryConfigTemplate;
+  script?: ScriptConfigTemplate;
+  rewrap?: RewrapConfigTemplate;
+}
+
+type TemplateVariable = { variable: string };
+
+type TemplatePath = string | TemplateVariable;
+
+interface DynamicBinaryConfigTemplate extends DynamicLinkingConfigTemplate {
+  packedExecutable: TemplatePath;
+  extraRuntimeLibraryPaths?: string[];
+}
+
+interface SharedLibraryConfigTemplate extends DynamicLinkingConfigTemplate {}
+
+interface ScriptConfigTemplate {
+  packedExecutable: TemplatePath;
+  env?: Record<string, EnvValueTemplate>;
+  clearEnv?: boolean;
+}
+
+interface RewrapConfigTemplate {}
+
+type EnvValueTemplate =
+  | { type: "clear" }
+  | { type: "inherit" }
+  | { type: "set"; value: EnvValueTemplateValue }
+  | { type: "fallback"; value: EnvValueTemplateValue }
+  | { type: "prepend"; value: EnvValueTemplateValue; separator: std.BString }
+  | { type: "append"; value: EnvValueTemplateValue; separator: std.BString };
+
+interface EnvValueTemplateValue {
+  components: EnvValueTemplateValueComponent[];
+}
+
+type EnvValueTemplateValueComponent =
+  | { type: "literal"; value: std.BString }
+  | { type: "relative_path"; path: std.BString }
+  | { type: "resource"; path: std.BString }
+  | { type: "variable"; variable: string };
+
+interface DynamicLinkingConfigTemplate {
+  libraryPaths?: TemplatePath[];
+  skipLibraries?: string[];
+  extraLibraries?: string[];
+  skipUnknownLibraries?: boolean;
+}
+
+type AutopackConfigVariable = { type: "path"; value: std.AsyncRecipe };

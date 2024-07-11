@@ -87,7 +87,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       cp -r "$glibc"/* "$BRIOCHE_OUTPUT"
 
       "$packer" \
-        autowrap \
+        autopack \
         "$BRIOCHE_OUTPUT" \
         --var "packed=path:$packed" \
         --var "lib=path:$BRIOCHE_OUTPUT/lib" \

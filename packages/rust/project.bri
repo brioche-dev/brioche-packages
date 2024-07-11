@@ -96,20 +96,17 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
     .map((lib) => lib.split("/").at(-1))
     .flatMap((name) => (name != null ? [name] : []));
 
-  result = std.autowrap(result, {
-    executables: [
-      "bin/cargo",
-      "bin/rustc",
-      "bin/rustdoc",
-      "libexec/rust-analyzer-proc-macro-srv",
-    ],
-    libraries: [std.tpl`${std.outputPath}/lib`],
-    skipLibraries: localLibNames,
-    runtimeLibraryDirs: ["../lib"],
+  result = std.setEnv(result, {
+    LIBRARY_PATH: { path: "lib" },
   });
-  result = std.autowrap(result, {
-    executables: ["lib/librustc_driver-d6f66a8619a171d6.so"],
-    libraries: [std.tpl`${std.outputPath}/lib`],
+
+  result = std.autopack(result, {
+    globs: ["bin/**", "libexec/**", "lib/librustc_driver-*.so"],
+    selfDependency: true,
+    dynamicBinaryConfig: {
+      skipLibraries: localLibNames,
+      extraRuntimeLibraryPaths: ["lib"],
+    },
   });
   return result;
 }

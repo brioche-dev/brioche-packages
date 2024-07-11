@@ -22,8 +22,8 @@ function nodejs(): std.Recipe<std.Directory> {
     .unarchive("tar", "xz")
     .peel();
 
-  node = std.autowrap(node, {
-    executables: ["bin/node"],
+  node = std.autopack(node, {
+    globs: ["bin/**"],
   });
 
   return std.withRunnableLink(node, "bin/node");

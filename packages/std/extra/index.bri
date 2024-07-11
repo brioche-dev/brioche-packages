@@ -1,4 +1,4 @@
-export * from "./autowrap.bri";
+export * from "./autopack.bri";
 export * from "./oci_container_image.bri";
 export * from "./run_bash.bri";
 export * from "./bash_runnable.bri";
