@@ -1,0 +1,33 @@
+import * as std from "std";
+import { goInstall } from "go";
+
+export const project = {
+  name: "k9s",
+  version: "0.32.5",
+};
+const gitCommit = "1440643e8d1a101a38d9be1933131ddf5c863940";
+
+const goModule = std
+  .download({
+    url: `https://github.com/derailed/k9s/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "e011697b3de99d7691119036eaae6e5d4f1a98e284755ab6b15ae6daba08595f",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return goInstall({
+    goModule,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        `-X github.com/derailed/k9s/cmd.version=${project.version}`,
+        `-X github.com/derailed/k9s/cmd.commit=${gitCommit}`,
+      ],
+    },
+    runnable: "bin/k9s",
+  });
+};
