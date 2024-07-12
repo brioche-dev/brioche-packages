@@ -45,13 +45,18 @@ export function go(): std.Recipe<std.Directory> {
 }
 export default go;
 
+type ModOptions = "readonly" | "vendor" | "mod";
+
 interface GoBuildParameters {
   generate?: boolean;
   ldflags?: string[];
+  trimpath?: boolean;
+  mod?: ModOptions;
 }
 
 interface GoBuildOptions {
   goModule: std.AsyncRecipe<std.Directory>;
+  env?: Record<string, std.ProcessTemplateLike>;
   buildParams?: GoBuildParameters;
   packagePath?: string;
   runnable?: string;
@@ -82,6 +87,8 @@ interface GoBuildOptions {
  *     goModule: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
  *     buildParams: {
  *       generate: true,
+ *       trimpath: true,
+ *       mod: "readonly",
  *       ldflags: [
  *         "-s",
  *         "-w"
@@ -104,16 +111,33 @@ export async function goInstall(
       go generate ./...
     fi
 
-    go install -ldflags="$ldflags" "$package_path"
+    goargs=()
+
+    if [ -n "$ldflags" ]; then
+      goargs+=("-ldflags=$ldflags")
+    fi
+
+    if [ "$trimpath" = "true" ]; then
+      goargs+=("-trimpath")
+    fi
+
+    if [ -n "$mod" ]; then
+      goargs+=("-mod=$mod")
+    fi
+
+    go install "\${goargs[@]}" "$package_path"
   `
     .workDir(options.goModule)
-    .dependencies(go())
+    .dependencies(go(), std.toolchain())
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
       go_generate: options.buildParams?.generate ?? false ? "true" : "false",
       ldflags: ldflagsWrapper(options.buildParams?.ldflags ?? []),
+      trimpath: options.buildParams?.trimpath ?? false ? "true" : "false",
+      mod: options.buildParams?.mod ?? "",
       package_path: options.packagePath ?? ".",
+      ...options.env,
     })
     .toDirectory();
 
