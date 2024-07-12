@@ -40,7 +40,7 @@ export interface AutopackOptions {
   dynamicBinaryConfig?: DynamicBinaryConfig;
   sharedLibraryConfig?: SharedLibraryConfig;
   scriptConfig?: ScriptConfig;
-  rewrapConfig?: RewrapConfig;
+  repackConfig?: RepackConfig;
 }
 
 interface DynamicBinaryConfig extends DynamicLinkingConfig {
@@ -57,7 +57,7 @@ interface ScriptConfig {
   env?: Record<string, EnvValueConfig>;
 }
 
-interface RewrapConfig {
+interface RepackConfig {
   enabled?: boolean;
 }
 
@@ -191,9 +191,9 @@ function buildConfig(options: AutopackOptions): AutopackConfigResult {
           ),
         } satisfies ScriptConfigTemplate)
       : undefined;
-  const rewrap =
-    options.rewrapConfig?.enabled === true
-      ? ({} satisfies RewrapConfigTemplate)
+  const repack =
+    options.repackConfig?.enabled === true
+      ? ({} satisfies RepackConfigTemplate)
       : undefined;
 
   const linkDependencies = [
@@ -209,7 +209,7 @@ function buildConfig(options: AutopackOptions): AutopackConfigResult {
     dynamicBinary,
     sharedLibrary,
     script,
-    rewrap,
+    repack,
   } satisfies AutopackConfigTemplate;
   return { config, variables };
 }
@@ -228,7 +228,7 @@ interface AutopackConfigTemplate {
   dynamicBinary?: DynamicBinaryConfigTemplate;
   sharedLibrary?: SharedLibraryConfigTemplate;
   script?: ScriptConfigTemplate;
-  rewrap?: RewrapConfigTemplate;
+  repack?: RepackConfigTemplate;
 }
 
 type TemplateVariable = { variable: string };
@@ -248,7 +248,7 @@ interface ScriptConfigTemplate {
   clearEnv?: boolean;
 }
 
-interface RewrapConfigTemplate {}
+interface RepackConfigTemplate {}
 
 type EnvValueTemplate =
   | { type: "clear" }
