@@ -1,0 +1,24 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "jwt_cli",
+  version: "6.1.0",
+};
+
+const crate = std
+  .download({
+    url: `https://github.com/mike-engel/jwt-cli/archive/refs/tags/${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "9bc2232f052f0fcc3171d95a301911b29b8dff12fcb7ea80718c0ef1c993f9b9",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function () {
+  return cargoBuild({
+    crate,
+    runnable: "bin/jwt",
+  });
+}
