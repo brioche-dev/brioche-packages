@@ -19,9 +19,6 @@ const goModule = std
 export default () => {
   return goInstall({
     goModule,
-    env: {
-      CGO_ENABLED: "0",
-    },
     buildParams: {
       ldflags: ["-w", "-s", `-X github.com/hashicorp/terraform/version.dev=no`],
       mod: "readonly",
