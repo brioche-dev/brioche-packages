@@ -1,0 +1,31 @@
+import * as std from "std";
+import { goInstall } from "go";
+
+export const project = {
+  name: "terraform",
+  version: "1.9.2",
+};
+
+const goModule = std
+  .download({
+    url: `https://github.com/hashicorp/terraform/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "4f61b84d5e55648dfe576ead2744bd09aba8db00d8f780a2d498f30537e287f1",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return goInstall({
+    goModule,
+    env: {
+      CGO_ENABLED: "0",
+    },
+    buildParams: {
+      ldflags: ["-w", "-s", `-X github.com/hashicorp/terraform/version.dev=no`],
+      mod: "readonly",
+    },
+    runnable: "bin/terraform",
+  });
+};
