@@ -49,7 +49,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
             --with-headers="$stage2/usr/include" \
             libc_cv_slibdir=/lib
 
-          export BRIOCHE_LD_AUTOWRAP=false
+          export BRIOCHE_LD_AUTOPACK=false
           make
           sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
           make install DESTDIR="$BRIOCHE_OUTPUT"
