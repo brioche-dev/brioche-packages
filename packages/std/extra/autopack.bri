@@ -2,6 +2,17 @@ import * as std from "/core";
 import { toolchain } from "/toolchain";
 import { runtimeUtils } from "/runnable_tools.bri";
 
+/**
+ * "Autopack" one or more files in a directory. Generally, this is useful
+ * for making packed executables from dynamically-linked binaries or
+ * scripts, such as when packaging a pre-built binary that links to glibc.
+ *
+ * The default behavior is to autopack dynamic binaries, shared libraries,
+ * and scripts, but not to repack already-packed files.
+ *
+ * See `AutopackOptions` for more details. Either `paths` or `globs` must be
+ * provided, but not both.
+ */
 export function autopack(
   recipe: std.AsyncRecipe<std.Directory>,
   options: AutopackOptions,
@@ -33,38 +44,121 @@ export function autopack(
 }
 
 export interface AutopackOptions {
+  /**
+   * A list of paths to autopack. If a provided path cannot be packed,
+   * autopacking will fail. Mutually exclusive with `globs`
+   */
   paths?: string[];
+
+  /**
+   * A list of glob pattenrs to autopack. If a matched file cannot be packed,
+   * it will be skipped. Mutually exclusive with `paths`
+   */
   globs?: string[];
+
+  /**
+   * A list of dependencies to search when linking. These will be used to find
+   * dynamic libraries, the dynamic linker, script interpreters, and any other
+   * dependencies needed to pack a file. A dependency will not be used if
+   * it isn't used by any packed files
+   */
   linkDependencies?: std.AsyncRecipe[];
+
+  /**
+   * Include the recipe itself as a dependency. This is useful when a binary
+   * depends on a shared library within the recipe
+   */
   selfDependency?: boolean;
+
+  /**
+   * Configuration for packing dynamic binaries. Enabled by default, but
+   * can be disabled by setting `enabled: false`
+   */
   dynamicBinaryConfig?: DynamicBinaryConfig;
+
+  /**
+   * Configuration for packing shared libraries. Enabled by default, but
+   * can be disabled by setting `enabled: false`
+   */
   sharedLibraryConfig?: SharedLibraryConfig;
+
+  /**
+   * Configuration for packing scripts. Enabled by default, but
+   * can be disabled by setting `enabled: false`
+   */
   scriptConfig?: ScriptConfig;
+
+  /**
+   * Configuration for repacking already-packed files. Disabled by default,
+   * but can be enabled by setting `enabled: true`
+   */
   repackConfig?: RepackConfig;
 }
 
 interface DynamicBinaryConfig extends DynamicLinkingConfig {
+  /**
+   * Whether to pack dynamic binaries. Defaults to `true`
+   */
   enabled?: boolean;
+
+  /**
+   * A list of extra paths (relative to the root of the recipe) to include
+   * when a dynamic binary is run. This is useful for including shared libraries
+   */
   extraRuntimeLibraryPaths?: string[];
 }
 
 interface SharedLibraryConfig extends DynamicLinkingConfig {
+  /**
+   * Whether to pack shared libraries. Defaults to `true`
+   */
   enabled?: boolean;
 }
 
 interface ScriptConfig {
+  /**
+   * Whether to pack scripts. Defaults to `true`
+   */
   enabled?: boolean;
+
+  /**
+   * Extra environment variables to set when a packed script is run
+   */
   env?: Record<string, EnvValueConfig>;
 }
 
 interface RepackConfig {
+  /**
+   * Whether to repack already-packed files. Defaults to `false`. When set
+   * the original file will be repacked from scratch by default, discarding
+   * any options used when it was originally packed
+   */
   enabled?: boolean;
 }
 
 interface DynamicLinkingConfig {
+  /**
+   * A list of directory recipes to search for libraries. Only matched libraries
+   * will actually be used in the packed file
+   */
   libraryPaths?: std.AsyncRecipe[];
+
+  /**
+   * A list of library names to exclude from packing. Even if a library is
+   * excluded, its transitive dependencies will still be searched and packed
+   */
   skipLibraries?: string[];
+
+  /**
+   * A list of extra library names to include while packing. This is useful
+   * if a program dynamically loads a library that isn't linked to directly
+   */
   extraLibraries?: string[];
+
+  /**
+   * When set, libraries that can't be found will be skipped instead of failing.
+   * Defaults to `false`
+   */
   skipUnknownLibraries?: boolean;
 }
 
