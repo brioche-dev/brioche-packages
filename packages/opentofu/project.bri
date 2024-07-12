@@ -1,0 +1,33 @@
+import * as std from "std";
+import { goInstall } from "go";
+
+export const project = {
+  name: "opentofu",
+  version: "1.7.3",
+};
+
+const goModule = std
+  .download({
+    url: `https://github.com/opentofu/opentofu/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "c97c470f3afbd30c67a141bb973ad4bcb458d3cd7a6bbe3aad1e99b4fbc026a8",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return goInstall({
+    goModule,
+    env: {
+      CGO_ENABLED: "0",
+    },
+    packagePath: "./cmd/tofu",
+    buildParams: {
+      ldflags: ["-s", "-w", `-X github.com/opentofu/opentofu/version.dev=no`],
+      mod: "readonly",
+      trimpath: true,
+    },
+    runnable: "bin/tofu",
+  });
+};
