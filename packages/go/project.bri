@@ -73,6 +73,9 @@ interface GoBuildOptions {
  * - `buildParams`: Optional build parameters:
  *   - `generate`: Run `go generate` before building.
  *   - `ldflags`: An array of ldflags to pass to the `go install` command.
+ *   - `trimpath`: Set the `-trimpath` flag.
+ *   - `mod`: Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
+ * - `env`: Optionally set environment variables for the build.
  * - `packagePath`: Optionally set the package path to build (e.g. `./cmd/foo`).
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
@@ -85,6 +88,9 @@ interface GoBuildOptions {
  * export default function {
  *   return goInstall({
  *     goModule: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *     env: {
+ *       CGO_ENABLED: "0",
+ *     },
  *     buildParams: {
  *       generate: true,
  *       trimpath: true,
