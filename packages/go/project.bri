@@ -134,7 +134,7 @@ export async function goInstall(
     go install "\${goargs[@]}" "$package_path"
   `
     .workDir(options.goModule)
-    .dependencies(go(), std.toolchain())
+    .dependencies(go())
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
