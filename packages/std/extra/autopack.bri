@@ -125,6 +125,13 @@ interface ScriptConfig {
    * Extra environment variables to set when a packed script is run
    */
   env?: Record<string, EnvValueConfig>;
+
+  /**
+   * When set, clears the environment when running the script. Specific
+   * environment variables can still be inherited by using the `inherit`
+   * environment variable config. Defaults to `false`
+   */
+  clearEnv?: boolean;
 }
 
 interface RepackConfig {
@@ -141,7 +148,7 @@ interface DynamicLinkingConfig {
    * A list of directory recipes to search for libraries. Only matched libraries
    * will actually be used in the packed file
    */
-  libraryPaths?: std.AsyncRecipe[];
+  libraryPaths?: std.AsyncRecipe<std.Directory>[];
 
   /**
    * A list of library names to exclude from packing. Even if a library is
