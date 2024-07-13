@@ -23,7 +23,7 @@ export default () => {
       generate: true,
       ldflags: ["-s", "-w", `-X main.version=${project.version}`],
     },
-    packagePath: "./cmd/carapace",
+    path: "./cmd/carapace",
     runnable: "bin/carapace",
   });
 };
