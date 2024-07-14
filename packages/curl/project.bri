@@ -17,7 +17,7 @@ const source = std
   .peel();
 
 export default (): std.Recipe<std.Directory> => {
-  const curl = std.runBash`
+  let curl = std.runBash`
     ./configure \\
       --prefix=/ \\
       --with-openssl \\
@@ -30,6 +30,12 @@ export default (): std.Recipe<std.Directory> => {
     .workDir(source)
     .dependencies(std.toolchain(), openssl())
     .toDirectory();
+
+  curl = std.setEnv(curl, {
+    CPATH: { path: "include" },
+    LIBRARY_PATH: { path: "lib" },
+    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+  });
 
   return std.withRunnableLink(curl, "bin/curl");
 };
