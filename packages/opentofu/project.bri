@@ -19,7 +19,7 @@ const goModule = std
 export default () => {
   return goInstall({
     goModule,
-    packagePath: "./cmd/tofu",
+    path: "./cmd/tofu",
     buildParams: {
       ldflags: ["-s", "-w", `-X github.com/opentofu/opentofu/version.dev=no`],
       mod: "readonly",

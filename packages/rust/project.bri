@@ -117,6 +117,7 @@ export interface CargoBuildOptions {
   path?: string;
   runnable?: string;
   dependencies?: std.AsyncRecipe<std.Directory>[];
+  env?: Record<string, std.ProcessTemplateLike>;
 }
 
 /**
@@ -131,6 +132,7 @@ export interface CargoBuildOptions {
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  * - `dependencies`: Optionally add additional dependencies to the build.
+ * - `env`: Optionally set environment variables for the build.
  *
  * ## Example
  *
@@ -143,6 +145,9 @@ export interface CargoBuildOptions {
  *     crate: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",
  *     dependencies: [openssl()],
+ *     env: {
+ *       CARGO_LOG: "debug",
+ *     },
  *   });
  * };
  * ```
@@ -197,6 +202,7 @@ export function cargoBuild(options: CargoBuildOptions) {
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
       crate_path: options.path ?? ".",
+      ...options.env,
     })
     .workDir(crate)
     .toDirectory();
