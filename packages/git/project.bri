@@ -1,0 +1,30 @@
+import * as std from "std";
+import openssl from "openssl";
+import curl from "curl";
+
+export const project = {
+  name: "git",
+  version: "2.45.2",
+};
+
+const source = std
+  .download({
+    url: `https://github.com/git/git/archive/refs/tags/v${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "8422abc4a16e389220d8da15e12d712f4e6219846ddd8b112e9b31f3087ddf9b",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default (): std.Recipe<std.Directory> => {
+  const git = std.runBash`
+    make prefix=/ all
+    make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), openssl(), curl())
+    .toDirectory();
+
+  return std.withRunnableLink(git, "bin/git");
+};
