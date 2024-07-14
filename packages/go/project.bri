@@ -56,6 +56,7 @@ interface GoBuildParameters {
 
 interface GoBuildOptions {
   source: std.AsyncRecipe<std.Directory>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   buildParams?: GoBuildParameters;
   path?: string;
@@ -75,6 +76,7 @@ interface GoBuildOptions {
  *   - `ldflags`: An array of ldflags to pass to the `go install` command.
  *   - `trimpath`: Set the `-trimpath` flag.
  *   - `mod`: Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
+ * - `dependencies`: Optionally add additional dependencies to the build.
  * - `env`: Optionally set environment variables for the build.
  * - `path`: Optionally set the package path to build (e.g. `./cmd/foo`).
  * - `runnable`: Optionally set a path to the binary to run
@@ -84,10 +86,12 @@ interface GoBuildOptions {
  *
  * ```typescript
  * import { goBuild } from "go";
+ * import openssl from "openssl";
  *
  * export default function {
  *   return goBuild({
  *     source: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *     dependencies: [openssl()],
  *     env: {
  *       CGO_ENABLED: "0",
  *     },
@@ -134,7 +138,7 @@ export async function goBuild(
     go install "\${goargs[@]}" "$package_path"
   `
     .workDir(options.source)
-    .dependencies(go())
+    .dependencies(go(), ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
