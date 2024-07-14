@@ -31,11 +31,11 @@ export default (): std.Recipe<std.Directory> => {
     .dependencies(std.toolchain(), openssl())
     .toDirectory();
 
-    curl = std.setEnv(curl, {
-      CPATH: { path: "include" },
-      LIBRARY_PATH: { path: "lib" },
-      PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
-    });
+  curl = std.setEnv(curl, {
+    CPATH: { path: "include" },
+    LIBRARY_PATH: { path: "lib" },
+    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+  });
 
   return std.withRunnableLink(curl, "bin/curl");
 };
