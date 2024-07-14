@@ -31,12 +31,16 @@ function nodejs(): std.Recipe<std.Directory> {
 export default nodejs;
 
 interface NpmInstallOptions {
-  npmPackage: std.AsyncRecipe<std.Directory>;
+  source: std.AsyncRecipe<std.Directory>;
 }
 
 /**
  * Install the dependencies from an NPM package. Returns a recipe containing
  * everything from the package, plus a `node_modules` directory.
+ *
+ * ## Options
+ *
+ * - `source`: The NPM package dependencies to install.
  *
  * ## Example
  *
@@ -46,10 +50,10 @@ interface NpmInstallOptions {
  *
  * export default () => {
  *   // Get all the files for the NPM package
- *   let npmPackage = Brioche.glob("src", "package.lock", "package.json");
+ *   const source = Brioche.glob("src", "package.lock", "package.json");
  *
  *   // Install the dependencies
- *   npmPackage = npmInstall({ npmPackage });
+ *   const npmPackage = npmInstall({ source });
  *
  *   // Run the build script and save the output from `dist/`
  *   return std.runBash`
@@ -69,7 +73,7 @@ export function npmInstall(
     npm clean-install
   `
     .dependencies(nodejs())
-    .outputScaffold(options.npmPackage)
+    .outputScaffold(options.source)
     .unsafe({ networking: true })
     .toDirectory();
 }

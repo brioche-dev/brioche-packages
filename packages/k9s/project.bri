@@ -7,7 +7,7 @@ export const project = {
 };
 const gitCommit = "1440643e8d1a101a38d9be1933131ddf5c863940";
 
-const goModule = std
+const source = std
   .download({
     url: `https://github.com/derailed/k9s/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
@@ -19,7 +19,7 @@ const goModule = std
 
 export default () => {
   return goInstall({
-    goModule,
+    source,
     buildParams: {
       ldflags: [
         "-s",

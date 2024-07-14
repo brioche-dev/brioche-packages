@@ -7,7 +7,7 @@ export const project = {
   version: "0.95.0",
 };
 
-const crate = std
+const source = std
   .download({
     url: `https://github.com/nushell/nushell/archive/refs/tags/${project.version}.tar.gz`,
     hash: std.sha256Hash(
@@ -19,7 +19,7 @@ const crate = std
 
 export default () => {
   return cargoBuild({
-    crate,
+    source,
     runnable: "bin/nu",
     dependencies: [openssl()],
   });

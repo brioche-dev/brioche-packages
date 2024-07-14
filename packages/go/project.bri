@@ -55,7 +55,7 @@ interface GoBuildParameters {
 }
 
 interface GoBuildOptions {
-  goModule: std.AsyncRecipe<std.Directory>;
+  source: std.AsyncRecipe<std.Directory>;
   env?: Record<string, std.ProcessTemplateLike>;
   buildParams?: GoBuildParameters;
   path?: string;
@@ -68,7 +68,7 @@ interface GoBuildOptions {
  *
  * ## Options
  *
- * - `goModule`: The Go module to build. Should include `go.mod`, as well as
+ * - `source`: The Go module to build. Should include `go.mod`, as well as
  *   `go.sum` if external dependencies are needed.
  * - `buildParams`: Optional build parameters:
  *   - `generate`: Run `go generate` before building.
@@ -87,7 +87,7 @@ interface GoBuildOptions {
  *
  * export default function {
  *   return goInstall({
- *     goModule: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *     source: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
  *     env: {
  *       CGO_ENABLED: "0",
  *     },
@@ -109,7 +109,7 @@ interface GoBuildOptions {
 export async function goInstall(
   options: GoBuildOptions,
 ): Promise<std.Recipe<std.Directory>> {
-  const modules = goModDownload(options.goModule);
+  const modules = goModDownload(options.source);
 
   let buildResult = std.runBash`
     # Run generate if requested
@@ -133,7 +133,7 @@ export async function goInstall(
 
     go install "\${goargs[@]}" "$package_path"
   `
-    .workDir(options.goModule)
+    .workDir(options.source)
     .dependencies(go())
     .env({
       GOMODCACHE: modules,

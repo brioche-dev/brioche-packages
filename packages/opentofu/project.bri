@@ -6,7 +6,7 @@ export const project = {
   version: "1.7.3",
 };
 
-const goModule = std
+const source = std
   .download({
     url: `https://github.com/opentofu/opentofu/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
@@ -18,7 +18,7 @@ const goModule = std
 
 export default () => {
   return goInstall({
-    goModule,
+    source,
     path: "./cmd/tofu",
     buildParams: {
       ldflags: ["-s", "-w", `-X github.com/opentofu/opentofu/version.dev=no`],
