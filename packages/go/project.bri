@@ -83,10 +83,10 @@ interface GoBuildOptions {
  * ## Example
  *
  * ```typescript
- * import { goInstall } from "go";
+ * import { goBuild } from "go";
  *
  * export default function {
- *   return goInstall({
+ *   return goBuild({
  *     source: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
  *     env: {
  *       CGO_ENABLED: "0",
@@ -106,7 +106,7 @@ interface GoBuildOptions {
  * };
  * ```
  */
-export async function goInstall(
+export async function goBuild(
   options: GoBuildOptions,
 ): Promise<std.Recipe<std.Directory>> {
   const modules = goModDownload(options.source);

@@ -1,5 +1,5 @@
 import * as std from "std";
-import { goInstall } from "go";
+import { goBuild } from "go";
 
 export const project = {
   name: "opentofu",
@@ -17,7 +17,7 @@ const source = std
   .peel();
 
 export default () => {
-  return goInstall({
+  return goBuild({
     source,
     path: "./cmd/tofu",
     buildParams: {
