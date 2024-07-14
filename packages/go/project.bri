@@ -55,7 +55,8 @@ interface GoBuildParameters {
 }
 
 interface GoBuildOptions {
-  goModule: std.AsyncRecipe<std.Directory>;
+  source: std.AsyncRecipe<std.Directory>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   buildParams?: GoBuildParameters;
   path?: string;
@@ -68,13 +69,14 @@ interface GoBuildOptions {
  *
  * ## Options
  *
- * - `goModule`: The Go module to build. Should include `go.mod`, as well as
+ * - `source`: The Go module to build. Should include `go.mod`, as well as
  *   `go.sum` if external dependencies are needed.
  * - `buildParams`: Optional build parameters:
  *   - `generate`: Run `go generate` before building.
  *   - `ldflags`: An array of ldflags to pass to the `go install` command.
  *   - `trimpath`: Set the `-trimpath` flag.
  *   - `mod`: Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
+ * - `dependencies`: Optionally add additional dependencies to the build.
  * - `env`: Optionally set environment variables for the build.
  * - `path`: Optionally set the package path to build (e.g. `./cmd/foo`).
  * - `runnable`: Optionally set a path to the binary to run
@@ -83,11 +85,13 @@ interface GoBuildOptions {
  * ## Example
  *
  * ```typescript
- * import { goInstall } from "go";
+ * import { goBuild } from "go";
+ * import openssl from "openssl";
  *
  * export default function {
- *   return goInstall({
- *     goModule: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *   return goBuild({
+ *     source: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *     dependencies: [openssl()],
  *     env: {
  *       CGO_ENABLED: "0",
  *     },
@@ -106,10 +110,10 @@ interface GoBuildOptions {
  * };
  * ```
  */
-export async function goInstall(
+export async function goBuild(
   options: GoBuildOptions,
 ): Promise<std.Recipe<std.Directory>> {
-  const modules = goModDownload(options.goModule);
+  const modules = goModDownload(options.source);
 
   let buildResult = std.runBash`
     # Run generate if requested
@@ -133,8 +137,8 @@ export async function goInstall(
 
     go install "\${goargs[@]}" "$package_path"
   `
-    .workDir(options.goModule)
-    .dependencies(go())
+    .workDir(options.source)
+    .dependencies(go(), ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,

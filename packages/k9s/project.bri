@@ -1,5 +1,5 @@
 import * as std from "std";
-import { goInstall } from "go";
+import { goBuild } from "go";
 
 export const project = {
   name: "k9s",
@@ -7,7 +7,7 @@ export const project = {
 };
 const gitCommit = "1440643e8d1a101a38d9be1933131ddf5c863940";
 
-const goModule = std
+const source = std
   .download({
     url: `https://github.com/derailed/k9s/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
@@ -18,8 +18,8 @@ const goModule = std
   .peel();
 
 export default () => {
-  return goInstall({
-    goModule,
+  return goBuild({
+    source,
     buildParams: {
       ldflags: [
         "-s",

@@ -113,7 +113,7 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
 export default rust;
 
 export interface CargoBuildOptions {
-  crate: std.AsyncRecipe<std.Directory>;
+  source: std.AsyncRecipe<std.Directory>;
   path?: string;
   runnable?: string;
   dependencies?: std.AsyncRecipe<std.Directory>[];
@@ -126,7 +126,7 @@ export interface CargoBuildOptions {
  *
  * ## Options
  *
- * - `crate`: The crate to build.
+ * - `source`: The crate to build.
  * - `path`: Optionally set a subpath to the crate to build. This is useful
  *   when building a crate within a workspace.
  * - `runnable`: Optionally set a path to the binary to run
@@ -142,7 +142,7 @@ export interface CargoBuildOptions {
  *
  * export default () => {
  *   return cargoBuild({
- *     crate: Brioche.glob("src", "Cargo.*"),
+ *     source: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",
  *     dependencies: [openssl()],
  *     env: {
@@ -155,7 +155,7 @@ export interface CargoBuildOptions {
 export function cargoBuild(options: CargoBuildOptions) {
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
-  const skeletonCrate = createSkeletonCrate(options.crate);
+  const skeletonCrate = createSkeletonCrate(options.source);
 
   // Vendor the dependencies with network access and save the Cargo config.toml
   // file, so the vendored dependencies are used
@@ -181,7 +181,7 @@ export function cargoBuild(options: CargoBuildOptions) {
     .toDirectory();
 
   // Combine the original crate with the vendored dependencies
-  let crate = std.merge(vendoredSkeletonCrate, options.crate);
+  let crate = std.merge(vendoredSkeletonCrate, options.source);
 
   // Copy the updated Cargo config.toml file into the crate
   crate = crate.insert(

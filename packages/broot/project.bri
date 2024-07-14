@@ -6,7 +6,7 @@ export const project = {
   version: "1.39.0",
 };
 
-const crate = std
+const source = std
   .download({
     url: `https://github.com/Canop/broot/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
@@ -18,7 +18,7 @@ const crate = std
 
 export default () => {
   return cargoBuild({
-    crate,
+    source,
     runnable: "bin/broot",
   });
 };
