@@ -18,7 +18,7 @@ const source = std
   .unarchive("tar", "gzip")
   .peel();
 
-export default (): std.Recipe<std.Directory> => {
+export default function git(): std.Recipe<std.Directory> {
   let git = std.runBash`
     make prefix=/ all
     make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
@@ -34,4 +34,46 @@ export default (): std.Recipe<std.Directory> => {
   git = std.withRunnableLink(git, "bin/git");
 
   return git;
-};
+}
+
+interface GitCheckoutOptions {
+  repository: string;
+  commit: string;
+}
+
+/**
+ * Checkout a git repository at a specific commit. The specified commit will
+ * be cloned without any history.
+ *
+ * ## Options
+ *
+ * - `repository`: The URL of the git repository to checkout.
+ * - `commit`: The full commit hash to checkout.
+ */
+export function gitCheckout(
+  options: GitCheckoutOptions,
+): std.Recipe<std.Directory> {
+  // Validate that the commit is a hash
+  std.assert(
+    /^[0-9a-f]{40}$/.test(options.commit),
+    `Invalid git commit hash: ${options.commit}`,
+  );
+
+  // Clone and fetch only the specified commit. See this article:
+  // https://blog.hartwork.org/posts/clone-arbitrary-single-git-commit/
+  return std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    git -c init.defaultBranch=main init
+    git remote add origin "$repository"
+    git fetch --depth 1 origin "$commit"
+    git -c advice.detachedHead=false checkout FETCH_HEAD
+  `
+    .dependencies(git(), caCertificates())
+    .env({
+      repository: options.repository,
+      commit: options.commit,
+    })
+    .outputScaffold(std.directory())
+    .unsafe({ networking: true })
+    .toDirectory();
+}
