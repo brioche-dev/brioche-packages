@@ -15,6 +15,9 @@ export default () => {
   return cargoBuild({
     source,
     dependencies: [git()],
+    env: {
+      GITUI_RELEASE: "1",
+    },
     runnable: "bin/gitui",
   });
 };
