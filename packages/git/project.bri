@@ -1,6 +1,7 @@
 import * as std from "std";
 import openssl from "openssl";
 import curl from "curl";
+import caCertificates from "ca_certificates";
 
 export const project = {
   name: "git",
@@ -18,7 +19,7 @@ const source = std
   .peel();
 
 export default (): std.Recipe<std.Directory> => {
-  const git = std.runBash`
+  let git = std.runBash`
     make prefix=/ all
     make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -26,5 +27,11 @@ export default (): std.Recipe<std.Directory> => {
     .dependencies(std.toolchain(), openssl(), curl())
     .toDirectory();
 
-  return std.withRunnableLink(git, "bin/git");
+  git = std.setEnv(git, {
+    GIT_EXEC_PATH: { path: "libexec/git-core" },
+    GIT_TEMPLATE_DIR: { path: "share/git-core/templates" },
+  });
+  git = std.withRunnableLink(git, "bin/git");
+
+  return git;
 };
