@@ -6,7 +6,7 @@ import { tools } from "/toolchain";
  * Bash script should create the path `$BRIOCHE_OUTPUT`, which will be used
  * as the output of the recipe.
  *
- * This funtion returns `std.Process`, which can be used for passing in
+ * This function returns `std.Process`, which can be used for passing in
  * extra dependencies or environment variables using `.dependencies()`
  * or `.env()`, respectively, along with other process options.
  *
