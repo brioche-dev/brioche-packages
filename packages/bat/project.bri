@@ -16,9 +16,23 @@ const source = std
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function bat(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/bat",
   });
-};
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(bat --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(bat());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `bat ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
