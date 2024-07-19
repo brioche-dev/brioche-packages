@@ -3,14 +3,14 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "dust",
-  version: "1.0.0",
+  version: "1.1.1",
 };
 
 const source = std
   .download({
     url: `https://github.com/bootandy/dust/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "34b72116ab6db9bdb97bc1e49dadf392a1619838204b44b0a4695539d54ffbe8",
+      "98cae3e4b32514e51fcc1ed07fdbe6929d4b80942925348cc6e57b308d9c4cb0",
     ),
   })
   .unarchive("tar", "gzip")
