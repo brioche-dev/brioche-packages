@@ -1,5 +1,6 @@
 import * as std from "std";
 import openssl from "openssl";
+import curl from "curl";
 
 export const project = {
   name: "cmake",
@@ -18,15 +19,23 @@ const source = std
 
 export default (): std.Recipe<std.Directory> => {
   const cmake = std.runBash`
-    ./bootstrap --prefix=/
+    ./bootstrap \\
+      --prefix=/ \\
+      --system-curl \\
+      -- \\
+      -DCMAKE_BUILD_TYPE=Release \\
+      -DCMAKE_C_BYTE_ORDER=LITTLE_ENDIAN \\
+      -DCMAKE_CXX_BYTE_ORDER=LITTLE_ENDIAN
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .env({
       OPENSSL_ROOT_DIR: std.tpl`${openssl()}`,
+      ZLIB_ROOT: std.tpl`${std.toolchain()}`,
+      CURL_ROOT: std.tpl`${curl()}`,
     })
-    .dependencies(std.toolchain(), openssl())
+    .dependencies(std.toolchain(), openssl(), curl())
     .toDirectory();
 
   return std.withRunnableLink(cmake, "bin/cmake");
