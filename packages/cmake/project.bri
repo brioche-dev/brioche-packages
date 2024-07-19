@@ -1,16 +1,16 @@
 import * as std from "std";
-// import openssl from "openssl";
+import openssl from "openssl";
 
 export const project = {
   name: "cmake",
-  version: "3.30.0",
+  version: "3.30.1",
 };
 
 const source = std
   .download({
     url: `https://gitlab.kitware.com/${project.name}/${project.name}/-/archive/v${project.version}/cmake-v${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "a8459074511c56f0022c45c959a7dca3c4e02d8a40137344608a4f6527c2a793",
+      "0c01e4b11e2c548cbf259dadb0f217194774cff682a65a400012e016e9fa9ef8",
     ),
   })
   .unarchive("tar", "gzip")
@@ -23,7 +23,10 @@ export default (): std.Recipe<std.Directory> => {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .env({
+      OPENSSL_ROOT_DIR: std.tpl`${openssl()}`,
+    })
+    .dependencies(std.toolchain(), openssl())
     .toDirectory();
 
   return std.withRunnableLink(cmake, "bin/cmake");
