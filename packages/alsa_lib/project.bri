@@ -1,0 +1,32 @@
+import * as std from "std";
+
+export const project = {
+  name: "alsa-lib",
+  version: "1.2.12",
+};
+
+const source = std
+  .download({
+    url: `https://www.alsa-project.org/files/pub/lib/alsa-lib-${project.version}.tar.bz2`,
+    hash: std.sha256Hash(
+      "4868cd908627279da5a634f468701625be8cc251d84262c7e5b6a218391ad0d2",
+    ),
+  })
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default (): std.Recipe<std.Directory> => {
+  const alsaLib = std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.setEnv(alsaLib, {
+    CPATH: { path: "include" },
+    LIBRARY_PATH: { path: "lib" },
+    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+  });
+};
