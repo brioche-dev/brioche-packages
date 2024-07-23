@@ -6,6 +6,8 @@ export const project = {
   version: "0.5.3",
 };
 
+// HACK: Workaround for issue unarchiving this tarfile. See:
+// https://github.com/brioche-dev/brioche/issues/103
 const sourceTar = std.download({
   url: `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
   hash: std.sha256Hash(
