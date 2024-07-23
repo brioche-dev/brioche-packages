@@ -1,7 +1,7 @@
 import * as std from "std";
 
 export const project = {
-  name: "alsa-lib",
+  name: "alsa_lib",
   version: "1.2.12",
 };
 
