@@ -17,7 +17,11 @@ export function autopack(
   recipe: std.AsyncRecipe<std.Directory>,
   options: AutopackOptions,
 ): std.Recipe<std.Directory> {
-  const { config, variables } = buildConfig(options);
+  const { config, variables } = buildAutopackConfig({
+    options,
+    defaultLinkDependencies: [toolchain()],
+    runtimeUtils: runtimeUtils(),
+  });
 
   const variableArgs: std.ProcessTemplateLike[] = Object.entries(
     variables,
@@ -179,7 +183,16 @@ type EnvValueConfig =
 
 type EnvValue = std.ProcessTemplateLike | { relativePath: string };
 
-function buildConfig(options: AutopackOptions): AutopackConfigResult {
+interface BuildConfigOptions {
+  options: AutopackOptions;
+  defaultLinkDependencies: std.AsyncRecipe[];
+  runtimeUtils: std.Recipe<std.Directory>;
+}
+
+export function buildAutopackConfig(
+  buildConfigOptions: BuildConfigOptions,
+): AutopackConfigResult {
+  const { options, defaultLinkDependencies, runtimeUtils } = buildConfigOptions;
   const variables: Record<string, AutopackConfigVariable> = {};
 
   let variableIndex = 0;
@@ -226,11 +239,11 @@ function buildConfig(options: AutopackOptions): AutopackConfigResult {
 
   const dynamicBinaryPackedExecutable = addVar({
     name: "dynamicBinaryPackedExecutable",
-    value: runtimeUtils().get("bin/brioche-packed-exec"),
+    value: runtimeUtils.get("bin/brioche-packed-exec"),
   });
   const scriptPackedExecutable = addVar({
     name: "scriptPackedExecutable",
-    value: runtimeUtils().get("bin/brioche-packed-plain-exec"),
+    value: runtimeUtils.get("bin/brioche-packed-plain-exec"),
   });
 
   const dynamicBinary =
@@ -299,7 +312,7 @@ function buildConfig(options: AutopackOptions): AutopackConfigResult {
 
   const linkDependencies = [
     ...(options.linkDependencies ?? []),
-    toolchain(),
+    ...defaultLinkDependencies,
   ].map((dep) => addVar({ value: dep }));
 
   const config = {
