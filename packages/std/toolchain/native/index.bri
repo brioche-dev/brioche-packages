@@ -67,7 +67,6 @@ const toolPackages = [
   zstd(),
   file(),
   bc(),
-  binutils(),
   sed(),
   grep(),
   bash(),
@@ -88,6 +87,7 @@ const toolchainOnlyPackages = [
   readline(),
   m4(),
   flex(),
+  binutils(),
   gmp(),
   mpfr(),
   mpc(),
@@ -127,19 +127,9 @@ const toolchainOnlyPackages = [
 export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   let tools = std.merge(...toolPackages);
 
-  // Set env vars when used as a dependency. These are also used
-  // when autopacking
-  tools = setEnv(tools, {
-    CPATH: { path: "include" },
-    LIBRARY_PATH: { path: "lib" },
-    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
-    MAGIC: { path: "share/misc/magic.mgc" },
-  });
-
   // Pack binaries and scripts
   tools = autopack(tools, {
     globs: ["bin/**"],
-    selfDependency: true,
     linkDependencies: [toolchain()],
     dynamicBinaryConfig: {
       enabled: true,
@@ -153,6 +143,21 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     repackConfig: {
       enabled: true,
     },
+  });
+
+  // Only take the binaries (plus the magic file)
+  tools = std.directory({
+    bin: tools.get("bin"),
+    share: std.directory({
+      misc: std.directory({
+        "magic.mgc": tools.get("share/misc/magic.mgc"),
+      }),
+    }),
+  });
+
+  // Set `$MAGIC` env var for `file` when used as a dependency
+  tools = setEnv(tools, {
+    MAGIC: { path: "share/misc/magic.mgc" },
   });
 
   return std.sync(tools);
