@@ -111,17 +111,23 @@ export function npmInstallGlobal(
   options: NpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
   const packageDir = std.runBash`
-    [ $(npm view "${options.packageName}@${options.version}" "dist.shasum" | { IFS= read -r line1; IFS= read -r line2; [ -z "$line2" ] && echo 1 || echo 0; }) -eq 1 ] && echo "The NPM package (${options.packageName}) is an exact version (${options.version})" || (echo "The NPM package (${options.packageName}) is not an exact version (${options.version}) please ensure the version is more specific." && exit 1)
-    npm install --prefix "$BRIOCHE_OUTPUT" ${options.packageName}@${options.version}
+    if [ "$(npm view "$PKG_NAME@$PKG_VERSION" "version")" != "$PKG_VERSION" ]; then
+      echo "The NPM package ($PKG_NAME) is not an exact version ($PKG_VERSION), please ensure the version is more specific."
+      exit 1
+    fi
+
+    npm install --prefix "$BRIOCHE_OUTPUT" "$PKG_NAME@$PKG_VERSION"
   `
     .dependencies(nodejs())
     .outputScaffold(std.directory({}))
+    .env({
+      PKG_VERSION: options.version,
+      PKG_NAME: options.packageName,
+    })
     .unsafe({ networking: true })
     .toDirectory();
 
   return std.castToDirectory(
-    std
-      .castToDirectory(packageDir.get("node_modules"))
-      .get(options.packageName),
+    packageDir.get(`node_modules/${options.packageName}`),
   );
 }
