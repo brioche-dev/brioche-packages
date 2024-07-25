@@ -1,10 +1,15 @@
 import * as std from "std";
 import { npmInstallGlobal } from "nodejs";
 
+export const project = {
+  name: "aws_cdk",
+  version: "2.150.0",
+};
+
 export default () => {
   const npmPackage = npmInstallGlobal({
     packageName: "aws-cdk",
-    version: "2.150.0",
+    version: project.version,
   });
 
   return std.withRunnableLink(npmPackage, "bin/cdk");
