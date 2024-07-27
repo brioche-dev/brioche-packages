@@ -3,9 +3,9 @@ import * as std from "/core";
 export function runtimeUtils(): std.Recipe<std.Directory> {
   return std
     .download({
-      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fad8671ca1ea5c14ebcbc31f373bbc443a9b5719/x86_64-linux/brioche-runtime-utils.tar.zstd",
+      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/47c4991e9f2d965e5604f8e4a6df93de17db8f77/x86_64-linux/brioche-runtime-utils.tar.zstd",
       hash: std.sha256Hash(
-        "7f1539e866ff937c27008da0f4ca6618d48165548df99edfa7b137abcfb09a30",
+        "a7d95992d56a6fa7e0a138ed54b5855ec4bdead94332eda41d0641d95075c7c7",
       ),
     })
     .unarchive("tar", "zstd");
