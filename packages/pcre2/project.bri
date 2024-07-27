@@ -16,7 +16,7 @@ const source = std
   .peel();
 
 export default function (): std.Recipe<std.Directory> {
-  let pcre2 = std.runBash`
+  const pcre2 = std.runBash`
     # Some of the build scripts hardcode a few paths, so we need to
     # create symlinks and set _lt_pkgdatadir to point to the correct
     # location.
