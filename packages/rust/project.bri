@@ -112,12 +112,17 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
 }
 export default rust;
 
+interface CargoBuildParameters {
+  features?: string[];
+}
+
 export interface CargoBuildOptions {
   source: std.AsyncRecipe<std.Directory>;
   path?: string;
   runnable?: string;
   dependencies?: std.AsyncRecipe<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
+  buildParams?: CargoBuildParameters;
 }
 
 /**
@@ -133,6 +138,8 @@ export interface CargoBuildOptions {
  *   by default (e.g. `bin/foo`).
  * - `dependencies`: Optionally add additional dependencies to the build.
  * - `env`: Optionally set environment variables for the build.
+ * - `buildParams`: Optional build parameters:
+ *   - `features`: An array of features to enable.
  *
  * ## Example
  *
@@ -147,6 +154,9 @@ export interface CargoBuildOptions {
  *     dependencies: [openssl()],
  *     env: {
  *       CARGO_LOG: "debug",
+ *     },
+ *     buildParams: {
+ *      features: ["foo", "bar"],
  *     },
  *   });
  * };
@@ -195,13 +205,17 @@ export function cargoBuild(options: CargoBuildOptions) {
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
-    cargo install --path "$crate_path" --frozen
+    cargo install --path "$crate_path" $features --frozen
   `
     .dependencies(rust(), std.toolchain(), ...(options.dependencies ?? []))
     .env({
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
       crate_path: options.path ?? ".",
+      features:
+        options.buildParams?.features != null
+          ? featuresWrapper(options.buildParams.features)
+          : "",
       ...options.env,
     })
     .workDir(crate)
@@ -251,4 +265,15 @@ function cargoChef(): std.Recipe<std.Directory> {
   return std.directory({
     bin: pkg.unarchive("tar", "gzip"),
   });
+}
+
+/**
+ * Wrapper function to generate a string of features for a Cargo build.
+ *
+ * @param features An array of features.
+ * @returns A string of features for a Cargo build.
+ */
+function featuresWrapper(features: string[]): string {
+  // From ["feature1", "feature2", "feature3"] to '--features feature1,feature2,feature3'
+  return `--features ${features.join(",")}`;
 }
