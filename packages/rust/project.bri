@@ -212,9 +212,10 @@ export function cargoBuild(options: CargoBuildOptions) {
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
       crate_path: options.path ?? ".",
-      features: options.buildParams?.features
-        ? featuresWrapper(options.buildParams.features)
-        : "",
+      features:
+        options.buildParams?.features != null
+          ? featuresWrapper(options.buildParams.features)
+          : "",
       ...options.env,
     })
     .workDir(crate)
