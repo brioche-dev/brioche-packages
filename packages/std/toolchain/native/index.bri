@@ -263,6 +263,7 @@ export const toolchain = std.memo(
     });
 
     // Pack all other scripts
+    // TODO: Use globs for Perl 5 paths
     toolchain = autopack(toolchain, {
       globs: ["bin/**"],
       selfDependency: true,
@@ -274,6 +275,21 @@ export const toolchain = std.memo(
       },
       scriptConfig: {
         enabled: true,
+        env: {
+          PERL5LIB: {
+            type: "append",
+            value: {
+              relativePaths: [
+                "lib/perl5/site_perl/5.38.0/x86_64-linux-thread-multi",
+                "lib/perl5/site_perl/5.38.0",
+                "lib/perl5/5.38.0/x86_64-linux-thread-multi",
+                "lib/perl5/5.38.0",
+              ],
+              separator: ":",
+            },
+            separator: ":",
+          },
+        },
       },
     });
 
