@@ -181,7 +181,10 @@ type EnvValueConfig =
   | { type: "prepend"; value: EnvValue; separator: string }
   | { type: "append"; value: EnvValue; separator: string };
 
-type EnvValue = std.ProcessTemplateLike | { relativePath: string };
+type EnvValue =
+  | std.ProcessTemplateLike
+  | { relativePath: string }
+  | { relativePaths: string[]; separator: string };
 
 interface BuildConfigOptions {
   options: AutopackOptions;
@@ -212,6 +215,20 @@ export function buildAutopackConfig(
         components: [
           { type: "relative_path", path: std.bstring(value.relativePath) },
         ],
+      };
+    } else if (typeof value === "object" && "relativePaths" in value) {
+      return {
+        components: value.relativePaths.flatMap((path, i) => [
+          ...(i === 0
+            ? []
+            : [
+                {
+                  type: "literal",
+                  value: std.bstring(value.separator),
+                } satisfies EnvValueTemplateValueComponent,
+              ]),
+          { type: "relative_path", path: std.bstring(path) },
+        ]),
       };
     } else {
       const processTemplate = std.processTemplate(value);
