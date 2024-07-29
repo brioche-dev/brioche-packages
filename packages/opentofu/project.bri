@@ -10,7 +10,7 @@ const source = std
   .download({
     url: `https://github.com/opentofu/opentofu/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "c97c470f3afbd30c67a141bb973ad4bcb458d3cd7a6bbe3aad1e99b4fbc026a8",
+      "9e3f622741a0df00a10fcd42653260742c966936b252d3171d1ad952de6e40e0",
     ),
   })
   .unarchive("tar", "gzip")
