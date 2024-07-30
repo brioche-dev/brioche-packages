@@ -1,0 +1,340 @@
+import * as std from "/core";
+
+type ArgValue = std.ProcessTemplateLike | { type: "rest" };
+
+export type EnvValueConfig =
+  | { type: "clear" }
+  | { type: "inherit" }
+  | { type: "set"; value: EnvValue }
+  | { type: "fallback"; value: EnvValue }
+  | { type: "prepend"; value: EnvValue; separator: string }
+  | { type: "append"; value: EnvValue; separator: string };
+
+type EnvValue =
+  | std.ProcessTemplateLike
+  | { relativePath: string }
+  | { relativePaths: string[]; separator: string };
+
+interface PackRunnableOptions {
+  command: std.ProcessTemplateLike;
+  args?: ArgValue[];
+  env?: Record<string, EnvValueConfig>;
+  clearEnv?: boolean;
+  source: std.ProcessTemplate | { relativePath: string };
+}
+
+export function buildPackRunnableConfig(
+  options: PackRunnableOptions,
+): PackRunnableConfigResult {
+  const resources: Record<string, std.ProcessTemplateLike> = {};
+
+  let resourceIndex = 0;
+  const addResource = (resource: {
+    name?: string;
+    value: std.ProcessTemplateLike;
+  }): PackRunnableValueTemplateResourceComponent => {
+    const name = resource.name ?? `var${resourceIndex++}`;
+    std.assert(!(name in resources), `duplicate resource name ${name}`);
+    resources[name] = resource.value;
+    return { type: "resource", name };
+  };
+
+  const getProcessTemplateComponents = (
+    value: std.ProcessTemplate,
+  ): std.ProcessTemplateLike[] => {
+    return value.components.flatMap((component) => {
+      if (
+        typeof component === "object" &&
+        "componentType" in component &&
+        component.componentType === "processTemplate"
+      ) {
+        return getProcessTemplateComponents(component);
+      } else {
+        return [component];
+      }
+    });
+  };
+
+  const buildTemplate = (
+    value: std.ProcessTemplateLike,
+  ): PackRunnableValueTemplate => {
+    const processTemplate = std.processTemplate(value);
+    const processTemplateComponents =
+      getProcessTemplateComponents(processTemplate);
+    return {
+      components: processTemplateComponents.flatMap(
+        (component): PackRunnableValueTemplateComponent[] => {
+          if (component == null || component === "") {
+            return [];
+          } else if (typeof component === "string") {
+            return [{ type: "literal", value: std.bstring(component) }];
+          } else if ("componentType" in component) {
+            throw new Error(
+              `cannot use component type in env value: ${component.componentType}`,
+            );
+          } else if (component instanceof Promise) {
+            throw new Error("cannot use promise in env value");
+          } else {
+            return [addResource({ value: component })];
+          }
+        },
+      ),
+    };
+  };
+
+  const isRestArg = (value: ArgValue): value is { type: "rest" } => {
+    return typeof value === "object" && "type" in value;
+  };
+
+  const buildArgTemplate = (value: ArgValue): PackRunnableArgValue => {
+    if (isRestArg(value)) {
+      return { type: "rest" };
+    } else {
+      return { type: "arg", value: buildTemplate(value) };
+    }
+  };
+
+  const isRelativePath = (
+    value: EnvValue,
+  ): value is { relativePath: string } => {
+    return typeof value === "object" && "relativePath" in value;
+  };
+
+  const isRelativePaths = (
+    value: EnvValue,
+  ): value is { relativePaths: string[]; separator: string } => {
+    return typeof value === "object" && "relativePaths" in value;
+  };
+
+  const buildEnvValueTemplate = (
+    value: EnvValue,
+  ): PackRunnableValueTemplate => {
+    if (isRelativePath(value)) {
+      return {
+        components: [
+          { type: "relative_path", path: std.bstring(value.relativePath) },
+        ],
+      };
+    } else if (isRelativePaths(value)) {
+      return {
+        components: value.relativePaths.flatMap((path, index) => [
+          { type: "relative_path", path: std.bstring(path) },
+          {
+            type: "literal",
+            value: std.bstring(
+              index === value.relativePaths.length - 1 ? "" : value.separator,
+            ),
+          },
+        ]),
+      };
+    } else {
+      return buildTemplate(value);
+    }
+  };
+
+  const buildEnvTemplate = (value: EnvValueConfig): PackRunnableEnvValue => {
+    switch (value.type) {
+      case "clear":
+        return { type: "clear" };
+      case "inherit":
+        return { type: "inherit" };
+      case "set":
+        return { type: "set", value: buildEnvValueTemplate(value.value) };
+      case "fallback":
+        return { type: "set", value: buildEnvValueTemplate(value.value) };
+      case "append":
+        return {
+          type: "append",
+          value: buildEnvValueTemplate(value.value),
+          separator: std.bstring(value.separator),
+        };
+      case "prepend":
+        return {
+          type: "prepend",
+          value: buildEnvValueTemplate(value.value),
+          separator: std.bstring(value.separator),
+        };
+      default:
+        return std.unreachable(value);
+    }
+  };
+
+  const buildSource = (
+    value: std.ProcessTemplate | { relativePath: string },
+  ): PackRunnableSource => {
+    if ("relativePath" in value) {
+      return {
+        path: {
+          type: "relative_path",
+          path: std.bstring(value.relativePath),
+        },
+      };
+    } else {
+      return {
+        path: addResource({ name: "source", value }),
+      };
+    }
+  };
+
+  const config = {
+    command: buildTemplate(options.command),
+    args: (options.args ?? []).map((arg) => buildArgTemplate(arg)),
+    env: Object.fromEntries(
+      Object.entries(options.env ?? {}).map(([key, value]) => [
+        key,
+        buildEnvTemplate(value),
+      ]),
+    ),
+    clearEnv: options.clearEnv ?? false,
+    source: buildSource(options.source),
+  } satisfies PackRunnableTemplate;
+
+  return {
+    config,
+    resources,
+  };
+}
+
+// const dynamicBinaryPackedExecutable = addVar({
+//   name: "dynamicBinaryPackedExecutable",
+//   value: runtimeUtils.get("bin/brioche-packed-exec"),
+// });
+// const scriptPackedExecutable = addVar({
+//   name: "scriptPackedExecutable",
+//   value: runtimeUtils.get("bin/brioche-packed-plain-exec"),
+// });
+
+// const dynamicBinary =
+//   options.dynamicBinaryConfig?.enabled !== false
+//     ? ({
+//         packedExecutable: dynamicBinaryPackedExecutable,
+//         extraLibraries: options.dynamicBinaryConfig?.extraLibraries,
+//         extraRuntimeLibraryPaths:
+//           options.dynamicBinaryConfig?.extraRuntimeLibraryPaths,
+//         libraryPaths: options.dynamicBinaryConfig?.libraryPaths?.map((path) =>
+//           addVar({ value: path }),
+//         ),
+//         skipLibraries: options.dynamicBinaryConfig?.skipLibraries,
+//         skipUnknownLibraries: options.dynamicBinaryConfig?.skipUnknownLibraries,
+//       } satisfies DynamicBinaryConfigTemplate)
+//     : undefined;
+// const sharedLibrary =
+//   options.sharedLibraryConfig?.enabled !== false
+//     ? ({
+//         libraryPaths: options.sharedLibraryConfig?.libraryPaths?.map((path) =>
+//           addVar({ value: path }),
+//         ),
+//         skipLibraries: options.sharedLibraryConfig?.skipLibraries,
+//         skipUnknownLibraries: options.sharedLibraryConfig?.skipUnknownLibraries,
+//       } satisfies SharedLibraryConfigTemplate)
+//     : undefined;
+// const script =
+//   options.scriptConfig?.enabled !== false
+//     ? ({
+//         packedExecutable: scriptPackedExecutable,
+//         env: Object.fromEntries(
+//           Object.entries(options.scriptConfig?.env ?? {}).map(
+//             ([key, value]): [string, EnvValueTemplate] => {
+//               switch (value.type) {
+//                 case "clear":
+//                 case "inherit":
+//                   return [key, { type: value.type }];
+//                 case "set":
+//                 case "fallback":
+//                   return [
+//                     key,
+//                     { type: value.type, value: buildEnvValue(value.value) },
+//                   ];
+//                 case "prepend":
+//                 case "append":
+//                   return [
+//                     key,
+//                     {
+//                       type: value.type,
+//                       value: buildEnvValue(value.value),
+//                       separator: std.bstring(value.separator),
+//                     },
+//                   ];
+//               }
+//             },
+//           ),
+//         ),
+//       } satisfies ScriptConfigTemplate)
+//     : undefined;
+// const repack =
+//   options.repackConfig?.enabled === true
+//     ? ({} satisfies RepackConfigTemplate)
+//     : undefined;
+
+// const linkDependencies = [
+//   ...(options.linkDependencies ?? []),
+//   ...defaultLinkDependencies,
+// ].map((dep) => addVar({ value: dep }));
+
+// const config = {
+//   paths: options.paths,
+//   globs: options.globs,
+//   linkDependencies,
+//   selfDependency: options.selfDependency,
+//   dynamicBinary,
+//   sharedLibrary,
+//   script,
+//   repack,
+// } satisfies PackRunnableConfigTemplate;
+// return { config, variables };
+// }
+
+interface PackRunnableConfigResult {
+  config: PackRunnableTemplate;
+  resources: Record<string, std.ProcessTemplateLike>;
+}
+
+interface PackRunnableTemplate {
+  command: PackRunnableValueTemplate;
+  args: PackRunnableArgValue[];
+  env: Record<string, PackRunnableEnvValue>;
+  clearEnv: boolean;
+  source: PackRunnableSource;
+}
+
+interface PackRunnableValueTemplate {
+  components: PackRunnableValueTemplateComponent[];
+}
+
+type PackRunnableValueTemplateComponent =
+  | { type: "literal"; value: std.BString }
+  | { type: "relative_path"; path: std.BString }
+  | PackRunnableValueTemplateResourceComponent;
+
+type PackRunnableValueTemplateResourceComponent = {
+  type: "resource";
+  name: string;
+};
+
+type PackRunnableArgValue =
+  | { type: "arg"; value: PackRunnableValueTemplate }
+  | { type: "rest" };
+
+type PackRunnableEnvValue =
+  | { type: "clear" }
+  | { type: "inherit" }
+  | { type: "set"; value: PackRunnableValueTemplate }
+  | { type: "fallback"; value: PackRunnableValueTemplate }
+  | {
+      type: "prepend";
+      value: PackRunnableValueTemplate;
+      separator: std.BString;
+    }
+  | {
+      type: "append";
+      value: PackRunnableValueTemplate;
+      separator: std.BString;
+    };
+
+interface PackRunnableSource {
+  path: PackRunnablePath;
+}
+
+type PackRunnablePath =
+  | { type: "relative_path"; path: std.BString }
+  | { type: "resource"; name: string };

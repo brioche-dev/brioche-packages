@@ -1,6 +1,10 @@
 import * as std from "/core";
 import { setEnv } from "/extra/set_env.bri";
 import { buildAutopackConfig, AutopackOptions } from "/extra/autopack.bri";
+import {
+  buildPackRunnableConfig,
+  EnvValueConfig,
+} from "/extra/pack_runnable.bri";
 import { runtimeUtils } from "/toolchain/utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
@@ -194,7 +198,7 @@ export const toolchain = std.memo(
     });
 
     // Pack scripts from autoconf
-    toolchain = autopack(toolchain, {
+    toolchain = withPackedRunnableScripts(toolchain, {
       paths: [
         "bin/autoconf",
         "bin/autoheader",
@@ -206,58 +210,130 @@ export const toolchain = std.memo(
         "bin/autoupdate-orig",
         "bin/ifnames",
       ],
-      selfDependency: true,
-      scriptConfig: {
-        env: {
-          AUTOCONF: {
-            type: "fallback",
-            value: { relativePath: "bin/autoconf" },
+      command: std.tpl`${perl()}/bin/perl`,
+      args: ["--"],
+      env: {
+        PERL5LIB: {
+          type: "append",
+          value: {
+            relativePaths: ["../share/autoconf"],
+            separator: ":",
           },
-          AUTOHEADER: {
-            type: "fallback",
-            value: { relativePath: "bin/autoheader" },
-          },
-          AUTOM4TE: {
-            type: "fallback",
-            value: { relativePath: "bin/autom4te" },
-          },
-          M4: { type: "fallback", value: { relativePath: "bin/m4" } },
-          autom4te_perllibdir: {
-            type: "fallback",
-            value: { relativePath: "share/autoconf" },
-          },
-          AC_MACRODIR: {
-            type: "fallback",
-            value: { relativePath: "share/autoconf" },
-          },
+          separator: ":",
+        },
+        AUTOCONF: {
+          type: "fallback",
+          value: { relativePath: "../bin/autoconf" },
+        },
+        AUTOHEADER: {
+          type: "fallback",
+          value: { relativePath: "../bin/autoheader" },
+        },
+        AUTOM4TE: {
+          type: "fallback",
+          value: { relativePath: "../bin/autom4te" },
+        },
+        M4: { type: "fallback", value: { relativePath: "../bin/m4" } },
+        autom4te_perllibdir: {
+          type: "fallback",
+          value: { relativePath: "../share/autoconf" },
+        },
+        AC_MACRODIR: {
+          type: "fallback",
+          value: { relativePath: "../share/autoconf" },
         },
       },
     });
+    // toolchain = autopack(toolchain, {
+    //   paths: [
+    //     "bin/autoconf",
+    //     "bin/autoheader",
+    //     "bin/autom4te",
+    //     "bin/autom4te-orig",
+    //     "bin/autoreconf",
+    //     "bin/autoscan",
+    //     "bin/autoupdate",
+    //     "bin/autoupdate-orig",
+    //     "bin/ifnames",
+    //   ],
+    //   selfDependency: true,
+    //   scriptConfig: {
+    //     env: {
+    //       PERL5LIB: {
+    //         type: "append",
+    //         value: {
+    //           relativePaths: [
+    //             "lib/perl5/site_perl/5.38.0/x86_64-linux-thread-multi",
+    //             "lib/perl5/site_perl/5.38.0",
+    //             "lib/perl5/5.38.0/x86_64-linux-thread-multi",
+    //             "lib/perl5/5.38.0",
+    //             "share/autoconf",
+    //           ],
+    //           separator: ":",
+    //         },
+    //         separator: ":",
+    //       },
+    //       AUTOCONF: {
+    //         type: "fallback",
+    //         value: { relativePath: "bin/autoconf" },
+    //       },
+    //       AUTOHEADER: {
+    //         type: "fallback",
+    //         value: { relativePath: "bin/autoheader" },
+    //       },
+    //       AUTOM4TE: {
+    //         type: "fallback",
+    //         value: { relativePath: "bin/autom4te" },
+    //       },
+    //       M4: { type: "fallback", value: { relativePath: "bin/m4" } },
+    //       autom4te_perllibdir: {
+    //         type: "fallback",
+    //         value: { relativePath: "share/autoconf" },
+    //       },
+    //       AC_MACRODIR: {
+    //         type: "fallback",
+    //         value: { relativePath: "share/autoconf" },
+    //       },
+    //     },
+    //   },
+    // });
 
     // Pack scripts from automake
-    toolchain = autopack(toolchain, {
-      globs: ["bin/automake", "bin/automake-*", "bin/aclocal", "bin/aclocal-*"],
-      selfDependency: true,
-      scriptConfig: {
-        env: {
-          AUTOMAKE_UNINSTALLED: { type: "fallback", value: "1" },
-          AUTOM4TE: {
-            type: "fallback",
-            value: { relativePath: "bin/autom4te" },
-          },
-          trailer_m4: {
-            type: "set",
-            value: { relativePath: "share/autoconf/autoconf/trailer.m4" },
-          },
-          ACLOCAL_PATH: {
-            type: "append",
-            value: { relativePath: "share/aclocal" },
+    toolchain = withPackedRunnableScripts(toolchain, {
+      paths: [
+        "bin/automake",
+        "bin/automake-1.16",
+        "bin/aclocal",
+        "bin/aclocal-1.16",
+      ],
+      command: std.tpl`${perl()}/bin/perl`,
+      args: ["--"],
+      env: {
+        PERL5LIB: {
+          type: "append",
+          value: {
+            relativePaths: ["../share/automake-1.16"],
             separator: ":",
           },
-          ACLOCAL_AUTOMAKE_DIR: {
-            type: "fallback",
-            value: { relativePath: "share/aclocal-1.16" },
-          },
+          separator: ":",
+        },
+        AUTOMAKE_UNINSTALLED: { type: "fallback", value: "1" },
+        AUTOM4TE: {
+          type: "fallback",
+          value: { relativePath: "../bin/autom4te" },
+        },
+        trailer_m4: {
+          type: "set",
+          value: { relativePath: "../share/autoconf/autoconf/trailer.m4" },
+        },
+        ACLOCAL_PATH: {
+          type: "append",
+          value: { relativePath: "../share/aclocal" },
+          separator: ":",
+        },
+        ACLOCAL_AUTOMAKE_DIR: {
+          type: "fallback",
+          value: { relativePath: "../share/aclocal-1.16" },
         },
       },
     });
@@ -365,4 +441,67 @@ function autopack(
       outputScaffold: recipe,
     })
     .toDirectory();
+}
+
+interface WithPackedScriptRunnablesOptions {
+  paths: string[];
+  command: std.ProcessTemplateLike;
+  args?: std.ProcessTemplateLike[];
+  trailingArgs?: std.ProcessTemplateLike[];
+  env?: Record<string, EnvValueConfig>;
+  clearEnv?: boolean;
+}
+
+function withPackedRunnableScripts(
+  recipe: std.AsyncRecipe<std.Directory>,
+  options: WithPackedScriptRunnablesOptions,
+): std.Recipe<std.Directory> {
+  const inputRecipe = std.recipe(recipe);
+  const packedScripts: std.Recipe<std.Directory>[] = [];
+  for (const path of options.paths) {
+    const script = std.tpl`${inputRecipe}/${path}`;
+    const args = [
+      ...(options.args ?? []),
+      script,
+      ...(options.trailingArgs ?? []),
+    ];
+    const { config, resources } = buildPackRunnableConfig({
+      command: options.command,
+      args,
+      env: options.env,
+      clearEnv: options.clearEnv,
+      source: script,
+    });
+
+    const resourceArgs: std.ProcessTemplateLike[] = Object.entries(
+      resources,
+    ).flatMap(([key, value]) => ["--resource", std.tpl`${key}=${value}`]);
+
+    const runtimeUtilsTesting = std
+      .download({
+        url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fbd5aceb3bb5322dd88fdb398103306507bd7e61/x86_64-linux/brioche-runtime-utils.tar.zstd",
+        hash: std.sha256Hash(
+          "59b8594945c4b343edd9256a14b163fe46b8213f9521eebac4f24a2ac628bd0a",
+        ),
+      })
+      .unarchive("tar", "zstd")
+      .peel(1);
+
+    const packedScript = std.process({
+      command: runtimeUtilsTesting.get("brioche-packer"),
+      args: [
+        "pack-runnable",
+        "--packed",
+        std.tpl`${runtimeUtils()}/bin/brioche-packed-plain-exec`,
+        "--output",
+        std.outputPath,
+        ...resourceArgs,
+        "--config",
+        JSON.stringify(config),
+      ],
+    });
+    packedScripts.push(std.directory({ [path]: packedScript }));
+  }
+
+  return std.merge(inputRecipe, ...packedScripts);
 }

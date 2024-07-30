@@ -20,11 +20,11 @@ export default function (): std.Recipe<std.Directory> {
     # Some of the build scripts hardcode a few paths, so we need to
     # create symlinks and set _lt_pkgdatadir to point to the correct
     # location.
-    mkdir -p "$TMPDIR"/pkgdatadir
-    ln -s "$toolchain"/share/libtool/build-aux "$TMPDIR"/pkgdatadir/build-aux
-    ln -s "$toolchain"/share/libtool "$TMPDIR"/pkgdatadir/libltdl
-    ln -s "$toolchain"/share/aclocal "$TMPDIR"/pkgdatadir/m4
-    export _lt_pkgdatadir="$TMPDIR"/pkgdatadir
+    # mkdir -p "$TMPDIR"/pkgdatadir
+    # ln -s "$toolchain"/share/libtool/build-aux "$TMPDIR"/pkgdatadir/build-aux
+    # ln -s "$toolchain"/share/libtool "$TMPDIR"/pkgdatadir/libltdl
+    # ln -s "$toolchain"/share/aclocal "$TMPDIR"/pkgdatadir/m4
+    # export _lt_pkgdatadir="$TMPDIR"/pkgdatadir
 
     autoreconf --install --force --verbose -I "$aclocal_dir"
     ./configure \\
@@ -36,9 +36,8 @@ export default function (): std.Recipe<std.Directory> {
     .dependencies(std.toolchain())
     .workDir(source)
     .env({
-      toolchain: std.toolchain(),
       aclocal_dir: std.tpl`${std.toolchain()}/share/aclocal`,
-      ...autotoolsEnv(),
+      // ...autotoolsEnv(),
     })
     .toDirectory();
 
