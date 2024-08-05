@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "ruff",
-  version: "0.5.3",
+  version: "0.5.6",
 };
 
 // HACK: Workaround for issue unarchiving this tarfile. See:
@@ -11,7 +11,7 @@ export const project = {
 const sourceTar = std.download({
   url: `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
   hash: std.sha256Hash(
-    "7d3e1d6405a5c0e9bf13b947b80327ba7330f010060aaba514feecfd6d585251",
+    "f774651e684e21f155b43e6738336f2eb53b44cd42444e72a73ee6eb1f6ee079",
   ),
 });
 const source = std
