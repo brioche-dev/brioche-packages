@@ -3,14 +3,14 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "broot",
-  version: "1.40.0",
+  version: "1.41.1",
 };
 
 const source = std
   .download({
     url: `https://github.com/Canop/broot/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "2b3cd1b01a71f102e5f26836afdf2b6ef24e02ecf7c5459cc9863e2e670a27da",
+      "a784f31833b4cd11386309c2816c8e2f48594cc7658feca63bc57886cd7a566c",
     ),
   })
   .unarchive("tar", "gzip")
