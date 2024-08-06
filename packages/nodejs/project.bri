@@ -77,3 +77,57 @@ export function npmInstall(
     .unsafe({ networking: true })
     .toDirectory();
 }
+
+interface NpmInstallGlobalOptions {
+  packageName: string;
+  version: string;
+}
+
+/**
+ * Installs a global NPM package. Returns a recipe containing the package
+ *
+ * ## Options
+ *
+ * - `packageName`: The NPM package dependencies to install.
+ * - `version`: The version of the package to install.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ * import { npmInstallGlobal } from "nodejs";
+ *
+ * // Install the dependency and return the path to the binary to run
+ * export default () => {
+ *   const npmPackage = npmInstallGlobal({
+ *     packageName: "aws-cdk",
+ *     version: "2.150.0",
+ *   });
+ *   return std.withRunnableLink(npmPackage, "bin/cdk");
+ * };
+ * ```
+ */
+export function npmInstallGlobal(
+  options: NpmInstallGlobalOptions,
+): std.Recipe<std.Directory> {
+  const packageDir = std.runBash`
+    if [ "$(npm view "$PKG_NAME@$PKG_VERSION" "version")" != "$PKG_VERSION" ]; then
+      echo "The NPM package ($PKG_NAME) is not an exact version ($PKG_VERSION), please ensure the version is more specific."
+      exit 1
+    fi
+
+    npm install --prefix "$BRIOCHE_OUTPUT" "$PKG_NAME@$PKG_VERSION"
+  `
+    .dependencies(nodejs())
+    .outputScaffold(std.directory({}))
+    .env({
+      PKG_VERSION: options.version,
+      PKG_NAME: options.packageName,
+    })
+    .unsafe({ networking: true })
+    .toDirectory();
+
+  return std.castToDirectory(
+    packageDir.get(`node_modules/${options.packageName}`),
+  );
+}
