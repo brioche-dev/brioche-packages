@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.79.0",
+  version: "1.80.0",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -42,7 +42,7 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
     .download({
       url: `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
       hash: std.sha256Hash(
-        "3608b3efa60fe074d8ef9186747d8ff803c4fc3108c7647f0e7f81c303b2cd95",
+        "e9e37f18ace35528c48463bd16158e6e4445684d497febaa3127509dbf25701e",
       ),
     })
     .read();
