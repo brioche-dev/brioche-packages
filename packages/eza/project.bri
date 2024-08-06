@@ -3,14 +3,14 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "eza",
-  version: "0.18.22",
+  version: "0.18.24",
 };
 
 const source = std
   .download({
     url: `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "552fe9997ed4fc6e11dafebffc2aa249ab3fb465a05c614181c7b62e8a0df698",
+      "bdcf83f73f6d5088f6dc17c119d0d288fed4acd122466404772be5ef278887de",
     ),
   })
   .unarchive("tar", "gzip")
