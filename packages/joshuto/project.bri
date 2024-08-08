@@ -16,7 +16,8 @@ const source = std
   .unarchive("tar", "gzip")
   .peel();
 
-// This patch is derived from the `Cargo.lock` from this commit in Joshuto:
+// Patch `Cargo.lock` to fix builds with Rust >= 1.80. This patch is derived
+// from the `Cargo.lock` from this commit in Joshuto:
 // https://github.com/kamiyaa/joshuto/commit/1245124fcd264e25becfd75258840708d7b8b4bb
 const patch = Brioche.includeFile("joshuto-v0.9.8.patch");
 
