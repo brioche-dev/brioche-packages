@@ -3,14 +3,14 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "oha",
-  version: "1.4.5",
+  version: "1.4.6",
 };
 
 const source = std
   .download({
     url: `https://github.com/hatoo/oha/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "dfed8814c74419ab7bdc545bbd778f69ccc515defd5f756d8368c3c1b74d2cc2",
+      "8a68d4411ce241d161aeaa87e9f1e778b381398454bf58e58c976d575fcb2c3b",
     ),
   })
   .unarchive("tar", "gzip")
