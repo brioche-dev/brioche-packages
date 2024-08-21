@@ -5,14 +5,14 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "git",
-  version: "2.45.2",
+  version: "2.46.0",
 };
 
 const source = std
   .download({
     url: `https://github.com/git/git/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "8422abc4a16e389220d8da15e12d712f4e6219846ddd8b112e9b31f3087ddf9b",
+      "d9a72f1648406806d2cb3049b4a73f357e2dc8df5d2962ce6d24220f3861a221",
     ),
   })
   .unarchive("tar", "gzip")
