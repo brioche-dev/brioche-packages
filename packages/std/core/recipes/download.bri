@@ -12,6 +12,9 @@ export interface DownloadOptions {
  * a file of its results. A hash must be provided, and will
  * be used to verify the downloaded contents.
  *
+ * See also `Brioche.download`, which does not require specifying
+ * a hash, but only works with a constant URL.
+ *
  * ## Example
  *
  * std.download({

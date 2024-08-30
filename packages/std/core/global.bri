@@ -88,6 +88,8 @@ declare global {
      * not take a hash, and it **must** be called with a constant string URL.
      * The hash of the downloaded file will be saved in the lockfile.
      *
+     * See also `std.download`, which can be used even if URL is not constant.
+     *
      * ## Example
      *
      * ```typescript
