@@ -9,7 +9,7 @@ export interface DownloadOptions {
 
 /**
  * Returns a recipe that will download a URL, and return
- * a file of its results. A has must be provided, and will
+ * a file of its results. A hash must be provided, and will
  * be used to verify the downloaded contents.
  *
  * ## Example
