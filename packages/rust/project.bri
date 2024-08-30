@@ -241,12 +241,9 @@ export function createSkeletonCrate(
 }
 
 function cargoChef(): std.Recipe<std.Directory> {
-  const pkg = std.download({
-    url: "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
-    hash: std.sha256Hash(
-      "91b518df5c8b02775026875f3aadef1946464354db1ca0758e4912249578f0bc",
-    ),
-  });
+  const pkg = Brioche.download(
+    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
+  );
 
   return std.directory({
     bin: pkg.unarchive("tar", "gzip"),

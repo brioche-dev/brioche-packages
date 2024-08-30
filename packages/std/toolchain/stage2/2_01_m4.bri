@@ -3,12 +3,9 @@ import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/m4-1.4.19.tar.xz",
-    hash: std.sha256Hash(
-      "63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/m4-1.4.19.tar.xz",
+  );
 
   return bootstrapRun({
     script: std.indoc`

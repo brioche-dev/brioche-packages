@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/flex-2.6.4.tar.gz",
-    hash: std.sha256Hash(
-      "e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/flex-2.6.4.tar.gz",
+  );
 
   return std
     .process({

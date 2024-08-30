@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
-    hash: std.sha256Hash(
-      "6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
+  );
 
   return std
     .process({

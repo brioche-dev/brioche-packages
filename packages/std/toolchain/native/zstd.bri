@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/zstd-1.5.5.tar.gz",
-    hash: std.sha256Hash(
-      "9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/zstd-1.5.5.tar.gz",
+  );
 
   return std
     .process({
