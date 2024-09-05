@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "eza",
-  version: "0.19.0",
+  version: "0.19.2",
 };
 
 // HACK: Workaround for issue unarchiving this tarfile. See:
@@ -11,7 +11,7 @@ export const project = {
 const sourceTar = std.download({
   url: `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
   hash: std.sha256Hash(
-    "440fff093c23635d7c1a9955d42489a2f5c5839a0e85a03e39daeca39e9dbf84",
+    "db4897ef7f58d0802620180e0b13bb35563e03c9de66624206b35dcad21007f8",
   ),
 });
 const source = std
