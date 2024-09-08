@@ -37,7 +37,7 @@ export function go(): std.Recipe<std.Directory> {
     }),
   });
   go = std.setEnv(go, {
-    GOROOT: { append: [{ path: "go" }] },
+    GOROOT: { fallback: { path: "go" } },
   });
   go = std.withRunnableLink(go, "go/bin/go");
 

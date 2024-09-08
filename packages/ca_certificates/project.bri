@@ -24,7 +24,7 @@ export default (): std.Recipe<std.Directory> => {
       }),
     }),
     {
-      SSL_CERT_FILE: { append: [{ path: "etc/ssl/certs/ca-bundle.crt" }] },
+      SSL_CERT_FILE: { fallback: { path: "etc/ssl/certs/ca-bundle.crt" } },
     },
   );
 };

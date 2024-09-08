@@ -193,8 +193,8 @@ export const toolchain = std.memo(
       },
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
-      AUTOCONF: { append: [{ path: "bin/autoconf" }] },
-      AUTOHEADER: { append: [{ path: "bin/autoheader" }] },
+      AUTOCONF: { fallback: { path: "bin/autoconf" } },
+      AUTOHEADER: { fallback: { path: "bin/autoheader" } },
     });
 
     // Pack scripts from autoconf
