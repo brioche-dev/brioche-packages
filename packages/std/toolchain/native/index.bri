@@ -195,106 +195,14 @@ export const toolchain = std.memo(
       MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
       AUTOCONF: { fallback: { path: "bin/autoconf" } },
       AUTOHEADER: { fallback: { path: "bin/autoheader" } },
-    });
-
-    // Pack scripts from autoconf
-    toolchain = autopack(toolchain, {
-      paths: [
-        "bin/autoconf",
-        "bin/autoheader",
-        "bin/autom4te",
-        "bin/autom4te-orig",
-        "bin/autoreconf",
-        "bin/autoscan",
-        "bin/autoupdate",
-        "bin/autoupdate-orig",
-        "bin/ifnames",
-      ],
-      selfDependency: true,
-      scriptConfig: {
-        env: {
-          AUTOCONF: {
-            type: "fallback",
-            value: { relativePath: "bin/autoconf" },
-          },
-          AUTOHEADER: {
-            type: "fallback",
-            value: { relativePath: "bin/autoheader" },
-          },
-          AUTOM4TE: {
-            type: "fallback",
-            value: { relativePath: "bin/autom4te" },
-          },
-          M4: { type: "fallback", value: { relativePath: "bin/m4" } },
-          autom4te_perllibdir: {
-            type: "fallback",
-            value: { relativePath: "share/autoconf" },
-          },
-          AC_MACRODIR: {
-            type: "fallback",
-            value: { relativePath: "share/autoconf" },
-          },
-        },
-      },
-    });
-
-    // Pack scripts from automake
-    toolchain = autopack(toolchain, {
-      globs: ["bin/automake", "bin/automake-*", "bin/aclocal", "bin/aclocal-*"],
-      selfDependency: true,
-      scriptConfig: {
-        env: {
-          AUTOMAKE_UNINSTALLED: { type: "fallback", value: "1" },
-          AUTOM4TE: {
-            type: "fallback",
-            value: { relativePath: "bin/autom4te" },
-          },
-          trailer_m4: {
-            type: "set",
-            value: { relativePath: "share/autoconf/autoconf/trailer.m4" },
-          },
-          ACLOCAL_PATH: {
-            type: "append",
-            value: { relativePath: "share/aclocal" },
-            separator: ":",
-          },
-          ACLOCAL_AUTOMAKE_DIR: {
-            type: "fallback",
-            value: { relativePath: "share/aclocal-1.16" },
-          },
-        },
-      },
-    });
-
-    // Pack all other scripts
-    // TODO: Use globs for Perl 5 paths
-    toolchain = autopack(toolchain, {
-      globs: ["bin/**"],
-      selfDependency: true,
-      dynamicBinaryConfig: {
-        enabled: false,
-      },
-      sharedLibraryConfig: {
-        enabled: false,
-      },
-      scriptConfig: {
-        enabled: true,
-        env: {
-          PERL5LIB: {
-            type: "append",
-            value: {
-              relativePaths: [
-                "lib/perl5/site_perl/5.38.0/x86_64-linux-thread-multi",
-                "lib/perl5/site_perl/5.38.0",
-                "lib/perl5/5.38.0/x86_64-linux-thread-multi",
-                "lib/perl5/5.38.0",
-              ],
-              separator: ":",
-            },
-            separator: ":",
-          },
-        },
-      },
+      AUTOM4TE: { fallback: { path: "bin/autom4te" } },
+      M4: { fallback: { path: "bin/m4" } },
+      autom4te_perllibdir: { fallback: { path: "share/autoconf" } },
+      AC_MACRODIR: { fallback: { path: "share/autoconf" } },
+      trailer_m4: { fallback: { path: "share/autoconf/autoconf/trailer.m4" } },
+      ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      ACLOCAL_AUTOMAKE_DIR: { fallback: { path: "share/aclocal-1.16" } },
+      AUTOMAKE_UNINSTALLED: { fallback: { value: "1" } },
     });
 
     // Re-pack all dynamic binaries. This is done so they reference libraries
@@ -316,20 +224,6 @@ export const toolchain = std.memo(
         enabled: true,
       },
     });
-
-    // Keep the unpacked version of several wrapper scripts
-    const keepUnpackedPaths = [
-      "bin/x86_64-pc-linux-gnu-c++",
-      "bin/x86_64-pc-linux-gnu-g++",
-      "bin/x86_64-pc-linux-gnu-gcc",
-      "bin/x86_64-pc-linux-gnu-gcc-13.2.0",
-      "bin/c++",
-      "bin/g++",
-      "bin/gcc",
-    ];
-    for (const path of keepUnpackedPaths) {
-      toolchain = toolchain.insert(path, unpackedToolchain.get(path));
-    }
 
     toolchain = std.sync(toolchain);
 
