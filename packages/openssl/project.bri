@@ -29,9 +29,9 @@ export default function openssl(): std.Recipe<std.Directory> {
     .toDirectory();
 
   openssl = std.setEnv(openssl, {
-    CPATH: { path: "include" },
-    LIBRARY_PATH: { path: "lib" },
-    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
 
   return std.withRunnableLink(openssl, "bin/openssl");

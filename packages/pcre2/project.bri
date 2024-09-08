@@ -50,9 +50,9 @@ export default function (): std.Recipe<std.Directory> {
     .toDirectory();
 
   return std.setEnv(pcre2, {
-    CPATH: { path: "include" },
-    LIBRARY_PATH: { path: "lib" },
-    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
 }
 

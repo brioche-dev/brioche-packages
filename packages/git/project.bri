@@ -28,8 +28,8 @@ export default function git(): std.Recipe<std.Directory> {
     .toDirectory();
 
   git = std.setEnv(git, {
-    GIT_EXEC_PATH: { path: "libexec/git-core" },
-    GIT_TEMPLATE_DIR: { path: "share/git-core/templates" },
+    GIT_EXEC_PATH: { append: [{ path: "libexec/git-core" }] },
+    GIT_TEMPLATE_DIR: { append: [{ path: "share/git-core/templates" }] },
   });
   git = std.withRunnableLink(git, "bin/git");
 

@@ -157,7 +157,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 
   // Set `$MAGIC` env var for `file` when used as a dependency
   tools = setEnv(tools, {
-    MAGIC: { path: "share/misc/magic.mgc" },
+    MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
   });
 
   return std.sync(tools);
@@ -183,14 +183,18 @@ export const toolchain = std.memo(
     // Set env vars when used as a dependency. These are also used
     // when autopacking
     toolchain = setEnv(toolchain, {
-      CPATH: { path: "include" },
-      LIBRARY_PATH: [
-        { path: "lib" },
-        { path: "lib/man-db" },
-        { path: "lib/gconv" },
-      ],
-      PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
-      MAGIC: { path: "share/misc/magic.mgc" },
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: {
+        append: [
+          { path: "lib" },
+          { path: "lib/man-db" },
+          { path: "lib/gconv" },
+        ],
+      },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
+      AUTOCONF: { append: [{ path: "bin/autoconf" }] },
+      AUTOHEADER: { append: [{ path: "bin/autoheader" }] },
     });
 
     // Pack scripts from autoconf
