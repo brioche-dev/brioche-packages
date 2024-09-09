@@ -205,17 +205,16 @@ export const toolchain = std.memo(
       AUTOMAKE_UNINSTALLED: { fallback: { value: "1" } },
     });
 
-    // Re-pack all dynamic binaries. This is done so they reference libraries
-    // from the toolchain itself. Note that libraries are not packed, mainly
-    // since libc specifically should not be packed.
+    // Re-pack all dynamic binaries and shared libraries
     toolchain = autopack(toolchain, {
-      globs: ["bin/**"],
+      globs: ["**"],
+      excludeGlobs: ["lib/libc.so*"],
       selfDependency: true,
       dynamicBinaryConfig: {
         enabled: true,
       },
       sharedLibraryConfig: {
-        enabled: false,
+        enabled: true,
       },
       scriptConfig: {
         enabled: false,
