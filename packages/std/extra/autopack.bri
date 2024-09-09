@@ -61,6 +61,12 @@ export interface AutopackOptions {
   globs?: string[];
 
   /**
+   * A list of glob patterns to exclude when autopacking. Can only be set
+   * when `globs` is set
+   */
+  excludeGlobs?: string[];
+
+  /**
    * A list of dependencies to search when linking. These will be used to find
    * dynamic libraries, the dynamic linker, script interpreters, and any other
    * dependencies needed to pack a file. A dependency will not be used if
@@ -117,6 +123,12 @@ interface SharedLibraryConfig extends DynamicLinkingConfig {
    * Whether to pack shared libraries. Defaults to `true`
    */
   enabled?: boolean;
+
+  /**
+   * Whether to pack a shared library even if it has no dependencies. Defaults
+   * to `false`
+   */
+  allowEmpty?: boolean;
 }
 
 interface ScriptConfig {
@@ -335,6 +347,7 @@ export function buildAutopackConfig(
   const config = {
     paths: options.paths,
     globs: options.globs,
+    excludeGlobs: options.excludeGlobs,
     linkDependencies,
     selfDependency: options.selfDependency,
     dynamicBinary,
@@ -353,6 +366,7 @@ interface AutopackConfigResult {
 interface AutopackConfigTemplate {
   paths?: TemplatePath[];
   globs?: string[];
+  excludeGlobs?: string[];
   quiet?: boolean;
   linkDependencies?: TemplatePath[];
   selfDependency?: boolean;
