@@ -1,0 +1,46 @@
+import * as runtime from "../runtime.bri";
+import { assert } from "../utils.bri";
+import { semverMatches } from "../semver.bri";
+import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
+import type { Directory } from "./directory.bri";
+
+/**
+ * Returns a directory recipe containing only files that match one of the
+ * specified glob patterns.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ *
+ * const dir = std.directory({
+ *   "file.txt": std.file("Hello, world!"),
+ *   "script.sh": std.file("echo 'Hello, world!'"),
+ * });
+ *
+ * // Get only the text files from the directory
+ * const textFiles = std.glob(dir, ["*.txt"]);
+ * ```
+ */
+export function glob(
+  recipe: AsyncRecipe<Directory>,
+  patterns: string[],
+): Recipe<Directory> {
+  return createRecipe<Directory>(["directory"], {
+    sourceDepth: 1,
+    briocheSerialize: async (meta) => {
+      assert(
+        semverMatches(runtime.BRIOCHE_VERSION, ">=0.1.2"),
+        "std.glob requires Brioche v0.1.2 or later",
+      );
+
+      const serializedDirectory = await (await recipe).briocheSerialize();
+      return {
+        meta,
+        type: "glob",
+        directory: serializedDirectory,
+        patterns: patterns.map((pattern) => runtime.bstring(pattern)),
+      };
+    },
+  });
+}
