@@ -97,7 +97,7 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
     .flatMap((name) => (name != null ? [name] : []));
 
   result = std.setEnv(result, {
-    LIBRARY_PATH: { path: "lib" },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
   });
 
   result = std.autopack(result, {
