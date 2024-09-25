@@ -4,12 +4,9 @@ import zlib from "./zlib.bri";
 import bzip2 from "./bzip2.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
-    hash: std.sha256Hash(
-      "eca551caec3bc549a4e590c0015003790bdd1a604ffe19cc78ee631d51f7072e",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/perl-5.38.0.tar.xz",
+  );
 
   return std
     .process({

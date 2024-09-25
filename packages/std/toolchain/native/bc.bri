@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bc-6.6.0.tar.xz",
-    hash: std.sha256Hash(
-      "309ef0faebf149376aa69446a496fac13c3ff483a100a51d9c67cea1a73b2906",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bc-6.6.0.tar.xz",
+  );
 
   return std
     .process({

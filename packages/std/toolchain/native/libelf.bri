@@ -10,12 +10,9 @@ import zlib from "./zlib.bri";
 export default std.memo((): std.Recipe<std.Directory> => {
   const toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());
 
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/elfutils-0.189.tar.bz2",
-    hash: std.sha256Hash(
-      "39bd8f1a338e2b7cd4abc3ff11a0eddc6e690f69578a57478d8179b4148708c8",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/elfutils-0.189.tar.bz2",
+  );
 
   return std
     .process({

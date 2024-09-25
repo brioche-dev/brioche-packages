@@ -4,12 +4,9 @@ import perl from "./perl.bri";
 import expat from "./expat.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/XML-Parser-2.46.tar.gz",
-    hash: std.sha256Hash(
-      "d331332491c51cccfb4cb94ffc44f9cd73378e618498d4a37df9e043661c515d",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/XML-Parser-2.46.tar.gz",
+  );
 
   return std
     .process({

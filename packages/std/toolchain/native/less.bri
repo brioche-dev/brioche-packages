@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/less-643.tar.gz",
-    hash: std.sha256Hash(
-      "c28dea82484a605590aa3dc0a173ab0a218a1293048ca4b42844bf10f1027eb5",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/less-643.tar.gz",
+  );
 
   return std
     .process({

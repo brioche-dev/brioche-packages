@@ -2,12 +2,9 @@ import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
-    hash: std.sha256Hash(
-      "cca91be956fe081f8f6da72034cded96fe35a50be4bfb7e103e354aa2159a674",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
+  );
 
   return bootstrapRun({
     script: std.indoc`

@@ -3,12 +3,9 @@ import stage2 from "/toolchain/stage2";
 import gmp from "./gmp.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
-    hash: std.sha256Hash(
-      "06a378df13501248c1b2db5aa977a2c8126ae849a9d9b7be2546fb4a9c26d993",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
+  );
 
   let mpfr = std
     .process({

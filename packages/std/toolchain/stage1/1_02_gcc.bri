@@ -3,30 +3,18 @@ import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-    hash: std.sha256Hash(
-      "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da",
-    ),
-  });
-  const mpfrArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
-    hash: std.sha256Hash(
-      "06a378df13501248c1b2db5aa977a2c8126ae849a9d9b7be2546fb4a9c26d993",
-    ),
-  });
-  const gmpArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gmp-6.3.0.tar.xz",
-    hash: std.sha256Hash(
-      "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
-    ),
-  });
-  const mpcArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpc-1.3.1.tar.gz",
-    hash: std.sha256Hash(
-      "ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
+  );
+  const mpfrArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
+  );
+  const gmpArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gmp-6.3.0.tar.xz",
+  );
+  const mpcArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpc-1.3.1.tar.gz",
+  );
 
   const stage1 = binutils();
 

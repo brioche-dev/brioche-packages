@@ -4,12 +4,9 @@ import pkgconf from "./pkgconf.bri";
 import ncurses from "./ncurses.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/procps-ng-4.0.3.tar.xz",
-    hash: std.sha256Hash(
-      "303c8ec4f96ae18d8eaef86c2bd0986938764a45dc505fe0a0af868c674dba92",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/procps-ng-4.0.3.tar.xz",
+  );
 
   return std
     .process({

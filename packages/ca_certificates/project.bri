@@ -6,12 +6,9 @@ export const project = {
 };
 
 export default (): std.Recipe<std.Directory> => {
-  const cacert = std.download({
-    url: `https://curl.se/ca/cacert-${project.version}.pem`,
-    hash: std.sha256Hash(
-      "1bf458412568e134a4514f5e170a328d11091e071c7110955c9884ed87972ac9",
-    ),
-  });
+  const cacert = Brioche.download(
+    `https://curl.se/ca/cacert-${project.version}.pem`,
+  );
 
   return std.setEnv(
     std.directory({

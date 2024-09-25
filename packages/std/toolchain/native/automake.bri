@@ -4,12 +4,9 @@ import m4 from "./m4.bri";
 import autoconf from "./autoconf.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/automake-1.16.5.tar.xz",
-    hash: std.sha256Hash(
-      "f01d58cd6d9d77fbdca9eb4bbd5ead1988228fdb73d6f7a201f5f8d6b118b469",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/automake-1.16.5.tar.xz",
+  );
 
   return std
     .process({
