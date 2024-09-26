@@ -1,0 +1,27 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "ripgrep",
+  version: "14.1.0",
+};
+
+const source = std
+  .download({
+    url: `https://github.com/BurntSushi/ripgrep/archive/refs/tags/${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "33c6169596a6bbfdc81415910008f26e0809422fda2d849562637996553b2ab6",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default () => {
+  return cargoBuild({
+    source,
+    buildParams: {
+      features: ["pcre2"],
+    },
+    runnable: "bin/rg",
+  });
+};

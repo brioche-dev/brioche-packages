@@ -5,6 +5,9 @@ import {
   createRecipe,
 } from "./recipes";
 import { source } from "./source.bri";
+import { BRIOCHE_VERSION } from "./runtime.bri";
+import { semverMatches } from "./semver.bri";
+import { assert } from "./utils.bri";
 
 declare global {
   // eslint-disable-next-line
@@ -171,6 +174,11 @@ declare global {
   });
 };
 (globalThis as any).Brioche.download ??= (url: string): Recipe<File> => {
+  assert(
+    semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
+    "Brioche.download(...) requires Brioche v0.1.2 or greater",
+  );
+
   const sourceFrame = source({ depth: 1 }).at(0);
   if (sourceFrame === undefined) {
     throw new Error(`Could not find source file to download ${url}`);

@@ -3,14 +3,14 @@ import openssl from "openssl";
 
 export const project = {
   name: "curl",
-  version: "8.8.0",
+  version: "8.9.1",
 };
 
 const source = std
   .download({
     url: `https://curl.se/download/curl-${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "77c0e1cd35ab5b45b659645a93b46d660224d0024f1185e8a95cdb27ae3d787d",
+      "291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5",
     ),
   })
   .unarchive("tar", "gzip")

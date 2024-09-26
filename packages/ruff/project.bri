@@ -2,14 +2,14 @@ import * as std from "std";
 import { cargoBuild } from "rust";
 
 export const project = {
-  name: "eza",
-  version: "0.19.2",
+  name: "ruff",
+  version: "0.6.1",
 };
 
 // HACK: Workaround for issue unarchiving this tarfile. See:
 // https://github.com/brioche-dev/brioche/issues/103
 const sourceTar = Brioche.download(
-  `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
+  `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
 );
 const source = std
   .process({
@@ -23,6 +23,7 @@ const source = std
 export default () => {
   return cargoBuild({
     source,
-    runnable: "bin/eza",
+    path: "crates/ruff",
+    runnable: "bin/ruff",
   });
 };
