@@ -6,10 +6,12 @@ export const project = {
   version: "0.26.3",
 };
 
-const source = gitCheckout({
-  repository: "https://github.com/extrawurst/gitui.git",
-  commit: "95e1d4d4324bf1eab34f8100afc7f3ae7e435252",
-});
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/extrawurst/gitui.git",
+    ref: `v${project.version}`,
+  }),
+);
 
 export default () => {
   return cargoBuild({
