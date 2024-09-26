@@ -9,6 +9,16 @@ import { BRIOCHE_VERSION } from "./runtime.bri";
 import { semverMatches } from "./semver.bri";
 import { assert } from "./utils.bri";
 
+interface GitRefOptions {
+  repository: string;
+  ref: string;
+}
+
+interface GitRefResult {
+  repository: string;
+  commit: string;
+}
+
 declare global {
   // eslint-disable-next-line
   namespace Brioche {
@@ -100,6 +110,38 @@ declare global {
      * ```
      */
     function download(url: string): Recipe<File>;
+
+    /**
+     * Get the commit hash for a git ref in a repository. This function must
+     * be called with constant strings for both the repository and ref. The
+     * commit hash will be saved in the lockfile, so the same commit hash
+     * will be used until the lockfile is updated.
+     *
+     * See also the `gitCheckout` function from the `git` package, which can
+     * checkout a git repo from a commit hash returned from `Brioche.gitRef`.
+     *
+     * ## Options
+     *
+     * - `repository`: A git repository URL.
+     * - `ref`: A git ref, such as a branch or tag name. Example: `main`
+     *
+     * ## Example
+     *
+     * ```typescript
+     * import { gitCheckout } from "git";
+     *
+     * // Check out the main branch from the Brioche repository. The commit
+     * // hash will be locked when first run, and will not change until the
+     * // lockfile is updated
+     * const source = gitCheckout(
+     *   Brioche.gitRef({
+     *     repository: "https://github.com/brioche-dev/brioche.git",
+     *     ref: "main",
+     *   }),
+     * );
+     * ```
+     */
+    function gitRef(options: GitRefOptions): Promise<GitRefResult>;
   }
 }
 
@@ -176,7 +218,7 @@ declare global {
 (globalThis as any).Brioche.download ??= (url: string): Recipe<File> => {
   assert(
     semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
-    "Brioche.download(...) requires Brioche v0.1.2 or greater",
+    "Brioche.download(...) requires Brioche v0.1.2 or later",
   );
 
   const sourceFrame = source({ depth: 1 }).at(0);
@@ -198,4 +240,38 @@ declare global {
       );
     },
   });
+};
+(globalThis as any).Brioche.gitRef ??= async (
+  options: GitRefOptions,
+): Promise<GitRefResult> => {
+  assert(
+    semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
+    "Brioche.gitRef(...) requires Brioche v0.1.2 or later",
+  );
+
+  const sourceFrame = source({ depth: 1 }).at(0);
+  if (sourceFrame === undefined) {
+    throw new Error(
+      `Could not find source file to resolve git ref '${options.ref}' from repository '${options.repository}'`,
+    );
+  }
+
+  const result = await (globalThis as any).Deno.core.ops.op_brioche_get_static(
+    sourceFrame.fileName,
+    {
+      type: "git_ref",
+      repository: options.repository,
+      ref: options.ref,
+    },
+  );
+  if (
+    typeof result !== "object" ||
+    result === null ||
+    typeof result.repository !== "string" ||
+    typeof result.commit !== "string"
+  ) {
+    throw new Error("failed to parse git ref result");
+  }
+
+  return { repository: result.repository, commit: result.commit };
 };

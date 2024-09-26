@@ -45,35 +45,59 @@ interface GitCheckoutOptions {
  * Checkout a git repository at a specific commit. The specified commit will
  * be cloned without any history.
  *
+ * See also the `Brioche.gitRef` function, which can be used with `gitCheckout`
+ * to get a commit hash from a git ref (such as a branch or tag name), and
+ * then record the commit hash in the lockfile.
+ *
  * ## Options
  *
  * - `repository`: The URL of the git repository to checkout.
  * - `commit`: The full commit hash to checkout.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import { gitCheckout } from "git";
+ *
+ * // Check out the main branch from the Brioche repository. The commit
+ * // hash will be locked when first run, and will not change until the
+ * // lockfile is updated
+ * const source = gitCheckout(
+ *   Brioche.gitRef({
+ *     repository: "https://github.com/brioche-dev/brioche.git",
+ *     ref: "main",
+ *   }),
+ * );
+ * ```
  */
 export function gitCheckout(
-  options: GitCheckoutOptions,
+  options: std.Awaitable<GitCheckoutOptions>,
 ): std.Recipe<std.Directory> {
-  // Validate that the commit is a hash
-  std.assert(
-    /^[0-9a-f]{40}$/.test(options.commit),
-    `Invalid git commit hash: ${options.commit}`,
-  );
+  return std.recipeFn(async () => {
+    const { commit, repository } = await options;
 
-  // Clone and fetch only the specified commit. See this article:
-  // https://blog.hartwork.org/posts/clone-arbitrary-single-git-commit/
-  return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    git -c init.defaultBranch=main init
-    git remote add origin "$repository"
-    git fetch --depth 1 origin "$commit"
-    git -c advice.detachedHead=false checkout FETCH_HEAD
-  `
-    .dependencies(git(), caCertificates())
-    .env({
-      repository: options.repository,
-      commit: options.commit,
-    })
-    .outputScaffold(std.directory())
-    .unsafe({ networking: true })
-    .toDirectory();
+    // Validate that the commit is a hash
+    std.assert(
+      /^[0-9a-f]{40}$/.test(commit),
+      `Invalid git commit hash: ${commit}`,
+    );
+
+    // Clone and fetch only the specified commit. See this article:
+    // https://blog.hartwork.org/posts/clone-arbitrary-single-git-commit/
+    return std.runBash`
+      cd "$BRIOCHE_OUTPUT"
+      git -c init.defaultBranch=main init
+      git remote add origin "$repository"
+      git fetch --depth 1 origin "$commit"
+      git -c advice.detachedHead=false checkout FETCH_HEAD
+    `
+      .dependencies(git(), caCertificates())
+      .env({
+        repository,
+        commit,
+      })
+      .outputScaffold(std.directory())
+      .unsafe({ networking: true })
+      .toDirectory();
+  });
 }
