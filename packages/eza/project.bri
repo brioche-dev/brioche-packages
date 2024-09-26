@@ -8,12 +8,9 @@ export const project = {
 
 // HACK: Workaround for issue unarchiving this tarfile. See:
 // https://github.com/brioche-dev/brioche/issues/103
-const sourceTar = std.download({
-  url: `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
-  hash: std.sha256Hash(
-    "db4897ef7f58d0802620180e0b13bb35563e03c9de66624206b35dcad21007f8",
-  ),
-});
+const sourceTar = Brioche.download(
+  `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
+);
 const source = std
   .process({
     command: "tar",
