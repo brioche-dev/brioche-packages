@@ -1,0 +1,74 @@
+import * as std from "std";
+
+export const project = {
+  name: "pcre2",
+  version: "10.44",
+};
+
+const source = std
+  .download({
+    url: `https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-${project.version}.tar.gz`,
+    hash: std.sha256Hash(
+      "07a002e8216382a96f722bc4a831f3d77457fe3e9e62a6dff250a2dd0e9c5e6d",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  const pcre2 = std.runBash`
+    # Some of the build scripts hardcode a few paths, so we need to
+    # create symlinks and set _lt_pkgdatadir to point to the correct
+    # location.
+    mkdir -p "$TMPDIR"/pkgdatadir
+    ln -s "$toolchain"/share/libtool/build-aux "$TMPDIR"/pkgdatadir/build-aux
+    ln -s "$toolchain"/share/libtool "$TMPDIR"/pkgdatadir/libltdl
+    ln -s "$toolchain"/share/aclocal "$TMPDIR"/pkgdatadir/m4
+    export _lt_pkgdatadir="$TMPDIR"/pkgdatadir
+
+    ./autogen.sh
+    ./configure \\
+      --prefix=/ \\
+      --enable-jit \\
+      --enable-pcre2-8 \\
+      --enable-pcre2-16 \\
+      --enable-pcre2-32
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source)
+    // `GREP` and `SED` are defined in libtool's scripts, but the values are
+    // hardcoded. Setting them here ensures that the build scripts can properly
+    // find them.
+    .env({
+      toolchain: std.toolchain(),
+      GREP: "grep",
+      SED: "sed",
+      ...autotoolsEnv(),
+    })
+    .toDirectory();
+
+  return std.setEnv(pcre2, {
+    CPATH: { path: "include" },
+    LIBRARY_PATH: { path: "lib" },
+    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+  });
+}
+
+// HACK: This should be removed once `std.toolchain()` properly sets
+// these variables for autotools
+function autotoolsEnv(): Record<string, std.ProcessTemplateLike> {
+  return {
+    M4: std.tpl`${std.toolchain()}/bin/m4`,
+    AUTOM4TE: std.tpl`${std.toolchain()}/bin/autom4te`,
+    trailer_m4: std.tpl`${std.toolchain()}/share/autoconf/autoconf/trailer.m4`,
+    PERL5LIB: std.tpl`${std.toolchain()}/share/autoconf:${std.toolchain()}/share/automake-1.16`,
+    autom4te_perllibdir: std.tpl`${std.toolchain()}/share/autoconf`,
+    AC_MACRODIR: std.tpl`${std.toolchain()}/share/autoconf`,
+    ACLOCAL_AUTOMAKE_DIR: std.tpl`${std.toolchain()}/share/aclocal-1.16`,
+    AUTOMAKE_UNINSTALLED: "1",
+    AUTOCONF: std.tpl`${std.toolchain()}/bin/autoconf`,
+    AUTOMAKE_LIBDIR: std.tpl`${std.toolchain()}/share/automake-1.16`,
+  };
+}

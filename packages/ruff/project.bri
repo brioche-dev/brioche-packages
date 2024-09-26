@@ -2,16 +2,16 @@ import * as std from "std";
 import { cargoBuild } from "rust";
 
 export const project = {
-  name: "eza",
-  version: "0.19.2",
+  name: "ruff",
+  version: "0.6.1",
 };
 
 // HACK: Workaround for issue unarchiving this tarfile. See:
 // https://github.com/brioche-dev/brioche/issues/103
 const sourceTar = std.download({
-  url: `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
+  url: `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
   hash: std.sha256Hash(
-    "db4897ef7f58d0802620180e0b13bb35563e03c9de66624206b35dcad21007f8",
+    "230a4ca5b172ae0632afb310ee7792eec6913eefa790423790862f0d91889ad1",
   ),
 });
 const source = std
@@ -26,6 +26,7 @@ const source = std
 export default () => {
   return cargoBuild({
     source,
-    runnable: "bin/eza",
+    path: "crates/ruff",
+    runnable: "bin/ruff",
   });
 };

@@ -1,4 +1,6 @@
 import { BRIOCHE_VERSION } from "../runtime.bri";
+import { semverMatches } from "../semver.bri";
+import { assert } from "../utils.bri";
 import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
 import type { Directory } from "./directory.bri";
 
@@ -14,13 +16,7 @@ export function collectReferences(
   return createRecipe(["directory"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
-      // TODO: Use a proper semver check
-      // TODO: Remove once support for v0.1.0 has been dropped
-      if (BRIOCHE_VERSION === "0.1.0") {
-        throw new Error(
-          "std.collectReferences is not supported in v0.1.0, please run `brioche self-update` to update Brioche!",
-        );
-      }
+      assert(semverMatches(BRIOCHE_VERSION, ">=0.1.1"));
 
       const serializedRecipe = await (await recipe).briocheSerialize();
       return {
