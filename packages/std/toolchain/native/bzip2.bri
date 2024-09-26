@@ -2,18 +2,12 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bzip2-1.0.8.tar.gz",
-    hash: std.sha256Hash(
-      "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
-    ),
-  });
-  const sourcePatch = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/bzip2-1.0.8-install_docs-1.patch",
-    hash: std.sha256Hash(
-      "35e3bbd9642af51fef2a8a83afba040d272da42d7e3a251d8e43255a7b496702",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bzip2-1.0.8.tar.gz",
+  );
+  const sourcePatch = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/bzip2-1.0.8-install_docs-1.patch",
+  );
 
   return std
     .process({

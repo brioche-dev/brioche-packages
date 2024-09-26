@@ -2,14 +2,14 @@ import * as std from "std";
 
 export const project = {
   name: "pv",
-  version: "1.8.10",
+  version: "1.8.13",
 };
 
 const source = std
   .download({
     url: `https://www.ivarch.com/programs/sources/pv-${project.version}.tar.gz`,
     hash: std.sha256Hash(
-      "d4c90c17cfcd44aa96b98237731e4f811e071d4c2052a689d2d81e6671f571b1",
+      "e2bde058d0d3bfe03e60a6eedef6a179991f5cc698d1bac01b64a86f5a8c17af",
     ),
   })
   .unarchive("tar", "gzip")
