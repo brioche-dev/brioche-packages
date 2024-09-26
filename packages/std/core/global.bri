@@ -218,7 +218,7 @@ declare global {
 (globalThis as any).Brioche.download ??= (url: string): Recipe<File> => {
   assert(
     semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
-    "Brioche.download(...) requires Brioche v0.1.2 or greater",
+    "Brioche.download(...) requires Brioche v0.1.2 or later",
   );
 
   const sourceFrame = source({ depth: 1 }).at(0);
