@@ -5,6 +5,9 @@ import {
   createRecipe,
 } from "./recipes";
 import { source } from "./source.bri";
+import { BRIOCHE_VERSION } from "./runtime.bri";
+import { semverMatches } from "./semver.bri";
+import { assert } from "./utils.bri";
 
 declare global {
   // eslint-disable-next-line
@@ -82,6 +85,21 @@ declare global {
      * ```
      */
     function glob(...patterns: string[]): Recipe<Directory>;
+
+    /**
+     * Download a file from a URL. Unlike `std.download`, this function does
+     * not take a hash, and it **must** be called with a constant string URL.
+     * The hash of the downloaded file will be saved in the lockfile.
+     *
+     * See also `std.download`, which can be used even if URL is not constant.
+     *
+     * ## Example
+     *
+     * ```typescript
+     * const file = Brioche.download("http://example.com/");
+     * ```
+     */
+    function download(url: string): Recipe<File>;
   }
 }
 
@@ -150,6 +168,32 @@ declare global {
         {
           type: "glob",
           patterns,
+        },
+      );
+    },
+  });
+};
+(globalThis as any).Brioche.download ??= (url: string): Recipe<File> => {
+  assert(
+    semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
+    "Brioche.download(...) requires Brioche v0.1.2 or greater",
+  );
+
+  const sourceFrame = source({ depth: 1 }).at(0);
+  if (sourceFrame === undefined) {
+    throw new Error(`Could not find source file to download ${url}`);
+  }
+
+  const sourceFile = sourceFrame.fileName;
+
+  return createRecipe(["file"], {
+    sourceDepth: 1,
+    briocheSerialize: async () => {
+      return await (globalThis as any).Deno.core.ops.op_brioche_get_static(
+        sourceFile,
+        {
+          type: "download",
+          url,
         },
       );
     },
