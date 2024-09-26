@@ -244,6 +244,11 @@ declare global {
 (globalThis as any).Brioche.gitRef ??= async (
   options: GitRefOptions,
 ): Promise<GitRefResult> => {
+  assert(
+    semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
+    "Brioche.gitRef(...) requires Brioche v0.1.2 or later",
+  );
+
   const sourceFrame = source({ depth: 1 }).at(0);
   if (sourceFrame === undefined) {
     throw new Error(
