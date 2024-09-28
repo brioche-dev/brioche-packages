@@ -3,7 +3,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "go",
-  version: "1.23.0",
+  version: "1.23.1",
 };
 
 /**
@@ -18,14 +18,10 @@ export const project = {
  *
  * The directory `go` is intended to be used as the `$GOROOT` env var.
  */
-export function go(): std.Recipe<std.Directory> {
-  const goRoot = std
-    .download({
-      url: `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
-      hash: std.sha256Hash(
-        "905a297f19ead44780548933e0ff1a1b86e8327bb459e92f9c0012569f76f5e3",
-      ),
-    })
+export default function go(): std.Recipe<std.Directory> {
+  const goRoot = Brioche.download(
+    `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
+  )
     .unarchive("tar", "gzip")
     .peel();
 
@@ -43,7 +39,6 @@ export function go(): std.Recipe<std.Directory> {
 
   return go;
 }
-export default go;
 
 type ModOptions = "readonly" | "vendor" | "mod";
 
@@ -110,9 +105,7 @@ interface GoBuildOptions {
  * };
  * ```
  */
-export async function goBuild(
-  options: GoBuildOptions,
-): Promise<std.Recipe<std.Directory>> {
+export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
   const modules = goModDownload(options.source);
 
   let buildResult = std.runBash`
@@ -158,30 +151,13 @@ export async function goBuild(
   return buildResult;
 }
 
-async function goModDownload(
+function goModDownload(
   goModule: std.AsyncRecipe<std.Directory>,
-): Promise<std.Recipe<std.Directory>> {
-  let goModuleDir = await goModule;
-
-  // HACK: Used so we can optionally grab `go.sum` (and fallback to an empty
-  // file if it isn't present). This should be replaced with a recipe to
-  // slice the `goModule` recipe using paths or glob patterns.
-  goModuleDir = std.merge(
-    std.directory({
-      "go.sum": std.file(""),
-    }),
-    goModuleDir,
-  );
-
+): std.Recipe<std.Directory> {
   return std.runBash`
     go mod download all
   `
-    .workDir(
-      std.directory({
-        "go.mod": goModuleDir.get("go.mod"),
-        "go.sum": goModuleDir.get("go.sum"),
-      }),
-    )
+    .workDir(std.glob(goModule, ["**/go.mod", "**/go.sum"]))
     .dependencies(go(), caCertificates())
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
