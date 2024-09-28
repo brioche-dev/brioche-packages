@@ -1,3 +1,4 @@
+import * as std from "std";
 import git, { gitCheckout } from "git";
 import { cargoBuild } from "rust";
 
