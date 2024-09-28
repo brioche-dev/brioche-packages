@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/hashicorp/terraform/archive/refs/tags/v1.9.2.tar.gz": {
+    "https://github.com/hashicorp/terraform/archive/refs/tags/v1.9.5.tar.gz": {
       "type": "sha256",
-      "value": "4f61b84d5e55648dfe576ead2744bd09aba8db00d8f780a2d498f30537e287f1"
+      "value": "89d558e5093d5c62f410d6975dfbd1e08714bf89d24c2d1d52a693965340114b"
     }
   }
 }

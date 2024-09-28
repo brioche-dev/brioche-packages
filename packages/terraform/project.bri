@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "terraform",
-  version: "1.9.2",
+  version: "1.9.5",
 };
 
 const source = Brioche.download(
