@@ -110,9 +110,7 @@ interface GoBuildOptions {
  * };
  * ```
  */
-export async function goBuild(
-  options: GoBuildOptions,
-): Promise<std.Recipe<std.Directory>> {
+export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
   const modules = goModDownload(options.source);
 
   let buildResult = std.runBash`
@@ -158,30 +156,13 @@ export async function goBuild(
   return buildResult;
 }
 
-async function goModDownload(
+function goModDownload(
   goModule: std.AsyncRecipe<std.Directory>,
-): Promise<std.Recipe<std.Directory>> {
-  let goModuleDir = await goModule;
-
-  // HACK: Used so we can optionally grab `go.sum` (and fallback to an empty
-  // file if it isn't present). This should be replaced with a recipe to
-  // slice the `goModule` recipe using paths or glob patterns.
-  goModuleDir = std.merge(
-    std.directory({
-      "go.sum": std.file(""),
-    }),
-    goModuleDir,
-  );
-
+): std.Recipe<std.Directory> {
   return std.runBash`
     go mod download all
   `
-    .workDir(
-      std.directory({
-        "go.mod": goModuleDir.get("go.mod"),
-        "go.sum": goModuleDir.get("go.sum"),
-      }),
-    )
+    .workDir(std.glob(goModule, ["**/go.mod", "**/go.sum"]))
     .dependencies(go(), caCertificates())
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
