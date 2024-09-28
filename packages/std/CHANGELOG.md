@@ -4,6 +4,31 @@ All notable changes to the `std` package will be documented in this file.
 
 The `std` package is not yet considered stable and doesn't currently assign version numbers to releases, so changes are documented by date. You are encouraged to use version control with the `brioche.lock` lockfile to ensure the version of the `std` package used stays consistent within your Brioche projects.
 
+
+## 2024-09-26
+
+PRs:
+- [#75](https://github.com/brioche-dev/brioche-packages/pull/75)
+- [#104](https://github.com/brioche-dev/brioche-packages/pull/104)
+- [#105](https://github.com/brioche-dev/brioche-packages/pull/105)
+- [#108](https://github.com/brioche-dev/brioche-packages/pull/108)
+
+> **Note**: This version of `std` requires Brioche v0.1.2 or greater. Run `brioche self-update` for installation instructions
+
+### Added
+
+- Add `Brioche.download(...)` function. This function takes a string literal, pins the download's hash in the `brioche.lock` lockfile, and returns a recipe. It's like `std.download()` except the hash doesn't need to be manually entered
+- Add `Brioche.gitRef({ repository, ref })` function. This function takes a string literal repository URL and a string literal git ref (branch or tag name), then records and returns the commit hash for that ref in the `brioche.lock` lockfile. This is designed to be used with the `gitCheckout` function from the `git` package, so a git branch or tag name can be supplied instead of manually entering a git commit hash.
+- Add `std.glob()` function. Takes a directory recipe and an array of glob patterns, and filters the recipe to only the paths that match one or more patterns.
+
+## 2024-08-31
+
+PR: [#106](https://github.com/brioche-dev/brioche-packages/pull/106)
+
+### Added
+
+- Add new `std.semverMatches(version, constraint)` function. Returns true if the given version meets the provided semver constraint. Example: `std.semverMatches("1.2.5", ">=1.1.0")` returns true
+
 ## 2024-07-12 (Breaking)
 
 PR: [#26](https://github.com/brioche-dev/brioche-packages/pull/58)

@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.79.0",
+  version: "1.80.1",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -42,7 +42,7 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
     .download({
       url: `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
       hash: std.sha256Hash(
-        "3608b3efa60fe074d8ef9186747d8ff803c4fc3108c7647f0e7f81c303b2cd95",
+        "de354821fe573e7514d4245a4f20223b45c755b265d76312c777ae7135c28ed1",
       ),
     })
     .read();
@@ -255,12 +255,9 @@ export function createSkeletonCrate(
 }
 
 function cargoChef(): std.Recipe<std.Directory> {
-  const pkg = std.download({
-    url: "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
-    hash: std.sha256Hash(
-      "91b518df5c8b02775026875f3aadef1946464354db1ca0758e4912249578f0bc",
-    ),
-  });
+  const pkg = Brioche.download(
+    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
+  );
 
   return std.directory({
     bin: pkg.unarchive("tar", "gzip"),

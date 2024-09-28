@@ -5,13 +5,9 @@ export const project = {
   version: "1.7.1",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/jqlang/jq/releases/download/jq-${project.version}/jq-${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "478c9ca129fd2e3443fe27314b455e211e0d8c60bc8ff7df703873deeee580c2",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/jqlang/jq/releases/download/jq-${project.version}/jq-${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

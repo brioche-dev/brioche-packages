@@ -1,0 +1,309 @@
+interface PartialSemver {
+  major?: number;
+  minor?: number;
+  patch?: number;
+  prereleaseIdentifiers?: (string | number)[];
+  metadataIdentifiers?: string[];
+}
+
+interface Semver {
+  major: number;
+  minor: number;
+  patch: number;
+  prereleaseIdentifiers?: (string | number)[];
+  metadataIdentifiers?: string[];
+}
+
+function validateIdentifier(s: string): string {
+  if (s === "") {
+    throw new Error("Semver identifier cannot be empty");
+  }
+
+  if (!/^[0-9A-Za-z-]+$/.test(s)) {
+    throw new Error(`Invalid character in semver identifier: ${s}`);
+  }
+
+  return s;
+}
+
+function validateInt(s: string): number {
+  if (s === "") {
+    throw new Error("Expected integer, got empty string");
+  }
+
+  if ((s.startsWith("0") && s !== "0") || s.startsWith("-")) {
+    throw new Error(`Expected integer, got ${s}`);
+  }
+
+  const number = Number(s);
+  if (!Number.isInteger(number)) {
+    throw new Error(`Expected integer, got ${s}`);
+  }
+
+  return number;
+}
+
+function parsePrereleaseIdentifier(s: string): string | number {
+  if (/^[0-9]+$/.test(s)) {
+    return validateInt(s);
+  } else {
+    return validateIdentifier(s);
+  }
+}
+
+function splitOnce(s: string, separator: string): [string, string | undefined] {
+  const index = s.indexOf(separator);
+
+  if (index === -1) {
+    return [s, undefined];
+  }
+
+  return [s.slice(0, index), s.slice(index + separator.length)];
+}
+
+function parsePartialSemver(version: string): PartialSemver {
+  const [versionPart, metadataPart] = splitOnce(version, "+");
+
+  const metadataIdentifiers = metadataPart
+    ?.split(".")
+    .map((ident) => validateIdentifier(ident));
+
+  const [versionCorePart, prereleasePart] = splitOnce(versionPart, "-");
+
+  const prereleaseIdentifiers = prereleasePart
+    ?.split(".")
+    .map((ident) => parsePrereleaseIdentifier(ident));
+
+  const [major, minor, patch, ...versionRest] = versionCorePart.split(".");
+
+  if (versionRest.length > 0) {
+    throw new Error(`Invalid semver version: ${version}`);
+  }
+
+  return {
+    major: major != null ? validateInt(major) : undefined,
+    minor: minor != null ? validateInt(minor) : undefined,
+    patch: patch != null ? validateInt(patch) : undefined,
+    prereleaseIdentifiers,
+    metadataIdentifiers,
+  };
+}
+
+function parseSemver(version: string): Semver {
+  const semver = parsePartialSemver(version);
+
+  if (semver.major == null || semver.minor == null || semver.patch == null) {
+    throw new Error(`Invalid semver version: ${version}`);
+  }
+
+  return {
+    major: semver.major,
+    minor: semver.minor,
+    patch: semver.patch,
+    prereleaseIdentifiers: semver.prereleaseIdentifiers,
+    metadataIdentifiers: semver.metadataIdentifiers,
+  };
+}
+
+type SemverConstraint =
+  | { type: "exact"; version: PartialSemver }
+  | { type: "compatible"; version: PartialSemver }
+  | { type: "greater"; version: PartialSemver }
+  | { type: "greaterOrEqual"; version: PartialSemver }
+  | { type: "less"; version: PartialSemver }
+  | { type: "lessOrEqual"; version: PartialSemver };
+
+function parseSemverConstraint(constraint: string): SemverConstraint {
+  if (constraint.startsWith("=")) {
+    return { type: "exact", version: parsePartialSemver(constraint.slice(1)) };
+  } else if (constraint.startsWith("^")) {
+    return {
+      type: "compatible",
+      version: parsePartialSemver(constraint.slice(1)),
+    };
+  } else if (constraint.startsWith(">=")) {
+    return {
+      type: "greaterOrEqual",
+      version: parsePartialSemver(constraint.slice(2)),
+    };
+  } else if (constraint.startsWith(">")) {
+    return {
+      type: "greater",
+      version: parsePartialSemver(constraint.slice(1)),
+    };
+  } else if (constraint.startsWith("<=")) {
+    return {
+      type: "lessOrEqual",
+      version: parsePartialSemver(constraint.slice(2)),
+    };
+  } else if (constraint.startsWith("<")) {
+    return { type: "less", version: parsePartialSemver(constraint.slice(1)) };
+  } else {
+    return { type: "compatible", version: parsePartialSemver(constraint) };
+  }
+}
+
+function parseSemverConstraints(constraints: string): SemverConstraint[] {
+  return constraints
+    .split(",")
+    .map((constraint) => parseSemverConstraint(constraint.trim()));
+}
+
+type SemverConstraintResult =
+  | "equal"
+  | "greaterCompatible"
+  | "greaterIncompatible"
+  | "lessCompatible"
+  | "lessIncompatible";
+
+function semverCompareConstraint(
+  semver: Semver,
+  constraint: SemverConstraint,
+): SemverConstraintResult {
+  if (constraint.version.major != null) {
+    if (semver.major > constraint.version.major) {
+      return "greaterIncompatible";
+    } else if (semver.major < constraint.version.major) {
+      return "lessIncompatible";
+    }
+  }
+
+  if (semver.major === 0 && constraint.version.minor != null) {
+    if (semver.minor > constraint.version.minor) {
+      return "greaterIncompatible";
+    } else if (semver.minor < constraint.version.minor) {
+      return "lessIncompatible";
+    }
+  } else if (constraint.version.minor != null) {
+    if (semver.minor > constraint.version.minor) {
+      return "greaterCompatible";
+    } else if (semver.minor < constraint.version.minor) {
+      return "lessCompatible";
+    }
+  }
+
+  if (constraint.version.patch != null) {
+    if (semver.patch > constraint.version.patch) {
+      return "greaterCompatible";
+    } else if (semver.patch < constraint.version.patch) {
+      return "lessCompatible";
+    }
+  }
+
+  if (
+    semver.prereleaseIdentifiers?.join(".") !==
+    constraint.version.prereleaseIdentifiers?.join(".")
+  ) {
+    const semverPrerelease = semver.prereleaseIdentifiers ?? [];
+    const constraintPrerelease = constraint.version.prereleaseIdentifiers ?? [];
+    if (semverPrerelease.length === constraintPrerelease.length) {
+      for (let i = 0; i < semverPrerelease.length; i++) {
+        const semverIdentifier = semverPrerelease[i];
+        const constraintIdentifier = constraintPrerelease[i];
+
+        if (semverIdentifier == null || constraintIdentifier == null) {
+          throw new Error("Expected identifiers to not be null");
+        }
+
+        if (semverIdentifier !== constraintIdentifier) {
+          if (
+            typeof semverIdentifier === "number" &&
+            typeof constraintIdentifier === "number"
+          ) {
+            if (semverIdentifier > constraintIdentifier) {
+              return "greaterCompatible";
+            } else if (semverIdentifier < constraintIdentifier) {
+              return "lessCompatible";
+            }
+          } else {
+            const comparison = semverIdentifier
+              .toString()
+              .localeCompare(constraintIdentifier.toString());
+            if (comparison > 0) {
+              return "greaterCompatible";
+            } else if (comparison < 0) {
+              return "lessCompatible";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return "equal";
+}
+
+/**
+ * Returns true if the given semantic version is compatible with the
+ * given constraints. Multiple constraints can be separated with a comma.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ *
+ * std.semverMatches("1.0.5", "^1.0.0"); // => true
+ * ```
+ */
+export function semverMatches(version: string, constraints: string): boolean {
+  const semver = parseSemver(version);
+  const semverConstraints = parseSemverConstraints(constraints);
+
+  for (const constraint of semverConstraints) {
+    const comparison = semverCompareConstraint(semver, constraint);
+    switch (constraint.type) {
+      case "exact": {
+        if (comparison !== "equal") {
+          return false;
+        }
+        break;
+      }
+      case "compatible": {
+        if (comparison !== "equal" && comparison !== "greaterCompatible") {
+          return false;
+        }
+        break;
+      }
+      case "greater": {
+        if (
+          comparison !== "greaterCompatible" &&
+          comparison !== "greaterIncompatible"
+        ) {
+          return false;
+        }
+        break;
+      }
+      case "greaterOrEqual": {
+        if (
+          comparison !== "equal" &&
+          comparison !== "greaterCompatible" &&
+          comparison !== "greaterIncompatible"
+        ) {
+          return false;
+        }
+        break;
+      }
+      case "less": {
+        if (
+          comparison !== "lessCompatible" &&
+          comparison !== "lessIncompatible"
+        ) {
+          return false;
+        }
+        break;
+      }
+      case "lessOrEqual": {
+        if (
+          comparison !== "equal" &&
+          comparison !== "lessCompatible" &&
+          comparison !== "lessIncompatible"
+        ) {
+          return false;
+        }
+        break;
+      }
+    }
+  }
+
+  return true;
+}

@@ -16,9 +16,22 @@ const source = std
   .unarchive("tar", "gzip")
   .peel();
 
+// Patch `Cargo.lock` to fix builds with Rust >= 1.80. This patch is derived
+// from the `Cargo.lock` from this commit in miniserve:
+// https://github.com/svenstaro/miniserve/commit/2fbfcbfe17b5c12630ccb03b6ccd31cb4b8316cc
+const patch = Brioche.includeFile("miniserve-v0.27.1.patch");
+
 export default () => {
+  const patchedSource = std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    patch -p1 < $patch
+  `
+    .outputScaffold(source)
+    .env({ patch })
+    .toDirectory();
+
   return cargoBuild({
-    source,
+    source: patchedSource,
     runnable: "bin/miniserve",
   });
 };

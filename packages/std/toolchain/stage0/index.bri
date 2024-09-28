@@ -9,23 +9,13 @@ interface BootstrapRunOptions {
 export function bootstrapRun(
   options: BootstrapRunOptions,
 ): std.Recipe<std.Directory> {
-  const bootstrapRootfs = std
-    .download({
-      url: "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd",
-      hash: std.sha256Hash(
-        "0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11",
-      ),
-    })
-    .unarchive("tar", "zstd");
+  const bootstrapRootfs = Brioche.download(
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd",
+  ).unarchive("tar", "zstd");
 
-  const busybox = std
-    .download({
-      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz",
-      hash: std.sha256Hash(
-        "e2e9ae181e115e155158cb9031687d943b0847d8058a4c28454194d835478be6",
-      ),
-    })
-    .unarchive("tar", "xz");
+  const busybox = Brioche.download(
+    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz",
+  ).unarchive("tar", "xz");
 
   const briocheLd = runtimeUtils().get("bin/brioche-ld");
   const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");
@@ -97,32 +87,17 @@ export function bootstrapRun(
 }
 
 export default async (): Promise<std.Recipe> => {
-  const utils = std
-    .download({
-      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
-      hash: std.sha256Hash(
-        "eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33",
-      ),
-    })
-    .unarchive("tar", "zstd");
+  const utils = Brioche.download(
+    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
+  ).unarchive("tar", "zstd");
 
-  const toolchain = std
-    .download({
-      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd",
-      hash: std.sha256Hash(
-        "27416708f7ee8cd0c5d408010192705b40c914647fd0d80f00c2194795828cd6",
-      ),
-    })
-    .unarchive("tar", "zstd");
+  const toolchain = Brioche.download(
+    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd",
+  ).unarchive("tar", "zstd");
 
-  const make = std
-    .download({
-      url: "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz",
-      hash: std.sha256Hash(
-        "f8a75f171c2c753bc86a331473812ddc24837d5e91b0b1c7af89d6a2aa6e8986",
-      ),
-    })
-    .unarchive("tar", "xz");
+  const make = Brioche.download(
+    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz",
+  ).unarchive("tar", "xz");
 
   const briocheLd = runtimeUtils().get("bin/brioche-ld");
   const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");

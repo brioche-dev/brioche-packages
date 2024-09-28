@@ -3,18 +3,22 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "eza",
-  version: "0.18.22",
+  version: "0.19.2",
 };
 
+// HACK: Workaround for issue unarchiving this tarfile. See:
+// https://github.com/brioche-dev/brioche/issues/103
+const sourceTar = Brioche.download(
+  `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
+);
 const source = std
-  .download({
-    url: `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "552fe9997ed4fc6e11dafebffc2aa249ab3fb465a05c614181c7b62e8a0df698",
-    ),
+  .process({
+    command: "tar",
+    args: ["-xf", sourceTar, "--strip-components=1", "-C", std.outputPath],
+    outputScaffold: std.directory(),
+    dependencies: [std.tools()],
   })
-  .unarchive("tar", "gzip")
-  .peel();
+  .toDirectory();
 
 export default () => {
   return cargoBuild({

@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/texinfo-7.0.3.tar.xz",
-    hash: std.sha256Hash(
-      "74b420d09d7f528e84f97aa330f0dd69a98a6053e7a4e01767eed115038807bf",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/texinfo-7.0.3.tar.xz",
+  );
 
   return std
     .process({

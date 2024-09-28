@@ -183,8 +183,7 @@ async function describeBlob(
 function collectReferences(
   recipe: std.AsyncRecipe<std.Directory>,
 ): std.Recipe<std.Directory> {
-  // TODO: Use proper semver comparison
-  if (std.BRIOCHE_VERSION !== "0.1.0") {
+  if (std.semverMatches(std.BRIOCHE_VERSION, ">=0.1.1")) {
     return std.collectReferences(recipe);
   }
 
