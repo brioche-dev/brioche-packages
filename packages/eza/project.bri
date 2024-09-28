@@ -8,7 +8,9 @@ export const project = {
 
 const source = Brioche.download(
   `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
-).unarchive("tar", "gzip");
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function (): std.Recipe<std.Directory> {
   return cargoBuild({

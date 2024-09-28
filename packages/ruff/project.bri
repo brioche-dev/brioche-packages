@@ -8,7 +8,9 @@ export const project = {
 
 const source = Brioche.download(
   `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
-).unarchive("tar", "gzip");
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
