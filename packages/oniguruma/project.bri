@@ -1,0 +1,66 @@
+import * as std from "std";
+
+export const project = {
+  name: "oniguruma",
+  version: "6.9.9",
+};
+
+const source = Brioche.download(
+  `https://github.com/kkos/oniguruma/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  let oniguruma = std.runBash`
+    # Some of the build scripts hardcode a few paths, so we need to
+    # create symlinks and set _lt_pkgdatadir to point to the correct
+    # location.
+    mkdir -p "$TMPDIR"/pkgdatadir
+    ln -s "$toolchain"/share/libtool/build-aux "$TMPDIR"/pkgdatadir/build-aux
+    ln -s "$toolchain"/share/libtool "$TMPDIR"/pkgdatadir/libltdl
+    ln -s "$toolchain"/share/aclocal "$TMPDIR"/pkgdatadir/m4
+    export _lt_pkgdatadir="$TMPDIR"/pkgdatadir
+
+    autoreconf --install --force --verbose -I "$aclocal_dir"
+    ./configure \\
+      --prefix=/ \\
+      --enable-posix-api=yes
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source)
+    .env({
+      toolchain: std.toolchain(),
+      aclocal_dir: std.tpl`${std.toolchain()}/share/aclocal`,
+      ...autotoolsEnv(),
+    })
+    .toDirectory();
+
+  oniguruma = std.setEnv(oniguruma, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return std.withRunnableLink(oniguruma, "bin/onig-config");
+}
+
+// HACK: This should be removed once `std.toolchain()` properly sets
+// these variables for autotools
+function autotoolsEnv(): Record<string, std.ProcessTemplateLike> {
+  return {
+    M4: std.tpl`${std.toolchain()}/bin/m4`,
+    AUTOM4TE: std.tpl`${std.toolchain()}/bin/autom4te`,
+    trailer_m4: std.tpl`${std.toolchain()}/share/autoconf/autoconf/trailer.m4`,
+    PERL5LIB: std.tpl`${std.toolchain()}/share/autoconf:${std.toolchain()}/share/automake-1.16`,
+    autom4te_perllibdir: std.tpl`${std.toolchain()}/share/autoconf`,
+    AC_MACRODIR: std.tpl`${std.toolchain()}/share/autoconf`,
+    ACLOCAL_AUTOMAKE_DIR: std.tpl`${std.toolchain()}/share/aclocal-1.16`,
+    AUTOMAKE_UNINSTALLED: "1",
+    AUTOCONF: std.tpl`${std.toolchain()}/bin/autoconf`,
+    AUTOMAKE_LIBDIR: std.tpl`${std.toolchain()}/share/automake-1.16`,
+    AUTOHEADER: std.tpl`${std.toolchain()}/bin/autoheader`,
+  };
+}

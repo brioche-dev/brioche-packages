@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/sed-4.9.tar.xz",
-    hash: std.sha256Hash(
-      "6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/sed-4.9.tar.xz",
+  );
 
   return std
     .process({

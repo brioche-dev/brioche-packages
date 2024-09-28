@@ -1,0 +1,19 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "ruff",
+  version: "0.6.1",
+};
+
+const source = Brioche.download(
+  `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
+).unarchive("tar", "gzip");
+
+export default function (): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/ruff",
+    runnable: "bin/ruff",
+  });
+}

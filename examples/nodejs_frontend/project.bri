@@ -5,7 +5,7 @@ import miniserve from "miniserve";
 // Build the static site into a plain directory
 export function staticSite(): std.Recipe<std.Directory> {
   // Get all the files needed for the build
-  let npmPackage = Brioche.glob(
+  const source = Brioche.glob(
     "public",
     "src",
     ".eslintrc.cjs",
@@ -16,7 +16,7 @@ export function staticSite(): std.Recipe<std.Directory> {
   );
 
   // Install the NPM dependencies
-  npmPackage = npmInstall({ npmPackage });
+  const npmPackage = npmInstall({ source });
 
   // Run the build script, then save the output from the `dist/` directory
   return std.runBash`

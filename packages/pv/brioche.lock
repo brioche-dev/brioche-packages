@@ -1,3 +1,9 @@
 {
-  "dependencies": {}
+  "dependencies": {},
+  "downloads": {
+    "https://www.ivarch.com/programs/sources/pv-1.8.13.tar.gz": {
+      "type": "sha256",
+      "value": "e2bde058d0d3bfe03e60a6eedef6a179991f5cc698d1bac01b64a86f5a8c17af"
+    }
+  }
 }

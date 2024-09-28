@@ -6,19 +6,29 @@ export const project = {
   version: "0.24.0",
 };
 
-const crate = std
-  .download({
-    url: `https://github.com/sharkdp/bat/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "907554a9eff239f256ee8fe05a922aad84febe4fe10a499def72a4557e9eedfb",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/sharkdp/bat/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function bat(): std.Recipe<std.Directory> {
   return cargoBuild({
-    crate,
+    source,
     runnable: "bin/bat",
   });
-};
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(bat --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(bat());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `bat ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}

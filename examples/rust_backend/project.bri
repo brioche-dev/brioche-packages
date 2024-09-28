@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export default function server() {
   return cargoBuild({
-    crate: Brioche.glob("src", "Cargo.*"),
+    source: Brioche.glob("src", "Cargo.*"),
     runnable: "bin/rust_backend",
   });
 }

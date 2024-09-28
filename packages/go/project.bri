@@ -3,7 +3,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "go",
-  version: "1.22.5",
+  version: "1.23.1",
 };
 
 /**
@@ -18,14 +18,10 @@ export const project = {
  *
  * The directory `go` is intended to be used as the `$GOROOT` env var.
  */
-export function go(): std.Recipe<std.Directory> {
-  const goRoot = std
-    .download({
-      url: `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
-      hash: std.sha256Hash(
-        "904b924d435eaea086515bc63235b192ea441bd8c9b198c507e85009e6e4c7f0",
-      ),
-    })
+export default function go(): std.Recipe<std.Directory> {
+  const goRoot = Brioche.download(
+    `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
+  )
     .unarchive("tar", "gzip")
     .peel();
 
@@ -37,13 +33,12 @@ export function go(): std.Recipe<std.Directory> {
     }),
   });
   go = std.setEnv(go, {
-    GOROOT: { path: "go" },
+    GOROOT: { fallback: { path: "go" } },
   });
   go = std.withRunnableLink(go, "go/bin/go");
 
   return go;
 }
-export default go;
 
 type ModOptions = "readonly" | "vendor" | "mod";
 
@@ -55,10 +50,11 @@ interface GoBuildParameters {
 }
 
 interface GoBuildOptions {
-  goModule: std.AsyncRecipe<std.Directory>;
+  source: std.AsyncRecipe<std.Directory>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   buildParams?: GoBuildParameters;
-  packagePath?: string;
+  path?: string;
   runnable?: string;
 }
 
@@ -68,23 +64,32 @@ interface GoBuildOptions {
  *
  * ## Options
  *
- * - `goModule`: The Go module to build. Should include `go.mod`, as well as
+ * - `source`: The Go module to build. Should include `go.mod`, as well as
  *   `go.sum` if external dependencies are needed.
  * - `buildParams`: Optional build parameters:
  *   - `generate`: Run `go generate` before building.
  *   - `ldflags`: An array of ldflags to pass to the `go install` command.
- * - `packagePath`: Optionally set the package path to build (e.g. `./cmd/foo`).
+ *   - `trimpath`: Set the `-trimpath` flag.
+ *   - `mod`: Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
+ * - `dependencies`: Optionally add additional dependencies to the build.
+ * - `env`: Optionally set environment variables for the build.
+ * - `path`: Optionally set the package path to build (e.g. `./cmd/foo`).
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  *
  * ## Example
  *
  * ```typescript
- * import { goInstall } from "go";
+ * import { goBuild } from "go";
+ * import openssl from "openssl";
  *
  * export default function {
- *   return goInstall({
- *     goModule: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *   return goBuild({
+ *     source: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
+ *     dependencies: [openssl()],
+ *     env: {
+ *       CGO_ENABLED: "0",
+ *     },
  *     buildParams: {
  *       generate: true,
  *       trimpath: true,
@@ -94,16 +99,14 @@ interface GoBuildOptions {
  *         "-w"
  *       ],
  *     },
- *     packagePath: "./cmd/hello",
+ *     path: "./cmd/hello",
  *     runnable: "bin/hello",
  *   });
  * };
  * ```
  */
-export async function goInstall(
-  options: GoBuildOptions,
-): Promise<std.Recipe<std.Directory>> {
-  const modules = goModDownload(options.goModule);
+export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
+  const modules = goModDownload(options.source);
 
   let buildResult = std.runBash`
     # Run generate if requested
@@ -127,8 +130,8 @@ export async function goInstall(
 
     go install "\${goargs[@]}" "$package_path"
   `
-    .workDir(options.goModule)
-    .dependencies(go(), std.toolchain())
+    .workDir(options.source)
+    .dependencies(go(), ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
@@ -136,7 +139,7 @@ export async function goInstall(
       ldflags: ldflagsWrapper(options.buildParams?.ldflags ?? []),
       trimpath: options.buildParams?.trimpath ?? false ? "true" : "false",
       mod: options.buildParams?.mod ?? "",
-      package_path: options.packagePath ?? ".",
+      package_path: options.path ?? ".",
       ...options.env,
     })
     .toDirectory();
@@ -148,30 +151,13 @@ export async function goInstall(
   return buildResult;
 }
 
-async function goModDownload(
+function goModDownload(
   goModule: std.AsyncRecipe<std.Directory>,
-): Promise<std.Recipe<std.Directory>> {
-  let goModuleDir = await goModule;
-
-  // HACK: Used so we can optionally grab `go.sum` (and fallback to an empty
-  // file if it isn't present). This should be replaced with a recipe to
-  // slice the `goModule` recipe using paths or glob patterns.
-  goModuleDir = std.merge(
-    std.directory({
-      "go.sum": std.file(""),
-    }),
-    goModuleDir,
-  );
-
+): std.Recipe<std.Directory> {
   return std.runBash`
     go mod download all
   `
-    .workDir(
-      std.directory({
-        "go.mod": goModuleDir.get("go.mod"),
-        "go.sum": goModuleDir.get("go.sum"),
-      }),
-    )
+    .workDir(std.glob(goModule, ["**/go.mod", "**/go.sum"]))
     .dependencies(go(), caCertificates())
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })

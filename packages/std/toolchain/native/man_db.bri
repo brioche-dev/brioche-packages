@@ -5,12 +5,9 @@ import libpipeline from "./libpipeline.bri";
 import groff from "./groff.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/man-db-2.11.2.tar.xz",
-    hash: std.sha256Hash(
-      "cffa1ee4e974be78646c46508e6dd2f37e7c589aaab2938cc1064f058fef9f8d",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/man-db-2.11.2.tar.xz",
+  );
 
   return std
     .process({

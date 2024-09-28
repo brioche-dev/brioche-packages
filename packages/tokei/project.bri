@@ -6,19 +6,15 @@ export const project = {
   version: "12.1.2",
 };
 
-const crate = std
-  .download({
-    url: `https://github.com/XAMPPRocky/tokei/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "81ef14ab8eaa70a68249a299f26f26eba22f342fb8e22fca463b08080f436e50",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/XAMPPRocky/tokei/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
-    crate,
+    source,
     runnable: "bin/tokei",
   });
-};
+}

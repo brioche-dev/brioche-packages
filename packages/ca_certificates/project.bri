@@ -2,16 +2,13 @@ import * as std from "std";
 
 export const project = {
   name: "ca_certificates",
-  version: "2024-03-11",
+  version: "2024-07-02",
 };
 
-export default (): std.Recipe<std.Directory> => {
-  const cacert = std.download({
-    url: `https://curl.se/ca/cacert-${project.version}.pem`,
-    hash: std.sha256Hash(
-      "1794c1d4f7055b7d02c2170337b61b48a2ef6c90d77e95444fd2596f4cac609f",
-    ),
-  });
+export default function (): std.Recipe<std.Directory> {
+  const cacert = Brioche.download(
+    `https://curl.se/ca/cacert-${project.version}.pem`,
+  );
 
   return std.setEnv(
     std.directory({
@@ -24,7 +21,7 @@ export default (): std.Recipe<std.Directory> => {
       }),
     }),
     {
-      SSL_CERT_FILE: { path: "etc/ssl/certs/ca-bundle.crt" },
+      SSL_CERT_FILE: { fallback: { path: "etc/ssl/certs/ca-bundle.crt" } },
     },
   );
-};
+}

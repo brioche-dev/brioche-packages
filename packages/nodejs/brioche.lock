@@ -1,3 +1,9 @@
 {
-  "dependencies": {}
+  "dependencies": {},
+  "downloads": {
+    "https://nodejs.org/dist/v20.16.0/node-v20.16.0-linux-x64.tar.xz": {
+      "type": "sha256",
+      "value": "c30af7dfea46de7d8b9b370fa33b8b15440bc93f0a686af8601bbb48b82f16c0"
+    }
+  }
 }

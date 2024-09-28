@@ -1,6 +1,8 @@
 import * as std from "/core";
-import { setEnv } from "/extra";
+import { setEnv } from "/extra/set_env.bri";
 import stage2 from "/toolchain/stage2";
+import { buildAutopackConfig, AutopackOptions } from "/extra/autopack.bri";
+import { runtimeUtils } from "/toolchain/utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
@@ -59,90 +61,211 @@ import patchelf from "./patchelf.bri";
 
 export { bash };
 
+const toolPackages = [
+  zlib(),
+  bzip2(),
+  xz(),
+  zstd(),
+  file(),
+  bc(),
+  sed(),
+  grep(),
+  bash(),
+  coreutils(),
+  diffutils(),
+  gawk(),
+  findutils(),
+  gzip(),
+  make(),
+  patch(),
+  tar(),
+  which(),
+];
+
+const toolchainOnlyPackages = [
+  linuxHeaders(),
+  glibc(),
+  readline(),
+  m4(),
+  flex(),
+  binutils(),
+  gmp(),
+  mpfr(),
+  mpc(),
+  attr(),
+  acl(),
+  libxcrypt(),
+  gcc(),
+  pkgconf(),
+  ncurses(),
+  psmisc(),
+  gettext(),
+  bison(),
+  libtool(),
+  gdbm(),
+  gperf(),
+  expat(),
+  inetutils(),
+  less(),
+  perl(),
+  perlXmlParser(),
+  intltool(),
+  autoconf(),
+  automake(),
+  libelf(),
+  groff(),
+  libpipeline(),
+  texinfo(),
+  manDb(),
+  procpsNg(),
+  utilLinux(),
+  patchelf(),
+];
+
 /**
  * Returns a set of common Unix-style utilities
  */
 export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  let tools = std.merge(
-    zlib(),
-    bzip2(),
-    xz(),
-    zstd(),
-    file(),
-    bc(),
-    binutils(),
-    sed(),
-    grep(),
-    bash(),
-    coreutils(),
-    diffutils(),
-    gawk(),
-    findutils(),
-    gzip(),
-    make(),
-    patch(),
-    tar(),
-    which(),
-  );
-  tools = fixShebangs(tools);
+  let tools = std.merge(...toolPackages);
+
+  // Pack binaries and scripts
+  tools = autopack(tools, {
+    globs: ["bin/**"],
+    linkDependencies: [toolchain()],
+    dynamicBinaryConfig: {
+      enabled: true,
+    },
+    sharedLibraryConfig: {
+      enabled: false,
+    },
+    scriptConfig: {
+      enabled: true,
+    },
+    repackConfig: {
+      enabled: true,
+    },
+  });
+
+  // Only take the binaries (plus the magic file)
+  tools = std.directory({
+    bin: tools.get("bin"),
+    share: std.directory({
+      misc: std.directory({
+        "magic.mgc": tools.get("share/misc/magic.mgc"),
+      }),
+    }),
+  });
+
+  // Set `$MAGIC` env var for `file` when used as a dependency
   tools = setEnv(tools, {
-    CPATH: { path: "include" },
-    LIBRARY_PATH: { path: "lib" },
-    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
-    MAGIC: { path: "share/misc/magic.mgc" },
+    MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
   });
 
   return std.sync(tools);
 });
 
-export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  let toolchainOnly = std.merge(
-    linuxHeaders(),
-    glibc(),
-    readline(),
-    m4(),
-    flex(),
-    gmp(),
-    mpfr(),
-    mpc(),
-    attr(),
-    acl(),
-    libxcrypt(),
-    gcc(),
-    pkgconf(),
-    ncurses(),
-    psmisc(),
-    gettext(),
-    bison(),
-    libtool(),
-    gdbm(),
-    gperf(),
-    expat(),
-    inetutils(),
-    less(),
-    perl(),
-    perlXmlParser(),
-    intltool(),
-    autoconf(),
-    automake(),
-    libelf(),
-    groff(),
-    libpipeline(),
-    texinfo(),
-    manDb(),
-    procpsNg(),
-    utilLinux(),
-    patchelf(),
-  );
-  toolchainOnly = fixShebangs(toolchainOnly);
-  toolchainOnly = toolchainOnly.insert(
-    "bin/cc",
-    std.symlink({ target: "gcc" }),
-  );
-  toolchainOnly = std.sync(toolchainOnly);
+/**
+ * Returns a complete toolchain, including a C compiler and common libraries.
+ * Includes all tools from `tools`.
+ */
+export const toolchain = std.memo(
+  async (): Promise<std.Recipe<std.Directory>> => {
+    // Merge all the packages
+    const unpackedToolchain = std.merge(
+      ...toolchainOnlyPackages,
+      ...toolPackages,
+    );
 
-  return std.merge(tools(), toolchainOnly);
-});
+    let toolchain = unpackedToolchain;
+
+    // Add a symlink for the C compiler
+    toolchain = toolchain.insert("bin/cc", std.symlink({ target: "gcc" }));
+
+    // Set env vars when used as a dependency. These are also used
+    // when autopacking
+    toolchain = setEnv(toolchain, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: {
+        append: [
+          { path: "lib" },
+          { path: "lib/man-db" },
+          { path: "lib/gconv" },
+        ],
+      },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
+      AUTOCONF: { fallback: { path: "bin/autoconf" } },
+      AUTOHEADER: { fallback: { path: "bin/autoheader" } },
+      AUTOM4TE: { fallback: { path: "bin/autom4te" } },
+      M4: { fallback: { path: "bin/m4" } },
+      autom4te_perllibdir: { fallback: { path: "share/autoconf" } },
+      AC_MACRODIR: { fallback: { path: "share/autoconf" } },
+      trailer_m4: { fallback: { path: "share/autoconf/autoconf/trailer.m4" } },
+      ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      ACLOCAL_AUTOMAKE_DIR: { fallback: { path: "share/aclocal-1.16" } },
+      AUTOMAKE_UNINSTALLED: { fallback: { value: "1" } },
+    });
+
+    // Re-pack all dynamic binaries and shared libraries
+    toolchain = autopack(toolchain, {
+      globs: ["**"],
+      excludeGlobs: ["lib/libc.so*"],
+      selfDependency: true,
+      dynamicBinaryConfig: {
+        enabled: true,
+      },
+      sharedLibraryConfig: {
+        enabled: true,
+      },
+      scriptConfig: {
+        enabled: false,
+      },
+      repackConfig: {
+        enabled: true,
+      },
+    });
+
+    toolchain = fixShebangs(toolchain);
+
+    toolchain = std.sync(toolchain);
+
+    return toolchain;
+  },
+);
+
+function autopack(
+  recipe: std.AsyncRecipe<std.Directory>,
+  options: AutopackOptions,
+): std.Recipe<std.Directory> {
+  const { config, variables } = buildAutopackConfig({
+    options,
+    defaultLinkDependencies: [],
+    runtimeUtils: runtimeUtils(),
+  });
+
+  const variableArgs: std.ProcessTemplateLike[] = Object.entries(
+    variables,
+  ).flatMap(([name, value]) => {
+    switch (value.type) {
+      case "path":
+        return ["--var", std.tpl`${name}=path:${value.value}`];
+    }
+  });
+
+  return std
+    .process({
+      command: std.tpl`${runtimeUtils()}/bin/brioche-packer`,
+      args: [
+        "autopack",
+        std.outputPath,
+        "--config",
+        JSON.stringify(config),
+        ...variableArgs,
+      ],
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
 
 function fixShebangs(
   recipe: std.AsyncRecipe<std.Directory>,

@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "nodejs",
-  version: "20.15.1",
+  version: "20.16.0",
 };
 
 /**
@@ -12,13 +12,9 @@ export const project = {
  * - `bin/npm`
  */
 function nodejs(): std.Recipe<std.Directory> {
-  let node = std
-    .download({
-      url: `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
-      hash: std.sha256Hash(
-        "26700f8d3e78112ad4a2618a9c8e2816e38a49ecf0213ece80e54c38cb02563f",
-      ),
-    })
+  let node = Brioche.download(
+    `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
+  )
     .unarchive("tar", "xz")
     .peel();
 
@@ -31,12 +27,16 @@ function nodejs(): std.Recipe<std.Directory> {
 export default nodejs;
 
 interface NpmInstallOptions {
-  npmPackage: std.AsyncRecipe<std.Directory>;
+  source: std.AsyncRecipe<std.Directory>;
 }
 
 /**
  * Install the dependencies from an NPM package. Returns a recipe containing
  * everything from the package, plus a `node_modules` directory.
+ *
+ * ## Options
+ *
+ * - `source`: The NPM package dependencies to install.
  *
  * ## Example
  *
@@ -44,12 +44,12 @@ interface NpmInstallOptions {
  * import * as std from "std";
  * import nodejs, { npmInstall } from "nodejs";
  *
- * export default () => {
+ * export default function () {
  *   // Get all the files for the NPM package
- *   let npmPackage = Brioche.glob("src", "package.lock", "package.json");
+ *   const source = Brioche.glob("src", "package.lock", "package.json");
  *
  *   // Install the dependencies
- *   npmPackage = npmInstall({ npmPackage });
+ *   const npmPackage = npmInstall({ source });
  *
  *   // Run the build script and save the output from `dist/`
  *   return std.runBash`
@@ -69,7 +69,7 @@ export function npmInstall(
     npm clean-install
   `
     .dependencies(nodejs())
-    .outputScaffold(options.npmPackage)
+    .outputScaffold(options.source)
     .unsafe({ networking: true })
     .toDirectory();
 }

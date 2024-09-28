@@ -2,24 +2,15 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
-    hash: std.sha256Hash(
-      "fb82998998b2b29965467bc1b69d152e9c307d2cf301c9eafb4555b770ef3fd2",
-    ),
-  });
-  const sourcePatchFhs = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
-    hash: std.sha256Hash(
-      "643552db030e2f2d7ffde4f558e0f5f83d3fabf34a2e0e56ebdb49750ac27b0d",
-    ),
-  });
-  const sourcePatchMemalign = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
-    hash: std.sha256Hash(
-      "3e4b4b15485c9767501151ccf1b33cf5ee912298fda899cd809277ece27e859c",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
+  );
+  const sourcePatchFhs = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
+  );
+  const sourcePatchMemalign = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
+  );
 
   let glibc = std
     .process({

@@ -1,0 +1,28 @@
+import * as std from "std";
+
+export const project = {
+  name: "alsa_lib",
+  version: "1.2.12",
+};
+
+const source = Brioche.download(
+  `https://www.alsa-project.org/files/pub/lib/alsa-lib-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  const alsaLib = std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.setEnv(alsaLib, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}

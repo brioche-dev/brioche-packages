@@ -5,13 +5,9 @@ export const project = {
   version: "6.24.13",
 };
 
-const source = std
-  .download({
-    url: `https://astron.com/pub/tcsh/tcsh-${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "1e927d52e9c85d162bf985f24d13c6ccede9beb880d86fec492ed15480a5c71a",
-    ),
-  })
+const source = Brioche.download(
+  `https://astron.com/pub/tcsh/tcsh-${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

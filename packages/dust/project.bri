@@ -3,22 +3,18 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "dust",
-  version: "1.0.0",
+  version: "1.1.1",
 };
 
-const crate = std
-  .download({
-    url: `https://github.com/bootandy/dust/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "34b72116ab6db9bdb97bc1e49dadf392a1619838204b44b0a4695539d54ffbe8",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/bootandy/dust/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
-    crate,
+    source,
     runnable: "bin/dust",
   });
-};
+}

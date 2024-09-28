@@ -1,3 +1,9 @@
 {
-  "dependencies": {}
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/XAMPPRocky/tokei/archive/refs/tags/v12.1.2.tar.gz": {
+      "type": "sha256",
+      "value": "81ef14ab8eaa70a68249a299f26f26eba22f342fb8e22fca463b08080f436e50"
+    }
+  }
 }

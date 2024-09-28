@@ -1,0 +1,26 @@
+import * as std from "std";
+import git, { gitCheckout } from "git";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "gitui",
+  version: "0.26.3",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/extrawurst/gitui.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function (): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [git()],
+    env: {
+      GITUI_RELEASE: "1",
+    },
+    runnable: "bin/gitui",
+  });
+}

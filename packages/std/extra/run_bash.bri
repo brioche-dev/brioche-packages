@@ -6,7 +6,7 @@ import { tools } from "/toolchain";
  * Bash script should create the path `$BRIOCHE_OUTPUT`, which will be used
  * as the output of the recipe.
  *
- * This funtion returns `std.Process`, which can be used for passing in
+ * This function returns `std.Process`, which can be used for passing in
  * extra dependencies or environment variables using `.dependencies()`
  * or `.env()`, respectively, along with other process options.
  *
@@ -21,7 +21,7 @@ import { tools } from "/toolchain";
  * // Running `brioche build -o output` will create a directory `output`
  * // with the file `hello.txt`. The result is cached, so the script won't
  * // re-run unless the script changes or its inputs change.
- * export default () => {
+ * export default function () {
  *   const file = std.file("Hello, world!");
  *
  *   // Return a recipe that will call the script, with `$file` set to

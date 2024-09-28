@@ -1,0 +1,26 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "opentofu",
+  version: "1.8.0",
+};
+
+const source = Brioche.download(
+  `https://github.com/opentofu/opentofu/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/tofu",
+    buildParams: {
+      ldflags: ["-s", "-w", `-X github.com/opentofu/opentofu/version.dev=no`],
+      mod: "readonly",
+      trimpath: true,
+    },
+    runnable: "bin/tofu",
+  });
+}

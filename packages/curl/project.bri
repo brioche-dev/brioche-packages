@@ -3,21 +3,17 @@ import openssl from "openssl";
 
 export const project = {
   name: "curl",
-  version: "8.8.0",
+  version: "8.9.1",
 };
 
-const source = std
-  .download({
-    url: `https://curl.se/download/curl-${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "77c0e1cd35ab5b45b659645a93b46d660224d0024f1185e8a95cdb27ae3d787d",
-    ),
-  })
+const source = Brioche.download(
+  `https://curl.se/download/curl-${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default (): std.Recipe<std.Directory> => {
-  const curl = std.runBash`
+export default function (): std.Recipe<std.Directory> {
+  let curl = std.runBash`
     ./configure \\
       --prefix=/ \\
       --with-openssl \\
@@ -31,5 +27,11 @@ export default (): std.Recipe<std.Directory> => {
     .dependencies(std.toolchain(), openssl())
     .toDirectory();
 
+  curl = std.setEnv(curl, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
   return std.withRunnableLink(curl, "bin/curl");
-};
+}

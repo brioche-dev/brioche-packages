@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.79.0",
+  version: "1.80.1",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -38,14 +38,9 @@ const Manifest = t.object({
  * ...among other binaries.
  */
 async function rust(): Promise<std.Recipe<std.Directory>> {
-  const manifestToml = await std
-    .download({
-      url: `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
-      hash: std.sha256Hash(
-        "3608b3efa60fe074d8ef9186747d8ff803c4fc3108c7647f0e7f81c303b2cd95",
-      ),
-    })
-    .read();
+  const manifestToml = await Brioche.download(
+    `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
+  ).read();
   const manifest = t.parse(Manifest, TOML.parse(manifestToml));
 
   // TODO: Support other profiles
@@ -97,7 +92,7 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
     .flatMap((name) => (name != null ? [name] : []));
 
   result = std.setEnv(result, {
-    LIBRARY_PATH: { path: "lib" },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
   });
 
   result = std.autopack(result, {
@@ -112,11 +107,17 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
 }
 export default rust;
 
+interface CargoBuildParameters {
+  features?: string[];
+}
+
 export interface CargoBuildOptions {
-  crate: std.AsyncRecipe<std.Directory>;
+  source: std.AsyncRecipe<std.Directory>;
   path?: string;
   runnable?: string;
   dependencies?: std.AsyncRecipe<std.Directory>[];
+  env?: Record<string, std.ProcessTemplateLike>;
+  buildParams?: CargoBuildParameters;
 }
 
 /**
@@ -125,12 +126,15 @@ export interface CargoBuildOptions {
  *
  * ## Options
  *
- * - `crate`: The crate to build.
+ * - `source`: The crate to build.
  * - `path`: Optionally set a subpath to the crate to build. This is useful
  *   when building a crate within a workspace.
  * - `runnable`: Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  * - `dependencies`: Optionally add additional dependencies to the build.
+ * - `env`: Optionally set environment variables for the build.
+ * - `buildParams`: Optional build parameters:
+ *   - `features`: An array of features to enable.
  *
  * ## Example
  *
@@ -138,11 +142,17 @@ export interface CargoBuildOptions {
  * import openssl from "openssl";
  * import { cargoBuild } from "rust";
  *
- * export default () => {
+ * export default function () {
  *   return cargoBuild({
- *     crate: Brioche.glob("src", "Cargo.*"),
+ *     source: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",
  *     dependencies: [openssl()],
+ *     env: {
+ *       CARGO_LOG: "debug",
+ *     },
+ *     buildParams: {
+ *      features: ["foo", "bar"],
+ *     },
  *   });
  * };
  * ```
@@ -150,7 +160,7 @@ export interface CargoBuildOptions {
 export function cargoBuild(options: CargoBuildOptions) {
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
-  const skeletonCrate = createSkeletonCrate(options.crate);
+  const skeletonCrate = createSkeletonCrate(options.source);
 
   // Vendor the dependencies with network access and save the Cargo config.toml
   // file, so the vendored dependencies are used
@@ -176,7 +186,7 @@ export function cargoBuild(options: CargoBuildOptions) {
     .toDirectory();
 
   // Combine the original crate with the vendored dependencies
-  let crate = std.merge(vendoredSkeletonCrate, options.crate);
+  let crate = std.merge(vendoredSkeletonCrate, options.source);
 
   // Copy the updated Cargo config.toml file into the crate
   crate = crate.insert(
@@ -190,13 +200,18 @@ export function cargoBuild(options: CargoBuildOptions) {
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
-    cargo install --path "$crate_path" --frozen
+    cargo install --path "$crate_path" $features --frozen
   `
     .dependencies(rust(), std.toolchain(), ...(options.dependencies ?? []))
     .env({
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
       crate_path: options.path ?? ".",
+      features:
+        options.buildParams?.features != null
+          ? featuresWrapper(options.buildParams.features)
+          : "",
+      ...options.env,
     })
     .workDir(crate)
     .toDirectory();
@@ -235,14 +250,22 @@ export function createSkeletonCrate(
 }
 
 function cargoChef(): std.Recipe<std.Directory> {
-  const pkg = std.download({
-    url: "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
-    hash: std.sha256Hash(
-      "91b518df5c8b02775026875f3aadef1946464354db1ca0758e4912249578f0bc",
-    ),
-  });
+  const pkg = Brioche.download(
+    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
+  );
 
   return std.directory({
     bin: pkg.unarchive("tar", "gzip"),
   });
+}
+
+/**
+ * Wrapper function to generate a string of features for a Cargo build.
+ *
+ * @param features An array of features.
+ * @returns A string of features for a Cargo build.
+ */
+function featuresWrapper(features: string[]): string {
+  // From ["feature1", "feature2", "feature3"] to '--features feature1,feature2,feature3'
+  return `--features ${features.join(",")}`;
 }

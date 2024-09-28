@@ -1,3 +1,9 @@
 {
-  "dependencies": {}
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/JakWai01/lurk/archive/refs/tags/v0.3.6.tar.gz": {
+      "type": "sha256",
+      "value": "5e5497fbe0480709619f70223d1724183031e62e28c42e609ceca51951b7081e"
+    }
+  }
 }

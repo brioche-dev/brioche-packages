@@ -1,12 +1,12 @@
 import * as std from "std";
-import { goInstall } from "go";
+import { goBuild } from "go";
 
 export const project = {
   name: "terraform",
   version: "1.9.2",
 };
 
-const goModule = std
+const source = std
   .download({
     url: `https://github.com/hashicorp/terraform/archive/refs/tags/v${project.version}.tar.gz`,
     hash: std.sha256Hash(
@@ -17,8 +17,8 @@ const goModule = std
   .peel();
 
 export default () => {
-  return goInstall({
-    goModule,
+  return goBuild({
+    source,
     buildParams: {
       ldflags: ["-w", "-s", `-X github.com/hashicorp/terraform/version.dev=no`],
       mod: "readonly",

@@ -5,12 +5,9 @@ import perlXmlParser from "./perl_xml_parser.bri";
 import expat from "./expat.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/intltool-0.51.0.tar.gz",
-    hash: std.sha256Hash(
-      "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/intltool-0.51.0.tar.gz",
+  );
 
   const perlDep = std.merge(perl(), perlXmlParser());
 
