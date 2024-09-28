@@ -10,9 +10,9 @@ const source = Brioche.download(
   `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
 ).unarchive("tar", "gzip");
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/eza",
   });
-};
+}

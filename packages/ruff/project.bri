@@ -10,10 +10,10 @@ const source = Brioche.download(
   `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
 ).unarchive("tar", "gzip");
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     path: "crates/ruff",
     runnable: "bin/ruff",
   });
-};
+}

@@ -11,7 +11,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default (): std.Recipe<std.Directory> => {
+export default function (): std.Recipe<std.Directory> {
   const pv = std.runBash`
     ./configure --prefix=/
     make
@@ -22,4 +22,4 @@ export default (): std.Recipe<std.Directory> => {
     .toDirectory();
 
   return std.withRunnableLink(pv, "bin/pv");
-};
+}

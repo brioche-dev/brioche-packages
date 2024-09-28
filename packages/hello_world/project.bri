@@ -4,7 +4,7 @@ export const project = {
   name: "hello_world",
 };
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return std.runBash`
     mkdir -p "$BRIOCHE_OUTPUT/bin"
     gcc src/main.c -o "$BRIOCHE_OUTPUT/bin/hello-world"
@@ -12,4 +12,4 @@ export default () => {
   `
     .workDir(Brioche.glob("src"))
     .dependencies(std.toolchain());
-};
+}

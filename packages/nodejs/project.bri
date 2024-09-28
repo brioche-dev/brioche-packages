@@ -44,7 +44,7 @@ interface NpmInstallOptions {
  * import * as std from "std";
  * import nodejs, { npmInstall } from "nodejs";
  *
- * export default () => {
+ * export default function () {
  *   // Get all the files for the NPM package
  *   const source = Brioche.glob("src", "package.lock", "package.json");
  *

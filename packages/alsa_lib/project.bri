@@ -11,7 +11,7 @@ const source = Brioche.download(
   .unarchive("tar", "bzip2")
   .peel();
 
-export default (): std.Recipe<std.Directory> => {
+export default function (): std.Recipe<std.Directory> {
   const alsaLib = std.runBash`
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -25,4 +25,4 @@ export default (): std.Recipe<std.Directory> => {
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
-};
+}

@@ -13,7 +13,7 @@ import * as std from "/core";
  * ```typescript
  * import * as std from "std";
  *
- * export default () => {
+ * export default function () {
  *   // Build a C program from the `src` directory
  *   let program = std.runBash`
  *     mkdir -p "$BRIOCHE_OUTPUT/bin"

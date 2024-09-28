@@ -13,11 +13,11 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/jj",
     path: "cli",
     dependencies: [openssl()],
   });
-};
+}

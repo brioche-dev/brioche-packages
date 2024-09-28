@@ -142,7 +142,7 @@ export interface CargoBuildOptions {
  * import openssl from "openssl";
  * import { cargoBuild } from "rust";
  *
- * export default () => {
+ * export default function () {
  *   return cargoBuild({
  *     source: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",

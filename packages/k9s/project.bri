@@ -13,7 +13,7 @@ const gitRef = await Brioche.gitRef({
 });
 const source = gitCheckout(gitRef);
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
@@ -26,4 +26,4 @@ export default () => {
     },
     runnable: "bin/k9s",
   });
-};
+}

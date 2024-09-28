@@ -12,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return goBuild({
     source,
     path: "./cmd/tofu",
@@ -23,4 +23,4 @@ export default () => {
     },
     runnable: "bin/tofu",
   });
-};
+}

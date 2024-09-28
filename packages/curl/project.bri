@@ -12,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default (): std.Recipe<std.Directory> => {
+export default function (): std.Recipe<std.Directory> {
   let curl = std.runBash`
     ./configure \\
       --prefix=/ \\
@@ -34,4 +34,4 @@ export default (): std.Recipe<std.Directory> => {
   });
 
   return std.withRunnableLink(curl, "bin/curl");
-};
+}

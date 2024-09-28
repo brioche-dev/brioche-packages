@@ -13,7 +13,7 @@ const source = gitCheckout(
   }),
 );
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     dependencies: [git()],
@@ -22,4 +22,4 @@ export default () => {
     },
     runnable: "bin/gitui",
   });
-};
+}

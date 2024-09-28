@@ -5,7 +5,7 @@ export const project = {
   version: "2024-07-02",
 };
 
-export default (): std.Recipe<std.Directory> => {
+export default function (): std.Recipe<std.Directory> {
   const cacert = Brioche.download(
     `https://curl.se/ca/cacert-${project.version}.pem`,
   );
@@ -24,4 +24,4 @@ export default (): std.Recipe<std.Directory> => {
       SSL_CERT_FILE: { fallback: { path: "etc/ssl/certs/ca-bundle.crt" } },
     },
   );
-};
+}
