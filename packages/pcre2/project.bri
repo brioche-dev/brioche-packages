@@ -5,13 +5,9 @@ export const project = {
   version: "10.44",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "07a002e8216382a96f722bc4a831f3d77457fe3e9e62a6dff250a2dd0e9c5e6d",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

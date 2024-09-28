@@ -12,13 +12,9 @@ export const project = {
  * - `bin/npm`
  */
 function nodejs(): std.Recipe<std.Directory> {
-  let node = std
-    .download({
-      url: `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
-      hash: std.sha256Hash(
-        "c30af7dfea46de7d8b9b370fa33b8b15440bc93f0a686af8601bbb48b82f16c0",
-      ),
-    })
+  let node = Brioche.download(
+    `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
+  )
     .unarchive("tar", "xz")
     .peel();
 

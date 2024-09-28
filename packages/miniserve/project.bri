@@ -6,13 +6,9 @@ export const project = {
   version: "0.27.1",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/svenstaro/miniserve/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "b65580574ca624072b1a94d59ebf201ab664eacacb46a5043ef7b81ebb538f80",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/svenstaro/miniserve/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

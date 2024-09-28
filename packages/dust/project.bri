@@ -6,13 +6,9 @@ export const project = {
   version: "1.1.1",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/bootandy/dust/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "98cae3e4b32514e51fcc1ed07fdbe6929d4b80942925348cc6e57b308d9c4cb0",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/bootandy/dust/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

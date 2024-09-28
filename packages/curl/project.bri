@@ -6,13 +6,9 @@ export const project = {
   version: "8.9.1",
 };
 
-const source = std
-  .download({
-    url: `https://curl.se/download/curl-${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5",
-    ),
-  })
+const source = Brioche.download(
+  `https://curl.se/download/curl-${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

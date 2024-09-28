@@ -38,14 +38,9 @@ const Manifest = t.object({
  * ...among other binaries.
  */
 async function rust(): Promise<std.Recipe<std.Directory>> {
-  const manifestToml = await std
-    .download({
-      url: `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
-      hash: std.sha256Hash(
-        "de354821fe573e7514d4245a4f20223b45c755b265d76312c777ae7135c28ed1",
-      ),
-    })
-    .read();
+  const manifestToml = await Brioche.download(
+    `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
+  ).read();
   const manifest = t.parse(Manifest, TOML.parse(manifestToml));
 
   // TODO: Support other profiles

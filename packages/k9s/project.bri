@@ -7,13 +7,9 @@ export const project = {
 };
 const gitCommit = "1440643e8d1a101a38d9be1933131ddf5c863940";
 
-const source = std
-  .download({
-    url: `https://github.com/derailed/k9s/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "e011697b3de99d7691119036eaae6e5d4f1a98e284755ab6b15ae6daba08595f",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/derailed/k9s/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

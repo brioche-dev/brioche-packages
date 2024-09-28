@@ -6,13 +6,9 @@ export const project = {
   version: "14.1.0",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/BurntSushi/ripgrep/archive/refs/tags/${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "33c6169596a6bbfdc81415910008f26e0809422fda2d849562637996553b2ab6",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/BurntSushi/ripgrep/archive/refs/tags/${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

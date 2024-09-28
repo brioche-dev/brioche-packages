@@ -1,3 +1,9 @@
 {
-  "dependencies": {}
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/Canop/broot/archive/refs/tags/v1.42.0.tar.gz": {
+      "type": "sha256",
+      "value": "f8a206d44b55287f47cdb63e2f19c9022d55d49f9399e5461f7797ccbe0264ba"
+    }
+  }
 }

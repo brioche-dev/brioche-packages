@@ -5,13 +5,9 @@ export const project = {
   version: "6.9.9",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/kkos/oniguruma/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "001aa1202e78448f4c0bf1a48c76e556876b36f16d92ce3207eccfd61d99f2a0",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/kkos/oniguruma/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 

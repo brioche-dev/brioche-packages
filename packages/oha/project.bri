@@ -6,13 +6,9 @@ export const project = {
   version: "1.4.6",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/hatoo/oha/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "8a68d4411ce241d161aeaa87e9f1e778b381398454bf58e58c976d575fcb2c3b",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/hatoo/oha/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
