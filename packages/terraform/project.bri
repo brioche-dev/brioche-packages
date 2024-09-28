@@ -6,17 +6,13 @@ export const project = {
   version: "1.9.2",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/hashicorp/terraform/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "4f61b84d5e55648dfe576ead2744bd09aba8db00d8f780a2d498f30537e287f1",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/hashicorp/terraform/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
@@ -25,4 +21,4 @@ export default () => {
     },
     runnable: "bin/terraform",
   });
-};
+}
