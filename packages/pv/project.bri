@@ -5,17 +5,13 @@ export const project = {
   version: "1.8.13",
 };
 
-const source = std
-  .download({
-    url: `https://www.ivarch.com/programs/sources/pv-${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "e2bde058d0d3bfe03e60a6eedef6a179991f5cc698d1bac01b64a86f5a8c17af",
-    ),
-  })
+const source = Brioche.download(
+  `https://www.ivarch.com/programs/sources/pv-${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default (): std.Recipe<std.Directory> => {
+export default function (): std.Recipe<std.Directory> {
   const pv = std.runBash`
     ./configure --prefix=/
     make
@@ -26,4 +22,4 @@ export default (): std.Recipe<std.Directory> => {
     .toDirectory();
 
   return std.withRunnableLink(pv, "bin/pv");
-};
+}

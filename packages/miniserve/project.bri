@@ -6,13 +6,9 @@ export const project = {
   version: "0.27.1",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/svenstaro/miniserve/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "b65580574ca624072b1a94d59ebf201ab664eacacb46a5043ef7b81ebb538f80",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/svenstaro/miniserve/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
@@ -21,7 +17,7 @@ const source = std
 // https://github.com/svenstaro/miniserve/commit/2fbfcbfe17b5c12630ccb03b6ccd31cb4b8316cc
 const patch = Brioche.includeFile("miniserve-v0.27.1.patch");
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   const patchedSource = std.runBash`
     cd "$BRIOCHE_OUTPUT"
     patch -p1 < $patch
@@ -34,4 +30,4 @@ export default () => {
     source: patchedSource,
     runnable: "bin/miniserve",
   });
-};
+}

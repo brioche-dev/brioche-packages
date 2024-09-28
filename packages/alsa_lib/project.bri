@@ -5,17 +5,13 @@ export const project = {
   version: "1.2.12",
 };
 
-const source = std
-  .download({
-    url: `https://www.alsa-project.org/files/pub/lib/alsa-lib-${project.version}.tar.bz2`,
-    hash: std.sha256Hash(
-      "4868cd908627279da5a634f468701625be8cc251d84262c7e5b6a218391ad0d2",
-    ),
-  })
+const source = Brioche.download(
+  `https://www.alsa-project.org/files/pub/lib/alsa-lib-${project.version}.tar.bz2`,
+)
   .unarchive("tar", "bzip2")
   .peel();
 
-export default (): std.Recipe<std.Directory> => {
+export default function (): std.Recipe<std.Directory> {
   const alsaLib = std.runBash`
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -29,4 +25,4 @@ export default (): std.Recipe<std.Directory> => {
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
-};
+}

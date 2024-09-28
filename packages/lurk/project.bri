@@ -6,19 +6,15 @@ export const project = {
   version: "0.3.6",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/JakWai01/lurk/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "5e5497fbe0480709619f70223d1724183031e62e28c42e609ceca51951b7081e",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/JakWai01/lurk/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/lurk",
   });
-};
+}

@@ -21,7 +21,7 @@ import { tools } from "/toolchain";
  * // Running `brioche build -o output` will create a directory `output`
  * // with the file `hello.txt`. The result is cached, so the script won't
  * // re-run unless the script changes or its inputs change.
- * export default () => {
+ * export default function () {
  *   const file = std.file("Hello, world!");
  *
  *   // Return a recipe that will call the script, with `$file` set to

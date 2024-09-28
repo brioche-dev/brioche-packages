@@ -6,23 +6,13 @@ export const project = {
   version: "0.19.2",
 };
 
-// HACK: Workaround for issue unarchiving this tarfile. See:
-// https://github.com/brioche-dev/brioche/issues/103
-const sourceTar = Brioche.download(
+const source = Brioche.download(
   `https://github.com/eza-community/eza/archive/refs/tags/v${project.version}.tar.gz`,
-);
-const source = std
-  .process({
-    command: "tar",
-    args: ["-xf", sourceTar, "--strip-components=1", "-C", std.outputPath],
-    outputScaffold: std.directory(),
-    dependencies: [std.tools()],
-  })
-  .toDirectory();
+).unarchive("tar", "gzip");
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/eza",
   });
-};
+}

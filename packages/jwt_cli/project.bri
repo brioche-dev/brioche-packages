@@ -6,17 +6,13 @@ export const project = {
   version: "6.1.0",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/mike-engel/jwt-cli/archive/refs/tags/${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "9bc2232f052f0fcc3171d95a301911b29b8dff12fcb7ea80718c0ef1c993f9b9",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/mike-engel/jwt-cli/archive/refs/tags/${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default function () {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/jwt",
