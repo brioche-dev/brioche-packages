@@ -17,7 +17,11 @@ export function autopack(
   recipe: std.AsyncRecipe<std.Directory>,
   options: AutopackOptions,
 ): std.Recipe<std.Directory> {
-  const { config, variables } = buildConfig(options);
+  const { config, variables } = buildAutopackConfig({
+    options,
+    defaultLinkDependencies: [toolchain()],
+    runtimeUtils: runtimeUtils(),
+  });
 
   const variableArgs: std.ProcessTemplateLike[] = Object.entries(
     variables,
@@ -55,6 +59,12 @@ export interface AutopackOptions {
    * it will be skipped. Mutually exclusive with `paths`
    */
   globs?: string[];
+
+  /**
+   * A list of glob patterns to exclude when autopacking. Can only be set
+   * when `globs` is set
+   */
+  excludeGlobs?: string[];
 
   /**
    * A list of dependencies to search when linking. These will be used to find
@@ -113,6 +123,12 @@ interface SharedLibraryConfig extends DynamicLinkingConfig {
    * Whether to pack shared libraries. Defaults to `true`
    */
   enabled?: boolean;
+
+  /**
+   * Whether to pack a shared library even if it has no dependencies. Defaults
+   * to `false`
+   */
+  allowEmpty?: boolean;
 }
 
 interface ScriptConfig {
@@ -177,9 +193,21 @@ type EnvValueConfig =
   | { type: "prepend"; value: EnvValue; separator: string }
   | { type: "append"; value: EnvValue; separator: string };
 
-type EnvValue = std.ProcessTemplateLike | { relativePath: string };
+type EnvValue =
+  | std.ProcessTemplateLike
+  | { relativePath: string }
+  | { relativePaths: string[]; separator: string };
 
-function buildConfig(options: AutopackOptions): AutopackConfigResult {
+interface BuildConfigOptions {
+  options: AutopackOptions;
+  defaultLinkDependencies: std.AsyncRecipe[];
+  runtimeUtils: std.Recipe<std.Directory>;
+}
+
+export function buildAutopackConfig(
+  buildConfigOptions: BuildConfigOptions,
+): AutopackConfigResult {
+  const { options, defaultLinkDependencies, runtimeUtils } = buildConfigOptions;
   const variables: Record<string, AutopackConfigVariable> = {};
 
   let variableIndex = 0;
@@ -199,6 +227,20 @@ function buildConfig(options: AutopackOptions): AutopackConfigResult {
         components: [
           { type: "relative_path", path: std.bstring(value.relativePath) },
         ],
+      };
+    } else if (typeof value === "object" && "relativePaths" in value) {
+      return {
+        components: value.relativePaths.flatMap((path, i) => [
+          ...(i === 0
+            ? []
+            : [
+                {
+                  type: "literal",
+                  value: std.bstring(value.separator),
+                } satisfies EnvValueTemplateValueComponent,
+              ]),
+          { type: "relative_path", path: std.bstring(path) },
+        ]),
       };
     } else {
       const processTemplate = std.processTemplate(value);
@@ -226,11 +268,11 @@ function buildConfig(options: AutopackOptions): AutopackConfigResult {
 
   const dynamicBinaryPackedExecutable = addVar({
     name: "dynamicBinaryPackedExecutable",
-    value: runtimeUtils().get("bin/brioche-packed-exec"),
+    value: runtimeUtils.get("bin/brioche-packed-exec"),
   });
   const scriptPackedExecutable = addVar({
     name: "scriptPackedExecutable",
-    value: runtimeUtils().get("bin/brioche-packed-plain-exec"),
+    value: runtimeUtils.get("bin/brioche-packed-plain-exec"),
   });
 
   const dynamicBinary =
@@ -299,12 +341,13 @@ function buildConfig(options: AutopackOptions): AutopackConfigResult {
 
   const linkDependencies = [
     ...(options.linkDependencies ?? []),
-    toolchain(),
+    ...defaultLinkDependencies,
   ].map((dep) => addVar({ value: dep }));
 
   const config = {
     paths: options.paths,
     globs: options.globs,
+    excludeGlobs: options.excludeGlobs,
     linkDependencies,
     selfDependency: options.selfDependency,
     dynamicBinary,
@@ -323,6 +366,7 @@ interface AutopackConfigResult {
 interface AutopackConfigTemplate {
   paths?: TemplatePath[];
   globs?: string[];
+  excludeGlobs?: string[];
   quiet?: boolean;
   linkDependencies?: TemplatePath[];
   selfDependency?: boolean;

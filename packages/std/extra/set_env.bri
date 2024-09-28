@@ -1,13 +1,20 @@
 import * as std from "/core";
 
-export type EnvValues = Record<string, EnvValue | EnvValue[]>;
+export type EnvValues = Record<string, EnvValue>;
 
-export type EnvValue = { path: string };
+export type EnvValue =
+  | { append: { path: string }[] }
+  | { fallback: { path: string } }
+  | { fallback: { value: string } };
 
 /**
  * Returns a new recipe with some environment variables. These environment
  * variables will be set when the recipe is included as a dependency for a
- * procss recipe.
+ * process recipe.
+ *
+ * Each environment variable can be set to either append one or more paths
+ * (relative to the root of the recipe), or set a fallback path / value
+ * if the environment variable is empty.
  *
  * ## Example
  *
@@ -17,10 +24,15 @@ export type EnvValue = { path: string };
  *   # ... build a library ...
  * `;
  *
- * // When myLibrary gets included as a dependency, `$LIBRARY_PATH`
- * // will get set to the absolute path of the `lib` directory
+ * // When myLibrary gets included as a dependency, the following
+ * // environment variables will be set:
+ * // - `$LIBRARY_PATH` will be appended with the absolute path to `lib`
+ * // - `$CC` will be set to the path to `cc-wrapper.sh` if not set
+ * // - `$DEBUG` will be set to `1` if not set
  * myLibrary = std.setEnv(myLibrary, {
- *   LIBRARY_PATH: { path: "lib" },
+ *   LIBRARY_PATH: { append: [{ path: "lib"}] },
+ *   CC: { fallback: { path: "cc-wrapper.sh" } },
+ *   DEBUG: { fallback: { value: "1" } },
  * });
  * ```
  */
@@ -30,14 +42,39 @@ export function setEnv(
 ): std.Recipe<std.Directory> {
   let result = std.recipe(recipe);
   for (const [key, value] of Object.entries(env)) {
-    const values = Array.isArray(value) ? value : [value];
-    for (const value of values) {
-      const escapedPath = value.path
-        .replaceAll("_", "__")
-        .replaceAll(/[\/\.]/g, "_");
+    if ("append" in value) {
+      for (const append of value.append) {
+        const escapedPath = append.path
+          .replaceAll("_", "__")
+          .replaceAll(/[\/\.]/g, "_");
+        result = result.insert(
+          `brioche-env.d/env/${key}/${escapedPath}`,
+          std.symlink({ target: `../../../${append.path}` }),
+        );
+      }
+    } else if ("fallback" in value && "path" in value.fallback) {
+      std.assert(
+        std.semverMatches(std.BRIOCHE_VERSION, ">=0.1.2"),
+        "fallback env vars require Brioche v0.1.2 or later",
+      );
+
       result = result.insert(
-        `brioche-env.d/env/${key}/${escapedPath}`,
-        std.symlink({ target: `../../../${value.path}` }),
+        `brioche-env.d/env/${key}`,
+        std.symlink({ target: `../../${value.fallback.path}` }),
+      );
+    } else if ("fallback" in value && "value" in value.fallback) {
+      std.assert(
+        std.semverMatches(std.BRIOCHE_VERSION, ">=0.1.2"),
+        "fallback env vars require Brioche v0.1.2 or later",
+      );
+
+      result = result.insert(
+        `brioche-env.d/env/${key}`,
+        std.file(value.fallback.value),
+      );
+    } else {
+      throw new Error(
+        `Invalid value for environment variable ${JSON.stringify(key)}`,
       );
     }
   }
