@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/derailed/k9s/archive/refs/tags/v0.32.5.tar.gz": {
-      "type": "sha256",
-      "value": "e011697b3de99d7691119036eaae6e5d4f1a98e284755ab6b15ae6daba08595f"
+  "git_refs": {
+    "https://github.com/derailed/k9s.git": {
+      "v0.32.5": "1440643e8d1a101a38d9be1933131ddf5c863940"
     }
   }
 }
