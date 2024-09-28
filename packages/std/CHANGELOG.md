@@ -4,6 +4,37 @@ All notable changes to the `std` package will be documented in this file.
 
 The `std` package is not yet considered stable and doesn't currently assign version numbers to releases, so changes are documented by date. You are encouraged to use version control with the `brioche.lock` lockfile to ensure the version of the `std` package used stays consistent within your Brioche projects.
 
+## 2024-09-28
+
+PR: [#110](https://github.com/brioche-dev/brioche-packages/pull/110)
+
+### Breaking
+
+`std.setEnv()` now takes a different input. To get the same behavior as before of appending env vars, each one needs to be wrapped in an object with the key `append`, like so:
+
+```typescript
+// Previously
+/*
+std.setEnv(recipe, {
+  FOO: { path: "foo" },
+  BAR: [{ path: "bar" }, { path: "baz" }],
+});
+*/
+
+// Now
+std.setEnv(recipe, {
+  FOO: { append: [{ path: "foo" }] },
+  BAR: { append: [{ path: "bar" }, { path: "baz" }] },
+});
+```
+
+### Changed
+
+- Updated `std.setEnv()` to support new "fallback" env vars (**requires Brioche v0.1.2 or later**):
+    - `VAR: { fallback: { path: "some/path" } }`: If `$VAR` is not set, set it to the absolute path for `some/path`
+    - `VAR: { fallback: { value: "1" } }`: If `$VAR` is not set, set it to the value `1`
+- Update `std.toolchain()` to set several env vars for automake/autoconf by default
+- Re-pack `std.tools()` and `std.toolchain()` to make sure they all use the final built version of all libraries. This should also help shrink their artifacts
 
 ## 2024-09-26
 
