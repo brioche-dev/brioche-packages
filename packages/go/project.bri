@@ -18,14 +18,10 @@ export const project = {
  *
  * The directory `go` is intended to be used as the `$GOROOT` env var.
  */
-export function go(): std.Recipe<std.Directory> {
-  const goRoot = std
-    .download({
-      url: `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
-      hash: std.sha256Hash(
-        "905a297f19ead44780548933e0ff1a1b86e8327bb459e92f9c0012569f76f5e3",
-      ),
-    })
+export default function go(): std.Recipe<std.Directory> {
+  const goRoot = Brioche.download(
+    `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
+  )
     .unarchive("tar", "gzip")
     .peel();
 
@@ -43,7 +39,6 @@ export function go(): std.Recipe<std.Directory> {
 
   return go;
 }
-export default go;
 
 type ModOptions = "readonly" | "vendor" | "mod";
 

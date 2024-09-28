@@ -1,3 +1,9 @@
 {
-  "dependencies": {}
+  "dependencies": {},
+  "downloads": {
+    "https://go.dev/dl/go1.23.0.linux-amd64.tar.gz": {
+      "type": "sha256",
+      "value": "905a297f19ead44780548933e0ff1a1b86e8327bb459e92f9c0012569f76f5e3"
+    }
+  }
 }
