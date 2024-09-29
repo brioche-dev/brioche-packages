@@ -27,7 +27,7 @@ jobs:
         run: |
           for project in packages/*; do
             echo "::group::$project"
-            brioche check -p "$project"
+            brioche check -p "$project" --locked
             brioche fmt -p "$project" --check
             echo "::endgroup::"
           done
@@ -54,7 +54,7 @@ jobs:
         run: |
           for project in packages/*; do
             echo "::group::$project"
-            brioche build -p "$project" --check --sync
+            brioche build -p "$project" --check --sync --locked
             echo "::endgroup::"
           done
         env:
