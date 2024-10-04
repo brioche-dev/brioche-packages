@@ -4,6 +4,14 @@ All notable changes to the `std` package will be documented in this file.
 
 The `std` package is not yet considered stable and doesn't currently assign version numbers to releases, so changes are documented by date. You are encouraged to use version control with the `brioche.lock` lockfile to ensure the version of the `std` package used stays consistent within your Brioche projects.
 
+## 2024-10-04
+
+PR: [#114](https://github.com/brioche-dev/brioche-packages/pull/114)
+
+### Changed
+
+- Updated `std.toolchain()` to set more env vars for autotools builds. Autotools builds should now work more reliably without any manual configuration
+
 ## 2024-09-28
 
 PR: [#110](https://github.com/brioche-dev/brioche-packages/pull/110)
