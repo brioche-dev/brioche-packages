@@ -181,10 +181,16 @@ export const toolchain = std.memo(
     // Add a symlink for the C compiler
     toolchain = toolchain.insert("bin/cc", std.symlink({ target: "gcc" }));
 
+    // Add a symlink that libtool needs
+    toolchain = toolchain.insert(
+      "share/libtool/m4",
+      std.symlink({ target: "../aclocal" }),
+    );
+
     // Set env vars when used as a dependency. These are also used
     // when autopacking
     toolchain = setEnv(toolchain, {
-      CPATH: { append: [{ path: "include" }] },
+      // Library paths for shared libraries
       LIBRARY_PATH: {
         append: [
           { path: "lib" },
@@ -192,18 +198,43 @@ export const toolchain = std.memo(
           { path: "lib/gconv" },
         ],
       },
+
+      // Include paths
+      CPATH: { append: [{ path: "include" }] },
+
+      // Perl library paths
+      PERL5LIB: {
+        append: [{ path: "share/autconf" }, { path: "share/automake-1.16" }],
+      },
+
+      // pkg-config search paths
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+
+      // Magic patterns used by `file`
       MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
+
+      // Autotools env vars
       AUTOCONF: { fallback: { path: "bin/autoconf" } },
       AUTOHEADER: { fallback: { path: "bin/autoheader" } },
       AUTOM4TE: { fallback: { path: "bin/autom4te" } },
-      M4: { fallback: { path: "bin/m4" } },
       autom4te_perllibdir: { fallback: { path: "share/autoconf" } },
       AC_MACRODIR: { fallback: { path: "share/autoconf" } },
       trailer_m4: { fallback: { path: "share/autoconf/autoconf/trailer.m4" } },
       ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
       ACLOCAL_AUTOMAKE_DIR: { fallback: { path: "share/aclocal-1.16" } },
+      AUTOMAKE_LIBDIR: { fallback: { path: "share/automake-1.16" } },
       AUTOMAKE_UNINSTALLED: { fallback: { value: "1" } },
+      _lt_pkgdatadir: { fallback: { path: "share/libtool" } },
+
+      // Programs that autotools uses. These default to absolute paths,
+      // setting them to just the name will resolve them using `$PATH` instead
+      M4: { fallback: { value: "m4" } },
+      SED: { fallback: { value: "sed" } },
+      GREP: { fallback: { value: "grep" } },
+      EGREP: { fallback: { value: "grep -E" } },
+      FGREP: { fallback: { value: "grep -F" } },
+      NM: { fallback: { value: "nm -B" } },
+      LD: { fallback: { value: "ld" } },
     });
 
     // Re-pack all dynamic binaries and shared libraries
