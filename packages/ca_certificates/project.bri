@@ -5,13 +5,10 @@ export const project = {
   version: "2024-07-02",
 };
 
-export default (): std.Recipe<std.Directory> => {
-  const cacert = std.download({
-    url: `https://curl.se/ca/cacert-${project.version}.pem`,
-    hash: std.sha256Hash(
-      "1bf458412568e134a4514f5e170a328d11091e071c7110955c9884ed87972ac9",
-    ),
-  });
+export default function (): std.Recipe<std.Directory> {
+  const cacert = Brioche.download(
+    `https://curl.se/ca/cacert-${project.version}.pem`,
+  );
 
   return std.setEnv(
     std.directory({
@@ -24,7 +21,7 @@ export default (): std.Recipe<std.Directory> => {
       }),
     }),
     {
-      SSL_CERT_FILE: { path: "etc/ssl/certs/ca-bundle.crt" },
+      SSL_CERT_FILE: { fallback: { path: "etc/ssl/certs/ca-bundle.crt" } },
     },
   );
-};
+}

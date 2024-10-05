@@ -1,9 +1,6 @@
 import * as std from "/core";
 import { tools } from "/toolchain";
-import {
-  type RunnableTemplate,
-  makeRunnableExecutable,
-} from "/runnable_tools.bri";
+import { withRunnable, type RunnableTemplateValue } from "./runnable.bri";
 
 export type BashRunnable = std.Recipe<std.Directory> & BashRunnableUtils;
 
@@ -45,7 +42,7 @@ export interface BashRunnableUtils {
  * import * as std from "std";
  *
  * // Running `brioche run` will print "Hello, world!"
- * export default () => {
+ * export default function () {
  *   return std.bashRunnable`
  *     echo "Hello, world!"
  *   `;
@@ -75,60 +72,12 @@ interface BashRunnableOptions {
 }
 
 function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
-  let recipe = options.root;
-  let n = 0;
-  let command: RunnableTemplate = { components: [] };
-  [command, recipe, n] = buildTemplate([tools().get("bin/bash")], recipe, n);
-
-  const argTemplates: RunnableTemplateValue = [
-    "-e",
-    "-u",
-    "-o",
-    "pipefail",
-    "-c",
-    options.script,
-    "--",
-  ];
-  const args: RunnableTemplate[] = [];
-  for (const arg of argTemplates) {
-    let argTemplate: RunnableTemplate;
-    [argTemplate, recipe, n] = buildTemplate(arg, recipe, n);
-    args.push(argTemplate);
-  }
-
-  const env: Record<string, RunnableTemplate> = {};
-  for (const [key, value] of Object.entries(options.env)) {
-    let valueTemplate: RunnableTemplate;
-    [valueTemplate, recipe, n] = buildTemplate(value, recipe, n);
-    env[key] = valueTemplate;
-  }
-
-  const path = env["PATH"] ?? { components: [] };
-  for (const dep of options.dependencies) {
-    let depTemplate: RunnableTemplate;
-    [depTemplate, recipe, n] = buildTemplate([dep, "/bin"], recipe, n);
-
-    if (path.components.length > 0) {
-      path.components.push(
-        { type: "literal", value: std.bstring(":") },
-        ...depTemplate.components,
-      );
-    } else {
-      path.components.push(...depTemplate.components);
-    }
-  }
-
-  if (path.components.length > 0) {
-    env["PATH"] = path;
-  }
-
-  const runnable = makeRunnableExecutable({
-    command,
-    args,
-    env,
+  const recipe = withRunnable(options.root, {
+    command: tools().get("bin/bash"),
+    args: ["-e", "-u", "-o", "pipefail", "-c", options.script, "--"],
+    env: options.env,
+    dependencies: options.dependencies,
   });
-
-  recipe = recipe.insert("brioche-run", runnable);
 
   return std.mixin(recipe, {
     env(values: Record<string, RunnableTemplateValue>): BashRunnable {
@@ -154,63 +103,4 @@ function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
       });
     },
   });
-}
-
-type RunnableTemplateValue =
-  | string
-  | undefined
-  | { relativePath: string }
-  | std.AsyncRecipe
-  | RunnableTemplateValue[];
-
-function buildTemplate(
-  template: RunnableTemplateValue,
-  recipe: std.AsyncRecipe<std.Directory>,
-  n: number,
-): [RunnableTemplate, std.Recipe<std.Directory>, number] {
-  let recipeValue = std.recipe(recipe);
-
-  if (template == null || template === "") {
-    return [{ components: [] }, recipeValue, n];
-  } else if (typeof template === "string") {
-    return [
-      { components: [{ type: "literal", value: std.bstring(template) }] },
-      recipeValue,
-      n,
-    ];
-  } else if (Array.isArray(template)) {
-    const resultComponents = [];
-    for (const component of template) {
-      let result: RunnableTemplate;
-      [result, recipeValue, n] = buildTemplate(component, recipeValue, n);
-
-      resultComponents.push(...result.components);
-    }
-
-    return [{ components: resultComponents }, recipeValue, n];
-  } else if ("relativePath" in template) {
-    return [
-      {
-        components: [
-          { type: "relative_path", path: std.bstring(template.relativePath) },
-        ],
-      },
-      recipeValue,
-      n,
-    ];
-  } else {
-    recipeValue = recipeValue.insert(`brioche-run.d/recipe-${n}`, template);
-    return [
-      {
-        components: [
-          {
-            type: "relative_path",
-            path: std.bstring(`brioche-run.d/recipe-${n}`),
-          },
-        ],
-      },
-      recipeValue,
-      n + 1,
-    ];
-  }
 }

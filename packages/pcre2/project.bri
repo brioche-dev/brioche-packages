@@ -1,0 +1,35 @@
+import * as std from "std";
+
+export const project = {
+  name: "pcre2",
+  version: "10.44",
+};
+
+const source = Brioche.download(
+  `https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  const pcre2 = std.runBash`
+    ./autogen.sh
+    ./configure \\
+      --prefix=/ \\
+      --enable-jit \\
+      --enable-pcre2-8 \\
+      --enable-pcre2-16 \\
+      --enable-pcre2-32
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source)
+    .toDirectory();
+
+  return std.setEnv(pcre2, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}

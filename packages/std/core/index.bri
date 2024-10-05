@@ -1,5 +1,6 @@
 export * from "./recipes";
 export { source } from "./source.bri";
+export { semverMatches } from "./semver.bri";
 export { assert, unreachable, indoc, mixin, type Awaitable } from "./utils.bri";
 export {
   BRIOCHE_VERSION,

@@ -4,24 +4,20 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "jujutsu",
-  version: "0.19.0",
+  version: "0.20.0",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/martinvonz/jj/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "d0b9db21894e65ec80fd7999f99023f1e65d15fa16b4ec76881247d9cd56dc55",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/martinvonz/jj/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/jj",
     path: "cli",
     dependencies: [openssl()],
   });
-};
+}

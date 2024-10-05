@@ -5,13 +5,9 @@ export const project = {
   version: "3.3.1",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/openssl/openssl/releases/download/openssl-${project.version}/openssl-${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/openssl/openssl/releases/download/openssl-${project.version}/openssl-${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
@@ -29,9 +25,9 @@ export default function openssl(): std.Recipe<std.Directory> {
     .toDirectory();
 
   openssl = std.setEnv(openssl, {
-    CPATH: { path: "include" },
-    LIBRARY_PATH: { path: "lib" },
-    PKG_CONFIG_PATH: { path: "lib/pkgconfig" },
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
 
   return std.withRunnableLink(openssl, "bin/openssl");

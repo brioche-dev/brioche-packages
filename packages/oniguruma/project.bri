@@ -1,0 +1,34 @@
+import * as std from "std";
+
+export const project = {
+  name: "oniguruma",
+  version: "6.9.9",
+};
+
+const source = Brioche.download(
+  `https://github.com/kkos/oniguruma/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  let oniguruma = std.runBash`
+    autoreconf --install --force --verbose
+    ./configure \\
+      --prefix=/ \\
+      --enable-posix-api=yes
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source)
+    .toDirectory();
+
+  oniguruma = std.setEnv(oniguruma, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return std.withRunnableLink(oniguruma, "bin/onig-config");
+}

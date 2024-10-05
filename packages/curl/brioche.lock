@@ -1,3 +1,9 @@
 {
-  "dependencies": {}
+  "dependencies": {},
+  "downloads": {
+    "https://curl.se/download/curl-8.9.1.tar.gz": {
+      "type": "sha256",
+      "value": "291124a007ee5111997825940b3876b3048f7d31e73e9caa681b80fe48b2dcd5"
+    }
+  }
 }

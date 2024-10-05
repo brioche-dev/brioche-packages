@@ -1,4 +1,4 @@
-import { Awaitable, mixin } from "../utils.bri";
+import { Awaitable, mixin, unreachable } from "../utils.bri";
 import * as runtime from "../runtime.bri";
 import type { File } from "./file.bri";
 import { type Directory, directory } from "./directory.bri";
@@ -245,11 +245,25 @@ export function tpl(
 // This is a branded type for one of the symbol type of process template
 // components. Note that we avoid true symbol/branded types so the types can
 // be structurally equivalent across different versions of `std`.
-type ProcessTemplateSymbol<K extends string> = {
-  componentType: K;
+type ProcessTemplateSymbol<
+  K extends ProcessTemplateSymbolKind = ProcessTemplateSymbolKind,
+> = {
+  componentType: "symbol";
+  symbol: K;
 } & {
-  [key in K]: never;
-};
+  [key in K]?: never;
+} & { __processTemplateSymbol: never };
+
+const PROCESS_TEMPLATE_SYMBOL_KINDS = [
+  "outputPath",
+  "resourceDir",
+  "inputResourceDirs",
+  "homeDir",
+  "workDir",
+  "tempDir",
+] as const;
+
+type ProcessTemplateSymbolKind = (typeof PROCESS_TEMPLATE_SYMBOL_KINDS)[number];
 
 /**
  * Expands to the path where the process should write its output. Equivalent
@@ -257,7 +271,8 @@ type ProcessTemplateSymbol<K extends string> = {
  */
 // eslint-disable-next-line
 export const outputPath = {
-  componentType: "outputPath",
+  componentType: "symbol",
+  symbol: "outputPath",
 } as OutputPath;
 type OutputPath = ProcessTemplateSymbol<"outputPath">;
 
@@ -268,7 +283,8 @@ type OutputPath = ProcessTemplateSymbol<"outputPath">;
  */
 // eslint-disable-next-line
 export const resourceDir = {
-  componentType: "resourceDir",
+  componentType: "symbol",
+  symbol: "resourceDir",
 } as ResourceDir;
 type ResourceDir = ProcessTemplateSymbol<"resourceDir">;
 
@@ -279,7 +295,8 @@ type ResourceDir = ProcessTemplateSymbol<"resourceDir">;
  */
 // eslint-disable-next-line
 export const inputResourceDirs = {
-  componentType: "inputResourceDirs",
+  componentType: "symbol",
+  symbol: "inputResourceDirs",
 } as InputResourceDirs;
 type InputResourceDirs = ProcessTemplateSymbol<"inputResourceDirs">;
 
@@ -289,7 +306,8 @@ type InputResourceDirs = ProcessTemplateSymbol<"inputResourceDirs">;
  */
 // eslint-disable-next-line
 export const homeDir = {
-  componentType: "homeDir",
+  componentType: "symbol",
+  symbol: "homeDir",
 } as HomeDir;
 type HomeDir = ProcessTemplateSymbol<"homeDir">;
 
@@ -299,7 +317,8 @@ type HomeDir = ProcessTemplateSymbol<"homeDir">;
  */
 // eslint-disable-next-line
 export const workDir = {
-  componentType: "workDir",
+  componentType: "symbol",
+  symbol: "workDir",
 } as WorkDir;
 type WorkDir = ProcessTemplateSymbol<"workDir">;
 
@@ -309,19 +328,22 @@ type WorkDir = ProcessTemplateSymbol<"workDir">;
  */
 // eslint-disable-next-line
 export const tempDir = {
-  componentType: "tempDir",
+  componentType: "symbol",
+  symbol: "tempDir",
 } as TempDir;
 type TempDir = ProcessTemplateSymbol<"tempDir">;
 
-function isProcessTemplateSymbol<K extends string>(
+function isProcessTemplateSymbol(
   value: unknown,
-  componentType: K,
-): value is ProcessTemplateSymbol<K> {
+): value is ProcessTemplateSymbol {
   return (
     typeof value === "object" &&
     value != null &&
     "componentType" in value &&
-    value["componentType"] === componentType
+    value["componentType"] === "symbol" &&
+    "symbol" in value &&
+    typeof value.symbol === "string" &&
+    (PROCESS_TEMPLATE_SYMBOL_KINDS as readonly string[]).includes(value.symbol)
   );
 }
 
@@ -331,12 +353,7 @@ export type ProcessTemplateComponent =
   | string
   | ProcessTemplate
   | Recipe
-  | typeof outputPath
-  | typeof resourceDir
-  | typeof inputResourceDirs
-  | typeof homeDir
-  | typeof workDir
-  | typeof tempDir
+  | ProcessTemplateSymbol
   | undefined;
 
 export class ProcessTemplate {
@@ -357,18 +374,23 @@ export class ProcessTemplate {
             return [];
           } else if (typeof component === "string") {
             return [{ type: "literal", value: runtime.bstring(component) }];
-          } else if (isProcessTemplateSymbol(component, "outputPath")) {
-            return [{ type: "output_path" }];
-          } else if (isProcessTemplateSymbol(component, "resourceDir")) {
-            return [{ type: "resource_dir" }];
-          } else if (isProcessTemplateSymbol(component, "inputResourceDirs")) {
-            return [{ type: "input_resource_dirs" }];
-          } else if (isProcessTemplateSymbol(component, "homeDir")) {
-            return [{ type: "home_dir" }];
-          } else if (isProcessTemplateSymbol(component, "workDir")) {
-            return [{ type: "work_dir" }];
-          } else if (isProcessTemplateSymbol(component, "tempDir")) {
-            return [{ type: "temp_dir" }];
+          } else if (isProcessTemplateSymbol(component)) {
+            switch (component.symbol) {
+              case "outputPath":
+                return [{ type: "output_path" }];
+              case "resourceDir":
+                return [{ type: "resource_dir" }];
+              case "inputResourceDirs":
+                return [{ type: "input_resource_dirs" }];
+              case "homeDir":
+                return [{ type: "home_dir" }];
+              case "workDir":
+                return [{ type: "work_dir" }];
+              case "tempDir":
+                return [{ type: "temp_dir" }];
+              default:
+                return unreachable(component.symbol);
+            }
           } else if (isProcessTemplateInstance(component)) {
             const serialized = await component.briocheSerialize();
             return serialized.components;

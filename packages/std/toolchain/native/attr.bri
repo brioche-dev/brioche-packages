@@ -2,12 +2,9 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = std.download({
-    url: "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/attr-2.5.1.tar.gz",
-    hash: std.sha256Hash(
-      "bae1c6949b258a0d68001367ce0c741cebdacdd3b62965d17e5eb23cd78adaf8",
-    ),
-  });
+  const sourceArchive = Brioche.download(
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/attr-2.5.1.tar.gz",
+  );
 
   return std
     .process({

@@ -104,6 +104,7 @@ export type Recipe =
   | PeelRecipe
   | GetRecipe
   | InsertRecipe
+  | GlobRecipe
   | SetPermissionsRecipe
   | CollectReferencesRecipe
   | ProxyRecipe
@@ -175,6 +176,12 @@ export type InsertRecipe = WithMeta & {
   directory: Recipe;
   path: BString;
   recipe?: Recipe | null | undefined;
+};
+
+export type GlobRecipe = WithMeta & {
+  type: "glob";
+  directory: Recipe;
+  patterns: BString[];
 };
 
 export type SetPermissionsRecipe = WithMeta & {

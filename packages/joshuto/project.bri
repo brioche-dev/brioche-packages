@@ -6,19 +6,28 @@ export const project = {
   version: "0.9.8",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/kamiyaa/joshuto/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "877d841b2e26d26d0f0f2e6f1dab3ea2fdda38c345abcd25085a3f659c24e013",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/kamiyaa/joshuto/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+// Patch `Cargo.lock` to fix builds with Rust >= 1.80. This patch is derived
+// from the `Cargo.lock` from this commit in Joshuto:
+// https://github.com/kamiyaa/joshuto/commit/1245124fcd264e25becfd75258840708d7b8b4bb
+const patch = Brioche.includeFile("joshuto-v0.9.8.patch");
+
+export default function (): std.Recipe<std.Directory> {
+  const patchedSource = std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    patch -p1 < $patch
+  `
+    .outputScaffold(source)
+    .env({ patch })
+    .toDirectory();
+
   return cargoBuild({
-    source,
+    source: patchedSource,
     runnable: "bin/joshuto",
   });
-};
+}

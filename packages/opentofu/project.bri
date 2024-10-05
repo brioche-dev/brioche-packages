@@ -3,20 +3,16 @@ import { goBuild } from "go";
 
 export const project = {
   name: "opentofu",
-  version: "1.7.3",
+  version: "1.8.0",
 };
 
-const source = std
-  .download({
-    url: `https://github.com/opentofu/opentofu/archive/refs/tags/v${project.version}.tar.gz`,
-    hash: std.sha256Hash(
-      "c97c470f3afbd30c67a141bb973ad4bcb458d3cd7a6bbe3aad1e99b4fbc026a8",
-    ),
-  })
+const source = Brioche.download(
+  `https://github.com/opentofu/opentofu/archive/refs/tags/v${project.version}.tar.gz`,
+)
   .unarchive("tar", "gzip")
   .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return goBuild({
     source,
     path: "./cmd/tofu",
@@ -27,4 +23,4 @@ export default () => {
     },
     runnable: "bin/tofu",
   });
-};
+}

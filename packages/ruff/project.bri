@@ -3,30 +3,19 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "ruff",
-  version: "0.5.3",
+  version: "0.6.1",
 };
 
-// HACK: Workaround for issue unarchiving this tarfile. See:
-// https://github.com/brioche-dev/brioche/issues/103
-const sourceTar = std.download({
-  url: `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
-  hash: std.sha256Hash(
-    "7d3e1d6405a5c0e9bf13b947b80327ba7330f010060aaba514feecfd6d585251",
-  ),
-});
-const source = std
-  .process({
-    command: "tar",
-    args: ["-xf", sourceTar, "--strip-components=1", "-C", std.outputPath],
-    outputScaffold: std.directory(),
-    dependencies: [std.tools()],
-  })
-  .toDirectory();
+const source = Brioche.download(
+  `https://github.com/astral-sh/ruff/archive/refs/tags/${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     path: "crates/ruff",
     runnable: "bin/ruff",
   });
-};
+}

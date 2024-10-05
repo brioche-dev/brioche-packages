@@ -46,6 +46,7 @@ export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
           | runtime.PeelRecipe
           | runtime.GetRecipe
           | runtime.InsertRecipe
+          | runtime.GlobRecipe
           | runtime.CollectReferencesRecipe
           | runtime.ProxyRecipe
           | runtime.SyncRecipe
