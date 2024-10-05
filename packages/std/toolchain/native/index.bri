@@ -210,6 +210,9 @@ export const toolchain = std.memo(
       // pkg-config search paths
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
 
+      // Bison data dir
+      BISON_PKGDATADIR: { fallback: { path: "share/bison" } },
+
       // Magic patterns used by `file`
       MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
 
