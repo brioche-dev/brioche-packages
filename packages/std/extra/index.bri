@@ -1,6 +1,7 @@
 export { autopack, type AutopackOptions } from "./autopack.bri";
 export * from "./oci_container_image.bri";
 export * from "./run_bash.bri";
+export * from "./runnable.bri";
 export * from "./bash_runnable.bri";
 export * from "./set_env.bri";
 export * from "./with_runnable_link.bri";
