@@ -6,11 +6,11 @@ export const project = {
   version: "2.150.0",
 };
 
-export default () => {
-  const npmPackage = npmInstallGlobal({
+export default function () {
+  const recipe = npmInstallGlobal({
     packageName: "aws-cdk",
     version: project.version,
   });
 
-  return std.withRunnableLink(npmPackage, "bin/cdk");
-};
+  return std.withRunnableLink(recipe, "bin/cdk");
+}
