@@ -221,10 +221,14 @@ function buildTemplate(
 
     return [{ components: resultComponents }, recipeValue, n];
   } else if ("relativePath" in template) {
+    const relativePath = [pathToRecipeRoot, template.relativePath]
+      .filter((path) => path != null && path !== "")
+      .join("/");
+
     return [
       {
         components: [
-          { type: "relative_path", path: std.bstring(template.relativePath) },
+          { type: "relative_path", path: std.bstring(relativePath) },
         ],
       },
       recipeValue,
