@@ -6,12 +6,18 @@ The `std` package is not yet considered stable and doesn't currently assign vers
 
 ## 2024-10-05
 
-PR: [#115](https://github.com/brioche-dev/brioche-packages/pull/115)
+PRs:
+- [#115](https://github.com/brioche-dev/brioche-packages/pull/115)
+- [#116](https://github.com/brioche-dev/brioche-packages/pull/116)
 
 ### Added
 
 - Added `std.withRunnable(recipe, options)` to make a recipe runnable by adding a `brioche-run` executable. The options specify the command, args, and env to run
 - Added `std.addRunnable(recipe, path, options)`, which is just like `std.withRunnable()`, except it takes the path for the executable (instead of just `brioche-run`)
+
+### Fixed
+
+- Fix bison in `std.toolchain()` by setting `$BISON_PKGDATADIR` by default
 
 ## 2024-10-04
 
