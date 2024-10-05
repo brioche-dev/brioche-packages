@@ -1,0 +1,28 @@
+import * as std from "std";
+
+export const project = {
+  name: "libpcap",
+  version: "1.10.5",
+};
+
+const source = Brioche.download(
+  `https://www.tcpdump.org/release/libpcap-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  const libpcap = std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.setEnv(libpcap, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
