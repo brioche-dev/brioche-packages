@@ -1,0 +1,25 @@
+import * as std from "std";
+import libpcap from "libpcap";
+
+export const project = {
+  name: "tcpdump",
+  version: "4.99.5",
+};
+
+const source = Brioche.download(
+  `https://www.tcpdump.org/release/tcpdump-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  const tcpdump = std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), libpcap())
+    .toDirectory();
+
+  return std.withRunnableLink(tcpdump, "bin/tcpdump");
+}
