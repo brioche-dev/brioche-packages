@@ -1,0 +1,256 @@
+import * as std from "/core";
+import {
+  type RunnableTemplate,
+  makeRunnableExecutable,
+} from "/runnable_tools.bri";
+
+export type WithRunnable = std.Recipe<std.Directory> & WithRunnableUtils;
+
+export interface WithRunnableUtils {
+  /**
+   * Set environment variables when the command is run.
+   */
+  env(values: Record<string, RunnableTemplateValue>): WithRunnable;
+
+  /**
+   * Include additonal dependencies when the command is run. This
+   * will set the `$PATH` environment variable.
+   */
+  dependencies(...dependencies: std.AsyncRecipe<std.Directory>[]): WithRunnable;
+}
+
+export interface RunnableOptions {
+  command: RunnableTemplateValue;
+  args?: RunnableTemplateValue[];
+  env?: Record<string, RunnableTemplateValue>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
+}
+
+/**
+ * Return a runnable recipe, where `brioche-run` is an executable that
+ * runs the specified command. This wraps the command so it can be run outside
+ * Brioche, such as by calling `brioche run` or by putting it into an OCI
+ * container image.
+ *
+ * See also `std.bashRunnable`, which allows running a full Bash script instead
+ * of a single command.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ *
+ * // Running `brioche run` will print "Hello, world!"
+ * export default function () {
+ *   return std.withRunnable(std.directory(), {
+ *     command: "echo",
+ *     args: ["Hello, world!"],
+ *     dependencies: [std.tools()],
+ *   });
+ * }
+ * ```
+ */
+export function withRunnable(
+  recipe: std.AsyncRecipe<std.Directory>,
+  options: RunnableOptions,
+): WithRunnable {
+  recipe = addRunnable(recipe, "brioche-run", options);
+
+  return std.mixin(recipe, {
+    env(values: Record<string, RunnableTemplateValue>): WithRunnable {
+      return withRunnable(recipe, {
+        ...options,
+        env: { ...options.env, ...values },
+      });
+    },
+
+    dependencies(
+      ...dependencies: std.AsyncRecipe<std.Directory>[]
+    ): WithRunnable {
+      return withRunnable(recipe, {
+        ...options,
+        dependencies: [...(options.dependencies ?? []), ...dependencies],
+      });
+    },
+  });
+}
+
+/**
+ * Return a new recipe with an executable at `path` that runs the specified
+ * command. This wraps the command so it can be run outside Brioche.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * import * as std from "std";
+ *
+ * // Running `brioche run -c bin/hello` will print "Hello, world!"
+ * export default function () {
+ *   return std.addRunnable(std.directory(), "bin/hello", {
+ *     command: "echo",
+ *     args: ["Hello, world!"],
+ *     dependencies: [std.tools()],
+ *   });
+ * }
+ * ```
+ */
+export function addRunnable(
+  recipe: std.AsyncRecipe<std.Directory>,
+  path: string,
+  options: RunnableOptions,
+): std.Recipe<std.Directory> {
+  // Compute the path to get from the runnable path (`path`) to the
+  // recipe root
+  const pathComponentsToRecipeRoot = [];
+  const dirComponents = path.split("/").slice(0, -1);
+  for (const component of dirComponents) {
+    if (component === "..") {
+      if (pathComponentsToRecipeRoot.length === 0) {
+        throw new Error(`path escapes recipe root: ${path}`);
+      }
+
+      // Remove one traversal when going up a directory
+      pathComponentsToRecipeRoot.pop();
+    } else if (component === "." || component === "") {
+      // Skip current dir and empty components
+    } else {
+      // For a normal path, we need to go up one more directory to get back
+      // to the root
+      pathComponentsToRecipeRoot.push("..");
+    }
+  }
+  const pathToRecipeRoot = pathComponentsToRecipeRoot.join("/");
+
+  let n = 0;
+  let command: RunnableTemplate;
+  [command, recipe, n] = buildTemplate(
+    options.command,
+    recipe,
+    pathToRecipeRoot,
+    n,
+  );
+
+  const args: RunnableTemplate[] = [];
+  for (const arg of options.args ?? []) {
+    let argTemplate: RunnableTemplate;
+    [argTemplate, recipe, n] = buildTemplate(arg, recipe, pathToRecipeRoot, n);
+    args.push(argTemplate);
+  }
+
+  const env: Record<string, RunnableTemplate> = {};
+  for (const [key, value] of Object.entries(options.env ?? {})) {
+    let valueTemplate: RunnableTemplate;
+    [valueTemplate, recipe, n] = buildTemplate(
+      value,
+      recipe,
+      pathToRecipeRoot,
+      n,
+    );
+    env[key] = valueTemplate;
+  }
+
+  const pathEnv = env["PATH"] ?? { components: [] };
+  for (const dep of options.dependencies ?? []) {
+    let depTemplate: RunnableTemplate;
+    [depTemplate, recipe, n] = buildTemplate(
+      [dep, "/bin"],
+      recipe,
+      pathToRecipeRoot,
+      n,
+    );
+
+    if (pathEnv.components.length > 0) {
+      pathEnv.components.push(
+        { type: "literal", value: std.bstring(":") },
+        ...depTemplate.components,
+      );
+    } else {
+      pathEnv.components.push(...depTemplate.components);
+    }
+  }
+
+  if (pathEnv.components.length > 0) {
+    env["PATH"] = pathEnv;
+  }
+
+  const runnable = makeRunnableExecutable({
+    command,
+    args,
+    env,
+  });
+
+  return recipe.insert(path, runnable);
+}
+
+export type RunnableTemplateValue =
+  | string
+  | undefined
+  | { relativePath: string }
+  | std.AsyncRecipe
+  | RunnableTemplateValue[];
+
+function buildTemplate(
+  template: RunnableTemplateValue,
+  recipe: std.AsyncRecipe<std.Directory>,
+  pathToRecipeRoot: string | undefined,
+  n: number,
+): [RunnableTemplate, std.Recipe<std.Directory>, number] {
+  let recipeValue = std.recipe(recipe);
+
+  if (template == null || template === "") {
+    return [{ components: [] }, recipeValue, n];
+  } else if (typeof template === "string") {
+    return [
+      { components: [{ type: "literal", value: std.bstring(template) }] },
+      recipeValue,
+      n,
+    ];
+  } else if (Array.isArray(template)) {
+    const resultComponents = [];
+    for (const component of template) {
+      let result: RunnableTemplate;
+      [result, recipeValue, n] = buildTemplate(
+        component,
+        recipeValue,
+        pathToRecipeRoot,
+        n,
+      );
+
+      resultComponents.push(...result.components);
+    }
+
+    return [{ components: resultComponents }, recipeValue, n];
+  } else if ("relativePath" in template) {
+    const relativePath = [pathToRecipeRoot, template.relativePath]
+      .filter((path) => path != null && path !== "")
+      .join("/");
+
+    return [
+      {
+        components: [
+          { type: "relative_path", path: std.bstring(relativePath) },
+        ],
+      },
+      recipeValue,
+      n,
+    ];
+  } else {
+    const pathToBriocheRunDir = [pathToRecipeRoot, "brioche-run.d"]
+      .filter((path) => path != null && path !== "")
+      .join("/");
+
+    recipeValue = recipeValue.insert(`brioche-run.d/recipe-${n}`, template);
+    return [
+      {
+        components: [
+          {
+            type: "relative_path",
+            path: std.bstring(`${pathToBriocheRunDir}/recipe-${n}`),
+          },
+        ],
+      },
+      recipeValue,
+      n + 1,
+    ];
+  }
+}
