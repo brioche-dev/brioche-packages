@@ -4,6 +4,15 @@ All notable changes to the `std` package will be documented in this file.
 
 The `std` package is not yet considered stable and doesn't currently assign version numbers to releases, so changes are documented by date. You are encouraged to use version control with the `brioche.lock` lockfile to ensure the version of the `std` package used stays consistent within your Brioche projects.
 
+## 2024-10-05
+
+PR: [#115](https://github.com/brioche-dev/brioche-packages/pull/115)
+
+### Added
+
+- Added `std.withRunnable(recipe, options)` to make a recipe runnable by adding a `brioche-run` executable. The options specify the command, args, and env to run
+- Added `std.addRunnable(recipe, path, options)`, which is just like `std.withRunnable()`, except it takes the path for the executable (instead of just `brioche-run`)
+
 ## 2024-10-04
 
 PR: [#114](https://github.com/brioche-dev/brioche-packages/pull/114)
