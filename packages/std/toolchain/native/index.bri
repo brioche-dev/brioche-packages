@@ -283,6 +283,8 @@ export const toolchain = std.memo(
 
     toolchain = fixShebangs(toolchain);
 
+    toolchain = makePkgConfigPathsRelative(toolchain);
+
     toolchain = std.sync(toolchain);
 
     return toolchain;
@@ -362,6 +364,33 @@ function fixShebangs(
                 chmod +x temp
                 mv temp "$file"
               fi
+            done
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
+
+          find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+            | while IFS= read -r -d $'\\0' file; do
+              sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
             done
         `,
       ],
