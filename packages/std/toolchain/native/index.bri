@@ -181,6 +181,28 @@ export const toolchain = std.memo(
     // Add a symlink for the C compiler
     toolchain = toolchain.insert("bin/cc", std.symlink({ target: "gcc" }));
 
+    // Fix broken library symlinks
+    toolchain = toolchain.insert(
+      "lib/libuuid.so",
+      std.symlink({ target: "libuuid.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libblkid.so",
+      std.symlink({ target: "libblk.id.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libsmartcols.so",
+      std.symlink({ target: "libsmartcols.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libfdisk.so",
+      std.symlink({ target: "libfdisk.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libmount.so",
+      std.symlink({ target: "libmount.so.1" }),
+    );
+
     // Add a symlink that libtool needs
     toolchain = toolchain.insert(
       "share/libtool/m4",
