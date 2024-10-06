@@ -204,7 +204,7 @@ export const toolchain = std.memo(
 
       // Perl library paths
       PERL5LIB: {
-        append: [{ path: "share/autconf" }, { path: "share/automake-1.16" }],
+        append: [{ path: "share/autoconf" }, { path: "share/automake-1.16" }],
       },
 
       // pkg-config search paths
