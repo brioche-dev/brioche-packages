@@ -181,6 +181,28 @@ export const toolchain = std.memo(
     // Add a symlink for the C compiler
     toolchain = toolchain.insert("bin/cc", std.symlink({ target: "gcc" }));
 
+    // Fix broken library symlinks
+    toolchain = toolchain.insert(
+      "lib/libuuid.so",
+      std.symlink({ target: "libuuid.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libblkid.so",
+      std.symlink({ target: "libblk.id.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libsmartcols.so",
+      std.symlink({ target: "libsmartcols.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libfdisk.so",
+      std.symlink({ target: "libfdisk.so.1" }),
+    );
+    toolchain = toolchain.insert(
+      "lib/libmount.so",
+      std.symlink({ target: "libmount.so.1" }),
+    );
+
     // Add a symlink that libtool needs
     toolchain = toolchain.insert(
       "share/libtool/m4",
@@ -204,7 +226,7 @@ export const toolchain = std.memo(
 
       // Perl library paths
       PERL5LIB: {
-        append: [{ path: "share/autconf" }, { path: "share/automake-1.16" }],
+        append: [{ path: "share/autoconf" }, { path: "share/automake-1.16" }],
       },
 
       // pkg-config search paths
@@ -260,6 +282,8 @@ export const toolchain = std.memo(
     });
 
     toolchain = fixShebangs(toolchain);
+
+    toolchain = makePkgConfigPathsRelative(toolchain);
 
     toolchain = std.sync(toolchain);
 
@@ -340,6 +364,33 @@ function fixShebangs(
                 chmod +x temp
                 mv temp "$file"
               fi
+            done
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-c",
+        std.indoc`
+          set -euo pipefail
+
+          find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+            | while IFS= read -r -d $'\\0' file; do
+              sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
             done
         `,
       ],
