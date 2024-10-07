@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.python.org/ftp/python/3.12.7/Python-3.12.7.tar.xz": {
+    "https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tar.xz": {
       "type": "sha256",
-      "value": "24887b92e2afd4a2ac602419ad4b596372f67ac9b077190f459aba390faf5550"
+      "value": "086de5882e3cb310d4dca48457522e2e48018ecd43da9cdf827f6a0759efb07d"
     }
   }
 }
