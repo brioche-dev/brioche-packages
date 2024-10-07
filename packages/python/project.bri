@@ -68,6 +68,10 @@ export default async function python() {
     },
   });
 
+  // Some binaries under `/bin` are shebang scripts. These need to be wrapped
+  // to avoid issues with absolute paths
+  python = std.recipe(wrapShebangs(python));
+
   python = python.insert("bin/python", std.symlink({ target: "python3" }));
   python = python.insert(
     "bin/python-config",
@@ -83,4 +87,35 @@ export function test() {
     python --version | tee -a "$BRIOCHE_OUTPUT"
     pip --version | tee -a "$BRIOCHE_OUTPUT"
   `.dependencies(python());
+}
+
+async function wrapShebangs(
+  recipe: std.Recipe<std.Directory>,
+): Promise<std.Recipe<std.Directory>> {
+  // Get all the files under `/bin` that are shebang scripts
+  const shebangPathList = await std.runBash`
+    cd "$recipe"
+    find bin -type f -executable \\
+    | while read file; do
+      if [[ "$(head -c 2 "$file")" == '#!' ]]; then
+        echo "$file" >> "$BRIOCHE_OUTPUT"
+      fi
+    done
+  `
+    .env({ recipe })
+    .toFile()
+    .read();
+  const shebangPaths = shebangPathList
+    .split("\n")
+    .filter((line) => line !== "");
+
+  // Wrap each script using `std.addRunnable()`
+  const wrappedShebangs = shebangPaths.map((path) => {
+    return std.addRunnable(std.directory(), path, {
+      command: { relativePath: "bin/python" },
+      args: [[std.glob(recipe, [path]), `/${path}`]],
+    });
+  });
+
+  return std.merge(recipe, ...wrappedShebangs);
 }
