@@ -4,6 +4,16 @@ All notable changes to the `std` package will be documented in this file.
 
 The `std` package is not yet considered stable and doesn't currently assign version numbers to releases, so changes are documented by date. You are encouraged to use version control with the `brioche.lock` lockfile to ensure the version of the `std` package used stays consistent within your Brioche projects.
 
+## 2024-10-06
+
+PR: [#118](https://github.com/brioche-dev/brioche-packages/pull/118)
+
+### Changed
+
+- Fixed typo in `$PERL5LIB` when using `std.toolchain()` as a dependency
+- Fixed broken symlinks for several library files in `std.toolchain()` under `lib/`
+- Patched pkg-config files in `std.toolchain()` to replace absolute paths with relative paths
+
 ## 2024-10-05
 
 PRs:
