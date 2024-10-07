@@ -1,0 +1,121 @@
+import * as std from "std";
+import openssl from "openssl";
+
+export const project = {
+  name: "python",
+  version: "3.12.7",
+};
+
+const source = Brioche.download(
+  `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default async function python() {
+  let python = std.runBash`
+    export LD_LIBRARY_PATH="$LIBRARY_PATH"
+    export PATH="$BRIOCHE_OUTPUT/bin\${PATH:+:$PATH}"
+
+    ./configure \\
+      --prefix=/ \\
+      --without-ensurepip
+    make -j8
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+
+    python3 -m ensurepip --default-pip
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), openssl())
+    .toDirectory();
+
+  // Get all the native Python modules
+  const nativeModuleList = await std.runBash`
+    find "$python"/lib/python*/lib-dynload \\
+       -name "*.so" \\
+       -exec basename {} \\; \\
+       > "$BRIOCHE_OUTPUT"
+  `
+    .env({ python })
+    .toFile()
+    .read();
+  const nativeModules = nativeModuleList
+    .split("\n")
+    .filter((mod) => mod !== "");
+
+  // Repack Python with all the dynamic libraries needed for all the native
+  // modules. It isn't linked against the native modules directly, just their
+  // transitive dependencies
+  python = std.autopack(python, {
+    globs: ["bin/python*"],
+    excludeGlobs: ["bin/python*-config"],
+    linkDependencies: [std.toolchain()],
+    dynamicBinaryConfig: {
+      // Listing the modules both under `extraLibraries` and `skipLibraries`
+      // forces Python to be linked with the modules' transitive dependencies
+      extraLibraries: nativeModules,
+      skipLibraries: nativeModules,
+      libraryPaths: [std.glob(python, ["lib/python*/lib-dynload"]).peel(3)],
+    },
+    sharedLibraryConfig: {
+      enabled: false,
+    },
+    scriptConfig: {
+      enabled: false,
+    },
+    repackConfig: {
+      enabled: true,
+    },
+  });
+
+  // Some binaries under `/bin` are shebang scripts. These need to be wrapped
+  // to avoid issues with absolute paths
+  python = std.recipe(wrapShebangs(python));
+
+  python = python.insert("bin/python", std.symlink({ target: "python3" }));
+  python = python.insert(
+    "bin/python-config",
+    std.symlink({ target: "python3-config" }),
+  );
+  python = python.insert("bin/pydoc", std.symlink({ target: "pydoc3" }));
+
+  return python;
+}
+
+export function test() {
+  return std.runBash`
+    python --version | tee -a "$BRIOCHE_OUTPUT"
+    pip --version | tee -a "$BRIOCHE_OUTPUT"
+  `.dependencies(python());
+}
+
+async function wrapShebangs(
+  recipe: std.Recipe<std.Directory>,
+): Promise<std.Recipe<std.Directory>> {
+  // Get all the files under `/bin` that are shebang scripts
+  const shebangPathList = await std.runBash`
+    cd "$recipe"
+    find bin -type f -executable \\
+    | while read file; do
+      if [[ "$(head -c 2 "$file")" == '#!' ]]; then
+        echo "$file" >> "$BRIOCHE_OUTPUT"
+      fi
+    done
+  `
+    .env({ recipe })
+    .toFile()
+    .read();
+  const shebangPaths = shebangPathList
+    .split("\n")
+    .filter((line) => line !== "");
+
+  // Wrap each script using `std.addRunnable()`
+  const wrappedShebangs = shebangPaths.map((path) => {
+    return std.addRunnable(std.directory(), path, {
+      command: { relativePath: "bin/python" },
+      args: [[std.glob(recipe, [path]), `/${path}`]],
+    });
+  });
+
+  return std.merge(recipe, ...wrappedShebangs);
+}
