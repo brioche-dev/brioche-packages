@@ -26,7 +26,7 @@ const source = Brioche.download(
   .peel();
 
 export default function (): std.Recipe<std.Directory> {
-  return std.runBash`
+  let sqlite = std.runBash`
     ./configure \\
       --prefix=/ \\
       --enable-readline
@@ -36,6 +36,10 @@ export default function (): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain())
     .toDirectory();
+
+  sqlite = makePkgConfigPathsRelative(sqlite);
+
+  return sqlite;
 }
 
 /**
@@ -71,4 +75,21 @@ function encodeVersionNumber(version: string): string {
   );
 
   return `${major}${xx}${yy}${zz}`;
+}
+
+// TODO: This is duplicated from the `std.toolchain()` build, we should
+// figure out how to generalize this
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+      | while IFS= read -r -d $'\\0' file; do
+        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+      done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
 }
