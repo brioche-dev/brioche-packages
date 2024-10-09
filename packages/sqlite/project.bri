@@ -38,6 +38,12 @@ export default function (): std.Recipe<std.Directory> {
     .toDirectory();
 
   sqlite = makePkgConfigPathsRelative(sqlite);
+  sqlite = std.setEnv(sqlite, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+  sqlite = std.withRunnableLink(sqlite, "bin/sqlite3");
 
   return sqlite;
 }
