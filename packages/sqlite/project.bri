@@ -29,7 +29,9 @@ export default function (): std.Recipe<std.Directory> {
   let sqlite = std.runBash`
     ./configure \\
       --prefix=/ \\
-      --enable-readline
+      --enable-readline \\
+      --enable-fts3 \\
+      --enable-session
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
