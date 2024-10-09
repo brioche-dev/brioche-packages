@@ -1,0 +1,103 @@
+import * as std from "std";
+
+export const project = {
+  name: "sqlite",
+  version: "3.46.1",
+  extra: {
+    // The version number as encoded in SQLite build product names
+    filenameEncodedVersion: "3460100",
+  },
+};
+
+// Ensure the version number matches the encoded version used for the download
+std.assert(
+  encodeVersionNumber(project.version) === project.extra.filenameEncodedVersion,
+  `sqlite version number ${encodeVersionNumber(
+    project.version,
+  )} does not match encoded version number ${
+    project.extra.filenameEncodedVersion
+  }`,
+);
+
+const source = Brioche.download(
+  `https://www.sqlite.org/2024/sqlite-autoconf-${project.extra.filenameEncodedVersion}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  let sqlite = std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-readline \\
+      --enable-fts3 \\
+      --enable-session
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  sqlite = makePkgConfigPathsRelative(sqlite);
+  sqlite = std.setEnv(sqlite, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+  sqlite = std.withRunnableLink(sqlite, "bin/sqlite3");
+
+  return sqlite;
+}
+
+/**
+ * Encode a sqlite version number used in filenames and URLs. See this page
+ * for more details:
+ *
+ * https://www.sqlite.org/download.html
+ */
+function encodeVersionNumber(version: string): string {
+  const [major, x, y, z, ...rest] = version.split(".");
+
+  std.assert(
+    major === "3",
+    `expected sqlite major version to be 3 in ${version}`,
+  );
+  std.assert(
+    x != null && x !== "",
+    `sqlite version string ${version} is missing minor version`,
+  );
+  std.assert(
+    y != null && y !== "",
+    `sqlite version string ${version} is missing patch version`,
+  );
+  std.assert(rest.length === 0, `invalid sqlite version ${version}`);
+
+  const xx = x.padStart(2, "0");
+  const yy = y.padStart(2, "0");
+  const zz = (z ?? "").padStart(2, "0");
+
+  std.assert(
+    xx.length === 2 && yy.length === 2 && zz.length === 2,
+    `unable to parse sqlite version ${version}`,
+  );
+
+  return `${major}${xx}${yy}${zz}`;
+}
+
+// TODO: This is duplicated from the `std.toolchain()` build, we should
+// figure out how to generalize this
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+      | while IFS= read -r -d $'\\0' file; do
+        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+      done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
