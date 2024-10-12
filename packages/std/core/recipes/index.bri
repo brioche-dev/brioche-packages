@@ -15,6 +15,7 @@ export {
   ProcessTemplate,
   type ProcessTemplateComponent,
   type ProcessTemplateLike,
+  type ProcessUnsafeOptions,
 } from "./process.bri";
 export { memo, createProxy } from "./proxy.bri";
 export { symlink, type SymlinkOptions, Symlink } from "./symlink.bri";
