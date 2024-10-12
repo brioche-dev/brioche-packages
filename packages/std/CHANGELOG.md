@@ -4,6 +4,37 @@ All notable changes to the `std` package will be documented in this file.
 
 The `std` package is not yet considered stable and doesn't currently assign version numbers to releases, so changes are documented by date. You are encouraged to use version control with the `brioche.lock` lockfile to ensure the version of the `std` package used stays consistent within your Brioche projects.
 
+## 2024-10-12
+
+PR: [#122](https://github.com/brioche-dev/brioche-packages/pull/122)
+
+### Breaking
+
+The inputs for `std.process()` for enabling unsafe features has been changed. Additionally, the `unsafe` flag is now conditionally set on the process recipe itself, making it easier to conditionally enable unsafe for processes. Here's a minimal example demonstrating the change:
+
+```typescript
+// Before
+std.process({
+  command: "/bin/sh",
+  args: ["-c", "echo 'Hello'"],
+  unsafe: true,
+  networking: true,
+});
+
+// After
+std.process({
+  command: "/bin/sh",
+  args: ["-c", "echo 'Hello'"],
+  unsafe: {
+    networking: false,
+  },
+});
+```
+
+### Added
+
+- Added `std.ProcessUnsafeOptions` type export. This is used by both the `unsafe` option for `std.process()` and the `.unsafe()` method on the `std.Process` type
+
 ## 2024-10-06
 
 PR: [#118](https://github.com/brioche-dev/brioche-packages/pull/118)
