@@ -13,13 +13,10 @@ export type ProcessOptions = {
   dependencies?: AsyncRecipe<Directory>[];
   workDir?: AsyncRecipe<Directory>;
   outputScaffold?: AsyncRecipe | null;
-} & ProcessUnsafeOptions;
+  unsafe?: ProcessUnsafeOptions;
+};
 
-export type ProcessUnsafeOptions =
-  | { unsafe?: false }
-  | ({ unsafe: true } & ProcessUnsafe);
-
-export interface ProcessUnsafe {
+export interface ProcessUnsafeOptions {
   networking?: boolean;
 }
 
@@ -48,9 +45,10 @@ export interface ProcessUtils {
   outputScaffold(outputScaffold: AsyncRecipe): Process;
 
   /**
-   * Returns a new process with unsafe options set.
+   * Returns a new process with unsafe options set. If unset, no unsafe
+   * options will be enabled.
    */
-  unsafe(unsafeOptions: ProcessUnsafe): Process;
+  unsafe(unsafeOptions?: ProcessUnsafeOptions): Process;
 
   /**
    * Cast the process's output to a file recipe. This will fail to bake if
@@ -96,9 +94,9 @@ export interface ProcessUtils {
  *   process's starting working directory.
  * - `outputScaffold`: Set to a recipe that will be be used to initialize
  *   `$BRIOCHE_OUTPUT`, which the process can then manipulate.
- * - `unsafe`: Set to `true` to use unsafe options. You must take extra
- *   care to ensure that running the process is hermetic when using these
- *   options! The following options are available:
+ * - `unsafe`: A nested object with extra unsafe options that can be enabled.
+ *   You must take extra care to ensure that running the process is hermetic
+ *   when using these options! The following options are available:
  *   - `networking`: Set to `true` to allow the process to access the network.
  *
  * ## Example
@@ -129,6 +127,16 @@ export function process(options: ProcessOptions): Process {
   const recipe = createRecipe(["file", "directory", "symlink"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
+      const { networking = false, ...unknownUnsafeOptions } =
+        options.unsafe ?? {};
+      const unknownUnsafeKeys = Object.keys(unknownUnsafeOptions);
+      if (unknownUnsafeKeys.length > 0) {
+        throw new Error(
+          `Unknown unsafe options: ${unknownUnsafeKeys.join(", ")}`,
+        );
+      }
+      const unsafe = networking;
+
       return {
         type: "process",
         command: await processTemplate(options.command).briocheSerialize(),
@@ -158,8 +166,8 @@ export function process(options: ProcessOptions): Process {
           options.outputScaffold != null
             ? await (await options.outputScaffold).briocheSerialize()
             : null,
-        unsafe: options.unsafe,
-        networking: options.unsafe === true ? options.networking : undefined,
+        unsafe,
+        networking,
         meta,
       };
     },
@@ -196,11 +204,10 @@ export function process(options: ProcessOptions): Process {
         outputScaffold,
       });
     },
-    unsafe(this: Process, unsafeOptions: ProcessUnsafe): Process {
+    unsafe(this: Process, unsafe: ProcessUnsafeOptions): Process {
       return process({
         ...options,
-        unsafe: true,
-        ...unsafeOptions,
+        unsafe,
       });
     },
     toFile(this: Process): Recipe<File> {
