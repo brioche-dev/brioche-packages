@@ -1,0 +1,22 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+import { gitCheckout } from "git";
+
+export const project = {
+  name: "wasmtime",
+  version: "25.0.2",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/bytecodealliance/wasmtime.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function (): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/wasmtime",
+  });
+}
