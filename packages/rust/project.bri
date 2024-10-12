@@ -117,6 +117,7 @@ export interface CargoBuildOptions {
   runnable?: string;
   dependencies?: std.AsyncRecipe<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
+  unsafe?: std.ProcessUnsafeOptions;
   buildParams?: CargoBuildParameters;
 }
 
@@ -133,6 +134,10 @@ export interface CargoBuildOptions {
  *   by default (e.g. `bin/foo`).
  * - `dependencies`: Optionally add additional dependencies to the build.
  * - `env`: Optionally set environment variables for the build.
+ * - `unsafe`: Optional unsafe options to enable when building. For example,
+ *   passing `{ networking: true }` will allow a `build.rs` script to
+ *   download files during the build. You must take extra care to ensure
+ *   the build is hermetic when setting these options!
  * - `buildParams`: Optional build parameters:
  *   - `features`: An array of features to enable.
  *
@@ -214,6 +219,7 @@ export function cargoBuild(options: CargoBuildOptions) {
       ...options.env,
     })
     .workDir(crate)
+    .unsafe(options.unsafe)
     .toDirectory();
 
   // Add a runnable link if set in the options
