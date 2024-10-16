@@ -94,6 +94,9 @@ async function wrapShebangs(
   recipe: std.Recipe<std.Directory>,
 ): Promise<std.Recipe<std.Directory>> {
   // Get all the files under `/bin` that are shebang scripts
+  // NOTE: These scripts can use `#!/bin/sh` when paths are long, so won't
+  // necessarily have a shebang to call Python directly. See this function:
+  // https://github.com/pypa/pip/blob/102d8187a1f5a4cd5de7a549fd8a9af34e89a54f/src/pip/_vendor/distlib/scripts.py#L154
   const shebangPathList = await std.runBash`
     cd "$recipe"
     find bin -type f -executable \\

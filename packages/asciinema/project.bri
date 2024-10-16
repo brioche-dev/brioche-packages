@@ -1,0 +1,68 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import python from "python";
+
+export const project = {
+  name: "asciinema",
+  version: "2.4.0",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/asciinema/asciinema.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+const pipDependencies = std.directory({
+  "setuptools-75.1.0-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/ff/ae/f19306b5a221f6a436d8f2238d5b80925004093fa3edea59835b514d9057/setuptools-75.1.0-py3-none-any.whl`,
+  ),
+  "wheel-0.44.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/1b/d1/9babe2ccaecff775992753d8686970b1e2755d21c8a63be73aba7a4e7d77/wheel-0.44.0-py3-none-any.whl",
+  ),
+});
+
+export default function (): std.Recipe<std.Directory> {
+  // Create a venv for asciinema
+  let venv = std.recipe(python());
+
+  // Install setuptools from the archive we downloaded. Setuptools is the
+  // only dependency we need installed in the venv, the rest will be installed
+  // by setuptools itself
+  venv = std.runBash`
+    pip install setuptools
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Install asciinema into the venv
+  venv = std.runBash`
+    pip install .
+  `
+    .workDir(source)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Create the final recipe with the venv under `venv`
+  let recipe = std.directory({
+    venv,
+  });
+
+  // Add `bin/asciinema` to run the main script
+  recipe = std.addRunnable(recipe, "bin/asciinema", {
+    command: { relativePath: "venv/bin/python" },
+    args: [{ relativePath: "venv/bin/asciinema" }],
+  });
+  return std.withRunnableLink(recipe, "bin/asciinema");
+}
