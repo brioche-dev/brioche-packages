@@ -12,7 +12,7 @@ const source = Brioche.download(
   .peel();
 
 // Patches from Linux From Scratch (current as of BLFS v12.2)
-// https://www.linuxfromscratch.org/blfs/view/stable/general/unzip.html
+// https://www.linuxfromscratch.org/blfs/view/12.2/general/unzip.html
 const patches = Brioche.includeDirectory("patches");
 
 export default function (): std.Recipe<std.Directory> {
