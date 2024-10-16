@@ -7,6 +7,10 @@ export const project = {
   version: "3.13.0",
 };
 
+const binaryVersion = project.version.split(".").slice(0, 2).join(".");
+const pythonBinary = `python${binaryVersion}`;
+const pythonBinaryAliases = ["python3", "python"];
+
 const source = Brioche.download(
   `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
 )
@@ -83,6 +87,70 @@ export default async function python() {
   return std.withRunnableLink(python, "bin/python");
 }
 
+export function pythonVenv(): std.Recipe<std.Directory> {
+  let venv = std.runBash`
+    # Create a new venv
+    python3 -m venv --symlinks "$BRIOCHE_OUTPUT"
+
+    # Patch activate script, replacing the venv absolute path with a Bash
+    # command to get the path relative to the script
+    # See this answer: https://stackoverflow.com/a/20956690
+    awk \\
+      -v abs_path="$BRIOCHE_OUTPUT" \\
+      -v rel_path='$(cd -- "$(abs_pathname -- "\${BASH_SOURCE[0]}")/.." &> /dev/null && pwd)' \\
+      '{
+        while (i = index($0, abs_path))
+            $0 = substr($0, 1, i-1) rel_path substr($0, i + length(abs_path))
+        print
+      }' \\
+      "$BRIOCHE_OUTPUT/bin/activate" > activate
+    mv activate "$BRIOCHE_OUTPUT/bin/activate"
+
+    # Remove other activate scripts (not yet patched)
+    rm "$BRIOCHE_OUTPUT"/bin/activate.* "$BRIOCHE_OUTPUT"/bin/Activate*
+  `
+    .dependencies(python())
+    .toDirectory();
+
+  // Remove the default Python binary and symlinks from the venv (we'll add
+  // our own)
+  for (const binary of [pythonBinary, ...pythonBinaryAliases]) {
+    venv = venv.remove(`bin/${binary}`);
+  }
+
+  // Add Python under `.local/libexec`
+  venv = venv.insert(`.local/libexec/python-${project.version}`, python());
+
+  // Add our custom `sitecustomize.py` module, which will edit the Python
+  // `sys` module based on environment vars
+  venv = venv.insert(
+    `.local/libexec/brioche-venv/sitecustomize.py`,
+    Brioche.includeFile("./brioche-venv/sitecustomize.py"),
+  );
+
+  // Add a custom runnable for `bin/python`
+  venv = std.addRunnable(venv, `bin/${pythonBinary}`, {
+    command: {
+      relativePath: `.local/libexec/python-${project.version}/bin/python`,
+    },
+    env: {
+      BRIOCHE_OVERRIDE_SYS_EXECUTABLE: { relativePath: `bin/${pythonBinary}` },
+      BRIOCHE_VIRTUAL_ENV: { relativePath: "." },
+      PYTHONPATH: [{ relativePath: ".local/libexec/brioche-venv" }],
+    },
+  });
+
+  // Add symlinks to our Python runnable
+  for (const binary of pythonBinaryAliases) {
+    venv = venv.insert(`bin/${binary}`, std.symlink({ target: pythonBinary }));
+  }
+
+  // Wrap shebangs in the venv
+  venv = std.recipe(wrapShebangs(venv));
+
+  return venv;
+}
+
 export function test() {
   return std.runBash`
     python --version | tee -a "$BRIOCHE_OUTPUT"
@@ -94,6 +162,9 @@ async function wrapShebangs(
   recipe: std.Recipe<std.Directory>,
 ): Promise<std.Recipe<std.Directory>> {
   // Get all the files under `/bin` that are shebang scripts
+  // NOTE: These scripts can use `#!/bin/sh` when paths are long, so won't
+  // necessarily have a shebang to call Python directly. See this function:
+  // https://github.com/pypa/pip/blob/102d8187a1f5a4cd5de7a549fd8a9af34e89a54f/src/pip/_vendor/distlib/scripts.py#L154
   const shebangPathList = await std.runBash`
     cd "$recipe"
     find bin -type f -executable \\
