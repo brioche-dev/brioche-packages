@@ -1,0 +1,30 @@
+import * as std from "std";
+
+export const project = {
+  name: "unzip",
+  version: "6.0",
+};
+
+const source = Brioche.download(
+  `https://sourceforge.net/projects/infozip/files/UnZip%206.x%20%28latest%29/UnZip%20${project.version}/unzip60.tar.gz/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+// Patches from Linux From Scratch (current as of BLFS v12.2)
+// https://www.linuxfromscratch.org/blfs/view/12.2/general/unzip.html
+const patches = Brioche.includeDirectory("patches");
+
+export default function (): std.Recipe<std.Directory> {
+  return std.runBash`
+    patch -Np1 -i "$patches"/unzip-6.0-consolidated_fixes-1.patch
+    patch -Np1 -i "$patches"/unzip-6.0-gcc14-1.patch
+
+    make -f unix/Makefile generic
+    make -f unix/Makefile install prefix="$BRIOCHE_OUTPUT"
+  `
+    .env({ patches })
+    .dependencies(std.toolchain())
+    .workDir(source)
+    .toDirectory();
+}

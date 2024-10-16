@@ -1,0 +1,63 @@
+Submitted By:            Bruce Dubbs
+Date:                    2024-06-01
+Initial Package Version: 6.0
+Upstream Status:         Unknown (no development since 2009)
+Origin:                  Sourceforge
+Description:             Fixes building with GCC 14
+
+diff -Nuarp unzip60.orig/unix/configure unzip60/unix/configure
+--- unzip60.orig/unix/configure	2024-05-13 16:04:47.991893663 -0400
++++ unzip60/unix/configure	2024-05-13 17:10:07.832793517 -0400
+@@ -382,7 +382,33 @@ $CC $CFLAGS -c conftest.c >/dev/null 2>/
+ for func in fchmod fchown lchown nl_langinfo
+ do
+   echo Check for $func
+-  echo "int main(){ $func(); return 0; }" > conftest.c
++#  echo "int main(){ $func(); return 0; }" > conftest.c
++  case $func in
++    fchmod)
++cat > conftest.c << _EOF_
++#include <sys/stat.h>
++int main(){ fchmod(0,0); return 0; }
++_EOF_
++    ;;
++    fchown)
++cat > conftest.c << _EOF_
++#include <unistd.h>
++int main(){ fchown(0,0,0); return 0; }
++_EOF_
++    ;;
++    lchown)
++cat > conftest.c << _EOF_
++#include <unistd.h>
++int main(){ lchown(0,0,0); return 0; }
++_EOF_
++    ;;
++    nl_langinfo)
++cat > conftest.c << _EOF_
++#include <langinfo.h>
++int main(){ nl_langinfo(0); return 0; }
++_EOF_
++    ;;
++  esac  
+   $CC $BFLAG -o conftest conftest.c >/dev/null 2>/dev/null
+   [ $? -ne 0 ] && CFLAGSR="${CFLAGSR} -DNO_`echo $func | tr '[a-z]' '[A-Z]'`"
+ done
+@@ -391,7 +417,7 @@ done
+ echo 'Check for lchmod'
+ temp_file="/tmp/unzip_test_$$"
+ temp_link="link_$$"
+-( echo '#include <unistd.h>' ; \
++( echo '#include <sys/stat.h>' ; \
+   echo "int main() { lchmod(\"${temp_file}\", 0666); }" \
+ ) > conftest.c
+ ln -s "${temp_link}" "${temp_file}" && \
+@@ -419,6 +445,8 @@ $CC $CFLAGS -c conftest.c >/dev/null 2>/
+ 
+ echo Check for directory libraries
+ cat > conftest.c << _EOF_
++#include <sys/types.h>
++#include <dirent.h>
+ int main() { return closedir(opendir(".")); }
+ _EOF_
+ 
