@@ -1,6 +1,6 @@
 import * as std from "std";
 import { gitCheckout } from "git";
-import { pythonVenv } from "python";
+import python from "python";
 
 export const project = {
   name: "asciinema",
@@ -25,7 +25,7 @@ const pipDependencies = std.directory({
 
 export default function (): std.Recipe<std.Directory> {
   // Create a venv for asciinema
-  let venv = pythonVenv();
+  let venv = std.recipe(python());
 
   // Install setuptools from the archive we downloaded. Setuptools is the
   // only dependency we need installed in the venv, the rest will be installed
