@@ -1,0 +1,23 @@
+import * as std from "std";
+
+export const project = {
+  name: "libxml2",
+  version: "2.9.9",
+};
+
+export const source = Brioche.download(
+  `https://download.gnome.org/sources/libxml2/2.9/libxml2-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+}
