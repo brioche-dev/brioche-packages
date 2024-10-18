@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.9.tar.xz": {
+    "https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.4.tar.xz": {
       "type": "sha256",
-      "value": "58a5c05a2951f8b47656b676ce1017921a29f6b1419c45e3baed0d6435ba03f5"
+      "value": "65d042e1c8010243e617efb02afda20b85c2160acdbfbcb5b26b80cec6515650"
     }
   }
 }

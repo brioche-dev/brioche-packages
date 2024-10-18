@@ -1,12 +1,13 @@
 import * as std from "std";
+import python from "python";
 
 export const project = {
   name: "libxml2",
-  version: "2.9.9",
+  version: "2.13.4",
 };
 
 export const source = Brioche.download(
-  `https://download.gnome.org/sources/libxml2/2.9/libxml2-${project.version}.tar.xz`,
+  `https://download.gnome.org/sources/libxml2/2.13/libxml2-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
@@ -18,6 +19,6 @@ export default function (): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain(), python())
     .toDirectory();
 }
