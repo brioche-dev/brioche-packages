@@ -1,0 +1,157 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import perl from "perl";
+import unzip from "unzip";
+import libxml2 from "libxml2";
+import libxslt from "libxslt";
+
+export const project = {
+  name: "moreutils",
+  version: "0.69",
+};
+
+export const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "git://git.joeyh.name/moreutils",
+    ref: project.version,
+  }),
+);
+
+export default function moreutils(): std.Recipe<std.Directory> {
+  let moreutils = std.runBash`
+    make
+    make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), libxml2(), libxslt())
+    .workDir(source)
+    .env({
+      // moreutils installs with `install -s` by defualt, which strips
+      // the metadata used by packed executables. Use `install` instead,
+      // which avoids stripping
+      INSTALL_BIN: "install",
+      // XML catalog for DocBook. The moreutils build validates some XML
+      // files against the DocBook schema, which will attempt to download
+      // the schema if not found in a system catalog. Providing a catalog
+      // ensures the build works offline
+      XML_CATALOG_FILES: std.tpl`${xmlCatalogs}/catalog.xml`,
+      // XSL files for DocBook. The build will look for these in a global
+      // path, and will fail if not found
+      DOCBOOKXSL: docbookXsl,
+    })
+    .toDirectory();
+
+  moreutils = wrapPerlShebangs(moreutils);
+
+  return moreutils;
+}
+
+export function test() {
+  return std.runBash`
+    chronic true
+    combine <(echo foo) and <(echo bar)
+    errno 13
+    ifdata -pe eth0
+    ifne false
+    isutf8 <(echo hello)
+    mispipe true false
+    parallel sh -c "echo hi; echo bye" -- 1 2 3
+    pee true
+    sponge test.txt
+    echo foo | ts
+    echo test.txt | EDITOR=cat vidir -v
+    echo hello world | gzip > hello.txt.gz
+    zrun cat hello.txt.gz
+    echo hello | EDITOR=cat vipe | cat
+
+    touch "$BRIOCHE_OUTPUT"
+  `.dependencies(moreutils());
+}
+
+const xmlCatalogs = std.directory({
+  "catalog.xml": std.file(std.indoc`
+    <?xml version="1.0"?>
+    <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+      <rewriteSystem
+        systemIdStartString="http://www.oasis-open.org/"
+        rewritePrefix="www.oasis-open.org/"
+      />
+    </catalog>
+  `),
+  "www.oasis-open.org/docbook/xml/4.4": std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    unzip "$docbook_zip"
+  `
+    .env({
+      docbook_zip: Brioche.download(
+        "https://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip",
+      ),
+    })
+    .dependencies(unzip())
+    .outputScaffold(std.directory())
+    .toDirectory(),
+});
+
+const docbookXsl = Brioche.download(
+  `https://github.com/docbook/xslt10-stylesheets/releases/download/release%2F1.79.2/docbook-xsl-nons-1.79.2.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+// Wrap Perl shebang scripts using `std.addRunnable`
+// TODO: Figure out where to move this, this is copied from `python`
+function wrapPerlShebangs(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.recipeFn(async () => {
+    // Add Perl in the recipe
+    recipe = recipe.insert(".local/libexec/moreutils/perl", perlEnv());
+
+    const perlShebangPathList = await std.runBash`
+      cd "$recipe"
+      find bin -type f -executable \\
+      | while read file; do
+        if [[ "$(head -c 2 "$file")" == '#!' ]] && head -n1 "$file" | grep -q perl; then
+          echo "$file" >> "$BRIOCHE_OUTPUT"
+        fi
+      done
+    `
+      .env({ recipe })
+      .toFile()
+      .read();
+    const perlShebangPaths = perlShebangPathList
+      .split("\n")
+      .filter((line) => line !== "");
+
+    // Wrap each script using `std.addRunnable()`
+    const wrappedShebangs = perlShebangPaths.map((path) => {
+      return std.addRunnable(std.directory(), path, {
+        command: { relativePath: ".local/libexec/moreutils/perl/bin/perl" },
+        args: [[std.glob(recipe, [path]), `/${path}`]],
+      });
+    });
+
+    return std.merge(recipe, ...wrappedShebangs);
+  });
+}
+
+function perlEnv(): std.Recipe<std.Directory> {
+  const ipcRun = Brioche.download(
+    "https://cpan.metacpan.org/authors/id/T/TO/TODDR/IPC-Run-20231003.0.tar.gz",
+  )
+    .unarchive("tar", "gzip")
+    .peel();
+
+  let perlEnv = perl();
+
+  perlEnv = std.runBash`
+    perl Makefile.PL
+    make
+    make install
+  `
+    .workDir(ipcRun)
+    .env({ PATH: std.tpl`${std.outputPath}/bin` })
+    .outputScaffold(perlEnv)
+    .toDirectory();
+
+  return perlEnv;
+}

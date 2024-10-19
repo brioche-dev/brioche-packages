@@ -1,0 +1,22 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://cpan.metacpan.org/authors/id/T/TO/TODDR/IPC-Run-20231003.0.tar.gz": {
+      "type": "sha256",
+      "value": "eb25bbdf5913d291797ef1bfe998f15130b455d3ed02aacde6856f0b25e4fe57"
+    },
+    "https://github.com/docbook/xslt10-stylesheets/releases/download/release%2F1.79.2/docbook-xsl-nons-1.79.2.tar.bz2": {
+      "type": "sha256",
+      "value": "ee8b9eca0b7a8f89075832a2da7534bce8c5478fc8fc2676f512d5d87d832102"
+    },
+    "https://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip": {
+      "type": "sha256",
+      "value": "02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090"
+    }
+  },
+  "git_refs": {
+    "git://git.joeyh.name/moreutils": {
+      "0.69": "0675c6ea5368f0843a91c28a472247b8f26015cf"
+    }
+  }
+}
