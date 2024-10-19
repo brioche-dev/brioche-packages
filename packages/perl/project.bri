@@ -1,0 +1,65 @@
+import * as std from "std";
+
+export const project = {
+  name: "perl",
+  version: "5.40.0",
+};
+
+const source = Brioche.download(
+  `https://www.cpan.org/src/5.0/perl-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function perl(): std.Recipe<std.Directory> {
+  // Perl will fail to build if there isn't at least one extra locale
+  // at build time, so generate a `C.UTF-8` locale
+  const locale = std.runBash`
+    mkdir -p "$BRIOCHE_OUTPUT"/C.UTF-8
+    localedef -i POSIX -f UTF-8 "$BRIOCHE_OUTPUT"/C.UTF-8 || true
+  `
+    .dependencies(std.toolchain())
+    .env({
+      I18NPATH: std.tpl`${std.toolchain()}/share/i18n`,
+    })
+    .toDirectory();
+
+  return std.runBash`
+    sh Configure \\
+      -des \\
+      -Dprefix=/ \\
+      -Duserelocatableinc \\
+      -Dusethreads
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .env({
+      LOCPATH: locale,
+      LANG: "C.UTF-8",
+    })
+    .toDirectory();
+}
+
+export function test() {
+  const testScript = std.file(std.indoc`
+    use strict;
+    use warnings FATAL => 'all';
+    use feature 'say';
+    use threads;
+
+    threads->create(sub {
+      say "Writing ", $ENV{BRIOCHE_OUTPUT};
+      open my $fh, '>', $ENV{BRIOCHE_OUTPUT};
+      close $fh;
+    })->join();
+  `);
+
+  return std.runBash`
+    perl --version
+    perl "$test_script"
+  `
+    .dependencies(perl())
+    .env({ test_script: testScript });
+}
