@@ -73,12 +73,21 @@ export default async function python() {
   // to avoid issues with absolute paths
   python = std.recipe(wrapShebangs(python));
 
+  // Fix absolute paths in pkg-config files
+  python = makePkgConfigPathsRelative(python);
+
   python = python.insert("bin/python", std.symlink({ target: "python3" }));
   python = python.insert(
     "bin/python-config",
     std.symlink({ target: "python3-config" }),
   );
   python = python.insert("bin/pydoc", std.symlink({ target: "pydoc3" }));
+
+  python = std.setEnv(python, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
 
   return std.withRunnableLink(python, "bin/python");
 }
@@ -122,4 +131,20 @@ async function wrapShebangs(
   });
 
   return std.merge(recipe, ...wrappedShebangs);
+}
+
+// TODO: Figure out where to move this, this is copied from `std`
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+      | while IFS= read -r -d $'\\0' file; do
+        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+      done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
 }
