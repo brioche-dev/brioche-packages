@@ -1,0 +1,22 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+
+export const project = {
+  name: "zx",
+  version: "8.1.9",
+};
+
+export default function zx() {
+  const recipe = npmInstallGlobal({
+    packageName: "zx",
+    version: project.version,
+  });
+
+  return std.withRunnableLink(recipe, "bin/zx");
+}
+
+export function test() {
+  return std.runBash`
+    zx --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(zx());
+}
