@@ -1,0 +1,26 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "amber",
+  version: "0.3.5-alpha",
+};
+
+const source = Brioche.download(
+  `https://github.com/amber-lang/amber/archive/refs/tags/${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function amber(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/amber",
+  });
+}
+
+export function test() {
+  return std.runBash`
+    amber --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(amber());
+}
