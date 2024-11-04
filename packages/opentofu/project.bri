@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "opentofu",
-  version: "1.8.0",
+  version: "1.8.5",
 };
 
 const source = Brioche.download(
