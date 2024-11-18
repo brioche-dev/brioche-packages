@@ -4,7 +4,7 @@ import * as typer from "typer";
 
 export const project = {
   name: "nodejs",
-  version: "20.16.0",
+  version: "22.11.0",
 };
 
 /**
@@ -30,6 +30,12 @@ export default nodejs;
 
 interface NpmInstallOptions {
   source: std.AsyncRecipe<std.Directory>;
+}
+
+export function test() {
+  return std.runBash`
+    node --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(nodejs());
 }
 
 /**
