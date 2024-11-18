@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.80.1",
+  version: "1.82.0",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -28,6 +28,12 @@ const Manifest = t.object({
   pkg: t.record(t.string(), ManifestPkg),
   profiles: t.record(t.string(), t.array(t.string())),
 });
+
+export function test() {
+  return std.runBash`
+    cargo --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(rust());
+}
 
 /**
  * The main Rust recipe. Returns a recipe containing the following:
