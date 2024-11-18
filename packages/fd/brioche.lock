@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/sharkdp/fd/archive/refs/tags/v10.2.0.tar.gz": {
+      "type": "sha256",
+      "value": "73329fe24c53f0ca47cd0939256ca5c4644742cb7c14cf4114c8c9871336d342"
+    }
+  }
+}
