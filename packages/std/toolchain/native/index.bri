@@ -221,9 +221,6 @@ export const toolchain = std.memo(
         ],
       },
 
-      // Include paths
-      CPATH: { append: [{ path: "include" }] },
-
       // Perl library paths
       PERL5LIB: {
         append: [{ path: "share/autoconf" }, { path: "share/automake-1.16" }],
