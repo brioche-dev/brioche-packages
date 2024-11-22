@@ -1,0 +1,62 @@
+import * as std from "std";
+import openssl from "openssl";
+import curl from "curl";
+
+export const project = {
+  name: "cmake",
+  version: "3.31.0",
+};
+
+const source = (() => {
+  let source = Brioche.download(
+    `https://github.com/Kitware/CMake/releases/download/v${project.version}/cmake-${project.version}.tar.gz`,
+  )
+    .unarchive("tar", "gzip")
+    .peel();
+
+  source = std
+    .process({
+      command: "patch",
+      args: [
+        "-p1",
+        "-i",
+        Brioche.includeFile("testbigendian-brioche.patch"),
+        "-d",
+        std.outputPath,
+      ],
+      outputScaffold: source,
+      dependencies: [std.tools()],
+    })
+    .toDirectory();
+
+  return source;
+})();
+
+export default function (): std.Recipe<std.Directory> {
+  let cmake = std.runBash`
+    ./bootstrap \\
+      --prefix=/ \\
+      --system-curl \\
+      --parallel=16 \\
+      -- \\
+      --trace-expand
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), openssl(), curl())
+    .env({
+      OPENSSL_ROOT_DIR: openssl(),
+      ZLIB_ROOT: std.toolchain(),
+      CURL_ROOT: curl(),
+    })
+    .toDirectory();
+
+  cmake = std.setEnv(cmake, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return std.withRunnableLink(cmake, "bin/cmake");
+}
