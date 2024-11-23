@@ -1,6 +1,6 @@
 import * as std from "/core";
 import { toolchain } from "/toolchain";
-import { runtimeUtils } from "/runnable_tools.bri";
+import { runtimeUtils } from "/runtime_utils.bri";
 
 /**
  * "Autopack" one or more files in a directory. Generally, this is useful
