@@ -72,11 +72,6 @@ export default function (): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain(), openssl(), curl())
-    .env({
-      OPENSSL_ROOT_DIR: openssl(),
-      ZLIB_ROOT: std.toolchain(),
-      CURL_ROOT: curl(),
-    })
     .toDirectory();
 
   cmake = cmake.insert("libexec/cmake/runtime-utils", std.runtimeUtils());
