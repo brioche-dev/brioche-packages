@@ -28,6 +28,7 @@ import { toolchain } from "./toolchain";
 export * from "./core";
 export * from "./extra";
 export * from "./toolchain";
+export { runtimeUtils } from "./runtime_utils.bri";
 
 export const project = {
   name: "std",
