@@ -37,9 +37,7 @@ export default function (): std.Recipe<std.Directory> {
     ./bootstrap \\
       --prefix=/ \\
       --system-curl \\
-      --parallel=16 \\
-      -- \\
-      --trace-expand
+      --parallel=16
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
