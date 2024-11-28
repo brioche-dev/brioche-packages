@@ -1,4 +1,5 @@
 import * as std from "std";
+import { gitCheckout } from "git";
 import openssl from "openssl";
 import curl from "curl";
 
@@ -7,6 +8,39 @@ export const project = {
   version: "3.31.0",
 };
 
+function patch(): std.Recipe<std.File> {
+  // Instead of directly using a fork of CMake, we instead grab the branch
+  // `brioche-patches`, diff it from `base/brioche-patches`, then apply it
+  // to whichever version of CMake we're building. This may make it easier
+  // to stay up-to-date, but it's not clear if this is the right approach...
+
+  return std.recipeFn(() => {
+    const base = gitCheckout(
+      Brioche.gitRef({
+        repository: "https://github.com/brioche-dev/CMake.git",
+        ref: "base/brioche-patches",
+      }),
+    );
+    const patched = gitCheckout(
+      Brioche.gitRef({
+        repository: "https://github.com/brioche-dev/CMake.git",
+        ref: "brioche-patches",
+      }),
+    );
+
+    return std.runBash`
+      diff -ru base patched > "$BRIOCHE_OUTPUT" || true
+    `
+      .workDir(
+        std.directory({
+          base: base.remove(".git"),
+          patched: patched.remove(".git"),
+        }),
+      )
+      .toFile();
+  });
+}
+
 const source = (() => {
   let source = Brioche.download(
     `https://github.com/Kitware/CMake/releases/download/v${project.version}/cmake-${project.version}.tar.gz`,
@@ -14,16 +48,11 @@ const source = (() => {
     .unarchive("tar", "gzip")
     .peel();
 
+  // Apply patch file
   source = std
     .process({
       command: "patch",
-      args: [
-        "-p1",
-        "-i",
-        Brioche.includeFile("testbigendian-brioche.patch"),
-        "-d",
-        std.outputPath,
-      ],
+      args: ["-p1", "-i", patch(), "-d", std.outputPath],
       outputScaffold: source,
       dependencies: [std.tools()],
     })
@@ -49,6 +78,12 @@ export default function (): std.Recipe<std.Directory> {
       CURL_ROOT: curl(),
     })
     .toDirectory();
+
+  cmake = cmake.insert("libexec/cmake/runtime-utils", std.runtimeUtils());
+  cmake = cmake.insert(
+    "libexec/cmake/brioche-packer",
+    std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
+  );
 
   cmake = std.setEnv(cmake, {
     CPATH: { append: [{ path: "include" }] },

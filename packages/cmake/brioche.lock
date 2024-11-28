@@ -5,5 +5,11 @@
       "type": "sha256",
       "value": "300b71db6d69dcc1ab7c5aae61cbc1aa2778a3e00cbd918bc720203e311468c3"
     }
+  },
+  "git_refs": {
+    "https://github.com/brioche-dev/CMake.git": {
+      "base/brioche-patches": "e22c8383b9ae4f27a78f7a8849693c03ca29c7bb",
+      "brioche-patches": "ca5d5f47043783ccc3537a47fbe0e6c4e65f074c"
+    }
   }
 }
