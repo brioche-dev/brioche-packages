@@ -2,7 +2,7 @@ import * as std from "/core";
 
 export function runtimeUtils(): std.Recipe<std.Directory> {
   return Brioche.download(
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/2c6c58bdeb42aeb9bd5204695aaa1f7eb18a56c0/x86_64-linux/brioche-runtime-utils.tar.zstd",
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/b44f9b743898b74faa79ee1a599440a2e2e6f295/x86_64-linux/brioche-runtime-utils.tar.zstd",
   ).unarchive("tar", "zstd");
 }
 
