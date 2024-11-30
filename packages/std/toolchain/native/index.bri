@@ -230,7 +230,9 @@ export const toolchain = std.memo(
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
 
       // CMake package paths
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
       ZLIB_ROOT: { fallback: { path: "." } },
+      LIBLZMA_ROOT: { fallback: { path: "." } },
 
       // Bison data dir
       BISON_PKGDATADIR: { fallback: { path: "share/bison" } },
