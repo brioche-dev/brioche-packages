@@ -9,10 +9,6 @@
       "type": "sha256",
       "value": "0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/2c6c58bdeb42aeb9bd5204695aaa1f7eb18a56c0/x86_64-linux/brioche-runtime-utils.tar.zstd": {
-      "type": "sha256",
-      "value": "722a78da59d3200c3d593b6940814086e316e46d85227e1282c755a3ff509358"
-    },
     "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/b44f9b743898b74faa79ee1a599440a2e2e6f295/x86_64-linux/brioche-runtime-utils.tar.zstd": {
       "type": "sha256",
       "value": "63a4092004f2a0c383c91a3be700f1a8ef034745697d3dfffe26005581cb081b"
