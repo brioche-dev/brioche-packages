@@ -13,6 +13,9 @@ const source = Brioche.download(
 
 export default function (): std.Recipe<std.Directory> {
   const alsaLib = std.runBash`
+    echo "uh oh..."
+    exit 1
+
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
