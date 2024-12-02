@@ -54,11 +54,18 @@ jobs:
         run: |
           for project in packages/*; do
             echo "::group::$project"
-            brioche build -p "$project" --check --sync --locked
+            brioche build -p "$project" --check --sync --locked --display plain-reduced
             echo "::endgroup::"
           done
         env:
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
+      - name: Save failed processes
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: process-events
+          path: ~/.local/share/brioche/process-temp/*/events.bin.zst
+          compression-level: 0
 
   publish:
     name: Publish packages
