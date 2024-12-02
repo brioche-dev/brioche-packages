@@ -1,0 +1,195 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import openssl from "openssl";
+import curl from "curl";
+
+export const project = {
+  name: "cmake",
+  version: "3.31.1",
+};
+
+function patch(): std.Recipe<std.File> {
+  // Instead of directly using a fork of CMake, we instead grab the branch
+  // `brioche-patches`, diff it from `base/brioche-patches`, then apply it
+  // to whichever version of CMake we're building. This may make it easier
+  // to stay up-to-date, but it's not clear if this is the right approach...
+
+  return std.recipeFn(() => {
+    const base = gitCheckout(
+      Brioche.gitRef({
+        repository: "https://github.com/brioche-dev/CMake.git",
+        ref: "base/brioche-patches",
+      }),
+    );
+    const patched = gitCheckout(
+      Brioche.gitRef({
+        repository: "https://github.com/brioche-dev/CMake.git",
+        ref: "brioche-patches",
+      }),
+    );
+
+    return std.runBash`
+      diff -ru base patched > "$BRIOCHE_OUTPUT" || true
+    `
+      .workDir(
+        std.directory({
+          base: base.remove(".git"),
+          patched: patched.remove(".git"),
+        }),
+      )
+      .toFile();
+  });
+}
+
+const source = (() => {
+  let source = Brioche.download(
+    `https://github.com/Kitware/CMake/releases/download/v${project.version}/cmake-${project.version}.tar.gz`,
+  )
+    .unarchive("tar", "gzip")
+    .peel();
+
+  // Apply patch file
+  source = std
+    .process({
+      command: "patch",
+      args: ["-p1", "-i", patch(), "-d", std.outputPath],
+      outputScaffold: source,
+      dependencies: [std.tools()],
+    })
+    .toDirectory();
+
+  return source;
+})();
+
+export default function cmake(): std.Recipe<std.Directory> {
+  let cmake = std.runBash`
+    ./bootstrap \\
+      --prefix=/ \\
+      --system-curl \\
+      --parallel=16
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), openssl(), curl())
+    .toDirectory();
+
+  cmake = cmake.insert("libexec/cmake/runtime-utils", std.runtimeUtils());
+  cmake = cmake.insert(
+    "libexec/cmake/brioche-packer",
+    std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
+  );
+
+  cmake = std.setEnv(cmake, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return std.withRunnableLink(cmake, "bin/cmake");
+}
+
+export interface CMakeBuildInstallOptions {
+  source: std.AsyncRecipe<std.Directory>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
+  config?: string;
+  env?: Record<string, std.ProcessTemplateLike>;
+  set?: Record<string, CMakeVariable>;
+  runnable?: string;
+}
+
+export type CMakeVariable =
+  | string
+  | { type?: CMakeVariableType; value: string };
+
+export type CMakeVariableType =
+  | "BOOL"
+  | "FILEPATH"
+  | "PATH"
+  | "STRING"
+  | "INTERNAL";
+
+/**
+ * Generate and build a CMake project.
+ *
+ * A project buildsystem will be generated out-of-tree from the source project,
+ * and will be built and installed automatically with the chosen build
+ * generator.
+ *
+ * If the result includes a `lib64/`, the symlink `lib/` will be added
+ * automatically to follow the standard Brioche conventions.
+ *
+ * ## Options
+ *
+ * - `source`: The CMake project to build.
+ * - `dependencies`: Optionally add dependencies to the build. Most projects
+ *   will want to include `std.toolchain()` or a similar toolchain.
+ * - `env`: Optionally set environment variables for the build.
+ * - `set`: Optionally set CMake cache variables during the build, as if
+ *   by passing `-D...`.
+ * - `runnable`: Optionally set a path to the binary to run by default
+ *   (e.g. `bin/foo`).
+ */
+export function cmakeBuild(
+  options: CMakeBuildInstallOptions,
+): std.Recipe<std.Directory> {
+  const { source, dependencies = [], config = "Release", set = {} } = options;
+
+  const env: Record<string, string> = {};
+  for (const [name, variable] of Object.entries(set)) {
+    std.assert(
+      /^[a-zA-Z0-9\-_]+$/.test(name),
+      `invalid CMake variable name: ${name}`,
+    );
+
+    const value = typeof variable === "object" ? variable.value : variable;
+    const type = typeof variable === "object" ? variable.type : undefined;
+
+    env[`cmake_value_${name}`] = value;
+    env[`cmake_type_${name}`] = type ?? "";
+  }
+
+  let result = std.runBash`
+    export LIB="$LIBRARY_PATH"
+
+    cmake_args=()
+    for name in $cmake_set_names; do
+      var_cmake_value="cmake_value_$name"
+      var_cmake_type="cmake_type_$name"
+      if [ -n "\${!var_cmake_type}" ]; then
+        cmake_args+=("-D\${name}:\${!var_cmake_type}=\${!var_cmake_value}")
+      else
+        cmake_args+=("-D\${name}=\${!var_cmake_value}")
+      fi
+    done
+
+    cmake "$source" "\${cmake_args[@]}"
+    cmake --build . --config "$config"
+    cmake --install . --prefix="$BRIOCHE_OUTPUT"
+
+    if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
+      ln -s lib64 "$BRIOCHE_OUTPUT/lib"
+    fi
+  `
+    .dependencies(...dependencies, cmake())
+    .env({
+      ...options.env,
+      source,
+      config,
+      cmake_set_names: Object.keys(set).join(" "),
+      ...env,
+    })
+    .toDirectory();
+
+  if (options.runnable != null) {
+    result = std.withRunnableLink(result, options.runnable);
+  }
+
+  return result;
+}
+
+export function test() {
+  return std.runBash`
+    cmake --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(cmake());
+}

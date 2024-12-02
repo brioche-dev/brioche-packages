@@ -221,9 +221,6 @@ export const toolchain = std.memo(
         ],
       },
 
-      // Include paths
-      CPATH: { append: [{ path: "include" }] },
-
       // Perl library paths
       PERL5LIB: {
         append: [{ path: "share/autoconf" }, { path: "share/automake-1.16" }],
@@ -231,6 +228,11 @@ export const toolchain = std.memo(
 
       // pkg-config search paths
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+
+      // CMake package paths
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      ZLIB_ROOT: { fallback: { path: "." } },
+      LIBLZMA_ROOT: { fallback: { path: "." } },
 
       // Bison data dir
       BISON_PKGDATADIR: { fallback: { path: "share/bison" } },

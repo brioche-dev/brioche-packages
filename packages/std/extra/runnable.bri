@@ -2,7 +2,7 @@ import * as std from "/core";
 import {
   type RunnableTemplate,
   makeRunnableExecutable,
-} from "/runnable_tools.bri";
+} from "/runtime_utils.bri";
 
 export type WithRunnable = std.Recipe<std.Directory> & WithRunnableUtils;
 
