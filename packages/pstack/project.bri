@@ -15,36 +15,15 @@ const gitRef = Brioche.gitRef({
 const source = gitCheckout(gitRef);
 
 export default async function pstack(): Promise<std.Recipe<std.Directory>> {
-  let pstack = cmakeBuild({
+  return cmakeBuild({
     source,
     config: "RelWithDebInfo",
     dependencies: [std.toolchain()],
     set: {
       VERSION_TAG: (await gitRef).commit,
     },
+    runnable: "bin/pstack",
   });
-  pstack = std.withRunnableLink(pstack, "bin/pstack");
-  return pstack;
-  // return std.runBash`
-  //   export LIB="$LIBRARY_PATH"
-
-  //   mkdir build
-  //   cd build
-  //   cmake \\
-  //     -DCMAKE_INSTALL_PREFIX="$BRIOCHE_OUTPUT" \\
-  //     -DCMAKE_BUILD_TYPE=RelWithDebInfo \\
-  //     --debug-find \\
-  //     ..
-  //   make -j4
-  //   make install
-
-  //   if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
-  //     ln -s lib64 "$BRIOCHE_OUTPUT/lib"
-  //   fi
-  // `
-  //   .workDir(source)
-  //   .dependencies(std.toolchain(), cmake(), git())
-  //   .toDirectory();
 }
 
 export function test() {
