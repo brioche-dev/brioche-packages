@@ -1,0 +1,33 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { gitCheckout } from "git";
+
+export const project = {
+  name: "pstack",
+  version: "2.8.3",
+};
+
+const gitRef = Brioche.gitRef({
+  repository: "https://github.com/peadar/pstack.git",
+  ref: `v${project.version}`,
+});
+
+const source = gitCheckout(gitRef);
+
+export default async function pstack(): Promise<std.Recipe<std.Directory>> {
+  return cmakeBuild({
+    source,
+    config: "RelWithDebInfo",
+    dependencies: [std.toolchain()],
+    set: {
+      VERSION_TAG: (await gitRef).commit,
+    },
+    runnable: "bin/pstack",
+  });
+}
+
+export function test() {
+  return std.runBash`
+    pstack --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(pstack());
+}

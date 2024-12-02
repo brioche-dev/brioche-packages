@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/peadar/pstack.git": {
+      "v2.8.3": "a83d4b95e6bc2c62fae97ca9f9785fc7133a9fdb"
+    }
+  }
+}
