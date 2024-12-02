@@ -187,3 +187,9 @@ export function cmakeBuild(
 
   return result;
 }
+
+export function test() {
+  return std.runBash`
+    cmake --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(cmake());
+}
