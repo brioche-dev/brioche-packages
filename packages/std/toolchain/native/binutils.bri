@@ -48,7 +48,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
   binutils = useBriocheLd(binutils, {
     ldPaths: ["bin/ld", "bin/ld.bfd", "bin/ld.gold"],
     interpreterPaths: {
-      "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
+      "lib/ld-linux-aarch64.so.1": "lib/ld-linux-aarch64.so.1",
     },
   });
 

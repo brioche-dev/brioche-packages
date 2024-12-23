@@ -11,7 +11,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     script: `
       set -euo pipefail
 
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/aarch64-linux-gnu/12\${PATH:+:$PATH}"
 
       mkdir -p source
       tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
@@ -28,7 +28,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     env: {
       source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: "aarch64-lfs-linux-gnu",
       stage1: stage1(),
     },
   });

@@ -49,20 +49,20 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     ldPaths: [
       "usr/bin/ld",
       "usr/bin/ld.bfd",
-      "usr/x86_64-lfs-linux-gnu/bin/ld",
-      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
+      "usr/aarch64-lfs-linux-gnu/bin/ld",
+      "usr/aarch64-lfs-linux-gnu/bin/ld.bfd",
     ],
     interpreterPaths: {
-      "lib64/ld-linux-x86-64.so.2": "lib/ld-linux-x86-64.so.2",
+      "lib/ld-linux-aarch64.so.1": "lib/ld-linux-aarch64.so.1",
     },
   });
 
   toolchain = wrapWithScript(toolchain, {
     paths: [
-      "usr/bin/x86_64-lfs-linux-gnu-c++",
-      "usr/bin/x86_64-lfs-linux-gnu-g++",
-      "usr/bin/x86_64-lfs-linux-gnu-gcc",
-      "usr/bin/x86_64-lfs-linux-gnu-gcc-13.2.0",
+      "usr/bin/aarch64-lfs-linux-gnu-c++",
+      "usr/bin/aarch64-lfs-linux-gnu-g++",
+      "usr/bin/aarch64-lfs-linux-gnu-gcc",
+      "usr/bin/aarch64-lfs-linux-gnu-gcc-13.2.0",
       "usr/bin/c++",
       "usr/bin/g++",
       "usr/bin/gcc",
@@ -131,8 +131,8 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 
         if [ "$include_system_headers" -eq 1 ]; then
           set -- \
-            -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0/x86_64-lfs-linux-gnu" \
-            -isystem "$sysroot/x86_64-lfs-linux-gnu/include/c++/13.2.0" \
+            -isystem "$sysroot/aarch64-lfs-linux-gnu/include/c++/13.2.0/aarch64-lfs-linux-gnu" \
+            -isystem "$sysroot/aarch64-lfs-linux-gnu/include/c++/13.2.0" \
             -isystem "$sysroot/usr/include" \
             "$@"
         fi
@@ -147,7 +147,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   for (const tool of prefixedTools) {
     toolchain = toolchain.insert(
       `usr/bin/${tool}`,
-      std.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }),
+      std.symlink({ target: `aarch64-lfs-linux-gnu-${tool}` }),
     );
   }
 

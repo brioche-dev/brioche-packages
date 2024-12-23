@@ -229,7 +229,7 @@ export type BString = string & { __bString: never };
 
 export type HexString = string & { __hexString: never };
 
-export type Platform = "x86_64-linux";
+export type Platform = "x86_64-linux" | "aarch64-linux";
 
 export type Hash = { type: "sha256"; value: HexString };
 

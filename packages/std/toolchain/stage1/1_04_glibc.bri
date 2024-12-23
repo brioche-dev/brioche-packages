@@ -22,7 +22,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
     script: std.indoc`
       set -euo pipefail
 
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/aarch64-linux-gnu/12\${PATH:+:$PATH}"
 
       mkdir -p source
       tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
@@ -31,7 +31,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       mkdir "$BRIOCHE_OUTPUT/lib"
 
       mkdir -p "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib"
-      ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib/"
+      ln -s "/lib/ld-linux-aarch64.so.1" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib/"
 
       case $(uname -m) in
         i?86)
@@ -66,7 +66,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       source: sourceArchive,
       sourcePatch,
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: "aarch64-lfs-linux-gnu",
       stage1,
     },
   });
@@ -75,7 +75,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
     script: std.indoc`
       set -euo pipefail
 
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/aarch64_64-linux-gnu/12\${PATH:+:$PATH}"
 
       mkdir -p "$BRIOCHE_OUTPUT"
       cp -r "$glibc"/* "$BRIOCHE_OUTPUT"

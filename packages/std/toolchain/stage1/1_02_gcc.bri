@@ -22,7 +22,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     script: std.indoc`
       set -euo pipefail
 
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/aarch64-linux-gnu/12\${PATH:+:$PATH}"
 
       mkdir -p source/build
       tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
@@ -35,14 +35,8 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       tar -xf "$mpcArchive" --no-same-owner --no-same-permissions
       mv mpc-1.3.1 mpc
 
-      case "$(uname -m)" in
-        x86_64 )
-          sed \\
-            -e '/m64=/s/lib64/lib/' \\
-            -i.orig \\
-            gcc/config/i386/t-linux64
-        ;;
-      esac
+      sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
+      sed -e '/mabi.lp64=/s/lib64/lib/' -i gcc/config/aarch64/t-aarch64-linux
 
       cd build
       ../configure \
@@ -78,7 +72,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       gmpArchive,
       mpcArchive,
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: "aarch64-lfs-linux-gnu",
       stage1,
     },
   });

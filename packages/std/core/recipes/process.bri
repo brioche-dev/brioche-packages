@@ -158,7 +158,7 @@ export function process(options: ProcessOptions): Process {
             async (dep) => await (await dep).briocheSerialize(),
           ),
         ),
-        platform: "x86_64-linux",
+        platform: "aarch64-linux",
         workDir: await (
           await (options.workDir ?? directory())
         ).briocheSerialize(),

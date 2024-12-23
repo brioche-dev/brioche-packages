@@ -5,29 +5,25 @@
       "type": "sha256",
       "value": "f4a245b94124b377d8b49646bf421f9155d36aa7614b6ebf83705d3ffc76eaad"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/aarch64-linux/brioche-bootstrap.tar.zstd": {
       "type": "sha256",
-      "value": "0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11"
+      "value": "dde2f006b119a8154dc6c22a63f064e67fd880bb42d74f64730be7325fde4fbb"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/b44f9b743898b74faa79ee1a599440a2e2e6f295/x86_64-linux/brioche-runtime-utils.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/4c24ca9f48e66822cdc6a34e1b27b2858ef04de2/aarch64-linux/brioche-runtime-utils.tar.zstd": {
       "type": "sha256",
-      "value": "63a4092004f2a0c383c91a3be700f1a8ef034745697d3dfffe26005581cb081b"
+      "value": "f093be9d26db3aaf729dc1d1c979b4e898f3241cf6829edbe264833ee7fa72b5"
     },
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz": {
+    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_arm64_linux.tar.xz": {
       "type": "sha256",
-      "value": "e2e9ae181e115e155158cb9031687d943b0847d8058a4c28454194d835478be6"
+      "value": "02308fd5aaea492d730f390b8122a0d518a13df7fbbeb46568497cc6ef93bc81"
     },
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz": {
+    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_arm64_linux.tar.zstd": {
       "type": "sha256",
-      "value": "f8a75f171c2c753bc86a331473812ddc24837d5e91b0b1c7af89d6a2aa6e8986"
+      "value": "823c4f9687aaee22f4115845063c84c62fccb75c081c2e50c0b78d459857b4fd"
     },
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_arm64_linux.tar.zstd": {
       "type": "sha256",
-      "value": "27416708f7ee8cd0c5d408010192705b40c914647fd0d80f00c2194795828cd6"
-    },
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd": {
-      "type": "sha256",
-      "value": "eb29ea059fcd9ca457841f5c79151721a74761a31610d694bce61a62f4de6d33"
+      "value": "36c0dcfb02e61a07f4654e1ca6047cdefb17ce1f2e37fcb2ba5dc20695b3e273"
     },
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz": {
       "type": "sha256",

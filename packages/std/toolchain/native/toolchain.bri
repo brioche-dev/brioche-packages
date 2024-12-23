@@ -6,10 +6,10 @@ export function createToolchain(
 ): std.Recipe<std.Directory> {
   return wrapWithScript(std.merge(...tools), {
     paths: [
-      "bin/x86_64-pc-linux-gnu-c++",
-      "bin/x86_64-pc-linux-gnu-g++",
-      "bin/x86_64-pc-linux-gnu-gcc",
-      "bin/x86_64-pc-linux-gnu-gcc-13.2.0",
+      "bin/aarch64-pc-linux-gnu-c++",
+      "bin/aarch64-pc-linux-gnu-g++",
+      "bin/aarch64-pc-linux-gnu-gcc",
+      "bin/aarch64-pc-linux-gnu-gcc-13.2.0",
       "bin/c++",
       "bin/g++",
       "bin/gcc",
@@ -78,8 +78,8 @@ export function createToolchain(
 
       if [ "$include_system_headers" -eq 1 ]; then
         set -- \
-          -isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include" \
-          -isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed" \
+          -isystem "$sysroot/lib/gcc/aarch64-pc-linux-gnu/13.2.0/include" \
+          -isystem "$sysroot/lib/gcc/aarch64-pc-linux-gnu/13.2.0/include-fixed" \
           -isystem "$sysroot/include" \
           "$@"
       fi
@@ -90,14 +90,3 @@ export function createToolchain(
       .withPermissions({ executable: true }),
   });
 }
-
-/*
-        set -- \
--isystem "$sysroot/include/c++/13.2.0" \
--isystem "$sysroot/include/c++/13.2.0/backward" \
--isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include" \
--isystem "$sysroot/lib/gcc/x86_64-pc-linux-gnu/13.2.0/include-fixed" \
--isystem "$sysroot/include/c++/13.2.0/x86_64-pc-linux-gnu" \
--isystem "$sysroot/include" \
-"$@"
-*/

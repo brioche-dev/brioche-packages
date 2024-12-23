@@ -14,7 +14,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   let stage1 = std.merge(binutils(), gcc(), linuxHeaders(), glibc());
 
   stage1 = wrapWithScript(stage1, {
-    paths: ["usr/bin/x86_64-lfs-linux-gnu-gcc"],
+    paths: ["usr/bin/aarch64-lfs-linux-gnu-gcc"],
     renameSuffix: "-orig",
     script: std
       .file(std.indoc`
@@ -27,13 +27,13 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 
   stage1 = useBriocheLd(stage1, {
     ldPaths: [
-      "usr/bin/x86_64-lfs-linux-gnu-ld",
-      "usr/bin/x86_64-lfs-linux-gnu-ld.bfd",
-      "usr/x86_64-lfs-linux-gnu/bin/ld",
-      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
+      "usr/bin/aarch64-lfs-linux-gnu-ld",
+      "usr/bin/aarch64-lfs-linux-gnu-ld.bfd",
+      "usr/aarch64-lfs-linux-gnu/bin/ld",
+      "usr/aarch64-lfs-linux-gnu/bin/ld.bfd",
     ],
     interpreterPaths: {
-      "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
+      "lib/ld-linux-aarch64.so.1": "lib/ld-linux-aarch64.so.1",
     },
   });
 
@@ -41,7 +41,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     script: std.indoc`
       set -euo pipefail
 
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+      export PATH="$stage1/usr/bin:/usr/lib/gcc/aarch64-linux-gnu/12\${PATH:+:$PATH}"
 
       mkdir -p source/build
       tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
@@ -63,12 +63,12 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       make
       make install DESTDIR="$BRIOCHE_OUTPUT"
 
-      rm -v "$BRIOCHE_OUTPUT/usr/lib"/lib{stdc++,stdc++fs,supc++}.la
+      rm -fv "$BRIOCHE_OUTPUT"/usr/lib{,64}/lib{stdc++,stdc++fs,supc++}.la
     `,
     env: {
       source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: "aarch64-lfs-linux-gnu",
       stage1,
     },
   });

@@ -12,7 +12,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
   );
 
-  let glibc = std
+  const glibc = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
@@ -55,15 +55,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
       },
     })
     .toDirectory();
-
-  glibc = glibc.insert(
-    "lib64",
-    std.directory({
-      "ld-linux-x86-64.so.2": std.symlink({
-        target: "../lib/ld-linux-x86-64.so.2",
-      }),
-    }),
-  );
 
   return glibc;
 });
