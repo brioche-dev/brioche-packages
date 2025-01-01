@@ -1,0 +1,60 @@
+import * as std from "std";
+import git, { gitCheckout } from "git";
+import talloc from "talloc";
+import libarchive from "libarchive";
+
+export const project = {
+  name: "proot",
+  version: "5.4.0",
+};
+
+export const source = std.recipeFn(() => {
+  const source = gitCheckout(
+    Brioche.gitRef({
+      repository: "https://github.com/proot-me/proot.git",
+      ref: `v${project.version}`,
+    }),
+  );
+  return std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    sed -i 's|/bin/echo|/usr/bin/env echo|g' src/GNUmakefile
+  `
+    .outputScaffold(source)
+    .toDirectory();
+});
+
+export default function proot(): std.Recipe<std.Directory> {
+  let proot = std.runBash`
+    BRIOCHE_LD_AUTOPACK=false make -C src loader.elf loader-m32.elf build.h
+    make -C src proot care
+    make -C src install PREFIX="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), git(), talloc(), uthash(), libarchive())
+    .toDirectory();
+
+  return proot;
+}
+
+function uthash(): std.Recipe<std.Directory> {
+  const uthash = gitCheckout(
+    Brioche.gitRef({
+      repository: "https://github.com/troydhanson/uthash.git",
+      ref: "master",
+    }),
+  );
+
+  return std.setEnv(uthash, {
+    CPATH: { append: [{ path: "include" }] },
+  });
+}
+
+export function test() {
+  return std.runBash`
+    proot --version
+    proot -R "$tools" ls /
+    exit 1
+  `
+    .dependencies(proot())
+    .env({ tools: std.tools() });
+}
