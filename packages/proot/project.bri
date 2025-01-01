@@ -33,6 +33,8 @@ export default function proot(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain(), git(), talloc(), uthash(), libarchive())
     .toDirectory();
 
+  proot = std.withRunnableLink(proot, "bin/proot");
+
   return proot;
 }
 
