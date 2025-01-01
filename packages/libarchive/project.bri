@@ -1,0 +1,47 @@
+import * as std from "std";
+
+export const project = {
+  name: "libarchive",
+  version: "3.7.7",
+};
+
+const source = Brioche.download(
+  `https://www.libarchive.org/downloads/libarchive-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  let libarchive = std.runBash`
+    ./configure --prefix="$BRIOCHE_OUTPUT"
+    make
+    make install
+  `
+    .workDir(source)
+    .dependencies(toolchain())
+    .toDirectory();
+
+  libarchive = std.setEnv(libarchive, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return libarchive;
+}
+
+// HACK: Quick patch to toolchain to replace absolute libtool
+// path in `libacl.la` with `-l` argument
+function toolchain(): std.Recipe<std.Directory> {
+  let toolchain = std.toolchain();
+
+  const patched = std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    sed -i 's|//lib/lib\\([^\\s]*\\).la|-l\\1|g' lib/*.la
+  `
+    .outputScaffold(std.glob(toolchain, ["lib/libacl.la"]))
+    .toDirectory();
+
+  toolchain = std.merge(toolchain, patched);
+  return toolchain;
+}
