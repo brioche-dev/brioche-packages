@@ -1,0 +1,32 @@
+import * as std from "std";
+import python from "python";
+
+export const project = {
+  name: "talloc",
+  version: "2.4.2",
+};
+
+const source = Brioche.download(
+  `https://www.samba.org/ftp/talloc/talloc-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  let talloc = std.runBash`
+    ./configure --prefix="$BRIOCHE_OUTPUT"
+    make
+    make install
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), python())
+    .toDirectory();
+
+  talloc = std.setEnv(talloc, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return talloc;
+}

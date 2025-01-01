@@ -20,6 +20,7 @@ export default async function python() {
 
     ./configure \\
       --prefix=/ \\
+      --enable-shared \\
       --without-ensurepip
     make -j8
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -56,7 +57,10 @@ export default async function python() {
       // forces Python to be linked with the modules' transitive dependencies
       extraLibraries: nativeModules,
       skipLibraries: nativeModules,
-      libraryPaths: [std.glob(python, ["lib/python*/lib-dynload"]).peel(3)],
+      libraryPaths: [
+        std.glob(python, ["lib/python*/lib-dynload"]).peel(3),
+        std.glob(python, ["lib/libpython*"]).peel(),
+      ],
     },
     sharedLibraryConfig: {
       enabled: false,
@@ -71,7 +75,7 @@ export default async function python() {
 
   // Some binaries under `/bin` are shebang scripts. These need to be wrapped
   // to avoid issues with absolute paths
-  python = std.recipe(wrapShebangs(python));
+  python = std.recipe(fixShebangs(python));
 
   // Fix absolute paths in pkg-config files
   python = makePkgConfigPathsRelative(python);
@@ -96,19 +100,22 @@ export function test() {
   return std.runBash`
     python --version | tee -a "$BRIOCHE_OUTPUT"
     pip --version | tee -a "$BRIOCHE_OUTPUT"
+    python-config --cflags --libs --ldflags | tee -a "$BRIOCHE_OUTPUT"
   `.dependencies(python());
 }
 
-async function wrapShebangs(
+async function fixShebangs(
   recipe: std.Recipe<std.Directory>,
 ): Promise<std.Recipe<std.Directory>> {
-  // Get all the files under `/bin` that are shebang scripts
-  // NOTE: These scripts can use `#!/bin/sh` when paths are long, so won't
-  // necessarily have a shebang to call Python directly. See this function:
+  // Get all Python shebang scripts under `bin/`. We assume _all_ shebang
+  // scripts we can find are Python scripts, except for `python-config`. This
+  // is because Python may install shebang scripts using `#!/bin/sh` when
+  // paths are long, so they won't necessarily have a shebang to call Python
+  // directly. See this function from Pip:
   // https://github.com/pypa/pip/blob/102d8187a1f5a4cd5de7a549fd8a9af34e89a54f/src/pip/_vendor/distlib/scripts.py#L154
-  const shebangPathList = await std.runBash`
+  const pythonShebangPathList = await std.runBash`
     cd "$recipe"
-    find bin -type f -executable \\
+    find bin ! -name 'python*-config' -type f -executable \\
     | while read file; do
       if [[ "$(head -c 2 "$file")" == '#!' ]]; then
         echo "$file" >> "$BRIOCHE_OUTPUT"
@@ -118,19 +125,51 @@ async function wrapShebangs(
     .env({ recipe })
     .toFile()
     .read();
-  const shebangPaths = shebangPathList
+  const pythonShebangPaths = pythonShebangPathList
     .split("\n")
     .filter((line) => line !== "");
 
-  // Wrap each script using `std.addRunnable()`
-  const wrappedShebangs = shebangPaths.map((path) => {
+  // Get the list of shebang shell scripts. We only handle the `python-config`
+  // script.
+  const shellShebangPathList = await std.runBash`
+    cd "$recipe"
+    find bin -name 'python*-config' -type f -executable \\
+    | while read file; do
+      if [[ "$(head -c 2 "$file")" == '#!' ]]; then
+        echo "$file" >> "$BRIOCHE_OUTPUT"
+      fi
+    done
+  `
+    .env({ recipe })
+    .toFile()
+    .read();
+  const shellShebangPaths = shellShebangPathList
+    .split("\n")
+    .filter((line) => line !== "");
+
+  // Wrap each Python script using `std.addRunnable()`
+  const pythonWrappedShebangs = pythonShebangPaths.map((path) => {
     return std.addRunnable(std.directory(), path, {
       command: { relativePath: "bin/python" },
       args: [[std.glob(recipe, [path]), `/${path}`]],
     });
   });
 
-  return std.merge(recipe, ...wrappedShebangs);
+  // Update each shell script by using `#!/usr/bin/env sh`. We can't
+  // use `std.addRunnable()` because `python-config` is sensitive to its
+  // path on disk.
+  const fixedShellShebangs = shellShebangPaths.map((path) => {
+    const fixedFile = std.runBash`
+      echo '#!/usr/bin/env sh' > "$BRIOCHE_OUTPUT"
+      tail -n+2 "$file" >> "$BRIOCHE_OUTPUT"
+      chmod +x "$BRIOCHE_OUTPUT"
+    `
+      .env({ file: recipe.get(path) })
+      .toFile();
+    return std.directory().insert(path, fixedFile);
+  });
+
+  return std.merge(recipe, ...pythonWrappedShebangs, ...fixedShellShebangs);
 }
 
 // TODO: Figure out where to move this, this is copied from `std`
