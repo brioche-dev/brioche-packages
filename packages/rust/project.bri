@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.82.0",
+  version: "1.83.0",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -169,45 +169,8 @@ export interface CargoBuildOptions {
  * ```
  */
 export function cargoBuild(options: CargoBuildOptions) {
-  // Create a skeleton crate so we have enough information to vendor the
-  // dependencies
-  const skeletonCrate = createSkeletonCrate(options.source);
-
-  // Vendor the dependencies with network access and save the Cargo config.toml
-  // file, so the vendored dependencies are used
-  const vendoredSkeletonCrate = std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    mkdir -p .cargo
-
-    # If the crate has a .cargo/config file, then move it to .cargo/config.toml
-    # Cargo prefers the config over config.toml, so we need to rename it
-    # to avoid any conflicts. It will still need to be removed from the merged
-    # crate later too
-    if [ -f .cargo/config ]; then
-      mv .cargo/config .cargo/config.toml
-    fi
-
-    # Always add a newline in case the file already exists and
-    # doesn't end with a newline
-    echo $'\n'"$(cargo vendor --locked)" >> .cargo/config.toml
-  `
-    .dependencies(rust(), caCertificates())
-    .outputScaffold(skeletonCrate)
-    .unsafe({ networking: true })
-    .toDirectory();
-
-  // Combine the original crate with the vendored dependencies
-  let crate = std.merge(vendoredSkeletonCrate, options.source);
-
-  // Copy the updated Cargo config.toml file into the crate
-  crate = crate.insert(
-    ".cargo/config.toml",
-    vendoredSkeletonCrate.get(".cargo/config.toml"),
-  );
-
-  // Remove the conflicting `cargo/config` file if it existed in the original
-  // crate. It will have already been copied over to `.cargo/config.toml`
-  crate = crate.remove(".cargo/config");
+  // Vendor the crate's dependencies
+  const crate = vendorCrate({ source: options.source });
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
@@ -259,6 +222,65 @@ export function createSkeletonCrate(
     .env({ recipe })
     .outputScaffold(std.directory())
     .toDirectory();
+}
+
+interface VendorCrateOptions {
+  source: std.AsyncRecipe<std.Directory>;
+}
+
+/**
+ * Vendor the dependencies for a Rust crate, returning the same crate with
+ * dependencies vendored using `cargo vendor`. `.cargo/config.toml` will
+ * also be updated to use the vendored dependencies.
+ *
+ * ## Options
+ *
+ * - `source`: The crate to build.
+ */
+export function vendorCrate(
+  options: VendorCrateOptions,
+): std.Recipe<std.Directory> {
+  // Create a skeleton crate so we have enough information to vendor the
+  // dependencies
+  const skeletonCrate = createSkeletonCrate(options.source);
+
+  // Vendor the dependencies with network access and save the Cargo config.toml
+  // file, so the vendored dependencies are used
+  const vendoredSkeletonCrate = std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    mkdir -p .cargo
+
+    # If the crate has a .cargo/config file, then move it to .cargo/config.toml
+    # Cargo prefers the config over config.toml, so we need to rename it
+    # to avoid any conflicts. It will still need to be removed from the merged
+    # crate later too
+    if [ -f .cargo/config ]; then
+      mv .cargo/config .cargo/config.toml
+    fi
+
+    # Always add a newline in case the file already exists and
+    # doesn't end with a newline
+    echo $'\n'"$(cargo vendor --locked)" >> .cargo/config.toml
+  `
+    .dependencies(rust(), caCertificates())
+    .outputScaffold(skeletonCrate)
+    .unsafe({ networking: true })
+    .toDirectory();
+
+  // Combine the original crate with the vendored dependencies
+  let crate = std.merge(vendoredSkeletonCrate, options.source);
+
+  // Copy the updated Cargo config.toml file into the crate
+  crate = crate.insert(
+    ".cargo/config.toml",
+    vendoredSkeletonCrate.get(".cargo/config.toml"),
+  );
+
+  // Remove the conflicting `cargo/config` file if it existed in the original
+  // crate. It will have already been copied over to `.cargo/config.toml`
+  crate = crate.remove(".cargo/config");
+
+  return crate;
 }
 
 function cargoChef(): std.Recipe<std.Directory> {
