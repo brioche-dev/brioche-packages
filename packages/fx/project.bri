@@ -1,0 +1,29 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "fx",
+  version: "35.0.0",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/antonmedv/fx.git",
+    ref: project.version,
+  }),
+);
+
+export default function fx(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    runnable: "bin/fx",
+  });
+}
+
+export function test() {
+  return std.runBash`
+    fx --version | tee "$BRIOCHE_OUTPUT"
+    echo '{"hello": "world"}' | fx 'Object.keys' | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(fx());
+}
