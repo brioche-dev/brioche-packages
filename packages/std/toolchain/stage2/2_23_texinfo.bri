@@ -3,20 +3,21 @@ import toolchain from "./2_18_toolchain.bri";
 import perl from "./2_21_perl.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/texinfo-7.0.3.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   return std
     .process({
       command: "/usr/bin/env",
       args: [
         "sh",
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar xf "$source" --strip-components=1
           ./configure --prefix=/usr
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -24,8 +25,8 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin:${perl()}/usr/bin`,
-        source: sourceArchive,
       },
+      workDir: source,
     })
     .toDirectory();
 });

@@ -2,9 +2,11 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
   const sourcePatchFhs = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
   );
@@ -12,18 +14,36 @@ export default std.memo((): std.Recipe<std.Directory> => {
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-memalign_fix-1.patch",
   );
 
+  source = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          cd "$BRIOCHE_OUTPUT"
+          patch -Np1 -i "$sourcePatchFhs"
+          patch -Np1 -i "$sourcePatchMemalign"
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+        sourcePatchFhs,
+        sourcePatchMemalign,
+      },
+      outputScaffold: source,
+    })
+    .toDirectory();
+
   let glibc = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-          patch -Np1 -i "$sourcePatchFhs"
-          patch -Np1 -i "$sourcePatchMemalign"
-
           mkdir build
           cd build
 
@@ -47,12 +67,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
-        sourcePatchFhs,
-        sourcePatchMemalign,
         PATH: std.tpl`${stage2()}/bin`,
         stage2: stage2(),
       },
+      workDir: source,
     })
     .toDirectory();
 

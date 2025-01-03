@@ -3,21 +3,23 @@ import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
+
+  source = bootstrapRun({
+    script: std.indoc`
+      cd "$BRIOCHE_OUTPUT"
+      sed -i 's/mawk//' configure
+    `,
+    outputScaffold: source,
+  });
 
   return bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
-
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
-
-      mkdir -p source
-      tar xf "$source" -C source --strip-components=1
-      cd source
-
-      sed -i s/mawk// configure
+      export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
       mkdir build
       pushd build
@@ -45,10 +47,10 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       echo "INPUT(-lncursesw)" > "$BRIOCHE_OUTPUT/usr/lib/libncurses.so"
     `,
     env: {
-      source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     },
+    workDir: source,
   });
 });

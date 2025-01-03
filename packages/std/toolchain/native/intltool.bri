@@ -5,9 +5,30 @@ import perlXmlParser from "./perl_xml_parser.bri";
 import expat from "./expat.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/intltool-0.51.0.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
+
+  source = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          cd "$BRIOCHE_OUTPUT"
+          sed -i 's:\\\\\\\${:\\\\\\\$\\\\{:' intltool-update.in
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: source,
+    })
+    .toDirectory();
 
   const perlDep = std.merge(perl(), perlXmlParser());
 
@@ -15,28 +36,22 @@ export default std.memo((): std.Recipe<std.Directory> => {
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
-          sed -i 's:\\\\\\\${:\\\\\\\$\\\\{:' intltool-update.in
-
-          perl -e "use XML::Parser; XML::Parser->new()->parse('<test/>'); print 'XML::Parser is available and working\\n';"
-
           ./configure --prefix=/
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${perlDep}/bin:${stage2()}/bin`,
+
         // expat is dynamically loaded by the Perl XML::Parser module
-        // TODO: Handle this in the `perl()` function somehow
         LD_LIBRARY_PATH: std.tpl`${expat()}/lib`,
       },
+      workDir: source,
     })
     .toDirectory();
 });

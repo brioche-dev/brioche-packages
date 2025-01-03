@@ -5,20 +5,20 @@ import libpipeline from "./libpipeline.bri";
 import groff from "./groff.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/man-db-2.11.2.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --sysconfdir=/etc \
@@ -30,7 +30,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin:${groff()}/bin`,
         MAGIC: std.tpl`${stage2()}/usr/share/misc/magic`,
         libpipeline_CFLAGS: std.tpl`-I${libpipeline()}/include`,
@@ -40,6 +39,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         GROFF_FONT_PATH: std.tpl`${groff()}/share/groff/current/font`,
         GROFF_TMAC_PATH: std.tpl`${groff()}/share/groff/current/tmac`,
       },
+      workDir: source,
     })
     .toDirectory();
 });

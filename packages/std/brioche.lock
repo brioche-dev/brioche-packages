@@ -145,9 +145,9 @@
       "type": "sha256",
       "value": "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd"
     },
-    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/less-643.tar.gz": {
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/less-643-original.tar.gz": {
       "type": "sha256",
-      "value": "c28dea82484a605590aa3dc0a173ab0a218a1293048ca4b42844bf10f1027eb5"
+      "value": "2911b5432c836fa084c8a2e68f6cd6312372c026a58faaa98862731c8b6052e8"
     },
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/libpipeline-1.5.7.tar.gz": {
       "type": "sha256",

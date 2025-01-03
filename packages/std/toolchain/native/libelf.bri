@@ -10,20 +10,20 @@ import zlib from "./zlib.bri";
 export default std.memo((): std.Recipe<std.Directory> => {
   const toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());
 
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/elfutils-0.189.tar.bz2",
-  );
+  )
+    .unarchive("tar", "bzip2")
+    .peel();
 
   return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --disable-debuginfod \
@@ -37,11 +37,11 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${toolchain}/bin:${bzip2()}/bin:${stage2()}/bin`,
         LDFLAGS: std.tpl`-L${zlib()}/lib -Wl,--push-state,--as-needed -lz -Wl,--pop-state`,
         CPPFLAGS: std.tpl`-I${zlib()}/include`,
       },
+      workDir: source,
     })
     .toDirectory();
 });

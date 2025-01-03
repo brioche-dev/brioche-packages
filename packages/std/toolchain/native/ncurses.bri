@@ -2,20 +2,20 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/ncurses-6.4.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
 
-  return std
+  let ncurses = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --with-shared \
@@ -27,22 +27,28 @@ export default std.memo((): std.Recipe<std.Directory> => {
             --with-pkg-config-libdir=/lib/pkgconfig
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
-
-          for lib in ncurses form panel menu ; do
-            rm -f "$BRIOCHE_OUTPUT"/lib/lib\${lib}.so
-            echo "INPUT(-l\${lib}w)" > "$BRIOCHE_OUTPUT"/lib/lib\${lib}.so
-            ln -sf \${lib}w.pc "$BRIOCHE_OUTPUT"/lib/pkgconfig/\${lib}.pc
-          done
-
-          rm -f "$BRIOCHE_OUTPUT"/lib/libcursesw.so
-          echo "INPUT(-lncursesw)" > "$BRIOCHE_OUTPUT"/lib/libcursesw.so
-          ln -sf libncurses.so "$BRIOCHE_OUTPUT"/lib/libcurses.so
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .toDirectory();
+
+  for (const lib of ["ncurses", "form", "panel", "menu"]) {
+    ncurses = ncurses.insert(`lib/lib${lib}.so`, std.file(`INPUT(-l${lib}w)`));
+    ncurses = ncurses.insert(
+      `lib/pkgconfig/${lib}.pc`,
+      std.symlink({ target: `${lib}w.pc` }),
+    );
+  }
+
+  ncurses = ncurses.insert("lib/libcursesw.so", std.file("INPUT(-lncursesw)"));
+  ncurses = ncurses.insert(
+    "lib/libcurses.so",
+    std.symlink({ target: "libncurses.so" }),
+  );
+
+  return ncurses;
 });

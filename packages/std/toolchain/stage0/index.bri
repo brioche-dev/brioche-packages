@@ -4,6 +4,8 @@ import { runtimeUtils } from "../utils.bri";
 interface BootstrapRunOptions {
   script: string;
   env?: Record<string, std.ProcessTemplateLike>;
+  workDir?: std.AsyncRecipe<std.Directory>;
+  outputScaffold?: std.AsyncRecipe<std.Directory>;
 }
 
 export function bootstrapRun(
@@ -58,8 +60,10 @@ export function bootstrapRun(
 
       export PATH="$HOME/.local/libexec/brioche-toolchain/bin\${PATH:+:$PATH}"
 
-      "$BUSYBOX/bin/busybox" pivot_root "$(pwd)/rootfs" "$(pwd)/rootfs/hostfs"
-      /bin/bash /bootstrap.sh
+      export work_dir="$(pwd)/work"
+      cd "$(pwd)/rootfs"
+      "$BUSYBOX/bin/busybox" pivot_root . "$(pwd)/hostfs"
+      exec "$BUSYBOX/bin/busybox" chroot . /bin/bash -c 'cd $work_dir && /bin/bash -euo pipefail /bootstrap.sh'
     `)
     .withPermissions({ executable: true });
 
@@ -71,16 +75,14 @@ export function bootstrapRun(
         BUSYBOX: busybox,
         BRIOCHE_LD: briocheLd,
         BRIOCHE_PACKED: briochePacked,
+        SYSTEM_TOOLCHAIN_PATH: "/usr/lib/gcc/x86_64-linux-gnu/12",
         ...options.env,
       },
       workDir: std.directory({
-        rootfs: std.merge(
-          bootstrapRootfs,
-          std.directory({
-            "bootstrap.sh": bootstrapScript,
-          }),
-        ),
+        rootfs: bootstrapRootfs.insert("bootstrap.sh", bootstrapScript),
+        work: options.workDir ?? std.directory(),
       }),
+      outputScaffold: options.outputScaffold,
     })
     .toDirectory();
 }

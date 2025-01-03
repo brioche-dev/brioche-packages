@@ -4,20 +4,20 @@ import gmp from "./gmp.bri";
 import mpfr from "./mpfr.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpc-1.3.1.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
 
   return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --disable-static
@@ -26,11 +26,11 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
         CPPFLAGS: std.tpl`-I${gmp()}/include -I${mpfr()}/include`,
         LDFLAGS: std.tpl`-L${gmp()}/lib -L${mpfr()}/lib`,
       },
+      workDir: source,
     })
     .toDirectory();
 });

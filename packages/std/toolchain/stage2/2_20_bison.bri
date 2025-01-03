@@ -2,20 +2,21 @@ import * as std from "/core";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bison-3.8.2.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   return std
     .process({
       command: "/usr/bin/env",
       args: [
         "sh",
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar xf "$source" --strip-components=1
           ./configure \
             --prefix=/usr \
             --docdir=/usr/share/doc/bison-3.8.2 \
@@ -26,8 +27,8 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin`,
-        source: sourceArchive,
       },
+      workDir: source,
     })
     .toDirectory();
 });

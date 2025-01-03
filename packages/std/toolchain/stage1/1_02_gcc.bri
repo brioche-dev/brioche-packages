@@ -3,48 +3,49 @@ import { bootstrapRun } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-  );
-  const mpfrArchive = Brioche.download(
+  )
+    .unarchive("tar", "xz")
+    .peel();
+  const mpfr = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpfr-4.2.0.tar.xz",
-  );
-  const gmpArchive = Brioche.download(
+  )
+    .unarchive("tar", "xz")
+    .peel();
+  const gmp = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gmp-6.3.0.tar.xz",
-  );
-  const mpcArchive = Brioche.download(
+  )
+    .unarchive("tar", "xz")
+    .peel();
+  const mpc = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/mpc-1.3.1.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
+
+  source = source.insert("mpfr", mpfr);
+  source = source.insert("gmp", gmp);
+  source = source.insert("mpc", mpc);
+
+  source = bootstrapRun({
+    script: std.indoc`
+      cd "$BRIOCHE_OUTPUT"
+      sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
+      sed -e '/mabi.lp64=/s/lib64/lib/' -i gcc/config/aarch64/t-aarch64-linux
+    `,
+    outputScaffold: source,
+  });
 
   const stage1 = binutils();
 
   return bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
+      export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
-
-      mkdir -p source/build
-      tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
-      cd source
-
-      tar -xf "$mpfrArchive" --no-same-owner --no-same-permissions
-      mv mpfr-4.2.0 mpfr
-      tar -xf "$gmpArchive" --no-same-owner --no-same-permissions
-      mv gmp-6.3.0 gmp
-      tar -xf "$mpcArchive" --no-same-owner --no-same-permissions
-      mv mpc-1.3.1 mpc
-
-      case "$(uname -m)" in
-        x86_64 )
-          sed \\
-            -e '/m64=/s/lib64/lib/' \\
-            -i.orig \\
-            gcc/config/i386/t-linux64
-        ;;
-      esac
-
+      mkdir -p build
       cd build
+
       ../configure \
         --prefix=/usr \
         --target="$TARGET" \
@@ -70,16 +71,13 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 
       cd ..
       cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
-        "$(dirname "$("$TARGET-gcc" -print-libgcc-file-name)")"/include/limits.h
+        "$(dirname "$("$BRIOCHE_OUTPUT/usr/bin/$TARGET-gcc" -print-libgcc-file-name)")"/include/limits.h
     `,
     env: {
-      source: sourceArchive,
-      mpfrArchive,
-      gmpArchive,
-      mpcArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1,
     },
+    workDir: source,
   });
 });

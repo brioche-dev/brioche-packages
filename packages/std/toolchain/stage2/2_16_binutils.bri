@@ -3,21 +3,23 @@ import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
+
+  source = bootstrapRun({
+    script: std.indoc`
+      cd "$BRIOCHE_OUTPUT"
+      sed '6009s/$add_dir//' -i ltmain.sh
+    `,
+    outputScaffold: source,
+  });
 
   return bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
-
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
-
-      mkdir -p source
-      tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
-      cd source
-
-      sed '6009s/$add_dir//' -i ltmain.sh
+      export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
       mkdir build
       cd build
@@ -38,10 +40,10 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       rm "$BRIOCHE_OUTPUT"/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.{a,la}
     `,
     env: {
-      source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     },
+    workDir: source,
   });
 });

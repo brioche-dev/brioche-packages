@@ -7,9 +7,11 @@ import glibc from "./1_04_glibc.bri";
 import { wrapWithScript, useBriocheLd } from "../utils.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   let stage1 = std.merge(binutils(), gcc(), linuxHeaders(), glibc());
 
@@ -39,13 +41,10 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 
   return bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
+      export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
-
-      mkdir -p source/build
-      tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
-      cd source/build
+      mkdir -p build
+      cd build
 
       export CFLAGS="--sysroot=$stage1 -isystem $stage1/usr/include"
       export CXXFLAGS="$CFLAGS"
@@ -63,13 +62,13 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       make
       make install DESTDIR="$BRIOCHE_OUTPUT"
 
-      rm -v "$BRIOCHE_OUTPUT/usr/lib"/lib{stdc++,stdc++fs,supc++}.la
+      rm -fv "$BRIOCHE_OUTPUT"/usr/lib{,64}/lib{stdc++,stdc++fs,supc++}.la
     `,
     env: {
-      source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1,
     },
+    workDir: source,
   });
 });

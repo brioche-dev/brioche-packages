@@ -3,19 +3,15 @@ import { bootstrapRun } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/grep-3.11.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   return bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
-
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
-
-      mkdir -p source
-      tar xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
-      cd source
+      export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
       ./configure \
         --prefix=/usr \
@@ -26,10 +22,10 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       make install DESTDIR="$BRIOCHE_OUTPUT"
     `,
     env: {
-      source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
       stage1: stage1(),
     },
+    workDir: source,
   });
 });

@@ -5,20 +5,20 @@ import autoconf from "./autoconf.bri";
 import automake from "./automake.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://github.com/NixOS/patchelf/archive/refs/tags/0.18.0.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
 
   return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./bootstrap.sh
           ./configure --prefix=/
           make
@@ -26,7 +26,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${autoconf()}/bin:${automake()}/bin:${stage2()}/bin`,
         // TODO: Move these variables into `autoconf()` / `automake()`
         M4: std.tpl`${m4()}/bin/m4`,
@@ -40,6 +39,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         AUTOCONF: std.tpl`${autoconf()}/bin/autoconf`,
         AUTOMAKE_LIBDIR: std.tpl`${automake()}/share/automake-1.16`,
       },
+      workDir: source,
     })
     .toDirectory();
 });

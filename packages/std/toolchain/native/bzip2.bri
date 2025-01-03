@@ -2,27 +2,45 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bzip2-1.0.8.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
   const sourcePatch = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/bzip2-1.0.8-install_docs-1.patch",
   );
+
+  source = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          cd "$BRIOCHE_OUTPUT"
+          patch -Np1 -i "$sourcePatch"
+          sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
+          sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+        `,
+      ],
+      env: {
+        sourcePatch,
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: source,
+    })
+    .toDirectory();
 
   return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
-          patch -Np1 -i "$sourcePatch"
-          sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
-          sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
-
           make -f Makefile-libbz2_so
           make clean
 
@@ -35,10 +53,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         sourcePatch,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .toDirectory();
 });
