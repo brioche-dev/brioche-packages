@@ -5,7 +5,7 @@
       "type": "sha256",
       "value": "f4a245b94124b377d8b49646bf421f9155d36aa7614b6ebf83705d3ffc76eaad"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/x86_64-linux/brioche-bootstrap.tar.zstd": {
       "type": "sha256",
       "value": "0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11"
     },

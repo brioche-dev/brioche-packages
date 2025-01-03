@@ -10,7 +10,7 @@ export function bootstrapRun(
   options: BootstrapRunOptions,
 ): std.Recipe<std.Directory> {
   const bootstrapRootfs = Brioche.download(
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd",
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/x86_64-linux/brioche-bootstrap.tar.zstd",
   ).unarchive("tar", "zstd");
 
   const busybox = Brioche.download(
