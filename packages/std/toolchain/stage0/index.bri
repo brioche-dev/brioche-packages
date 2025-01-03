@@ -49,13 +49,12 @@ export function bootstrapRun(
       "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_RESOURCE_DIR" "$(pwd)/rootfs/$BRIOCHE_RESOURCE_DIR"
 
       "$BUSYBOX/bin/busybox" mkdir -p "$HOME/.local/libexec/brioche-toolchain/bin" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64"
-      "$BUSYBOX/bin/busybox" cp "$BRIOCHE_LD" "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld"
+      "$BUSYBOX/bin/busybox" cp "$BRIOCHE_LD" "$HOME/.local/libexec/brioche-toolchain/bin/ld"
       "$BUSYBOX/bin/busybox" cp "$BRIOCHE_PACKED" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
-      "$BUSYBOX/bin/busybox" chmod +x "$HOME/.local/libexec/brioche-toolchain/bin/brioche-ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
+      "$BUSYBOX/bin/busybox" chmod +x "$HOME/.local/libexec/brioche-toolchain/bin/ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
       "$BUSYBOX/bin/busybox" ln -s "/usr/bin/ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/ld"
       "$BUSYBOX/bin/busybox" ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64/"
-      "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/ld"
-      "$BUSYBOX/bin/busybox" ln -s "brioche-ld" "$HOME/.local/libexec/brioche-toolchain/bin/x86_64-linux-gnu-ld"
+      "$BUSYBOX/bin/busybox" ln -s "ld" "$HOME/.local/libexec/brioche-toolchain/bin/x86_64-linux-gnu-ld"
 
       export PATH="$HOME/.local/libexec/brioche-toolchain/bin\${PATH:+:$PATH}"
 

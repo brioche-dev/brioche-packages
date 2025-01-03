@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { wrapWithScript, runtimeUtils } from "../utils.bri";
+import { useBriocheCc } from "../utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import stage2 from "/toolchain/stage2";
 import glibc from "./glibc.bri";
@@ -88,8 +88,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
-  gcc = wrapWithScript(gcc, {
-    paths: [
+  gcc = useBriocheCc(gcc, {
+    ccPaths: [
       "bin/x86_64-pc-linux-gnu-c++",
       "bin/x86_64-pc-linux-gnu-g++",
       "bin/x86_64-pc-linux-gnu-gcc",
@@ -98,8 +98,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       "bin/g++",
       "bin/gcc",
     ],
-    renameSuffix: "-orig",
-    script: std.castToFile(runtimeUtils().get("bin/brioche-cc")),
+    sysrootPath: "",
   });
 
   return gcc;
