@@ -1,0 +1,131 @@
+import * as std from "std";
+import kmod from "kmod";
+import openssl from "openssl";
+
+export const project = {
+  name: "linux",
+  version: "6.12.8",
+  extra: {
+    majorVersion: "6",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+
+export function linuxSource(): std.Recipe<std.Directory> {
+  const source = Brioche.download(
+    `https://cdn.kernel.org/pub/linux/kernel/v${project.extra.majorVersion}.x/linux-${project.version}.tar.xz`,
+  )
+    .unarchive("tar", "xz")
+    .peel();
+  return distClean(source);
+}
+
+interface LinuxDefconfigOptions {
+  env?: Record<string, std.ProcessTemplateLike>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
+}
+
+export function linuxDefconfig(
+  options: LinuxDefconfigOptions = {},
+): std.Recipe<std.File> {
+  const { env = {}, dependencies = [] } = options;
+
+  const source = linuxSource();
+
+  return std.runBash`
+    make defconfig
+  `
+    .workDir(source)
+    .dependencies(...dependencies, ldWrapper(), std.toolchain())
+    .env({
+      ...env,
+      KCONFIG_CONFIG: std.outputPath,
+    })
+    .toFile();
+}
+
+interface LinuxOptions {
+  config?: std.AsyncRecipe<std.File>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
+  env?: Record<string, std.ProcessTemplateLike>;
+}
+
+export default function (
+  options: LinuxOptions = {},
+): std.Recipe<std.Directory> {
+  const { config = linuxDefconfig(), env = {}, dependencies = [] } = options;
+
+  const source = linuxSource().insert(".config", config);
+
+  return std.runBash`
+    make -j16
+    make install
+    make modules_install
+  `
+    .workDir(source)
+    .dependencies(
+      ...dependencies,
+      openssl(),
+      kmod(),
+      ldWrapper(),
+      std.toolchain(),
+    )
+    .env({
+      INSTALL_PATH: std.tpl`${std.outputPath}/boot`,
+      INSTALL_MOD_PATH: std.outputPath,
+
+      // Needed since we're using `ld.bfd`, which tries to resolve transitive
+      // dependencies for libraries, so it needs to know where to look
+      HOSTLDFLAGS: std.tpl`-Wl,-rpath-link,${std.toolchain()}/lib`,
+
+      // Needed because tools from the kernel build use `pthread_exit`, which
+      // dynamically opens `libgcc_s.so.1`, which is not directly a dependency
+      // of glibc
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain()}/lib`,
+
+      ...env,
+    })
+    .toDirectory();
+}
+
+function distClean(
+  source: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    make distclean
+  `
+    .dependencies(std.toolchain())
+    .outputScaffold(source)
+    .toDirectory();
+}
+
+function ldWrapper(): std.Recipe<std.Directory> {
+  // Create a custom wrapper to use `ld.bfd` instead of gold when linking.
+  // HACK: We also explicitly disable autopacking based on the output filename,
+  // but `brioche-ld` should handle these edge cases better.
+  return std.directory({
+    "bin/ld": std
+      .file(std.indoc`
+        #!/usr/bin/env sh
+
+        for (( i=1; i <= "$#"; i++ )); do
+            if [[ "\${!i}" == "-o" ]]; then
+                i=$((i + 1))
+                case "\${!i}" in
+                    *.o | *.ko | *.elf | *vmlinux* )
+                        export BRIOCHE_LD_AUTOPACK=false
+                        ;;
+                    *)
+                        ;;
+                esac
+            fi
+        done
+
+        exec ld.bfd "$@"
+      `)
+      .withPermissions({ executable: true }),
+  });
+}
