@@ -95,10 +95,6 @@ export default async (): Promise<std.Recipe> => {
     "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd",
   ).unarchive("tar", "zstd");
 
-  const make = Brioche.download(
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz",
-  ).unarchive("tar", "xz");
-
   const briocheLd = runtimeUtils().get("bin/brioche-ld");
   const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");
 
@@ -121,7 +117,7 @@ export default async (): Promise<std.Recipe> => {
     }),
   });
 
-  let stage0 = std.merge(utils, toolchain, make, briochePack);
+  let stage0 = std.merge(utils, toolchain, briochePack);
 
   const systemLd = stage0.get("x86_64-linux-musl/bin/ld");
   stage0 = stage0.insert("x86_64-linux-musl/bin/system-ld", systemLd);

@@ -17,10 +17,6 @@
       "type": "sha256",
       "value": "e2e9ae181e115e155158cb9031687d943b0847d8058a4c28454194d835478be6"
     },
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz": {
-      "type": "sha256",
-      "value": "f8a75f171c2c753bc86a331473812ddc24837d5e91b0b1c7af89d6a2aa6e8986"
-    },
     "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd": {
       "type": "sha256",
       "value": "27416708f7ee8cd0c5d408010192705b40c914647fd0d80f00c2194795828cd6"
