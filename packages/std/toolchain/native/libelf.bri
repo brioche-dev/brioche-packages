@@ -38,7 +38,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       ],
       env: {
         PATH: std.tpl`${toolchain}/bin:${bzip2()}/bin:${stage2()}/bin`,
-        LDFLAGS: std.tpl`-L${zlib()}/lib -Wl,--push-state,--as-needed -lz -Wl,--pop-state`,
+        LDFLAGS: std.tpl`-L${zlib()}/lib`,
         CPPFLAGS: std.tpl`-I${zlib()}/include`,
       },
       workDir: source,

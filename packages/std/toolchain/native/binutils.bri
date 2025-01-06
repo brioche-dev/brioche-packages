@@ -1,7 +1,6 @@
 import * as std from "/core";
 import stage2 from "/toolchain/stage2";
-import { useBriocheLd, runtimeUtils } from "/toolchain/utils.bri";
-import { buildAutopackConfig, AutopackOptions } from "/extra/autopack.bri";
+import { useBriocheLd } from "/toolchain/utils.bri";
 import flex from "./flex.bri";
 import zlib from "./zlib.bri";
 
@@ -26,7 +25,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
           ../configure \
             --prefix="$BRIOCHE_OUTPUT" \
             --enable-gold \
-            --enable-ld=default \
+            --enable-ld \
             --enable-plugins \
             --enable-shared \
             --disable-werror \
@@ -46,29 +45,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
-  // Repack `ld` and friends to include `libm`. `liblto_plugin.so` gets
-  // used during the gcc build, and it links against `libm`. But since it's
-  // a plugin that gets loaded dynamically, we need to manually make sure
-  // `ld` is linked against `libm`.
-  binutils = autopack(binutils, {
-    globs: ["bin/ld*"],
-    linkDependencies: [stage2()],
-    dynamicBinaryConfig: {
-      extraLibraries: ["libm.so.6"],
-      libraryPaths: [
-        std.castToDirectory(binutils.get("lib")),
-        std.castToDirectory(stage2().get("lib")),
-        std.castToDirectory(stage2().get("usr/lib")),
-        std.castToDirectory(zlib().get("lib")),
-      ],
-    },
-    repackConfig: {
-      enabled: true,
-    },
-  });
+  binutils = binutils.insert("bin/ld", std.symlink({ target: "ld.gold" }));
 
   binutils = useBriocheLd(binutils, {
-    ldPaths: ["bin/ld", "bin/ld.bfd", "bin/ld.gold"],
+    ldPaths: ["bin/ld.bfd", "bin/ld.gold"],
     interpreterPaths: {
       "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
     },
@@ -76,37 +56,3 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return binutils;
 });
-
-function autopack(
-  recipe: std.AsyncRecipe<std.Directory>,
-  options: AutopackOptions,
-): std.Recipe<std.Directory> {
-  const { config, variables } = buildAutopackConfig({
-    options,
-    defaultLinkDependencies: [],
-    runtimeUtils: runtimeUtils(),
-  });
-
-  const variableArgs: std.ProcessTemplateLike[] = Object.entries(
-    variables,
-  ).flatMap(([name, value]) => {
-    switch (value.type) {
-      case "path":
-        return ["--var", std.tpl`${name}=path:${value.value}`];
-    }
-  });
-
-  return std
-    .process({
-      command: std.tpl`${runtimeUtils()}/bin/brioche-packer`,
-      args: [
-        "autopack",
-        std.outputPath,
-        "--config",
-        JSON.stringify(config),
-        ...variableArgs,
-      ],
-      outputScaffold: recipe,
-    })
-    .toDirectory();
-}
