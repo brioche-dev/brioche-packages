@@ -40,7 +40,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "-c",
         std.indoc`
           ./configure \
-            --prefix=/ \
+            --prefix= \
             --disable-static \
             --enable-thread-safe
           make

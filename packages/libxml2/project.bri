@@ -14,7 +14,7 @@ export const source = Brioche.download(
 
 export default function (): std.Recipe<std.Directory> {
   let libxml2 = std.runBash`
-    ./configure --prefix=/
+    ./configure --prefix=
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `

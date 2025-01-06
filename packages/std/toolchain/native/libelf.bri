@@ -25,7 +25,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "-c",
         std.indoc`
           ./configure \
-            --prefix=/ \
+            --prefix= \
             --disable-debuginfod \
             --enable-libdebuginfod=dummy
           make

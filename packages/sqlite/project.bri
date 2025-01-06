@@ -28,7 +28,7 @@ const source = Brioche.download(
 export default function (): std.Recipe<std.Directory> {
   let sqlite = std.runBash`
     ./configure \\
-      --prefix=/ \\
+      --prefix= \\
       --enable-readline \\
       --enable-fts3 \\
       --enable-session

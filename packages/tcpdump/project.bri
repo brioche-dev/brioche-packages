@@ -14,7 +14,7 @@ const source = Brioche.download(
 
 export default function (): std.Recipe<std.Directory> {
   const tcpdump = std.runBash`
-    ./configure --prefix=/
+    ./configure --prefix=
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

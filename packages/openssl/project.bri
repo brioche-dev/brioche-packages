@@ -14,7 +14,7 @@ const source = Brioche.download(
 export default function openssl(): std.Recipe<std.Directory> {
   let openssl = std.runBash`
     ./config \\
-      --prefix=/ \\
+      --prefix= \\
       --openssldir=/etc/ssl \\
       --libdir=lib
     make

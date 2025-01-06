@@ -54,7 +54,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
           export MAGIC="$stage2/usr/share/misc/magic"
 
           ../configure \
-            --prefix=/ \
+            --prefix= \
             --enable-kernel=4.14 \
             --enable-stack-protector=strong \
             --with-headers="$stage2/usr/include" \

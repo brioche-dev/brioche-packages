@@ -15,7 +15,7 @@ export default function (): std.Recipe<std.Directory> {
   let oniguruma = std.runBash`
     autoreconf --install --force --verbose
     ./configure \\
-      --prefix=/ \\
+      --prefix= \\
       --enable-posix-api=yes
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"

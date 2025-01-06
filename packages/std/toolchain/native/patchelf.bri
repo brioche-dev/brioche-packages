@@ -20,7 +20,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "-c",
         std.indoc`
           ./bootstrap.sh
-          ./configure --prefix=/
+          ./configure --prefix=
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
         `,
