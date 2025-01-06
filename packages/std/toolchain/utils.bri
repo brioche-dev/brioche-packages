@@ -118,6 +118,47 @@ export function useBriocheCc(
   return dir;
 }
 
+interface UseBriocheStripOptions {
+  stripPaths: string[];
+}
+
+export function useBriocheStrip(
+  dir: std.Recipe<std.Directory>,
+  options: UseBriocheStripOptions,
+): std.Recipe<std.Directory> {
+  const briocheStrip = runtimeUtils().get("bin/brioche-strip");
+
+  for (const stripPath of options.stripPaths) {
+    const systemStrip = dir.get(stripPath);
+
+    const stripDir = stripPath.split("/").slice(0, -1).join("/");
+    const stripParentDirComponents = stripDir.split("/").slice(0, -1);
+    const stripName = stripPath.split("/").at(-1);
+    const stripParentDirName = stripDir.split("/").at(-1);
+    std.assert(stripName != null && stripParentDirName != null);
+
+    const libexecBriocheStripDir = [
+      ...stripParentDirComponents,
+      "libexec",
+      "brioche-strip",
+    ].join("/");
+
+    dir = dir.insert(
+      `${libexecBriocheStripDir}/${stripName}`,
+      std.symlink({
+        target: `../../${stripParentDirName}/.brioche-strip-orig-${stripName}`,
+      }),
+    );
+    dir = dir.insert(
+      `${stripDir}/.brioche-strip-orig-${stripName}`,
+      systemStrip,
+    );
+    dir = dir.insert(stripPath, briocheStrip);
+  }
+
+  return dir;
+}
+
 interface WrapWithScriptOptions {
   paths: string[];
   renamePrefix?: string;

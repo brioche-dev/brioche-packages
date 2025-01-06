@@ -2,7 +2,7 @@ import * as std from "/core";
 import { setEnv } from "/extra/set_env.bri";
 import stage2 from "/toolchain/stage2";
 import { buildAutopackConfig, AutopackOptions } from "/extra/autopack.bri";
-import { runtimeUtils } from "/toolchain/utils.bri";
+import { runtimeUtils, useBriocheStrip } from "/toolchain/utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
@@ -302,6 +302,10 @@ export const toolchain = std.memo(
       repackConfig: {
         enabled: true,
       },
+    });
+
+    toolchain = useBriocheStrip(toolchain, {
+      stripPaths: ["bin/strip"],
     });
 
     toolchain = fixShebangs(toolchain);
