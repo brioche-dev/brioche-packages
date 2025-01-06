@@ -28,8 +28,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
-  flex = flex.insert("bin/flex", std.symlink({ target: "lex" }));
-  flex = flex.insert("share/man/man1/flex.1", std.symlink({ target: "lex.1" }));
+  flex = flex.insert("bin/lex", std.symlink({ target: "flex" }));
+  flex = flex.insert("share/man/man1/lex.1", std.symlink({ target: "flex.1" }));
 
   return flex;
 });
