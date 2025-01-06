@@ -25,10 +25,6 @@ export default function moreutils(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain(), libxml2(), libxslt())
     .workDir(source)
     .env({
-      // moreutils installs with `install -s` by defualt, which strips
-      // the metadata used by packed executables. Use `install` instead,
-      // which avoids stripping
-      INSTALL_BIN: "install",
       // XML catalog for DocBook. The moreutils build validates some XML
       // files against the DocBook schema, which will attempt to download
       // the schema if not found in a system catalog. Providing a catalog
