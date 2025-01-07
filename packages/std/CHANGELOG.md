@@ -4,6 +4,18 @@ All notable changes to the `std` package will be documented in this file.
 
 The `std` package is not yet considered stable and doesn't currently assign version numbers to releases, so changes are documented by date. You are encouraged to use version control with the `brioche.lock` lockfile to ensure the version of the `std` package used stays consistent within your Brioche projects.
 
+## 2025-01-07
+
+PR: [#156](https://github.com/brioche-dev/brioche-packages/pull/156)
+
+### Changed
+
+- Added new variant to `std.Platform` type: `aarch64-linux`
+- Fix `bin/ld.bfd` in `std.toolchain()` to call the correct linker (previously, it would still call gold instead of the libbfd linker)
+- Wrap `bin/strip` in `std.toolchain()` to handle stripping [packed executables](https://brioche.dev/docs/how-it-works/packed-executables/) properly
+- Restructure unwrapped binaries in `std.toolchain()` for `ld` / `cc`. Instead of adding `-orig` as a suffix, they now use the prefix `.brioche-`
+- Fix absolute paths in `lib/libacl.la` in `std.toolchain()` (other libtool libraries remain unchanged)
+
 ## 2024-10-12
 
 PR: [#122](https://github.com/brioche-dev/brioche-packages/pull/122)
