@@ -14,7 +14,7 @@ const source = Brioche.download(
 export default function (): std.Recipe<std.Directory> {
   const jq = std.runBash`
     ./configure \\
-      --prefix= \\
+      --prefix=/ \\
       --with-oniguruma=builtin
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"

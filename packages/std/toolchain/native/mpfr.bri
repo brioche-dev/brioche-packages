@@ -40,7 +40,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "-c",
         std.indoc`
           ./configure \
-            --prefix= \
+            --prefix=/ \
             --disable-static \
             --enable-thread-safe
           make
@@ -65,7 +65,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         `
-          sed 's|/lib/libgmp.la|-lgmp|' "$libtoolArchive" > "$BRIOCHE_OUTPUT"
+          sed 's|//lib/libgmp.la|-lgmp|' "$libtoolArchive" > "$BRIOCHE_OUTPUT"
         `,
       ],
       env: {

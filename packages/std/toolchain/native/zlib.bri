@@ -16,7 +16,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "-euo",
         "pipefail",
         std.indoc`
-          ./configure --prefix=
+          ./configure --prefix=/
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
         `,

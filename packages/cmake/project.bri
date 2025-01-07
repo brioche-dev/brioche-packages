@@ -64,7 +64,7 @@ const source = (() => {
 export default function cmake(): std.Recipe<std.Directory> {
   let cmake = std.runBash`
     ./bootstrap \\
-      --prefix= \\
+      --prefix=/ \\
       --system-curl \\
       --parallel=16
     make

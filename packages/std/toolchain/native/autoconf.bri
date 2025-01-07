@@ -41,7 +41,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
             -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \
             -i.orig tests/local.at
 
-          ./configure --prefix=
+          ./configure --prefix=/
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
 

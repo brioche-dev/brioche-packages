@@ -19,7 +19,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "-c",
         std.indoc`
           ./configure \
-            --prefix= \
+            --prefix=/ \
             --disable-static
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

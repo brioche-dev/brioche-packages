@@ -15,7 +15,7 @@ const source = Brioche.download(
 export default function (): std.Recipe<std.Directory> {
   let curl = std.runBash`
     ./configure \\
-      --prefix= \\
+      --prefix=/ \\
       --with-openssl \\
       --without-ca-bundle \\
       --without-ca-path \\

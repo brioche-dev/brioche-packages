@@ -14,7 +14,7 @@ const source = Brioche.download(
 export default function (): std.Recipe<std.Directory> {
   const tcsh = std.runBash`
     ./configure \\
-      --prefix=
+      --prefix=/
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `

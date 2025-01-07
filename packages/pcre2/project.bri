@@ -15,7 +15,7 @@ export default function (): std.Recipe<std.Directory> {
   const pcre2 = std.runBash`
     ./autogen.sh
     ./configure \\
-      --prefix= \\
+      --prefix=/ \\
       --enable-jit \\
       --enable-pcre2-8 \\
       --enable-pcre2-16 \\
