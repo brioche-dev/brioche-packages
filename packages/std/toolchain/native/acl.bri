@@ -9,7 +9,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
     .unarchive("tar", "xz")
     .peel();
 
-  return std
+  let acl = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
@@ -32,4 +32,22 @@ export default std.memo((): std.Recipe<std.Directory> => {
       workDir: source,
     })
     .toDirectory();
+
+  acl = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          cd "$BRIOCHE_OUTPUT"
+          sed -i 's|/lib/lib\\([^\\s]*\\).la|-l\\1|g' lib/*.la
+        `,
+      ],
+      outputScaffold: acl,
+    })
+    .toDirectory();
+
+  return acl;
 });

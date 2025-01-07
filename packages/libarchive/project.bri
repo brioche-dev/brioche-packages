@@ -18,7 +18,7 @@ export default function (): std.Recipe<std.Directory> {
     make install
   `
     .workDir(source)
-    .dependencies(toolchain())
+    .dependencies(std.toolchain())
     .toDirectory();
 
   libarchive = std.setEnv(libarchive, {
@@ -28,20 +28,4 @@ export default function (): std.Recipe<std.Directory> {
   });
 
   return libarchive;
-}
-
-// HACK: Quick patch to toolchain to replace absolute libtool
-// path in `libacl.la` with `-l` argument
-function toolchain(): std.Recipe<std.Directory> {
-  let toolchain = std.toolchain();
-
-  const patched = std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    sed -i 's|//lib/lib\\([^\\s]*\\).la|-l\\1|g' lib/*.la
-  `
-    .outputScaffold(std.glob(toolchain, ["lib/libacl.la"]))
-    .toDirectory();
-
-  toolchain = std.merge(toolchain, patched);
-  return toolchain;
 }
