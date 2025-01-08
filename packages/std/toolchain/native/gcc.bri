@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { wrapWithScript, runtimeUtils } from "../utils.bri";
+import { useBriocheCc } from "../utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import stage2 from "/toolchain/stage2";
 import glibc from "./glibc.bri";
@@ -11,9 +11,32 @@ import mpc from "./mpc.bri";
 import libxcrypt from "./libxcrypt.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
+
+  source = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          cd "$BRIOCHE_OUTPUT"
+
+          sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
+          sed -e '/mabi.lp64=/s/lib64/lib/' -i gcc/config/aarch64/t-aarch64-linux
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: source,
+    })
+    .toDirectory();
 
   const buildSysroot = std.merge(
     linuxHeaders(),
@@ -34,18 +57,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
-          case "$(uname -m)" in
-            x86_64 )
-              sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
-            ;;
-          esac
-
           mkdir build
           cd build
 
@@ -76,7 +91,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
         CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
         LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
@@ -85,11 +99,12 @@ export default std.memo((): std.Recipe<std.Directory> => {
         mpfr: mpfr(),
         mpc: mpc(),
       },
+      workDir: source,
     })
     .toDirectory();
 
-  gcc = wrapWithScript(gcc, {
-    paths: [
+  gcc = useBriocheCc(gcc, {
+    ccPaths: [
       "bin/x86_64-pc-linux-gnu-c++",
       "bin/x86_64-pc-linux-gnu-g++",
       "bin/x86_64-pc-linux-gnu-gcc",
@@ -98,8 +113,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       "bin/g++",
       "bin/gcc",
     ],
-    renameSuffix: "-orig",
-    script: std.castToFile(runtimeUtils().get("bin/brioche-cc")),
+    sysrootPath: "",
   });
 
   return gcc;

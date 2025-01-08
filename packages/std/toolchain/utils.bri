@@ -5,7 +5,7 @@ import * as std from "/core";
 // tools used for building the toolchain should be upgraded
 export function runtimeUtils(): std.Recipe<std.Directory> {
   return Brioche.download(
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/b44f9b743898b74faa79ee1a599440a2e2e6f295/x86_64-linux/brioche-runtime-utils.tar.zstd",
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/f61b0e1a0478743c9bcfebf019bbccd2c7f04d90/x86_64-linux/brioche-runtime-utils.tar.zstd",
   ).unarchive("tar", "zstd");
 }
 
@@ -27,18 +27,14 @@ export function useBriocheLd(
     const ldDir = ldPath.split("/").slice(0, -1).join("/");
     const ldParentDirComponents = ldDir.split("/").slice(0, -1);
     const ldName = ldPath.split("/").at(-1);
-    const ldParentName = ldDir.split("/").at(-1);
-    std.assert(ldName != null && ldParentName != null);
+    const ldParentDirName = ldDir.split("/").at(-1);
+    std.assert(ldName != null && ldParentDirName != null);
 
-    const briocheLdPath = [
+    const libexecBriocheLdDir = [
       ...ldParentDirComponents,
       "libexec",
       "brioche-ld",
     ].join("/");
-    let briocheLdDir: std.Recipe<std.Directory> = std.directory({
-      ld: std.symlink({ target: `../../${ldParentName}/${ldName}-orig` }),
-      "brioche-packed": briochePacked,
-    });
 
     for (const [interpreterPath, interpreterTargetPath] of Object.entries(
       options.interpreterPaths,
@@ -48,20 +44,116 @@ export function useBriocheLd(
         .split("/")
         .map(() => "..")
         .join("/");
-      const pathToRoot = briocheLdPath
+      const pathToRoot = libexecBriocheLdDir
         .split("/")
         .map(() => "..")
         .join("/");
       const interpreterTarget = `${pathToBriocheLd}/${pathToRoot}/${interpreterTargetPath}`;
-      briocheLdDir = briocheLdDir.insert(
-        interpreterPath,
+      dir = dir.insert(
+        `${libexecBriocheLdDir}/${interpreterPath}`,
         std.symlink({ target: interpreterTarget }),
       );
     }
 
-    dir = dir.insert(`${ldDir}/${ldName}-orig`, systemLd);
+    dir = dir.insert(
+      `${libexecBriocheLdDir}/${ldName}`,
+      std.symlink({
+        target: `../../${ldParentDirName}/.brioche-ld-orig-${ldName}`,
+      }),
+    );
+    dir = dir.insert(`${libexecBriocheLdDir}/brioche-packed`, briochePacked);
+    dir = dir.insert(`${ldDir}/.brioche-ld-orig-${ldName}`, systemLd);
     dir = dir.insert(ldPath, briocheLd);
-    dir = dir.insert(briocheLdPath, briocheLdDir);
+  }
+
+  return dir;
+}
+
+interface UseBriocheCcOptions {
+  ccPaths: string[];
+  sysrootPath: string;
+}
+
+export function useBriocheCc(
+  dir: std.Recipe<std.Directory>,
+  options: UseBriocheCcOptions,
+): std.Recipe<std.Directory> {
+  const briocheCc = runtimeUtils().get("bin/brioche-cc");
+
+  for (const ccPath of options.ccPaths) {
+    const systemCc = dir.get(ccPath);
+
+    const ccDir = ccPath.split("/").slice(0, -1).join("/");
+    const ccParentDirComponents = ccDir.split("/").slice(0, -1);
+    const ccName = ccPath.split("/").at(-1);
+    const ccParentDirName = ccDir.split("/").at(-1);
+    std.assert(ccName != null && ccParentDirName != null);
+
+    const libexecBriocheCcDir = [
+      ...ccParentDirComponents,
+      "libexec",
+      "brioche-cc",
+    ].join("/");
+
+    const pathToRoot = libexecBriocheCcDir
+      .split("/")
+      .map(() => "..")
+      .join("/");
+    const sysrootTarget = `${pathToRoot}/${options.sysrootPath}`;
+    dir = dir.insert(
+      `${libexecBriocheCcDir}/sysroot`,
+      std.symlink({ target: sysrootTarget }),
+    );
+
+    dir = dir.insert(
+      `${libexecBriocheCcDir}/${ccName}`,
+      std.symlink({
+        target: `../../${ccParentDirName}/.brioche-cc-orig-${ccName}`,
+      }),
+    );
+    dir = dir.insert(`${ccDir}/.brioche-cc-orig-${ccName}`, systemCc);
+    dir = dir.insert(ccPath, briocheCc);
+  }
+
+  return dir;
+}
+
+interface UseBriocheStripOptions {
+  stripPaths: string[];
+}
+
+export function useBriocheStrip(
+  dir: std.Recipe<std.Directory>,
+  options: UseBriocheStripOptions,
+): std.Recipe<std.Directory> {
+  const briocheStrip = runtimeUtils().get("bin/brioche-strip");
+
+  for (const stripPath of options.stripPaths) {
+    const systemStrip = dir.get(stripPath);
+
+    const stripDir = stripPath.split("/").slice(0, -1).join("/");
+    const stripParentDirComponents = stripDir.split("/").slice(0, -1);
+    const stripName = stripPath.split("/").at(-1);
+    const stripParentDirName = stripDir.split("/").at(-1);
+    std.assert(stripName != null && stripParentDirName != null);
+
+    const libexecBriocheStripDir = [
+      ...stripParentDirComponents,
+      "libexec",
+      "brioche-strip",
+    ].join("/");
+
+    dir = dir.insert(
+      `${libexecBriocheStripDir}/${stripName}`,
+      std.symlink({
+        target: `../../${stripParentDirName}/.brioche-strip-orig-${stripName}`,
+      }),
+    );
+    dir = dir.insert(
+      `${stripDir}/.brioche-strip-orig-${stripName}`,
+      systemStrip,
+    );
+    dir = dir.insert(stripPath, briocheStrip);
   }
 
   return dir;
@@ -69,7 +161,8 @@ export function useBriocheLd(
 
 interface WrapWithScriptOptions {
   paths: string[];
-  renameSuffix: string;
+  renamePrefix?: string;
+  renameSuffix?: string;
   script: std.AsyncRecipe<std.File>;
 }
 
@@ -77,13 +170,32 @@ export function wrapWithScript(
   directory: std.AsyncRecipe<std.Directory>,
   options: WrapWithScriptOptions,
 ): std.Recipe<std.Directory> {
+  const renamePrefix = options.renamePrefix ?? "";
+  const renameSuffix = options.renameSuffix ?? "";
+  std.assert(
+    renamePrefix !== "" || renameSuffix !== "",
+    "renamePrefix or renameSuffix must be provided",
+  );
+
   let dir = std.recipe(directory);
 
   for (const path of options.paths) {
     const program = dir.get(path);
 
+    const pathComponents = path.split("/");
+    const dirComponents = pathComponents.slice(0, -1);
+    const name = pathComponents.at(-1);
+
+    std.assert(
+      name != null && name !== "",
+      `failed to get filename in path '${path}'`,
+    );
+
+    const renameName = `${renamePrefix}${name}${renameSuffix}`;
+    const renamePath = [...dirComponents, renameName].join("/");
+
     dir = dir.insert(path, options.script);
-    dir = dir.insert(`${path}${options.renameSuffix}`, program);
+    dir = dir.insert(renamePath, program);
   }
 
   return dir;

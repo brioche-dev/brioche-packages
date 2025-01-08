@@ -5,21 +5,17 @@
       "type": "sha256",
       "value": "f4a245b94124b377d8b49646bf421f9155d36aa7614b6ebf83705d3ffc76eaad"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/brioche-bootstrap.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/x86_64-linux/brioche-bootstrap.tar.zstd": {
       "type": "sha256",
       "value": "0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/b44f9b743898b74faa79ee1a599440a2e2e6f295/x86_64-linux/brioche-runtime-utils.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/f61b0e1a0478743c9bcfebf019bbccd2c7f04d90/x86_64-linux/brioche-runtime-utils.tar.zstd": {
       "type": "sha256",
-      "value": "63a4092004f2a0c383c91a3be700f1a8ef034745697d3dfffe26005581cb081b"
+      "value": "2f0bc2e4ef35eff0cbe4c4e07628587e2126ab61a004b4ccefe57a35664625d5"
     },
     "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz": {
       "type": "sha256",
       "value": "e2e9ae181e115e155158cb9031687d943b0847d8058a4c28454194d835478be6"
-    },
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/make_static_linux_amd64.tar.xz": {
-      "type": "sha256",
-      "value": "f8a75f171c2c753bc86a331473812ddc24837d5e91b0b1c7af89d6a2aa6e8986"
     },
     "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd": {
       "type": "sha256",
@@ -149,9 +145,9 @@
       "type": "sha256",
       "value": "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd"
     },
-    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/less-643.tar.gz": {
+    "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/less-643-original.tar.gz": {
       "type": "sha256",
-      "value": "c28dea82484a605590aa3dc0a173ab0a218a1293048ca4b42844bf10f1027eb5"
+      "value": "2911b5432c836fa084c8a2e68f6cd6312372c026a58faaa98862731c8b6052e8"
     },
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/libpipeline-1.5.7.tar.gz": {
       "type": "sha256",

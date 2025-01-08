@@ -6,12 +6,24 @@ import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
   const sourcePatch = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/glibc-2.38-fhs-1.patch",
   );
+  source = bootstrapRun({
+    script: std.indoc`
+      cd "$BRIOCHE_OUTPUT"
+      patch -Np1 -i "$sourcePatch"
+    `,
+    env: {
+      sourcePatch,
+    },
+    outputScaffold: source,
+  });
 
   const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");
   const briochePacker = runtimeUtils().get("bin/brioche-packer");
@@ -20,18 +32,12 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   let glibc = bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
-
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
-
-      mkdir -p source
-      tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
-      cd source
+      export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
       mkdir "$BRIOCHE_OUTPUT/lib"
 
       mkdir -p "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib"
-      ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib/"
+      ln -s "$LD_LINUX" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/usr/lib/"
 
       case $(uname -m) in
         i?86)
@@ -43,8 +49,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
           ln -sfv ../lib/ld-linux-x86-64.so.2 "$BRIOCHE_OUTPUT/lib64/ld-lsb-x86-64.so.3"
           ;;
       esac
-
-      patch -Np1 -i "$sourcePatch"
 
       mkdir build
       cd build
@@ -63,19 +67,17 @@ export default std.memo((): std.Recipe<std.Directory> => {
       make install DESTDIR="$BRIOCHE_OUTPUT"
     `,
     env: {
-      source: sourceArchive,
-      sourcePatch,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
+      LD_LINUX: "/lib64/ld-linux-x86-64.so.2",
       stage1,
     },
+    workDir: source,
   });
 
   glibc = bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
-
-      export PATH="$stage1/usr/bin:/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
+      export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
       mkdir -p "$BRIOCHE_OUTPUT"
       cp -r "$glibc"/* "$BRIOCHE_OUTPUT"

@@ -1,31 +1,31 @@
 import * as std from "/core";
-import { useBriocheLd } from "../utils.bri";
 import stage2 from "/toolchain/stage2";
+import { useBriocheLd } from "/toolchain/utils.bri";
 import flex from "./flex.bri";
 import zlib from "./zlib.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   let binutils = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           mkdir build
           cd build
 
           ../configure \
             --prefix="$BRIOCHE_OUTPUT" \
             --enable-gold \
-            --enable-ld=default \
+            --enable-ld \
             --enable-plugins \
             --enable-shared \
             --disable-werror \
@@ -37,16 +37,18 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin:${flex()}/bin`,
         CPPFLAGS: std.tpl`-I${zlib()}/include`,
         LDFLAGS: std.tpl`-L${zlib()}/lib`,
       },
+      workDir: source,
     })
     .toDirectory();
 
+  binutils = binutils.insert("bin/ld", std.symlink({ target: "ld.gold" }));
+
   binutils = useBriocheLd(binutils, {
-    ldPaths: ["bin/ld", "bin/ld.bfd", "bin/ld.gold"],
+    ldPaths: ["bin/ld.bfd", "bin/ld.gold"],
     interpreterPaths: {
       "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
     },

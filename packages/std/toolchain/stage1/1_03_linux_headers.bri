@@ -2,19 +2,15 @@ import * as std from "/core";
 import { bootstrapRun } from "/toolchain/stage0";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/linux-6.4.12.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   return bootstrapRun({
     script: std.indoc`
-      set -euo pipefail
-
-      export PATH="/usr/lib/gcc/x86_64-linux-gnu/12\${PATH:+:$PATH}"
-
-      mkdir -p source
-      tar -xf "$source" -C source --strip-components=1 --no-same-owner --no-same-permissions
-      cd source
+      export PATH="$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
       make mrproper
 
@@ -25,9 +21,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       cp -r usr/include "$BRIOCHE_OUTPUT/usr"
     `,
     env: {
-      source: sourceArchive,
       BRIOCHE_OUTPUT: std.outputPath,
       TARGET: "x86_64-lfs-linux-gnu",
     },
+    workDir: source,
   });
 });

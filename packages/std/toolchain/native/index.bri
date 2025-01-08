@@ -2,7 +2,7 @@ import * as std from "/core";
 import { setEnv } from "/extra/set_env.bri";
 import stage2 from "/toolchain/stage2";
 import { buildAutopackConfig, AutopackOptions } from "/extra/autopack.bri";
-import { runtimeUtils } from "/toolchain/utils.bri";
+import { runtimeUtils, useBriocheStrip } from "/toolchain/utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
@@ -267,7 +267,7 @@ export const toolchain = std.memo(
     // Re-pack all dynamic binaries and shared libraries
     toolchain = autopack(toolchain, {
       globs: ["**"],
-      excludeGlobs: ["lib/libc.so*"],
+      excludeGlobs: ["lib/libc.so*", "bin/.brioche-ld-orig*"],
       selfDependency: true,
       dynamicBinaryConfig: {
         enabled: true,
@@ -281,6 +281,31 @@ export const toolchain = std.memo(
       repackConfig: {
         enabled: true,
       },
+    });
+
+    // Repack `ld` and friends to include `libm`. `liblto_plugin.so` links
+    // against `libm`, which gets dynamically loaded. But since e.g. `ld.bfd`
+    // doesn't depend on `libm`, we need to manually include it
+    toolchain = autopack(toolchain, {
+      globs: ["bin/.brioche-ld-orig-*"],
+      selfDependency: true,
+      dynamicBinaryConfig: {
+        enabled: true,
+        extraLibraries: ["libm.so.6"],
+      },
+      sharedLibraryConfig: {
+        enabled: true,
+      },
+      scriptConfig: {
+        enabled: false,
+      },
+      repackConfig: {
+        enabled: true,
+      },
+    });
+
+    toolchain = useBriocheStrip(toolchain, {
+      stripPaths: ["bin/strip"],
     });
 
     toolchain = fixShebangs(toolchain);
@@ -336,10 +361,10 @@ function fixShebangs(
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
           find "$BRIOCHE_OUTPUT"/bin -type f -executable -print0 \
             | while IFS= read -r -d $'\\0' file; do
               if [ "$(head -c 2 "$file")" == "#!" ]; then
@@ -386,10 +411,10 @@ function makePkgConfigPathsRelative(
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
           find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
             | while IFS= read -r -d $'\\0' file; do
               sed -i 's|=/|=\${pcfiledir}/../../|' "$file"

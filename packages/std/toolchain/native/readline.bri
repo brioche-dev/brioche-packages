@@ -2,28 +2,47 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/readline-8.2.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
   const sourcePatch = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/patches/readline-8.2-upstream_fix-1.patch",
   );
 
-  return std
+  source = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
+          cd "$BRIOCHE_OUTPUT"
 
           sed -i '/MV.*old/d' Makefile.in
           sed -i '/{OLDSUFF}/c:' support/shlib-install
 
           patch -Np1 -i "$sourcePatch"
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+        sourcePatch,
+      },
+      outputScaffold: source,
+    })
+    .toDirectory();
 
+  return std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
           ./configure \
             --prefix=/ \
             --with-curses
@@ -32,10 +51,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
         sourcePatch,
       },
+      workDir: source,
     })
     .toDirectory();
 });

@@ -3,20 +3,20 @@ import stage2 from "/toolchain/stage2";
 import attr from "./attr.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/acl-2.3.1.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
-  return std
+  let acl = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --disable-static
@@ -25,11 +25,32 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
         CPPFLAGS: std.tpl`-I${attr()}/include`,
         LDFLAGS: std.tpl`-L${attr()}/lib`,
       },
+      workDir: source,
     })
     .toDirectory();
+
+  acl = std
+    .process({
+      command: std.tpl`${stage2()}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          cd "$BRIOCHE_OUTPUT"
+          sed -i 's|//lib/lib\\([^\\s]*\\).la|-l\\1|g' lib/*.la
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2()}/bin`,
+      },
+      outputScaffold: acl,
+    })
+    .toDirectory();
+
+  return acl;
 });

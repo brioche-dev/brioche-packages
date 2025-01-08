@@ -2,20 +2,20 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bash-5.2.15.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
 
   let bash = std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           ./configure \
             --prefix=/ \
             --without-bash-malloc \
@@ -25,9 +25,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
+        source: source,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .toDirectory();
 

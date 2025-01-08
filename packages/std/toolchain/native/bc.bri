@@ -2,20 +2,20 @@ import * as std from "/core";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/bc-6.6.0.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           CC=gcc ./configure \\
             --prefix=/ \\
             --disable-nls \\
@@ -27,9 +27,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${stage2()}/bin`,
       },
+      workDir: source,
     })
     .toDirectory();
 });

@@ -2,9 +2,11 @@ import * as std from "/core";
 import toolchain from "./2_18_toolchain.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/Python-3.11.4.tar.xz",
-  );
+  )
+    .unarchive("tar", "xz")
+    .peel();
 
   return std
     .process({
@@ -13,7 +15,6 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         "sh",
         "-c",
         std.indoc`
-          tar xf "$source" --strip-components=1
           ./configure \
             --prefix=/usr \
             --enable-shared \
@@ -24,8 +25,8 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       ],
       env: {
         PATH: std.tpl`${toolchain()}/bin`,
-        source: sourceArchive,
       },
+      workDir: source,
     })
     .toDirectory();
 });

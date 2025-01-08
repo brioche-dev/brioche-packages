@@ -4,20 +4,20 @@ import perl from "./perl.bri";
 import expat from "./expat.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const sourceArchive = Brioche.download(
+  const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/XML-Parser-2.46.tar.gz",
-  );
+  )
+    .unarchive("tar", "gzip")
+    .peel();
 
   return std
     .process({
       command: std.tpl`${stage2()}/bin/bash`,
       args: [
+        "-euo",
+        "pipefail",
         "-c",
         std.indoc`
-          set -euo pipefail
-
-          tar -xf "$source" --strip-components=1 --no-same-owner --no-same-permissions
-
           perl Makefile.PL \
             EXPATLIBPATH="$expat/lib" \
             EXPATINCPATH="$expat/include" \
@@ -28,11 +28,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        source: sourceArchive,
         PATH: std.tpl`${perl()}/bin:${stage2()}/bin`,
         expat: expat(),
-        WATERMARK: "1",
       },
+      workDir: source,
     })
     .toDirectory();
 });
