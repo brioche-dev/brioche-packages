@@ -61,7 +61,17 @@ export default function (
 
   return std.runBash`
     make -j16
-    make install
+
+    image_path="$(make image_name)"
+    image_name="$(basename "$image_path")"
+
+    mkdir -p "$BRIOCHE_OUTPUT/boot"
+    install -m 0644 "$image_path" "$BRIOCHE_OUTPUT/boot/$image_name"
+    install -m 0644 System.map "$BRIOCHE_OUTPUT/boot/System.map"
+    if [ ! -f "$BRIOCHE_OUTPUT/boot/linux" ]; then
+      ln -s "$image_name" "$BRIOCHE_OUTPUT/boot/linux"
+    fi
+
     make modules_install
   `
     .workDir(source)
