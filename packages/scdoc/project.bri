@@ -1,0 +1,42 @@
+import * as std from "std";
+
+export const project = {
+  name: "scdoc",
+  version: "1.11.3",
+};
+
+export const source = Brioche.download(
+  `https://git.sr.ht/~sircmpwn/scdoc/archive/${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function scdoc(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make PREFIX=/
+    make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .env({
+      // scdoc gets compiled to a static binary, so disable autopacking
+      // TODO: Remove this and make it so brioche-ld handles this properly
+      BRIOCHE_LD_AUTOPACK: "false",
+    })
+    .toDirectory();
+}
+
+export function test() {
+  const exampleFile = std.file(std.indoc`
+    SCDOC_TEST(7)
+
+    # scdoc test
+
+    Hello world! This is an example scdoc file :)
+  `);
+  return std.runBash`
+    scdoc < "$example_file" | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(scdoc())
+    .env({ example_file: exampleFile });
+}
