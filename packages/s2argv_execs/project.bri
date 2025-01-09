@@ -1,0 +1,29 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "s2argv_execs",
+  version: "1.4",
+};
+
+export const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/virtualsquare/s2argv-execs.git",
+    ref: project.version,
+  }),
+);
+
+export default function (): std.Recipe<std.Directory> {
+  let s2argv_execs = cmakeBuild({
+    source,
+    dependencies: [std.toolchain()],
+  });
+
+  s2argv_execs = std.setEnv(s2argv_execs, {
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    CPATH: { append: [{ path: "include" }] },
+  });
+
+  return s2argv_execs;
+}
