@@ -100,6 +100,56 @@ export default function (
     .toDirectory();
 }
 
+type LinuxUpdateConfigValue =
+  | true
+  | false
+  | undefined
+  | "module"
+  | { string: string }
+  | { enableAfter: string }
+  | { disableAfter: string }
+  | { moduleAfter: string };
+
+export function linuxUpdateConfig(
+  config: std.AsyncRecipe<std.File>,
+  values: Record<string, LinuxUpdateConfigValue>,
+): std.Recipe<std.File> {
+  const args = Object.entries(values).flatMap(([key, value]) => {
+    if (value === true) {
+      return ["--enable", key];
+    } else if (value === false) {
+      return ["--disable", key];
+    } else if (value === "module") {
+      return ["--module", key];
+    } else if (value == null) {
+      return ["--unset", key];
+    } else if (typeof value === "object") {
+      if ("string" in value) {
+        return ["--set-str", key, value.string];
+      } else if ("enableAfter" in value) {
+        return ["--enable-after", key, value.enableAfter];
+      } else if ("disableAfter" in value) {
+        return ["--disable-after", key, value.disableAfter];
+      } else if ("moduleAfter" in value) {
+        return ["--module-after", key, value.moduleAfter];
+      } else {
+        return std.unreachable(value);
+      }
+    } else {
+      return std.unreachable(value);
+    }
+  });
+
+  return std
+    .process({
+      command: std.tpl`${linuxSource()}/scripts/config`,
+      args: ["--file", std.outputPath, ...args],
+      dependencies: [std.tools()],
+      outputScaffold: config,
+    })
+    .toFile();
+}
+
 function distClean(
   source: std.AsyncRecipe<std.Directory>,
 ): std.Recipe<std.Directory> {
