@@ -1,0 +1,30 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { gitCheckout } from "git";
+import s2argvExecs from "s2argv_execs";
+
+export const project = {
+  name: "vdeplug4",
+  version: "4.0.1",
+};
+
+export const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/rd235/vdeplug4.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function (): std.Recipe<std.Directory> {
+  let vdeplug = cmakeBuild({
+    source,
+    dependencies: [std.toolchain(), s2argvExecs()],
+  });
+
+  vdeplug = std.setEnv(vdeplug, {
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    CPATH: { append: [{ path: "include" }] },
+  });
+
+  return vdeplug;
+}
