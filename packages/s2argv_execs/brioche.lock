@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/virtualsquare/s2argv-execs.git": {
+      "1.4": "d357705f8678f5299d90fc33245b8783cfd0d29c"
+    }
+  }
+}
