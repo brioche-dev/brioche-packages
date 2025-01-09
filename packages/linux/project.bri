@@ -1,0 +1,248 @@
+import * as std from "std";
+import kmod from "kmod";
+import openssl from "openssl";
+
+export const project = {
+  name: "linux",
+  version: "6.12.8",
+  extra: {
+    majorVersion: "6",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+
+/**
+ * The Linux kernel source tree. Cleaned by running `make distclean`
+ * within the directory, as recommended.
+ */
+export function linuxSource(): std.Recipe<std.Directory> {
+  const source = Brioche.download(
+    `https://cdn.kernel.org/pub/linux/kernel/v${project.extra.majorVersion}.x/linux-${project.version}.tar.xz`,
+  )
+    .unarchive("tar", "xz")
+    .peel();
+  return distClean(source);
+}
+
+interface LinuxDefconfigOptions {
+  env?: Record<string, std.ProcessTemplateLike>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
+}
+
+/**
+ * Generate a default Linux kernel `.config` file using `make defconfig`.
+ */
+export function linuxDefconfig(
+  options: LinuxDefconfigOptions = {},
+): std.Recipe<std.File> {
+  const { env = {}, dependencies = [] } = options;
+
+  const source = linuxSource();
+
+  return std.runBash`
+    make defconfig
+  `
+    .workDir(source)
+    .dependencies(...dependencies, ldWrapper(), std.toolchain())
+    .env({
+      ...env,
+      KCONFIG_CONFIG: std.outputPath,
+    })
+    .toFile();
+}
+
+interface LinuxOptions {
+  config?: std.AsyncRecipe<std.File>;
+  dependencies?: std.AsyncRecipe<std.Directory>[];
+  env?: Record<string, std.ProcessTemplateLike>;
+}
+
+/**
+ * A recipe that builds the Linux kernel. Defaults to using a default
+ * configuration using `make defconfig`.
+ *
+ * The output will contain the following paths:
+ *
+ * - `boot/linux`: A symlink to the kernel image within `boot/`.
+ * - `boot/System.map`: The kernel's system map.
+ * - `lib/modules/${version}`: Built kernel modules.
+ *
+ * ## Options
+ *
+ * - `config`: The kernel `.config` file to use for the build. Defaults
+ *   to the default configuration produced by `make defconfig`.
+ * - `dependencies`: Additional build dependencies.
+ * - `env`: Additional environment variables to set during the build.
+ */
+export default function linux(
+  options: LinuxOptions = {},
+): std.Recipe<std.Directory> {
+  const { config = linuxDefconfig(), env = {}, dependencies = [] } = options;
+
+  const source = linuxSource().insert(".config", config);
+
+  return std.runBash`
+    make -j16
+
+    image_path="$(make image_name)"
+    image_name="$(basename "$image_path")"
+
+    mkdir -p "$BRIOCHE_OUTPUT/boot"
+    install -m 0644 "$image_path" "$BRIOCHE_OUTPUT/boot/$image_name"
+    install -m 0644 System.map "$BRIOCHE_OUTPUT/boot/System.map"
+    if [ ! -f "$BRIOCHE_OUTPUT/boot/linux" ]; then
+      ln -s "$image_name" "$BRIOCHE_OUTPUT/boot/linux"
+    fi
+
+    make modules_install
+  `
+    .workDir(source)
+    .dependencies(
+      ...dependencies,
+      openssl(),
+      kmod(),
+      ldWrapper(),
+      std.toolchain(),
+    )
+    .env({
+      INSTALL_PATH: std.tpl`${std.outputPath}/boot`,
+      INSTALL_MOD_PATH: std.outputPath,
+
+      // Needed since we're using `ld.bfd`, which tries to resolve transitive
+      // dependencies for libraries, so it needs to know where to look
+      HOSTLDFLAGS: std.tpl`-Wl,-rpath-link,${std.toolchain()}/lib`,
+
+      // Needed because tools from the kernel build use `pthread_exit`, which
+      // dynamically opens `libgcc_s.so.1`, which is not directly a dependency
+      // of glibc
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain()}/lib`,
+
+      ...env,
+    })
+    .toDirectory();
+}
+
+type LinuxUpdateConfigValue =
+  | true
+  | false
+  | undefined
+  | "module"
+  | { value: string }
+  | { enableAfter: string }
+  | { disableAfter: string }
+  | { moduleAfter: string };
+
+/**
+ * Update a Linux kernel configuration file by setting (or un-setting)
+ * various configuration values.
+ *
+ * ## Arguments
+ *
+ * - `config`: The base kernel configuration file to start with.
+ * - `values`: An object mapping configuration options to their values. Each
+ *   value can be one of the following:
+ *   - `true`: Enable the option
+ *   - `false`: Disable the option
+ *   - `"module"`: Enable the option as a module
+ *   - `undefined`: Unset the option
+ *   - `{ value: string }`: Set the option to a specific string value
+ *   - `{ enableAfter: string }`: Enable the option after another option is
+ *      enabled
+ *   - `{ disableAfter: string }`: Disable the option after another option
+ *      is disabled
+ *   - `{ moduleAfter: string }`: Enable the option as a module after
+ *      another option is enabled
+ *
+ * ## Example
+ *
+ * ```typescript
+ * const config = linuxUpdateConfig(linuxDefconfig(), {
+ *   VIRTIO: true, // enable CONFIG_VIRTIO
+ *   USER_NS: false, // disable CONFIG_USER_NS
+ *   OVERLAY_FS: "module", // enable CONFIG_OVERLAY_FS as a module
+ *   DEFAULT_INIT: { value: "/example" }, // override the default init path
+ * });
+ * ```
+ *
+ */
+export function linuxUpdateConfig(
+  config: std.AsyncRecipe<std.File>,
+  values: Record<string, LinuxUpdateConfigValue>,
+): std.Recipe<std.File> {
+  const args = Object.entries(values).flatMap(([key, value]) => {
+    if (value === true) {
+      return ["--enable", key];
+    } else if (value === false) {
+      return ["--disable", key];
+    } else if (value === "module") {
+      return ["--module", key];
+    } else if (value == null) {
+      return ["--unset", key];
+    } else if (typeof value === "object") {
+      if ("value" in value) {
+        return ["--set-str", key, value.value];
+      } else if ("enableAfter" in value) {
+        return ["--enable-after", key, value.enableAfter];
+      } else if ("disableAfter" in value) {
+        return ["--disable-after", key, value.disableAfter];
+      } else if ("moduleAfter" in value) {
+        return ["--module-after", key, value.moduleAfter];
+      } else {
+        return std.unreachable(value);
+      }
+    } else {
+      return std.unreachable(value);
+    }
+  });
+
+  return std
+    .process({
+      command: std.tpl`${linuxSource()}/scripts/config`,
+      args: ["--file", std.outputPath, ...args],
+      dependencies: [std.tools()],
+      outputScaffold: config,
+    })
+    .toFile();
+}
+
+function distClean(
+  source: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    make distclean
+  `
+    .dependencies(std.toolchain())
+    .outputScaffold(source)
+    .toDirectory();
+}
+
+function ldWrapper(): std.Recipe<std.Directory> {
+  // Create a custom wrapper to use `ld.bfd` instead of gold when linking.
+  // HACK: We also explicitly disable autopacking based on the output filename,
+  // but `brioche-ld` should handle these edge cases better.
+  return std.directory({
+    "bin/ld": std
+      .file(std.indoc`
+        #!/usr/bin/env sh
+
+        for (( i=1; i <= "$#"; i++ )); do
+            if [[ "\${!i}" == "-o" ]]; then
+                i=$((i + 1))
+                case "\${!i}" in
+                    *.o | *.ko | *.elf | *vmlinux* )
+                        export BRIOCHE_LD_AUTOPACK=false
+                        ;;
+                    *)
+                        ;;
+                esac
+            fi
+        done
+
+        exec ld.bfd "$@"
+      `)
+      .withPermissions({ executable: true }),
+  });
+}
