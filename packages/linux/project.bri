@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "linux",
-  version: "6.12.8",
+  version: "6.12.9",
   extra: {
     majorVersion: "6",
   },
@@ -83,6 +83,9 @@ export default function linux(
 
   const source = linuxSource().insert(".config", config);
 
+  // Build and install the kernel. We explicitly install the kernel image
+  // and `System.map` because not all architectures have a `make install`
+  // target
   return std.runBash`
     make -j16
 
@@ -107,7 +110,6 @@ export default function linux(
       std.toolchain(),
     )
     .env({
-      INSTALL_PATH: std.tpl`${std.outputPath}/boot`,
       INSTALL_MOD_PATH: std.outputPath,
 
       // Needed since we're using `ld.bfd`, which tries to resolve transitive
