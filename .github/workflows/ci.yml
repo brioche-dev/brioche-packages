@@ -15,18 +15,45 @@ jobs:
     name: Check packages
     runs-on: ubuntu-22.04
     steps:
+      # 1) Use dorny/paths-filter@v3 to detect changes in packages/**
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          list-files: shell
+          filters: |
+            packages:
+              - 'packages/**'
+
+      # 2) Only checkout if there's a change in packages
       - name: Checkout code
+        if: steps.changes.outputs.packages == 'true'
         uses: actions/checkout@v4
+
       - name: Install Brioche
+        if: steps.changes.outputs.packages == 'true'
         run: |
           mkdir -p ~/.local/bin
           curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Check projects
+
+      # 3) Only run 'check' for the subdirectories under packages that changed
+      - name: Check updated packages
+        if: steps.changes.outputs.packages == 'true'
         run: |
-          for project in packages/*; do
-            echo "::group::$project"
+          echo "Changed files:"
+          echo "${{ steps.changes.outputs.packages }}"
+
+          # Convert the JSON array of changed files to a bash-friendly list
+          changed_files=$(echo '${{ steps.changes.outputs.packages }}' | jq -r '.[]')
+
+          # Extract unique subdirectories in packages/ (e.g. packages/dir1) and run check
+          unique_projects=$(echo "$changed_files" \
+            | sed -E 's|(packages/[^/]+).*|\1|' \
+            | sort -u)
+
+          for project in $unique_projects; do
+            echo "::group::Check $project"
             brioche check -p "$project" --locked
             brioche fmt -p "$project" --check
             echo "::endgroup::"
