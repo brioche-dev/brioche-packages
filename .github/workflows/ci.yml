@@ -44,11 +44,8 @@ jobs:
           echo "Changed files:"
           echo "${{ steps.changes.outputs.packages_files }}"
 
-          # Convert the JSON array of changed files to a bash-friendly list
-          changed_files=$(echo '${{ steps.changes.outputs.packages_files }}' | jq -r '.[]')
-
           # Extract unique subdirectories in packages/ (e.g. packages/dir1) and run check
-          unique_projects=$(echo "$changed_files" \
+          unique_projects=$(echo "${{ steps.changes.outputs.packages_files }}" \
             | sed -E 's|(packages/[^/]+).*|\1|' \
             | sort -u)
 
