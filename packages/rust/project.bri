@@ -175,6 +175,11 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
   const crate = vendorCrate({ source: options.source });
 
+  const featuresArgs = makeFeaturesArgs(
+    options.buildParams?.features ?? [],
+    options.buildParams?.defaultFeatures ?? true,
+  );
+
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
     cargo install --path "$crate_path" $features --frozen
@@ -184,13 +189,7 @@ export function cargoBuild(options: CargoBuildOptions) {
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
       crate_path: options.path ?? ".",
-      features:
-        options.buildParams?.features != null
-          ? featuresWrapper(
-              options.buildParams.features,
-              options.buildParams.defaultFeatures ?? true,
-            )
-          : "",
+      features: featuresArgs?.join(" "),
       ...options.env,
     })
     .workDir(crate)
@@ -305,7 +304,10 @@ function cargoChef(): std.Recipe<std.Directory> {
  * @param features An array of features.
  * @returns A string of features for a Cargo build.
  */
-function featuresWrapper(features: string[], defaultFeatures: boolean): string {
+function makeFeaturesArgs(
+  features: string[],
+  defaultFeatures: boolean,
+): string[] | undefined {
   // From ["feature1", "feature2", "feature3"] to '--features feature1,feature2,feature3'
   for (const feature of features) {
     std.assert(
@@ -314,9 +316,17 @@ function featuresWrapper(features: string[], defaultFeatures: boolean): string {
     );
   }
 
-  return [
-    "--features",
-    features.join(","),
-    ...(defaultFeatures ? [] : ["--no-default-features"]),
-  ].join(" ");
+  const args = [];
+  if (features.length > 0) {
+    args.push("--features", features.join(","));
+  }
+  if (!defaultFeatures) {
+    args.push("--no-default-features");
+  }
+
+  if (args.length > 0) {
+    return args;
+  } else {
+    return undefined;
+  }
 }
