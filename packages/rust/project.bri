@@ -196,6 +196,10 @@ export function cargoBuild(options: CargoBuildOptions) {
     .unsafe(options.unsafe)
     .toDirectory();
 
+  // Remove extra metadata created by `cargo install`
+  buildResult = buildResult.remove(".crates.toml");
+  buildResult = buildResult.remove(".crates2.json");
+
   // Add a runnable link if set in the options
   if (options.runnable != null) {
     buildResult = std.withRunnableLink(buildResult, options.runnable);
