@@ -115,6 +115,7 @@ export default rust;
 
 interface CargoBuildParameters {
   features?: string[];
+  defaultFeatures?: boolean;
 }
 
 export interface CargoBuildOptions {
@@ -146,6 +147,8 @@ export interface CargoBuildOptions {
  *   the build is hermetic when setting these options!
  * - `buildParams`: Optional build parameters:
  *   - `features`: An array of features to enable.
+ *   - `defaultFeatures`: Set to `false` to opt out of the crate's
+ *     default features.
  *
  * ## Example
  *
@@ -172,6 +175,11 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
   const crate = vendorCrate({ source: options.source });
 
+  const featuresArgs = makeFeaturesArgs(
+    options.buildParams?.features ?? [],
+    options.buildParams?.defaultFeatures ?? true,
+  );
+
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std.runBash`
     cargo install --path "$crate_path" $features --frozen
@@ -181,15 +189,16 @@ export function cargoBuild(options: CargoBuildOptions) {
       CARGO_INSTALL_ROOT: std.outputPath,
       PATH: std.tpl`${std.outputPath}/bin`,
       crate_path: options.path ?? ".",
-      features:
-        options.buildParams?.features != null
-          ? featuresWrapper(options.buildParams.features)
-          : "",
+      features: featuresArgs?.join(" "),
       ...options.env,
     })
     .workDir(crate)
     .unsafe(options.unsafe)
     .toDirectory();
+
+  // Remove extra metadata created by `cargo install`
+  buildResult = buildResult.remove(".crates.toml");
+  buildResult = buildResult.remove(".crates2.json");
 
   // Add a runnable link if set in the options
   if (options.runnable != null) {
@@ -299,7 +308,29 @@ function cargoChef(): std.Recipe<std.Directory> {
  * @param features An array of features.
  * @returns A string of features for a Cargo build.
  */
-function featuresWrapper(features: string[]): string {
+function makeFeaturesArgs(
+  features: string[],
+  defaultFeatures: boolean,
+): string[] | undefined {
   // From ["feature1", "feature2", "feature3"] to '--features feature1,feature2,feature3'
-  return `--features ${features.join(",")}`;
+  for (const feature of features) {
+    std.assert(
+      /^[a-zA-Z0-9\-_]+$/.test(feature),
+      `Unsupported feature name: ${feature}`,
+    );
+  }
+
+  const args = [];
+  if (features.length > 0) {
+    args.push("--features", features.join(","));
+  }
+  if (!defaultFeatures) {
+    args.push("--no-default-features");
+  }
+
+  if (args.length > 0) {
+    return args;
+  } else {
+    return undefined;
+  }
 }
