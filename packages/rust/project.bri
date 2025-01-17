@@ -115,6 +115,7 @@ export default rust;
 
 interface CargoBuildParameters {
   features?: string[];
+  defaultFeatures?: boolean;
 }
 
 export interface CargoBuildOptions {
@@ -146,6 +147,8 @@ export interface CargoBuildOptions {
  *   the build is hermetic when setting these options!
  * - `buildParams`: Optional build parameters:
  *   - `features`: An array of features to enable.
+ *   - `defaultFeatures`: Set to `false` to opt out of the crate's
+ *     default features.
  *
  * ## Example
  *
@@ -183,7 +186,10 @@ export function cargoBuild(options: CargoBuildOptions) {
       crate_path: options.path ?? ".",
       features:
         options.buildParams?.features != null
-          ? featuresWrapper(options.buildParams.features)
+          ? featuresWrapper(
+              options.buildParams.features,
+              options.buildParams.defaultFeatures ?? true,
+            )
           : "",
       ...options.env,
     })
@@ -299,7 +305,18 @@ function cargoChef(): std.Recipe<std.Directory> {
  * @param features An array of features.
  * @returns A string of features for a Cargo build.
  */
-function featuresWrapper(features: string[]): string {
+function featuresWrapper(features: string[], defaultFeatures: boolean): string {
   // From ["feature1", "feature2", "feature3"] to '--features feature1,feature2,feature3'
-  return `--features ${features.join(",")}`;
+  for (const feature of features) {
+    std.assert(
+      /^[a-zA-Z0-9\-_]+$/.test(feature),
+      `Unsupported feature name: ${feature}`,
+    );
+  }
+
+  return [
+    "--features",
+    features.join(","),
+    ...(defaultFeatures ? [] : ["--no-default-features"]),
+  ].join(" ");
 }
