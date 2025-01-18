@@ -1,0 +1,26 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "just",
+  version: "1.38.0",
+};
+
+const source = Brioche.download(
+  `https://github.com/casey/just/archive/refs/tags/${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function just(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/just",
+  });
+}
+
+export function test() {
+  return std.runBash`
+    just --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(just());
+}

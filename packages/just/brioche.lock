@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/casey/just/archive/refs/tags/1.38.0.tar.gz": {
+      "type": "sha256",
+      "value": "3d47e27755d39f40e1ca34bc0ef535fa514e7ed547b2af62311dcadd8bd6d564"
+    }
+  }
+}
