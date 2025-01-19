@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/sharkdp/bat/archive/refs/tags/v0.24.0.tar.gz": {
+    "https://github.com/sharkdp/bat/archive/refs/tags/v0.25.0.tar.gz": {
       "type": "sha256",
-      "value": "907554a9eff239f256ee8fe05a922aad84febe4fe10a499def72a4557e9eedfb"
+      "value": "4433403785ebb61d1e5d4940a8196d020019ce11a6f7d4553ea1d324331d8924"
     }
   }
 }
