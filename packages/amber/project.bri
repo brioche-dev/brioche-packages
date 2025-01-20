@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "amber",
-  version: "0.3.5-alpha",
+  version: "0.4.0-alpha",
 };
 
 const source = Brioche.download(
