@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "jwt_cli",
-  version: "6.1.0",
+  version: "6.2.0",
 };
 
 const source = Brioche.download(
