@@ -1,0 +1,28 @@
+import { BRIOCHE_VERSION } from "../runtime.bri";
+import { semverMatches } from "../semver.bri";
+import { assert } from "../utils.bri";
+import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
+import type { Directory } from "./directory.bri";
+
+/**
+ * Attach resources to the files within a recipe by searching within
+ * directories named `brioche-resources.d`. This is useful when unarchiving
+ * a recipe that was archived using `collectReferences`.
+ */
+export function attachResources(
+  recipe: AsyncRecipe<Directory>,
+): Recipe<Directory> {
+  return createRecipe(["directory"], {
+    sourceDepth: 1,
+    briocheSerialize: async (meta) => {
+      assert(semverMatches(BRIOCHE_VERSION, ">=0.1.4"));
+
+      const serializedRecipe = await (await recipe).briocheSerialize();
+      return {
+        meta,
+        type: "attach_resources",
+        recipe: serializedRecipe,
+      };
+    },
+  });
+}

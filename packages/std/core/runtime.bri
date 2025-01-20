@@ -107,6 +107,7 @@ export type Recipe =
   | GlobRecipe
   | SetPermissionsRecipe
   | CollectReferencesRecipe
+  | AttachResourcesRecipe
   | ProxyRecipe
   | SyncRecipe;
 
@@ -192,6 +193,11 @@ export type SetPermissionsRecipe = WithMeta & {
 
 export type CollectReferencesRecipe = WithMeta & {
   type: "collect_references";
+  recipe: Recipe;
+};
+
+export type AttachResourcesRecipe = WithMeta & {
+  type: "attach_resources";
   recipe: Recipe;
 };
 
