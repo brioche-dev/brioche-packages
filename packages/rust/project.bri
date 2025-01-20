@@ -294,7 +294,7 @@ export function vendorCrate(
 
 function cargoChef(): std.Recipe<std.Directory> {
   const pkg = Brioche.download(
-    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.67/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
+    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.70/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
   );
 
   return std.directory({
