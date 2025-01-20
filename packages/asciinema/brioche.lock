@@ -8,11 +8,10 @@
     "https://files.pythonhosted.org/packages/ff/ae/f19306b5a221f6a436d8f2238d5b80925004093fa3edea59835b514d9057/setuptools-75.1.0-py3-none-any.whl": {
       "type": "sha256",
       "value": "35ab7fd3bcd95e6b7fd704e4a1539513edad446c097797f2985e0e4b960772f2"
-    }
-  },
-  "git_refs": {
-    "https://github.com/asciinema/asciinema.git": {
-      "v2.4.0": "1a71be26c4c29e7cd98b97a11233cf3fb724ba9b"
+    },
+    "https://github.com/asciinema/asciinema/archive/refs/tags/v2.4.0.tar.gz": {
+      "type": "sha256",
+      "value": "b0e05f0b5ae7ae4e7186c6bd824e6d670203bb24f1c89ee52fc8fae7254e6091"
     }
   }
 }
