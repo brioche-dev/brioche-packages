@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "jujutsu",
-  version: "0.20.0",
+  version: "0.25.0",
 };
 
 const source = Brioche.download(
