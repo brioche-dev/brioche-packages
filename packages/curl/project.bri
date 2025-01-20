@@ -3,7 +3,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "curl",
-  version: "8.9.1",
+  version: "8.11.1",
 };
 
 const source = Brioche.download(
@@ -19,7 +19,8 @@ export default function (): std.Recipe<std.Directory> {
       --with-openssl \\
       --without-ca-bundle \\
       --without-ca-path \\
-      --with-ca-fallback
+      --with-ca-fallback \\
+      --without-libpsl
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
