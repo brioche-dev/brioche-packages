@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/eza-community/eza/archive/refs/tags/v0.19.2.tar.gz": {
+    "https://github.com/eza-community/eza/archive/refs/tags/v0.20.17.tar.gz": {
       "type": "sha256",
-      "value": "db4897ef7f58d0802620180e0b13bb35563e03c9de66624206b35dcad21007f8"
+      "value": "62bcf8f1b2d087fa0c2c8365e4427ad30ffa986330413191da47061aecfe20de"
     }
   }
 }
