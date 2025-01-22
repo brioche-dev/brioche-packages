@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "tcsh",
-  version: "6.24.13",
+  version: "6.24.14",
 };
 
 const source = Brioche.download(
