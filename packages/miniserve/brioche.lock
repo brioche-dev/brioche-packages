@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/svenstaro/miniserve/archive/refs/tags/v0.27.1.tar.gz": {
+    "https://github.com/svenstaro/miniserve/archive/refs/tags/v0.28.0.tar.gz": {
       "type": "sha256",
-      "value": "b65580574ca624072b1a94d59ebf201ab664eacacb46a5043ef7b81ebb538f80"
+      "value": "c4c5e12796bdae2892eff3832b66c4c04364738b62cf1429259428b03363d1f1"
     }
   }
 }
