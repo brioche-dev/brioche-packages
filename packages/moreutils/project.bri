@@ -7,7 +7,7 @@ import libxslt from "libxslt";
 
 export const project = {
   name: "moreutils",
-  version: "0.69",
+  version: "0.70",
 };
 
 export const source = gitCheckout(
