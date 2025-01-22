@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "libxml2",
-  version: "2.13.4",
+  version: "2.13.5",
 };
 
 export const source = Brioche.download(
