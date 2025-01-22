@@ -4,7 +4,7 @@ import { gitCheckout } from "git";
 
 export const project = {
   name: "pstack",
-  version: "2.8.3",
+  version: "2.9",
 };
 
 const gitRef = Brioche.gitRef({
