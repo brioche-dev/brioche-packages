@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "nushell",
-  version: "0.96.1",
+  version: "0.101.0",
 };
 
 const source = Brioche.download(
