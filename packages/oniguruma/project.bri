@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "oniguruma",
-  version: "6.9.9",
+  version: "6.9.10",
 };
 
 const source = Brioche.download(
