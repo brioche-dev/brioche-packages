@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/astral-sh/ruff/archive/refs/tags/0.6.1.tar.gz": {
+    "https://github.com/astral-sh/ruff/archive/refs/tags/0.9.2.tar.gz": {
       "type": "sha256",
-      "value": "230a4ca5b172ae0632afb310ee7792eec6913eefa790423790862f0d91889ad1"
+      "value": "d47a61bbbfceda23ddd29dd0c3cb3bb55f240e80a7aa0ba944e7f9f3f6ed886f"
     }
   }
 }
