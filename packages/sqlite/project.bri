@@ -2,10 +2,10 @@ import * as std from "std";
 
 export const project = {
   name: "sqlite",
-  version: "3.46.1",
+  version: "3.48.0",
   extra: {
     // The version number as encoded in SQLite build product names
-    filenameEncodedVersion: "3460100",
+    filenameEncodedVersion: "3480000",
   },
 };
 
@@ -20,7 +20,7 @@ std.assert(
 );
 
 const source = Brioche.download(
-  `https://www.sqlite.org/2024/sqlite-autoconf-${project.extra.filenameEncodedVersion}.tar.gz`,
+  `https://www.sqlite.org/2025/sqlite-autoconf-${project.extra.filenameEncodedVersion}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
