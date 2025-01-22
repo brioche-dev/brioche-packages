@@ -4,7 +4,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "python",
-  version: "3.13.0",
+  version: "3.13.1",
 };
 
 const source = Brioche.download(
