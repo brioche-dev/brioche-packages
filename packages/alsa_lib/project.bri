@@ -1,3 +1,5 @@
+import caCertificates from "ca_certificates";
+import nushell from "nushell";
 import * as std from "std";
 
 export const project = {
@@ -11,7 +13,7 @@ const source = Brioche.download(
   .unarchive("tar", "bzip2")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function alsaLib(): std.Recipe<std.Directory> {
   const alsaLib = std.runBash`
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -25,4 +27,58 @@ export default function (): std.Recipe<std.Directory> {
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
+}
+
+export async function test() {
+  const src = std.file(std.indoc`
+      #include <stdio.h>
+      #include <alsa/asoundlib.h>
+
+      int main(void)
+      {
+          const char *alsa_version = snd_asoundlib_version();
+          printf("%s", alsa_version);
+
+          return 0;
+      }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -lasound
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), alsaLib())
+    .env({ src: src });
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    http get https://www.alsa-project.org/files/pub/lib
+      | lines
+      | where {|it| ($it | str contains "alsa-lib") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="alsa-lib-(?<version>.+)\.tar\.bz2">'
+      | sort-by --natural --reverse version
+      | get 0.version
+      | tee { save $env.BRIOCHE_OUTPUT }
+  `);
+
+  return std
+    .process({
+      command: std.tpl`${nushell()}/bin/nu`,
+      args: [src],
+      unsafe: {
+        networking: true,
+      },
+    })
+    .dependencies(caCertificates())
+    .toFile();
 }
