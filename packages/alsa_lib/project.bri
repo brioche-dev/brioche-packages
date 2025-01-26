@@ -1,4 +1,3 @@
-import caCertificates from "ca_certificates";
 import nushell from "nushell";
 import * as std from "std";
 
@@ -62,23 +61,20 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    http get https://www.alsa-project.org/files/pub/lib
+    let version = http get https://www.alsa-project.org/files/pub/lib
       | lines
       | where {|it| ($it | str contains "alsa-lib") and (not ($it | str contains ".sig")) }
       | parse --regex '<a href="alsa-lib-(?<version>.+)\.tar\.bz2">'
       | sort-by --natural --reverse version
       | get 0.version
-      | tee { save $env.BRIOCHE_OUTPUT }
+
+    $env.project | from json | update version $version | to json
   `);
 
-  return std
-    .process({
-      command: std.tpl`${nushell()}/bin/nu`,
-      args: [src],
-      unsafe: {
-        networking: true,
-      },
-    })
-    .dependencies(caCertificates())
-    .toFile();
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
