@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/mike-engel/jwt-cli/archive/refs/tags/6.2.0.tar.gz": {
-      "type": "sha256",
-      "value": "49d67d920391978684dc32b75e553a2abbd46c775365c0fb4b232d22c0ed653a"
+  "git_refs": {
+    "https://github.com/mike-engel/jwt-cli.git": {
+      "6.2.0": "fe5fdd375c9ae4094490d47b3e7bdd6c597d9945"
     }
   }
 }
