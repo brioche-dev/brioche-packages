@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/martinvonz/jj/archive/refs/tags/v0.25.0.tar.gz": {
-      "type": "sha256",
-      "value": "3a99528539e414a3373f24eb46a0f153d4e52f7035bb06df47bd317a19912ea3"
+  "git_refs": {
+    "https://github.com/martinvonz/jj.git": {
+      "v0.25.0": "041c4fecb77434dd6720e7d7f1ce48d9575ac5f7"
     }
   }
 }
