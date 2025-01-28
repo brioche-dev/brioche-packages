@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/Canop/broot/archive/refs/tags/v1.44.6.tar.gz": {
-      "type": "sha256",
-      "value": "554abc12c8343a0e921f92740e06bf3a86993f71eb78246c9b494293da13b1df"
+  "git_refs": {
+    "https://github.com/Canop/broot.git": {
+      "v1.44.6": "ba709580aa824549674ac5f424f67e2297ddfe19"
     }
   }
 }
