@@ -1,0 +1,51 @@
+import * as std from "std";
+import { goBuild } from "go";
+import { gitCheckout } from "git";
+import nushell from "nushell";
+
+export const project = {
+  name: "seaweedfs",
+  version: "3.82",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/seaweedfs/seaweedfs.git",
+    ref: project.version,
+  }),
+);
+
+export default function seaweedfs(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./weed",
+    runnable: "bin/weed",
+  });
+}
+
+export async function test() {
+  const recipe = std.runBash`
+    weed version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(seaweedfs());
+
+  const result = await recipe.toFile().read();
+  std.assert(result.includes(` ${project.version} `));
+
+  return recipe;
+}
+
+export async function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/seaweedfs/seaweedfs/releases/latest
+      | get tag_name
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
