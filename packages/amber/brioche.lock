@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/amber-lang/amber/archive/refs/tags/0.4.0-alpha.tar.gz": {
-      "type": "sha256",
-      "value": "14046dd50c12c5f470177fc43029495fb8f489ba84fe301e3aada1f32493b211"
+  "git_refs": {
+    "https://github.com/amber-lang/amber.git": {
+      "0.4.0-alpha": "d3ceda317fc053ae9645e9f3c8f166657eba24e9"
     }
   }
 }

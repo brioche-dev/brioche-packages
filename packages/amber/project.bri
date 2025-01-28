@@ -1,5 +1,6 @@
 import nushell from "nushell";
 import * as std from "std";
+import { gitCheckout } from "git";
 import { cargoBuild } from "rust";
 
 export const project = {
@@ -7,11 +8,12 @@ export const project = {
   version: "0.4.0-alpha",
 };
 
-const source = Brioche.download(
-  `https://github.com/amber-lang/amber/archive/refs/tags/${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/amber-lang/amber.git",
+    ref: `${project.version}`,
+  }),
+);
 
 export default function amber(): std.Recipe<std.Directory> {
   return cargoBuild({
