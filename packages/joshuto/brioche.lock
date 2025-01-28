@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/kamiyaa/joshuto/archive/refs/tags/v0.9.8.tar.gz": {
-      "type": "sha256",
-      "value": "877d841b2e26d26d0f0f2e6f1dab3ea2fdda38c345abcd25085a3f659c24e013"
+  "git_refs": {
+    "https://github.com/kamiyaa/joshuto.git": {
+      "v0.9.8": "2a392e85633d73a7bfc55feb80c62ecabe70de75"
     }
   }
 }
