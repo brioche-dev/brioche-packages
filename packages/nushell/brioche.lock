@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/nushell/nushell/archive/refs/tags/0.101.0.tar.gz": {
-      "type": "sha256",
-      "value": "43e4a123e86f0fb4754e40d0e2962b69a04f8c2d58470f47cb9be81daabab347"
+  "git_refs": {
+    "https://github.com/nushell/nushell.git": {
+      "0.101.0": "fb2610904997f54f50ad52095948bede81695f31"
     }
   }
 }
