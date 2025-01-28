@@ -1,16 +1,18 @@
 import * as std from "std";
 import { goBuild } from "go";
+import { gitCheckout } from "git";
 
 export const project = {
   name: "terraform",
   version: "1.10.4",
 };
 
-const source = Brioche.download(
-  `https://github.com/hashicorp/terraform/archive/refs/tags/v${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/hashicorp/terraform.git",
+    ref: `v${project.version}`,
+  }),
+);
 
 export default function (): std.Recipe<std.Directory> {
   return goBuild({
