@@ -1,4 +1,5 @@
 import * as std from "std";
+import libffi from "libffi";
 import openssl from "openssl";
 import sqlite from "sqlite";
 
@@ -28,7 +29,7 @@ export default async function python() {
     python3 -m ensurepip --default-pip
   `
     .workDir(source)
-    .dependencies(std.toolchain(), openssl(), sqlite())
+    .dependencies(std.toolchain(), libffi(), openssl(), sqlite())
     .toDirectory();
 
   // Get all the native Python modules
