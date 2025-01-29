@@ -11,7 +11,7 @@ export const project = {
 const source = gitCheckout(
   Brioche.gitRef({
     repository: "https://github.com/nushell/nushell.git",
-    ref: `${project.version}`,
+    ref: project.version,
   }),
 );
 
