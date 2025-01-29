@@ -35,8 +35,8 @@ export async function test() {
 
       int main(void)
       {
-          const char *alsa_version = snd_asoundlib_version();
-          printf("%s", alsa_version);
+          const char *version = snd_asoundlib_version();
+          printf("%s", version);
 
           return 0;
       }
