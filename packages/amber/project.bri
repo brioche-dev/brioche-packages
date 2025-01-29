@@ -24,7 +24,7 @@ export default function amber(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    amber --version | tr -d '\n' | tee "$BRIOCHE_OUTPUT"
+    echo -n $(amber --version) | tee "$BRIOCHE_OUTPUT"
   `.dependencies(amber());
 
   const result = await script.toFile().read();
