@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/opentofu/opentofu/archive/refs/tags/v1.9.0.tar.gz": {
-      "type": "sha256",
-      "value": "95234f00bb8a6d73bcd3f3920e376a32189004df3aaf26cb95917cec5441f8a8"
+  "git_refs": {
+    "https://github.com/opentofu/opentofu.git": {
+      "v1.9.0": "0d57aa4f35998bf2847ac3acb343f9e16b5c2995"
     }
   }
 }

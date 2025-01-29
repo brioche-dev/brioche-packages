@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/hatoo/oha/archive/refs/tags/v1.6.0.tar.gz": {
-      "type": "sha256",
-      "value": "44ae493c24f42f8994b4192ace99e63866c054e305d368bf77176108cbfa93fd"
+  "git_refs": {
+    "https://github.com/hatoo/oha.git": {
+      "v1.6.0": "349b43dabf889933d2332922aa69b0ed9cb205b3"
     }
   }
 }

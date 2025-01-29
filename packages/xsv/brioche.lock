@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/BurntSushi/xsv/archive/refs/tags/0.13.0.tar.gz": {
-      "type": "sha256",
-      "value": "2b75309b764c9f2f3fdc1dd31eeea5a74498f7da21ae757b3ffd6fd537ec5345"
+  "git_refs": {
+    "https://github.com/BurntSushi/xsv.git": {
+      "0.13.0": "2b4cbaa0eecf7b507a612632fe00289b1b358c15"
     }
   }
 }

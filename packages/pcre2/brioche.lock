@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-10.44.tar.gz": {
-      "type": "sha256",
-      "value": "07a002e8216382a96f722bc4a831f3d77457fe3e9e62a6dff250a2dd0e9c5e6d"
+  "git_refs": {
+    "https://github.com/PCRE2Project/pcre2.git": {
+      "pcre2-10.44": "6ae58beca071f13ccfed31d03b3f479ab520639b"
     }
   }
 }

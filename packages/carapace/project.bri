@@ -1,4 +1,5 @@
 import * as std from "std";
+import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
@@ -6,11 +7,12 @@ export const project = {
   version: "1.1.1",
 };
 
-const source = Brioche.download(
-  `https://github.com/carapace-sh/carapace-bin/archive/refs/tags/v${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/carapace-sh/carapace.git",
+    ref: `v${project.version}`,
+  }),
+);
 
 export default function (): std.Recipe<std.Directory> {
   return goBuild({

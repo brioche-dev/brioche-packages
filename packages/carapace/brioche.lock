@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/carapace-sh/carapace-bin/archive/refs/tags/v1.1.1.tar.gz": {
-      "type": "sha256",
-      "value": "c479ef19a9d1b5a8579abb2da437afe7fb024ab23d11feadf746ffda0bbc833a"
+  "git_refs": {
+    "https://github.com/carapace-sh/carapace.git": {
+      "v1.1.1": "74167cbe2c66c0bbd8a11c5adcd58ec68b1be337"
     }
   }
 }

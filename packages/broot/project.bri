@@ -1,16 +1,18 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
+import { gitCheckout } from "git";
 
 export const project = {
   name: "broot",
   version: "1.44.6",
 };
 
-const source = Brioche.download(
-  `https://github.com/Canop/broot/archive/refs/tags/v${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/Canop/broot.git",
+    ref: `v${project.version}`,
+  }),
+);
 
 export default function (): std.Recipe<std.Directory> {
   return cargoBuild({

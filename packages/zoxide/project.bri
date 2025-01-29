@@ -1,16 +1,18 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
+import { gitCheckout } from "git";
 
 export const project = {
   name: "zoxide",
   version: "0.9.6",
 };
 
-const source = Brioche.download(
-  `https://github.com/ajeetdsouza/zoxide/archive/refs/tags/v${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/ajeetdsouza/zoxide.git",
+    ref: `v${project.version}`,
+  }),
+);
 
 export default function (): std.Recipe<std.Directory> {
   return cargoBuild({

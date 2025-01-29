@@ -1,15 +1,17 @@
 import * as std from "std";
+import { gitCheckout } from "git";
 
 export const project = {
   name: "pcre2",
   version: "10.44",
 };
 
-const source = Brioche.download(
-  `https://github.com/PCRE2Project/pcre2/archive/refs/tags/pcre2-${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/PCRE2Project/pcre2.git",
+    ref: `pcre2-${project.version}`,
+  }),
+);
 
 export default function (): std.Recipe<std.Directory> {
   const pcre2 = std.runBash`

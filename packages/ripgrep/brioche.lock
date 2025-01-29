@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/BurntSushi/ripgrep/archive/refs/tags/14.1.1.tar.gz": {
-      "type": "sha256",
-      "value": "4dad02a2f9c8c3c8d89434e47337aa654cb0e2aa50e806589132f186bf5c2b66"
+  "git_refs": {
+    "https://github.com/BurntSushi/ripgrep.git": {
+      "14.1.1": "4649aa9700619f94cf9c66876e9549d83420e16c"
     }
   }
 }

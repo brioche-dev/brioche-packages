@@ -1,15 +1,17 @@
 import * as std from "std";
+import { gitCheckout } from "git";
 
 export const project = {
   name: "oniguruma",
   version: "6.9.10",
 };
 
-const source = Brioche.download(
-  `https://github.com/kkos/oniguruma/archive/refs/tags/v${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/kkos/oniguruma.git",
+    ref: `v${project.version}`,
+  }),
+);
 
 export default function (): std.Recipe<std.Directory> {
   let oniguruma = std.runBash`
