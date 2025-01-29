@@ -1,4 +1,3 @@
-import { gitCheckout } from "git";
 import * as std from "std";
 
 export const project = {
@@ -6,12 +5,11 @@ export const project = {
   version: "1.7.1",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/jqlang/jq.git",
-    ref: `jq-${project.version}`,
-  }),
-);
+const source = Brioche.download(
+  `https://github.com/jqlang/jq/releases/download/jq-${project.version}/jq-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function (): std.Recipe<std.Directory> {
   const jq = std.runBash`
