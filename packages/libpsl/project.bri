@@ -1,0 +1,77 @@
+import * as std from "std";
+import nushell from "nushell";
+import python from "python";
+
+export const project = {
+  name: "libpsl",
+  version: "0.21.5",
+};
+
+const source = Brioche.download(
+  `https://github.com/rockdaboot/libpsl/releases/download/${project.version}/libpsl-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libPsl(): std.Recipe<std.Directory> {
+  const libpsl = std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), python())
+    .toDirectory();
+
+  return std.setEnv(libpsl, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export async function test() {
+  const src = std.file(std.indoc`
+      #include <stdio.h>
+      #include <libpsl.h>
+
+      int main(void)
+      {
+          const char *version = psl_get_version();
+          printf("%s", version);
+
+          return 0;
+      }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -lpsl
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), libPsl())
+    .env({ src: src });
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version} (no IDNA support)`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/rockdaboot/libpsl/releases/latest
+      | get tag_name
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
