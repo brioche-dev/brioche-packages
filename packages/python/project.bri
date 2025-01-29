@@ -1,4 +1,5 @@
 import * as std from "std";
+import libffi from "libffi";
 import openssl from "openssl";
 import sqlite from "sqlite";
 
@@ -28,7 +29,7 @@ export default async function python() {
     python3 -m ensurepip --default-pip
   `
     .workDir(source)
-    .dependencies(std.toolchain(), openssl(), sqlite())
+    .dependencies(std.toolchain(), libffi(), openssl(), sqlite())
     .toDirectory();
 
   // Get all the native Python modules
@@ -55,7 +56,16 @@ export default async function python() {
     dynamicBinaryConfig: {
       // Listing the modules both under `extraLibraries` and `skipLibraries`
       // forces Python to be linked with the modules' transitive dependencies
-      extraLibraries: nativeModules,
+      extraLibraries: [
+        ...nativeModules,
+
+        // Extra libraries used for FFI (needed for e.g. `aws_cli`)
+        // TODO: Figure out when/where/why these are used and how to simplify!
+        "librt.so.1",
+        "libpthread.so.0",
+        "libgcc_s.so.1",
+        "libdl.so.2",
+      ],
       skipLibraries: nativeModules,
       libraryPaths: [
         std.glob(python, ["lib/python*/lib-dynload"]).peel(3),
