@@ -6,15 +6,53 @@ import sqlite from "sqlite";
 export const project = {
   name: "python",
   version: "3.13.1",
+  extra: {
+    currentMinorVersion: "3.13",
+    minorVersions: {
+      "3.13": "3.13.1",
+      "3.12": "3.12.8",
+    },
+  },
 };
 
-const source = Brioche.download(
-  `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
-)
-  .unarchive("tar", "xz")
-  .peel();
+std.assert(
+  project.extra.currentMinorVersion in project.extra.minorVersions,
+  "Python package extra.currentVersion not found in extra.minorVersions",
+);
+std.assert(
+  Object.keys(project.extra.minorVersions).some((minorVersion) =>
+    project.version.startsWith(`${minorVersion}.`),
+  ),
+  "Python package version not found in extra.minorVersions",
+);
 
-export default async function python() {
+type PythonVersion = keyof typeof project.extra.minorVersions;
+
+const sources: { [version: string]: std.Recipe<std.File> } = {
+  "3.12": Brioche.download(
+    `https://www.python.org/ftp/python/${project.extra.minorVersions["3.12"]}/Python-${project.extra.minorVersions["3.12"]}.tar.xz`,
+  ),
+  "3.13": Brioche.download(
+    `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
+  ),
+} satisfies Record<PythonVersion, std.Recipe<std.File>>;
+
+interface PythonOptions {
+  version?: PythonVersion;
+}
+
+export default async function python(options: PythonOptions = {}) {
+  const { version = project.extra.currentMinorVersion } = options;
+
+  // Get the Python source for the selected version
+  const source = sources[version]?.unarchive("tar", "xz").peel();
+  std.assert(
+    source != null,
+    `Expected Python version ${JSON.stringify(
+      version,
+    )} to be one of ${JSON.stringify(Object.keys(sources))}`,
+  );
+
   let python = std.runBash`
     export LD_LIBRARY_PATH="$LIBRARY_PATH"
     export PATH="$BRIOCHE_OUTPUT/bin\${PATH:+:$PATH}"
@@ -107,11 +145,22 @@ export default async function python() {
 }
 
 export function test() {
-  return std.runBash`
-    python --version | tee -a "$BRIOCHE_OUTPUT"
-    pip --version | tee -a "$BRIOCHE_OUTPUT"
-    python-config --cflags --libs --ldflags | tee -a "$BRIOCHE_OUTPUT"
-  `.dependencies(python());
+  const pythonVersions = Object.keys(
+    project.extra.minorVersions,
+  ) as PythonVersion[];
+
+  const tests = pythonVersions.map((version) => {
+    return std.runBash`
+      mkdir "$BRIOCHE_OUTPUT"
+      python --version | tee "$BRIOCHE_OUTPUT/python-version.txt"
+      pip --version | tee "$BRIOCHE_OUTPUT/pip-version.txt"
+      python-config --cflags --libs --ldflags | tee "$BRIOCHE_OUTPUT/python-config.txt"
+    `
+      .dependencies(python({ version }))
+      .toDirectory();
+  });
+
+  return std.merge(...tests);
 }
 
 async function fixShebangs(
