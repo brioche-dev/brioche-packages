@@ -1,0 +1,47 @@
+diff --git a/requirements-dev-lock.txt b/requirements-dev-lock.txt
+index a7a849fb9..5cd1c7e62 100644
+--- a/requirements-dev-lock.txt
++++ b/requirements-dev-lock.txt
+@@ -131,16 +131,10 @@ macholib==1.16.3 \
+     --hash=sha256:07ae9e15e8e4cd9a788013d81f5908b3609aa76f9b1421bae9c4d7606ec86a30 \
+     --hash=sha256:0e315d7583d38b8c77e815b1ecbdbf504a8258d8b3e17b61165c6feb60d18f2c
+     # via pyinstaller
+-packaging==24.1 \
+-    --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
+-    --hash=sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124
+-    # via
+-    #   -r requirements-test.txt
+-    #   build
+-    #   pyinstaller-hooks-contrib
+-    #   pyproject-api
+-    #   pytest
+-    #   tox
++packaging==24.2 \
++    --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \
++    --hash=sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f
++    # (manually patched)
+ pefile==2023.2.7 \
+     --hash=sha256:82e6114004b3d6911c77c3953e3838654b04511b8b66e8583db70c65998017dc \
+     --hash=sha256:da185cd2af68c08a6cd4481f7325ed600a88f6a813bad9dea07ab3ef73d8d8d6
+diff --git a/requirements-test-lock.txt b/requirements-test-lock.txt
+index b838c3940..c891e0e86 100644
+--- a/requirements-test-lock.txt
++++ b/requirements-test-lock.txt
+@@ -97,13 +97,10 @@ jsonschema==4.7.2 \
+     --hash=sha256:73764f461d61eb97a057c929368610a134d1d1fffd858acfe88864ee94f1f1d3 \
+     --hash=sha256:c7448a421b25e424fccfceea86b4e3a8672b4436e1988ccbde92c80828d4f085
+     # via -r requirements-test.txt
+-packaging==24.1 \
+-    --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
+-    --hash=sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124
+-    # via
+-    #   -r requirements-test.txt
+-    #   build
+-    #   pytest
++packaging==24.2 \
++    --hash=sha256:09abb1bccd265c01f4a3aa3f7a7db064b36514d2cba19a2f694fe6150451a759 \
++    --hash=sha256:c228a6dc5e932d346bc5739379109d49e8853dd8223571c7c5b55260edc0b97f
++    # (manually patched)
+ pip-tools==7.0.0 \
+     --hash=sha256:6a2308712727c86cc8a6cedc0e6ba01232a337c706d63926d3789462ad083d06 \
+     --hash=sha256:ae185db747195c8ed011866c366279cbb64f7f8c1528e7a828f515bd2bb0b31b
