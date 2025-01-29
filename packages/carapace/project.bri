@@ -9,7 +9,7 @@ export const project = {
 
 const source = gitCheckout(
   Brioche.gitRef({
-    repository: "https://github.com/carapace-sh/carapace.git",
+    repository: "https://github.com/carapace-sh/carapace-bin.git",
     ref: `v${project.version}`,
   }),
 );
