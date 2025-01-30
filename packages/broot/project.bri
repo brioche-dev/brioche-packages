@@ -1,4 +1,5 @@
 import * as std from "std";
+import nushell from "nushell";
 import { cargoBuild } from "rust";
 import { gitCheckout } from "git";
 
@@ -14,9 +15,40 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function broot(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/broot",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(broot --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(broot());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `broot ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/Canop/broot/releases/latest
+      | get tag_name
+      | str substring 1..
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }
