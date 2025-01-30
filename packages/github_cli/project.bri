@@ -47,18 +47,23 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/cli/cli/releases/latest
-      
-    let version = releaseData
-      | get tag_name
-      | str substring 1..
+    let releaseData = (http get https://api.github.com/repos/cli/cli/releases/latest | from json)
 
-    let latestBuildDate = releaseData
+    let version = $releaseData
+      | get tag_name
+      | str replace '^v' ''
+
+    let latestBuildDate = $releaseData
       | get created_at
       | into datetime
       | date format "%Y-%m-%d"
 
-    $env.project | from json | update version $version | update latestBuildDate $latestBuildDate | to json
+    $env.project
+      | from json
+      | update version $version
+      | update latestBuildDate $latestBuildDate
+      | to json
+
   `);
 
   return std.withRunnable(std.directory(), {
