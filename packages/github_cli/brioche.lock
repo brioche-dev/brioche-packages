@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/cli/cli.git": {
+      "v2.65.0": "b3be16e98e1413f5bb0943c06402516cec3fd3b4"
+    }
+  }
+}

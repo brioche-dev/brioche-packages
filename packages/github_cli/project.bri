@@ -1,0 +1,75 @@
+import * as std from "std";
+import nushell from "nushell";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "github_cli",
+  version: "2.65.0",
+  latestBuildDate: "2025-01-29",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/cli/cli.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function gh(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      trimpath: true,
+      ldflags: [
+        `-X github.com/cli/cli/v2/internal/build.Version=${project.version}`,
+        `-X github.com/cli/cli/v2/internal/build.Date=${project.latestBuildDate}`,
+      ],
+    },
+    path: "./cmd/gh",
+    runnable: "bin/gh",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(gh --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(gh());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `gh version ${project.version} (${project.latestBuildDate}) https://github.com/cli/cli/releases/tag/v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = (http get https://api.github.com/repos/cli/cli/releases/latest | from json)
+
+    let version = $releaseData
+      | get tag_name
+      | str replace '^v' ''
+
+    let latestBuildDate = $releaseData
+      | get created_at
+      | into datetime
+      | date format "%Y-%m-%d"
+
+    $env.project
+      | from json
+      | update version $version
+      | update latestBuildDate $latestBuildDate
+      | to json
+
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
