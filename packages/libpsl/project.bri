@@ -1,27 +1,28 @@
-import nushell from "nushell";
 import * as std from "std";
+import nushell from "nushell";
+import python from "python";
 
 export const project = {
-  name: "alsa_lib",
-  version: "1.2.13",
+  name: "libpsl",
+  version: "0.21.5",
 };
 
 const source = Brioche.download(
-  `https://www.alsa-project.org/files/pub/lib/alsa-lib-${project.version}.tar.bz2`,
+  `https://github.com/rockdaboot/libpsl/releases/download/${project.version}/libpsl-${project.version}.tar.gz`,
 )
-  .unarchive("tar", "bzip2")
+  .unarchive("tar", "gzip")
   .peel();
 
-export default function alsaLib(): std.Recipe<std.Directory> {
-  const alsaLib = std.runBash`
+export default function libPsl(): std.Recipe<std.Directory> {
+  const libpsl = std.runBash`
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain(), python())
     .toDirectory();
 
-  return std.setEnv(alsaLib, {
+  return std.setEnv(libpsl, {
     CPATH: { append: [{ path: "include" }] },
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
@@ -31,11 +32,11 @@ export default function alsaLib(): std.Recipe<std.Directory> {
 export async function test() {
   const src = std.file(std.indoc`
       #include <stdio.h>
-      #include <alsa/asoundlib.h>
+      #include <libpsl.h>
 
       int main(void)
       {
-          const char *version = snd_asoundlib_version();
+          const char *version = psl_get_version();
           printf("%s", version);
 
           return 0;
@@ -44,16 +45,16 @@ export async function test() {
 
   const script = std.runBash`
     cp "$src" main.c
-    gcc main.c -o main -lasound
+    gcc main.c -o main -lpsl
     ./main | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), alsaLib())
+    .dependencies(std.toolchain(), libPsl())
     .env({ src: src });
 
   const result = await script.toFile().read();
 
   // Check that the result contains the expected version
-  const expected = `${project.version}`;
+  const expected = `${project.version} (no IDNA support)`;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
@@ -61,12 +62,8 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let version = http get https://www.alsa-project.org/files/pub/lib
-      | lines
-      | where {|it| ($it | str contains "alsa-lib") and (not ($it | str contains ".sig")) }
-      | parse --regex '<a href="alsa-lib-(?<version>.+)\.tar\.bz2">'
-      | sort-by --natural --reverse version
-      | get 0.version
+    let version = http get https://api.github.com/repos/rockdaboot/libpsl/releases/latest
+      | get tag_name
 
     $env.project | from json | update version $version | to json
   `);
