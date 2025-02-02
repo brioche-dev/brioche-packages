@@ -40,7 +40,7 @@ export function autoUpdate() {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/sharkdp/bat/releases/latest
       | get tag_name
-      | str substring 1..
+      | str replace --regex '^v' ''
 
     $env.project | from json | update version $version | to json
   `);
