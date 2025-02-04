@@ -1,0 +1,28 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+
+export const project = {
+  name: "nasm",
+  version: "2.16.03",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/netwide-assembler/nasm.git",
+    ref: `nasm-${project.version}`,
+  }),
+);
+
+export default function () {
+  return std.runBash`
+    ./autogen.sh
+    ./configure
+    make
+    make strip
+    mkdir -p "$BRIOCHE_OUTPUT/bin"
+    cp nasm "$BRIOCHE_OUTPUT/bin/nasm"
+    ln -s "bin/nasm" "$BRIOCHE_OUTPUT/brioche-run"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source);
+}
