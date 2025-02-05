@@ -51,7 +51,7 @@ export function autoUpdate() {
 
     let version = $releaseData
       | get tag_name
-      | str replace '^v' ''
+      | str replace --regex '^v' ''
 
     let latestBuildDate = $releaseData
       | get created_at
@@ -63,7 +63,6 @@ export function autoUpdate() {
       | update version $version
       | update latestBuildDate $latestBuildDate
       | to json
-
   `);
 
   return std.withRunnable(std.directory(), {
