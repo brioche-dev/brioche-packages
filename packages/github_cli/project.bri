@@ -1,6 +1,6 @@
 import * as std from "std";
 import nushell from "nushell";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
 import { goBuild } from "go";
 
 export const project = {

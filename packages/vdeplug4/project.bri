@@ -1,6 +1,6 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
 import s2argvExecs from "s2argv_execs";
 
 export const project = {

@@ -1,6 +1,6 @@
 import * as std from "std";
 import { goBuild } from "go";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
 
 export const project = {
   name: "terraform",

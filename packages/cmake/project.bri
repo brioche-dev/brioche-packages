@@ -1,5 +1,6 @@
 import * as std from "std";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
+import nushell from "nushell";
 import openssl from "openssl";
 import curl from "curl";
 
