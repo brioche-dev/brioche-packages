@@ -128,7 +128,7 @@ declare global {
      * ## Example
      *
      * ```typescript
-     * import { gitCheckout } from "git";
+     * import { gitCheckout } from "helpers";
      *
      * // Check out the main branch from the Brioche repository. The commit
      * // hash will be locked when first run, and will not change until the

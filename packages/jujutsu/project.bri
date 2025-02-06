@@ -1,7 +1,7 @@
 import * as std from "std";
 import openssl from "openssl";
 import { cargoBuild } from "rust";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
 
 export const project = {
   name: "jujutsu",

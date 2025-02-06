@@ -1,5 +1,5 @@
 import * as std from "std";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
 import perl from "perl";
 import unzip from "unzip";
 import libxml2 from "libxml2";

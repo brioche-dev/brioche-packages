@@ -1,5 +1,5 @@
 import * as std from "std";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
 import { goBuild } from "go";
 import nushell from "nushell";
 

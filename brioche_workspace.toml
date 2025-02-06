@@ -1,1 +1,1 @@
-members = ["packages/*"]
+members = ["lib/*", "packages/*"]

@@ -1,6 +1,6 @@
 import nushell from "nushell";
 import * as std from "std";
-import { gitCheckout } from "git";
+import { gitCheckout } from "helpers";
 import { cargoBuild } from "rust";
 
 export const project = {
