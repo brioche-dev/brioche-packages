@@ -1,6 +1,7 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
 import { gitCheckout } from "git";
+import nushell from "nushell";
 
 export const project = {
   name: "ripgrep",
@@ -14,12 +15,45 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function ripgrep(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     buildParams: {
       features: ["pcre2"],
     },
     runnable: "bin/rg",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n "$(rg --version)" | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(ripgrep());
+  const output = await script.toFile().read();
+
+  const version = output.split("\n").at(0);
+
+  std.assert(
+    version === `ripgrep ${project.version}`,
+    `expected version ${project.version}, got ${version}`,
+  );
+
+  return script;
+}
+
+export async function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/BurntSushi/ripgrep/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }
