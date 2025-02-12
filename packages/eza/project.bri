@@ -1,6 +1,7 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
 import { gitCheckout } from "git";
+import nushell from "nushell";
 
 export const project = {
   name: "eza",
@@ -14,9 +15,52 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function eza(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/eza",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n "$(eza --version)" | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(eza());
+  const output = await script.toFile().read();
+
+  const version = output
+    .split("\n")
+    .flatMap((line) => {
+      const versionMatch = line.match(/^v([^\s]+)/);
+      if (versionMatch == null) {
+        return [];
+      }
+      const version = versionMatch[1];
+      return version != null ? [version] : [];
+    })
+    .at(0);
+
+  std.assert(
+    version === project.version,
+    `expected version ${project.version}, got ${version}`,
+  );
+
+  return script;
+}
+
+export async function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/eza-community/eza/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }
