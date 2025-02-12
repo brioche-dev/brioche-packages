@@ -4,7 +4,7 @@ import { gitCheckout } from "git";
 
 export const project = {
   name: "eza",
-  version: "0.20.17",
+  version: "0.20.20",
 };
 
 const source = gitCheckout(
