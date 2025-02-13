@@ -1,3 +1,4 @@
+import nushell from "nushell";
 import * as std from "std";
 import { gitCheckout } from "git";
 import { goBuild } from "go";
@@ -32,8 +33,33 @@ export default function dasel(): std.Recipe<std.Directory> {
   });
 }
 
-export function test() {
-  return std.runBash`
-    dasel --version | tee "$BRIOCHE_OUTPUT"
+export async function test() {
+  const script = std.runBash`
+    echo -n $(dasel --version) | tee "$BRIOCHE_OUTPUT"
   `.dependencies(dasel());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `dasel version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/TomWright/dasel/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
