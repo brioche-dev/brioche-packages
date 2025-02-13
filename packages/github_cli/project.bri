@@ -47,7 +47,7 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let releaseData = (http get https://api.github.com/repos/cli/cli/releases/latest | from json)
+    let releaseData = http get https://api.github.com/repos/cli/cli/releases/latest
 
     let version = $releaseData
       | get tag_name
@@ -56,7 +56,7 @@ export function autoUpdate() {
     let latestBuildDate = $releaseData
       | get created_at
       | into datetime
-      | date format "%Y-%m-%d"
+      | format date "%Y-%m-%d"
 
     $env.project
       | from json
