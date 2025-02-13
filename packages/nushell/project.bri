@@ -15,10 +15,41 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function nushell(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/nu",
     dependencies: [openssl()],
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(nu --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(nushell());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/nushell/nushell/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }
