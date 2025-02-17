@@ -1,3 +1,4 @@
+import nushell from "nushell";
 import * as std from "std";
 
 export const project = {
@@ -11,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function jq(): std.Recipe<std.Directory> {
   const jq = std.runBash`
     ./configure \\
       --prefix=/ \\
@@ -23,4 +24,35 @@ export default function (): std.Recipe<std.Directory> {
     .dependencies(std.toolchain())
     .toDirectory();
   return std.withRunnableLink(jq, "bin/jq");
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(jq --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(jq());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `jq-${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/jqlang/jq/releases/latest
+      | get tag_name
+      | str replace --regex '^jq-' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
