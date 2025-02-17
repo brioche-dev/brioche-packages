@@ -1,0 +1,57 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+import nushell from "nushell";
+
+export const project = {
+  name: "steampipe",
+  version: "1.0.3",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/turbot/steampipe.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function steampipe(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", `-X main.version=${project.version}`],
+    },
+    runnable: "bin/steampipe",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(steampipe --version 2>&1) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(steampipe());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `Steampipe v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/turbot/steampipe/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
