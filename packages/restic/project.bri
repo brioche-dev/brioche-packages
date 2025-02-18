@@ -1,0 +1,55 @@
+import * as std from "std";
+import { goBuild } from "go";
+import { gitCheckout } from "git";
+import nushell from "nushell";
+
+export const project = {
+  name: "restic",
+  version: "0.17.3",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/restic/restic.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function restic(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/restic",
+    runnable: "bin/restic",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n "$(restic version)" | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(restic());
+  const output = await script.toFile().read();
+
+  std.assert(
+    output.startsWith(`restic ${project.version} `),
+    `expected version ${project.version}, got ${JSON.stringify(output)}`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/BurntSushi/ripgrep/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
