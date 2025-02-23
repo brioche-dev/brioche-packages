@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/skvadrik/re2c.git": {
+      "4.1": "8baaca5774db8b83784afcbfcc3fe761a1fcbd37"
+    }
+  }
+}
