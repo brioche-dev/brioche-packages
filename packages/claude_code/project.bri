@@ -1,0 +1,54 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+import nushell from "nushell";
+
+export const project = {
+  name: "claude_code",
+  version: "0.2.9",
+  packageName: "@anthropic-ai/claude-code",
+};
+
+export default function claudeCode() {
+  const recipe = npmInstallGlobal({
+    packageName: project.packageName,
+    version: project.version,
+  });
+
+  return std.withRunnableLink(recipe, "bin/claude");
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(claude --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(claudeCode());
+  
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version}`;
+  std.assert(result === expected, `expected ${project.version}, got ${result}`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://registry.npmjs.org/${project.packageName}/latest
+
+    let version = $releaseData
+      | get version
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
