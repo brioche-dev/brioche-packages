@@ -8,16 +8,14 @@ export const project = {
   version: "4.1",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/skvadrik/re2c.git",
-    ref: `${project.version}`,
-  }),
-);
+const source = Brioche.download(
+  `https://github.com/skvadrik/re2c/releases/download/${project.version}/re2c-${project.version}.tar.xz`
+)
+  .unarchive("tar", "xz")
+  .peel();
 
 export default function re2c(): std.Recipe<std.Directory> {
   let re2c = std.runBash`
-    autoreconf -i -W all
     ./configure \\
       --prefix=/ 
     make
