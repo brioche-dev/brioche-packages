@@ -8,7 +8,7 @@ export const project = {
 };
 
 const source = Brioche.download(
-  `https://github.com/skvadrik/re2c/releases/download/${project.version}/re2c-${project.version}.tar.xz`
+  `https://github.com/skvadrik/re2c/releases/download/${project.version}/re2c-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
