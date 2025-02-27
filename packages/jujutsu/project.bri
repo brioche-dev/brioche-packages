@@ -2,10 +2,11 @@ import * as std from "std";
 import openssl from "openssl";
 import { cargoBuild } from "rust";
 import { gitCheckout } from "git";
+import nushell from "nushell";
 
 export const project = {
   name: "jujutsu",
-  version: "0.25.0",
+  version: "0.26.0",
 };
 
 const source = gitCheckout(
@@ -15,11 +16,45 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function jujutsu(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/jj",
     path: "cli",
     dependencies: [openssl()],
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    jj version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(jujutsu());
+
+  const version = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expectedVersion = `jj ${project.version}`;
+  std.assert(
+    version === expectedVersion,
+    `expected '${expectedVersion}', got '${version}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/jj-vcs/jj/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }

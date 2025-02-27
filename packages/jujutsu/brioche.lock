@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/martinvonz/jj.git": {
-      "v0.25.0": "041c4fecb77434dd6720e7d7f1ce48d9575ac5f7"
+      "v0.26.0": "613742dfbbd89324b25672a75ef8ce9e671ae0d3"
     }
   }
 }
