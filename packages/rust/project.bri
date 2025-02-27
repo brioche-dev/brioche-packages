@@ -29,12 +29,6 @@ const Manifest = t.object({
   profiles: t.record(t.string(), t.array(t.string())),
 });
 
-export function test() {
-  return std.runBash`
-    cargo --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(rust());
-}
-
 /**
  * The main Rust recipe. Returns a recipe containing the following:
  *
@@ -43,7 +37,7 @@ export function test() {
  *
  * ...among other binaries.
  */
-async function rust(): Promise<std.Recipe<std.Directory>> {
+export default async function rust(): Promise<std.Recipe<std.Directory>> {
   const manifestToml = await Brioche.download(
     `https://static.rust-lang.org/dist/channel-rust-${project.version}.toml`,
   ).read();
@@ -111,7 +105,20 @@ async function rust(): Promise<std.Recipe<std.Directory>> {
   });
   return result;
 }
-export default rust;
+
+export async function test() {
+  const script = std.runBash`
+    rustc --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust())
+    .toFile();
+  const versionOutput = await script.read().then((output) => output.trim());
+  std.assert(
+    versionOutput.startsWith(`rustc ${project.version} `),
+    `expected ${project.version}, got ${JSON.stringify(versionOutput)}`,
+  );
+  return script;
+}
 
 interface CargoBuildParameters {
   features?: string[];
