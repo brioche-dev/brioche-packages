@@ -1,0 +1,70 @@
+import * as std from "std";
+import nushell from "nushell";
+import python from "python";
+
+export const project = {
+  name: "re2c",
+  version: "4.1",
+};
+
+const source = Brioche.download(
+  `https://github.com/skvadrik/re2c/releases/download/${project.version}/re2c-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function re2c(): std.Recipe<std.Directory> {
+  let re2c = std.runBash`
+    ./configure \\
+      --prefix=/ 
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), python())
+    .workDir(source)
+    .toDirectory();
+
+  re2c = std.setEnv(re2c, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return std.withRunnableLink(re2c, "bin/re2c");
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(re2c --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(re2c());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `re2c ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/skvadrik/re2c/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
