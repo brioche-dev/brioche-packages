@@ -267,7 +267,7 @@ export function vendorCrate(
     mkdir -p .cargo
 
     # If the crate has a .cargo/config file, then move it to .cargo/config.toml
-    # Cargo prefers the config over config.toml, so we need to rename it
+    # Cargo prefers config over config.toml, so we need to rename it
     # to avoid any conflicts. It will still need to be removed from the merged
     # crate later too
     if [ -f .cargo/config ]; then
@@ -276,7 +276,11 @@ export function vendorCrate(
 
     # Always add a newline in case the file already exists and
     # doesn't end with a newline
-    echo $'\n'"$(cargo vendor --locked)" >> .cargo/config.toml
+    echo >> .cargo/config.toml
+
+    # Vendor the dependencies, and update the config to use the
+    # vendored dependencies
+    cargo vendor --locked >> .cargo/config.toml
   `
     .dependencies(rust(), caCertificates())
     .outputScaffold(skeletonCrate)
