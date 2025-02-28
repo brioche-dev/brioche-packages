@@ -7,12 +7,23 @@ export const project = {
   version: "0.21.9",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/sayanarijit/xplr.git",
-    ref: `v${project.version}`,
-  }),
-);
+const source = (() => {
+  let source = gitCheckout(
+    Brioche.gitRef({
+      repository: "https://github.com/sayanarijit/xplr.git",
+      ref: `v${project.version}`,
+    }),
+  );
+
+  // HACK: Workaround for https://github.com/LukeMathWalker/cargo-chef/issues/295#issuecomment-2619963413
+  source = std.runBash`
+    sed -i "s|path = './benches/|path = 'benches/|g" "$BRIOCHE_OUTPUT/Cargo.toml"
+  `
+    .outputScaffold(source)
+    .toDirectory();
+
+  return source;
+})();
 
 export default function (): std.Recipe<std.Directory> {
   return cargoBuild({
