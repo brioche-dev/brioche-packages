@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/astral-sh/ruff.git": {
-      "0.9.2": "0a393483811e0999578b5655d82e2c03238296f3"
+      "0.9.9": "091d0af2ab026a08b82d4aa7d3ab6b1ca4db778c"
     }
   }
 }
