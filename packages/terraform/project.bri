@@ -1,3 +1,4 @@
+import nushell from "nushell";
 import * as std from "std";
 import { goBuild } from "go";
 import { gitCheckout } from "git";
@@ -22,5 +23,22 @@ export default function (): std.Recipe<std.Directory> {
       mod: "readonly",
     },
     runnable: "bin/terraform",
+  });
+}
+
+export async function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/hashicorp/terraform/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }
