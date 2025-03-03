@@ -1,3 +1,4 @@
+import nushell from "nushell";
 import * as std from "std";
 import python from "python";
 import { gitCheckout } from "git";
@@ -65,4 +66,21 @@ export default function (): std.Recipe<std.Directory> {
     args: [{ relativePath: "venv/bin/asciinema" }],
   });
   return std.withRunnableLink(recipe, "bin/asciinema");
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/asciinema/asciinema/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
