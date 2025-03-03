@@ -39,7 +39,7 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/BurntSushi/ripgrep/releases/latest
+    let version = http get https://api.github.com/repos/restic/restic/releases/latest
       | get tag_name
       | str replace --regex '^v' ''
 
