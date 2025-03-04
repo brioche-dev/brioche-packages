@@ -1,3 +1,4 @@
+import nushell from "nushell";
 import * as std from "std";
 import { gitCheckout } from "git";
 
@@ -33,5 +34,22 @@ export default function (): std.Recipe<std.Directory> {
     CPATH: { append: [{ path: "include" }] },
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/PCRE2Project/pcre2/releases/latest
+      | get tag_name
+      | str replace --regex '^pcre2-' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }

@@ -1,3 +1,4 @@
+import nushell from "nushell";
 import * as std from "std";
 import { cargoBuild } from "rust";
 import { gitCheckout } from "git";
@@ -25,4 +26,21 @@ export function test() {
   return std.runBash`
     just --version | tee "$BRIOCHE_OUTPUT"
   `.dependencies(just());
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/casey/just/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
