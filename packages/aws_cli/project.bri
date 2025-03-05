@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "aws_cli",
-  version: "2.24.15",
+  version: "2.24.17",
 };
 
 const source = std.recipeFn(() => {
