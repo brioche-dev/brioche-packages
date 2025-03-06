@@ -7,12 +7,14 @@ export const project = {
   version: "10.45",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/PCRE2Project/pcre2.git",
-    ref: `pcre2-${project.version}`,
-  }),
-);
+const gitRef = Brioche.gitRef({
+  repository: "https://github.com/PCRE2Project/pcre2.git",
+  ref: `pcre2-${project.version}`,
+});
+
+const source = gitCheckout(gitRef, {
+  submodules: true,
+});
 
 export default function (): std.Recipe<std.Directory> {
   const pcre2 = std.runBash`
