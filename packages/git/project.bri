@@ -32,9 +32,14 @@ export default function git(): std.Recipe<std.Directory> {
   return git;
 }
 
-interface GitCheckoutOptions {
+interface GitCheckoutInit {
   repository: string;
   commit: string;
+  options?: GitCheckoutOptions;
+}
+
+interface GitCheckoutOptions {
+  submodules?: boolean;
 }
 
 /**
@@ -49,6 +54,7 @@ interface GitCheckoutOptions {
  *
  * - `repository`: The URL of the git repository to checkout.
  * - `commit`: The full commit hash to checkout.
+ * - `submodules`: Set to true to recursively checkout git submodules too.
  *
  * ## Example
  *
@@ -67,10 +73,12 @@ interface GitCheckoutOptions {
  * ```
  */
 export function gitCheckout(
-  options: std.Awaitable<GitCheckoutOptions>,
+  init: std.Awaitable<GitCheckoutInit>,
+  options: GitCheckoutOptions = {},
 ): std.Recipe<std.Directory> {
   return std.recipeFn(async () => {
-    const { commit, repository } = await options;
+    const { commit, repository, options: initOptions } = await init;
+    options = { ...initOptions, ...options };
 
     // Validate that the commit is a hash
     std.assert(
@@ -80,7 +88,7 @@ export function gitCheckout(
 
     // Clone and fetch only the specified commit. See this article:
     // https://blog.hartwork.org/posts/clone-arbitrary-single-git-commit/
-    return std.runBash`
+    let repo = std.runBash`
       cd "$BRIOCHE_OUTPUT"
       git -c init.defaultBranch=main init
       git remote add origin "$repository"
@@ -95,5 +103,18 @@ export function gitCheckout(
       .outputScaffold(std.directory())
       .unsafe({ networking: true })
       .toDirectory();
+
+    if (options.submodules === true) {
+      repo = std.runBash`
+        cd "$BRIOCHE_OUTPUT"
+        git submodule update --init --recursive
+      `
+        .dependencies(git(), caCertificates())
+        .outputScaffold(repo)
+        .unsafe({ networking: true })
+        .toDirectory();
+    }
+
+    return repo;
   });
 }
