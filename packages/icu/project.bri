@@ -34,11 +34,30 @@ export default function icu(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain())
     .toDirectory();
+
   icu = std.setEnv(icu, {
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     CPATH: { append: [{ path: "include" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
+
+  // During the build, ICU uses "stub" libraries for compilation. Re-pack
+  // the artifact to use the final libraries after compilation instead
+  icu = std.autopack(icu, {
+    globs: ["bin/**", "lib/**"],
+    selfDependency: true,
+    dynamicBinaryConfig: {
+      enabled: true,
+    },
+    sharedLibraryConfig: {
+      enabled: true,
+      allowEmpty: true,
+    },
+    repackConfig: {
+      enabled: true,
+    },
+  });
+
   return icu;
 }
 
