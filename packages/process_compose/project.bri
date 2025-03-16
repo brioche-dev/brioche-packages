@@ -1,0 +1,93 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import nushell from "nushell";
+import { goBuild } from "go";
+
+export const project = {
+  name: "process_compose",
+  version: "1.46.0",
+  extra: {
+    lastModifiedDate: "20241220221126",
+  },
+};
+
+const gitRef = Brioche.gitRef({
+  repository: "https://github.com/F1bonacc1/process-compose.git",
+  ref: `v${project.version}`,
+});
+export const source = gitCheckout(gitRef);
+
+export default function processCompose(): std.Recipe<std.Directory> {
+  let processCompose = std.recipeFn(async () =>
+    goBuild({
+      source,
+      buildParams: {
+        ldflags: [
+          `-X github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
+          `-X github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.lastModifiedDate}`,
+          `-X github.com/f1bonacc1/process-compose/src/config.Commit=${
+            (await gitRef).commit
+          }`,
+          "-s",
+          "-w",
+        ],
+      },
+      path: "./...",
+    }),
+  );
+
+  // Rename main binary from `bin/src` to `bin/process-compose`
+  processCompose = processCompose.insert(
+    "bin/process-compose",
+    processCompose.get("bin/src"),
+  );
+
+  // Add a link for `brioche run`
+  processCompose = std.withRunnableLink(processCompose, "bin/process-compose");
+
+  return processCompose;
+}
+
+export async function test() {
+  const script = std.runBash`
+    process-compose version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(processCompose());
+
+  const result = await script.toFile().read();
+
+  const version = result.match(/^Version:\s*v([\d.]+)$/m)?.at(1);
+  std.assert(
+    version === project.version,
+    `expected '${project.version}', got '${version}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/F1bonacc1/process-compose/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    let lastModifiedDate = $releaseData
+      | get created_at
+      | into datetime
+      | format date "%Y%m%d%H%M%S"
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.lastModifiedDate $lastModifiedDate
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
