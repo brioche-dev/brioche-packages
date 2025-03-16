@@ -1,0 +1,73 @@
+import * as std from "std";
+import nushell from "nushell";
+
+export const project = {
+  name: "icu",
+  version: "77.1",
+  extra: {
+    versionDash: "77-1",
+    versionUnderscore: "77_1",
+  },
+};
+
+std.assert(
+  project.extra.versionDash === project.version.replace(".", "-"),
+  `expected ICU 'project.extra.versionDash' field '${project.extra.versionDash}' to match version '${project.version}'`,
+);
+std.assert(
+  project.extra.versionUnderscore === project.version.replace(".", "_"),
+  `expected ICU 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
+);
+
+const source = Brioche.download(
+  `https://github.com/unicode-org/icu/releases/download/release-${project.extra.versionDash}/icu4c-${project.extra.versionUnderscore}-src.tgz`,
+).unarchive("tar", "gzip");
+
+export default function icu(): std.Recipe<std.Directory> {
+  let icu = std.runBash`
+    cd icu/source
+    ./runConfigureICU Linux \\
+      --prefix=/
+    make -j16
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+  icu = std.setEnv(icu, {
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    CPATH: { append: [{ path: "include" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+  return icu;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/unicode-org/icu/releases/latest
+
+    let versionDash = $releaseData
+      | get tag_name
+      | str replace --regex '^release-' ''
+
+    let versionUnderscore = $versionDash
+      | str replace '-' '_'
+
+    let version = $versionDash
+      | str replace '-' '.'
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.versionDash $versionDash
+      | update extra.versionUnderscore $versionUnderscore
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
