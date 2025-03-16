@@ -61,6 +61,29 @@ export default function icu(): std.Recipe<std.Directory> {
   return icu;
 }
 
+export async function test() {
+  const script = std.runBash`
+    icuinfo | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(icu());
+  const result = await script.toFile().read();
+
+  const version = result.match(/<param name="version">([^<]*)<\/param>/)?.at(1);
+  const returnCode = result
+    .match(/^ICU Initialization returned: (.*)$/m)
+    ?.at(1);
+
+  std.assert(
+    version === project.version,
+    `expected version number to be '${project.version}', got ${version}`,
+  );
+  std.assert(
+    returnCode === "U_ZERO_ERROR",
+    `expected icuinfo initialization to return U_ZERO_ERROR, got '${returnCode}'`,
+  );
+
+  return script;
+}
+
 export function autoUpdate() {
   const src = std.file(std.indoc`
     let releaseData = http get https://api.github.com/repos/unicode-org/icu/releases/latest
