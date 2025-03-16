@@ -3,6 +3,8 @@ import icu from "icu";
 import openssl from "openssl";
 import libxml from "libxml2";
 import libxslt from "libxslt";
+import nushell from "nushell";
+import curl from "curl";
 
 export const project = {
   name: "postgresql",
@@ -31,4 +33,42 @@ export default function postgresql(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain(), icu(), openssl(), libxml(), libxslt())
     .toDirectory();
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(postgres --version) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(postgresql());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `postgres (PostgreSQL) ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    # Get the URL that '/ftp/latest' redirects to. The resulting URL
+    # will have the version number at the end
+    let latestUrl = curl --proto '=https' --tlsv1.2 -fsSLI -o /dev/null 'https://www.postgresql.org/ftp/latest' -w '%{url_effective}'
+
+    let version = $latestUrl
+      | parse --regex '/ftp/source/v([\\d\\.]+)/?$'
+      | get 0.capture0
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell(), curl()],
+  });
 }
