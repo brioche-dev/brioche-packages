@@ -1,0 +1,34 @@
+import * as std from "std";
+import icu from "icu";
+import openssl from "openssl";
+import libxml from "libxml2";
+import libxslt from "libxslt";
+
+export const project = {
+  name: "postgresql",
+  version: "17.4",
+};
+
+const source = Brioche.download(
+  `https://ftp.postgresql.org/pub/source/v${project.version}/postgresql-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function postgresql(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-rpath \\
+      --with-zstd \\
+      --with-openssl \\
+      --with-uuid=e2fs \\
+      --with-libxml \\
+      --with-libxslt
+    make world-bin -j16
+    make install-world-bin DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), icu(), openssl(), libxml(), libxslt())
+    .toDirectory();
+}
