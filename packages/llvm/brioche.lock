@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/llvm/llvm-project.git": {
+      "llvmorg-20.1.0": "24a30daaa559829ad079f2ff7f73eb4e18095f88"
+    }
+  }
+}
