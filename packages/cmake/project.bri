@@ -99,9 +99,12 @@ export interface CMakeBuildInstallOptions {
   runnable?: string;
 }
 
-export type CMakeVariable =
-  | string
-  | { type?: CMakeVariableType; value: string };
+export type CMakeVariable = CMakeVariableValue | std.ProcessTemplateLike;
+
+export interface CMakeVariableValue {
+  type?: CMakeVariableType;
+  value: std.ProcessTemplateLike;
+}
 
 export type CMakeVariableType =
   | "BOOL"
@@ -136,31 +139,43 @@ export function cmakeBuild(
 ): std.Recipe<std.Directory> {
   const { source, dependencies = [], config = "Release", set = {} } = options;
 
-  const env: Record<string, string> = {};
-  for (const [name, variable] of Object.entries(set)) {
-    std.assert(
-      /^[a-zA-Z0-9\-_]+$/.test(name),
-      `invalid CMake variable name: ${name}`,
-    );
+  const env: Record<string, std.ProcessTemplateLike> = {};
 
-    const value = typeof variable === "object" ? variable.value : variable;
-    const type = typeof variable === "object" ? variable.type : undefined;
+  const setEntries = Object.entries(set);
+  setEntries.sort(([aName, _aValue], [bName, _bValue]) => {
+    if (aName > bName) {
+      return 1;
+    } else if (aName < bName) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+  const setEntriesWithIndices = setEntries.map(
+    ([name, value], index) => [name, value, index] as const,
+  );
 
-    env[`cmake_value_${name}`] = value;
-    env[`cmake_type_${name}`] = type ?? "";
+  for (const [name, variable, index] of setEntriesWithIndices) {
+    const value = isCMakeVariableValue(variable) ? variable.value : variable;
+    const type = isCMakeVariableValue(variable) ? variable.type : undefined;
+
+    env[`cmake_name_${index}`] = name;
+    env[`cmake_value_${index}`] = value;
+    env[`cmake_type_${index}`] = type ?? "";
   }
 
   let result = std.runBash`
     export LIB="$LIBRARY_PATH"
 
     cmake_args=()
-    for name in $cmake_set_names; do
-      var_cmake_value="cmake_value_$name"
-      var_cmake_type="cmake_type_$name"
+    for index in $(seq 0 "$((cmake_num_set_entries-1))"); do
+      var_cmake_name="cmake_name_$index"
+      var_cmake_value="cmake_value_$index"
+      var_cmake_type="cmake_type_$index"
       if [ -n "\${!var_cmake_type}" ]; then
-        cmake_args+=("-D\${name}:\${!var_cmake_type}=\${!var_cmake_value}")
+        cmake_args+=("-D\${!var_cmake_name}:\${!var_cmake_type}=\${!var_cmake_value}")
       else
-        cmake_args+=("-D\${name}=\${!var_cmake_value}")
+        cmake_args+=("-D\${!var_cmake_name}=\${!var_cmake_value}")
       fi
     done
 
@@ -177,7 +192,7 @@ export function cmakeBuild(
       ...options.env,
       source,
       config,
-      cmake_set_names: Object.keys(set).join(" "),
+      cmake_num_set_entries: setEntriesWithIndices.length.toString(),
       ...env,
     })
     .toDirectory();
@@ -210,4 +225,28 @@ export function autoUpdate() {
     env: { project: JSON.stringify(project) },
     dependencies: [nushell()],
   });
+}
+
+function isCMakeVariableValue(
+  variable: CMakeVariable,
+): variable is CMakeVariableValue {
+  if (
+    typeof variable !== "object" ||
+    !("type" in variable) ||
+    !("value" in variable)
+  ) {
+    return false;
+  }
+
+  switch (variable.type) {
+    case undefined:
+    case "PATH":
+    case "BOOL":
+    case "FILEPATH":
+    case "INTERNAL":
+    case "STRING":
+      return true;
+    default:
+      return false;
+  }
 }
