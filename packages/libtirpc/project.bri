@@ -1,0 +1,62 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+
+export const project = {
+  name: "libtirpc",
+  version: "1.3.6",
+  extra: {
+    versionTag: "libtirpc-1-3-6",
+  },
+};
+
+std.assert(
+  project.extra.versionTag ===
+    `libtirpc-${project.version.replaceAll(".", "-")}`,
+  `version tag '${project.extra.versionTag}' does not match version ${project.version}`,
+);
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "git://git.linux-nfs.org/projects/steved/libtirpc.git",
+    ref: project.extra.versionTag,
+  }),
+);
+
+export default function (): std.Recipe<std.Directory> {
+  let libtirpc = std.runBash`
+    ./bootstrap
+    ./configure \\
+      --prefix=/ \\
+      --disable-gssapi
+    make -j16
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  libtirpc = std.setEnv(libtirpc, {
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    CPATH: { append: [{ path: "include" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+  libtirpc = makePkgConfigPathsRelative(libtirpc);
+
+  return libtirpc;
+}
+
+// TODO: Figure out where to move this, this is copied from `std`
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+      | while IFS= read -r -d $'\\0' file; do
+        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+      done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}

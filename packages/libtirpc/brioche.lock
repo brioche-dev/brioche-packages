@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "git://git.linux-nfs.org/projects/steved/libtirpc.git": {
+      "libtirpc-1-3-6": "cf7441f5b90f043308cc34ae8d25127aed844c92"
+    }
+  }
+}
