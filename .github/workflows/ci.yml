@@ -36,7 +36,7 @@ jobs:
     name: Build packages
     needs: [check]
     if: github.repository == 'brioche-dev/brioche-packages' && github.event_name == 'push' && ( github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/build/') )
-    runs-on: proxmox-runner-set
+    runs-on: brioche-dev-builder-runner
     timeout-minutes: 720
     steps:
       - name: Install system packages
