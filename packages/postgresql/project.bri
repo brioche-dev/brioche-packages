@@ -18,7 +18,7 @@ const source = Brioche.download(
   .peel();
 
 export default function postgresql(): std.Recipe<std.Directory> {
-  return std.runBash`
+  let postgresql = std.runBash`
     ./configure \\
       --prefix=/ \\
       --disable-rpath \\
@@ -33,6 +33,16 @@ export default function postgresql(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain(), icu(), openssl(), libxml(), libxslt())
     .toDirectory();
+
+  postgresql = makePkgConfigPathsRelative(postgresql);
+
+  postgresql = std.setEnv(postgresql, {
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    CPATH: { append: [{ path: "include" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+
+  return postgresql;
 }
 
 export async function test() {
@@ -71,4 +81,20 @@ export function autoUpdate() {
     env: { project: JSON.stringify(project) },
     dependencies: [nushell(), curl()],
   });
+}
+
+// TODO: Figure out where to move this, this is copied from `std`
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+      | while IFS= read -r -d $'\\0' file; do
+        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+      done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
 }
