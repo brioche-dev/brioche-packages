@@ -23,6 +23,9 @@ export default async function pstack(): Promise<std.Recipe<std.Directory>> {
     set: {
       VERSION_TAG: (await gitRef).commit,
     },
+    env: {
+      CMAKE_BUILD_PARALLEL_LEVEL: "16",
+    },
     runnable: "bin/pstack",
   });
 }
