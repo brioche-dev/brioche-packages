@@ -1,0 +1,29 @@
+import * as std from "std";
+
+export const project = {
+  name: "rpcsvc_proto",
+  version: "1.4.4",
+};
+
+const source = Brioche.download(
+  `https://github.com/thkukuk/rpcsvc-proto/releases/download/v${project.version}/rpcsvc-proto-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function (): std.Recipe<std.Directory> {
+  let rpcsvcProto = std.runBash`
+    ./configure --prefix=/
+    make -j16
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  rpcsvcProto = std.setEnv(rpcsvcProto, {
+    CPATH: { append: [{ path: "include" }] },
+  });
+
+  return rpcsvcProto;
+}
