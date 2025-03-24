@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/nginx/nginx/releases/download/release-1.27.4/nginx-1.27.4.tar.gz": {
+      "type": "sha256",
+      "value": "294816f879b300e621fa4edd5353dd1ec00badb056399eceb30de7db64b753b2"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+import * as std from "std";
+import pcre2 from "pcre2";
+
+export const project = {
+  name: "nginx",
+  version: "1.27.4",
+};
+
+const source = Brioche.download(
+  `https://github.com/nginx/nginx/releases/download/release-${project.version}/nginx-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function nginx(): std.Recipe<std.Directory> {
+  let nginx = std.runBash`
+    ./configure \\
+      --prefix=/etc/nginx \\
+      --sbin-path=/bin/nginx
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), pcre2())
+    .toDirectory();
+
+  nginx = std.withRunnableLink(nginx, "bin/nginx");
+
+  return nginx;
+}
