@@ -36,3 +36,20 @@ export default function llvm(): std.Recipe<std.Directory> {
 
   return llvm;
 }
+
+export function llvmToolchain(): std.Recipe<std.Directory> {
+  const clangConfig = std.file(std.indoc`
+    --sysroot <CFGDIR>/../toolchain
+  `);
+
+  let toolchain = llvm();
+  toolchain = toolchain.insert("toolchain", std.toolchain());
+  toolchain = toolchain.insert(
+    "bin/ld",
+    std.symlink({ target: "../toolchain/bin/ld" }),
+  );
+  toolchain = toolchain.insert("bin/clang.cfg", clangConfig);
+  toolchain = toolchain.insert("bin/clang++.cfg", clangConfig);
+
+  return toolchain;
+}
