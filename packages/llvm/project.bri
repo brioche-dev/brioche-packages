@@ -15,8 +15,8 @@ const source = gitCheckout(
   }),
 );
 
-export default function () {
-  return cmakeBuild({
+export default function llvm(): std.Recipe<std.Directory> {
+  let llvm = cmakeBuild({
     source,
     path: "llvm",
     set: {
@@ -28,4 +28,11 @@ export default function () {
     },
     dependencies: [std.toolchain(), python()],
   });
+
+  llvm = std.setEnv(llvm, {
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    CPATH: { append: [{ path: "include" }] },
+  });
+
+  return llvm;
 }
