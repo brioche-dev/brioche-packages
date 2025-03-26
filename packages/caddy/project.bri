@@ -1,0 +1,23 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "caddy",
+  version: "2.9.1",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/caddyserver/caddy.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function caddy(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/caddy",
+    runnable: "bin/caddy",
+  });
+}
