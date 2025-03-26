@@ -20,7 +20,7 @@ export default function llvm(): std.Recipe<std.Directory> {
     source,
     path: "llvm",
     set: {
-      LLVM_ENABLE_PROJECTS: "clang;clang-tools-extra",
+      LLVM_ENABLE_PROJECTS: "clang;clang-tools-extra;lld;lldb",
       CMAKE_BUILD_TYPE: "Release",
     },
     env: {
