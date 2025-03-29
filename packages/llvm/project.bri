@@ -34,6 +34,15 @@ export default function llvm(): std.Recipe<std.Directory> {
     CPATH: { append: [{ path: "include" }] },
   });
 
+  // Remove a bunch of `*.tmp*` files left over in the build
+  // TODO: Figure out where these temp files are coming from!
+  llvm = std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    find . -name '*.tmp*' -delete
+  `
+    .outputScaffold(llvm)
+    .toDirectory();
+
   return llvm;
 }
 
