@@ -47,6 +47,14 @@ export default function llvm(): std.Recipe<std.Directory> {
   return llvm;
 }
 
+/**
+ * A minimal toolchain that uses LLVM-based tools for compilation, such
+ * as Clang and LLD. It currently still uses components from
+ * `std.toolchain()`, such as system libraries and headers.
+ *
+ * The LLVM toolchain in Brioche is considered experimental, and is very
+ * likely to have major breaking changes over time!
+ */
 export function llvmToolchain(): std.Recipe<std.Directory> {
   const clangConfig = std.file(std.indoc`
     --sysroot <CFGDIR>/../toolchain
