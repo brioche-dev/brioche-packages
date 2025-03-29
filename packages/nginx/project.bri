@@ -1,5 +1,6 @@
 import * as std from "std";
 import pcre2 from "pcre2";
+import nushell from "nushell";
 
 export const project = {
   name: "nginx",
@@ -27,4 +28,42 @@ export default function nginx(): std.Recipe<std.Directory> {
   nginx = std.withRunnableLink(nginx, "bin/nginx");
 
   return nginx;
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n "$(nginx -v 2>&1)" | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(nginx());
+
+  const versionMessage = await script.toFile().read();
+  const expectedVersionMessage = `nginx version: nginx/${project.version}`;
+
+  std.assert(
+    versionMessage === expectedVersionMessage,
+    `expected '${expectedVersionMessage}', got '${versionMessage}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/nginx/nginx/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^release-' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
