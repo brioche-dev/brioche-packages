@@ -17,7 +17,7 @@ const source = Brioche.download(
 export default function php(): std.Recipe<std.Directory> {
   let php = std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
-    make
+    make -j16
     make install
   `
     .dependencies(std.toolchain(), libxml2(), sqlite())
