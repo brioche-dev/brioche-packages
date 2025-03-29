@@ -2,6 +2,7 @@ import * as std from "std";
 import { cmakeBuild } from "cmake";
 import { gitCheckout } from "git";
 import python from "python";
+import nushell from "nushell";
 
 export const project = {
   name: "llvm",
@@ -61,4 +62,41 @@ export function llvmToolchain(): std.Recipe<std.Directory> {
   toolchain = toolchain.insert("bin/clang++.cfg", clangConfig);
 
   return toolchain;
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n "$(llvm-config --version)" | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(llvm());
+
+  const version = await script.toFile().read();
+
+  std.assert(
+    version === project.version,
+    `expected '${project.version}', got '${version}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/llvm/llvm-project/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^llvmorg-' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
