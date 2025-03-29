@@ -1,0 +1,110 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { gitCheckout } from "git";
+import python from "python";
+import nushell from "nushell";
+
+export const project = {
+  name: "llvm",
+  version: "20.1.1",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/llvm/llvm-project.git",
+    ref: `llvmorg-${project.version}`,
+  }),
+);
+
+export default function llvm(): std.Recipe<std.Directory> {
+  let llvm = cmakeBuild({
+    source,
+    path: "llvm",
+    set: {
+      LLVM_ENABLE_PROJECTS: "clang;clang-tools-extra;lld;lldb",
+      CMAKE_BUILD_TYPE: "Release",
+    },
+    env: {
+      CMAKE_BUILD_PARALLEL_LEVEL: "16",
+    },
+    dependencies: [std.toolchain(), python()],
+  });
+
+  llvm = std.setEnv(llvm, {
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    CPATH: { append: [{ path: "include" }] },
+  });
+
+  // Remove a bunch of `*.tmp*` files left over in the build
+  // TODO: Figure out where these temp files are coming from!
+  llvm = std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+    find . -name '*.tmp*' -delete
+  `
+    .outputScaffold(llvm)
+    .toDirectory();
+
+  return llvm;
+}
+
+/**
+ * A minimal toolchain that uses LLVM-based tools for compilation, such
+ * as Clang and LLD. It currently still uses components from
+ * `std.toolchain()`, such as system libraries and headers.
+ *
+ * The LLVM toolchain in Brioche is considered experimental, and is very
+ * likely to have major breaking changes over time!
+ */
+export function llvmToolchain(): std.Recipe<std.Directory> {
+  const clangConfig = std.file(std.indoc`
+    --sysroot <CFGDIR>/../toolchain
+  `);
+
+  let toolchain = llvm();
+  toolchain = toolchain.insert("toolchain", std.toolchain());
+  toolchain = toolchain.insert(
+    "bin/ld",
+    std.symlink({ target: "../toolchain/bin/ld" }),
+  );
+  toolchain = toolchain.insert("bin/clang.cfg", clangConfig);
+  toolchain = toolchain.insert("bin/clang++.cfg", clangConfig);
+
+  return toolchain;
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n "$(llvm-config --version)" | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(llvm());
+
+  const version = await script.toFile().read();
+
+  std.assert(
+    version === project.version,
+    `expected '${project.version}', got '${version}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/llvm/llvm-project/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^llvmorg-' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
