@@ -1,0 +1,108 @@
+import * as std from "std";
+import caCertificates from "ca_certificates";
+import { gitCheckout } from "git";
+import go, { goBuild } from "go";
+import nushell from "nushell";
+
+export const project = {
+  name: "caddy",
+  version: "2.9.1",
+  extra: {
+    xcaddy: {
+      version: "0.4.4",
+    },
+  },
+};
+
+const sourceRef = Brioche.gitRef({
+  repository: "https://github.com/caddyserver/caddy.git",
+  ref: `v${project.version}`,
+});
+
+export default function caddy(): std.Recipe<std.Directory> {
+  let caddy = std.recipeFn(async () => {
+    const commit = (await sourceRef).commit;
+
+    // Build Caddy using `xcaddy build`. This is the officially-recommended
+    // way to build Caddy from source. Building it like a normal Go project
+    // leaves out version information
+    return std
+      .process({
+        command: "xcaddy",
+        args: [
+          "build",
+          commit,
+          "--output",
+          std.tpl`${std.outputPath}/bin/caddy`,
+        ],
+        dependencies: [xcaddy(), go(), caCertificates()],
+        unsafe: {
+          networking: true,
+        },
+      })
+      .toDirectory();
+  });
+
+  caddy = std.withRunnableLink(caddy, "bin/caddy");
+
+  return caddy;
+}
+
+function xcaddy(): std.Recipe<std.Directory> {
+  const source = gitCheckout(
+    Brioche.gitRef({
+      repository: "https://github.com/caddyserver/xcaddy.git",
+      ref: `v${project.extra.xcaddy.version}`,
+    }),
+  );
+
+  return goBuild({
+    source,
+    path: "./cmd/xcaddy",
+    runnable: "bin/xcaddy",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    caddy version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(caddy());
+
+  const result = await script.toFile().read();
+
+  std.assert(
+    result.startsWith(`v${project.version} `),
+    `expected '${project.version}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/caddyserver/caddy/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    let xcaddyReleaseData = http get https://api.github.com/repos/caddyserver/xcaddy/releases/latest
+
+    let xcaddyVersion = $xcaddyReleaseData
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.xcaddy.version $xcaddyVersion
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}

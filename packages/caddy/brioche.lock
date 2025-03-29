@@ -1,0 +1,11 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/caddyserver/caddy.git": {
+      "v2.9.1": "0e570e0cc717f02cf3800ae741df70cd074c7275"
+    },
+    "https://github.com/caddyserver/xcaddy.git": {
+      "v0.4.4": "c548f44e2d9290d6c490868336699d65f43dd36e"
+    }
+  }
+}
