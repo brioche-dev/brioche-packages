@@ -5,7 +5,7 @@ import caCertificates from "ca_certificates";
 
 export const project = {
   name: "rust",
-  version: "1.85.0",
+  version: "1.85.1",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -123,6 +123,9 @@ export async function test() {
 interface CargoBuildParameters {
   features?: string[];
   defaultFeatures?: boolean;
+  allFeatures?: boolean;
+  bins?: boolean | string[];
+  examples?: boolean | string[];
 }
 
 export interface CargoBuildOptions {
@@ -156,6 +159,12 @@ export interface CargoBuildOptions {
  *   - `features`: An array of features to enable.
  *   - `defaultFeatures`: Set to `false` to opt out of the crate's
  *     default features.
+ *   - `allFeatures`: Set to `true` to enable all of the crate's features.
+ *   - `bins`: Set to `true` to build all bin targets in the crate, or set
+ *     to an array of bin targets to build. Defaults to `true` if no other
+ *     targets are specified.
+ *   - `examples`: Set to `true` to build all example targets in the crate,
+ *     or set to an array of example targets to build.
  *
  * ## Example
  *
@@ -182,25 +191,98 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
   const crate = vendorCrate({ source: options.source });
 
-  const featuresArgs = makeFeaturesArgs(
-    options.buildParams?.features ?? [],
-    options.buildParams?.defaultFeatures ?? true,
-  );
+  const extraArgs: string[] = [];
+  const features = options.buildParams?.features ?? [];
+  if (features.length > 0) {
+    for (const feature of features) {
+      std.assert(
+        /^[a-zA-Z0-9\-_]+$/.test(feature),
+        `Unsupported feature name: ${feature}`,
+      );
+    }
+
+    extraArgs.push("--features", features.join(","));
+  }
+
+  if (!(options.buildParams?.defaultFeatures ?? true)) {
+    extraArgs.push("--no-default-features");
+  }
+
+  if (options.buildParams?.allFeatures ?? false) {
+    extraArgs.push("--all-features");
+  }
+
+  const bins = options.buildParams?.bins;
+  if (bins != null) {
+    if (Array.isArray(bins)) {
+      for (const bin of bins) {
+        std.assert(
+          /^[a-zA-Z0-9\-_]+$/.test(bin),
+          `Unsupported bin name: ${bin}`,
+        );
+      }
+
+      extraArgs.push(...bins.flatMap((bin) => ["--bin", bin]));
+    } else if (typeof bins === "boolean") {
+      if (bins) {
+        extraArgs.push("--bins");
+      }
+    } else {
+      std.unreachable(bins);
+    }
+  }
+
+  const examples = options.buildParams?.examples;
+  if (examples != null) {
+    if (Array.isArray(examples)) {
+      for (const example of examples) {
+        std.assert(
+          /^[a-zA-Z0-9\-_]+$/.test(example),
+          `Unsupported example name: ${example}`,
+        );
+      }
+
+      extraArgs.push(...examples.flatMap((example) => ["--example", example]));
+    } else if (typeof examples === "boolean") {
+      if (examples) {
+        extraArgs.push("--examples");
+      }
+    } else {
+      std.unreachable(examples);
+    }
+  }
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
-  let buildResult = std.runBash`
-    cargo install --path "$crate_path" $features --frozen
-  `
-    .dependencies(rust(), std.toolchain(), ...(options.dependencies ?? []))
-    .env({
-      CARGO_INSTALL_ROOT: std.outputPath,
-      PATH: std.tpl`${std.outputPath}/bin`,
-      crate_path: options.path ?? ".",
-      features: featuresArgs?.join(" "),
-      ...options.env,
+  let buildResult = std
+    .process({
+      command: std.tpl`${rust()}/bin/cargo`,
+      args: [
+        "install",
+
+        // Install the crate specified by `path`
+        "--path",
+        options.path ?? ".",
+
+        // Install to `$BRIOCHE_OUTPUT`
+        "--root",
+        std.outputPath,
+
+        // Ensure the lockfile is up-to-date
+        "--frozen",
+
+        ...extraArgs,
+      ],
+      env: {
+        // Include the output binary path in `$PATH` so Cargo doesn't warn
+        // us to add the directory to the `$PATH`
+        PATH: std.tpl`${std.outputPath}/bin`,
+
+        ...options.env,
+      },
+      dependencies: [rust(), std.toolchain(), ...(options.dependencies ?? [])],
+      workDir: crate,
+      unsafe: options.unsafe,
     })
-    .workDir(crate)
-    .unsafe(options.unsafe)
     .toDirectory();
 
   // Remove extra metadata created by `cargo install`
@@ -311,37 +393,4 @@ function cargoChef(): std.Recipe<std.Directory> {
   return std.directory({
     bin: pkg.unarchive("tar", "gzip"),
   });
-}
-
-/**
- * Wrapper function to generate a string of features for a Cargo build.
- *
- * @param features An array of features.
- * @returns A string of features for a Cargo build.
- */
-function makeFeaturesArgs(
-  features: string[],
-  defaultFeatures: boolean,
-): string[] | undefined {
-  // From ["feature1", "feature2", "feature3"] to '--features feature1,feature2,feature3'
-  for (const feature of features) {
-    std.assert(
-      /^[a-zA-Z0-9\-_]+$/.test(feature),
-      `Unsupported feature name: ${feature}`,
-    );
-  }
-
-  const args = [];
-  if (features.length > 0) {
-    args.push("--features", features.join(","));
-  }
-  if (!defaultFeatures) {
-    args.push("--no-default-features");
-  }
-
-  if (args.length > 0) {
-    return args;
-  } else {
-    return undefined;
-  }
 }
