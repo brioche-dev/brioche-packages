@@ -27,7 +27,6 @@ export default function php(): std.Recipe<std.Directory> {
   php = std.setEnv(php, {
     CPATH: { append: [{ path: "include" }] },
     LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
 
   return std.withRunnableLink(php, "bin/php");
