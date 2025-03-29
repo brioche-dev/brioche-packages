@@ -5,9 +5,9 @@
       "type": "sha256",
       "value": "bc601a12f1e086a995690e9eed86353b23d9e0429509bfaae1db2e39b41cde52"
     },
-    "https://static.rust-lang.org/dist/channel-rust-1.85.0.toml": {
+    "https://static.rust-lang.org/dist/channel-rust-1.85.1.toml": {
       "type": "sha256",
-      "value": "009e8b5ff43f12bf644b5e5b9fd89f96453072062a450c623882f64e85405da5"
+      "value": "1e7dae690cd12e27405a97e64704917489a27c650201bf47780a936055d67909"
     }
   }
 }
