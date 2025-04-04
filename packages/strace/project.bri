@@ -1,0 +1,66 @@
+import * as std from "std";
+import nushell from "nushell";
+
+export const project = {
+  name: "strace",
+  version: "6.14",
+};
+
+const source = Brioche.download(
+  `https://github.com/strace/strace/releases/download/v${project.version}/strace-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function strace(): std.Recipe<std.Directory> {
+  let strace = std.runBash`
+    ./configure --prefix=/
+    make -j16
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  strace = std.withRunnableLink(strace, "bin/strace");
+
+  return strace;
+}
+
+export async function test() {
+  const script = std.runBash`
+    strace --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(strace());
+
+  const result = await script.toFile().read();
+
+  const version = result.match(/^strace -- version ([\d.]+)$/m)?.at(1);
+  std.assert(
+    version === project.version,
+    `expected '${project.version}', got '${version}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/strace/strace/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
