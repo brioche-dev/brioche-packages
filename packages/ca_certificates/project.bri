@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "ca_certificates",
-  version: "2024-12-31",
+  version: "2025-02-25",
 };
 
 export default function (): std.Recipe<std.Directory> {
