@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "eza",
-  version: "0.20.23",
+  version: "0.21.0",
 };
 
 const source = gitCheckout(
