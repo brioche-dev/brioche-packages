@@ -14,11 +14,12 @@ std.assert(
   `Dasel major version ${majorVersion} does not match version number ${project.version}`,
 );
 
-const gitRef = Brioche.gitRef({
-  repository: "https://github.com/TomWright/dasel.git",
-  ref: `v${project.version}`,
-});
-const source = gitCheckout(gitRef);
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/TomWright/dasel.git",
+    ref: `v${project.version}`,
+  }),
+);
 
 export default function dasel(): std.Recipe<std.Directory> {
   return goBuild({
