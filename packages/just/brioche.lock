@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/casey/just.git": {
-      "1.39.0": "9ec7b60b55cba4d9c095d3b8f119637980286165"
+      "1.40.0": "679a9403ac29d7fc9045285453e58e2534d98d8d"
     }
   }
 }
