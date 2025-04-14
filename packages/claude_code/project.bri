@@ -4,7 +4,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "claude_code",
-  version: "0.2.29",
+  version: "0.2.69",
   packageName: "@anthropic-ai/claude-code",
 };
 
@@ -25,7 +25,7 @@ export async function test() {
   const result = await script.toFile().read();
 
   // Check that the result contains the expected version
-  const expected = `${project.version}`;
+  const expected = `${project.version} (Claude Code)`;
   std.assert(result === expected, `expected ${project.version}, got ${result}`);
 
   return script;
