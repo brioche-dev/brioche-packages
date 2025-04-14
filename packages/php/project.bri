@@ -5,7 +5,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "php",
-  version: "8.4.5",
+  version: "8.4.6",
 };
 
 const source = Brioche.download(
