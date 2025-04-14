@@ -5,8 +5,8 @@ import { goBuild } from "go";
 
 export const project = {
   name: "github_cli",
-  version: "2.67.0",
-  latestBuildDate: "2025-02-11",
+  version: "2.69.0",
+  latestBuildDate: "2025-03-19",
 };
 
 const source = gitCheckout(
