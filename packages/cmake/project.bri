@@ -209,10 +209,19 @@ export function cmakeBuild(
   return result;
 }
 
-export function test() {
-  return std.runBash`
-    cmake --version | tee "$BRIOCHE_OUTPUT"
+export async function test() {
+  const script = std.runBash`
+    # Only retrieve the first line of the output, other lines are not relevant for the version check
+    echo -n $(cmake --version | head -n 1) | tee "$BRIOCHE_OUTPUT"
   `.dependencies(cmake());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `cmake version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
