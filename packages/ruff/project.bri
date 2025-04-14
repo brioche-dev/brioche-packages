@@ -5,7 +5,7 @@ import { gitCheckout } from "git";
 
 export const project = {
   name: "ruff",
-  version: "0.9.9",
+  version: "0.11.5",
 };
 
 const source = gitCheckout(
@@ -15,12 +15,26 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function ruff(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     path: "crates/ruff",
     runnable: "bin/ruff",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n "$(ruff --version)" | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(ruff());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `ruff ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
