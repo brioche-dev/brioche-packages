@@ -37,11 +37,12 @@ export default function (): std.Recipe<std.Directory> {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
+    # Version can either be prefixed with 'v' or not
     let version = http get https://api.github.com/repos/kamiyaa/joshuto/git/matching-refs/
       | get ref
       | each {|ref|
         $ref
-        | parse --regex '^refs/tags/(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
         | get -i 0
       }
       | sort-by -n major minor patch
