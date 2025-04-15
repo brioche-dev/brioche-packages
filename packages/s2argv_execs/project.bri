@@ -1,3 +1,4 @@
+import nushell from "nushell";
 import * as std from "std";
 import { gitCheckout } from "git";
 import { cmakeBuild } from "cmake";
@@ -14,7 +15,7 @@ export const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function s2argvExecs(): std.Recipe<std.Directory> {
   let s2argv_execs = cmakeBuild({
     source,
     dependencies: [std.toolchain()],
@@ -26,4 +27,74 @@ export default function (): std.Recipe<std.Directory> {
   });
 
   return s2argv_execs;
+}
+
+export async function test() {
+  // Create a simple C program that uses s2argv_execs to execute a command passed via stdin
+  const src = std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <execs.h>
+
+      #define BUFLEN 1024
+
+      int main(void)
+      {
+          char buf[BUFLEN];
+
+          if (fgets(buf, BUFLEN, stdin) != NULL)
+          {
+              char **argv = s2argv(buf);
+              if (argv != NULL)
+              {
+                  execvp(argv[0], argv);
+                  s2argv_free(argv);
+              }
+          }
+
+          return 1;
+      }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -lexecs
+
+    # Output 'Hello, World!' through s2argv_execs
+    echo -n $(echo "echo 'Hello, World!'" | ./main) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), s2argvExecs())
+    .env({ src: src });
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected result
+  const expected = "Hello, World!";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/virtualsquare/s2argv-execs/git/matching-refs/
+      | get ref
+      | each {|ref|
+        $ref
+        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)(\\.(?P<patch>[\\d]+))?)'
+        | get -i 0
+      }
+      | sort-by -n major minor patch
+      | last
+      | get tag
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
