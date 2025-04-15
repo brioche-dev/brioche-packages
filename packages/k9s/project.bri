@@ -5,7 +5,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "k9s",
-  version: "0.40.5",
+  version: "0.50.3",
 };
 
 const gitRef = await Brioche.gitRef({
@@ -14,7 +14,7 @@ const gitRef = await Brioche.gitRef({
 });
 const source = gitCheckout(gitRef);
 
-export default function (): std.Recipe<std.Directory> {
+export default function k9s(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
@@ -27,6 +27,21 @@ export default function (): std.Recipe<std.Directory> {
     },
     runnable: "bin/k9s",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    # Remove ANSI color codes from the output, before extracting the version
+    echo -n $(k9s version | sed -r 's/\x1B\[[0-9;]*[mK]//g' | awk '/^Version:/ { print $2 }') | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(k9s());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export async function autoUpdate() {
