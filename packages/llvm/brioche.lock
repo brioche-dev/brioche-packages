@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/llvm/llvm-project.git": {
-      "llvmorg-20.1.1": "424c2d9b7e4de40d0804dd374721e6411c27d1d1"
+      "llvmorg-20.1.2": "58df0ef89dd64126512e4ee27b4ac3fd8ddf6247"
     }
   }
 }
