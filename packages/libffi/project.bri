@@ -3,7 +3,7 @@ import * as std from "std";
 
 export const project = {
   name: "libffi",
-  version: "3.4.7",
+  version: "3.4.8",
 };
 
 const source = Brioche.download(
@@ -12,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function libffi(): std.Recipe<std.Directory> {
   const libffi = std.runBash`
     ./configure --prefix=/
     make
@@ -27,6 +27,20 @@ export default function (): std.Recipe<std.Directory> {
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    echo -n $(pkg-config --modversion libffi) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(std.toolchain(), libffi());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
