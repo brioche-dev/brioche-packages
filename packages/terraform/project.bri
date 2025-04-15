@@ -5,7 +5,7 @@ import { gitCheckout } from "git";
 
 export const project = {
   name: "terraform",
-  version: "1.11.0",
+  version: "1.11.4",
 };
 
 const source = gitCheckout(
@@ -15,15 +15,38 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function terraform(): std.Recipe<std.Directory> {
+  const patchedSource = std.runBash`
+    # Workaround for Go 1.24, see: https://github.com/NixOS/nixpkgs/blob/2631b0b7abcea6e640ce31cd78ea58910d31e650/pkgs/applications/networking/cluster/terraform/default.nix#L48
+    cd "$BRIOCHE_OUTPUT"
+    sed -i 's/godebug tlskyber=0/godebug tlsmlkem=0/g' go.mod
+  `
+    .outputScaffold(source)
+    .toDirectory();
+
   return goBuild({
-    source,
+    source: patchedSource,
     buildParams: {
       ldflags: ["-w", "-s", `-X github.com/hashicorp/terraform/version.dev=no`],
       mod: "readonly",
     },
     runnable: "bin/terraform",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    # Only retrieve the first line of the output, other lines are not relevant for the version check
+    echo -n $(terraform --version | head -n 1) | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(terraform());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `Terraform v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export async function autoUpdate() {
