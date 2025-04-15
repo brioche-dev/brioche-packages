@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "restic",
-  version: "0.17.3",
+  version: "0.18.0",
 };
 
 const source = gitCheckout(
