@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/derailed/popeye.git": {
+      "v0.22.1": "35b554961dcdabfa7aba6bd070673c6c24c70884"
+    }
+  }
+}
