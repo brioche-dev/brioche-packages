@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/turbot/steampipe.git": {
-      "v1.0.3": "720a09bd49d508234c091755ec130ee241f4f5c9"
+      "v1.1.0": "a312d91d978c92d3bfb79cc02d1345a33cce3681"
     }
   }
 }
