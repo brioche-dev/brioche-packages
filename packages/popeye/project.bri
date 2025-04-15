@@ -1,0 +1,62 @@
+import nushell from "nushell";
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "popeye",
+  version: "0.22.1",
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: "https://github.com/derailed/popeye.git",
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function popeye(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        `-X github.com/derailed/popeye/cmd.version=${project.version}`,
+        `-X github.com/derailed/popeye/cmd.commit=${gitRef.commit}`,
+      ],
+    },
+    runnable: "bin/popeye",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    # Remove ANSI color codes from the output, before extracting the version
+    echo -n $(popeye version| sed -r 's/\x1B\[[0-9;]*[mK]//g' | awk '/^Version:/ { print $2 }') | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(popeye());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/derailed/popeye/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
