@@ -28,10 +28,21 @@ export default function tofu(): std.Recipe<std.Directory> {
   });
 }
 
-export function test() {
-  return std.runBash`
+export async function test() {
+  const script = std.runBash`
     tofu --version | tee "$BRIOCHE_OUTPUT"
   `.dependencies(tofu());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `OpenTofu v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
 
 export async function autoUpdate() {
