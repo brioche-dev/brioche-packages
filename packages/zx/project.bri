@@ -1,9 +1,10 @@
 import * as std from "std";
 import { npmInstallGlobal } from "nodejs";
+import nushell from "nushell";
 
 export const project = {
   name: "zx",
-  version: "8.3.0",
+  version: "8.5.2",
 };
 
 export default function zx() {
@@ -15,8 +16,41 @@ export default function zx() {
   return std.withRunnableLink(recipe, "bin/zx");
 }
 
-export function test() {
-  return std.runBash`
+export async function test() {
+  const script = std.runBash`
     zx --version | tee "$BRIOCHE_OUTPUT"
   `.dependencies(zx());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://registry.npmjs.org/${project.name}/latest
+
+    let version = $releaseData
+      | get version
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
