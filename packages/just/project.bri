@@ -22,10 +22,21 @@ export default function just(): std.Recipe<std.Directory> {
   });
 }
 
-export function test() {
-  return std.runBash`
+export async function test() {
+  const script = std.runBash`
     just --version | tee "$BRIOCHE_OUTPUT"
   `.dependencies(just());
+
+  const version = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expectedVersion = `just ${project.version}`;
+  std.assert(
+    version === expectedVersion,
+    `expected '${expectedVersion}', got '${version}'`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
