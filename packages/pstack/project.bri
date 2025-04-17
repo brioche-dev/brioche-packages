@@ -30,10 +30,21 @@ export default async function pstack(): Promise<std.Recipe<std.Directory>> {
   });
 }
 
-export function test() {
-  return std.runBash`
-    pstack --version | tee "$BRIOCHE_OUTPUT"
+export async function test() {
+  const script = std.runBash`
+    pstack --version 2>&1 | tee "$BRIOCHE_OUTPUT"
   `.dependencies(pstack());
+
+  const version = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expectedVersion = (await gitRef).commit;
+  std.assert(
+    version === expectedVersion,
+    `expected '${expectedVersion}', got '${version}'`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
