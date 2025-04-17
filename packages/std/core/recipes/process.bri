@@ -10,6 +10,7 @@ export type ProcessOptions = {
   command: ProcessTemplateLike;
   args?: ProcessTemplateLike[];
   env?: Record<string, ProcessTemplateLike>;
+  currentDir?: ProcessTemplateLike;
   dependencies?: AsyncRecipe<Directory>[];
   workDir?: AsyncRecipe<Directory>;
   outputScaffold?: AsyncRecipe | null;
@@ -27,6 +28,8 @@ export interface ProcessUtils {
    * Returns a new process with more environment variables set.
    */
   env(values: Record<string, ProcessTemplateLike>): Process;
+
+  currentDir(currentDir: ProcessTemplateLike): Process;
 
   /**
    * Returns a new process with more dependencies added. The new
@@ -153,6 +156,10 @@ export function process(options: ProcessOptions): Process {
             ]),
           ),
         ),
+        currentDir:
+          options.currentDir != null
+            ? await processTemplate(options.currentDir).briocheSerialize()
+            : undefined,
         dependencies: await Promise.all(
           (options.dependencies ?? []).map(
             async (dep) => await (await dep).briocheSerialize(),
@@ -181,6 +188,12 @@ export function process(options: ProcessOptions): Process {
           ...options.env,
           ...values,
         },
+      });
+    },
+    currentDir(this: Process, currentDir: ProcessTemplateLike): Process {
+      return process({
+        ...options,
+        currentDir,
       });
     },
     dependencies(

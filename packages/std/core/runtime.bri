@@ -134,6 +134,7 @@ export type ProcessRecipe = WithMeta & {
   command: ProcessTemplate;
   args: ProcessTemplate[];
   env: Record<BString, ProcessTemplate>;
+  currentDir?: ProcessTemplate;
   dependencies?: Recipe[];
   workDir: Recipe;
   outputScaffold?: Recipe | null;
