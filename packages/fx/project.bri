@@ -22,11 +22,21 @@ export default function fx(): std.Recipe<std.Directory> {
   });
 }
 
-export function test() {
-  return std.runBash`
+export async function test() {
+  const script = std.runBash`
     fx --version | tee "$BRIOCHE_OUTPUT"
-    echo '{"hello": "world"}' | fx 'Object.keys' | tee "$BRIOCHE_OUTPUT"
   `.dependencies(fx());
+
+  const version = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expectedVersion = project.version;
+  std.assert(
+    version === expectedVersion,
+    `expected '${expectedVersion}', got '${version}'`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
