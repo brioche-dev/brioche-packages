@@ -1,5 +1,4 @@
 import * as std from "std";
-import caCertificates from "ca_certificates";
 
 export const project = {
   name: "go",
@@ -158,7 +157,7 @@ function goModDownload(
     go mod download all
   `
     .workDir(std.glob(goModule, ["**/go.mod", "**/go.sum"]))
-    .dependencies(go(), caCertificates())
+    .dependencies(go())
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
     .toDirectory();

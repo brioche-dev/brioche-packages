@@ -1,5 +1,4 @@
 import * as std from "std";
-import caCertificates from "ca_certificates";
 import { gitCheckout } from "git";
 import go, { goBuild } from "go";
 import nushell from "nushell";
@@ -35,7 +34,7 @@ export default function caddy(): std.Recipe<std.Directory> {
           "--output",
           std.tpl`${std.outputPath}/bin/caddy`,
         ],
-        dependencies: [xcaddy(), go(), caCertificates()],
+        dependencies: [xcaddy(), go()],
         unsafe: {
           networking: true,
         },
