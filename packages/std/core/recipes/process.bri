@@ -268,6 +268,7 @@ const PROCESS_TEMPLATE_SYMBOL_KINDS = [
   "homeDir",
   "workDir",
   "tempDir",
+  "caCertificateBundlePath",
 ] as const;
 
 type ProcessTemplateSymbolKind = (typeof PROCESS_TEMPLATE_SYMBOL_KINDS)[number];
@@ -340,6 +341,18 @@ export const tempDir = {
 } as TempDir;
 type TempDir = ProcessTemplateSymbol<"tempDir">;
 
+/**
+ * Expands to a file path containing trusted CA certificates (PEM-encoded).
+ * Can only be used in a process recipe when the `networking` unsafe option
+ * is enabled. Equivalent to the default environment variable `$SSL_CERT_FILE`.
+ */
+// eslint-disable-next-line
+export const caCertificateBundlePath = {
+  componentType: "symbol",
+  symbol: "caCertificateBundlePath",
+} as CaCertificateBundlePath;
+type CaCertificateBundlePath = ProcessTemplateSymbol<"caCertificateBundlePath">;
+
 function isProcessTemplateSymbol(
   value: unknown,
 ): value is ProcessTemplateSymbol {
@@ -395,6 +408,8 @@ export class ProcessTemplate {
                 return [{ type: "work_dir" }];
               case "tempDir":
                 return [{ type: "temp_dir" }];
+              case "caCertificateBundlePath":
+                return [{ type: "ca_certificate_bundle_path" }];
               default:
                 return unreachable(component.symbol);
             }

@@ -255,7 +255,8 @@ export type ProcessTemplateComponent =
   | { type: "input_resource_dirs" }
   | { type: "home_dir" }
   | { type: "work_dir" }
-  | { type: "temp_dir" };
+  | { type: "temp_dir" }
+  | { type: "ca_certificate_bundle_path" };
 
 export function isHex(s: string): s is HexString {
   return /^([0-9a-fA-F]{2})*$/.test(s);
