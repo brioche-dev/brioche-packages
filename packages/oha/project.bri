@@ -15,11 +15,25 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function oha(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/oha",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    oha --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(oha());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `oha ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
