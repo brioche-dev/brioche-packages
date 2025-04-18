@@ -15,11 +15,25 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function lurk(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/lurk",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    lurk --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(lurk());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `lurk ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
