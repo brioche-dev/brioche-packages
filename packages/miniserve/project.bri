@@ -15,11 +15,25 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function miniserve(): std.Recipe<std.Directory> {
   return cargoBuild({
     source: source,
     runnable: "bin/miniserve",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    miniserve --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(miniserve());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `miniserve ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
