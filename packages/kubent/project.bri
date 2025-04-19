@@ -1,0 +1,61 @@
+import nushell from "nushell";
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "kubent",
+  version: "0.7.3",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/doitintl/kube-no-trouble.git",
+    ref: project.version,
+  }),
+);
+
+export default function kubent(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/kubent",
+    buildParams: {
+      ldflags: ["-s", "-w", `-X main.version=v${project.version}`],
+    },
+    runnable: "bin/kubent",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    kubent --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(kubent());
+
+  const result = (await script.toFile().read()).trim();
+
+  const versionMatch = result.match(/version v([^\s]+)/);
+  const version = versionMatch == null ? null : versionMatch[1];
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/doitintl/kube-no-trouble/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
