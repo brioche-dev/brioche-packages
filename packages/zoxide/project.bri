@@ -15,11 +15,28 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function zoxide(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/zoxide",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    zoxide --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(zoxide());
+
+  const result = await script.toFile().read();
+
+  // Check that the result contains the expected version
+  const expected = `zoxide ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
