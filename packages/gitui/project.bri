@@ -16,7 +16,7 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function gitui(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     dependencies: [cmake(), git()],
@@ -25,6 +25,23 @@ export default function (): std.Recipe<std.Directory> {
     },
     runnable: "bin/gitui",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    gitui --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(gitui());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `gitui ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected ${expected}, got ${result}`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
