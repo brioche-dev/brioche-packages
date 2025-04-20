@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/doitintl/kube-no-trouble.git": {
+      "0.7.3": "57480c07b3f91238f12a35d0ec88d9368aae99aa"
+    }
+  }
+}
