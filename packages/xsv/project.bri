@@ -15,11 +15,25 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function xsv(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/xsv",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    xsv --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(xsv());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
