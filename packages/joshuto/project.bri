@@ -20,7 +20,7 @@ const source = gitCheckout(
 // https://github.com/kamiyaa/joshuto/commit/1245124fcd264e25becfd75258840708d7b8b4bb
 const patch = Brioche.includeFile("joshuto-v0.9.8.patch");
 
-export default function (): std.Recipe<std.Directory> {
+export default function joshuto(): std.Recipe<std.Directory> {
   const patchedSource = std.runBash`
     cd "$BRIOCHE_OUTPUT"
     patch -p1 < $patch
@@ -33,6 +33,23 @@ export default function (): std.Recipe<std.Directory> {
     source: patchedSource,
     runnable: "bin/joshuto",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    joshuto --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(joshuto());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `joshuto-${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected ${expected}, got ${result}`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
