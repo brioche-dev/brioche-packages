@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "libarchive",
-  version: "3.7.7",
+  version: "3.7.9",
 };
 
 const source = Brioche.download(
