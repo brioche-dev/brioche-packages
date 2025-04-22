@@ -68,7 +68,10 @@ export function autoUpdate() {
       | sort-by --natural --reverse version
       | get 0.version
 
-    $env.project | from json | update version $version | to json
+    $env.project
+      | from json
+      | update version $version
+      | to json
   `);
 
   return std.withRunnable(std.directory(), {
