@@ -15,11 +15,28 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function jwtCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/jwt",
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    jwt --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(jwtCli());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `jwt ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected ${expected}, got ${result}`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
