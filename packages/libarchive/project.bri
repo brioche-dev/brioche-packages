@@ -1,8 +1,9 @@
 import * as std from "std";
+import nushell from "nushell";
 
 export const project = {
   name: "libarchive",
-  version: "3.7.7",
+  version: "3.7.9",
 };
 
 const source = Brioche.download(
@@ -11,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "xz")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function libarchive(): std.Recipe<std.Directory> {
   let libarchive = std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
     make
@@ -28,4 +29,41 @@ export default function (): std.Recipe<std.Directory> {
   });
 
   return libarchive;
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libarchive | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(std.toolchain(), libarchive());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://www.libarchive.de/downloads
+      | lines
+      | where {|it| $it | str contains "libarchive" }
+      | parse --regex '<a href="./libarchive-(?<version>.+)\.tar\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
