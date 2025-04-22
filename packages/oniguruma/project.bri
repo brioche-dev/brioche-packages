@@ -14,7 +14,7 @@ const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function oniguruma(): std.Recipe<std.Directory> {
   let oniguruma = std.runBash`
     autoreconf --install --force --verbose
     ./configure \\
@@ -34,6 +34,20 @@ export default function (): std.Recipe<std.Directory> {
   });
 
   return std.withRunnableLink(oniguruma, "bin/onig-config");
+}
+
+export async function test() {
+  const script = std.runBash`
+    onig-config --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(oniguruma());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected ${expected}, got ${result}`);
+
+  return script;
 }
 
 export function autoUpdate() {
