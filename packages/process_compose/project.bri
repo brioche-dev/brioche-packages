@@ -56,10 +56,10 @@ export async function test() {
   const result = await script.toFile().read();
 
   const version = result.match(/^Version:\s*v([\d.]+)$/m)?.at(1);
-  std.assert(
-    version === project.version,
-    `expected '${project.version}', got '${version}'`,
-  );
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
 
   return script;
 }

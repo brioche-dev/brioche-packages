@@ -35,13 +35,11 @@ export async function test() {
     echo -n "$(nginx -v 2>&1)" | tee "$BRIOCHE_OUTPUT"
   `.dependencies(nginx());
 
-  const versionMessage = await script.toFile().read();
-  const expectedVersionMessage = `nginx version: nginx/${project.version}`;
+  const result = await script.toFile().read();
 
-  std.assert(
-    versionMessage === expectedVersionMessage,
-    `expected '${expectedVersionMessage}', got '${versionMessage}'`,
-  );
+  // Check that the result contains the expected version
+  const expected = `nginx version: nginx/${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }

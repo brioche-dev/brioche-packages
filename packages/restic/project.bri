@@ -29,9 +29,11 @@ export async function test() {
   `.dependencies(restic());
   const output = await script.toFile().read();
 
+  // Check that the result contains the expected version
+  const expected = `restic ${project.version}`;
   std.assert(
-    output.startsWith(`restic ${project.version} `),
-    `expected version ${project.version}, got ${JSON.stringify(output)}`,
+    output.startsWith(expected),
+    `expected '${expected}', got '${JSON.stringify(output)}'`,
   );
 
   return script;

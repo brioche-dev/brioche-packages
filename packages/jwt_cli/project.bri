@@ -33,7 +33,7 @@ export async function test() {
   const expected = `jwt ${project.version}`;
   std.assert(
     result.startsWith(expected),
-    `expected ${expected}, got ${result}`,
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;

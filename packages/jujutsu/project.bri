@@ -33,11 +33,8 @@ export async function test() {
   const version = (await script.toFile().read()).trim();
 
   // Check that the result contains the expected version
-  const expectedVersion = `jj ${project.version}`;
-  std.assert(
-    version === expectedVersion,
-    `expected '${expectedVersion}', got '${version}'`,
-  );
+  const expected = `jj ${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
 
   return script;
 }

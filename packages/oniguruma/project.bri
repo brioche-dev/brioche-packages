@@ -45,7 +45,7 @@ export async function test() {
 
   // Check that the result contains the expected version
   const expected = project.version;
-  std.assert(result === expected, `expected ${expected}, got ${result}`);
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
