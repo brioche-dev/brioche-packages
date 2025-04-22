@@ -65,7 +65,10 @@ export function autoUpdate() {
       | str replace --regex '^v' ''
       | str replace --all '_' '.'
 
-    $env.project | from json | update version $version | to json
+    $env.project
+      | from json
+      | update version $version
+      | to json
   `);
 
   return std.withRunnable(std.directory(), {
