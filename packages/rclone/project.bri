@@ -1,0 +1,60 @@
+import * as std from "std";
+import git, { gitCheckout } from "git";
+import { goBuild } from "go";
+import nushell from "nushell";
+
+export const project = {
+  name: "rclone",
+  version: "1.69.1",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/rclone/rclone.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function rclone(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    dependencies: [git()],
+    runnable: "bin/rclone",
+    buildParams: {
+      // Remove `-DEV` suffix from version number
+      ldflags: ["-s", "-X", "github.com/rclone/rclone/fs.VersionSuffix="],
+    },
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    rclone --version | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(rclone());
+
+  const scriptOutput = await script.toFile().read();
+  const result = scriptOutput.split("\n").at(0);
+
+  // Check that the result contains the expected version
+  const expected = `rclone v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/rclone/rclone/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
