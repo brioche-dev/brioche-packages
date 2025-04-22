@@ -1,4 +1,5 @@
 import * as std from "std";
+import nushell from "nushell";
 
 export const project = {
   name: "libpcap",
@@ -11,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "xz")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function libpcap(): std.Recipe<std.Directory> {
   const libpcap = std.runBash`
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -24,5 +25,42 @@ export default function (): std.Recipe<std.Directory> {
     CPATH: { append: [{ path: "include" }] },
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libpcap | tee "$BRIOCHE_OUTPUT"
+  `.dependencies(std.toolchain(), libpcap());
+
+  const result = (await script.toFile().read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://www.tcpdump.org/release
+      | lines
+      | where {|it| ($it | str contains "libpcap") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="libpcap-(?<version>.+)\.tar\.[^"]+">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
   });
 }
