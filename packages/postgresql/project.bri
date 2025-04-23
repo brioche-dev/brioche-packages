@@ -47,10 +47,12 @@ export default function postgresql(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(postgres --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(postgresql());
+    postgres --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(postgresql())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `postgres (PostgreSQL) ${project.version}`;

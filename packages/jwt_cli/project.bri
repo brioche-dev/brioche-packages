@@ -25,9 +25,11 @@ export default function jwtCli(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     jwt --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(jwtCli());
+  `
+    .dependencies(jwtCli())
+    .toFile();
 
-  const result = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `jwt ${project.version}`;

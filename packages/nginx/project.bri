@@ -32,10 +32,12 @@ export default function nginx(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n "$(nginx -v 2>&1)" | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(nginx());
+    nginx -v 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nginx())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `nginx version: nginx/${project.version}`;

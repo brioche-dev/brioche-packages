@@ -25,9 +25,11 @@ export default function oha(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     oha --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(oha());
+  `
+    .dependencies(oha())
+    .toFile();
 
-  const result = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `oha ${project.version}`;

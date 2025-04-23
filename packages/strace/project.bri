@@ -30,9 +30,11 @@ export default function strace(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     strace --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(strace());
+  `
+    .dependencies(strace())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   const version = result.match(/^strace -- version ([\d.]+)$/m)?.at(1);
 

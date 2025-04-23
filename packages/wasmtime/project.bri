@@ -24,10 +24,12 @@ export default function wasmtime(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(wasmtime --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(wasmtime());
+    wasmtime --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(wasmtime())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `wasmtime ${project.version}`;

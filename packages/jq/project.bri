@@ -28,10 +28,12 @@ export default function jq(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(jq --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(jq());
+    jq --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(jq())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `jq-${project.version}`;

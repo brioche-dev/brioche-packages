@@ -48,9 +48,10 @@ export async function test() {
     ./main | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain(), alsaLib())
-    .env({ src: src });
+    .env({ src: src })
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = project.version;

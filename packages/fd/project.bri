@@ -25,13 +25,15 @@ export default function fd(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     fd --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(fd());
+  `
+    .dependencies(fd())
+    .toFile();
 
-  const version = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `fd ${project.version}`;
-  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }

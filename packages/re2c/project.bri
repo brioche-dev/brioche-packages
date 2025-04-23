@@ -16,7 +16,7 @@ const source = Brioche.download(
 export default function re2c(): std.Recipe<std.Directory> {
   let re2c = std.runBash`
     ./configure \\
-      --prefix=/ 
+      --prefix=/
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -35,10 +35,12 @@ export default function re2c(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(re2c --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(re2c());
+    re2c --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(re2c())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `re2c ${project.version}`;

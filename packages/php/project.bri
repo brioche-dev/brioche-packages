@@ -34,10 +34,12 @@ export default function php(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(php --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(php());
+    php --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(php())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `PHP ${project.version} (cli)`;

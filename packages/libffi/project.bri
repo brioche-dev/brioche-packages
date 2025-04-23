@@ -31,10 +31,12 @@ export default function libffi(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(pkg-config --modversion libffi) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(std.toolchain(), libffi());
+    pkg-config --modversion libffi | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), libffi())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = project.version;

@@ -19,10 +19,12 @@ export default function claudeCode() {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(claude --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(claudeCode());
+    claude --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(claudeCode())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `${project.version} (Claude Code)`;

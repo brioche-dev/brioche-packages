@@ -25,10 +25,12 @@ export default function ruff(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n "$(ruff --version)" | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(ruff());
+    ruff --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ruff())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `ruff ${project.version}`;

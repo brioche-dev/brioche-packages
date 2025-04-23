@@ -24,11 +24,14 @@ export default function eza(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n "$(eza --version)" | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(eza());
-  const output = await script.toFile().read();
+    eza --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(eza())
+    .toFile();
 
-  const version = output
+  const result = (await script.read()).trim();
+
+  const version = result
     .split("\n")
     .flatMap((line) => {
       const versionMatch = line.match(/^v([^\s]+)/);

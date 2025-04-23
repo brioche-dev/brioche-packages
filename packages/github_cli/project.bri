@@ -33,10 +33,12 @@ export default function gh(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(gh --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(gh());
+    gh --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gh())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `gh version ${project.version} (${project.latestBuildDate}) https://github.com/cli/cli/releases/tag/v${project.version}`;
