@@ -137,7 +137,10 @@ export function autoUpdate() {
       | last
       | get tag
 
-    $env.project | from json | update version $version | to json
+    $env.project
+      | from json
+      | update version $version
+      | to json
   `);
 
   return std.withRunnable(std.directory(), {

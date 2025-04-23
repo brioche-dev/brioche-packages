@@ -50,7 +50,10 @@ export async function autoUpdate() {
       | get tag_name
       | str replace --regex '^v' ''
 
-    $env.project | from json | update version $version | to json
+    $env.project
+      | from json
+      | update version $version
+      | to json
   `);
 
   return std.withRunnable(std.directory(), {
