@@ -1,19 +1,29 @@
 import * as std from "std";
 import python from "python";
 import libxml2 from "libxml2";
+import nushell from "nushell";
 
 export const project = {
   name: "libxslt",
-  version: "1.1.42",
+  version: "1.1.43",
+  extra: {
+    majorVersion: "1",
+    minorVersion: "1",
+  },
 };
 
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
 const source = Brioche.download(
-  `https://download.gnome.org/sources/libxslt/1.1/libxslt-${project.version}.tar.xz`,
+  `https://download.gnome.org/sources/libxslt/${project.extra.majorVersion}.${project.extra.minorVersion}/libxslt-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function libxslt(): std.Recipe<std.Directory> {
   let libxslt = std.runBash`
     ./configure --prefix=/
     make
@@ -32,6 +42,61 @@ export default function (): std.Recipe<std.Directory> {
   });
 
   return libxslt;
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libxslt | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), libxslt())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let versionWithoutPatch = http get https://download.gnome.org/sources/libxslt
+      | lines
+      | where {|it| $it | str contains 'href="' }
+      | parse --regex '<a href="(?<version>.+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let version = http get $"https://download.gnome.org/sources/libxslt/($versionWithoutPatch)"
+      | lines
+      | where {|it| ($it | str contains 'a href="libxslt') and (not ($it | str contains '.sha256sum')) and (not ($it | str contains '.news')) }
+      | parse --regex '<a href="libxslt-(?<version>[^"]+)\.tar\.xz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let majorVersion = $version
+      | split words
+      | get 0
+    let minorVersion = $version
+      | split words
+      | get 1
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.majorVersion $majorVersion
+      | update extra.minorVersion $minorVersion
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
 
 // TODO: Figure out where to move this, this is copied from `std`

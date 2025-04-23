@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.42.tar.xz": {
+    "https://download.gnome.org/sources/libxslt/1.1/libxslt-1.1.43.tar.xz": {
       "type": "sha256",
-      "value": "85ca62cac0d41fc77d3f6033da9df6fd73d20ea2fc18b0a3609ffb4110e1baeb"
+      "value": "5a3d6b383ca5afc235b171118e90f5ff6aa27e9fea3303065231a6d403f0183a"
     }
   }
 }
