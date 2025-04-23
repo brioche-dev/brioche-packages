@@ -72,10 +72,11 @@ export async function test() {
     .match(/^ICU Initialization returned: (.*)$/m)
     ?.at(1);
 
-  std.assert(
-    version === project.version,
-    `expected version number to be '${project.version}', got ${version}`,
-  );
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  // Check that the result contains the expected return code
   std.assert(
     returnCode === "U_ZERO_ERROR",
     `expected icuinfo initialization to return U_ZERO_ERROR, got '${returnCode}'`,

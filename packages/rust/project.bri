@@ -112,10 +112,14 @@ export async function test() {
   `
     .dependencies(rust())
     .toFile();
+
   const versionOutput = await script.read().then((output) => output.trim());
+
+  // Check that the result contains the expected version
+  const expected = `rustc ${project.version}`;
   std.assert(
-    versionOutput.startsWith(`rustc ${project.version} `),
-    `expected ${project.version}, got ${JSON.stringify(versionOutput)}`,
+    versionOutput.startsWith(expected),
+    `expected '${expected}', got '${JSON.stringify(versionOutput)}'`,
   );
   return script;
 }

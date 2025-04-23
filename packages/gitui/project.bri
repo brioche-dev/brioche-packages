@@ -38,7 +38,7 @@ export async function test() {
   const expected = `gitui ${project.version}`;
   std.assert(
     result.startsWith(expected),
-    `expected ${expected}, got ${result}`,
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;

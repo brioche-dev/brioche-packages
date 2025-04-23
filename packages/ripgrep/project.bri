@@ -33,10 +33,9 @@ export async function test() {
 
   const version = output.split("\n").at(0);
 
-  std.assert(
-    version === `ripgrep ${project.version}`,
-    `expected version ${project.version}, got ${version}`,
-  );
+  // Check that the result contains the expected version
+  const expected = `ripgrep ${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
 
   return script;
 }
