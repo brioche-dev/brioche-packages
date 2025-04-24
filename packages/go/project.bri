@@ -1,5 +1,6 @@
 import * as std from "std";
 import caCertificates from "ca_certificates";
+import nushell from "nushell";
 
 export const project = {
   name: "go",
@@ -38,6 +39,52 @@ export default function go(): std.Recipe<std.Directory> {
   go = std.withRunnableLink(go, "go/bin/go");
 
   return go;
+}
+
+export async function test() {
+  const script = std.runBash`
+    go version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(go())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `go version go${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/golang/go/git/matching-refs/
+      | get ref
+      | each {|ref|
+        $ref
+        | parse --regex '^refs/tags/go(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | get -i 0
+      }
+      | sort-by -n major minor patch
+      | last
+      | get tag
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
 
 type ModOptions = "readonly" | "vendor" | "mod";
