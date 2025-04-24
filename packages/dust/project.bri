@@ -24,10 +24,12 @@ export default function dust(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(dust --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(dust());
+    dust --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(dust())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `Dust ${project.version}`;

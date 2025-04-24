@@ -32,10 +32,12 @@ export default function popeye(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     # Remove ANSI color codes from the output, before extracting the version
-    echo -n $(popeye version| sed -r 's/\x1B\[[0-9;]*[mK]//g' | awk '/^Version:/ { print $2 }') | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(popeye());
+    popeye version | sed -r 's/\x1B\[[0-9;]*[mK]//g' | awk '/^Version:/ { print $2 }' | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(popeye())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = project.version;

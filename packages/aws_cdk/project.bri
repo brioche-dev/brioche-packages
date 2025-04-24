@@ -20,9 +20,11 @@ export default function awsCdk() {
 export async function test() {
   const script = std.runBash`
     cdk --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(awsCdk());
+  `
+    .dependencies(awsCdk())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   const versionMatch = result.match(/([^\s]+) \(build [^\s]+\)/);
   const version = versionMatch == null ? null : versionMatch[1];

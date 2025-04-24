@@ -29,9 +29,11 @@ export default function kubent(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     kubent --version 2>&1 | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(kubent());
+  `
+    .dependencies(kubent())
+    .toFile();
 
-  const result = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   const versionMatch = result.match(/version v([^\s]+)/);
   const version = versionMatch == null ? null : versionMatch[1];

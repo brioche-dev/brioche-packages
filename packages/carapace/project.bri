@@ -29,10 +29,12 @@ export default function carapace(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(carapace --version 2>&1) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(carapace());
+    carapace --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(carapace())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `carapace-bin ${project.version}`;

@@ -25,9 +25,11 @@ export default function miniserve(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     miniserve --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(miniserve());
+  `
+    .dependencies(miniserve())
+    .toFile();
 
-  const result = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `miniserve ${project.version}`;

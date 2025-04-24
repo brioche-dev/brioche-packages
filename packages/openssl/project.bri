@@ -39,9 +39,11 @@ export default function openssl(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     openssl version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(openssl());
+  `
+    .dependencies(openssl())
+    .toFile();
 
-  const result = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `OpenSSL ${project.version}`;

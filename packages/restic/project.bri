@@ -25,15 +25,18 @@ export default function restic(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n "$(restic version)" | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(restic());
-  const output = await script.toFile().read();
+    restic version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(restic())
+    .toFile();
+
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `restic ${project.version}`;
   std.assert(
-    output.startsWith(expected),
-    `expected '${expected}', got '${JSON.stringify(output)}'`,
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;

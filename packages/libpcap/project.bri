@@ -31,9 +31,11 @@ export default function libpcap(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     pkg-config --modversion libpcap | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(std.toolchain(), libpcap());
+  `
+    .dependencies(std.toolchain(), libpcap())
+    .toFile();
 
-  const result = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = project.version;

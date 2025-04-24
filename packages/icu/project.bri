@@ -64,8 +64,11 @@ export default function icu(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     icuinfo | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(icu());
-  const result = await script.toFile().read();
+  `
+    .dependencies(icu())
+    .toFile();
+
+  const result = (await script.read()).trim();
 
   const version = result.match(/<param name="version">([^<]*)<\/param>/)?.at(1);
   const returnCode = result

@@ -51,9 +51,11 @@ export default function processCompose(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     process-compose version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(processCompose());
+  `
+    .dependencies(processCompose())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   const version = result.match(/^Version:\s*v([\d.]+)$/m)?.at(1);
 

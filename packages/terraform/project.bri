@@ -37,10 +37,12 @@ export default function terraform(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     # Only retrieve the first line of the output, other lines are not relevant for the version check
-    echo -n $(terraform --version | head -n 1) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(terraform());
+    terraform --version | head -n 1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(terraform())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `Terraform v${project.version}`;

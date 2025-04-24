@@ -27,10 +27,12 @@ export default function steampipe(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(steampipe --version 2>&1) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(steampipe());
+    steampipe --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(steampipe())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `Steampipe v${project.version}`;

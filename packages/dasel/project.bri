@@ -36,10 +36,12 @@ export default function dasel(): std.Recipe<std.Directory> {
 
 export async function test() {
   const script = std.runBash`
-    echo -n $(dasel --version) | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(dasel());
+    dasel --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(dasel())
+    .toFile();
 
-  const result = await script.toFile().read();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `dasel version ${project.version}`;
