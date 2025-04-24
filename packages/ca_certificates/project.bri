@@ -1,11 +1,13 @@
 import * as std from "std";
+import nushell from "nushell";
+import openssl from "openssl";
 
 export const project = {
   name: "ca_certificates",
   version: "2025-02-25",
 };
 
-export default function (): std.Recipe<std.Directory> {
+export default function caCertificates(): std.Recipe<std.Directory> {
   const cacert = Brioche.download(
     `https://curl.se/ca/cacert-${project.version}.pem`,
   );
@@ -24,4 +26,47 @@ export default function (): std.Recipe<std.Directory> {
       SSL_CERT_FILE: { fallback: { path: "etc/ssl/certs/ca-bundle.crt" } },
     },
   );
+}
+
+export async function test() {
+  const script = std.runBash`
+    openssl x509 -in $SSL_CERT_FILE -noout -text | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(caCertificates(), openssl())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the CA certificate
+  const expected = `CA:TRUE`;
+
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://curl.se/docs/caextract.html
+      | lines
+      | where {|it| $it | str contains 'href="/ca/cacert-' }
+      | parse --regex '<a href="/ca/cacert-(?<version>.+).pem"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
