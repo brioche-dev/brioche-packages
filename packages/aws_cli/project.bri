@@ -128,7 +128,7 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/aws/aws-cli/git/matching-refs/
+    let version = http get https://api.github.com/repos/aws/aws-cli/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
