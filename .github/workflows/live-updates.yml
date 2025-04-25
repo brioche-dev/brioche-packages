@@ -8,5 +8,39 @@ jobs:
     name: Check packages for live updates
     runs-on: ubuntu-22.04
     steps:
-      - run: |
-          echo "Work in progress..."
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.LIVE_UPDATE_APP_ID }}
+          private-key: ${{ secrets.LIVE_UPDATE_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      # See: https://github.com/actions/create-github-app-token/tree/a3c826a2042b1cef171cbabedfd93c93623f4061?tab=readme-ov-file#configure-git-cli-for-an-apps-bot-user
+      - name: Configure git user
+        run: |
+          user_id=$(gh api "/users/${app_slug}[bot]" --jq .id)
+          git config --global user.name "${app_slug}[bot]"
+          git config --global user.email "${user_id}+${app_slug}[bot]@users.noreply.github.com"
+        env:
+          app_slug: ${{ steps.app-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      # Re-run actions/checkout but persist credentials this time. This ensures
+      # we only persist the credentials now that we're ready to push
+      - name: Configure git credentials
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: true
+
+      - name: Push branch
+        run: |
+          git checkout -b build/live-update-test
+          git commit --allow-empty -m 'Live update test'
+          git push origin build/live-update-test
