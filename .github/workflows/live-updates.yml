@@ -82,4 +82,7 @@ jobs:
           git for-each-ref --format='%(refname:short)' refs/heads/live-update | while read branch; do
             echo "Pushing $branch"
             echo git push origin "$branch"
+            echo "Run URL: $run_url"
           done
+        env:
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
