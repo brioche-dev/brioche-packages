@@ -1,0 +1,12 @@
+name: Live updates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-live-updates:
+    name: Check packages for live updates
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          echo "Work in progress..."
