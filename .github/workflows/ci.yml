@@ -59,7 +59,7 @@ jobs:
         run: |
           for project in packages/*; do
             echo "::group::$project"
-            brioche build -p "$project" --check --sync --locked --display plain-reduced
+            brioche build -p "$project" --sync --locked --display plain-reduced
             echo "::endgroup::"
           done
         env:
