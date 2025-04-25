@@ -66,22 +66,10 @@ jobs:
             fi
           done
 
-      # Check out the repo again with actions/checkout but persist credentials
-      # this time. This sets up credentials, which we then copy over
-      # to the original checkout. See this issue:
-      # https://github.com/actions/checkout/issues/234
-      - name: Get git credentials
-        uses: actions/checkout@v4
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          path: temp-checkout
-          persist-credentials: true
-
-      # Copy the git config over to the main checkout to use the credentials
-      - name: Set up git credentials
-        run: |
-          cp temp-checkout/.git/config .git/config
-          rm -rf temp-checkout
+      - name: Configure git credentials
+        run: git remote set-url origin "$auth_url"
+        env:
+          auth_url: https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
 
       - name: Push branches
         run: |
