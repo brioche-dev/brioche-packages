@@ -17,10 +17,14 @@ jobs:
     runs-on: ubuntu-22.04
     # Skip jobs for PRs from `build/` and `live-update/` branches, since
     # both are already triggered by push events
-    if: ! (github.event_name == 'pull_request' && (startsWith(github.head_ref, 'build/') || startsWith(github.head_ref, 'live-update/')))
+    if: always() && ! (github.event_name == 'pull_request' && (startsWith(github.head_ref, 'build/') || startsWith(github.head_ref, 'live-update/')))
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        env:
+          event_name: ${{ github.event_name }}
+          head_ref: ${{ github.head_ref }}
+          condition: ${{ ! (github.event_name == 'pull_request' && (startsWith(github.head_ref, 'build/') || startsWith(github.head_ref, 'live-update/'))) }}
       - name: Install Brioche
         run: |
           mkdir -p ~/.local/bin
