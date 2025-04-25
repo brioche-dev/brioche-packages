@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-live-updates:
-    name: Check packages for live updates
+  live-update-packages:
+    name: Live-update packages
     runs-on: ubuntu-22.04
     steps:
       - name: Create GitHub App Token
