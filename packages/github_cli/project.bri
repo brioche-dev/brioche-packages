@@ -41,7 +41,7 @@ export async function test() {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `gh version ${project.version} (${project.latestBuildDate}) https://github.com/cli/cli/releases/tag/v${project.version}`;
+  const expected = `gh version ${project.version} (${project.latestBuildDate})\nhttps://github.com/cli/cli/releases/tag/v${project.version}`;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
