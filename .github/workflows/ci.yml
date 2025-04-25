@@ -72,6 +72,27 @@ jobs:
           AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
           AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
           AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
+      - name: Run project tests
+        run: |
+          for project in packages/*; do
+            if grep -q 'export.*test' "$project/project.bri"; then
+              echo "::group::$project"
+              brioche build -p "$project" -e test --sync --locked
+              echo "::endgroup::"
+            else
+              echo "$project: no tests found"
+            fi
+          done
+        env:
+          BRIOCHE_LEGACY_REGISTRY_SYNC: "true"
+          BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
+          BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_AWS_SECRET_ACCESS_KEY }}
+          AWS_ENDPOINT_URL_S3: ${{ secrets.CACHE_AWS_ENDPOINT_URL_S3 }}
+          AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
+          AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+          AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
       - name: Save failed processes
         if: failure()
         uses: actions/upload-artifact@v4
