@@ -15,6 +15,9 @@ jobs:
   check:
     name: Check packages
     runs-on: ubuntu-22.04
+    # Skip jobs for PRs from `build/` and `live-update/` branches, since
+    # both are already triggered by push events
+    if: ! (github.event_name == 'pull_request' && (startsWith(github.head_ref, 'build/') || startsWith(github.head_ref, 'live-update/')))
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
