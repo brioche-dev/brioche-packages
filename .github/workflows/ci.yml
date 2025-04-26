@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'build/**'
+      - 'live-update/**'
   pull_request:
 
 concurrency:
@@ -14,28 +15,35 @@ jobs:
   check:
     name: Check packages
     runs-on: ubuntu-22.04
+    # Skip jobs for PRs from `build/` and `live-update/` branches, since
+    # both are already triggered by push events
+    if: always() && ! (github.event_name == 'pull_request' && (startsWith(github.head_ref, 'build/') || startsWith(github.head_ref, 'live-update/')))
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        env:
+          event_name: ${{ github.event_name }}
+          head_ref: ${{ github.head_ref }}
+          condition: ${{ ! (github.event_name == 'pull_request' && (startsWith(github.head_ref, 'build/') || startsWith(github.head_ref, 'live-update/'))) }}
       - name: Install Brioche
         run: |
           mkdir -p ~/.local/bin
           curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Check projects
+      - name: Check packages
         run: |
-          for project in packages/*; do
-            echo "::group::$project"
-            brioche check -p "$project" --locked
-            brioche fmt -p "$project" --check
+          for package in packages/*; do
+            echo "::group::$package"
+            brioche check -p "$package" --locked
+            brioche fmt -p "$package" --check
             echo "::endgroup::"
           done
 
   build:
     name: Build packages
     needs: [check]
-    if: github.repository == 'brioche-dev/brioche-packages' && github.event_name == 'push' && ( github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/build/') )
+    if: github.repository == 'brioche-dev/brioche-packages' && github.event_name == 'push' && ( github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/build/') || startsWith(github.ref, 'refs/heads/live-update/') )
     runs-on: brioche-dev-builder-runner
     timeout-minutes: 720
     steps:
@@ -51,12 +59,33 @@ jobs:
           curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Build projects
+      - name: Build packages
         run: |
-          for project in packages/*; do
-            echo "::group::$project"
-            brioche build -p "$project" --check --sync --locked --display plain-reduced
+          for package in packages/*; do
+            echo "::group::$package"
+            brioche build -p "$package" --sync --locked --display plain-reduced
             echo "::endgroup::"
+          done
+        env:
+          BRIOCHE_LEGACY_REGISTRY_SYNC: "true"
+          BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
+          BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_AWS_SECRET_ACCESS_KEY }}
+          AWS_ENDPOINT_URL_S3: ${{ secrets.CACHE_AWS_ENDPOINT_URL_S3 }}
+          AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
+          AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+          AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
+      - name: Run package tests
+        run: |
+          for package in packages/*; do
+            if grep -q 'export.*test' "$package/project.bri"; then
+              echo "::group::$package"
+              brioche build -p "$package" -e test --sync --locked
+              echo "::endgroup::"
+            else
+              echo "$package: no tests found"
+            fi
           done
         env:
           BRIOCHE_LEGACY_REGISTRY_SYNC: "true"
@@ -90,11 +119,11 @@ jobs:
           curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Publish projects
+      - name: Publish packages
         run: |
-          for project in packages/*; do
-            echo "::group::$project"
-            brioche publish -p "$project"
+          for package in packages/*; do
+            echo "::group::$package"
+            brioche publish -p "$package"
             echo "::endgroup::"
           done
         env:
