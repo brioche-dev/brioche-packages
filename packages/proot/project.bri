@@ -56,7 +56,7 @@ export function test() {
   return std.runBash`
     proot --version
     proot -R "$tools" ls /
-    exit 1
+    touch "$BRIOCHE_OUTPUT"
   `
     .dependencies(proot())
     .env({ tools: std.tools() });
