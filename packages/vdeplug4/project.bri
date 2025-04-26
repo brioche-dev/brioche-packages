@@ -16,10 +16,11 @@ export const source = gitCheckout(
   }),
 );
 
-export default function (): std.Recipe<std.Directory> {
+export default function vdeplug4(): std.Recipe<std.Directory> {
   let vdeplug = cmakeBuild({
     source,
     dependencies: [std.toolchain(), s2argvExecs()],
+    runnable: "bin/vde_plug",
   });
 
   vdeplug = std.setEnv(vdeplug, {
@@ -28,6 +29,52 @@ export default function (): std.Recipe<std.Directory> {
   });
 
   return vdeplug;
+}
+
+export async function test() {
+  const src = std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <string.h>
+      #include <libvdeplug.h>
+
+      int main()
+      {
+          char *vnl = "vde:///tmp/vde.ctl";
+          struct vde_open_args args;
+
+          memset(&args, 0, sizeof(args));
+
+          // Open VDE connection
+          VDECONN *conn = vde_open(vnl, "vdeplug4-client", &args);
+          if (conn == NULL)
+          {
+              printf("Failed to open VDE connection");
+              return EXIT_SUCCESS;
+          }
+
+          vde_close(conn);
+
+          return EXIT_SUCCESS;
+      }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -lvdeplug
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), vdeplug4())
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "Failed to open VDE connection";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
