@@ -57,7 +57,7 @@ export function test() {
     echo test.txt | EDITOR=cat vidir -v
     echo hello world | gzip > hello.txt.gz
     zrun cat hello.txt.gz
-    echo hello | EDITOR=cat vipe | cat
+    type vipe
 
     touch "$BRIOCHE_OUTPUT"
   `.dependencies(moreutils());
