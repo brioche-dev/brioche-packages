@@ -4,7 +4,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "nginx",
-  version: "1.27.4",
+  version: "1.28.0",
 };
 
 const source = Brioche.download(
