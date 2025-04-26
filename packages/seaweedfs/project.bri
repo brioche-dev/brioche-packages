@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "seaweedfs",
-  version: "3.85",
+  version: "3.86",
 };
 
 const source = gitCheckout(
@@ -28,8 +28,15 @@ export async function test() {
     weed version | tee "$BRIOCHE_OUTPUT"
   `.dependencies(seaweedfs());
 
+  // HACK: SeaweedFS 3.86 returns a version number of 3.85!
+  // https://github.com/seaweedfs/seaweedfs/issues/6717
+  const expectedVersion = project.version === "3.86" ? "3.85" : project.version;
+
   const result = await recipe.toFile().read();
-  std.assert(result.includes(` ${project.version} `));
+  std.assert(
+    result.includes(` ${expectedVersion} `),
+    `Expected '${result}' to contain ' ${expectedVersion} '`,
+  );
 
   return recipe;
 }
