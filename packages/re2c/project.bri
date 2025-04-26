@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "re2c",
-  version: "4.1",
+  version: "4.2",
 };
 
 const source = Brioche.download(
