@@ -1,0 +1,26 @@
+name: "[Check]"
+
+on:
+  workflow_call:
+
+jobs:
+  check:
+    name: Check packages
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Brioche
+        run: |
+          mkdir -p ~/.local/bin
+          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
+          chmod +x ~/.local/bin/brioche
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Check packages
+        run: |
+          for package in packages/*; do
+            echo "::group::$package"
+            brioche check -p "$package" --locked
+            brioche fmt -p "$package" --check
+            echo "::endgroup::"
+          done

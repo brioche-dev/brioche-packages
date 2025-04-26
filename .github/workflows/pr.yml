@@ -1,0 +1,15 @@
+name: Check PR
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    uses: ./.github/workflows/_check.yml
+
+  # Build "Live update" PRs (PRs from `live-update/` branches from this repo)
+  build:
+    needs: [check]
+    if: github.event.pull_request.head.repo.full_name == github.repository && startsWith(github.head_ref, 'live-update/')
+    uses: ./.github/workflows/_build.yml
+    secrets: inherit
