@@ -15,7 +15,7 @@ const source = Brioche.download(
 // https://www.linuxfromscratch.org/blfs/view/12.2/general/unzip.html
 const patches = Brioche.includeDirectory("patches");
 
-export default function (): std.Recipe<std.Directory> {
+export default function unzip(): std.Recipe<std.Directory> {
   return std.runBash`
     patch -Np1 -i "$patches"/unzip-6.0-consolidated_fixes-1.patch
     patch -Np1 -i "$patches"/unzip-6.0-gcc14-1.patch
@@ -27,4 +27,23 @@ export default function (): std.Recipe<std.Directory> {
     .dependencies(std.toolchain())
     .workDir(source)
     .toDirectory();
+}
+
+export async function test() {
+  const script = std.runBash`
+    unzip --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(unzip())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `UnZip ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
