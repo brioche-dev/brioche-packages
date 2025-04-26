@@ -16,7 +16,7 @@ const source = gitCheckout(gitRef, {
   submodules: true,
 });
 
-export default function (): std.Recipe<std.Directory> {
+export default function pcre2(): std.Recipe<std.Directory> {
   const pcre2 = std.runBash`
     ./autogen.sh
     ./configure \\
@@ -37,6 +37,29 @@ export default function (): std.Recipe<std.Directory> {
     LIBRARY_PATH: { append: [{ path: "lib" }] },
     PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
   });
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libpcre2-8 | tee -a "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libpcre2-16 | tee -a "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libpcre2-32 | tee -a "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libpcre2-posix | tee -a "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), pcre2())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  const expectedNumber = 4;
+  std.assert(
+    result.match(new RegExp(expected, "g"))?.length === expectedNumber,
+    `expected '${expected}' ${expectedNumber} times, got '${result}'`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {

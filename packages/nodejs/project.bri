@@ -32,10 +32,47 @@ interface NpmInstallOptions {
   source: std.AsyncRecipe<std.Directory>;
 }
 
-export function test() {
-  return std.runBash`
+export async function test() {
+  const script = std.runBash`
     node --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(nodejs());
+  `
+    .dependencies(nodejs())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
+      | get ref
+      | each {|ref|
+        $ref
+        | parse --regex '^refs/tags/v(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | get -i 0
+      }
+      | sort-by -n major minor patch
+      | last
+      | get tag
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
 
 /**

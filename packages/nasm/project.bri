@@ -14,7 +14,7 @@ const source = gitCheckout(
   }),
 );
 
-export default function () {
+export default function nasm() {
   return std.runBash`
     ./autogen.sh
     ./configure
@@ -25,12 +25,32 @@ export default function () {
     ln -s "bin/nasm" "$BRIOCHE_OUTPUT/brioche-run"
   `
     .dependencies(std.toolchain())
-    .workDir(source);
+    .workDir(source)
+    .toDirectory();
+}
+
+export async function test() {
+  const script = std.runBash`
+    nasm --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nasm())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `NASM version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/netwide-assembler/nasm/git/matching-refs/
+    let version = http get https://api.github.com/repos/netwide-assembler/nasm/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref

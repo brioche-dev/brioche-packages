@@ -6,7 +6,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "caddy",
-  version: "2.9.1",
+  version: "2.10.0",
   extra: {
     xcaddy: {
       version: "0.4.4",

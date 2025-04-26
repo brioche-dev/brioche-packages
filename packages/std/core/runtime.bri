@@ -239,7 +239,7 @@ export type Platform = "x86_64-linux" | "aarch64-linux";
 
 export type Hash = { type: "sha256"; value: HexString };
 
-export type ArchiveFormat = "tar";
+export type ArchiveFormat = "tar" | "zip";
 
 export type CompressionFormat = "none" | "bzip2" | "gzip" | "xz" | "zstd";
 

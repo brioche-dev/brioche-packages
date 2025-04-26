@@ -52,7 +52,7 @@ export async function test() {
               }
           }
 
-          return 1;
+          return EXIT_SUCCESS;
       }
   `);
 
@@ -78,7 +78,7 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/virtualsquare/s2argv-execs/git/matching-refs/
+    let version = http get https://api.github.com/repos/virtualsquare/s2argv-execs/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
