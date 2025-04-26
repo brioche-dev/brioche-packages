@@ -44,7 +44,7 @@ export async function test() {
 export function autoUpdate() {
   const src = std.file(std.indoc`
     # Version can be suffixed with '-alpha.X'
-    let version = http get https://api.github.com/repos/XAMPPRocky/tokei/git/matching-refs/
+    let version = http get https://api.github.com/repos/XAMPPRocky/tokei/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
