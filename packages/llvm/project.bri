@@ -6,7 +6,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "llvm",
-  version: "20.1.2",
+  version: "20.1.3",
 };
 
 const source = gitCheckout(
