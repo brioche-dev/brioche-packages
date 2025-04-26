@@ -24,7 +24,7 @@ const pipDependencies = std.directory({
   ),
 });
 
-export default function (): std.Recipe<std.Directory> {
+export default function asciinema(): std.Recipe<std.Directory> {
   // Create a venv for asciinema
   let venv = std.recipe(python());
 
@@ -66,6 +66,37 @@ export default function (): std.Recipe<std.Directory> {
     args: [{ relativePath: "venv/bin/asciinema" }],
   });
   return std.withRunnableLink(recipe, "bin/asciinema");
+}
+
+export async function test() {
+  // Generate a locale which is required by asciinema to run properly
+  const locale = std.runBash`
+    mkdir -p "$BRIOCHE_OUTPUT"/C.UTF-8
+    localedef -i POSIX -f UTF-8 "$BRIOCHE_OUTPUT"/C.UTF-8 || true
+  `
+    .dependencies(std.toolchain())
+    .env({
+      I18NPATH: std.tpl`${std.toolchain()}/share/i18n`,
+    })
+    .toDirectory();
+
+  const script = std.runBash`
+    asciinema --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(asciinema())
+    .env({
+      LOCPATH: locale,
+      LANG: "C.UTF-8",
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `asciinema ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 export function autoUpdate() {
