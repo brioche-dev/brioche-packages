@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/opentofu/opentofu.git": {
-      "v1.9.0": "0d57aa4f35998bf2847ac3acb343f9e16b5c2995"
+      "v1.9.1": "308af66278c3ac4d264e19e73da931f3e8a8397d"
     }
   }
 }
