@@ -13,7 +13,7 @@ const source = Brioche.download(
   .peel();
 
 export default function pcre(): std.Recipe<std.Directory> {
-  let pcre = std.runBash`
+  const pcre = std.runBash`
     ./configure \\
       --prefix=/ \\
       --enable-jit \\
