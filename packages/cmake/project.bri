@@ -6,7 +6,7 @@ import curl from "curl";
 
 export const project = {
   name: "cmake",
-  version: "3.31.1",
+  version: "4.0.1",
 };
 
 function patch(): std.Recipe<std.File> {
