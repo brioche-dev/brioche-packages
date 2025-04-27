@@ -3,9 +3,6 @@
   "git_refs": {
     "https://github.com/proot-me/proot.git": {
       "v5.4.0": "bd5a5f63d72f8210d8cee76195eb9f0749e5bd70"
-    },
-    "https://github.com/troydhanson/uthash.git": {
-      "master": "f69112c04f1b6e059b8071cb391a1fcc83791a00"
     }
   }
 }

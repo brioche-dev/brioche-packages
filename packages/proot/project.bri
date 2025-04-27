@@ -3,19 +3,20 @@ import * as std from "std";
 import git, { gitCheckout } from "git";
 import talloc from "talloc";
 import libarchive from "libarchive";
+import uthash from "uthash";
 
 export const project = {
   name: "proot",
   version: "5.4.0",
 };
 
-export const source = std.recipeFn(() => {
-  const source = gitCheckout(
-    Brioche.gitRef({
-      repository: "https://github.com/proot-me/proot.git",
-      ref: `v${project.version}`,
-    }),
-  );
+const gitRef = await Brioche.gitRef({
+  repository: "https://github.com/proot-me/proot.git",
+  ref: `v${project.version}`,
+});
+const source = std.recipeFn(() => {
+  const source = gitCheckout(gitRef);
+
   return std.runBash`
     cd "$BRIOCHE_OUTPUT"
     sed -i 's|/bin/echo|/usr/bin/env echo|g' src/GNUmakefile
@@ -39,27 +40,24 @@ export default function proot(): std.Recipe<std.Directory> {
   return proot;
 }
 
-function uthash(): std.Recipe<std.Directory> {
-  const uthash = gitCheckout(
-    Brioche.gitRef({
-      repository: "https://github.com/troydhanson/uthash.git",
-      ref: "master",
-    }),
-  );
-
-  return std.setEnv(uthash, {
-    CPATH: { append: [{ path: "include" }] },
-  });
-}
-
-export function test() {
-  return std.runBash`
-    proot --version
-    proot -R "$tools" ls /
-    touch "$BRIOCHE_OUTPUT"
+export async function test() {
+  // No version is outputted, only the short hash of the commit version is displayed
+  const script = std.runBash`
+    proot --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(proot())
-    .env({ tools: std.tools() });
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = `-${gitRef.commit.slice(0, 8)}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
 
 export function autoUpdate() {
