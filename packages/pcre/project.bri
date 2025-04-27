@@ -1,0 +1,91 @@
+import * as std from "std";
+import nushell from "nushell";
+
+export const project = {
+  name: "pcre",
+  version: "8.45",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/pcre/pcre/${project.version}/pcre-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function pcre(): std.Recipe<std.Directory> {
+  const pcre = std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-jit \\
+      --enable-utf8 \\
+      --enable-pcre8 \\
+      --enable-pcre16 \\
+      --enable-pcre32 \\
+      --enable-unicode-properties
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain())
+    .workDir(source)
+    .toDirectory();
+
+  return std.setEnv(pcre, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libpcre | tee -a "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libpcre16 | tee -a "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libpcre32 | tee -a "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libpcrecpp | tee -a "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libpcreposix | tee -a "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), pcre())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  const expectedNumber = 5;
+  std.assert(
+    result.match(new RegExp(expected, "g"))?.length === expectedNumber,
+    `expected '${expected}' ${expectedNumber} times, got '${result}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let versionWithoutPatch = http get https://sourceforge.net/projects/pcre/files/pcre
+      | lines
+      | where {|it| $it | str contains 'href="/projects/pcre/files/pcre/' }
+      | parse --regex '<a href="/projects/pcre/files/pcre/(?<version>.+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let version = http get $"https://sourceforge.net/projects/pcre/files/pcre/($versionWithoutPatch)"
+      | lines
+      | where {|it| ($it | str contains 'a href="https://sourceforge.net') and ($it | str contains '.tar.gz') and (not ($it | str contains '.sig')) }
+      | parse --regex ($"<a href=\\"https://sourceforge.net/projects/pcre/files/pcre/($versionWithoutPatch)/pcre-" + '(?<version>[^"]+)\.tar\.gz/')
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
