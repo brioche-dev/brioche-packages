@@ -16,7 +16,7 @@ std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
 // Ensure the minor version number matches the version
 std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
 
-export const source = Brioche.download(
+const source = Brioche.download(
   `https://download.gnome.org/sources/libxml2/${project.extra.majorVersion}.${project.extra.minorVersion}/libxml2-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
