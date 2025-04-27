@@ -15,7 +15,7 @@ const gitRef = Brioche.gitRef({
   repository: "https://github.com/F1bonacc1/process-compose.git",
   ref: `v${project.version}`,
 });
-export const source = gitCheckout(gitRef);
+const source = gitCheckout(gitRef);
 
 export default function processCompose(): std.Recipe<std.Directory> {
   let processCompose = std.recipeFn(async () =>

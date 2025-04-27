@@ -8,7 +8,7 @@ export const project = {
   version: "1.4",
 };
 
-export const source = gitCheckout(
+const source = gitCheckout(
   Brioche.gitRef({
     repository: "https://github.com/virtualsquare/s2argv-execs.git",
     ref: project.version,

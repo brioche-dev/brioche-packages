@@ -15,6 +15,7 @@ jobs:
 
   build:
     needs: [check]
+    if: github.repository == 'brioche-dev/brioche-packages'
     uses: ./.github/workflows/_build.yml
     secrets: inherit
 

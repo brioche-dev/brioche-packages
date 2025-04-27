@@ -5,7 +5,7 @@ export const project = {
   version: "1.11.3",
 };
 
-export const source = Brioche.download(
+const source = Brioche.download(
   `https://git.sr.ht/~sircmpwn/scdoc/archive/${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
