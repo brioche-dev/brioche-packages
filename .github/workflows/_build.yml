@@ -2,10 +2,15 @@ name: "[Build]"
 
 on:
   workflow_call:
+    inputs:
+      enabled:
+        type: boolean
+        default: true
 
 jobs:
   build:
     name: Build packages
+    if: inputs.enabled
     runs-on: brioche-dev-builder-runner
     timeout-minutes: 720
     steps:
