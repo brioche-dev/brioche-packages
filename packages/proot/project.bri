@@ -9,7 +9,7 @@ export const project = {
   version: "5.4.0",
 };
 
-export const source = std.recipeFn(() => {
+const source = std.recipeFn(() => {
   const source = gitCheckout(
     Brioche.gitRef({
       repository: "https://github.com/proot-me/proot.git",

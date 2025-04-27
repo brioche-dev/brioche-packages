@@ -10,7 +10,7 @@ export const project = {
   version: "0.70",
 };
 
-export const source = gitCheckout(
+const source = gitCheckout(
   Brioche.gitRef({
     repository: "git://git.joeyh.name/moreutils",
     ref: project.version,
