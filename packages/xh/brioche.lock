@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ducaale/xh.git": {
+      "v0.24.0": "21e998e5b2f8f2cef28da2b5ca83b9bf9dde5c60"
+    }
+  }
+}
