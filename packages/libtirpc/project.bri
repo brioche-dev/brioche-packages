@@ -1,28 +1,18 @@
 import * as std from "std";
-import { gitCheckout } from "git";
+import nushell from "nushell";
 
 export const project = {
   name: "libtirpc",
   version: "1.3.6",
-  extra: {
-    versionTag: "libtirpc-1-3-6",
-  },
 };
 
-std.assert(
-  project.extra.versionTag ===
-    `libtirpc-${project.version.replaceAll(".", "-")}`,
-  `version tag '${project.extra.versionTag}' does not match version ${project.version}`,
-);
+const source = Brioche.download(
+  `https://sourceforge.net/projects/libtirpc/files/libtirpc/${project.version}/libtirpc-${project.version}.tar.bz2/download`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "git://git.linux-nfs.org/projects/steved/libtirpc.git",
-    ref: project.extra.versionTag,
-  }),
-);
-
-export default function (): std.Recipe<std.Directory> {
+export default function libtirpc(): std.Recipe<std.Directory> {
   let libtirpc = std.runBash`
     ./bootstrap
     ./configure \\
@@ -43,6 +33,52 @@ export default function (): std.Recipe<std.Directory> {
   libtirpc = makePkgConfigPathsRelative(libtirpc);
 
   return libtirpc;
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libtirpc | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), libtirpc())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let sourceUrl = http get https://sourceforge.net/projects/libtirpc/files/libtirpc
+      | lines
+      | where {|it| $it | str contains 'href="/projects/libtirpc/files/libtirpc/' }
+      | parse --regex '<a href="/projects/libtirpc/files/libtirpc/(?<version>.+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let version = http get $"https://sourceforge.net/projects/libtirpc/files/libtirpc/($sourceUrl)"
+      | lines
+      | where {|it| ($it | str contains 'a href="https://sourceforge.net') and ($it | str contains '.tar.bz2') }
+      | parse --regex ($"<a href=\\"https://sourceforge.net/projects/libtirpc/files/libtirpc/($sourceUrl)/libtirpc-" + '(?<version>[^"]+)\.tar\.bz2/')
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
 
 // TODO: Figure out where to move this, this is copied from `std`
