@@ -1,0 +1,61 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+import { gitCheckout } from "git";
+import nushell from "nushell";
+
+export const project = {
+  name: "rip2",
+  version: "0.9.4",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/MilesCranmer/rip2.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function rip2(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/rip",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    rip --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rip2())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const version = result.split("\n").at(0);
+
+  // Check that the result contains the expected version
+  const expected = `rip ${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
+export async function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/MilesCranmer/rip2/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}

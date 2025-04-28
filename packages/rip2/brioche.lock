@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/MilesCranmer/rip2.git": {
+      "v0.9.4": "b0af446ef693c5d2b08a6ae36d7b6156c7ec72f6"
+    }
+  }
+}
