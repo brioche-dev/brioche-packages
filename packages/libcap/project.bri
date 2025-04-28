@@ -1,0 +1,155 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import jq from "jq";
+
+export const project = {
+  name: "libcap",
+  version: "1.2.76",
+};
+
+const source = std.recipeFn(() => {
+  const source = gitCheckout(
+    Brioche.gitRef({
+      repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
+      ref: `v${project.version}`,
+    }),
+  );
+
+  return std.runBash`
+    sed -i 's|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT/progs/mkcapshdoc.sh"
+  `
+    .outputScaffold(source)
+    .toDirectory();
+});
+
+export default function libcap(): std.Recipe<std.Directory> {
+  let libcap = std.runBash`
+    make \\
+      prefix=/ \\
+      lib=lib \\
+      sbin=bin \\
+      OBJCOPY=brioche-objcopy
+    make install \\
+      prefix=/ \\
+      lib=lib \\
+      sbin=bin \\
+      DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain(), std.runtimeUtils(), briocheObjcopy())
+    .toDirectory();
+
+  libcap = std.setEnv(libcap, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+  libcap = makePkgConfigPathsRelative(libcap);
+  libcap = fixSharedObjects(libcap);
+
+  return libcap;
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libcap | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), libcap())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version (minor + patch only)
+  const expected = project.version.split(".").slice(1).join(".");
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+function briocheObjcopy(): std.Recipe<std.Directory> {
+  // A custom wrapper script around `objcopy`, which automatically resolves
+  // packed executable paths into unpacked executable paths.
+  //
+  // The libcap build uses `objcopy` to get the interpreter path of an
+  // executable, which fails with packed executables. This script fixes it by
+  // redirecting the `objcopy` call to the underlying executable path.
+  const briocheObjcopyScript = std
+    .file(std.indoc`
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      args=()
+      for arg in "$@"; do
+        if [[ $arg == -* ]]; then
+          args+=( "$arg" )
+        else
+          args+=( "$(brioche-packer source-path "$arg" 2>/dev/null || echo "$arg")" )
+        fi
+      done
+
+      printf '%s\\n' objcopy "\${args[@]}"
+      exec objcopy "\${args[@]}"
+    `)
+    .withPermissions({ executable: true });
+
+  let briocheObjcopy = std.directory({
+    "bin/brioche-objcopy": briocheObjcopyScript,
+  });
+  briocheObjcopy = std.autopack(briocheObjcopy, {
+    paths: ["bin/brioche-objcopy"],
+    scriptConfig: { enabled: true },
+    linkDependencies: [std.bash()],
+  });
+
+  return briocheObjcopy;
+}
+
+function fixSharedObjects(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // `libcap` compiles its shared libraries with extra flags so they also work
+  // as executables. `brioche-ld` therefore treats them like executables, which
+  // breaks when they are used as shared libraries. This script repacks each
+  // one as a shared library instead.
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT"/lib -name '*.so*' -type f -print0 \
+      | while IFS= read -r -d $'\\0' lib; do
+        source_path="$(brioche-packer source-path "$lib")"
+        if [ -z "$source_path" ]; then
+          echo "Skipping $lib (not wrapped)"
+          continue
+        fi
+        if [ "$source_path" = "$lib" ]; then
+          echo "Skipping $lib (already static)"
+          continue
+        fi
+
+        new_pack="$(brioche-packer read "$lib" | jq '{type: "static", libraryDirs}')"
+        echo "Updating $lib -> $source_path"
+
+        brioche-packer pack \\
+          --packed "$source_path" \\
+          --output "$lib" \\
+          --pack "$new_pack"
+      done
+  `
+    .dependencies(jq(), std.runtimeUtils())
+    .outputScaffold(recipe)
+    .toDirectory();
+}
+
+// TODO: Figure out where to move this, this is copied from `std`
+function makePkgConfigPathsRelative(
+  recipe: std.AsyncRecipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replaces things that look like absolute paths in pkg-config files with
+  // relative paths (using the `${pcfiledir}` variable)
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
+      | while IFS= read -r -d $'\\0' file; do
+        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+      done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
