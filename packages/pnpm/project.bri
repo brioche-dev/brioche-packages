@@ -1,0 +1,50 @@
+import nushell from "nushell";
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+
+export const project = {
+  name: "pnpm",
+  version: "10.10.0",
+};
+
+export default function pnpm(): std.Recipe<std.Directory> {
+  const recipe = npmInstallGlobal({
+    packageName: project.name,
+    version: project.version,
+  });
+
+  return std.withRunnableLink(recipe, "bin/pnpm");
+}
+
+export async function test() {
+  const script = std.runBash`
+    pnpm --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pnpm())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/pnpm/pnpm/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project | from json | update version $version | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
