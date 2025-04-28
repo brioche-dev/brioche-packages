@@ -8,7 +8,7 @@ export const project = {
   packageName: "@anthropic-ai/claude-code",
 };
 
-export default function claudeCode() {
+export default function claudeCode(): std.Recipe<std.Directory> {
   const recipe = npmInstallGlobal({
     packageName: project.packageName,
     version: project.version,

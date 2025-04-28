@@ -8,7 +8,7 @@ export const project = {
   packageName: "aws-cdk",
 };
 
-export default function awsCdk() {
+export default function awsCdk(): std.Recipe<std.Directory> {
   const recipe = npmInstallGlobal({
     packageName: project.packageName,
     version: project.version,
