@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/GyulyVGC/sniffnet.git": {
+      "v1.3.1": "ecb20f62d3475112105b4210b2cba5a652a08f16"
+    }
+  }
+}

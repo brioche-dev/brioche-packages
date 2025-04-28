@@ -1,0 +1,62 @@
+import nushell from "nushell";
+import * as std from "std";
+import alsa_lib from "alsa_lib";
+import libpcap from "libpcap";
+import { gitCheckout } from "git";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "sniffnet",
+  version: "1.3.1",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/GyulyVGC/sniffnet.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function sniffnet(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [alsa_lib(), libpcap()],
+    runnable: "bin/sniffnet",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    sniffnet --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sniffnet())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `sniffnet ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
