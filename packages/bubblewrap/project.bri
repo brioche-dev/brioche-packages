@@ -1,0 +1,66 @@
+import * as std from "std";
+import meson from "meson";
+import ninja from "ninja";
+import cmake from "cmake";
+import libcap from "libcap";
+import nushell from "nushell";
+
+export const project = {
+  name: "bubblewrap",
+  version: "0.11.0",
+};
+
+const source = Brioche.download(
+  `https://github.com/containers/bubblewrap/releases/download/v${project.version}/bubblewrap-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function bubblewrap(): std.Recipe<std.Directory> {
+  const bubblewrap = std.runBash`
+    meson setup _builddir --prefix /
+    meson compile -C _builddir
+    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), meson(), ninja(), cmake(), libcap())
+    .workDir(source)
+    .toDirectory();
+
+  return std.withRunnableLink(bubblewrap, "bin/bwrap");
+}
+
+export async function test() {
+  const script = std.runBash`
+    bwrap --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(bubblewrap())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `bubblewrap ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/containers/bubblewrap/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
