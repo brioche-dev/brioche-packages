@@ -1,7 +1,6 @@
 import * as std from "std";
 import { gitCheckout } from "git";
 import jq from "jq";
-import nushell from "nushell";
 
 export const project = {
   name: "libcap",
