@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ninja-build/ninja.git": {
+      "v1.12.1": "2daa09ba270b0a43e1929d29b073348aa985dfaa"
+    }
+  }
+}
