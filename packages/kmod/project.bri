@@ -1,6 +1,7 @@
 import * as std from "std";
 import scdoc from "scdoc";
 import openssl from "openssl";
+import nushell from "nushell";
 
 export const project = {
   name: "kmod",
@@ -31,13 +32,49 @@ export default function kmod(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export function test() {
-  return std.runBash`
+export async function test() {
+  const script = std.runBash`
     depmod --version | tee -a "$BRIOCHE_OUTPUT"
     insmod --version | tee -a "$BRIOCHE_OUTPUT"
-    lsmod | tee -a "$BRIOCHE_OUTPUT"
     modinfo --version | tee -a "$BRIOCHE_OUTPUT"
     modprobe --version | tee -a "$BRIOCHE_OUTPUT"
     rmmod --version | tee -a "$BRIOCHE_OUTPUT"
-  `.dependencies(kmod());
+  `
+    .dependencies(kmod())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `kmod version ${project.version}`;
+  const expectedNumber = 5;
+  std.assert(
+    result.match(new RegExp(expected, "g"))?.length === expectedNumber,
+    `expected '${expected}' ${expectedNumber} times, got '${result}'`,
+  );
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://www.kernel.org/pub/linux/utils/kernel/kmod
+      | lines
+      | where {|it| ($it | str contains 'href="kmod-') and ($it | str contains '.tar.gz')}
+      | parse --regex '<a href="kmod-(?<version>.+).tar.gz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
