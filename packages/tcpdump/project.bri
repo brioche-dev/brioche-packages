@@ -12,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "xz")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function tcpdump(): std.Recipe<std.Directory> {
   const tcpdump = std.runBash`
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -22,4 +22,23 @@ export default function (): std.Recipe<std.Directory> {
     .toDirectory();
 
   return std.withRunnableLink(tcpdump, "bin/tcpdump");
+}
+
+export async function test() {
+  const script = std.runBash`
+    tcpdump --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tcpdump())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tcpdump version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
