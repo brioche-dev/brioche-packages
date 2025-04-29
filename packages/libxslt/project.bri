@@ -62,14 +62,14 @@ export async function test() {
 
 export function autoUpdate() {
   const src = std.file(std.indoc`
-    let versionWithoutPatch = http get https://download.gnome.org/sources/libxslt
+    let sourceUrl = http get https://download.gnome.org/sources/libxslt
       | lines
       | where {|it| $it | str contains 'href="' }
       | parse --regex '<a href="(?<version>.+)/"'
       | sort-by --natural --reverse version
       | get 0.version
 
-    let version = http get $"https://download.gnome.org/sources/libxslt/($versionWithoutPatch)"
+    let version = http get $"https://download.gnome.org/sources/libxslt/($sourceUrl)"
       | lines
       | where {|it| ($it | str contains 'a href="libxslt') and (not ($it | str contains '.sha256sum')) and (not ($it | str contains '.news')) }
       | parse --regex '<a href="libxslt-(?<version>[^"]+)\.tar\.xz"'
