@@ -1,5 +1,6 @@
 import * as std from "std";
 import { gitCheckout } from "git";
+import nushell from "nushell";
 import perl from "perl";
 import unzip from "unzip";
 import libxml2 from "libxml2";
@@ -41,26 +42,43 @@ export default function moreutils(): std.Recipe<std.Directory> {
   return moreutils;
 }
 
-export function test() {
-  return std.runBash`
-    chronic true
-    combine <(echo foo) and <(echo bar)
-    errno 13
-    ifdata -pe eth0
-    ifne false
-    isutf8 <(echo hello)
-    mispipe true false
-    parallel sh -c "echo hi; echo bye" -- 1 2 3
-    pee true
-    sponge test.txt
-    echo foo | ts
-    echo test.txt | EDITOR=cat vidir -v
-    echo hello world | gzip > hello.txt.gz
-    zrun cat hello.txt.gz
-    type vipe
+export async function test() {
+  const script = std.runBash`
+    errno 13 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(moreutils())
+    .toFile();
 
-    touch "$BRIOCHE_OUTPUT"
-  `.dependencies(moreutils());
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = `EACCES 13 Permission denied`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function autoUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://git.joeyh.name/git/moreutils.git/refs/tags
+      | lines
+      | where {|it| ($it | str contains 'href="') and (not ($it | str contains 'sponge')) }
+      | parse --regex '<a href="(?<version>[0-9.]+)"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
 }
 
 const xmlCatalogs = std.directory({
