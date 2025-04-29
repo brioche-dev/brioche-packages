@@ -44,7 +44,7 @@ jobs:
 
           for package in packages/*; do
             branch_name="live-update/$(basename "$package")"
-            if grep -q 'export.*autoUpdate' "$package/project.bri"; then
+            if grep -q 'export.*liveUpdate' "$package/project.bri"; then
               echo "::group::$package"
 
               git checkout "origin/${branch_name}" || git checkout "${git_head}"

@@ -54,7 +54,7 @@ export async function test() {
   return script;
 }
 
-export function autoUpdate() {
+export function liveUpdate() {
   const src = std.file(std.indoc`
     # Version can either be prefixed with 'v' or not
     let version = http get https://api.github.com/repos/kamiyaa/joshuto/git/matching-refs/tags

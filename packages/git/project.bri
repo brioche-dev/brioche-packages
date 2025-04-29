@@ -49,7 +49,7 @@ export async function test() {
   return script;
 }
 
-export function autoUpdate() {
+export function liveUpdate() {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/git/git/git/matching-refs/
       | get ref

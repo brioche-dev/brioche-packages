@@ -60,7 +60,7 @@ export async function test() {
   return script;
 }
 
-export function autoUpdate() {
+export function liveUpdate() {
   const src = std.file(std.indoc`
     let sourceUrl = http get https://download.gnome.org/sources/libxslt
       | lines
