@@ -7,7 +7,7 @@ export const project = {
   version: "8.5.3",
 };
 
-export default function zx() {
+export default function zx(): std.Recipe<std.Directory> {
   const recipe = npmInstallGlobal({
     packageName: "zx",
     version: project.version,

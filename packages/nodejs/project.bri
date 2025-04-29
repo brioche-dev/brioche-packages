@@ -89,7 +89,7 @@ export function autoUpdate() {
  * import * as std from "std";
  * import nodejs, { npmInstall } from "nodejs";
  *
- * export default function () {
+ * export default function (): std.Recipe<std.Directory> {
  *   // Get all the files for the NPM package
  *   const source = Brioche.glob("src", "package.lock", "package.json");
  *

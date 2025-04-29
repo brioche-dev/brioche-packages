@@ -14,7 +14,7 @@ const source = gitCheckout(
   }),
 );
 
-export default function nasm() {
+export default function nasm(): std.Recipe<std.Directory> {
   return std.runBash`
     ./autogen.sh
     ./configure

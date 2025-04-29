@@ -205,7 +205,7 @@ export interface CargoBuildOptions {
  * import openssl from "openssl";
  * import { cargoBuild } from "rust";
  *
- * export default function () {
+ * export default function (): std.Recipe<std.Directory> {
  *   return cargoBuild({
  *     source: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",

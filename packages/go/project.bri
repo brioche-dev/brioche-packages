@@ -130,7 +130,7 @@ interface GoBuildOptions {
  * import { goBuild } from "go";
  * import openssl from "openssl";
  *
- * export default function {
+ * export default function (): std.Recipe<std.Directory> {
  *   return goBuild({
  *     source: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
  *     dependencies: [openssl()],
