@@ -61,7 +61,7 @@ export async function test() {
   return script;
 }
 
-export function autoUpdate() {
+export function liveUpdate() {
   const src = std.file(std.indoc`
     # Get the URL that '/ftp/latest' redirects to. The resulting URL
     # will have the version number at the end

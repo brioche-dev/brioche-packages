@@ -41,7 +41,7 @@ export async function test() {
   return recipe;
 }
 
-export async function autoUpdate() {
+export async function liveUpdate() {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/seaweedfs/seaweedfs/releases/latest
       | get tag_name

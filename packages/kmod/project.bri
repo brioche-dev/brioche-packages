@@ -56,7 +56,7 @@ export async function test() {
   return script;
 }
 
-export function autoUpdate() {
+export function liveUpdate() {
   const src = std.file(std.indoc`
     let version = http get https://www.kernel.org/pub/linux/utils/kernel/kmod
       | lines
