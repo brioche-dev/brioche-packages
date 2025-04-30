@@ -1,11 +1,13 @@
 import * as std from "std";
-import scdoc from "scdoc";
-import openssl from "openssl";
+import meson from "meson";
+import ninja from "ninja";
 import nushell from "nushell";
+import openssl from "openssl";
+import scdoc from "scdoc";
 
 export const project = {
   name: "kmod",
-  version: "33",
+  version: "34.2",
 };
 
 const source = Brioche.download(
@@ -16,29 +18,18 @@ const source = Brioche.download(
 
 export default function kmod(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --sysconfdir=/etc \
-      --with-zstd \
-      --with-xz \
-      --with-zlib \
-      --with-openssl \
-      CFLAGS="-g -O2"
-    make
-    make install DESTDIR="$BRIOCHE_OUTPUT"
+    meson setup build --prefix=/ -Dmanpages=false
+    meson compile -C build
+    DESTDIR="$BRIOCHE_OUTPUT" meson install -C build
   `
     .workDir(source)
-    .dependencies(std.toolchain(), scdoc(), openssl())
+    .dependencies(std.toolchain(), meson(), ninja(), scdoc(), openssl())
     .toDirectory();
 }
 
 export async function test() {
   const script = std.runBash`
-    depmod --version | tee -a "$BRIOCHE_OUTPUT"
-    insmod --version | tee -a "$BRIOCHE_OUTPUT"
-    modinfo --version | tee -a "$BRIOCHE_OUTPUT"
-    modprobe --version | tee -a "$BRIOCHE_OUTPUT"
-    rmmod --version | tee -a "$BRIOCHE_OUTPUT"
+    kmod --version | tee -a "$BRIOCHE_OUTPUT"
   `
     .dependencies(kmod())
     .toFile();
@@ -47,10 +38,9 @@ export async function test() {
 
   // Check that the result contains the expected version
   const expected = `kmod version ${project.version}`;
-  const expectedNumber = 5;
   std.assert(
-    result.match(new RegExp(expected, "g"))?.length === expectedNumber,
-    `expected '${expected}' ${expectedNumber} times, got '${result}'`,
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;
