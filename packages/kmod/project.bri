@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "kmod",
-  version: "33",
+  version: "34.2",
 };
 
 const source = Brioche.download(
