@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://nodejs.org/dist/v23.6.1/node-v23.6.1-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v23.11.0/node-v23.11.0-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "9387c4bf8f175e81cb2f004f3f4b2cd96abfb708df3755142e878effe035fcc5"
+      "value": "fa9ae28d8796a6cfb7057397e1eea30ca1c61002b42b8897f354563a254e7cf5"
     }
   }
 }
