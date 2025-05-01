@@ -12,7 +12,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function talloc(): std.Recipe<std.Directory> {
   let talloc = std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
     make
@@ -29,4 +29,20 @@ export default function (): std.Recipe<std.Directory> {
   });
 
   return talloc;
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion talloc | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), talloc())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
