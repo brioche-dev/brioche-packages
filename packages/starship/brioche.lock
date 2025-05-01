@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/starship/starship.git": {
+      "v1.23.0": "661c8a2c1cc43b1c0ba1f034ee1dd17442cce815"
+    }
+  }
+}
