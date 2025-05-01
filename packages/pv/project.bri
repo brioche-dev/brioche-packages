@@ -11,7 +11,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function pv(): std.Recipe<std.Directory> {
   const pv = std.runBash`
     ./configure --prefix=/
     make
@@ -22,4 +22,23 @@ export default function (): std.Recipe<std.Directory> {
     .toDirectory();
 
   return std.withRunnableLink(pv, "bin/pv");
+}
+
+export async function test() {
+  const script = std.runBash`
+    pv --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pv())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `pv ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
