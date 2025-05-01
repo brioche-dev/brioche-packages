@@ -42,24 +42,21 @@ export default function perl(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export function test() {
-  const testScript = std.file(std.indoc`
-    use strict;
-    use warnings FATAL => 'all';
-    use feature 'say';
-    use threads;
-
-    threads->create(sub {
-      say "Writing ", $ENV{BRIOCHE_OUTPUT};
-      open my $fh, '>', $ENV{BRIOCHE_OUTPUT};
-      close $fh;
-    })->join();
-  `);
-
-  return std.runBash`
-    perl --version
-    perl "$test_script"
+export async function test() {
+  const script = std.runBash`
+    perl --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(perl())
-    .env({ test_script: testScript });
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `v${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
