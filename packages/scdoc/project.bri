@@ -26,7 +26,7 @@ export default function scdoc(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export function test() {
+export async function test() {
   const exampleFile = std.file(std.indoc`
     SCDOC_TEST(7)
 
@@ -34,9 +34,22 @@ export function test() {
 
     Hello world! This is an example scdoc file :)
   `);
-  return std.runBash`
+
+  const script = std.runBash`
     scdoc < "$example_file" | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(scdoc())
-    .env({ example_file: exampleFile });
+    .env({ example_file: exampleFile })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = `scdoc ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
