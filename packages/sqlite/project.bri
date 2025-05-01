@@ -25,7 +25,7 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
+export default function sqlite(): std.Recipe<std.Directory> {
   let sqlite = std.runBash`
     ./configure \\
       --prefix=/ \\
@@ -48,6 +48,22 @@ export default function (): std.Recipe<std.Directory> {
   sqlite = std.withRunnableLink(sqlite, "bin/sqlite3");
 
   return sqlite;
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion sqlite3 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), sqlite())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
 }
 
 /**
