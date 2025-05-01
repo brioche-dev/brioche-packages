@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-33.tar.xz": {
+    "https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-34.2.tar.xz": {
       "type": "sha256",
-      "value": "dc768b3155172091f56dc69430b5481f2d76ecd9ccb54ead8c2540dbcf5ea9bc"
+      "value": "5a5d5073070cc7e0c7a7a3c6ec2a0e1780850c8b47b3e3892226b93ffcb9cb54"
     }
   }
 }
