@@ -1,0 +1,59 @@
+import nushell from "nushell";
+import * as std from "std";
+import { cargoBuild } from "rust";
+import { gitCheckout } from "git";
+
+export const project = {
+  name: "tailspin",
+  version: "5.4.2",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/bensadeh/tailspin.git",
+    ref: project.version,
+  }),
+);
+
+export default function tailspin(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/tspin",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    tspin --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tailspin())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tspin ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/bensadeh/tailspin/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
