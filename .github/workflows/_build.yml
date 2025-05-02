@@ -34,7 +34,6 @@ jobs:
             echo "::endgroup::"
           done
         env:
-          BRIOCHE_LEGACY_REGISTRY_SYNC: "true"
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
           BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
@@ -55,7 +54,6 @@ jobs:
             fi
           done
         env:
-          BRIOCHE_LEGACY_REGISTRY_SYNC: "true"
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
           BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
