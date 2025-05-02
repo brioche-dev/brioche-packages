@@ -8,7 +8,7 @@ export const project = {
   version: "2.10",
 };
 
-const gitRef = Brioche.gitRef({
+const gitRef = await Brioche.gitRef({
   repository: "https://github.com/peadar/pstack.git",
   ref: `v${project.version}`,
 });
@@ -21,7 +21,7 @@ export default async function pstack(): Promise<std.Recipe<std.Directory>> {
     config: "RelWithDebInfo",
     dependencies: [std.toolchain()],
     set: {
-      VERSION_TAG: (await gitRef).commit,
+      VERSION_TAG: gitRef.commit,
     },
     env: {
       CMAKE_BUILD_PARALLEL_LEVEL: "16",
@@ -40,7 +40,7 @@ export async function test() {
   const version = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = (await gitRef).commit;
+  const expected = gitRef.commit;
   std.assert(version === expected, `expected '${expected}', got '${version}'`);
 
   return script;
