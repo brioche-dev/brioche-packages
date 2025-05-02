@@ -29,7 +29,7 @@ const source = std.recipeFn(() => {
 });
 
 export default function awsCli(): std.Recipe<std.Directory> {
-  // Create a venv for aws-cli
+  // Create a venv
   let venv = std.recipe(python({ version: "3.12" }));
 
   // Download dependencies from PyPI
@@ -80,7 +80,7 @@ export default function awsCli(): std.Recipe<std.Directory> {
   // shebang script that we need to re-fix
   venv = std.recipe(fixShebangs(venv));
 
-  // Install aws-cli into the venv
+  // Install the application into the venv
   venv = std.runBash`
     pip install .
   `
