@@ -1,0 +1,73 @@
+import nushell from "nushell";
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "eks_node_viewer",
+  version: "0.7.4",
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: "https://github.com/awslabs/eks-node-viewer.git",
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default async function eksNodeViewer(): Promise<
+  std.Recipe<std.Directory>
+> {
+  return goBuild({
+    source,
+    buildParams: {
+      generate: true,
+      ldflags: [
+        "-s",
+        "-w",
+        `-X main.commit=${gitRef.commit}`,
+        `-X main.version=${project.version}`,
+      ],
+    },
+    path: "./cmd/eks-node-viewer",
+    runnable: "bin/eks-node-viewer",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    eks-node-viewer --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(eksNodeViewer())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `eks-node-viewer version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/awslabs/eks-node-viewer/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
