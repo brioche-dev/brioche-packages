@@ -11,12 +11,12 @@ export const project = {
 };
 
 std.assert(
-  project.extra.versionDash === project.version.replace(".", "-"),
-  `expected ICU 'project.extra.versionDash' field '${project.extra.versionDash}' to match version '${project.version}'`,
+  project.extra.versionDash === project.version.replaceAll(".", "-"),
+  `expected 'project.extra.versionDash' field '${project.extra.versionDash}' to match version '${project.version}'`,
 );
 std.assert(
-  project.extra.versionUnderscore === project.version.replace(".", "_"),
-  `expected ICU 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
+  project.extra.versionUnderscore === project.version.replaceAll(".", "_"),
+  `expected 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
 );
 
 const source = Brioche.download(
