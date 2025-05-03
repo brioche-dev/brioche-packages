@@ -1,0 +1,68 @@
+import nushell from "nushell";
+import * as std from "std";
+import { gitCheckout } from "git";
+
+export const project = {
+  name: "zlib_ng",
+  version: "2.2.4",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/zlib-ng/zlib-ng.git",
+    ref: project.version,
+  }),
+);
+
+export default function zlibNg(): std.Recipe<std.Directory> {
+  const zlibNg = std.runBash`
+    ./configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.setEnv(zlibNg, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion zlib-ng | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), zlibNg())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/zlib-ng/zlib-ng/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
