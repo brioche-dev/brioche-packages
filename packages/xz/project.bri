@@ -1,0 +1,66 @@
+import nushell from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "xz",
+  version: "5.8.1",
+};
+
+const source = Brioche.download(
+  `https://github.com/tukaani-project/xz/releases/download/v${project.version}/xz-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function xz(): std.Recipe<std.Directory> {
+  const xz = std.runBash`
+    ./configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.setEnv(xz, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion liblzma | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), xz())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://api.github.com/repos/tukaani-project/xz/releases/latest
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
