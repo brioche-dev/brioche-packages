@@ -11,7 +11,7 @@ export const project = {
   },
 };
 
-const gitRef = Brioche.gitRef({
+const gitRef = await Brioche.gitRef({
   repository: "https://github.com/F1bonacc1/process-compose.git",
   ref: `v${project.version}`,
 });
@@ -25,9 +25,7 @@ export default function processCompose(): std.Recipe<std.Directory> {
         ldflags: [
           `-X github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
           `-X github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.lastModifiedDate}`,
-          `-X github.com/f1bonacc1/process-compose/src/config.Commit=${
-            (await gitRef).commit
-          }`,
+          `-X github.com/f1bonacc1/process-compose/src/config.Commit=${gitRef.commit}`,
           "-s",
           "-w",
         ],

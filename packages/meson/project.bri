@@ -25,7 +25,7 @@ const pipDependencies = std.directory({
 });
 
 export default function meson(): std.Recipe<std.Directory> {
-  // Create a venv for meson
+  // Create a venv
   let venv = std.recipe(python());
 
   // Install setuptools from the archive we downloaded. Setuptools is the
@@ -42,7 +42,7 @@ export default function meson(): std.Recipe<std.Directory> {
     .outputScaffold(venv)
     .toDirectory();
 
-  // Install meson into the venv
+  // Install the application into the venv
   venv = std.runBash`
     pip install .
   `

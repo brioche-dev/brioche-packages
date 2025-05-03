@@ -24,21 +24,24 @@ export default function seaweedfs(): std.Recipe<std.Directory> {
 }
 
 export async function test() {
-  const recipe = std.runBash`
+  const script = std.runBash`
     weed version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(seaweedfs());
+  `
+    .dependencies(seaweedfs())
+    .toFile();
 
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
   // HACK: SeaweedFS 3.86 returns a version number of 3.85!
   // https://github.com/seaweedfs/seaweedfs/issues/6717
-  const expectedVersion = project.version === "3.86" ? "3.85" : project.version;
-
-  const result = await recipe.toFile().read();
+  const expected = project.version === "3.86" ? "3.85" : project.version;
   std.assert(
-    result.includes(` ${expectedVersion} `),
-    `Expected '${result}' to contain ' ${expectedVersion} '`,
+    result.includes(` ${expected} `),
+    `expected '${expected}', got '${result}'`,
   );
 
-  return recipe;
+  return script;
 }
 
 export async function liveUpdate() {

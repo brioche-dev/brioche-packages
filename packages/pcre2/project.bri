@@ -7,7 +7,7 @@ export const project = {
   version: "10.45",
 };
 
-const gitRef = Brioche.gitRef({
+const gitRef = await Brioche.gitRef({
   repository: "https://github.com/PCRE2Project/pcre2.git",
   ref: `pcre2-${project.version}`,
 });
