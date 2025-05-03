@@ -81,7 +81,7 @@ interface GitCheckoutInit {
   options?: GitCheckoutOptions;
 }
 
-interface GitCheckoutOptions {
+export interface GitCheckoutOptions {
   submodules?: boolean;
 }
 

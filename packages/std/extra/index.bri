@@ -5,3 +5,5 @@ export * from "./runnable.bri";
 export * from "./bash_runnable.bri";
 export * from "./set_env.bri";
 export * from "./with_runnable_link.bri";
+
+import "./extra_global.bri";
