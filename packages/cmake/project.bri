@@ -1,6 +1,5 @@
 import nushell from "nushell";
 import * as std from "std";
-import { gitCheckout } from "git";
 import openssl from "openssl";
 import curl from "curl";
 
@@ -16,18 +15,14 @@ function patch(): std.Recipe<std.File> {
   // to stay up-to-date, but it's not clear if this is the right approach...
 
   return std.recipeFn(() => {
-    const base = gitCheckout(
-      Brioche.gitRef({
-        repository: "https://github.com/brioche-dev/CMake.git",
-        ref: "base/brioche-patches",
-      }),
-    );
-    const patched = gitCheckout(
-      Brioche.gitRef({
-        repository: "https://github.com/brioche-dev/CMake.git",
-        ref: "brioche-patches",
-      }),
-    );
+    const base = Brioche.gitCheckout({
+      repository: "https://github.com/brioche-dev/CMake.git",
+      ref: "base/brioche-patches",
+    });
+    const patched = Brioche.gitCheckout({
+      repository: "https://github.com/brioche-dev/CMake.git",
+      ref: "brioche-patches",
+    });
 
     return std.runBash`
       diff -ru base patched > "$BRIOCHE_OUTPUT" || true

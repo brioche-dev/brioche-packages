@@ -1,6 +1,5 @@
 import * as std from "std";
 import nushell from "nushell";
-import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
@@ -9,12 +8,10 @@ export const project = {
   latestBuildDate: "2025-04-24",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/cli/cli.git",
-    ref: `v${project.version}`,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/cli/cli.git",
+  ref: `v${project.version}`,
+});
 
 export default function gh(): std.Recipe<std.Directory> {
   return goBuild({

@@ -1,6 +1,5 @@
 import nushell from "nushell";
 import * as std from "std";
-import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
@@ -8,12 +7,10 @@ export const project = {
   version: "0.7.3",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/doitintl/kube-no-trouble.git",
-    ref: project.version,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/doitintl/kube-no-trouble.git",
+  ref: project.version,
+});
 
 export default function kubent(): std.Recipe<std.Directory> {
   return goBuild({

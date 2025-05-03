@@ -1,6 +1,5 @@
 import nushell from "nushell";
 import * as std from "std";
-import { gitCheckout } from "git";
 import { cmakeBuild } from "cmake";
 
 export const project = {
@@ -8,12 +7,10 @@ export const project = {
   version: "1.4",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/virtualsquare/s2argv-execs.git",
-    ref: project.version,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/virtualsquare/s2argv-execs.git",
+  ref: project.version,
+});
 
 export default function s2argvExecs(): std.Recipe<std.Directory> {
   let s2argv_execs = cmakeBuild({
