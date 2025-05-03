@@ -51,6 +51,7 @@ jobs:
               git clean -ffdx
               if ! brioche live-update -p "$package" --locked; then
                 echo "🔴 Failed to update $package"
+                echo "::error file=$package/project.bri::Failed to update $package"
                 continue
               fi
 
