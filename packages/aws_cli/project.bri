@@ -16,13 +16,11 @@ const source = std.recipeFn(() => {
 
   // Patch the source to fix unresolvable `packaging` dependencies
   // across `requirements*.txt` files
-  return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    patch -p1 < $patch
-  `
-    .outputScaffold(source)
-    .env({ patch })
-    .toDirectory();
+  return std.applyPatch({
+    source,
+    patch,
+    strip: 1,
+  });
 });
 
 export default function awsCli(): std.Recipe<std.Directory> {

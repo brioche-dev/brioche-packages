@@ -18,13 +18,11 @@ const source = Brioche.gitCheckout({
 const patch = Brioche.includeFile("joshuto-v0.9.8.patch");
 
 export default function joshuto(): std.Recipe<std.Directory> {
-  const patchedSource = std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    patch -p1 < $patch
-  `
-    .outputScaffold(source)
-    .env({ patch })
-    .toDirectory();
+  const patchedSource = std.applyPatch({
+    source,
+    patch,
+    strip: 1,
+  });
 
   return cargoBuild({
     source: patchedSource,

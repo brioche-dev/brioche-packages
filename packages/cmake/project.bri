@@ -45,14 +45,11 @@ const source = (() => {
     .peel();
 
   // Apply patch file
-  source = std
-    .process({
-      command: "patch",
-      args: ["-p1", "-i", patch(), "-d", std.outputPath],
-      outputScaffold: source,
-      dependencies: [std.tools()],
-    })
-    .toDirectory();
+  source = std.applyPatch({
+    source,
+    patch: patch(),
+    strip: 1,
+  });
 
   return source;
 })();
