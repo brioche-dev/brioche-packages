@@ -161,8 +161,6 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     MAGIC: { append: [{ path: "share/misc/magic.mgc" }] },
   });
 
-  tools = syncTarball(tools);
-
   return tools;
 });
 
@@ -311,10 +309,7 @@ export const toolchain = std.memo(
     });
 
     toolchain = fixShebangs(toolchain);
-
     toolchain = makePkgConfigPathsRelative(toolchain);
-
-    toolchain = syncTarball(toolchain);
 
     return toolchain;
   },
@@ -429,37 +424,4 @@ function makePkgConfigPathsRelative(
       outputScaffold: recipe,
     })
     .toDirectory();
-}
-
-/**
- * Sync a recipe by creating an archive of it, then unarchiving it. When
- * fetched from the registry, the recipe will be downloaded as a single
- * compressed tarball, which may be faster than syncing lots of individual
- * files.
- */
-function syncTarball(
-  recipe: std.AsyncRecipe<std.Directory>,
-): std.Recipe<std.Directory> {
-  recipe = std.collectReferences(std.directory({ recipe }));
-
-  const tarredRecipe = std
-    .process({
-      command: "tar",
-      args: [
-        "--zstd",
-        "-cf",
-        std.outputPath,
-        "--hard-dereference",
-        "-C",
-        recipe,
-        ".",
-      ],
-      dependencies: [tar(), zstd()],
-    })
-    .toFile();
-
-  let untarredRecipe = tarredRecipe.unarchive("tar", "zstd");
-  untarredRecipe = std.attachResources(untarredRecipe);
-
-  return std.castToDirectory(untarredRecipe.get("recipe"));
 }
