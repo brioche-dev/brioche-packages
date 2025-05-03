@@ -2,6 +2,8 @@ name: Live updates
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17 12 * * FRI' # Every Friday at 12:17pm UTC
 
 jobs:
   live-update-packages:
