@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/bensadeh/tailspin.git": {
+      "5.4.2": "4428757281da1ca63ca9beaa7095ab97d2e80a40"
+    }
+  }
+}
