@@ -41,6 +41,7 @@ jobs:
       - name: Update packages
         run: |
           git_head="$(git rev-parse HEAD)"
+          failed_packages=()
 
           for package in packages/*; do
             branch_name="live-update/$(basename "$package")"
@@ -52,6 +53,7 @@ jobs:
               if ! brioche live-update -p "$package" --locked; then
                 echo "🔴 Failed to update $package"
                 echo "::error file=$package/project.bri::Failed to update $package"
+                failed_packages+=( "$package" )
                 continue
               fi
 
@@ -69,6 +71,9 @@ jobs:
               echo "$package: no live-update found"
             fi
           done
+
+          git checkout "$git_head"
+          printf "%s\n" "${failed_packages[@]}" > failed-packages.txt
 
       - name: Configure git credentials
         run: git remote set-url origin "$auth_url"
@@ -91,3 +96,11 @@ jobs:
           run_label: "${{ github.workflow }} #${{ github.run_number}}"
           run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Check for failed packages
+        run: |
+          if [ -n "$(cat failed-packages.txt)" ]; then
+            echo "The following package live updates failed:"
+            cat failed-packages.txt
+            exit 1
+          fi
