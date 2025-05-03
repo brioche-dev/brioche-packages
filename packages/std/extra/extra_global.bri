@@ -1,7 +1,7 @@
 import { type Recipe, type Directory, recipeFn } from "/core/recipes";
 import { source } from "/core/source.bri";
 import type { GitRefOptions } from "/core/global.bri";
-import { gitCheckout, type GitCheckoutOptions } from "git";
+import type { GitCheckoutOptions } from "git";
 
 interface GitCheckoutInit extends GitRefOptions {
   options?: GitCheckoutOptions;
@@ -57,6 +57,12 @@ declare global {
   }
 
   return recipeFn(async () => {
+    // Import `git` dynamically to avoid issues with execution order. Note this
+    // only works because we have a top-level `import type ... from "git"`,
+    // which means git is already found as a dependency. See:
+    // https://github.com/brioche-dev/brioche/issues/242
+    const { gitCheckout } = await import("git");
+
     const result = await (
       globalThis as any
     ).Deno.core.ops.op_brioche_get_static(sourceFrame.fileName, {
