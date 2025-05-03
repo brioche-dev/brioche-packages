@@ -1,0 +1,48 @@
+import * as std from "/core";
+import { tools } from "/toolchain";
+
+interface ApplyPatchOptions {
+  source: std.AsyncRecipe<std.Directory>;
+  patch: std.AsyncRecipe<std.File>;
+  strip: number | null;
+}
+
+/**
+ * Create a recipe that applies a patch to the provided directory.
+ *
+ * ## Options
+ *
+ * - `source`: The input directory recipe to patch
+ * - `patch`: The patch file to apply
+ * - `strip`: The number of components to strip from the patch's path.
+ * Corresponds to the `-p` (`--strip`) flag of the `patch` command. Using
+ * `null` corresponds to leaving the `-p` flag off.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * const source = Brioche.gitCheckout({
+ *   repository: "https://github.com/kamiyaa/joshuto.git",
+ *   ref: `v${project.version}`,
+ * });
+ * const patch = Brioche.includeFile("changes.patch");
+ * const patchedSource = std.applyPatch({
+ *   source,
+ *   patch,
+ *   strip: 1
+ * });
+ * ```
+ */
+export function applyPatch(opts: ApplyPatchOptions): std.Recipe<std.Directory> {
+  return std
+    .process({
+      command: tools().get("bin/patch"),
+      args: [
+        ...(opts.strip != null ? [`-p${opts.strip}`] : []),
+        std.tpl`--input=${opts.patch}`,
+      ],
+      currentDir: std.outputPath,
+      outputScaffold: opts.source,
+    })
+    .toDirectory();
+}
