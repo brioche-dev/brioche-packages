@@ -1,0 +1,69 @@
+import nushell from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "zlib",
+  version: "1.3.1",
+};
+
+const source = Brioche.download(
+  `https://zlib.net/zlib-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function zlib(): std.Recipe<std.Directory> {
+  const zlib = std.runBash`
+    ./configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.setEnv(zlib, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion zlib | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), zlib())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://zlib.net
+      | lines
+      | where {|it| $it | str contains '<B> zlib ' }
+      | parse --regex '<B> zlib (?<version>[^"]+)</B>'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
