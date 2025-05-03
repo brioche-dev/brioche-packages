@@ -1,5 +1,4 @@
 import * as std from "std";
-import caCertificates from "ca_certificates";
 import nushell from "nushell";
 
 export const project = {
@@ -205,7 +204,7 @@ function goModDownload(
     go mod download all
   `
     .workDir(std.glob(goModule, ["**/go.mod", "**/go.sum"]))
-    .dependencies(go(), caCertificates())
+    .dependencies(go())
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
     .toDirectory();

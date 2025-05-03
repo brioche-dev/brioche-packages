@@ -1,7 +1,6 @@
 import * as std from "std";
 import * as TOML from "smol_toml";
 import * as t from "typer";
-import caCertificates from "ca_certificates";
 import nushell from "nushell";
 
 export const project = {
@@ -397,7 +396,7 @@ export function vendorCrate(
     # vendored dependencies
     cargo vendor --locked >> .cargo/config.toml
   `
-    .dependencies(rust(), caCertificates())
+    .dependencies(rust())
     .outputScaffold(skeletonCrate)
     .unsafe({ networking: true })
     .toDirectory();

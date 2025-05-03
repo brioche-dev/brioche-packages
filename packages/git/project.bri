@@ -1,7 +1,6 @@
 import * as std from "std";
 import openssl from "openssl";
 import curl from "curl";
-import caCertificates from "ca_certificates";
 import nushell from "nushell";
 
 export const project = {
@@ -139,7 +138,7 @@ export function gitCheckout(
       git fetch --depth 1 origin "$commit"
       git -c advice.detachedHead=false checkout FETCH_HEAD
     `
-      .dependencies(git(), caCertificates())
+      .dependencies(git())
       .env({
         repository,
         commit,
@@ -153,7 +152,7 @@ export function gitCheckout(
         cd "$BRIOCHE_OUTPUT"
         git submodule update --init --recursive
       `
-        .dependencies(git(), caCertificates())
+        .dependencies(git())
         .outputScaffold(repo)
         .unsafe({ networking: true })
         .toDirectory();
