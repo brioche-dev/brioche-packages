@@ -50,8 +50,8 @@ jobs:
               git checkout "origin/${branch_name}" || git checkout "${git_head}"
               git clean -ffdx
               if ! brioche live-update -p "$package" --locked; then
-                continue
                 echo "🔴 Failed to update $package"
+                continue
               fi
 
               if [ -n "$(git status --porcelain)" ]; then
