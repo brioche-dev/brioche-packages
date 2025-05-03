@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/awslabs/eks-node-viewer.git": {
+      "v0.7.4": "798f9ba5059be4fe1083d535817918b9cdc2eca2"
+    }
+  }
+}
