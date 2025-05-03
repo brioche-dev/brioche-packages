@@ -1,0 +1,79 @@
+import nushell from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "expat",
+  version: "2.7.1",
+  extra: {
+    versionUnderscore: "2_7_1",
+  },
+};
+
+std.assert(
+  project.extra.versionUnderscore === project.version.replaceAll(".", "_"),
+  `expected 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
+);
+
+const source = Brioche.download(
+  `https://github.com/libexpat/libexpat/releases/download/R_${project.extra.versionUnderscore}/expat-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function expat(): std.Recipe<std.Directory> {
+  const expat = std.runBash`
+    ls
+    ./configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain())
+    .toDirectory();
+
+  return std.setEnv(expat, {
+    CPATH: { append: [{ path: "include" }] },
+    LIBRARY_PATH: { append: [{ path: "lib" }] },
+    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion expat | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain(), expat())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  const src = std.file(std.indoc`
+    let versionUnderscore = http get https://api.github.com/repos/libexpat/libexpat/releases/latest
+      | get tag_name
+      | str replace --regex '^R_' ''
+
+    let version = $versionUnderscore
+      | str replace --all '_' '.'
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.versionUnderscore $versionUnderscore
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell()],
+  });
+}
