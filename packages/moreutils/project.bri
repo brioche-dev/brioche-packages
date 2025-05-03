@@ -2,7 +2,6 @@ import * as std from "std";
 import { gitCheckout } from "git";
 import nushell from "nushell";
 import perl from "perl";
-import unzip from "unzip";
 import libxml2 from "libxml2";
 import libxslt from "libxslt";
 
@@ -91,18 +90,9 @@ const xmlCatalogs = std.directory({
       />
     </catalog>
   `),
-  "www.oasis-open.org/docbook/xml/4.4": std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    unzip "$docbook_zip"
-  `
-    .env({
-      docbook_zip: Brioche.download(
-        "https://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip",
-      ),
-    })
-    .dependencies(unzip())
-    .outputScaffold(std.directory())
-    .toDirectory(),
+  "www.oasis-open.org/docbook/xml/4.4": Brioche.download(
+    "https://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip",
+  ).unarchive("zip"),
 });
 
 const docbookXsl = Brioche.download(
