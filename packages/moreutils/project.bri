@@ -103,7 +103,7 @@ const docbookXsl = Brioche.download(
 function wrapPerlShebangs(
   recipe: std.Recipe<std.Directory>,
 ): std.Recipe<std.Directory> {
-  return std.recipeFn(async () => {
+  return std.recipe(async () => {
     // Add Perl in the recipe
     recipe = recipe.insert(".local/libexec/moreutils/perl", perlEnv());
 

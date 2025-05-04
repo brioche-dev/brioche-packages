@@ -18,7 +18,7 @@ const sourceRef = Brioche.gitRef({
 });
 
 export default function caddy(): std.Recipe<std.Directory> {
-  let caddy = std.recipeFn(async () => {
+  let caddy = std.recipe(async () => {
     const commit = (await sourceRef).commit;
 
     // Build Caddy using `xcaddy build`. This is the officially-recommended

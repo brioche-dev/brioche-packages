@@ -1,4 +1,4 @@
-import { type Recipe, type Directory, recipeFn } from "/core/recipes";
+import { type Recipe, type Directory, recipe } from "/core/recipes";
 import { source } from "/core/source.bri";
 import type { GitRefOptions } from "/core/global.bri";
 import type { GitCheckoutOptions } from "git";
@@ -56,7 +56,7 @@ declare global {
     );
   }
 
-  return recipeFn(async () => {
+  return recipe(async () => {
     // Import `git` dynamically to avoid issues with execution order. Note this
     // only works because we have a top-level `import type ... from "git"`,
     // which means git is already found as a dependency. See:

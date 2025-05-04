@@ -18,7 +18,7 @@ const gitRef = await Brioche.gitRef({
 const source = gitCheckout(gitRef);
 
 export default function processCompose(): std.Recipe<std.Directory> {
-  let processCompose = std.recipeFn(async () =>
+  let processCompose = std.recipe(async () =>
     goBuild({
       source,
       buildParams: {

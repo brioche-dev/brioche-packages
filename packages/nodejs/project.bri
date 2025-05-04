@@ -159,7 +159,7 @@ const BinList = typer.array(
 export function npmInstallGlobal(
   options: NpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
-  return std.recipeFn(async () => {
+  return std.recipe(async () => {
     const { packageName, version, wrapBins = true } = options;
 
     let recipe = std.runBash`

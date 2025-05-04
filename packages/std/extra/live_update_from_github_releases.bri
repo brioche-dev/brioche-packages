@@ -54,7 +54,7 @@ export function liveUpdateFromGithubReleases(
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
   const matchTag = options.matchTag ?? DEFAULT_REGEX_MATCH_TAG;
 
-  return std.recipeFn(async () => {
+  return std.recipe(async () => {
     const { default: nushell } = await import("nushell");
 
     const src = std.file(std.indoc`

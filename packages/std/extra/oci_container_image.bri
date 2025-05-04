@@ -27,7 +27,7 @@ interface OciContainerImageOptions {
 export function ociContainerImage(
   options: OciContainerImageOptions,
 ): std.Recipe<std.File> {
-  return std.recipeFn(async (): Promise<std.Recipe<std.File>> => {
+  return std.recipe(async (): Promise<std.Recipe<std.File>> => {
     const entrypoint = options.entrypoint ?? ["/brioche-run"];
 
     let imageDir = std.directory();

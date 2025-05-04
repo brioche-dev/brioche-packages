@@ -120,7 +120,7 @@ export function gitCheckout(
   init: std.Awaitable<GitCheckoutInit>,
   options: GitCheckoutOptions = {},
 ): std.Recipe<std.Directory> {
-  return std.recipeFn(async () => {
+  return std.recipe(async () => {
     const { commit, repository, options: initOptions } = await init;
     options = { ...initOptions, ...options };
 

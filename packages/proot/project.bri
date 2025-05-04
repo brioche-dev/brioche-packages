@@ -14,7 +14,7 @@ const gitRef = await Brioche.gitRef({
   repository: project.repository,
   ref: `v${project.version}`,
 });
-const source = std.recipeFn(() => {
+const source = std.recipe(() => {
   const source = gitCheckout(gitRef);
 
   return std.runBash`

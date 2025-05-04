@@ -28,7 +28,7 @@ function patch(): std.Recipe<std.File> {
   // to whichever version of CMake we're building. This may make it easier
   // to stay up-to-date, but it's not clear if this is the right approach...
 
-  return std.recipeFn(() => {
+  return std.recipe(() => {
     const base = Brioche.gitCheckout({
       repository: "https://github.com/brioche-dev/CMake.git",
       ref: "base/brioche-patches",
