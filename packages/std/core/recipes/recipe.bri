@@ -45,15 +45,8 @@ export type Recipe<T extends Artifact = Artifact> = RecipeCommon &
  * delay the function call or awaiting the result until the recipe is baked.
  */
 export type RecipeLike<T extends Artifact = Artifact> =
-  | AsyncRecipe<T>
-  | (() => AsyncRecipe<T>);
-
-/**
- * A recipe that may be wrapped in a promise. An `AsyncRecipe` can be converted
- * to a `Recipe` using the `std.recipe()` function, even when not in
- * an async function.
- */
-export type AsyncRecipe<T extends Artifact = Artifact> = Awaitable<Recipe<T>>;
+  | Awaitable<Recipe<T>>
+  | (() => Awaitable<Recipe<T>>);
 
 export function briocheDeserializeAny(
   artifact: runtime.Artifact,

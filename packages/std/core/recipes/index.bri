@@ -23,7 +23,6 @@ export { collectReferences } from "./collect_references.bri";
 export { attachResources } from "./attach_resources.bri";
 export { glob } from "./glob.bri";
 export {
-  type AsyncRecipe,
   type Recipe,
   type RecipeLike,
   type Artifact,
