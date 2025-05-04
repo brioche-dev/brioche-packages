@@ -28,7 +28,7 @@ export type ArtifactType<T extends Artifact> = T extends File
  * an output artifact. Recipes are lazy and won't do anything until `.bake()`
  * is called on them.
  */
-export type Recipe<T extends Artifact = Artifact> = RecipeCommon<T> &
+export type Recipe<T extends Artifact = Artifact> = RecipeCommon &
   ([T] extends [File]
     ? FileRecipeUtils
     : [T] extends [Directory]
@@ -94,16 +94,6 @@ export function recipe<T extends Artifact>(recipe: RecipeLike<T>): Recipe<T> {
         }
         return result.briocheSerialize();
       },
-      bake: async () => {
-        if (result == null) {
-          if (typeof recipe === "function") {
-            result = await recipe();
-          } else {
-            result = await recipe;
-          }
-        }
-        return result.bake();
-      },
     },
   );
 }
@@ -123,18 +113,10 @@ export function recipeFn<T extends Artifact, Args extends [] = []>(
   };
 }
 
-export type CreateRecipeOptions<T extends Artifact> = {
+export type CreateRecipeOptions = {
   sourceDepth?: number;
-} & (
-  | {
-      briocheSerialize?(meta: runtime.Meta): Awaitable<runtime.Recipe>;
-      bake(meta: runtime.Meta): Awaitable<T>;
-    }
-  | {
-      briocheSerialize(meta: runtime.Meta): Awaitable<runtime.Recipe>;
-      bake?(meta: runtime.Meta): Awaitable<T>;
-    }
-);
+  briocheSerialize(meta: runtime.Meta): Awaitable<runtime.Recipe>;
+};
 
 /**
  * Create a new recipe by providing either a list of possible output types,
@@ -145,7 +127,7 @@ export type CreateRecipeOptions<T extends Artifact> = {
  */
 export function createRecipe<T extends Artifact>(
   types: ArtifactType<T>[],
-  opts: CreateRecipeOptions<T>,
+  opts: CreateRecipeOptions,
 ): Recipe<T> {
   const source = briocheSource({ depth: (opts.sourceDepth ?? 0) + 1 });
   const meta = { source };
@@ -156,23 +138,11 @@ export function createRecipe<T extends Artifact>(
 
   return {
     briocheSerialize: async () => {
-      if (opts.briocheSerialize != null) {
-        return opts.briocheSerialize(meta);
-      } else if (opts.bake != null) {
-        return (await opts.bake(meta)).briocheSerialize();
-      } else {
-        throw new Error("bake or briocheSerialize is required");
-      }
+      return opts.briocheSerialize(meta);
     },
     bake: async () => {
-      if (opts.bake != null) {
-        return opts.bake(meta);
-      } else if (opts.briocheSerialize != null) {
-        const result = await runtime.bake(await opts.briocheSerialize(meta));
-        return briocheDeserializeAny(result, source);
-      } else {
-        throw new Error("bake or briocheSerialize is required");
-      }
+      const result = await runtime.bake(await opts.briocheSerialize(meta));
+      return briocheDeserializeAny(result, source);
     },
     ...(isFile ? fileRecipeUtils : {}),
     ...(isDirectory ? directoryRecipeUtils : {}),
@@ -180,15 +150,7 @@ export function createRecipe<T extends Artifact>(
   } as unknown as Recipe<T>;
 }
 
-interface RecipeCommon<T extends Artifact> extends RecipeUtils {
-  /**
-   * Bake a recipe, returning a promise that will contain the resulting
-   * artifact. Normally, you won't need to call this function yourself, as
-   * you can instead return a recipe directly, where the runtime will
-   * automatically bake it.
-   */
-  bake(): Awaitable<T>;
-
+interface RecipeCommon extends RecipeUtils {
   /**
    * Serialize a recipe to a plain JSON-style object for the Brioche runtime
    * to handle. This is useful for wrapping another recipe, avoiding the need
@@ -332,7 +294,14 @@ export const fileRecipeUtils: FileRecipeUtils = {
     });
   },
   async readBytes(this: Recipe<File>): Promise<Uint8Array> {
-    const artifact = await this.bake();
+    const serialized = await this.briocheSerialize();
+    const artifact = await runtime.bake(serialized);
+    if (artifact.type !== "file") {
+      throw new Error(
+        `expected artifact in '.readBytes()' call to be a file, was ${artifact.type}`,
+      );
+    }
+
     const bstring = await runtime.readBlob(artifact.contentBlob);
     return runtime.bstringToBytes(bstring);
   },

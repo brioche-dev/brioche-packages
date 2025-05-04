@@ -88,10 +88,6 @@ export class Directory implements Recipe<Directory> {
     this.source = options.source;
   }
 
-  bake(): Directory {
-    return this;
-  }
-
   briocheSerialize(): runtime.Directory {
     return {
       type: "directory",

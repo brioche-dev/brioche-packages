@@ -1,11 +1,10 @@
 import * as runtime from "../runtime.bri";
-import { type Equatable, assert, jsonSerialize } from "../utils.bri";
+import { type Equatable, jsonSerialize } from "../utils.bri";
 import {
   type Artifact,
   type AsyncRecipe,
   type Recipe,
   type ArtifactType,
-  briocheDeserializeAny,
   createRecipe,
 } from "./recipe.bri";
 
@@ -42,7 +41,6 @@ export function createProxy<T extends Artifact>(
   recipe: AsyncRecipe<T>,
 ): Recipe<T> {
   let serialized: Promise<runtime.ProxyRecipe> | undefined;
-  let baked: T | undefined;
 
   const serializeProxy = async (): Promise<runtime.ProxyRecipe> => {
     if (serialized === undefined) {
@@ -63,17 +61,6 @@ export function createProxy<T extends Artifact>(
     sourceDepth: 1,
     briocheSerialize: async () => {
       return await serializeProxy();
-    },
-    bake: async () => {
-      if (baked === undefined) {
-        const proxy = await serializeProxy();
-        const bakedArtifact = await runtime.bake(proxy);
-        baked = briocheDeserializeAny(bakedArtifact, proxy.meta?.source) as T;
-      }
-
-      /* eslint-disable-next-line */
-      assert(baked != null, "expected `bake()` to return a value");
-      return baked;
     },
   });
 }
