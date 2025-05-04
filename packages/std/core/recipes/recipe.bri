@@ -227,6 +227,24 @@ interface RecipeCommon<T extends Artifact> extends RecipeUtils {
 }
 
 interface RecipeUtils {
+  /**
+   * Pipe a recipe through a list of functions, feeding the previous
+   * value as the input to the next function. This is a convenience method
+   * around the `std.pipe()` utility function.
+   *
+   * ## Example
+   *
+   * ```typescript
+   * const result = recipe.pipe(
+   *   function1,
+   *   function2,
+   *   function3,
+   * );
+   *
+   * // Equivalent to:
+   * // function3(function2(function1(recipe)));
+   * ```
+   */
   pipe: typeof thisPipe;
 }
 
