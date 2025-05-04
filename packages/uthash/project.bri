@@ -49,7 +49,7 @@ export async function test() {
     gcc main.c -o main
     ./main | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), uthash())
+    .dependencies(std.toolchain, uthash)
     .env({ src: src })
     .toFile();
 

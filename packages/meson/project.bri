@@ -69,7 +69,7 @@ export async function test() {
   const script = std.runBash`
     meson --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(meson())
+    .dependencies(meson)
     .toFile();
 
   const result = (await script.read()).trim();

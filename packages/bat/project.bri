@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     bat --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(bat())
+    .dependencies(bat)
     .toFile();
 
   const result = (await script.read()).trim();

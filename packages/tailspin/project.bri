@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     tspin --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(tailspin())
+    .dependencies(tailspin)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -17,7 +17,7 @@ export default function scdoc(): std.Recipe<std.Directory> {
     make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .env({
       // scdoc gets compiled to a static binary, so disable autopacking
       // TODO: Remove this and make it so brioche-ld handles this properly
@@ -38,7 +38,7 @@ export async function test() {
   const script = std.runBash`
     scdoc < "$example_file" | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(scdoc())
+    .dependencies(scdoc)
     .env({ example_file: exampleFile })
     .toFile();
 

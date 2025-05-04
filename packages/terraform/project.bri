@@ -36,7 +36,7 @@ export async function test() {
     # Only retrieve the first line of the output, other lines are not relevant for the version check
     terraform --version | head -n 1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(terraform())
+    .dependencies(terraform)
     .toFile();
 
   const result = (await script.read()).trim();

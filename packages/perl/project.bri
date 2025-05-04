@@ -18,7 +18,7 @@ export default function perl(): std.Recipe<std.Directory> {
     mkdir -p "$BRIOCHE_OUTPUT"/C.UTF-8
     localedef -i POSIX -f UTF-8 "$BRIOCHE_OUTPUT"/C.UTF-8 || true
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .env({
       I18NPATH: std.tpl`${std.toolchain()}/share/i18n`,
     })
@@ -34,7 +34,7 @@ export default function perl(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .env({
       LOCPATH: locale,
       LANG: "C.UTF-8",
@@ -46,7 +46,7 @@ export async function test() {
   const script = std.runBash`
     perl --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(perl())
+    .dependencies(perl)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -44,7 +44,7 @@ export async function test() {
   const script = std.runBash`
     go version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(go())
+    .dependencies(go)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -177,7 +177,7 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
     go install "\${goargs[@]}" "$package_path"
   `
     .workDir(options.source)
-    .dependencies(go(), ...(options.dependencies ?? []))
+    .dependencies(go, ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
@@ -204,7 +204,7 @@ function goModDownload(
     go mod download all
   `
     .workDir(std.glob(goModule, ["**/go.mod", "**/go.sum"]))
-    .dependencies(go())
+    .dependencies(go)
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
     .toDirectory();

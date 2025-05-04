@@ -23,7 +23,7 @@ export default function kmod(): std.Recipe<std.Directory> {
     DESTDIR="$BRIOCHE_OUTPUT" meson install -C build
   `
     .workDir(source)
-    .dependencies(std.toolchain(), meson(), ninja(), scdoc(), openssl())
+    .dependencies(std.toolchain, meson, ninja, scdoc, openssl)
     .toDirectory();
 }
 
@@ -31,7 +31,7 @@ export async function test() {
   const script = std.runBash`
     kmod --version | tee -a "$BRIOCHE_OUTPUT"
   `
-    .dependencies(kmod())
+    .dependencies(kmod)
     .toFile();
 
   const result = (await script.read()).trim();

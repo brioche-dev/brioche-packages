@@ -22,7 +22,7 @@ export default function libtirpc(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   libtirpc = std.setEnv(libtirpc, {
@@ -39,7 +39,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libtirpc | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libtirpc())
+    .dependencies(std.toolchain, libtirpc)
     .toFile();
 
   const result = (await script.read()).trim();

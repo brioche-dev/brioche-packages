@@ -21,7 +21,7 @@ export default function jq(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
   return std.withRunnableLink(jq, "bin/jq");
 }
@@ -30,7 +30,7 @@ export async function test() {
   const script = std.runBash`
     jq --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(jq())
+    .dependencies(jq)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -19,7 +19,7 @@ export default function tcpdump(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), libpcap())
+    .dependencies(std.toolchain, libpcap)
     .toDirectory();
 
   return std.withRunnableLink(tcpdump, "bin/tcpdump");
@@ -29,7 +29,7 @@ export async function test() {
   const script = std.runBash`
     tcpdump --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(tcpdump())
+    .dependencies(tcpdump)
     .toFile();
 
   const result = (await script.read()).trim();

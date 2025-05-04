@@ -31,7 +31,7 @@ export default function postgresql(): std.Recipe<std.Directory> {
     make install-world-bin DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), icu(), openssl(), libxml(), libxslt())
+    .dependencies(std.toolchain, icu, openssl, libxml, libxslt)
     .toDirectory();
 
   postgresql = makePkgConfigPathsRelative(postgresql);
@@ -49,7 +49,7 @@ export async function test() {
   const script = std.runBash`
     postgres --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(postgresql())
+    .dependencies(postgresql)
     .toFile();
 
   const result = (await script.read()).trim();

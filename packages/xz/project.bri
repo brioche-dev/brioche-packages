@@ -19,7 +19,7 @@ export default function xz(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.setEnv(xz, {
@@ -33,7 +33,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion liblzma | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), xz())
+    .dependencies(std.toolchain, xz)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -20,7 +20,7 @@ import * as std from "/core";
  *     gcc -o "$BRIOCHE_OUTPUT/bin/hello" src/hello.c
  *   `
  *     .workDir(Brioche.glob("src"))
- *     .dependencies(std.toolchain());
+ *     .dependencies(std.toolchain);
  *
  *   // Add a symlink so that `brioche run` will run `bin/hello`
  *   program = std.withRunnableLink(program, "bin/hello");

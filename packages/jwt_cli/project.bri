@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     jwt --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(jwtCli())
+    .dependencies(jwtCli)
     .toFile();
 
   const result = (await script.read()).trim();

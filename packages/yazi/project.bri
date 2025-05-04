@@ -28,7 +28,7 @@ export default function yazi(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     yazi --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(yazi());
+  `.dependencies(yazi);
 
   const result = (await script.toFile().read()).trim();
 

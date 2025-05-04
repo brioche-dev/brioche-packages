@@ -24,7 +24,7 @@ export default function unzip(): std.Recipe<std.Directory> {
     make -f unix/Makefile install prefix="$BRIOCHE_OUTPUT"
   `
     .env({ patches })
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory();
 }
@@ -33,7 +33,7 @@ export async function test() {
   const script = std.runBash`
     unzip --help | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(unzip())
+    .dependencies(unzip)
     .toFile();
 
   const result = (await script.read()).trim();

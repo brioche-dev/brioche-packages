@@ -22,7 +22,7 @@ export default function nginx(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), pcre2())
+    .dependencies(std.toolchain, pcre2)
     .toDirectory();
 
   nginx = std.withRunnableLink(nginx, "bin/nginx");
@@ -34,7 +34,7 @@ export async function test() {
   const script = std.runBash`
     nginx -v 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(nginx())
+    .dependencies(nginx)
     .toFile();
 
   const result = (await script.read()).trim();

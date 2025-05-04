@@ -17,7 +17,7 @@ const source = Brioche.download(
     // Apply patch file
     std.applyPatch({
       source,
-      patch: patch(),
+      patch,
       strip: 1,
     }),
   );
@@ -61,7 +61,7 @@ export default function cmake(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), openssl(), curl())
+    .dependencies(std.toolchain, openssl, curl)
     .toDirectory();
 
   cmake = cmake.insert("libexec/cmake/runtime-utils", std.runtimeUtils());
@@ -180,7 +180,7 @@ export function cmakeBuild(
       ln -s lib64 "$BRIOCHE_OUTPUT/lib"
     fi
   `
-    .dependencies(...dependencies, cmake())
+    .dependencies(...dependencies, cmake)
     .env({
       ...options.env,
       source,
@@ -203,7 +203,7 @@ export async function test() {
     # Only retrieve the first line of the output, other lines are not relevant for the version check
     cmake --version | head -n 1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(cmake())
+    .dependencies(cmake)
     .toFile();
 
   const result = (await script.read()).trim();

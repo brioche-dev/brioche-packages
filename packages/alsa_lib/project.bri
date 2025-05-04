@@ -18,7 +18,7 @@ export default function alsaLib(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.setEnv(alsaLib, {
@@ -48,7 +48,7 @@ export async function test() {
     gcc main.c -o main -lasound
     ./main | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), alsaLib())
+    .dependencies(std.toolchain, alsaLib)
     .env({ src: src })
     .toFile();
 

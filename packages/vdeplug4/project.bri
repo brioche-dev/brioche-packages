@@ -61,7 +61,7 @@ export async function test() {
     gcc main.c -o main -lvdeplug
     ./main | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), vdeplug4())
+    .dependencies(std.toolchain, vdeplug4)
     .env({ src: src })
     .toFile();
 

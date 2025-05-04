@@ -18,7 +18,7 @@ export default function htop(): std.Recipe<std.Directory> {
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory();
 
@@ -29,7 +29,7 @@ export async function test() {
   const script = std.runBash`
     htop --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(htop())
+    .dependencies(htop)
     .toFile();
 
   const result = (await script.read()).trim();

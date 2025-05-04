@@ -19,7 +19,7 @@ export default function zlib(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.setEnv(zlib, {
@@ -33,7 +33,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion zlib | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), zlib())
+    .dependencies(std.toolchain, zlib)
     .toFile();
 
   const result = (await script.read()).trim();

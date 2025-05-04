@@ -19,7 +19,7 @@ export default function pv(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.withRunnableLink(pv, "bin/pv");
@@ -29,7 +29,7 @@ export async function test() {
   const script = std.runBash`
     pv --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(pv())
+    .dependencies(pv)
     .toFile();
 
   const result = (await script.read()).trim();

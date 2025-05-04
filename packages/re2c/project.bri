@@ -20,7 +20,7 @@ export default function re2c(): std.Recipe<std.Directory> {
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), python())
+    .dependencies(std.toolchain, python)
     .workDir(source)
     .toDirectory();
 
@@ -37,7 +37,7 @@ export async function test() {
   const script = std.runBash`
     re2c --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(re2c())
+    .dependencies(re2c)
     .toFile();
 
   const result = (await script.read()).trim();

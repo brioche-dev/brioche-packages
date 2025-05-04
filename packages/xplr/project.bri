@@ -34,7 +34,7 @@ export async function test() {
   const script = std.runBash`
     xplr --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(xplr())
+    .dependencies(xplr)
     .toFile();
 
   const result = (await script.read()).trim();

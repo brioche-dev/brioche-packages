@@ -63,7 +63,7 @@ export async function test() {
   const script = std.runBash`
     caddy version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(caddy())
+    .dependencies(caddy)
     .toFile();
 
   const result = (await script.read()).trim();

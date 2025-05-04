@@ -71,7 +71,7 @@ export async function test() {
     mkdir -p "$BRIOCHE_OUTPUT"/C.UTF-8
     localedef -i POSIX -f UTF-8 "$BRIOCHE_OUTPUT"/C.UTF-8 || true
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .env({
       I18NPATH: std.tpl`${std.toolchain()}/share/i18n`,
     })
@@ -80,7 +80,7 @@ export async function test() {
   const script = std.runBash`
     asciinema --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(asciinema())
+    .dependencies(asciinema)
     .env({
       LOCPATH: locale,
       LANG: "C.UTF-8",

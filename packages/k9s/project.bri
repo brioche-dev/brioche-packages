@@ -34,7 +34,7 @@ export async function test() {
     # Remove ANSI color codes from the output, before extracting the version
     k9s version | sed -r 's/\x1B\[[0-9;]*[mK]//g' | awk '/^Version:/ { print $2 }' | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(k9s())
+    .dependencies(k9s)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     amber --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(amber())
+    .dependencies(amber)
     .toFile();
 
   const result = (await script.read()).trim();

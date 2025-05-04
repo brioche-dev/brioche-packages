@@ -37,7 +37,7 @@ export async function test() {
   const script = std.runBash`
     eks-node-viewer --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(eksNodeViewer())
+    .dependencies(eksNodeViewer)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -73,7 +73,7 @@ export async function test() {
   const script = std.runBash`
     llvm-config --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(llvm())
+    .dependencies(llvm)
     .toFile();
 
   const result = (await script.read()).trim();

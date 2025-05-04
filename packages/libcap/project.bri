@@ -52,7 +52,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libcap | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libcap())
+    .dependencies(std.toolchain, libcap)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -154,7 +154,7 @@ function fixSharedObjects(
           --pack "$new_pack"
       done
   `
-    .dependencies(jq(), std.runtimeUtils())
+    .dependencies(jq, std.runtimeUtils)
     .outputScaffold(recipe)
     .toDirectory();
 }

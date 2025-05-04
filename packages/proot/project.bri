@@ -32,7 +32,7 @@ export default function proot(): std.Recipe<std.Directory> {
     make -C src install PREFIX="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), git(), talloc(), uthash(), libarchive())
+    .dependencies(std.toolchain, git, talloc, uthash, libarchive)
     .toDirectory();
 
   proot = std.withRunnableLink(proot, "bin/proot");
@@ -45,7 +45,7 @@ export async function test() {
   const script = std.runBash`
     proot --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(proot())
+    .dependencies(proot)
     .toFile();
 
   const result = (await script.read()).trim();

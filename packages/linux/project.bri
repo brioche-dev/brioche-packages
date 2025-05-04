@@ -45,7 +45,7 @@ export function linuxDefconfig(
     make defconfig
   `
     .workDir(source)
-    .dependencies(...dependencies, ldWrapper(), std.toolchain())
+    .dependencies(...dependencies, ldWrapper, std.toolchain)
     .env({
       ...env,
       KCONFIG_CONFIG: std.outputPath,
@@ -102,13 +102,7 @@ export default function linux(
     make modules_install
   `
     .workDir(source)
-    .dependencies(
-      ...dependencies,
-      openssl(),
-      kmod(),
-      ldWrapper(),
-      std.toolchain(),
-    )
+    .dependencies(...dependencies, openssl, kmod, ldWrapper, std.toolchain)
     .env({
       INSTALL_MOD_PATH: std.outputPath,
 
@@ -216,7 +210,7 @@ function distClean(
     cd "$BRIOCHE_OUTPUT"
     make distclean
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .outputScaffold(source)
     .toDirectory();
 }

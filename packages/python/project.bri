@@ -67,7 +67,7 @@ export default async function python(options: PythonOptions = {}) {
     python3 -m ensurepip --default-pip
   `
     .workDir(source)
-    .dependencies(std.toolchain(), libffi(), openssl(), sqlite())
+    .dependencies(std.toolchain, libffi, openssl, sqlite)
     .toDirectory();
 
   // Get all the native Python modules

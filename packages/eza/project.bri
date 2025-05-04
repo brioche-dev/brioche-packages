@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     eza --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(eza())
+    .dependencies(eza)
     .toFile();
 
   const result = (await script.read()).trim();

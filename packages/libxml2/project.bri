@@ -29,7 +29,7 @@ export default function libxml2(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), python())
+    .dependencies(std.toolchain, python)
     .toDirectory();
 
   libxml2 = makePkgConfigPathsRelative(libxml2);
@@ -47,7 +47,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libxml-2.0 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libxml2())
+    .dependencies(std.toolchain, libxml2)
     .toFile();
 
   const result = (await script.read()).trim();
