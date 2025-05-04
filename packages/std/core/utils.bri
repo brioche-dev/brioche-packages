@@ -245,3 +245,139 @@ export function mixin<T extends object, U extends object>(
 ): T & U {
   return { ...base, ...mixin };
 }
+
+export function pipe<T>(input: T): T;
+export function pipe<T, T2>(input: T, f: (input: T) => T2): T2;
+export function pipe<T, T2, T3>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+): T3;
+export function pipe<T, T2, T3, T4>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+): T4;
+export function pipe<T, T2, T3, T4, T5>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+): T5;
+export function pipe<T, T2, T3, T4, T5, T6>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+): T6;
+export function pipe<T, T2, T3, T4, T5, T6, T7>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+): T7;
+export function pipe<T, T2, T3, T4, T5, T6, T7, T8>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+  f7: (input: T7) => T8,
+): T8;
+export function pipe<T, T2, T3, T4, T5, T6, T7, T8, T9>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+  f7: (input: T7) => T8,
+  f8: (input: T8) => T9,
+): T9;
+export function pipe<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+  f7: (input: T7) => T8,
+  f8: (input: T8) => T9,
+  f9: (input: T9) => T10,
+): T10;
+export function pipe<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+  f7: (input: T7) => T8,
+  f8: (input: T8) => T9,
+  f9: (input: T9) => T10,
+  f10: (input: T10) => T11,
+): T11;
+export function pipe<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+  f7: (input: T7) => T8,
+  f8: (input: T8) => T9,
+  f9: (input: T9) => T10,
+  f10: (input: T10) => T11,
+  f11: (input: T11) => T12,
+): T12;
+export function pipe<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+  f7: (input: T7) => T8,
+  f8: (input: T8) => T9,
+  f9: (input: T9) => T10,
+  f10: (input: T10) => T11,
+  f11: (input: T11) => T12,
+  f12: (input: T12) => T13,
+): T13;
+export function pipe<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+  input: T,
+  f: (input: T) => T2,
+  f2: (input: T2) => T3,
+  f3: (input: T3) => T4,
+  f4: (input: T4) => T5,
+  f5: (input: T5) => T6,
+  f6: (input: T6) => T7,
+  f7: (input: T7) => T8,
+  f8: (input: T8) => T9,
+  f9: (input: T9) => T10,
+  f10: (input: T10) => T11,
+  f11: (input: T11) => T12,
+  f12: (input: T12) => T13,
+  f13: (input: T13) => unknown,
+  ...rest: ((input: unknown) => unknown)[]
+): unknown;
+export function pipe(
+  input: unknown,
+  ...functions: ((input: unknown) => unknown)[]
+): unknown {
+  return functions.reduce<unknown>((input, f) => f(input), input);
+}
