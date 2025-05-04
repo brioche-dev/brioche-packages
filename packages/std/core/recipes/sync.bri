@@ -1,8 +1,8 @@
 import {
   type Artifact,
   type ArtifactType,
-  type AsyncRecipe,
   type Recipe,
+  type RecipeLike,
   createRecipe,
 } from "./recipe.bri";
 
@@ -11,11 +11,13 @@ import {
  * of recipes get synced normally, so this allows explicitly syncing a
  * recipe that would otherwise not be synced.
  */
-export function sync<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
+export function sync<T extends Artifact>(recipe: RecipeLike<T>): Recipe<T> {
   return createRecipe(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
-      const serializedRecipe = await (await recipe).briocheSerialize();
+      const recipeValue =
+        typeof recipe === "function" ? await recipe() : await recipe;
+      const serializedRecipe = await recipeValue.briocheSerialize();
       return {
         meta,
         type: "sync",

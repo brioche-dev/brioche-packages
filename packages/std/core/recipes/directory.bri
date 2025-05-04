@@ -2,8 +2,8 @@ import * as runtime from "../runtime.bri";
 import { assert } from "../utils.bri";
 import { createProxy } from "./proxy.bri";
 import {
-  type AsyncRecipe,
   type Recipe,
+  type RecipeLike,
   createRecipe,
   directoryRecipeUtils,
 } from "./recipe.bri";
@@ -23,9 +23,9 @@ import {
  * ```
  */
 export function directory(
-  entries: Record<string, AsyncRecipe> = {},
+  entries: Record<string, RecipeLike> = {},
 ): Recipe<Directory> {
-  const bEntries: Record<runtime.BString, AsyncRecipe> = {};
+  const bEntries: Record<runtime.BString, RecipeLike> = {};
   for (const [k, v] of Object.entries(entries)) {
     bEntries[runtime.bstring(k)] = v;
   }
@@ -35,10 +35,11 @@ export function directory(
     briocheSerialize: async (meta) => {
       const entries = await Promise.all(
         Object.entries(bEntries).map(
-          async ([k, v]): Promise<[runtime.BString, runtime.Recipe]> => [
-            k as runtime.BString,
-            await (await v).briocheSerialize(),
-          ],
+          async ([k, v]): Promise<[runtime.BString, runtime.Recipe]> => {
+            const recipeValue = typeof v === "function" ? await v() : await v;
+            const serializedRecipe = await recipeValue.briocheSerialize();
+            return [k as runtime.BString, serializedRecipe];
+          },
         ),
       );
       return {
@@ -55,9 +56,9 @@ export function directory(
  * takes precedence.
  */
 export function merge(
-  ...directories: AsyncRecipe<Directory>[]
+  ...directories: RecipeLike<Directory>[]
 ): Recipe<Directory> {
-  const proxyDirectories = directories.map((dir) => createProxy(dir));
+  const proxyDirectories = directories.map(createProxy);
   return createRecipe(["directory"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {

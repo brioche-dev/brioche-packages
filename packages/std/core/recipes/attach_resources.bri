@@ -1,7 +1,7 @@
 import { BRIOCHE_VERSION } from "../runtime.bri";
 import { semverMatches } from "../semver.bri";
 import { assert } from "../utils.bri";
-import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
+import { type Recipe, type RecipeLike, createRecipe } from "./recipe.bri";
 import type { Directory } from "./directory.bri";
 
 /**
@@ -10,14 +10,16 @@ import type { Directory } from "./directory.bri";
  * a recipe that was archived using `collectReferences`.
  */
 export function attachResources(
-  recipe: AsyncRecipe<Directory>,
+  recipe: RecipeLike<Directory>,
 ): Recipe<Directory> {
   return createRecipe(["directory"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       assert(semverMatches(BRIOCHE_VERSION, ">=0.1.4"));
 
-      const serializedRecipe = await (await recipe).briocheSerialize();
+      const recipeValue =
+        typeof recipe === "function" ? await recipe() : await recipe;
+      const serializedRecipe = await recipeValue.briocheSerialize();
       return {
         meta,
         type: "attach_resources",

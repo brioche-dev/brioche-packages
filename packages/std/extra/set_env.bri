@@ -37,7 +37,7 @@ export type EnvValue =
  * ```
  */
 export function setEnv(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   env: EnvValues,
 ): std.Recipe<std.Directory> {
   let result = std.recipe(recipe);

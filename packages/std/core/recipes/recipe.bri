@@ -235,7 +235,7 @@ interface DirectoryRecipeUtils extends RecipeUtils {
    * replaced. If the path descends into a non-directory, baking the recipe
    * will fail.
    */
-  insert(path: string, recipe: AsyncRecipe<Artifact>): Recipe<Directory>;
+  insert(path: string, recipe: RecipeLike<Artifact>): Recipe<Directory>;
 
   /**
    * Return a new directory with the given recipe removed at the provided
@@ -330,7 +330,7 @@ export const directoryRecipeUtils: DirectoryRecipeUtils = {
   insert(
     this: Recipe<Directory>,
     path: string,
-    recipe: AsyncRecipe<Artifact>,
+    recipe: RecipeLike<Artifact>,
   ): Recipe<Directory> {
     const proxyDirectory = createProxy(this);
     const proxyRecipe = createProxy(recipe);
@@ -338,8 +338,10 @@ export const directoryRecipeUtils: DirectoryRecipeUtils = {
     return createRecipe(["directory"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
-        const serializedDirectory = await proxyDirectory.briocheSerialize();
-        const serializedRecipe = await proxyRecipe.briocheSerialize();
+        const [serializedDirectory, serializedRecipe] = await Promise.all([
+          proxyDirectory.briocheSerialize(),
+          proxyRecipe.briocheSerialize(),
+        ]);
         return {
           type: "insert",
           directory: serializedDirectory,

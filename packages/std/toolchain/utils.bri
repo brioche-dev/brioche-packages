@@ -163,11 +163,11 @@ interface WrapWithScriptOptions {
   paths: string[];
   renamePrefix?: string;
   renameSuffix?: string;
-  script: std.AsyncRecipe<std.File>;
+  script: std.RecipeLike<std.File>;
 }
 
 export function wrapWithScript(
-  directory: std.AsyncRecipe<std.Directory>,
+  directory: std.RecipeLike<std.Directory>,
   options: WrapWithScriptOptions,
 ): std.Recipe<std.Directory> {
   const renamePrefix = options.renamePrefix ?? "";

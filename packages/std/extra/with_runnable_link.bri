@@ -30,7 +30,7 @@ import * as std from "/core";
  * ```
  */
 export function withRunnableLink(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   runPath: string,
 ): std.Recipe<std.Directory> {
   let result = std.recipe(recipe);

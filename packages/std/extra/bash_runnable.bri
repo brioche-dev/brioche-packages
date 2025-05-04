@@ -11,7 +11,7 @@ export interface BashRunnableUtils {
    * the Bash script, you can get the path to the recipe root with the
    * `$root` environment variable.
    */
-  root(recipe: std.AsyncRecipe<std.Directory>): BashRunnable;
+  root(recipe: std.RecipeLike<std.Directory>): BashRunnable;
 
   /**
    * Set environment variables when the Bash script gets run.
@@ -22,7 +22,7 @@ export interface BashRunnableUtils {
    * Include additonal dependencies when the Bash script gets run. This
    * will set the `$PATH` environment variable.
    */
-  dependencies(...dependencies: std.AsyncRecipe<std.Directory>[]): BashRunnable;
+  dependencies(...dependencies: std.RecipeLike<std.Directory>[]): BashRunnable;
 }
 
 /**
@@ -66,9 +66,9 @@ export function bashRunnable(
 
 interface BashRunnableOptions {
   script: string;
-  root: std.AsyncRecipe<std.Directory>;
+  root: std.RecipeLike<std.Directory>;
   env: Record<string, RunnableTemplateValue>;
-  dependencies: std.AsyncRecipe<std.Directory>[];
+  dependencies: std.RecipeLike<std.Directory>[];
 }
 
 function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
@@ -88,7 +88,7 @@ function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
     },
 
     dependencies(
-      ...dependencies: std.AsyncRecipe<std.Directory>[]
+      ...dependencies: std.RecipeLike<std.Directory>[]
     ): BashRunnable {
       return makeBashRunnable({
         ...options,
@@ -96,7 +96,7 @@ function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
       });
     },
 
-    root(recipe: std.AsyncRecipe<std.Directory>): BashRunnable {
+    root(recipe: std.RecipeLike<std.Directory>): BashRunnable {
       return makeBashRunnable({
         ...options,
         root: recipe,

@@ -26,6 +26,7 @@ export { glob } from "./glob.bri";
 export {
   type AsyncRecipe,
   type Recipe,
+  type RecipeLike,
   type Artifact,
   type ArtifactType,
   type ArtifactTypes,

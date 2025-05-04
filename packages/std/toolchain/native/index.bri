@@ -316,7 +316,7 @@ export const toolchain = std.memo(
 );
 
 function autopack(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   options: AutopackOptions,
 ): std.Recipe<std.Directory> {
   const { config, variables } = buildAutopackConfig({
@@ -350,7 +350,7 @@ function autopack(
 }
 
 function fixShebangs(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // TODO: Handle shebangs with wrapper scripts instead of just using
   // `/usr/bin/env`. This currently duplicates the fix from stage 2
@@ -400,7 +400,7 @@ function fixShebangs(
 }
 
 function makePkgConfigPathsRelative(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with
   // relative paths (using the `${pcfiledir}` variable)

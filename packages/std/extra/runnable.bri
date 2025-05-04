@@ -16,14 +16,14 @@ export interface WithRunnableUtils {
    * Include additonal dependencies when the command is run. This
    * will set the `$PATH` environment variable.
    */
-  dependencies(...dependencies: std.AsyncRecipe<std.Directory>[]): WithRunnable;
+  dependencies(...dependencies: std.RecipeLike<std.Directory>[]): WithRunnable;
 }
 
 export interface RunnableOptions {
   command: RunnableTemplateValue;
   args?: RunnableTemplateValue[];
   env?: Record<string, RunnableTemplateValue>;
-  dependencies?: std.AsyncRecipe<std.Directory>[];
+  dependencies?: std.RecipeLike<std.Directory>[];
 }
 
 /**
@@ -51,7 +51,7 @@ export interface RunnableOptions {
  * ```
  */
 export function withRunnable(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   options: RunnableOptions,
 ): WithRunnable {
   recipe = addRunnable(recipe, "brioche-run", options);
@@ -65,7 +65,7 @@ export function withRunnable(
     },
 
     dependencies(
-      ...dependencies: std.AsyncRecipe<std.Directory>[]
+      ...dependencies: std.RecipeLike<std.Directory>[]
     ): WithRunnable {
       return withRunnable(recipe, {
         ...options,
@@ -95,7 +95,7 @@ export function withRunnable(
  * ```
  */
 export function addRunnable(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   path: string,
   options: RunnableOptions,
 ): std.Recipe<std.Directory> {
@@ -186,12 +186,12 @@ export type RunnableTemplateValue =
   | string
   | undefined
   | { relativePath: string }
-  | std.AsyncRecipe
+  | std.RecipeLike
   | RunnableTemplateValue[];
 
 function buildTemplate(
   template: RunnableTemplateValue,
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   pathToRecipeRoot: string | undefined,
   n: number,
 ): [RunnableTemplate, std.Recipe<std.Directory>, number] {
