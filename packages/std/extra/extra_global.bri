@@ -1,0 +1,88 @@
+import { type Recipe, type Directory, recipeFn } from "/core/recipes";
+import { source } from "/core/source.bri";
+import type { GitRefOptions } from "/core/global.bri";
+import type { GitCheckoutOptions } from "git";
+
+interface GitCheckoutInit extends GitRefOptions {
+  options?: GitCheckoutOptions;
+}
+
+declare global {
+  // eslint-disable-next-line
+  namespace Brioche {
+    /**
+     * Checkout a git repository from a specific git ref. The repository
+     * will be cloned without any history. This function must be called with
+     * constant strings for both the repository and ref. The commit hash
+     * will be saved in the lockfile, so the same commit hash will be used
+     * until the lockfile is updated.
+     *
+     * See also the function `Brioche.gitRef`, which directly returns the
+     * resolved commit hash instead.
+     *
+     * ## Options
+     *
+     * - `repository`: A git repository URL.
+     * - `ref`: A git ref, such as a branch or tag name. Example: `main`
+     * - `options`: Extra options for the checkout. See the `gitCheckout`
+     *   function from the `git` package for all available extra options.
+     *
+     * ## Example
+     *
+     * ```typescript
+     * import * as std from "std";
+     *
+     * // Check out the main branch from the Brioche repository. The commit
+     * // hash will be locked when first run, and will not change until the
+     * // lockfile is updated
+     * const source = Brioche.gitCheckout({
+     *   repository: "https://github.com/brioche-dev/brioche.git",
+     *   ref: "main",
+     * });
+     * ```
+     */
+    function gitCheckout(options: GitCheckoutInit): Recipe<Directory>;
+  }
+}
+
+(globalThis as any).Brioche ??= {};
+(globalThis as any).Brioche.gitCheckout ??= (
+  init: GitCheckoutInit,
+): Recipe<Directory> => {
+  const sourceFrame = source({ depth: 1 }).at(0);
+  if (sourceFrame === undefined) {
+    throw new Error(
+      `Could not find source file to resolve git ref '${init.ref}' from repository '${init.repository}'`,
+    );
+  }
+
+  return recipeFn(async () => {
+    // Import `git` dynamically to avoid issues with execution order. Note this
+    // only works because we have a top-level `import type ... from "git"`,
+    // which means git is already found as a dependency. See:
+    // https://github.com/brioche-dev/brioche/issues/242
+    const { gitCheckout } = await import("git");
+
+    const result = await (
+      globalThis as any
+    ).Deno.core.ops.op_brioche_get_static(sourceFrame.fileName, {
+      type: "git_ref",
+      repository: init.repository,
+      ref: init.ref,
+    });
+    if (
+      typeof result !== "object" ||
+      result === null ||
+      typeof result.repository !== "string" ||
+      typeof result.commit !== "string"
+    ) {
+      throw new Error("failed to parse git ref result");
+    }
+
+    return gitCheckout({
+      repository: result.repository,
+      commit: result.commit,
+      options: init.options,
+    });
+  });
+};

@@ -1,6 +1,5 @@
 import * as std from "std";
 import python from "python";
-import { gitCheckout } from "git";
 import nushell from "nushell";
 
 export const project = {
@@ -9,12 +8,10 @@ export const project = {
 };
 
 const source = std.recipeFn(() => {
-  const source = gitCheckout(
-    Brioche.gitRef({
-      repository: "https://github.com/aws/aws-cli.git",
-      ref: project.version,
-    }),
-  );
+  const source = Brioche.gitCheckout({
+    repository: "https://github.com/aws/aws-cli.git",
+    ref: project.version,
+  });
   const patch = Brioche.includeFile("resolved-lockfiles.patch");
 
   // Patch the source to fix unresolvable `packaging` dependencies

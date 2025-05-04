@@ -1,19 +1,16 @@
 import nushell from "nushell";
 import * as std from "std";
 import { cargoBuild } from "rust";
-import { gitCheckout } from "git";
 
 export const project = {
   name: "joshuto",
   version: "0.9.8",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/kamiyaa/joshuto.git",
-    ref: `v${project.version}`,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/kamiyaa/joshuto.git",
+  ref: `v${project.version}`,
+});
 
 // Patch `Cargo.lock` to fix builds with Rust >= 1.80. This patch is derived
 // from the `Cargo.lock` from this commit in Joshuto:

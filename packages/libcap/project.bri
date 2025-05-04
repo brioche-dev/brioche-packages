@@ -1,5 +1,4 @@
 import * as std from "std";
-import { gitCheckout } from "git";
 import jq from "jq";
 import nushell from "nushell";
 
@@ -9,12 +8,10 @@ export const project = {
 };
 
 const source = std.recipeFn(() => {
-  const source = gitCheckout(
-    Brioche.gitRef({
-      repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
-      ref: `v${project.version}`,
-    }),
-  );
+  const source = Brioche.gitCheckout({
+    repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
+    ref: `v${project.version}`,
+  });
 
   return std.runBash`
     sed -i 's|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT/progs/mkcapshdoc.sh"

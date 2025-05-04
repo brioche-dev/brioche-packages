@@ -1,19 +1,16 @@
 import nushell from "nushell";
 import * as std from "std";
 import { cargoBuild } from "rust";
-import { gitCheckout } from "git";
 
 export const project = {
   name: "lurk",
   version: "0.3.9",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/JakWai01/lurk.git",
-    ref: `v${project.version}`,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/JakWai01/lurk.git",
+  ref: `v${project.version}`,
+});
 
 export default function lurk(): std.Recipe<std.Directory> {
   return cargoBuild({

@@ -81,7 +81,7 @@ interface GitCheckoutInit {
   options?: GitCheckoutOptions;
 }
 
-interface GitCheckoutOptions {
+export interface GitCheckoutOptions {
   submodules?: boolean;
 }
 
@@ -97,7 +97,8 @@ interface GitCheckoutOptions {
  *
  * - `repository`: The URL of the git repository to checkout.
  * - `commit`: The full commit hash to checkout.
- * - `submodules`: Set to true to recursively checkout git submodules too.
+ * - `options`: Extra options for the checkout.
+ *   - `submodules`: Set to true to recursively checkout git submodules too.
  *
  * ## Example
  *

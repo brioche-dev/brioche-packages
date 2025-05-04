@@ -1,6 +1,5 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
-import { gitCheckout } from "git";
 import python from "python";
 import nushell from "nushell";
 
@@ -9,12 +8,10 @@ export const project = {
   version: "20.1.4",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/llvm/llvm-project.git",
-    ref: `llvmorg-${project.version}`,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/llvm/llvm-project.git",
+  ref: `llvmorg-${project.version}`,
+});
 
 export default function llvm(): std.Recipe<std.Directory> {
   let llvm = cmakeBuild({

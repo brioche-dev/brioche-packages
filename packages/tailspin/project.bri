@@ -1,19 +1,16 @@
 import nushell from "nushell";
 import * as std from "std";
 import { cargoBuild } from "rust";
-import { gitCheckout } from "git";
 
 export const project = {
   name: "tailspin",
   version: "5.4.2",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/bensadeh/tailspin.git",
-    ref: project.version,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/bensadeh/tailspin.git",
+  ref: project.version,
+});
 
 export default function tailspin(): std.Recipe<std.Directory> {
   return cargoBuild({

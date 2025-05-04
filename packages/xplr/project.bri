@@ -1,7 +1,6 @@
 import nushell from "nushell";
 import * as std from "std";
 import { cargoBuild } from "rust";
-import { gitCheckout } from "git";
 
 export const project = {
   name: "xplr",
@@ -9,12 +8,10 @@ export const project = {
 };
 
 const source = (() => {
-  let source = gitCheckout(
-    Brioche.gitRef({
-      repository: "https://github.com/sayanarijit/xplr.git",
-      ref: `v${project.version}`,
-    }),
-  );
+  let source = Brioche.gitCheckout({
+    repository: "https://github.com/sayanarijit/xplr.git",
+    ref: `v${project.version}`,
+  });
 
   // HACK: Workaround for https://github.com/LukeMathWalker/cargo-chef/issues/295#issuecomment-2619963413
   source = std.runBash`

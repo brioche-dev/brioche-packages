@@ -1,19 +1,17 @@
 import nushell from "nushell";
 import * as std from "std";
-import { gitCheckout } from "git";
 
 export const project = {
   name: "pcre2",
   version: "10.45",
 };
 
-const gitRef = await Brioche.gitRef({
+const source = Brioche.gitCheckout({
   repository: "https://github.com/PCRE2Project/pcre2.git",
   ref: `pcre2-${project.version}`,
-});
-
-const source = gitCheckout(gitRef, {
-  submodules: true,
+  options: {
+    submodules: true,
+  },
 });
 
 export default function pcre2(): std.Recipe<std.Directory> {

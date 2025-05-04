@@ -1,6 +1,5 @@
 import nushell from "nushell";
 import * as std from "std";
-import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
@@ -14,12 +13,10 @@ std.assert(
   `Dasel major version ${majorVersion} does not match version number ${project.version}`,
 );
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "https://github.com/TomWright/dasel.git",
-    ref: `v${project.version}`,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/TomWright/dasel.git",
+  ref: `v${project.version}`,
+});
 
 export default function dasel(): std.Recipe<std.Directory> {
   return goBuild({

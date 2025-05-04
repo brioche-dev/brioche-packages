@@ -9,7 +9,7 @@ import { BRIOCHE_VERSION } from "./runtime.bri";
 import { semverMatches } from "./semver.bri";
 import { assert } from "./utils.bri";
 
-interface GitRefOptions {
+export interface GitRefOptions {
   repository: string;
   ref: string;
 }

@@ -1,5 +1,4 @@
 import * as std from "std";
-import { gitCheckout } from "git";
 import nushell from "nushell";
 import perl from "perl";
 import libxml2 from "libxml2";
@@ -10,12 +9,10 @@ export const project = {
   version: "0.70",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: "git://git.joeyh.name/moreutils",
-    ref: project.version,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: "git://git.joeyh.name/moreutils",
+  ref: project.version,
+});
 
 export default function moreutils(): std.Recipe<std.Directory> {
   let moreutils = std.runBash`
