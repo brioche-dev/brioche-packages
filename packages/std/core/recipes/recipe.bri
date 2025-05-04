@@ -149,33 +149,18 @@ export function recipe<T extends Artifact>(recipe: RecipeLike<T>): Recipe<T> {
 }
 
 /**
- * Create a recipe from a function that returns an `AsyncRecipe`. This function
- * itself is not async, meaning it can even be called from a synchronous
- * function. Under the hood, this will defer the function call until the
- * recipe is baked (or serialized).
+ * Wrap a function that returns a `RecipeLike`, returning a new function that
+ * accepts the same arguments but returns a `Recipe`.
+ *
+ * The return result is passed to `std.recipe`, which can be more convenient for
+ * function callers, since methods from `Recipe` can be used directly.
  */
-export function recipeFn<T extends Artifact>(
-  f: () => AsyncRecipe<T>,
-): Recipe<T> {
-  let result: Recipe<T> | undefined;
-  return createRecipe<T>(
-    ["file", "directory", "symlink"] as ArtifactType<T>[],
-    {
-      sourceDepth: 1,
-      briocheSerialize: async () => {
-        if (result == null) {
-          result = await f();
-        }
-        return result.briocheSerialize();
-      },
-      bake: async () => {
-        if (result == null) {
-          result = await f();
-        }
-        return result.bake();
-      },
-    },
-  );
+export function recipeFn<T extends Artifact, Args extends [] = []>(
+  f: (...args: Args) => RecipeLike<T>,
+): (...args: Args) => Recipe<T> {
+  return (...args: Args): Recipe<T> => {
+    return recipe(f(...args));
+  };
 }
 
 export type CreateRecipeOptions<T extends Artifact> = {
