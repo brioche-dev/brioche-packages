@@ -126,7 +126,7 @@ function briocheObjcopy(): std.Recipe<std.Directory> {
 }
 
 function fixSharedObjects(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // `libcap` compiles its shared libraries with extra flags so they also work
   // as executables. `brioche-ld` therefore treats them like executables, which
@@ -161,7 +161,7 @@ function fixSharedObjects(
 
 // TODO: Figure out where to move this, this is copied from `std`
 function makePkgConfigPathsRelative(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with
   // relative paths (using the `${pcfiledir}` variable)

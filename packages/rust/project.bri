@@ -161,10 +161,10 @@ interface CargoBuildParameters {
 }
 
 export interface CargoBuildOptions {
-  source: std.AsyncRecipe<std.Directory>;
+  source: std.RecipeLike<std.Directory>;
   path?: string;
   runnable?: string;
-  dependencies?: std.AsyncRecipe<std.Directory>[];
+  dependencies?: std.RecipeLike<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   unsafe?: std.ProcessUnsafeOptions;
   buildParams?: CargoBuildParameters;
@@ -336,7 +336,7 @@ export function cargoBuild(options: CargoBuildOptions) {
  * to re-vendor the crates any time the source code changes!
  */
 export function createSkeletonCrate(
-  crate: std.AsyncRecipe<std.Directory>,
+  crate: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   const recipe = std.runBash`
     cargo chef prepare --recipe-path "$BRIOCHE_OUTPUT"
@@ -355,7 +355,7 @@ export function createSkeletonCrate(
 }
 
 interface VendorCrateOptions {
-  source: std.AsyncRecipe<std.Directory>;
+  source: std.RecipeLike<std.Directory>;
 }
 
 /**

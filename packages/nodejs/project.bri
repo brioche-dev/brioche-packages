@@ -29,7 +29,7 @@ function nodejs(): std.Recipe<std.Directory> {
 export default nodejs;
 
 interface NpmInstallOptions {
-  source: std.AsyncRecipe<std.Directory>;
+  source: std.RecipeLike<std.Directory>;
 }
 
 export async function test() {

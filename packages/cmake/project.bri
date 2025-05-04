@@ -80,9 +80,9 @@ export default function cmake(): std.Recipe<std.Directory> {
 }
 
 export interface CMakeBuildInstallOptions {
-  source: std.AsyncRecipe<std.Directory>;
+  source: std.RecipeLike<std.Directory>;
   path?: string;
-  dependencies?: std.AsyncRecipe<std.Directory>[];
+  dependencies?: std.RecipeLike<std.Directory>[];
   config?: string;
   env?: Record<string, std.ProcessTemplateLike>;
   set?: Record<string, CMakeVariable>;

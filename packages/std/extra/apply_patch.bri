@@ -2,8 +2,8 @@ import * as std from "/core";
 import { tools } from "/toolchain";
 
 interface ApplyPatchOptions {
-  source: std.AsyncRecipe<std.Directory>;
-  patch: std.AsyncRecipe<std.File>;
+  source: std.RecipeLike<std.Directory>;
+  patch: std.RecipeLike<std.File>;
   strip: number | null;
 }
 

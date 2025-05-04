@@ -96,8 +96,8 @@ interface GoBuildParameters {
 }
 
 interface GoBuildOptions {
-  source: std.AsyncRecipe<std.Directory>;
-  dependencies?: std.AsyncRecipe<std.Directory>[];
+  source: std.RecipeLike<std.Directory>;
+  dependencies?: std.RecipeLike<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   buildParams?: GoBuildParameters;
   path?: string;
@@ -198,7 +198,7 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
 }
 
 function goModDownload(
-  goModule: std.AsyncRecipe<std.Directory>,
+  goModule: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   return std.runBash`
     go mod download all

@@ -104,7 +104,7 @@ function encodeVersionNumber(version: string): string {
 // TODO: This is duplicated from the `std.toolchain()` build, we should
 // figure out how to generalize this
 function makePkgConfigPathsRelative(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with
   // relative paths (using the `${pcfiledir}` variable)
