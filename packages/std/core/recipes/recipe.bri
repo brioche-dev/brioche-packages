@@ -22,46 +22,6 @@ export type ArtifactType<T extends Artifact> = T extends File
       ? "symlink"
       : never;
 
-export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
-  (T extends File
-    ?
-        | runtime.File
-        | runtime.DownloadRecipe
-        | runtime.ProcessRecipe
-        | runtime.CreateFileRecipe
-        | runtime.CastRecipe
-        | runtime.PeelRecipe
-        | runtime.GetRecipe
-        | runtime.SetPermissionsRecipe
-        | runtime.ProxyRecipe
-        | runtime.SyncRecipe
-    : T extends Directory
-      ?
-          | runtime.Directory
-          | runtime.UnarchiveRecipe
-          | runtime.ProcessRecipe
-          | runtime.CreateDirectoryRecipe
-          | runtime.CastRecipe
-          | runtime.MergeRecipe
-          | runtime.PeelRecipe
-          | runtime.GetRecipe
-          | runtime.InsertRecipe
-          | runtime.GlobRecipe
-          | runtime.CollectReferencesRecipe
-          | runtime.AttachResourcesRecipe
-          | runtime.ProxyRecipe
-          | runtime.SyncRecipe
-      : T extends Symlink
-        ?
-            | runtime.Symlink
-            | runtime.ProcessRecipe
-            | runtime.CastRecipe
-            | runtime.PeelRecipe
-            | runtime.GetRecipe
-            | runtime.ProxyRecipe
-            | runtime.SyncRecipe
-        : never);
-
 /**
  * A "recipe" is a type that describes how to create an artifact in Brioche.
  * When you call `brioche build`, the returned recipe is "baked" to produce
@@ -167,11 +127,11 @@ export type CreateRecipeOptions<T extends Artifact> = {
   sourceDepth?: number;
 } & (
   | {
-      briocheSerialize?(meta: runtime.Meta): Awaitable<RecipeSerialization<T>>;
+      briocheSerialize?(meta: runtime.Meta): Awaitable<runtime.Recipe>;
       bake(meta: runtime.Meta): Awaitable<T>;
     }
   | {
-      briocheSerialize(meta: runtime.Meta): Awaitable<RecipeSerialization<T>>;
+      briocheSerialize(meta: runtime.Meta): Awaitable<runtime.Recipe>;
       bake?(meta: runtime.Meta): Awaitable<T>;
     }
 );
@@ -234,7 +194,7 @@ interface RecipeCommon<T extends Artifact> extends RecipeUtils {
    * to handle. This is useful for wrapping another recipe, avoiding the need
    * to call `.bake()` when implementing custom recipes.
    */
-  briocheSerialize(): Awaitable<RecipeSerialization<T>>;
+  briocheSerialize(): Awaitable<runtime.Recipe>;
 }
 
 interface RecipeUtils {

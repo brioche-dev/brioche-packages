@@ -4,7 +4,6 @@ import {
   type Artifact,
   type AsyncRecipe,
   type Recipe,
-  type RecipeSerialization,
   type ArtifactType,
   briocheDeserializeAny,
   createRecipe,
@@ -63,8 +62,7 @@ export function createProxy<T extends Artifact>(
   return createRecipe(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,
     briocheSerialize: async () => {
-      const proxy = (await serializeProxy()) as unknown;
-      return proxy as RecipeSerialization<T>;
+      return await serializeProxy();
     },
     bake: async () => {
       if (baked === undefined) {

@@ -3,7 +3,6 @@ import {
   type ArtifactType,
   type AsyncRecipe,
   type Recipe,
-  type RecipeSerialization,
   createRecipe,
 } from "./recipe.bri";
 
@@ -21,7 +20,7 @@ export function sync<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
         meta,
         type: "sync",
         recipe: serializedRecipe,
-      } satisfies RecipeSerialization<Artifact> as any as RecipeSerialization<T>;
+      };
     },
   });
 }
