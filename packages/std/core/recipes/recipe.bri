@@ -80,6 +80,15 @@ export type Recipe<T extends Artifact = Artifact> = RecipeCommon<T> &
           : never);
 
 /**
+ * A recipe that may be wrapped in a promise or a function call. A `RecipeLike`
+ * can be converted to a `Recipe` using the `std.recipe()` function, which will
+ * delay the function call or awaiting the result until the recipe is baked.
+ */
+export type RecipeLike<T extends Artifact = Artifact> =
+  | AsyncRecipe<T>
+  | (() => AsyncRecipe<T>);
+
+/**
  * A recipe that may be wrapped in a promise. An `AsyncRecipe` can be converted
  * to a `Recipe` using the `std.recipe()` function, even when not in
  * an async function.
@@ -103,20 +112,37 @@ export function briocheDeserializeAny(
 }
 
 /**
- * Create a recipe from an `AsyncRecipe`. This function itself is not async,
+ * Create a recipe from a `RecipeLike`. This function itself is not async,
  * meaning it can even be called from a synchronous function. Under the hood,
- * this will defer the async call until the recipe is baked (or serialized).
+ * this will delay the function call or awaiting the result until the recipe is
+ * baked (or serialized).
  */
-export function recipe<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
+export function recipe<T extends Artifact>(recipe: RecipeLike<T>): Recipe<T> {
+  let result: Recipe<T> | undefined;
+
   return createRecipe<T>(
     ["file", "directory", "symlink"] as ArtifactType<T>[],
     {
       sourceDepth: 1,
       briocheSerialize: async () => {
-        return (await recipe).briocheSerialize();
+        if (result == null) {
+          if (typeof recipe === "function") {
+            result = await recipe();
+          } else {
+            result = await recipe;
+          }
+        }
+        return result.briocheSerialize();
       },
       bake: async () => {
-        return (await recipe).bake();
+        if (result == null) {
+          if (typeof recipe === "function") {
+            result = await recipe();
+          } else {
+            result = await recipe;
+          }
+        }
+        return result.bake();
       },
     },
   );
