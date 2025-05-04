@@ -10,24 +10,20 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: "https://github.com/kamiyaa/joshuto.git",
   ref: `v${project.version}`,
-});
-
-// Patch `Cargo.lock` to fix builds with Rust >= 1.80. This patch is derived
-// from the `Cargo.lock` from this commit in Joshuto:
-// https://github.com/kamiyaa/joshuto/commit/1245124fcd264e25becfd75258840708d7b8b4bb
-const patch = Brioche.includeFile("joshuto-v0.9.8.patch");
+}).pipe((source) =>
+  // Patch `Cargo.lock` to fix builds with Rust >= 1.80. This patch is derived
+  // from the `Cargo.lock` from this commit in Joshuto:
+  // https://github.com/kamiyaa/joshuto/commit/1245124fcd264e25becfd75258840708d7b8b4bb
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("joshuto-v0.9.8.patch"),
+    strip: 1,
+  }),
+);
 
 export default function joshuto(): std.Recipe<std.Directory> {
-  const patchedSource = std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    patch -p1 < $patch
-  `
-    .outputScaffold(source)
-    .env({ patch })
-    .toDirectory();
-
   return cargoBuild({
-    source: patchedSource,
+    source,
     runnable: "bin/joshuto",
   });
 }

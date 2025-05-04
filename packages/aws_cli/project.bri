@@ -7,23 +7,18 @@ export const project = {
   version: "2.27.4",
 };
 
-const source = std.recipeFn(() => {
-  const source = Brioche.gitCheckout({
-    repository: "https://github.com/aws/aws-cli.git",
-    ref: project.version,
-  });
-  const patch = Brioche.includeFile("resolved-lockfiles.patch");
-
+const source = Brioche.gitCheckout({
+  repository: "https://github.com/aws/aws-cli.git",
+  ref: project.version,
+}).pipe((source) =>
   // Patch the source to fix unresolvable `packaging` dependencies
   // across `requirements*.txt` files
-  return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    patch -p1 < $patch
-  `
-    .outputScaffold(source)
-    .env({ patch })
-    .toDirectory();
-});
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("resolved-lockfiles.patch"),
+    strip: 1,
+  }),
+);
 
 export default function awsCli(): std.Recipe<std.Directory> {
   // Create a venv
