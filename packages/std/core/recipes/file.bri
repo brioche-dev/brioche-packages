@@ -88,4 +88,5 @@ export class File implements Recipe<File> {
   unarchive = fileRecipeUtils.unarchive;
   readBytes = fileRecipeUtils.readBytes;
   read = fileRecipeUtils.read;
+  pipe = fileRecipeUtils.pipe;
 }

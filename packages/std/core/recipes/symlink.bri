@@ -1,7 +1,7 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
-import type { Recipe } from "./recipe.bri";
+import { type Recipe, symlinkRecipeUtils } from "./recipe.bri";
 
 export interface SymlinkOptions {
   target: string;
@@ -54,4 +54,6 @@ export class Symlink implements Recipe<Symlink> {
   bake(): Symlink {
     return this;
   }
+
+  pipe = symlinkRecipeUtils.pipe;
 }
