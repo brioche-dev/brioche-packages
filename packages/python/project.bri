@@ -53,7 +53,7 @@ export default async function python(options: PythonOptions = {}) {
     )} to be one of ${JSON.stringify(Object.keys(sources))}`,
   );
 
-  let python = std.runBash`
+  const python = std.runBash`
     export LD_LIBRARY_PATH="$LIBRARY_PATH"
     export PATH="$BRIOCHE_OUTPUT/bin\${PATH:+:$PATH}"
 
@@ -84,64 +84,62 @@ export default async function python(options: PythonOptions = {}) {
     .split("\n")
     .filter((mod) => mod !== "");
 
-  // Repack Python with all the dynamic libraries needed for all the native
-  // modules. It isn't linked against the native modules directly, just their
-  // transitive dependencies
-  python = std.autopack(python, {
-    globs: ["bin/python*"],
-    excludeGlobs: ["bin/python*-config"],
-    linkDependencies: [std.toolchain()],
-    dynamicBinaryConfig: {
-      // Listing the modules both under `extraLibraries` and `skipLibraries`
-      // forces Python to be linked with the modules' transitive dependencies
-      extraLibraries: [
-        ...nativeModules,
+  return python.pipe(
+    // Repack Python with all the dynamic libraries needed for all the native
+    // modules. It isn't linked against the native modules directly, just
+    // tier transitive dependencies
+    (python) =>
+      std.autopack(python, {
+        globs: ["bin/python*"],
+        excludeGlobs: ["bin/python*-config"],
+        linkDependencies: [std.toolchain()],
+        dynamicBinaryConfig: {
+          // Listing the modules both under `extraLibraries` and `skipLibraries`
+          // forces Python to be linked with the modules' transitive dependencies
+          extraLibraries: [
+            ...nativeModules,
 
-        // Extra libraries used for FFI (needed for e.g. `aws_cli`)
-        // TODO: Figure out when/where/why these are used and how to simplify!
-        "librt.so.1",
-        "libpthread.so.0",
-        "libgcc_s.so.1",
-        "libdl.so.2",
-      ],
-      skipLibraries: nativeModules,
-      libraryPaths: [
-        std.glob(python, ["lib/python*/lib-dynload"]).peel(3),
-        std.glob(python, ["lib/libpython*"]).peel(),
-      ],
-    },
-    sharedLibraryConfig: {
-      enabled: false,
-    },
-    scriptConfig: {
-      enabled: false,
-    },
-    repackConfig: {
-      enabled: true,
-    },
-  });
-
-  // Some binaries under `/bin` are shebang scripts. These need to be wrapped
-  // to avoid issues with absolute paths
-  python = std.recipe(fixShebangs(python));
-
-  // Fix absolute paths in pkg-config files
-  python = makePkgConfigPathsRelative(python);
-
-  python = python.insert("bin/python", std.symlink({ target: "python3" }));
-  python = python.insert(
-    "bin/python-config",
-    std.symlink({ target: "python3-config" }),
+            // Extra libraries used for FFI (needed for e.g. `aws_cli`)
+            // TODO: Figure out when/where/why these are used and how to simplify!
+            "librt.so.1",
+            "libpthread.so.0",
+            "libgcc_s.so.1",
+            "libdl.so.2",
+          ],
+          skipLibraries: nativeModules,
+          libraryPaths: [
+            std.glob(python, ["lib/python*/lib-dynload"]).peel(3),
+            std.glob(python, ["lib/libpython*"]).peel(),
+          ],
+        },
+        sharedLibraryConfig: {
+          enabled: false,
+        },
+        scriptConfig: {
+          enabled: false,
+        },
+        repackConfig: {
+          enabled: true,
+        },
+      }),
+    // Some binaries under `/bin` are shebang scripts. These need to be wrapped
+    // to avoid issues with absolute paths
+    (python) => std.recipe(fixShebangs(python)),
+    // Fix absolute paths in pkg-config files
+    (python) => makePkgConfigPathsRelative(python),
+    (python) =>
+      python
+        .insert("bin/python", std.symlink({ target: "python3" }))
+        .insert("bin/python-config", std.symlink({ target: "python3-config" }))
+        .insert("bin/pydoc", std.symlink({ target: "pydoc3" })),
+    (python) =>
+      std.setEnv(python, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    (python) => std.withRunnableLink(python, "bin/python"),
   );
-  python = python.insert("bin/pydoc", std.symlink({ target: "pydoc3" }));
-
-  python = std.setEnv(python, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
-
-  return std.withRunnableLink(python, "bin/python");
 }
 
 export function test() {

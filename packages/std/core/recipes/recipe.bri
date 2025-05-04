@@ -1,6 +1,6 @@
 import * as runtime from "../runtime.bri";
 import { source as briocheSource } from "../source.bri";
-import { type Awaitable, unreachable } from "../utils.bri";
+import { type Awaitable, unreachable, thisPipe } from "../utils.bri";
 import { File, type FilePermissions } from "./file.bri";
 import { Directory } from "./directory.bri";
 import { Symlink } from "./symlink.bri";
@@ -226,7 +226,27 @@ interface RecipeCommon<T extends Artifact> extends RecipeUtils {
   briocheSerialize(): Awaitable<RecipeSerialization<T>>;
 }
 
-interface RecipeUtils {}
+interface RecipeUtils {
+  /**
+   * Pipe a recipe through a list of functions, feeding the previous
+   * value as the input to the next function. This is a convenience method
+   * around the `std.pipe()` utility function.
+   *
+   * ## Example
+   *
+   * ```typescript
+   * const result = recipe.pipe(
+   *   function1,
+   *   function2,
+   *   function3,
+   * );
+   *
+   * // Equivalent to:
+   * // function3(function2(function1(recipe)));
+   * ```
+   */
+  pipe: typeof thisPipe;
+}
 
 interface FileRecipeUtils extends RecipeUtils {
   /**
@@ -349,6 +369,7 @@ export const fileRecipeUtils: FileRecipeUtils = {
     const bytes = await this.readBytes();
     return runtime.utf8Decode(bytes);
   },
+  pipe: thisPipe,
 };
 
 export const directoryRecipeUtils: DirectoryRecipeUtils = {
@@ -421,6 +442,9 @@ export const directoryRecipeUtils: DirectoryRecipeUtils = {
       },
     });
   },
+  pipe: thisPipe,
 };
 
-export const symlinkRecipeUtils: SymlinkRecipeUtils = {};
+export const symlinkRecipeUtils: SymlinkRecipeUtils = {
+  pipe: thisPipe,
+};

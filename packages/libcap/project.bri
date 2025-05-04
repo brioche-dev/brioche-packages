@@ -21,7 +21,7 @@ const source = std.recipeFn(() => {
 });
 
 export default function libcap(): std.Recipe<std.Directory> {
-  let libcap = std.runBash`
+  return std.runBash`
     make \\
       prefix=/ \\
       lib=lib \\
@@ -35,17 +35,17 @@ export default function libcap(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain(), std.runtimeUtils(), briocheObjcopy())
-    .toDirectory();
-
-  libcap = std.setEnv(libcap, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
-  libcap = makePkgConfigPathsRelative(libcap);
-  libcap = fixSharedObjects(libcap);
-
-  return libcap;
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+      makePkgConfigPathsRelative,
+      fixSharedObjects,
+    );
 }
 
 export async function test() {
