@@ -1,4 +1,4 @@
-import { Awaitable, mixin, unreachable } from "../utils.bri";
+import { mixin, unreachable } from "../utils.bri";
 import * as runtime from "../runtime.bri";
 import type { File } from "./file.bri";
 import { type Directory } from "./directory.bri";
@@ -389,9 +389,7 @@ function isProcessTemplateSymbol(
   );
 }
 
-export type ProcessTemplateLike = Awaitable<ProcessTemplateComponent>;
-
-export type ProcessTemplateComponent =
+export type ProcessTemplateLike =
   | string
   | ProcessTemplate
   | RecipeLike
@@ -408,7 +406,11 @@ export class ProcessTemplate {
   }
 
   async briocheSerialize(): Promise<runtime.ProcessTemplate> {
-    const components = await Promise.all(this.components);
+    const components = await Promise.all(
+      this.components.map((component) =>
+        typeof component === "function" ? component() : component,
+      ),
+    );
     const runtimeComponents = await Promise.all(
       components.map(
         async (component): Promise<runtime.ProcessTemplateComponent[]> => {
@@ -439,10 +441,9 @@ export class ProcessTemplate {
             const serialized = await component.briocheSerialize();
             return serialized.components;
           } else {
-            const recipeValue =
-              typeof component === "function" ? await component() : component;
-            const serializedRecipe = await recipeValue.briocheSerialize();
-            return [{ type: "input", recipe: serializedRecipe }];
+            return [
+              { type: "input", recipe: await component.briocheSerialize() },
+            ];
           }
         },
       ),

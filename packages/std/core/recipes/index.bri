@@ -13,7 +13,6 @@ export {
   type Process,
   type ProcessOptions,
   ProcessTemplate,
-  type ProcessTemplateComponent,
   type ProcessTemplateLike,
   type ProcessUnsafeOptions,
 } from "./process.bri";
