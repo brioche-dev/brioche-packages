@@ -1,0 +1,45 @@
+import * as std from "std";
+import libunwind from "libunwind";
+import { cargoBuild } from "rust";
+import { gitCheckout } from "git";
+
+export const project = {
+  name: "bugstalker",
+  version: "0.3.0",
+  repository: "https://github.com/godzie44/BugStalker.git",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: project.repository,
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function bugstalker(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/bs",
+    dependencies: [libunwind],
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    bs --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(bugstalker)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `bugstalker ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}

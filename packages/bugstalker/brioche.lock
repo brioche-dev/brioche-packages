@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/godzie44/BugStalker.git": {
+      "v0.3.0": "b3aa00ceb16adf487506f576ba9c6e55631f52bc"
+    }
+  }
+}
