@@ -4,7 +4,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "talloc",
-  version: "2.4.2",
+  version: "2.4.3",
 };
 
 const source = Brioche.download(
