@@ -71,21 +71,19 @@ export function briocheDeserializeAny(
  * baked (or serialized).
  */
 export function recipe<T extends Artifact>(recipe: RecipeLike<T>): Recipe<T> {
-  let result: Recipe<T> | undefined;
+  let serialized: runtime.Recipe | undefined;
 
   return createRecipe<T>(
     ["file", "directory", "symlink"] as ArtifactType<T>[],
     {
       sourceDepth: 1,
       briocheSerialize: async () => {
-        if (result == null) {
-          if (typeof recipe === "function") {
-            result = await recipe();
-          } else {
-            result = await recipe;
-          }
+        if (serialized == null) {
+          const recipeValue =
+            typeof recipe === "function" ? await recipe() : await recipe;
+          serialized = await recipeValue.briocheSerialize();
         }
-        return result.briocheSerialize();
+        return serialized;
       },
     },
   );
