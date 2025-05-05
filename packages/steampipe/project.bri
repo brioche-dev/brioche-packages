@@ -16,7 +16,7 @@ export default function steampipe(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
-      ldflags: ["-s", "-w", `-X main.version=${project.version}`],
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
     },
     runnable: "bin/steampipe",
   });

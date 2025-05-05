@@ -17,7 +17,7 @@ export default function kubent(): std.Recipe<std.Directory> {
     source,
     path: "./cmd/kubent",
     buildParams: {
-      ldflags: ["-s", "-w", `-X main.version=v${project.version}`],
+      ldflags: ["-s", "-w", "-X", `main.version=v${project.version}`],
     },
     runnable: "bin/kubent",
   });

@@ -24,8 +24,10 @@ export default async function eksNodeViewer(): Promise<
       ldflags: [
         "-s",
         "-w",
-        `-X main.commit=${gitRef.commit}`,
-        `-X main.version=${project.version}`,
+        "-X",
+        `main.commit=${gitRef.commit}`,
+        "-X",
+        `main.version=${project.version}`,
       ],
     },
     path: "./cmd/eks-node-viewer",
