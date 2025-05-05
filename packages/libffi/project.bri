@@ -1,4 +1,3 @@
-import nushell from "nushell";
 import * as std from "std";
 
 export const project = {
