@@ -26,7 +26,7 @@ export async function test() {
   const script = std.runBash`
     jj version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(jujutsu())
+    .dependencies(jujutsu)
     .toFile();
 
   const result = (await script.read()).trim();

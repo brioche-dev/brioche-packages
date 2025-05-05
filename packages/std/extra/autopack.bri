@@ -14,7 +14,7 @@ import { runtimeUtils } from "/runtime_utils.bri";
  * provided, but not both.
  */
 export function autopack(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   options: AutopackOptions,
 ): std.Recipe<std.Directory> {
   const { config, variables } = buildAutopackConfig({
@@ -72,7 +72,7 @@ export interface AutopackOptions {
    * dependencies needed to pack a file. A dependency will not be used if
    * it isn't used by any packed files
    */
-  linkDependencies?: std.AsyncRecipe[];
+  linkDependencies?: std.RecipeLike[];
 
   /**
    * Include the recipe itself as a dependency. This is useful when a binary
@@ -164,7 +164,7 @@ interface DynamicLinkingConfig {
    * A list of directory recipes to search for libraries. Only matched libraries
    * will actually be used in the packed file
    */
-  libraryPaths?: std.AsyncRecipe<std.Directory>[];
+  libraryPaths?: std.RecipeLike<std.Directory>[];
 
   /**
    * A list of library names to exclude from packing. Even if a library is
@@ -200,7 +200,7 @@ type EnvValue =
 
 interface BuildConfigOptions {
   options: AutopackOptions;
-  defaultLinkDependencies: std.AsyncRecipe[];
+  defaultLinkDependencies: std.RecipeLike[];
   runtimeUtils: std.Recipe<std.Directory>;
 }
 
@@ -213,7 +213,7 @@ export function buildAutopackConfig(
   let variableIndex = 0;
   const addVar = (variable: {
     name?: string;
-    value: std.AsyncRecipe;
+    value: std.RecipeLike;
   }): TemplateVariable => {
     const name = variable.name ?? `var${variableIndex++}`;
     std.assert(!(name in variables), `duplicate variable name ${name}`);
@@ -420,4 +420,4 @@ interface DynamicLinkingConfigTemplate {
   skipUnknownLibraries?: boolean;
 }
 
-type AutopackConfigVariable = { type: "path"; value: std.AsyncRecipe };
+type AutopackConfigVariable = { type: "path"; value: std.RecipeLike };

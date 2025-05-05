@@ -28,7 +28,7 @@ export default function expat(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.setEnv(expat, {
@@ -42,7 +42,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion expat | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), expat())
+    .dependencies(std.toolchain, expat)
     .toFile();
 
   const result = (await script.read()).trim();

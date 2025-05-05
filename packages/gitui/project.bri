@@ -29,7 +29,7 @@ export async function test() {
   const script = std.runBash`
     gitui --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(gitui())
+    .dependencies(gitui)
     .toFile();
 
   const result = (await script.read()).trim();

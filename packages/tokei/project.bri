@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     tokei --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(tokei())
+    .dependencies(tokei)
     .toFile();
 
   const result = (await script.read()).trim();

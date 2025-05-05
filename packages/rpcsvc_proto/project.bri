@@ -18,7 +18,7 @@ export default function (): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   rpcsvcProto = std.setEnv(rpcsvcProto, {

@@ -13,7 +13,6 @@ export {
   type Process,
   type ProcessOptions,
   ProcessTemplate,
-  type ProcessTemplateComponent,
   type ProcessTemplateLike,
   type ProcessUnsafeOptions,
 } from "./process.bri";
@@ -24,9 +23,8 @@ export { collectReferences } from "./collect_references.bri";
 export { attachResources } from "./attach_resources.bri";
 export { glob } from "./glob.bri";
 export {
-  type AsyncRecipe,
   type Recipe,
-  type RecipeSerialization,
+  type RecipeLike,
   type Artifact,
   type ArtifactType,
   type ArtifactTypes,

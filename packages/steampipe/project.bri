@@ -26,7 +26,7 @@ export async function test() {
   const script = std.runBash`
     steampipe --version 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(steampipe())
+    .dependencies(steampipe)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -26,7 +26,7 @@ export default function curl(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), openssl(), libpsl())
+    .dependencies(std.toolchain, openssl, libpsl)
     .toDirectory();
 
   curl = std.setEnv(curl, {
@@ -43,7 +43,7 @@ export default function curl(): std.Recipe<std.Directory> {
 export async function test() {
   const script = std.runBash`
     curl --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(curl());
+  `.dependencies(curl);
 
   const result = (await script.toFile().read()).trim();
 

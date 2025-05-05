@@ -11,6 +11,6 @@ export default function (): std.Recipe<std.Directory> {
     ln -s bin/hello-world "$BRIOCHE_OUTPUT/brioche-run"
   `
     .workDir(Brioche.glob("src"))
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 }

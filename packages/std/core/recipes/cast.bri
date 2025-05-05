@@ -1,6 +1,6 @@
 import {
-  type AsyncRecipe,
   type Recipe,
+  type RecipeLike,
   type Artifact,
   createRecipe,
 } from "./recipe.bri";
@@ -18,13 +18,15 @@ interface CastOptions {
  * runtime. The cast will be validated when the recipe is baked.
  */
 export function castToFile<T extends Artifact>(
-  recipe: AsyncRecipe<T>,
+  recipe: RecipeLike<T>,
   options: CastOptions = {},
 ): T extends File ? Recipe<T & File> : never {
   return createRecipe<File>(["file"], {
     sourceDepth: (options.sourceDepth ?? 0) + 1,
     briocheSerialize: async (meta) => {
-      const serializedRecipe = await (await recipe).briocheSerialize();
+      const recipeValue =
+        typeof recipe === "function" ? await recipe() : await recipe;
+      const serializedRecipe = await recipeValue.briocheSerialize();
       return {
         meta,
         type: "cast",
@@ -41,13 +43,15 @@ export function castToFile<T extends Artifact>(
  * runtime. The cast will be validated when the recipe is baked.
  */
 export function castToDirectory<T extends Artifact>(
-  recipe: AsyncRecipe<T>,
+  recipe: RecipeLike<T>,
   options: CastOptions = {},
 ): T extends Directory ? Recipe<T & Directory> : never {
   return createRecipe<Directory>(["directory"], {
     sourceDepth: (options.sourceDepth ?? 0) + 1,
     briocheSerialize: async (meta) => {
-      const serializedRecipe = await (await recipe).briocheSerialize();
+      const recipeValue =
+        typeof recipe === "function" ? await recipe() : await recipe;
+      const serializedRecipe = await recipeValue.briocheSerialize();
       return {
         meta,
         type: "cast",
@@ -64,13 +68,15 @@ export function castToDirectory<T extends Artifact>(
  * runtime. The cast will be validated when the recipe is baked.
  */
 export function castToSymlink<T extends Artifact>(
-  recipe: AsyncRecipe<T>,
+  recipe: RecipeLike<T>,
   options: CastOptions = {},
 ): T extends Symlink ? Recipe<T & Symlink> : never {
   return createRecipe<Symlink>(["symlink"], {
     sourceDepth: (options.sourceDepth ?? 0) + 1,
     briocheSerialize: async (meta) => {
-      const serializedRecipe = await (await recipe).briocheSerialize();
+      const recipeValue =
+        typeof recipe === "function" ? await recipe() : await recipe;
+      const serializedRecipe = await recipeValue.briocheSerialize();
       return {
         meta,
         type: "cast",

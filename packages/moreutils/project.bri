@@ -19,7 +19,7 @@ export default function moreutils(): std.Recipe<std.Directory> {
     make
     make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libxml2(), libxslt())
+    .dependencies(std.toolchain, libxml2, libxslt)
     .workDir(source)
     .env({
       // XML catalog for DocBook. The moreutils build validates some XML
@@ -42,7 +42,7 @@ export async function test() {
   const script = std.runBash`
     errno 13 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(moreutils())
+    .dependencies(moreutils)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -103,7 +103,7 @@ const docbookXsl = Brioche.download(
 function wrapPerlShebangs(
   recipe: std.Recipe<std.Directory>,
 ): std.Recipe<std.Directory> {
-  return std.recipeFn(async () => {
+  return std.recipe(async () => {
     // Add Perl in the recipe
     recipe = recipe.insert(".local/libexec/moreutils/perl", perlEnv());
 

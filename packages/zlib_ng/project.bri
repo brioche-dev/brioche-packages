@@ -18,7 +18,7 @@ export default function zlibNg(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.setEnv(zlibNg, {
@@ -32,7 +32,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion zlib-ng | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), zlibNg())
+    .dependencies(std.toolchain, zlibNg)
     .toFile();
 
   const result = (await script.read()).trim();

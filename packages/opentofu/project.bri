@@ -29,7 +29,7 @@ export async function test() {
   const script = std.runBash`
     tofu --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(tofu())
+    .dependencies(tofu)
     .toFile();
 
   const result = (await script.read()).trim();

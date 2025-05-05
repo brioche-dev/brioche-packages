@@ -28,7 +28,7 @@ export function linuxSource(): std.Recipe<std.Directory> {
 
 interface LinuxDefconfigOptions {
   env?: Record<string, std.ProcessTemplateLike>;
-  dependencies?: std.AsyncRecipe<std.Directory>[];
+  dependencies?: std.RecipeLike<std.Directory>[];
 }
 
 /**
@@ -45,7 +45,7 @@ export function linuxDefconfig(
     make defconfig
   `
     .workDir(source)
-    .dependencies(...dependencies, ldWrapper(), std.toolchain())
+    .dependencies(...dependencies, ldWrapper, std.toolchain)
     .env({
       ...env,
       KCONFIG_CONFIG: std.outputPath,
@@ -54,8 +54,8 @@ export function linuxDefconfig(
 }
 
 interface LinuxOptions {
-  config?: std.AsyncRecipe<std.File>;
-  dependencies?: std.AsyncRecipe<std.Directory>[];
+  config?: std.RecipeLike<std.File>;
+  dependencies?: std.RecipeLike<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
 }
 
@@ -102,13 +102,7 @@ export default function linux(
     make modules_install
   `
     .workDir(source)
-    .dependencies(
-      ...dependencies,
-      openssl(),
-      kmod(),
-      ldWrapper(),
-      std.toolchain(),
-    )
+    .dependencies(...dependencies, openssl, kmod, ldWrapper, std.toolchain)
     .env({
       INSTALL_MOD_PATH: std.outputPath,
 
@@ -170,7 +164,7 @@ type LinuxUpdateConfigValue =
  *
  */
 export function linuxUpdateConfig(
-  config: std.AsyncRecipe<std.File>,
+  config: std.RecipeLike<std.File>,
   values: Record<string, LinuxUpdateConfigValue>,
 ): std.Recipe<std.File> {
   const args = Object.entries(values).flatMap(([key, value]) => {
@@ -210,13 +204,13 @@ export function linuxUpdateConfig(
 }
 
 function distClean(
-  source: std.AsyncRecipe<std.Directory>,
+  source: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   return std.runBash`
     cd "$BRIOCHE_OUTPUT"
     make distclean
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .outputScaffold(source)
     .toDirectory();
 }

@@ -27,7 +27,7 @@ export async function test() {
   const script = std.runBash`
     biome --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(biome())
+    .dependencies(biome)
     .toFile();
 
   const result = (await script.read()).trim();

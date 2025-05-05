@@ -21,7 +21,7 @@ export default function openssl(): std.Recipe<std.Directory> {
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory();
 
@@ -40,7 +40,7 @@ export async function test() {
   const script = std.runBash`
     openssl version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(openssl())
+    .dependencies(openssl)
     .toFile();
 
   const result = (await script.read()).trim();

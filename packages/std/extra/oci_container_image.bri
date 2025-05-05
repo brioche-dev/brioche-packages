@@ -2,7 +2,7 @@ import * as std from "/core";
 import { runBash } from "./run_bash.bri";
 
 interface OciContainerImageOptions {
-  recipe: std.AsyncRecipe<std.Directory>;
+  recipe: std.RecipeLike<std.Directory>;
   entrypoint?: string[];
 }
 
@@ -27,7 +27,7 @@ interface OciContainerImageOptions {
 export function ociContainerImage(
   options: OciContainerImageOptions,
 ): std.Recipe<std.File> {
-  return std.recipeFn(async (): Promise<std.Recipe<std.File>> => {
+  return std.recipe(async (): Promise<std.Recipe<std.File>> => {
     const entrypoint = options.entrypoint ?? ["/brioche-run"];
 
     let imageDir = std.directory();
@@ -157,7 +157,7 @@ interface DescribeBlobResult {
 }
 
 async function describeBlob(
-  file: std.AsyncRecipe<std.File>,
+  file: std.RecipeLike<std.File>,
 ): Promise<DescribeBlobResult> {
   const description = await runBash`
     sha256sum < "$file" > "$BRIOCHE_OUTPUT"
@@ -181,7 +181,7 @@ async function describeBlob(
 
 // TODO: Remove once Brioche v0.1.0 is no longer supported
 function collectReferences(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   if (std.semverMatches(std.BRIOCHE_VERSION, ">=0.1.1")) {
     return std.collectReferences(recipe);
@@ -216,7 +216,7 @@ function collectReferences(
     .toDirectory();
 }
 
-function tar(recipe: std.AsyncRecipe<std.Directory>): std.Recipe<std.File> {
+function tar(recipe: std.RecipeLike<std.Directory>): std.Recipe<std.File> {
   return runBash`
     tar -cf "$BRIOCHE_OUTPUT" -C "$recipe" .
   `
@@ -224,7 +224,7 @@ function tar(recipe: std.AsyncRecipe<std.Directory>): std.Recipe<std.File> {
     .toFile();
 }
 
-function gzip(file: std.AsyncRecipe<std.File>): std.Recipe<std.File> {
+function gzip(file: std.RecipeLike<std.File>): std.Recipe<std.File> {
   return runBash`
     gzip -c "$file" > "$BRIOCHE_OUTPUT"
   `

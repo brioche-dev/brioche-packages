@@ -27,7 +27,7 @@ export async function test() {
   const script = std.runBash`
     kubent --version 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(kubent())
+    .dependencies(kubent)
     .toFile();
 
   const result = (await script.read()).trim();

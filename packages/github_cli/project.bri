@@ -32,7 +32,7 @@ export async function test() {
   const script = std.runBash`
     gh --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(gh())
+    .dependencies(gh)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     lurk --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(lurk())
+    .dependencies(lurk)
     .toFile();
 
   const result = (await script.read()).trim();

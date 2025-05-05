@@ -4,8 +4,8 @@ import { runtimeUtils } from "../utils.bri";
 interface BootstrapRunOptions {
   script: string;
   env?: Record<string, std.ProcessTemplateLike>;
-  workDir?: std.AsyncRecipe<std.Directory>;
-  outputScaffold?: std.AsyncRecipe<std.Directory>;
+  workDir?: std.RecipeLike<std.Directory>;
+  outputScaffold?: std.RecipeLike<std.Directory>;
 }
 
 export function bootstrapRun(

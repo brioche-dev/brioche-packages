@@ -29,14 +29,14 @@ function nodejs(): std.Recipe<std.Directory> {
 export default nodejs;
 
 interface NpmInstallOptions {
-  source: std.AsyncRecipe<std.Directory>;
+  source: std.RecipeLike<std.Directory>;
 }
 
 export async function test() {
   const script = std.runBash`
     node --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(nodejs())
+    .dependencies(nodejs)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -102,7 +102,7 @@ export function liveUpdate() {
  *     mv dist "$BRIOCHE_OUTPUT"
  *   `
  *     .workDir(npmPackage)
- *     .dependencies(nodejs());
+ *     .dependencies(nodejs);
  * };
  * ```
  */
@@ -113,7 +113,7 @@ export function npmInstall(
     cd "$BRIOCHE_OUTPUT"
     npm clean-install
   `
-    .dependencies(nodejs())
+    .dependencies(nodejs)
     .outputScaffold(options.source)
     .unsafe({ networking: true })
     .toDirectory();
@@ -159,7 +159,7 @@ const BinList = typer.array(
 export function npmInstallGlobal(
   options: NpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
-  return std.recipeFn(async () => {
+  return std.recipe(async () => {
     const { packageName, version, wrapBins = true } = options;
 
     let recipe = std.runBash`
@@ -170,7 +170,7 @@ export function npmInstallGlobal(
 
       npm install --global "\${package_name}@\${version}"
     `
-      .dependencies(nodejs())
+      .dependencies(nodejs)
       .outputScaffold(std.directory())
       .env({
         package_name: packageName,

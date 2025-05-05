@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     starship --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(starship())
+    .dependencies(starship)
     .toFile();
 
   const result = (await script.read()).trim();

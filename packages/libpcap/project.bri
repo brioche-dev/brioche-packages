@@ -18,7 +18,7 @@ export default function libpcap(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.setEnv(libpcap, {
@@ -32,7 +32,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libpcap | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libpcap())
+    .dependencies(std.toolchain, libpcap)
     .toFile();
 
   const result = (await script.read()).trim();

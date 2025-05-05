@@ -110,7 +110,7 @@ export async function test() {
   const script = std.runBash`
     rustc --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(rust())
+    .dependencies(rust)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -161,10 +161,10 @@ interface CargoBuildParameters {
 }
 
 export interface CargoBuildOptions {
-  source: std.AsyncRecipe<std.Directory>;
+  source: std.RecipeLike<std.Directory>;
   path?: string;
   runnable?: string;
-  dependencies?: std.AsyncRecipe<std.Directory>[];
+  dependencies?: std.RecipeLike<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   unsafe?: std.ProcessUnsafeOptions;
   buildParams?: CargoBuildParameters;
@@ -336,26 +336,26 @@ export function cargoBuild(options: CargoBuildOptions) {
  * to re-vendor the crates any time the source code changes!
  */
 export function createSkeletonCrate(
-  crate: std.AsyncRecipe<std.Directory>,
+  crate: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   const recipe = std.runBash`
     cargo chef prepare --recipe-path "$BRIOCHE_OUTPUT"
   `
-    .dependencies(rust(), cargoChef())
+    .dependencies(rust, cargoChef)
     .workDir(crate)
     .toFile();
   return std.runBash`
     cd "$BRIOCHE_OUTPUT"
     cargo chef cook --recipe-path "$recipe" --no-build
   `
-    .dependencies(rust(), cargoChef())
+    .dependencies(rust, cargoChef)
     .env({ recipe })
     .outputScaffold(std.directory())
     .toDirectory();
 }
 
 interface VendorCrateOptions {
-  source: std.AsyncRecipe<std.Directory>;
+  source: std.RecipeLike<std.Directory>;
 }
 
 /**
@@ -396,7 +396,7 @@ export function vendorCrate(
     # vendored dependencies
     cargo vendor --locked >> .cargo/config.toml
   `
-    .dependencies(rust())
+    .dependencies(rust)
     .outputScaffold(skeletonCrate)
     .unsafe({ networking: true })
     .toDirectory();

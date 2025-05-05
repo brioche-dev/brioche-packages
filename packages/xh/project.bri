@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     xh --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(xh())
+    .dependencies(xh)
     .toFile();
 
   const result = (await script.read()).trim();

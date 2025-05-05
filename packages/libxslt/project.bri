@@ -30,7 +30,7 @@ export default function libxslt(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), python(), libxml2())
+    .dependencies(std.toolchain, python, libxml2)
     .toDirectory();
 
   libxslt = makePkgConfigPathsRelative(libxslt);
@@ -48,7 +48,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libxslt | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libxslt())
+    .dependencies(std.toolchain, libxslt)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -101,7 +101,7 @@ export function liveUpdate() {
 
 // TODO: Figure out where to move this, this is copied from `std`
 function makePkgConfigPathsRelative(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with
   // relative paths (using the `${pcfiledir}` variable)

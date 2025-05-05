@@ -20,7 +20,7 @@ export default function git(): std.Recipe<std.Directory> {
     make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), openssl(), curl())
+    .dependencies(std.toolchain, openssl, curl)
     .toDirectory();
 
   git = std.setEnv(git, {
@@ -36,7 +36,7 @@ export async function test() {
   const script = std.runBash`
     git --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(git())
+    .dependencies(git)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -120,7 +120,7 @@ export function gitCheckout(
   init: std.Awaitable<GitCheckoutInit>,
   options: GitCheckoutOptions = {},
 ): std.Recipe<std.Directory> {
-  return std.recipeFn(async () => {
+  return std.recipe(async () => {
     const { commit, repository, options: initOptions } = await init;
     options = { ...initOptions, ...options };
 
@@ -139,7 +139,7 @@ export function gitCheckout(
       git fetch --depth 1 origin "$commit"
       git -c advice.detachedHead=false checkout FETCH_HEAD
     `
-      .dependencies(git())
+      .dependencies(git)
       .env({
         repository,
         commit,
@@ -153,7 +153,7 @@ export function gitCheckout(
         cd "$BRIOCHE_OUTPUT"
         git submodule update --init --recursive
       `
-        .dependencies(git())
+        .dependencies(git)
         .outputScaffold(repo)
         .unsafe({ networking: true })
         .toDirectory();

@@ -34,7 +34,7 @@ export async function test() {
   const script = std.runBash`
     pstack --version 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(pstack())
+    .dependencies(pstack)
     .toFile();
 
   const version = (await script.read()).trim();

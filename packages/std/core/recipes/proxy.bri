@@ -1,12 +1,10 @@
 import * as runtime from "../runtime.bri";
-import { type Equatable, assert, jsonSerialize } from "../utils.bri";
+import { type Equatable, jsonSerialize } from "../utils.bri";
 import {
   type Artifact,
-  type AsyncRecipe,
   type Recipe,
-  type RecipeSerialization,
+  type RecipeLike,
   type ArtifactType,
-  briocheDeserializeAny,
   createRecipe,
 } from "./recipe.bri";
 
@@ -15,7 +13,7 @@ import {
  * converted to a proxy automatically (see `std.createProxy()`).
  */
 export function memo<Args extends Equatable[], Ret extends Artifact>(
-  f: (...args: Args) => AsyncRecipe<Ret>,
+  f: (...args: Args) => RecipeLike<Ret>,
 ): (...args: Args) => Recipe<Ret> {
   const proxies = new Map<string, Recipe<Ret>>();
   return (...args: Args) => {
@@ -40,15 +38,16 @@ export function memo<Args extends Equatable[], Ret extends Artifact>(
  * recipe's serialization.
  */
 export function createProxy<T extends Artifact>(
-  recipe: AsyncRecipe<T>,
+  recipe: RecipeLike<T>,
 ): Recipe<T> {
   let serialized: Promise<runtime.ProxyRecipe> | undefined;
-  let baked: T | undefined;
 
   const serializeProxy = async (): Promise<runtime.ProxyRecipe> => {
     if (serialized === undefined) {
       serialized = (async () => {
-        const serializedRecipe = await (await recipe).briocheSerialize();
+        const recipeValue =
+          typeof recipe === "function" ? await recipe() : await recipe;
+        const serializedRecipe = await recipeValue.briocheSerialize();
         const proxy = await runtime.createProxy(serializedRecipe);
         return {
           ...proxy,
@@ -63,19 +62,7 @@ export function createProxy<T extends Artifact>(
   return createRecipe(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,
     briocheSerialize: async () => {
-      const proxy = (await serializeProxy()) as unknown;
-      return proxy as RecipeSerialization<T>;
-    },
-    bake: async () => {
-      if (baked === undefined) {
-        const proxy = await serializeProxy();
-        const bakedArtifact = await runtime.bake(proxy);
-        baked = briocheDeserializeAny(bakedArtifact, proxy.meta?.source) as T;
-      }
-
-      /* eslint-disable-next-line */
-      assert(baked != null, "expected `bake()` to return a value");
-      return baked;
+      return await serializeProxy();
     },
   });
 }

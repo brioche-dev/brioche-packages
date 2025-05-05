@@ -24,7 +24,7 @@ export async function test() {
   const script = std.runBash`
     restic version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(restic())
+    .dependencies(restic)
     .toFile();
 
   const result = (await script.read()).trim();

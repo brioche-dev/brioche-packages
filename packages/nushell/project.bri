@@ -25,7 +25,7 @@ export async function test() {
   const script = std.runBash`
     nu --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(nushell())
+    .dependencies(nushell)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -29,7 +29,7 @@ export default function libxml2(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), python())
+    .dependencies(std.toolchain, python)
     .toDirectory();
 
   libxml2 = makePkgConfigPathsRelative(libxml2);
@@ -47,7 +47,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libxml-2.0 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libxml2())
+    .dependencies(std.toolchain, libxml2)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -100,7 +100,7 @@ export function liveUpdate() {
 
 // TODO: Figure out where to move this, this is copied from `std`
 function makePkgConfigPathsRelative(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with
   // relative paths (using the `${pcfiledir}` variable)

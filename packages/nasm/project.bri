@@ -21,7 +21,7 @@ export default function nasm(): std.Recipe<std.Directory> {
     cp nasm "$BRIOCHE_OUTPUT/bin/nasm"
     ln -s "bin/nasm" "$BRIOCHE_OUTPUT/brioche-run"
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory();
 }
@@ -30,7 +30,7 @@ export async function test() {
   const script = std.runBash`
     nasm --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(nasm())
+    .dependencies(nasm)
     .toFile();
 
   const result = (await script.read()).trim();

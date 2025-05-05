@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     zoxide --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(zoxide())
+    .dependencies(zoxide)
     .toFile();
 
   const result = (await script.read()).trim();

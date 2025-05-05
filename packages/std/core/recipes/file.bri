@@ -55,10 +55,6 @@ export class File implements Recipe<File> {
     this.resources = options.resources;
   }
 
-  bake(): File {
-    return this;
-  }
-
   briocheSerialize(): runtime.File {
     return {
       type: "file",

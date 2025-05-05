@@ -20,7 +20,7 @@ export default function php(): std.Recipe<std.Directory> {
     make -j16
     make install
   `
-    .dependencies(std.toolchain(), libxml2(), sqlite())
+    .dependencies(std.toolchain, libxml2, sqlite)
     .workDir(source)
     .toDirectory();
 
@@ -36,7 +36,7 @@ export async function test() {
   const script = std.runBash`
     php --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(php())
+    .dependencies(php)
     .toFile();
 
   const result = (await script.read()).trim();

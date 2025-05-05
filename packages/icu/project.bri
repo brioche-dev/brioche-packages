@@ -32,7 +32,7 @@ export default function icu(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   icu = std.setEnv(icu, {
@@ -65,7 +65,7 @@ export async function test() {
   const script = std.runBash`
     icuinfo | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(icu())
+    .dependencies(icu)
     .toFile();
 
   const result = (await script.read()).trim();

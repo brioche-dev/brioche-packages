@@ -19,7 +19,7 @@ export default function libffi(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .toDirectory();
 
   return std.setEnv(libffi, {
@@ -33,7 +33,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libffi | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libffi())
+    .dependencies(std.toolchain, libffi)
     .toFile();
 
   const result = (await script.read()).trim();

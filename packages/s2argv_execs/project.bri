@@ -60,7 +60,7 @@ export async function test() {
     # Output 'Hello, World!' through s2argv_execs
     echo "echo 'Hello, World!'" | ./main | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), s2argvExecs())
+    .dependencies(std.toolchain, s2argvExecs)
     .env({ src: src })
     .toFile();
 

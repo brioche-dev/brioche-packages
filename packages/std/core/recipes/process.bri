@@ -1,9 +1,14 @@
-import { Awaitable, mixin, unreachable } from "../utils.bri";
+import { mixin, unreachable } from "../utils.bri";
 import * as runtime from "../runtime.bri";
 import type { File } from "./file.bri";
-import { type Directory, directory } from "./directory.bri";
+import { type Directory } from "./directory.bri";
 import type { Symlink } from "./symlink.bri";
-import { type AsyncRecipe, type Recipe, createRecipe } from "./recipe.bri";
+import {
+  type Recipe,
+  type RecipeLike,
+  recipe,
+  createRecipe,
+} from "./recipe.bri";
 import { castToFile, castToDirectory, castToSymlink } from "./cast.bri";
 
 export type ProcessOptions = {
@@ -11,9 +16,9 @@ export type ProcessOptions = {
   args?: ProcessTemplateLike[];
   env?: Record<string, ProcessTemplateLike>;
   currentDir?: ProcessTemplateLike;
-  dependencies?: AsyncRecipe<Directory>[];
-  workDir?: AsyncRecipe<Directory>;
-  outputScaffold?: AsyncRecipe | null;
+  dependencies?: RecipeLike<Directory>[];
+  workDir?: RecipeLike<Directory>;
+  outputScaffold?: RecipeLike | null;
   unsafe?: ProcessUnsafeOptions;
 };
 
@@ -35,17 +40,17 @@ export interface ProcessUtils {
    * Returns a new process with more dependencies added. The new
    * dependencies take precedence over the old ones.
    */
-  dependencies(...dependencies: AsyncRecipe<Directory>[]): Process;
+  dependencies(...dependencies: RecipeLike<Directory>[]): Process;
 
   /**
    * Returns a new process with a different working directory.
    */
-  workDir(workDir: AsyncRecipe<Directory>): Process;
+  workDir(workDir: RecipeLike<Directory>): Process;
 
   /**
    * Returns a new process with a different output scaffold.
    */
-  outputScaffold(outputScaffold: AsyncRecipe): Process;
+  outputScaffold(outputScaffold: RecipeLike): Process;
 
   /**
    * Returns a new process with unsafe options set. If unset, no unsafe
@@ -124,12 +129,20 @@ export function process(options: ProcessOptions): Process {
     ...options.env,
   };
 
-  const bEnv: Record<runtime.BString, ProcessTemplate> = {};
-  for (const [k, v] of Object.entries(env)) {
-    bEnv[runtime.bstring(k)] = processTemplate(v);
-  }
+  const envPairs = Object.entries(env).map(
+    ([key, value]) => [key, processTemplate(value)] as const,
+  );
 
-  const recipe = createRecipe(["file", "directory", "symlink"], {
+  const command = processTemplate(options.command);
+  const args = (options.args ?? []).map((arg) => processTemplate(arg));
+  const dependencies = (options.dependencies ?? []).map((dep) => recipe(dep));
+  const workDir = options.workDir != null ? recipe(options.workDir) : null;
+  const outputScaffold =
+    options.outputScaffold != null ? recipe(options.outputScaffold) : null;
+  const currentDir =
+    options.currentDir != null ? processTemplate(options.currentDir) : null;
+
+  const processRecipe = createRecipe(["file", "directory", "symlink"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
       const unknownUnsafeKeys = Object.keys(unknownUnsafeOptions);
@@ -140,39 +153,42 @@ export function process(options: ProcessOptions): Process {
       }
       const unsafe = networking;
 
+      const [
+        workDirSerialized,
+        outputScaffoldSerialized,
+        currentDirSerialized,
+        commandSerialized,
+        argsSerialized,
+        envPairsSerialized,
+        dependenciesSerialized,
+      ] = await Promise.all([
+        workDir?.briocheSerialize(),
+        outputScaffold?.briocheSerialize(),
+        currentDir?.briocheSerialize(),
+        command.briocheSerialize(),
+        Promise.all(args.map((arg) => arg.briocheSerialize())),
+        Promise.all(
+          envPairs.map(async ([k, v]) => [
+            runtime.bstring(k),
+            await v.briocheSerialize(),
+          ]),
+        ),
+        Promise.all(dependencies.map((dep) => dep.briocheSerialize())),
+      ]);
+
       return {
         type: "process",
-        command: await processTemplate(options.command).briocheSerialize(),
-        args: await Promise.all(
-          (options.args ?? []).map(
-            async (arg) => await processTemplate(arg).briocheSerialize(),
-          ),
-        ),
-        env: Object.fromEntries(
-          await Promise.all(
-            Object.entries(env).map(async ([k, v]) => [
-              k,
-              await processTemplate(v).briocheSerialize(),
-            ]),
-          ),
-        ),
-        currentDir:
-          options.currentDir != null
-            ? await processTemplate(options.currentDir).briocheSerialize()
-            : undefined,
-        dependencies: await Promise.all(
-          (options.dependencies ?? []).map(
-            async (dep) => await (await dep).briocheSerialize(),
-          ),
-        ),
+        command: commandSerialized,
+        args: argsSerialized,
+        env: Object.fromEntries(envPairsSerialized),
+        currentDir: currentDirSerialized ?? undefined,
+        dependencies: dependenciesSerialized,
         platform: "x86_64-linux",
-        workDir: await (
-          await (options.workDir ?? directory())
-        ).briocheSerialize(),
-        outputScaffold:
-          options.outputScaffold != null
-            ? await (await options.outputScaffold).briocheSerialize()
-            : null,
+        workDir: workDirSerialized ?? {
+          type: "create_directory",
+          entries: {},
+        },
+        outputScaffold: outputScaffoldSerialized,
         unsafe,
         networking,
         meta,
@@ -180,7 +196,7 @@ export function process(options: ProcessOptions): Process {
     },
   });
 
-  return mixin(recipe, {
+  return mixin(processRecipe, {
     env(this: Process, values: Record<string, ProcessTemplateLike>): Process {
       return process({
         ...options,
@@ -198,20 +214,20 @@ export function process(options: ProcessOptions): Process {
     },
     dependencies(
       this: Process,
-      ...dependencies: AsyncRecipe<Directory>[]
+      ...dependencies: RecipeLike<Directory>[]
     ): Process {
       return process({
         ...options,
         dependencies: [...dependencies, ...(options.dependencies ?? [])],
       });
     },
-    workDir(this: Process, workDir: AsyncRecipe<Directory>): Process {
+    workDir(this: Process, workDir: RecipeLike<Directory>): Process {
       return process({
         ...options,
         workDir,
       });
     },
-    outputScaffold(this: Process, outputScaffold: AsyncRecipe): Process {
+    outputScaffold(this: Process, outputScaffold: RecipeLike): Process {
       return process({
         ...options,
         outputScaffold,
@@ -380,18 +396,17 @@ function isProcessTemplateSymbol(
   );
 }
 
-export type ProcessTemplateLike = Awaitable<ProcessTemplateComponent>;
-
-export type ProcessTemplateComponent =
+export type ProcessTemplateLike =
   | string
   | ProcessTemplate
-  | Recipe
+  | RecipeLike
   | ProcessTemplateSymbol
   | undefined;
 
 export class ProcessTemplate {
   componentType: "processTemplate" = "processTemplate";
   components: ProcessTemplateLike[];
+  #serialized: runtime.ProcessTemplate | undefined;
 
   constructor(...components: ProcessTemplateLike[]) {
     /* eslint-disable-next-line */
@@ -399,48 +414,55 @@ export class ProcessTemplate {
   }
 
   async briocheSerialize(): Promise<runtime.ProcessTemplate> {
-    const components = await Promise.all(this.components);
-    const runtimeComponents = await Promise.all(
-      components.map(
-        async (component): Promise<runtime.ProcessTemplateComponent[]> => {
-          if (component == null || component === "") {
-            return [];
-          } else if (typeof component === "string") {
-            return [{ type: "literal", value: runtime.bstring(component) }];
-          } else if (isProcessTemplateSymbol(component)) {
-            switch (component.symbol) {
-              case "outputPath":
-                return [{ type: "output_path" }];
-              case "resourceDir":
-                return [{ type: "resource_dir" }];
-              case "inputResourceDirs":
-                return [{ type: "input_resource_dirs" }];
-              case "homeDir":
-                return [{ type: "home_dir" }];
-              case "workDir":
-                return [{ type: "work_dir" }];
-              case "tempDir":
-                return [{ type: "temp_dir" }];
-              case "caCertificateBundlePath":
-                return [{ type: "ca_certificate_bundle_path" }];
-              default:
-                return unreachable(component.symbol);
+    if (this.#serialized == null) {
+      const components = await Promise.all(
+        this.components.map((component) =>
+          typeof component === "function" ? component() : component,
+        ),
+      );
+      const runtimeComponents = await Promise.all(
+        components.map(
+          async (component): Promise<runtime.ProcessTemplateComponent[]> => {
+            if (component == null || component === "") {
+              return [];
+            } else if (typeof component === "string") {
+              return [{ type: "literal", value: runtime.bstring(component) }];
+            } else if (isProcessTemplateSymbol(component)) {
+              switch (component.symbol) {
+                case "outputPath":
+                  return [{ type: "output_path" }];
+                case "resourceDir":
+                  return [{ type: "resource_dir" }];
+                case "inputResourceDirs":
+                  return [{ type: "input_resource_dirs" }];
+                case "homeDir":
+                  return [{ type: "home_dir" }];
+                case "workDir":
+                  return [{ type: "work_dir" }];
+                case "tempDir":
+                  return [{ type: "temp_dir" }];
+                case "caCertificateBundlePath":
+                  return [{ type: "ca_certificate_bundle_path" }];
+                default:
+                  return unreachable(component.symbol);
+              }
+            } else if (isProcessTemplateInstance(component)) {
+              const serialized = await component.briocheSerialize();
+              return serialized.components;
+            } else {
+              return [
+                { type: "input", recipe: await component.briocheSerialize() },
+              ];
             }
-          } else if (isProcessTemplateInstance(component)) {
-            const serialized = await component.briocheSerialize();
-            return serialized.components;
-          } else {
-            return [
-              { type: "input", recipe: await component.briocheSerialize() },
-            ];
-          }
-        },
-      ),
-    );
+          },
+        ),
+      );
 
-    return {
-      components: runtimeComponents.flat(1),
-    };
+      this.#serialized = {
+        components: runtimeComponents.flat(1),
+      };
+    }
+    return this.#serialized;
   }
 }
 

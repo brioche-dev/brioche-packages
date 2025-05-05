@@ -28,7 +28,7 @@ export async function test() {
   const script = std.runBash`
     carapace --version 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(carapace())
+    .dependencies(carapace)
     .toFile();
 
   const result = (await script.read()).trim();

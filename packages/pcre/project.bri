@@ -25,7 +25,7 @@ export default function pcre(): std.Recipe<std.Directory> {
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain())
+    .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory();
 
@@ -44,7 +44,7 @@ export async function test() {
     pkg-config --modversion libpcrecpp | tee -a "$BRIOCHE_OUTPUT"
     pkg-config --modversion libpcreposix | tee -a "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), pcre())
+    .dependencies(std.toolchain, pcre)
     .toFile();
 
   const result = (await script.read()).trim();

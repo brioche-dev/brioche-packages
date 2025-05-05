@@ -20,7 +20,7 @@ import * as std from "/core";
  *     gcc -o "$BRIOCHE_OUTPUT/bin/hello" src/hello.c
  *   `
  *     .workDir(Brioche.glob("src"))
- *     .dependencies(std.toolchain());
+ *     .dependencies(std.toolchain);
  *
  *   // Add a symlink so that `brioche run` will run `bin/hello`
  *   program = std.withRunnableLink(program, "bin/hello");
@@ -30,7 +30,7 @@ import * as std from "/core";
  * ```
  */
 export function withRunnableLink(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
   runPath: string,
 ): std.Recipe<std.Directory> {
   let result = std.recipe(recipe);

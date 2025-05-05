@@ -29,7 +29,7 @@ export async function test() {
   const script = std.runBash`
     rclone --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(rclone())
+    .dependencies(rclone)
     .toFile();
 
   const result = (await script.read()).trim();

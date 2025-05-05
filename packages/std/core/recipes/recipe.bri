@@ -22,53 +22,13 @@ export type ArtifactType<T extends Artifact> = T extends File
       ? "symlink"
       : never;
 
-export type RecipeSerialization<T extends Artifact> = runtime.WithMeta &
-  (T extends File
-    ?
-        | runtime.File
-        | runtime.DownloadRecipe
-        | runtime.ProcessRecipe
-        | runtime.CreateFileRecipe
-        | runtime.CastRecipe
-        | runtime.PeelRecipe
-        | runtime.GetRecipe
-        | runtime.SetPermissionsRecipe
-        | runtime.ProxyRecipe
-        | runtime.SyncRecipe
-    : T extends Directory
-      ?
-          | runtime.Directory
-          | runtime.UnarchiveRecipe
-          | runtime.ProcessRecipe
-          | runtime.CreateDirectoryRecipe
-          | runtime.CastRecipe
-          | runtime.MergeRecipe
-          | runtime.PeelRecipe
-          | runtime.GetRecipe
-          | runtime.InsertRecipe
-          | runtime.GlobRecipe
-          | runtime.CollectReferencesRecipe
-          | runtime.AttachResourcesRecipe
-          | runtime.ProxyRecipe
-          | runtime.SyncRecipe
-      : T extends Symlink
-        ?
-            | runtime.Symlink
-            | runtime.ProcessRecipe
-            | runtime.CastRecipe
-            | runtime.PeelRecipe
-            | runtime.GetRecipe
-            | runtime.ProxyRecipe
-            | runtime.SyncRecipe
-        : never);
-
 /**
  * A "recipe" is a type that describes how to create an artifact in Brioche.
  * When you call `brioche build`, the returned recipe is "baked" to produce
  * an output artifact. Recipes are lazy and won't do anything until `.bake()`
  * is called on them.
  */
-export type Recipe<T extends Artifact = Artifact> = RecipeCommon<T> &
+export type Recipe<T extends Artifact = Artifact> = RecipeCommon &
   ([T] extends [File]
     ? FileRecipeUtils
     : [T] extends [Directory]
@@ -80,11 +40,13 @@ export type Recipe<T extends Artifact = Artifact> = RecipeCommon<T> &
           : never);
 
 /**
- * A recipe that may be wrapped in a promise. An `AsyncRecipe` can be converted
- * to a `Recipe` using the `std.recipe()` function, even when not in
- * an async function.
+ * A recipe that may be wrapped in a promise or a function call. A `RecipeLike`
+ * can be converted to a `Recipe` using the `std.recipe()` function, which will
+ * delay the function call or awaiting the result until the recipe is baked.
  */
-export type AsyncRecipe<T extends Artifact = Artifact> = Awaitable<Recipe<T>>;
+export type RecipeLike<T extends Artifact = Artifact> =
+  | Awaitable<Recipe<T>>
+  | (() => Awaitable<Recipe<T>>);
 
 export function briocheDeserializeAny(
   artifact: runtime.Artifact,
@@ -103,67 +65,49 @@ export function briocheDeserializeAny(
 }
 
 /**
- * Create a recipe from an `AsyncRecipe`. This function itself is not async,
+ * Create a recipe from a `RecipeLike`. This function itself is not async,
  * meaning it can even be called from a synchronous function. Under the hood,
- * this will defer the async call until the recipe is baked (or serialized).
+ * this will delay the function call or awaiting the result until the recipe is
+ * baked (or serialized).
  */
-export function recipe<T extends Artifact>(recipe: AsyncRecipe<T>): Recipe<T> {
+export function recipe<T extends Artifact>(recipe: RecipeLike<T>): Recipe<T> {
+  let serialized: runtime.Recipe | undefined;
+
   return createRecipe<T>(
     ["file", "directory", "symlink"] as ArtifactType<T>[],
     {
       sourceDepth: 1,
       briocheSerialize: async () => {
-        return (await recipe).briocheSerialize();
-      },
-      bake: async () => {
-        return (await recipe).bake();
+        if (serialized == null) {
+          const recipeValue =
+            typeof recipe === "function" ? await recipe() : await recipe;
+          serialized = await recipeValue.briocheSerialize();
+        }
+        return serialized;
       },
     },
   );
 }
 
 /**
- * Create a recipe from a function that returns an `AsyncRecipe`. This function
- * itself is not async, meaning it can even be called from a synchronous
- * function. Under the hood, this will defer the function call until the
- * recipe is baked (or serialized).
+ * Wrap a function that returns a `RecipeLike`, returning a new function that
+ * accepts the same arguments but returns a `Recipe`.
+ *
+ * The return result is passed to `std.recipe`, which can be more convenient for
+ * function callers, since methods from `Recipe` can be used directly.
  */
-export function recipeFn<T extends Artifact>(
-  f: () => AsyncRecipe<T>,
-): Recipe<T> {
-  let result: Recipe<T> | undefined;
-  return createRecipe<T>(
-    ["file", "directory", "symlink"] as ArtifactType<T>[],
-    {
-      sourceDepth: 1,
-      briocheSerialize: async () => {
-        if (result == null) {
-          result = await f();
-        }
-        return result.briocheSerialize();
-      },
-      bake: async () => {
-        if (result == null) {
-          result = await f();
-        }
-        return result.bake();
-      },
-    },
-  );
+export function recipeFn<T extends Artifact, Args extends [] = []>(
+  f: (...args: Args) => RecipeLike<T>,
+): (...args: Args) => Recipe<T> {
+  return (...args: Args): Recipe<T> => {
+    return recipe(f(...args));
+  };
 }
 
-export type CreateRecipeOptions<T extends Artifact> = {
+export type CreateRecipeOptions = {
   sourceDepth?: number;
-} & (
-  | {
-      briocheSerialize?(meta: runtime.Meta): Awaitable<RecipeSerialization<T>>;
-      bake(meta: runtime.Meta): Awaitable<T>;
-    }
-  | {
-      briocheSerialize(meta: runtime.Meta): Awaitable<RecipeSerialization<T>>;
-      bake?(meta: runtime.Meta): Awaitable<T>;
-    }
-);
+  briocheSerialize(meta: runtime.Meta): Awaitable<runtime.Recipe>;
+};
 
 /**
  * Create a new recipe by providing either a list of possible output types,
@@ -174,7 +118,7 @@ export type CreateRecipeOptions<T extends Artifact> = {
  */
 export function createRecipe<T extends Artifact>(
   types: ArtifactType<T>[],
-  opts: CreateRecipeOptions<T>,
+  opts: CreateRecipeOptions,
 ): Recipe<T> {
   const source = briocheSource({ depth: (opts.sourceDepth ?? 0) + 1 });
   const meta = { source };
@@ -185,23 +129,11 @@ export function createRecipe<T extends Artifact>(
 
   return {
     briocheSerialize: async () => {
-      if (opts.briocheSerialize != null) {
-        return opts.briocheSerialize(meta);
-      } else if (opts.bake != null) {
-        return (await opts.bake(meta)).briocheSerialize();
-      } else {
-        throw new Error("bake or briocheSerialize is required");
-      }
+      return opts.briocheSerialize(meta);
     },
     bake: async () => {
-      if (opts.bake != null) {
-        return opts.bake(meta);
-      } else if (opts.briocheSerialize != null) {
-        const result = await runtime.bake(await opts.briocheSerialize(meta));
-        return briocheDeserializeAny(result, source);
-      } else {
-        throw new Error("bake or briocheSerialize is required");
-      }
+      const result = await runtime.bake(await opts.briocheSerialize(meta));
+      return briocheDeserializeAny(result, source);
     },
     ...(isFile ? fileRecipeUtils : {}),
     ...(isDirectory ? directoryRecipeUtils : {}),
@@ -209,21 +141,13 @@ export function createRecipe<T extends Artifact>(
   } as unknown as Recipe<T>;
 }
 
-interface RecipeCommon<T extends Artifact> extends RecipeUtils {
-  /**
-   * Bake a recipe, returning a promise that will contain the resulting
-   * artifact. Normally, you won't need to call this function yourself, as
-   * you can instead return a recipe directly, where the runtime will
-   * automatically bake it.
-   */
-  bake(): Awaitable<T>;
-
+interface RecipeCommon extends RecipeUtils {
   /**
    * Serialize a recipe to a plain JSON-style object for the Brioche runtime
    * to handle. This is useful for wrapping another recipe, avoiding the need
    * to call `.bake()` when implementing custom recipes.
    */
-  briocheSerialize(): Awaitable<RecipeSerialization<T>>;
+  briocheSerialize(): Awaitable<runtime.Recipe>;
 }
 
 interface RecipeUtils {
@@ -302,7 +226,7 @@ interface DirectoryRecipeUtils extends RecipeUtils {
    * replaced. If the path descends into a non-directory, baking the recipe
    * will fail.
    */
-  insert(path: string, recipe: AsyncRecipe<Artifact>): Recipe<Directory>;
+  insert(path: string, recipe: RecipeLike<Artifact>): Recipe<Directory>;
 
   /**
    * Return a new directory with the given recipe removed at the provided
@@ -361,7 +285,14 @@ export const fileRecipeUtils: FileRecipeUtils = {
     });
   },
   async readBytes(this: Recipe<File>): Promise<Uint8Array> {
-    const artifact = await this.bake();
+    const serialized = await this.briocheSerialize();
+    const artifact = await runtime.bake(serialized);
+    if (artifact.type !== "file") {
+      throw new Error(
+        `expected artifact in '.readBytes()' call to be a file, was ${artifact.type}`,
+      );
+    }
+
     const bstring = await runtime.readBlob(artifact.contentBlob);
     return runtime.bstringToBytes(bstring);
   },
@@ -390,7 +321,7 @@ export const directoryRecipeUtils: DirectoryRecipeUtils = {
   insert(
     this: Recipe<Directory>,
     path: string,
-    recipe: AsyncRecipe<Artifact>,
+    recipe: RecipeLike<Artifact>,
   ): Recipe<Directory> {
     const proxyDirectory = createProxy(this);
     const proxyRecipe = createProxy(recipe);
@@ -398,8 +329,10 @@ export const directoryRecipeUtils: DirectoryRecipeUtils = {
     return createRecipe(["directory"], {
       sourceDepth: 1,
       briocheSerialize: async (meta) => {
-        const serializedDirectory = await proxyDirectory.briocheSerialize();
-        const serializedRecipe = await proxyRecipe.briocheSerialize();
+        const [serializedDirectory, serializedRecipe] = await Promise.all([
+          proxyDirectory.briocheSerialize(),
+          proxyRecipe.briocheSerialize(),
+        ]);
         return {
           type: "insert",
           directory: serializedDirectory,

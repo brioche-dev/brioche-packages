@@ -21,7 +21,7 @@ export async function test() {
   const script = std.runBash`
     claude --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(claudeCode())
+    .dependencies(claudeCode)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -51,9 +51,5 @@ export class Symlink implements Recipe<Symlink> {
     return new Symlink({ target: artifact.target, source });
   }
 
-  bake(): Symlink {
-    return this;
-  }
-
   pipe = symlinkRecipeUtils.pipe;
 }

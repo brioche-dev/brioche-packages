@@ -31,7 +31,7 @@ export default function postgresql(): std.Recipe<std.Directory> {
     make install-world-bin DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), icu(), openssl(), libxml(), libxslt())
+    .dependencies(std.toolchain, icu, openssl, libxml, libxslt)
     .toDirectory();
 
   postgresql = makePkgConfigPathsRelative(postgresql);
@@ -49,7 +49,7 @@ export async function test() {
   const script = std.runBash`
     postgres --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(postgresql())
+    .dependencies(postgresql)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -87,7 +87,7 @@ export function liveUpdate() {
 
 // TODO: Figure out where to move this, this is copied from `std`
 function makePkgConfigPathsRelative(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with
   // relative paths (using the `${pcfiledir}` variable)

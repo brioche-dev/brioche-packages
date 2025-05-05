@@ -7,7 +7,7 @@ export const project = {
   version: "1.2.76",
 };
 
-const source = std.recipeFn(() => {
+const source = std.recipe(() => {
   const source = Brioche.gitCheckout({
     repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
     ref: `v${project.version}`,
@@ -52,7 +52,7 @@ export async function test() {
   const script = std.runBash`
     pkg-config --modversion libcap | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain(), libcap())
+    .dependencies(std.toolchain, libcap)
     .toFile();
 
   const result = (await script.read()).trim();
@@ -126,7 +126,7 @@ function briocheObjcopy(): std.Recipe<std.Directory> {
 }
 
 function fixSharedObjects(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // `libcap` compiles its shared libraries with extra flags so they also work
   // as executables. `brioche-ld` therefore treats them like executables, which
@@ -154,14 +154,14 @@ function fixSharedObjects(
           --pack "$new_pack"
       done
   `
-    .dependencies(jq(), std.runtimeUtils())
+    .dependencies(jq, std.runtimeUtils)
     .outputScaffold(recipe)
     .toDirectory();
 }
 
 // TODO: Figure out where to move this, this is copied from `std`
 function makePkgConfigPathsRelative(
-  recipe: std.AsyncRecipe<std.Directory>,
+  recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with
   // relative paths (using the `${pcfiledir}` variable)

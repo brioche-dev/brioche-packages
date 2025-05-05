@@ -23,7 +23,7 @@ export async function test() {
   const script = std.runBash`
     miniserve --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(miniserve())
+    .dependencies(miniserve)
     .toFile();
 
   const result = (await script.read()).trim();
