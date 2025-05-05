@@ -1,0 +1,53 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "go_mockery",
+  version: "3.2.5",
+  repository: "https://github.com/vektra/mockery.git",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: project.repository,
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function goMockery(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      generate: true,
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/vektra/mockery/v3/internal/logging.SemVer=${project.version}`,
+      ],
+    },
+    path: ".",
+    runnable: "bin/mockery",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    mockery version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(goMockery)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
