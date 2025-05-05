@@ -3,7 +3,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "pv",
-  version: "1.9.27",
+  version: "1.9.31",
 };
 
 const source = Brioche.download(
