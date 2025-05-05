@@ -24,7 +24,7 @@ export default function terraform(): std.Recipe<std.Directory> {
   return goBuild({
     source: patchedSource,
     buildParams: {
-      ldflags: ["-w", "-s", `-X github.com/hashicorp/terraform/version.dev=no`],
+      ldflags: ["-s", "-w", `-X github.com/hashicorp/terraform/version.dev=no`],
       mod: "readonly",
     },
     runnable: "bin/terraform",
