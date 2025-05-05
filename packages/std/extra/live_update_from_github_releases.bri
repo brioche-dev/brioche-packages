@@ -1,0 +1,126 @@
+import * as std from "/core";
+import { withRunnable } from "./runnable.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+// The default regex used for matching tags. Strips an optional "v" prefix,
+// then matches the rest if it looks like a version number (either semver or
+// a semver-like version)
+const DEFAULT_REGEX_MATCH_TAG =
+  /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:-(?:(?:[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
+
+interface LiveUpdateFromGithubReleasesOptions {
+  project: { version: string; repository: string };
+  matchTag?: RegExp;
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * tag from a GitHub repository. The project's version will be set based on a
+ * regex match against the latest tag name. The repository is inferrred from the
+ * `repository` field of the project.
+ *
+ * ## Options
+ *
+ * - `project`: The project export that should be updated. Must include a
+ *   `repository` property containing a GitHub repository URL.
+ * - `matchTag`: A regex value (`/.../`) to extract the version number from
+ *   a tag name. The regex must include a group named "version". If not
+ *   provided, an optional "v" prefix will be stripped and the rest of the
+ *   tag will be checked if it's a semver or semver-like version number.
+ *
+ * ## Example
+ *
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   repository: "https://github.com/brioche-dev/brioche.git",
+ * };
+ *
+ * export function liveUpdate() {
+ *   return std.liveUpdateFromGithubReleases({
+ *     project,
+ *     matchTag: /^v(?<version>.*)$/, // Strip "v" prefix from tags
+ *   });
+ * }
+ * ```
+ */
+export function liveUpdateFromGithubReleases(
+  options: LiveUpdateFromGithubReleasesOptions,
+): std.Recipe<std.Directory> {
+  const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
+  const matchTag = options.matchTag ?? DEFAULT_REGEX_MATCH_TAG;
+
+  return std.recipeFn(async () => {
+    const { default: nushell } = await import("nushell");
+
+    const src = std.file(std.indoc`
+      let tagName = http get $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
+        | get tag_name
+
+      let parsedTagName = $tagName | parse --regex $env.matchTag
+      if ($parsedTagName | length) == 0 {
+        error make { msg: $'Latest release tag ($tagName) did not match regex ($env.matchTag)' }
+      }
+
+      let version = $parsedTagName.0.version?
+      if version == null {
+        error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
+      }
+
+      $env.project
+        | from json
+        | update version $version
+        | to json
+    `);
+
+    return withRunnable(std.directory(), {
+      command: "nu",
+      args: [src],
+      env: {
+        project: JSON.stringify(options.project),
+        repoOwner,
+        repoName,
+        matchTag: matchTag.source,
+      },
+      dependencies: [nushell()],
+    });
+  });
+}
+
+interface GithubRepoInfo {
+  repoOwner: string;
+  repoName: string;
+}
+
+function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
+  const match = repo.match(
+    /^(?:https?:\/\/)?(www\.)?(?:github\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
+  );
+
+  const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
+  if (repoOwner == null || matchedRepoName == null) {
+    return null;
+  }
+
+  let repoName = matchedRepoName;
+  if (repoName.endsWith(".git")) {
+    repoName = repoName.slice(0, -4);
+  }
+
+  return { repoOwner, repoName };
+}
+
+function parseGithubRepo(repo: string): GithubRepoInfo {
+  const info = tryParseGithubRepo(repo);
+  if (info == null) {
+    throw new Error(
+      `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
+    );
+  }
+
+  return info;
+}
