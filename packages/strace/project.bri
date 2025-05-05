@@ -1,13 +1,13 @@
 import * as std from "std";
-import nushell from "nushell";
 
 export const project = {
   name: "strace",
   version: "6.14",
+  repository: "https://github.com/strace/strace",
 };
 
 const source = Brioche.download(
-  `https://github.com/strace/strace/releases/download/v${project.version}/strace-${project.version}.tar.xz`,
+  `${project.repository}/releases/download/v${project.version}/strace-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
@@ -46,23 +46,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/strace/strace/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

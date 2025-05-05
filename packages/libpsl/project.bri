@@ -1,14 +1,14 @@
 import * as std from "std";
-import nushell from "nushell";
 import python from "python";
 
 export const project = {
   name: "libpsl",
   version: "0.21.5",
+  repository: "https://github.com/rockdaboot/libpsl",
 };
 
 const source = Brioche.download(
-  `https://github.com/rockdaboot/libpsl/releases/download/${project.version}/libpsl-${project.version}.tar.gz`,
+  `${project.repository}/releases/download/${project.version}/libpsl-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -63,21 +63,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/rockdaboot/libpsl/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

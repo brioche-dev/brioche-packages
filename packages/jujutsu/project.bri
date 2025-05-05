@@ -1,15 +1,15 @@
 import * as std from "std";
 import openssl from "openssl";
 import { cargoBuild } from "rust";
-import nushell from "nushell";
 
 export const project = {
   name: "jujutsu",
   version: "0.28.2",
+  repository: "https://github.com/martinvonz/jj.git",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/martinvonz/jj.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 
@@ -39,21 +39,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/jj-vcs/jj/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

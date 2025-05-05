@@ -1,13 +1,13 @@
-import nushell from "nushell";
 import * as std from "std";
 
 export const project = {
   name: "xz",
   version: "5.8.1",
+  repository: "https://github.com/tukaani-project/xz",
 };
 
 const source = Brioche.download(
-  `https://github.com/tukaani-project/xz/releases/download/v${project.version}/xz-${project.version}.tar.gz`,
+  `${project.repository}/releases/download/v${project.version}/xz-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -46,21 +46,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/tukaani-project/xz/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

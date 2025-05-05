@@ -1,14 +1,14 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
-import nushell from "nushell";
 
 export const project = {
   name: "rip2",
   version: "0.9.4",
+  repository: "https://github.com/MilesCranmer/rip2.git",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/MilesCranmer/rip2.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 
@@ -38,21 +38,5 @@ export async function test() {
 }
 
 export async function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/MilesCranmer/rip2/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

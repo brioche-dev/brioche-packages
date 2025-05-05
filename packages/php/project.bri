@@ -1,11 +1,11 @@
 import * as std from "std";
-import nushell from "nushell";
 import libxml2 from "libxml2";
 import sqlite from "sqlite";
 
 export const project = {
   name: "php",
   version: "8.4.6",
+  repository: "https://github.com/php/php-src",
 };
 
 const source = Brioche.download(
@@ -52,23 +52,8 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/php/php-src/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^php-' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^php-(?<version>.*)$/,
   });
 }

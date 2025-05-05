@@ -5,10 +5,11 @@ import { cargoBuild } from "rust";
 export const project = {
   name: "nushell",
   version: "0.104.0",
+  repository: "https://github.com/nushell/nushell.git",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/nushell/nushell.git",
+  repository: project.repository,
   ref: project.version,
 });
 
@@ -37,21 +38,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/nushell/nushell/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

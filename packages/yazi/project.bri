@@ -1,15 +1,15 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
 import { gitCheckout } from "git";
-import nushell from "nushell";
 
 export const project = {
   name: "yazi",
   version: "25.4.8",
+  repository: "https://github.com/sxyazi/yazi.git",
 };
 
 const gitRef = await Brioche.gitRef({
-  repository: "https://github.com/sxyazi/yazi.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 const source = gitCheckout(gitRef);
@@ -43,18 +43,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/sxyazi/yazi/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project | from json | update version $version | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

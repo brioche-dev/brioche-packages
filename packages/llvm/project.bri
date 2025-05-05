@@ -1,15 +1,15 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
 import python from "python";
-import nushell from "nushell";
 
 export const project = {
   name: "llvm",
   version: "20.1.4",
+  repository: "https://github.com/llvm/llvm-project.git",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/llvm/llvm-project.git",
+  repository: project.repository,
   ref: `llvmorg-${project.version}`,
 });
 
@@ -86,23 +86,8 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/llvm/llvm-project/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^llvmorg-' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^llvmorg-(?<version>.*)$/,
   });
 }

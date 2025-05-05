@@ -1,14 +1,14 @@
 import * as std from "std";
-import nushell from "nushell";
 import python from "python";
 
 export const project = {
   name: "re2c",
   version: "4.2",
+  repository: "https://github.com/skvadrik/re2c",
 };
 
 const source = Brioche.download(
-  `https://github.com/skvadrik/re2c/releases/download/${project.version}/re2c-${project.version}.tar.xz`,
+  `${project.repository}/releases/download/${project.version}/re2c-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
@@ -50,23 +50,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/skvadrik/re2c/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

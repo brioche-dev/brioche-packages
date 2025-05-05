@@ -1,13 +1,13 @@
 import * as std from "std";
-import nushell from "nushell";
 
 export const project = {
   name: "openssl",
   version: "3.5.0",
+  repository: "https://github.com/openssl/openssl",
 };
 
 const source = Brioche.download(
-  `https://github.com/openssl/openssl/releases/download/openssl-${project.version}/openssl-${project.version}.tar.gz`,
+  `${project.repository}/releases/download/openssl-${project.version}/openssl-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -56,21 +56,8 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/openssl/openssl/releases/latest
-      | get tag_name
-      | str replace --regex '${project.name}-' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^openssl-(?<version>.*)$/,
   });
 }

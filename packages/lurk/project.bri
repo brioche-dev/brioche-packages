@@ -5,10 +5,11 @@ import { cargoBuild } from "rust";
 export const project = {
   name: "lurk",
   version: "0.3.9",
+  repository: "https://github.com/JakWai01/lurk.git",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/JakWai01/lurk.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 
@@ -36,21 +37,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/JakWai01/lurk/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }
