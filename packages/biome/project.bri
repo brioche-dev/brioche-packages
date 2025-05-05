@@ -1,14 +1,14 @@
-import nushell from "nushell";
 import * as std from "std";
 import { cargoBuild } from "rust";
 
 export const project = {
   name: "biome",
   version: "1.9.4",
+  repository: "https://github.com/biomejs/biome.git",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/biomejs/biome.git",
+  repository: project.repository,
   ref: `cli/v${project.version}`,
 });
 
@@ -40,21 +40,8 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/biomejs/biome/releases/latest
-      | get tag_name
-      | str replace --regex '^cli/v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^cli\/v(?<version>.*)$/,
   });
 }

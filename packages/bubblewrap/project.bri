@@ -3,15 +3,15 @@ import meson from "meson";
 import ninja from "ninja";
 import cmake from "cmake";
 import libcap from "libcap";
-import nushell from "nushell";
 
 export const project = {
   name: "bubblewrap",
   version: "0.11.0",
+  repository: "https://github.com/containers/bubblewrap",
 };
 
 const source = Brioche.download(
-  `https://github.com/containers/bubblewrap/releases/download/v${project.version}/bubblewrap-${project.version}.tar.xz`,
+  `${project.repository}/releases/download/v${project.version}/bubblewrap-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
@@ -46,21 +46,5 @@ export async function test() {
 }
 
 export async function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/containers/bubblewrap/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

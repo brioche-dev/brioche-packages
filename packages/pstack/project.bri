@@ -1,4 +1,3 @@
-import nushell from "nushell";
 import * as std from "std";
 import { cmakeBuild } from "cmake";
 import { gitCheckout } from "git";
@@ -6,10 +5,11 @@ import { gitCheckout } from "git";
 export const project = {
   name: "pstack",
   version: "2.10",
+  repository: "https://github.com/peadar/pstack.git",
 };
 
 const gitRef = await Brioche.gitRef({
-  repository: "https://github.com/peadar/pstack.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 
@@ -47,21 +47,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/peadar/pstack/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

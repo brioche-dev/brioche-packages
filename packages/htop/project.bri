@@ -1,13 +1,13 @@
 import * as std from "std";
-import nushell from "nushell";
 
 export const project = {
   name: "htop",
   version: "3.4.1",
+  repository: "https://github.com/htop-dev/htop",
 };
 
 const source = Brioche.download(
-  `https://github.com/htop-dev/htop/releases/download/${project.version}/htop-${project.version}.tar.xz`,
+  `${project.repository}/releases/download/${project.version}/htop-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
@@ -44,20 +44,5 @@ export async function test() {
 }
 
 export async function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/htop-dev/htop/releases/latest
-      | get tag_name
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

@@ -1,14 +1,14 @@
 import * as std from "std";
 import pcre2 from "pcre2";
-import nushell from "nushell";
 
 export const project = {
   name: "nginx",
   version: "1.28.0",
+  repository: "https://github.com/nginx/nginx",
 };
 
 const source = Brioche.download(
-  `https://github.com/nginx/nginx/releases/download/release-${project.version}/nginx-${project.version}.tar.gz`,
+  `${project.repository}/releases/download/release-${project.version}/nginx-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -47,23 +47,8 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/nginx/nginx/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^release-' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>.*)$/,
   });
 }

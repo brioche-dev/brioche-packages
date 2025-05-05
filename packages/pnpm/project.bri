@@ -1,10 +1,10 @@
-import nushell from "nushell";
 import * as std from "std";
 import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "pnpm",
   version: "10.10.0",
+  repository: "https://github.com/pnpm/pnpm",
 };
 
 export default function pnpm(): std.Recipe<std.Directory> {
@@ -33,18 +33,5 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/pnpm/pnpm/releases/latest
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project | from json | update version $version | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }

@@ -1,13 +1,13 @@
-import nushell from "nushell";
 import * as std from "std";
 
 export const project = {
   name: "jq",
   version: "1.7.1",
+  repository: "https://github.com/jqlang/jq",
 };
 
 const source = Brioche.download(
-  `https://github.com/jqlang/jq/releases/download/jq-${project.version}/jq-${project.version}.tar.gz`,
+  `${project.repository}/releases/download/jq-${project.version}/jq-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -43,21 +43,8 @@ export async function test() {
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/jqlang/jq/releases/latest
-      | get tag_name
-      | str replace --regex '^jq-' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^jq-(?<version>.*)$/,
   });
 }
