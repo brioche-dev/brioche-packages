@@ -82,7 +82,7 @@ export function liveUpdate() {
     command: "nu",
     args: [src],
     env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+    dependencies: [nushell],
   });
 }
 
@@ -132,7 +132,7 @@ interface GoBuildOptions {
  * export default function (): std.Recipe<std.Directory> {
  *   return goBuild({
  *     source: Brioche.glob("**\/*.go", "go.mod", "go.sum"),
- *     dependencies: [openssl()],
+ *     dependencies: [openssl],
  *     env: {
  *       CGO_ENABLED: "0",
  *     },

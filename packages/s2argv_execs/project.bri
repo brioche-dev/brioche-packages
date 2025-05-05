@@ -15,7 +15,7 @@ const source = Brioche.gitCheckout({
 export default function s2argvExecs(): std.Recipe<std.Directory> {
   let s2argv_execs = cmakeBuild({
     source,
-    dependencies: [std.toolchain()],
+    dependencies: [std.toolchain],
   });
 
   s2argv_execs = std.setEnv(s2argv_execs, {
@@ -96,6 +96,6 @@ export function liveUpdate() {
     command: "nu",
     args: [src],
     env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+    dependencies: [nushell],
   });
 }

@@ -148,7 +148,7 @@ export function liveUpdate() {
     command: "nu",
     args: [src],
     env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+    dependencies: [nushell],
   });
 }
 
@@ -208,7 +208,7 @@ export interface CargoBuildOptions {
  *   return cargoBuild({
  *     source: Brioche.glob("src", "Cargo.*"),
  *     runnable: "bin/hello",
- *     dependencies: [openssl()],
+ *     dependencies: [openssl],
  *     env: {
  *       CARGO_LOG: "debug",
  *     },

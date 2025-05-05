@@ -24,7 +24,7 @@ export default function llvm(): std.Recipe<std.Directory> {
     env: {
       CMAKE_BUILD_PARALLEL_LEVEL: "16",
     },
-    dependencies: [std.toolchain(), python()],
+    dependencies: [std.toolchain, python],
   });
 
   llvm = std.setEnv(llvm, {

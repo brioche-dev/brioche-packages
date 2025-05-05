@@ -16,7 +16,7 @@ const source = Brioche.gitCheckout({
 export default function rclone(): std.Recipe<std.Directory> {
   return goBuild({
     source,
-    dependencies: [git()],
+    dependencies: [git],
     runnable: "bin/rclone",
     buildParams: {
       // Remove `-DEV` suffix from version number

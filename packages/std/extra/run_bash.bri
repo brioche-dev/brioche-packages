@@ -42,6 +42,6 @@ export function runBash(
   return std.process({
     command: std.tpl`${tools()}/bin/bash`,
     args: ["-e", "-u", "-o", "pipefail", "-c", script],
-    dependencies: [tools()],
+    dependencies: [tools],
   });
 }

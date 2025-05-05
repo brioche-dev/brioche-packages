@@ -45,7 +45,7 @@ export interface RunnableOptions {
  *   return std.withRunnable(std.directory(), {
  *     command: "echo",
  *     args: ["Hello, world!"],
- *     dependencies: [std.tools()],
+ *     dependencies: [std.tools],
  *   });
  * }
  * ```
@@ -89,7 +89,7 @@ export function withRunnable(
  *   return std.addRunnable(std.directory(), "bin/hello", {
  *     command: "echo",
  *     args: ["Hello, world!"],
- *     dependencies: [std.tools()],
+ *     dependencies: [std.tools],
  *   });
  * }
  * ```

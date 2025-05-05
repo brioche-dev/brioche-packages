@@ -83,7 +83,7 @@ export function liveUpdate() {
     command: "nu",
     args: [src],
     env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+    dependencies: [nushell],
   });
 }
 
@@ -119,7 +119,7 @@ function briocheObjcopy(): std.Recipe<std.Directory> {
   briocheObjcopy = std.autopack(briocheObjcopy, {
     paths: ["bin/brioche-objcopy"],
     scriptConfig: { enabled: true },
-    linkDependencies: [std.bash()],
+    linkDependencies: [std.bash],
   });
 
   return briocheObjcopy;

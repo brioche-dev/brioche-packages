@@ -131,7 +131,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   // Pack binaries and scripts
   tools = autopack(tools, {
     globs: ["bin/**"],
-    linkDependencies: [toolchain()],
+    linkDependencies: [toolchain],
     dynamicBinaryConfig: {
       enabled: true,
     },

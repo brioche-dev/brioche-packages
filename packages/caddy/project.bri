@@ -33,7 +33,7 @@ export default function caddy(): std.Recipe<std.Directory> {
           "--output",
           std.tpl`${std.outputPath}/bin/caddy`,
         ],
-        dependencies: [xcaddy(), go()],
+        dependencies: [xcaddy, go],
         unsafe: {
           networking: true,
         },
@@ -101,6 +101,6 @@ export function liveUpdate() {
     command: "nu",
     args: [src],
     env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+    dependencies: [nushell],
   });
 }

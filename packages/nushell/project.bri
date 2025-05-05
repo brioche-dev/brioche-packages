@@ -17,7 +17,7 @@ export default function nushell(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/nu",
-    dependencies: [openssl()],
+    dependencies: [openssl],
   });
 }
 

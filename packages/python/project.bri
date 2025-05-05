@@ -92,7 +92,7 @@ export default async function python(options: PythonOptions = {}) {
       std.autopack(python, {
         globs: ["bin/python*"],
         excludeGlobs: ["bin/python*-config"],
-        linkDependencies: [std.toolchain()],
+        linkDependencies: [std.toolchain],
         dynamicBinaryConfig: {
           // Listing the modules both under `extraLibraries` and `skipLibraries`
           // forces Python to be linked with the modules' transitive dependencies
