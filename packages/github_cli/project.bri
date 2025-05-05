@@ -19,6 +19,8 @@ export default function gh(): std.Recipe<std.Directory> {
     buildParams: {
       trimpath: true,
       ldflags: [
+        "-s",
+        "-w",
         `-X github.com/cli/cli/v2/internal/build.Version=${project.version}`,
         `-X github.com/cli/cli/v2/internal/build.Date=${project.latestBuildDate}`,
       ],

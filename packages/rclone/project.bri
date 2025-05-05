@@ -20,7 +20,7 @@ export default function rclone(): std.Recipe<std.Directory> {
     runnable: "bin/rclone",
     buildParams: {
       // Remove `-DEV` suffix from version number
-      ldflags: ["-s", "-X", "github.com/rclone/rclone/fs.VersionSuffix="],
+      ldflags: ["-s", "-w", "-X", "github.com/rclone/rclone/fs.VersionSuffix="],
     },
   });
 }

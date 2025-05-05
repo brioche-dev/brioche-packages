@@ -23,11 +23,11 @@ export default function processCompose(): std.Recipe<std.Directory> {
       source,
       buildParams: {
         ldflags: [
+          "-s",
+          "-w",
           `-X github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
           `-X github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.lastModifiedDate}`,
           `-X github.com/f1bonacc1/process-compose/src/config.Commit=${gitRef.commit}`,
-          "-s",
-          "-w",
         ],
       },
       path: "./...",

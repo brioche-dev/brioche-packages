@@ -25,6 +25,8 @@ export default function dasel(): std.Recipe<std.Directory> {
     runnable: "bin/dasel",
     buildParams: {
       ldflags: [
+        "-s",
+        "-w",
         `-X github.com/tomwright/dasel/v${majorVersion}/internal.Version=${project.version}`,
       ],
     },
