@@ -200,10 +200,19 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
 function goModDownload(
   goModule: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
+  // Includes all the modules in the specified directory and its subdirectories
+  // If a workspace file exists also include it
   return std.runBash`
     go mod download all
   `
-    .workDir(std.glob(goModule, ["**/go.mod", "**/go.sum"]))
+    .workDir(
+      std.glob(goModule, [
+        "**/go.mod",
+        "**/go.sum",
+        "**/go.work",
+        "**/go.work.sum",
+      ]),
+    )
     .dependencies(go)
     .env({ GOMODCACHE: std.outputPath })
     .unsafe({ networking: true })
