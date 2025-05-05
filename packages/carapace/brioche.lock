@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/carapace-sh/carapace-bin.git": {
-      "v1.3.0": "2790a2b7a1055d3c03b3e913c0ea0b0ca0a81d96"
+      "v1.3.1": "dd5741590bdab8b952d61929430388ec007dad24"
     }
   }
 }
