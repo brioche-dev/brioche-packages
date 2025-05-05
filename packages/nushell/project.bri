@@ -13,12 +13,56 @@ const source = Brioche.gitCheckout({
   ref: project.version,
 });
 
+/**
+ * Represents a Nushell plugin.
+ *
+ * ## Options
+ *
+ * `name`: The name of the plugin.
+ * `dependencies`: The dependencies of the plugin.
+ */
+interface NushellPlugin {
+  name: string;
+  dependencies?: std.RecipeLike<std.Directory>[];
+}
+
+const nushellPlugins: NushellPlugin[] = [
+  {
+    name: "nu_plugin_formats",
+  },
+  {
+    name: "nu_plugin_gstat",
+    dependencies: [openssl],
+  },
+  {
+    name: "nu_plugin_inc",
+  },
+  {
+    name: "nu_plugin_polars",
+  },
+  {
+    name: "nu_plugin_query",
+    dependencies: [openssl],
+  },
+];
+
 export default function nushell(): std.Recipe<std.Directory> {
-  return cargoBuild({
+  const nushell = cargoBuild({
     source,
     runnable: "bin/nu",
     dependencies: [openssl],
   });
+
+  // Build the Nushell plugins
+  const plugins = nushellPlugins.map((plugin: NushellPlugin) =>
+    cargoBuild({
+      source,
+      path: `crates/${plugin.name}`,
+      dependencies: plugin.dependencies ?? [],
+    }),
+  );
+
+  return std.merge(nushell, ...plugins);
 }
 
 export async function test() {
