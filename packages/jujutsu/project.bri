@@ -18,7 +18,7 @@ export default function jujutsu(): std.Recipe<std.Directory> {
     source,
     runnable: "bin/jj",
     path: "cli",
-    dependencies: [openssl()],
+    dependencies: [openssl],
   });
 }
 

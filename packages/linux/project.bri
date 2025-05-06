@@ -197,7 +197,7 @@ export function linuxUpdateConfig(
     .process({
       command: std.tpl`${linuxSource()}/scripts/config`,
       args: ["--file", std.outputPath, ...args],
-      dependencies: [std.tools()],
+      dependencies: [std.tools],
       outputScaffold: config,
     })
     .toFile();

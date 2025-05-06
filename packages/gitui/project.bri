@@ -17,7 +17,7 @@ const source = Brioche.gitCheckout({
 export default function gitui(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [cmake(), git()],
+    dependencies: [cmake, git],
     env: {
       GITUI_RELEASE: "1",
     },

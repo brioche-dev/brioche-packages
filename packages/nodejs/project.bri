@@ -71,7 +71,7 @@ export function liveUpdate() {
     command: "nu",
     args: [src],
     env: { project: JSON.stringify(project) },
-    dependencies: [nushell()],
+    dependencies: [nushell],
   });
 }
 
@@ -199,7 +199,7 @@ export function npmInstallGlobal(
         return std.addRunnable(std.directory(), name, {
           command: "node",
           args: [{ relativePath: target }],
-          dependencies: [nodejs()],
+          dependencies: [nodejs],
         });
       });
 

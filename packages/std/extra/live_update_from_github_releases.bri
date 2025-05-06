@@ -86,7 +86,7 @@ export function liveUpdateFromGithubReleases(
         repoName,
         matchTag: matchTag.source,
       },
-      dependencies: [nushell()],
+      dependencies: [nushell],
     });
   });
 }
