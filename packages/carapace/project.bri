@@ -17,7 +17,7 @@ export default function carapace(): std.Recipe<std.Directory> {
     source,
     buildParams: {
       generate: true,
-      ldflags: ["-s", "-w", `-X main.version=${project.version}`],
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
     },
     path: "./cmd/carapace",
     runnable: "bin/carapace",

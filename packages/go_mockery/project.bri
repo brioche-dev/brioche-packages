@@ -3,40 +3,40 @@ import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
-  name: "k9s",
-  version: "0.50.4",
-  repository: "https://github.com/derailed/k9s.git",
+  name: "go_mockery",
+  version: "3.2.5",
+  repository: "https://github.com/vektra/mockery.git",
 };
 
-const gitRef = await Brioche.gitRef({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
-const source = gitCheckout(gitRef);
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: project.repository,
+    ref: `v${project.version}`,
+  }),
+);
 
-export default function k9s(): std.Recipe<std.Directory> {
+export default function goMockery(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
+      generate: true,
       ldflags: [
         "-s",
         "-w",
         "-X",
-        `github.com/derailed/k9s/cmd.version=${project.version}`,
-        "-X",
-        `github.com/derailed/k9s/cmd.commit=${gitRef.commit}`,
+        `github.com/vektra/mockery/v3/internal/logging.SemVer=${project.version}`,
       ],
     },
-    runnable: "bin/k9s",
+    path: ".",
+    runnable: "bin/mockery",
   });
 }
 
 export async function test() {
   const script = std.runBash`
-    # Remove ANSI color codes from the output, before extracting the version
-    k9s version | sed -r 's/\x1B\[[0-9;]*[mK]//g' | awk '/^Version:/ { print $2 }' | tee "$BRIOCHE_OUTPUT"
+    mockery version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(k9s)
+    .dependencies(goMockery)
     .toFile();
 
   const result = (await script.read()).trim();

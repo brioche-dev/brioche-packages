@@ -27,7 +27,8 @@ export default function dasel(): std.Recipe<std.Directory> {
       ldflags: [
         "-s",
         "-w",
-        `-X github.com/tomwright/dasel/v${majorVersion}/internal.Version=${project.version}`,
+        "-X",
+        `github.com/tomwright/dasel/v${majorVersion}/internal.Version=${project.version}`,
       ],
     },
   });

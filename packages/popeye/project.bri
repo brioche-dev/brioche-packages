@@ -21,8 +21,10 @@ export default function popeye(): std.Recipe<std.Directory> {
       ldflags: [
         "-s",
         "-w",
-        `-X github.com/derailed/popeye/cmd.version=${project.version}`,
-        `-X github.com/derailed/popeye/cmd.commit=${gitRef.commit}`,
+        "-X",
+        `github.com/derailed/popeye/cmd.version=${project.version}`,
+        "-X",
+        `github.com/derailed/popeye/cmd.commit=${gitRef.commit}`,
       ],
     },
     runnable: "bin/popeye",
