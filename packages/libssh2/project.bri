@@ -1,0 +1,70 @@
+import * as std from "std";
+import nushell from "nushell";
+import openssl from "openssl";
+
+export const project = {
+  name: "libssh2",
+  version: "1.11.1",
+};
+
+const source = Brioche.download(
+  `https://libssh2.org/download/libssh2-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libssh2(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, openssl)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libssh2 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libssh2)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  const src = std.file(std.indoc`
+    let version = http get https://www.libssh2.org/download
+      | lines
+      | where {|it| ($it | str contains "libssh2") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="libssh2-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell],
+  });
+}
