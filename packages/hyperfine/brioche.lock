@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/sharkdp/hyperfine.git": {
+      "v1.19.0": "12fec42098642a19855ead34c8cb1e0be28c8ead"
+    }
+  }
+}

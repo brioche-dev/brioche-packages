@@ -1,0 +1,40 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "hyperfine",
+  version: "1.19.0",
+  repository: "https://github.com/sharkdp/hyperfine.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function hyperfine(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/hyperfine",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    hyperfine --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(hyperfine)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `hyperfine ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
