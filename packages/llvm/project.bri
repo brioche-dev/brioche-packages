@@ -25,12 +25,12 @@ export default function llvm(): std.Recipe<std.Directory> {
       CMAKE_BUILD_PARALLEL_LEVEL: "16",
     },
     dependencies: [std.toolchain, python],
-  });
-
-  llvm = std.setEnv(llvm, {
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    CPATH: { append: [{ path: "include" }] },
-  });
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CPATH: { append: [{ path: "include" }] },
+    }),
+  );
 
   // Remove a bunch of `*.tmp*` files left over in the build
   // TODO: Figure out where these temp files are coming from!
