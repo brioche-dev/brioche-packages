@@ -13,17 +13,15 @@ const source = Brioche.gitCheckout({
 });
 
 export default function s2argvExecs(): std.Recipe<std.Directory> {
-  let s2argv_execs = cmakeBuild({
+  return cmakeBuild({
     source,
     dependencies: [std.toolchain],
-  });
-
-  s2argv_execs = std.setEnv(s2argv_execs, {
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    CPATH: { append: [{ path: "include" }] },
-  });
-
-  return s2argv_execs;
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CPATH: { append: [{ path: "include" }] },
+    }),
+  );
 }
 
 export async function test() {
