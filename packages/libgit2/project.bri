@@ -1,0 +1,55 @@
+import * as std from "std";
+import libssh2 from "libssh2";
+import openssl from "openssl";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "libgit2",
+  version: "1.9.0",
+  repository: "https://github.com/libgit2/libgit2.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function libgit2(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, libssh2, openssl],
+    set: {
+      USE_SSH: "ON",
+      BUILD_EXAMPLES: "OFF",
+      BUILD_TESTS: "OFF",
+    },
+  }).pipe(
+    (recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib64/pkgconfig" }] },
+      }),
+    (recipe) => std.withRunnableLink(recipe, "bin/git2"),
+  );
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libgit2 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libgit2)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
