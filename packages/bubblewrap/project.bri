@@ -17,16 +17,15 @@ const source = Brioche.download(
   .peel();
 
 export default function bubblewrap(): std.Recipe<std.Directory> {
-  const bubblewrap = std.runBash`
+  return std.runBash`
     meson setup _builddir --prefix /
     meson compile -C _builddir
     meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, meson, ninja, cmake, libcap)
     .workDir(source)
-    .toDirectory();
-
-  return std.withRunnableLink(bubblewrap, "bin/bwrap");
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/bwrap"));
 }
 
 export async function test() {
