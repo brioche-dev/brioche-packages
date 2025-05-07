@@ -1,0 +1,45 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "gron",
+  version: "0.7.1",
+  repository: "https://github.com/tomnomnom/gron.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function gron(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.gronVersion=${project.version}`],
+    },
+    runnable: "bin/gron",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    gron --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gron)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const version = result.split("\n").at(0);
+
+  // Check that the result contains the expected version
+  const expected = `gron version ${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
