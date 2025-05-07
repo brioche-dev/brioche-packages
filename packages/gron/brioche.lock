@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/tomnomnom/gron.git": {
+      "v0.7.1": "badf401da553eb41b7ffde4be6a64809ed0ed846"
+    }
+  }
+}
