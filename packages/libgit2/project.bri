@@ -27,7 +27,7 @@ export default function libgit2(): std.Recipe<std.Directory> {
     (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        LIBRARY_PATH: { append: [{ path: "lib64" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib64/pkgconfig" }] },
       }),
     (recipe) => std.withRunnableLink(recipe, "bin/git2"),

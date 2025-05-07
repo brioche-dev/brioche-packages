@@ -15,7 +15,9 @@ const source = Brioche.download(
 
 export default function libssh2(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix=/
+    ./configure \\
+      --prefix=/ \\
+      --disable-examples-build
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
