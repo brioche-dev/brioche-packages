@@ -1,5 +1,4 @@
 import * as std from "std";
-import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
@@ -8,12 +7,10 @@ export const project = {
   repository: "https://github.com/vektra/mockery.git",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: project.repository,
-    ref: `v${project.version}`,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
 
 export default function goMockery(): std.Recipe<std.Directory> {
   return goBuild({
