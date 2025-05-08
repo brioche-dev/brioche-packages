@@ -3,6 +3,7 @@ import * as std from "std";
 export const project = {
   name: "rpcsvc_proto",
   version: "1.4.4",
+  repository: "https://github.com/thkukuk/rpcsvc-proto.git",
 };
 
 const source = Brioche.download(
@@ -11,19 +12,40 @@ const source = Brioche.download(
   .unarchive("tar", "xz")
   .peel();
 
-export default function (): std.Recipe<std.Directory> {
-  let rpcsvcProto = std.runBash`
+export default function rpcsvcProto(): std.Recipe<std.Directory> {
+  return std.runBash`
     ./configure --prefix=/
     make -j16
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .toDirectory();
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/rpcgen"),
+    );
+}
 
-  rpcsvcProto = std.setEnv(rpcsvcProto, {
-    CPATH: { append: [{ path: "include" }] },
-  });
+export async function test() {
+  const script = std.runBash`
+    rpcgen --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rpcsvcProto)
+    .toFile();
 
-  return rpcsvcProto;
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `rpcgen (rpcsvc-proto) ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
 }
