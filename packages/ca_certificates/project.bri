@@ -7,17 +7,17 @@ export const project = {
   version: "2025-02-25",
 };
 
-export default function caCertificates(): std.Recipe<std.Directory> {
-  const cacert = Brioche.download(
-    `https://curl.se/ca/cacert-${project.version}.pem`,
-  );
+const source = Brioche.download(
+  `https://curl.se/ca/cacert-${project.version}.pem`,
+);
 
+export default function caCertificates(): std.Recipe<std.Directory> {
   return std.setEnv(
     std.directory({
       etc: std.directory({
         ssl: std.directory({
           certs: std.directory({
-            "ca-bundle.crt": cacert,
+            "ca-bundle.crt": source,
           }),
         }),
       }),

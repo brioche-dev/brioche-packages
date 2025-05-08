@@ -53,16 +53,21 @@ export default function asciinema(): std.Recipe<std.Directory> {
     .toDirectory();
 
   // Create the final recipe with the venv under `venv`
-  let recipe = std.directory({
-    venv,
-  });
-
-  // Add `bin/asciinema` to run the main script
-  recipe = std.addRunnable(recipe, "bin/asciinema", {
-    command: { relativePath: "venv/bin/python" },
-    args: [{ relativePath: "venv/bin/asciinema" }],
-  });
-  return std.withRunnableLink(recipe, "bin/asciinema");
+  return (
+    std
+      .directory({
+        venv,
+      })
+      // Add `bin/asciinema` to run the main script
+      .pipe(
+        (recipe) =>
+          std.addRunnable(recipe, "bin/asciinema", {
+            command: { relativePath: "venv/bin/python" },
+            args: [{ relativePath: "venv/bin/asciinema" }],
+          }),
+        (recipe) => std.withRunnableLink(recipe, "bin/asciinema"),
+      )
+  );
 }
 
 export async function test() {

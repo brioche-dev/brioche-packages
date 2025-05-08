@@ -14,18 +14,16 @@ const source = Brioche.gitCheckout({
 });
 
 export default function vdeplug4(): std.Recipe<std.Directory> {
-  let vdeplug = cmakeBuild({
+  return cmakeBuild({
     source,
     dependencies: [std.toolchain, s2argvExecs],
     runnable: "bin/vde_plug",
-  });
-
-  vdeplug = std.setEnv(vdeplug, {
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    CPATH: { append: [{ path: "include" }] },
-  });
-
-  return vdeplug;
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CPATH: { append: [{ path: "include" }] },
+    }),
+  );
 }
 
 export async function test() {
