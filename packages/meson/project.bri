@@ -53,16 +53,21 @@ export default function meson(): std.Recipe<std.Directory> {
     .toDirectory();
 
   // Create the final recipe with the venv under `venv`
-  let recipe = std.directory({
-    venv,
-  });
-
-  // Add `bin/meson` to run the main script
-  recipe = std.addRunnable(recipe, "bin/meson", {
-    command: { relativePath: "venv/bin/python" },
-    args: [{ relativePath: "venv/bin/meson" }],
-  });
-  return std.withRunnableLink(recipe, "bin/meson");
+  return (
+    std
+      .directory({
+        venv,
+      })
+      // Add `bin/meson` to run the main script
+      .pipe(
+        (recipe) =>
+          std.addRunnable(recipe, "bin/meson", {
+            command: { relativePath: "venv/bin/python" },
+            args: [{ relativePath: "venv/bin/meson" }],
+          }),
+        (recipe) => std.withRunnableLink(recipe, "bin/meson"),
+      )
+  );
 }
 
 export async function test() {

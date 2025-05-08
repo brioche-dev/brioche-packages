@@ -13,22 +13,21 @@ const source = Brioche.download(
   .peel();
 
 export default function libarchive(): std.Recipe<std.Directory> {
-  let libarchive = std.runBash`
+  return std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
     make
     make install
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .toDirectory();
-
-  libarchive = std.setEnv(libarchive, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
-
-  return libarchive;
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
 }
 
 export async function test() {

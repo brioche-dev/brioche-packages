@@ -18,35 +18,27 @@ const gitRef = await Brioche.gitRef({
 const source = gitCheckout(gitRef);
 
 export default function processCompose(): std.Recipe<std.Directory> {
-  let processCompose = std.recipe(async () =>
-    goBuild({
-      source,
-      buildParams: {
-        ldflags: [
-          "-s",
-          "-w",
-          "-X",
-          `github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
-          "-X",
-          `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.lastModifiedDate}`,
-          "-X",
-          `github.com/f1bonacc1/process-compose/src/config.Commit=${gitRef.commit}`,
-        ],
-      },
-      path: "./...",
-    }),
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
+        "-X",
+        `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.lastModifiedDate}`,
+        "-X",
+        `github.com/f1bonacc1/process-compose/src/config.Commit=${gitRef.commit}`,
+      ],
+    },
+    path: "./...",
+  }).pipe(
+    // Rename main binary from `bin/src` to `bin/process-compose`
+    (recipe) => recipe.insert("bin/process-compose", recipe.get("bin/src")),
+    // Add a link for `brioche run`
+    (recipe) => std.withRunnableLink(recipe, "bin/process-compose"),
   );
-
-  // Rename main binary from `bin/src` to `bin/process-compose`
-  processCompose = processCompose.insert(
-    "bin/process-compose",
-    processCompose.get("bin/src"),
-  );
-
-  // Add a link for `brioche run`
-  processCompose = std.withRunnableLink(processCompose, "bin/process-compose");
-
-  return processCompose;
 }
 
 export async function test() {

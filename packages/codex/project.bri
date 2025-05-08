@@ -9,12 +9,10 @@ export const project = {
 };
 
 export default function codex(): std.Recipe<std.Directory> {
-  const recipe = npmInstallGlobal({
+  return npmInstallGlobal({
     packageName: project.packageName,
     version: project.version,
-  });
-
-  return std.withRunnableLink(recipe, "bin/codex");
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
 }
 
 export async function test() {

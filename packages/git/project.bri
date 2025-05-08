@@ -15,21 +15,21 @@ const source = Brioche.download(
   .peel();
 
 export default function git(): std.Recipe<std.Directory> {
-  let git = std.runBash`
+  return std.runBash`
     make prefix=/ all
     make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain, openssl, curl)
-    .toDirectory();
-
-  git = std.setEnv(git, {
-    GIT_EXEC_PATH: { fallback: { path: "libexec/git-core" } },
-    GIT_TEMPLATE_DIR: { fallback: { path: "share/git-core/templates" } },
-  });
-  git = std.withRunnableLink(git, "bin/git");
-
-  return git;
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          GIT_EXEC_PATH: { fallback: { path: "libexec/git-core" } },
+          GIT_TEMPLATE_DIR: { fallback: { path: "share/git-core/templates" } },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/git"),
+    );
 }
 
 export async function test() {

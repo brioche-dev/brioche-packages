@@ -14,7 +14,7 @@ const source = Brioche.download(
   .peel();
 
 export default function nginx(): std.Recipe<std.Directory> {
-  let nginx = std.runBash`
+  return std.runBash`
     ./configure \\
       --prefix=/etc/nginx \\
       --sbin-path=/bin/nginx
@@ -23,11 +23,8 @@ export default function nginx(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain, pcre2)
-    .toDirectory();
-
-  nginx = std.withRunnableLink(nginx, "bin/nginx");
-
-  return nginx;
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nginx"));
 }
 
 export async function test() {

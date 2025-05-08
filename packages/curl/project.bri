@@ -15,7 +15,7 @@ const source = Brioche.download(
   .peel();
 
 export default function curl(): std.Recipe<std.Directory> {
-  let curl = std.runBash`
+  return std.runBash`
     ./configure \\
       --prefix=/ \\
       --with-openssl \\
@@ -27,17 +27,18 @@ export default function curl(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain, openssl, libpsl)
-    .toDirectory();
-
-  curl = std.setEnv(curl, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-    CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
-    CURL_ROOT: { fallback: { path: "." } },
-  });
-
-  return std.withRunnableLink(curl, "bin/curl");
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+          CURL_ROOT: { fallback: { path: "." } },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/curl"),
+    );
 }
 
 export async function test() {

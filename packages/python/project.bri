@@ -88,8 +88,8 @@ export default async function python(options: PythonOptions = {}) {
     // Repack Python with all the dynamic libraries needed for all the native
     // modules. It isn't linked against the native modules directly, just
     // tier transitive dependencies
-    (python) =>
-      std.autopack(python, {
+    (recipe) =>
+      std.autopack(recipe, {
         globs: ["bin/python*"],
         excludeGlobs: ["bin/python*-config"],
         linkDependencies: [std.toolchain],
@@ -108,8 +108,8 @@ export default async function python(options: PythonOptions = {}) {
           ],
           skipLibraries: nativeModules,
           libraryPaths: [
-            std.glob(python, ["lib/python*/lib-dynload"]).peel(3),
-            std.glob(python, ["lib/libpython*"]).peel(),
+            std.glob(recipe, ["lib/python*/lib-dynload"]).peel(3),
+            std.glob(recipe, ["lib/libpython*"]).peel(),
           ],
         },
         sharedLibraryConfig: {
@@ -124,21 +124,21 @@ export default async function python(options: PythonOptions = {}) {
       }),
     // Some binaries under `/bin` are shebang scripts. These need to be wrapped
     // to avoid issues with absolute paths
-    (python) => std.recipe(fixShebangs(python)),
+    (recipe) => std.recipe(fixShebangs(recipe)),
     // Fix absolute paths in pkg-config files
-    (python) => makePkgConfigPathsRelative(python),
-    (python) =>
-      python
+    (recipe) => makePkgConfigPathsRelative(recipe),
+    (recipe) =>
+      recipe
         .insert("bin/python", std.symlink({ target: "python3" }))
         .insert("bin/python-config", std.symlink({ target: "python3-config" }))
         .insert("bin/pydoc", std.symlink({ target: "pydoc3" })),
-    (python) =>
-      std.setEnv(python, {
+    (recipe) =>
+      std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       }),
-    (python) => std.withRunnableLink(python, "bin/python"),
+    (recipe) => std.withRunnableLink(recipe, "bin/python"),
   );
 }
 

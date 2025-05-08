@@ -49,7 +49,7 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
     throw new Error("Rustup minimal profile not found");
   }
 
-  let result = std.directory();
+  let recipe = std.directory();
   for (const pkgName of profilePackages) {
     const pkg = manifest.pkg[pkgName];
     if (pkg === undefined) {
@@ -77,13 +77,13 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
       .env({ pkgTargetArchive })
       .toDirectory();
 
-    result = std.merge(result, installedPkg);
+    recipe = std.merge(recipe, installedPkg);
   }
 
   const localLibs = await std.runBash`
     find lib -type f -name '*.so' -print0 > "$BRIOCHE_OUTPUT"
   `
-    .workDir(result)
+    .workDir(recipe)
     .toFile()
     .read()
     .then((libs) => libs.split("\0").filter((lib) => lib !== ""));
@@ -91,19 +91,20 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
     .map((lib) => lib.split("/").at(-1))
     .flatMap((name) => (name != null ? [name] : []));
 
-  result = std.setEnv(result, {
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-  });
-
-  result = std.autopack(result, {
-    globs: ["bin/**", "libexec/**", "lib/librustc_driver-*.so"],
-    selfDependency: true,
-    dynamicBinaryConfig: {
-      skipLibraries: localLibNames,
-      extraRuntimeLibraryPaths: ["lib"],
-    },
-  });
-  return result;
+  return std
+    .setEnv(recipe, {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    })
+    .pipe((recipe) =>
+      std.autopack(recipe, {
+        globs: ["bin/**", "libexec/**", "lib/librustc_driver-*.so"],
+        selfDependency: true,
+        dynamicBinaryConfig: {
+          skipLibraries: localLibNames,
+          extraRuntimeLibraryPaths: ["lib"],
+        },
+      }),
+    );
 }
 
 export async function test() {

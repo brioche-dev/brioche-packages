@@ -8,12 +8,10 @@ export const project = {
 };
 
 export default function pnpm(): std.Recipe<std.Directory> {
-  const recipe = npmInstallGlobal({
+  return npmInstallGlobal({
     packageName: project.name,
     version: project.version,
-  });
-
-  return std.withRunnableLink(recipe, "bin/pnpm");
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/pnpm"));
 }
 
 export async function test() {

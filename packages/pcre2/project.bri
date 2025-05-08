@@ -15,7 +15,7 @@ const source = Brioche.gitCheckout({
 });
 
 export default function pcre2(): std.Recipe<std.Directory> {
-  const pcre2 = std.runBash`
+  return std.runBash`
     ./autogen.sh
     ./configure \\
       --prefix=/ \\
@@ -28,13 +28,14 @@ export default function pcre2(): std.Recipe<std.Directory> {
   `
     .dependencies(std.toolchain)
     .workDir(source)
-    .toDirectory();
-
-  return std.setEnv(pcre2, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
 }
 
 export async function test() {

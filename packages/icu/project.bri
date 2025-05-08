@@ -24,7 +24,7 @@ const source = Brioche.download(
 ).unarchive("tar", "gzip");
 
 export default function icu(): std.Recipe<std.Directory> {
-  let icu = std.runBash`
+  return std.runBash`
     cd icu/source
     ./runConfigureICU Linux \\
       --prefix=/
@@ -33,32 +33,32 @@ export default function icu(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .toDirectory();
-
-  icu = std.setEnv(icu, {
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    CPATH: { append: [{ path: "include" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
-
-  // During the build, ICU uses "stub" libraries for compilation. Re-pack
-  // the artifact to use the final libraries after compilation instead
-  icu = std.autopack(icu, {
-    globs: ["bin/**", "lib/**"],
-    selfDependency: true,
-    dynamicBinaryConfig: {
-      enabled: true,
-    },
-    sharedLibraryConfig: {
-      enabled: true,
-      allowEmpty: true,
-    },
-    repackConfig: {
-      enabled: true,
-    },
-  });
-
-  return icu;
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          CPATH: { append: [{ path: "include" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+      // During the build, ICU uses "stub" libraries for compilation. Re-pack
+      // the artifact to use the final libraries after compilation instead
+      (recipe) =>
+        std.autopack(recipe, {
+          globs: ["bin/**", "lib/**"],
+          selfDependency: true,
+          dynamicBinaryConfig: {
+            enabled: true,
+          },
+          sharedLibraryConfig: {
+            enabled: true,
+            allowEmpty: true,
+          },
+          repackConfig: {
+            enabled: true,
+          },
+        }),
+    );
 }
 
 export async function test() {

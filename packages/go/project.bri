@@ -25,19 +25,21 @@ export default function go(): std.Recipe<std.Directory> {
     .unarchive("tar", "gzip")
     .peel();
 
-  let go = std.directory({
-    go: goRoot,
-    bin: std.directory({
-      go: std.symlink({ target: "../go/bin/go" }),
-      gofmt: std.symlink({ target: "../go/bin/gofmt" }),
-    }),
-  });
-  go = std.setEnv(go, {
-    GOROOT: { fallback: { path: "go" } },
-  });
-  go = std.withRunnableLink(go, "go/bin/go");
-
-  return go;
+  return std
+    .directory({
+      go: goRoot,
+      bin: std.directory({
+        go: std.symlink({ target: "../go/bin/go" }),
+        gofmt: std.symlink({ target: "../go/bin/gofmt" }),
+      }),
+    })
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          GOROOT: { fallback: { path: "go" } },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "go/bin/go"),
+    );
 }
 
 export async function test() {

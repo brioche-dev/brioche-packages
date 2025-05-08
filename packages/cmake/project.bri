@@ -52,7 +52,7 @@ function patch(): std.Recipe<std.File> {
 }
 
 export default function cmake(): std.Recipe<std.Directory> {
-  let cmake = std.runBash`
+  return std.runBash`
     ./bootstrap \\
       --prefix=/ \\
       --system-curl \\
@@ -62,21 +62,23 @@ export default function cmake(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain, openssl, curl)
-    .toDirectory();
-
-  cmake = cmake.insert("libexec/cmake/runtime-utils", std.runtimeUtils());
-  cmake = cmake.insert(
-    "libexec/cmake/brioche-packer",
-    std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
-  );
-
-  cmake = std.setEnv(cmake, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
-
-  return std.withRunnableLink(cmake, "bin/cmake");
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        recipe.insert("libexec/cmake/runtime-utils", std.runtimeUtils()),
+      (recipe) =>
+        recipe.insert(
+          "libexec/cmake/brioche-packer",
+          std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
+        ),
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/cmake"),
+    );
 }
 
 export interface CMakeBuildInstallOptions {

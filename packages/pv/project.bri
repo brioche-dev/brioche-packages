@@ -13,16 +13,15 @@ const source = Brioche.download(
   .peel();
 
 export default function pv(): std.Recipe<std.Directory> {
-  const pv = std.runBash`
+  return std.runBash`
     ./configure --prefix=/
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .toDirectory();
-
-  return std.withRunnableLink(pv, "bin/pv");
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/pv"));
 }
 
 export async function test() {

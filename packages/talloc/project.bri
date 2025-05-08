@@ -14,22 +14,21 @@ const source = Brioche.download(
   .peel();
 
 export default function talloc(): std.Recipe<std.Directory> {
-  let talloc = std.runBash`
+  return std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
     make
     make install
   `
     .workDir(source)
     .dependencies(std.toolchain, python)
-    .toDirectory();
-
-  talloc = std.setEnv(talloc, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
-
-  return talloc;
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
 }
 
 export async function test() {

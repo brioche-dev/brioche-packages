@@ -14,15 +14,14 @@ const source = Brioche.download(
   .peel();
 
 export default function tcpdump(): std.Recipe<std.Directory> {
-  const tcpdump = std.runBash`
+  return std.runBash`
     ./configure --prefix=/
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain, libpcap)
-    .toDirectory();
-
-  return std.withRunnableLink(tcpdump, "bin/tcpdump");
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/tcpdump"));
 }
 
 export async function test() {

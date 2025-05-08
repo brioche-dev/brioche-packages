@@ -18,32 +18,30 @@ const sourceRef = Brioche.gitRef({
 });
 
 export default function caddy(): std.Recipe<std.Directory> {
-  let caddy = std.recipe(async () => {
-    const commit = (await sourceRef).commit;
+  return std
+    .recipe(async () => {
+      const commit = (await sourceRef).commit;
 
-    // Build Caddy using `xcaddy build`. This is the officially-recommended
-    // way to build Caddy from source. Building it like a normal Go project
-    // leaves out version information
-    return std
-      .process({
-        command: "xcaddy",
-        args: [
-          "build",
-          commit,
-          "--output",
-          std.tpl`${std.outputPath}/bin/caddy`,
-        ],
-        dependencies: [xcaddy, go],
-        unsafe: {
-          networking: true,
-        },
-      })
-      .toDirectory();
-  });
-
-  caddy = std.withRunnableLink(caddy, "bin/caddy");
-
-  return caddy;
+      // Build Caddy using `xcaddy build`. This is the officially-recommended
+      // way to build Caddy from source. Building it like a normal Go project
+      // leaves out version information
+      return std
+        .process({
+          command: "xcaddy",
+          args: [
+            "build",
+            commit,
+            "--output",
+            std.tpl`${std.outputPath}/bin/caddy`,
+          ],
+          dependencies: [xcaddy, go],
+          unsafe: {
+            networking: true,
+          },
+        })
+        .toDirectory();
+    })
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/caddy"));
 }
 
 function xcaddy(): std.Recipe<std.Directory> {

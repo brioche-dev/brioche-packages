@@ -13,16 +13,15 @@ const source = Brioche.download(
   .peel();
 
 export default function htop(): std.Recipe<std.Directory> {
-  const htop = std.runBash`
+  return std.runBash`
     ./configure --prefix=/
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain)
     .workDir(source)
-    .toDirectory();
-
-  return std.withRunnableLink(htop, "bin/htop");
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/htop"));
 }
 
 export async function test() {
