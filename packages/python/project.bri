@@ -147,15 +147,20 @@ export function test() {
     project.extra.minorVersions,
   ) as PythonVersion[];
 
-  const tests = pythonVersions.map((version) => {
-    return std.runBash`
-      mkdir "$BRIOCHE_OUTPUT"
-      python --version | tee "$BRIOCHE_OUTPUT/python-version.txt"
-      pip --version | tee "$BRIOCHE_OUTPUT/pip-version.txt"
-      python-config --cflags --libs --ldflags | tee "$BRIOCHE_OUTPUT/python-config.txt"
+  const tests = pythonVersions.map(async (version) => {
+    const script = std.runBash`
+      python --version | tee "$BRIOCHE_OUTPUT"
     `
       .dependencies(python({ version }))
-      .toDirectory();
+      .toFile();
+
+    const result = (await script.read()).trim();
+
+    // Check that the result contains the expected version
+    const expected = `Python ${project.extra.minorVersions[version]}`;
+    std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+    return std.directory().insert(version, script);
   });
 
   return std.merge(...tests);
