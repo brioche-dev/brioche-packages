@@ -14,9 +14,7 @@ const gitRef = await Brioche.gitRef({
 });
 const source = gitCheckout(gitRef);
 
-export default async function eksNodeViewer(): Promise<
-  std.Recipe<std.Directory>
-> {
+export default function eksNodeViewer(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
