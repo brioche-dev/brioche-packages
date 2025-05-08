@@ -10,19 +10,19 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-});
-
-export default function terraform(): std.Recipe<std.Directory> {
-  const patchedSource = std.runBash`
+}).pipe((recipe) =>
+  std.runBash`
     # Workaround for Go 1.24, see: https://github.com/NixOS/nixpkgs/blob/2631b0b7abcea6e640ce31cd78ea58910d31e650/pkgs/applications/networking/cluster/terraform/default.nix#L48
     cd "$BRIOCHE_OUTPUT"
     sed -i 's/godebug tlskyber=0/godebug tlsmlkem=0/g' go.mod
   `
-    .outputScaffold(source)
-    .toDirectory();
+    .outputScaffold(recipe)
+    .toDirectory(),
+);
 
+export default function terraform(): std.Recipe<std.Directory> {
   return goBuild({
-    source: patchedSource,
+    source: source,
     buildParams: {
       ldflags: [
         "-s",
