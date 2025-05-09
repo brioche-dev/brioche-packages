@@ -65,7 +65,7 @@ export default function cmake(): std.Recipe<std.Directory> {
     .toDirectory()
     .pipe(
       (recipe) =>
-        recipe.insert("libexec/cmake/runtime-utils", std.runtimeUtils()),
+        recipe.insert("libexec/cmake/runtime-utils", std.runtimeUtils),
       (recipe) =>
         recipe.insert(
           "libexec/cmake/brioche-packer",
