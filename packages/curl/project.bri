@@ -1,5 +1,6 @@
 import * as std from "std";
 import libpsl from "libpsl";
+import libssh2 from "libssh2";
 import nushell from "nushell";
 import openssl from "openssl";
 
@@ -19,6 +20,7 @@ export default function curl(): std.Recipe<std.Directory> {
     ./configure \\
       --prefix=/ \\
       --with-openssl \\
+      --with-libssh2 \\
       --without-ca-bundle \\
       --without-ca-path \\
       --with-ca-fallback
@@ -26,7 +28,7 @@ export default function curl(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, libpsl)
+    .dependencies(std.toolchain, openssl, libpsl, libssh2)
     .toDirectory();
 
   curl = std.setEnv(curl, {
