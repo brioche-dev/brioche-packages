@@ -13,7 +13,7 @@ const source = Brioche.download(
   .peel();
 
 export default function pcre(): std.Recipe<std.Directory> {
-  const pcre = std.runBash`
+  return std.runBash`
     ./configure \\
       --prefix=/ \\
       --enable-jit \\
@@ -27,13 +27,14 @@ export default function pcre(): std.Recipe<std.Directory> {
   `
     .dependencies(std.toolchain)
     .workDir(source)
-    .toDirectory();
-
-  return std.setEnv(pcre, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
 }
 
 export async function test() {

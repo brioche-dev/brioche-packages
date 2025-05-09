@@ -13,7 +13,7 @@ const source = Brioche.download(
   .peel();
 
 export default function tcsh(): std.Recipe<std.Directory> {
-  const tcsh = std.runBash`
+  return std.runBash`
     ./configure \\
       --prefix=/
     make
@@ -21,9 +21,8 @@ export default function tcsh(): std.Recipe<std.Directory> {
   `
     .dependencies(std.toolchain)
     .workDir(source)
-    .toDirectory();
-
-  return std.withRunnableLink(tcsh, "bin/tcsh");
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/tcsh"));
 }
 
 export async function test() {

@@ -8,12 +8,10 @@ export const project = {
 };
 
 export default function zx(): std.Recipe<std.Directory> {
-  const recipe = npmInstallGlobal({
+  return npmInstallGlobal({
     packageName: "zx",
     version: project.version,
-  });
-
-  return std.withRunnableLink(recipe, "bin/zx");
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/zx"));
 }
 
 export async function test() {

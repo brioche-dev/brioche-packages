@@ -15,21 +15,22 @@ const source = Brioche.download(
   .peel();
 
 export default function php(): std.Recipe<std.Directory> {
-  let php = std.runBash`
+  return std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
     make -j16
     make install
   `
     .dependencies(std.toolchain, libxml2, sqlite)
     .workDir(source)
-    .toDirectory();
-
-  php = std.setEnv(php, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-  });
-
-  return std.withRunnableLink(php, "bin/php");
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/php"),
+    );
 }
 
 export async function test() {

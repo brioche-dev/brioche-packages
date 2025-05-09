@@ -57,16 +57,13 @@ export function llvmToolchain(): std.Recipe<std.Directory> {
     --sysroot <CFGDIR>/../toolchain
   `);
 
-  let toolchain = llvm();
-  toolchain = toolchain.insert("toolchain", std.toolchain());
-  toolchain = toolchain.insert(
-    "bin/ld",
-    std.symlink({ target: "../toolchain/bin/ld" }),
+  return llvm().pipe(
+    (recipe) => recipe.insert("toolchain", std.toolchain()),
+    (recipe) =>
+      recipe.insert("bin/ld", std.symlink({ target: "../toolchain/bin/ld" })),
+    (recipe) => recipe.insert("bin/clang.cfg", clangConfig),
+    (recipe) => recipe.insert("bin/clang++.cfg", clangConfig),
   );
-  toolchain = toolchain.insert("bin/clang.cfg", clangConfig);
-  toolchain = toolchain.insert("bin/clang++.cfg", clangConfig);
-
-  return toolchain;
 }
 
 export async function test() {

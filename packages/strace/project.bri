@@ -13,18 +13,15 @@ const source = Brioche.download(
   .peel();
 
 export default function strace(): std.Recipe<std.Directory> {
-  let strace = std.runBash`
+  return std.runBash`
     ./configure --prefix=/
     make -j16
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .toDirectory();
-
-  strace = std.withRunnableLink(strace, "bin/strace");
-
-  return strace;
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/strace"));
 }
 
 export async function test() {

@@ -13,7 +13,7 @@ const source = Brioche.download(
   .peel();
 
 export default function jq(): std.Recipe<std.Directory> {
-  const jq = std.runBash`
+  return std.runBash`
     ./configure \\
       --prefix=/ \\
       --with-oniguruma=builtin
@@ -22,8 +22,8 @@ export default function jq(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .toDirectory();
-  return std.withRunnableLink(jq, "bin/jq");
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/jq"));
 }
 
 export async function test() {

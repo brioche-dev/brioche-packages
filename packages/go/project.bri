@@ -6,6 +6,12 @@ export const project = {
   version: "1.24.2",
 };
 
+const source = Brioche.download(
+  `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
 /**
  * The Go programming language.
  *
@@ -19,25 +25,21 @@ export const project = {
  * The directory `go` is intended to be used as the `$GOROOT` env var.
  */
 export default function go(): std.Recipe<std.Directory> {
-  const goRoot = Brioche.download(
-    `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
-  )
-    .unarchive("tar", "gzip")
-    .peel();
-
-  let go = std.directory({
-    go: goRoot,
-    bin: std.directory({
-      go: std.symlink({ target: "../go/bin/go" }),
-      gofmt: std.symlink({ target: "../go/bin/gofmt" }),
-    }),
-  });
-  go = std.setEnv(go, {
-    GOROOT: { fallback: { path: "go" } },
-  });
-  go = std.withRunnableLink(go, "go/bin/go");
-
-  return go;
+  return std
+    .directory({
+      go: source,
+      bin: std.directory({
+        go: std.symlink({ target: "../go/bin/go" }),
+        gofmt: std.symlink({ target: "../go/bin/gofmt" }),
+      }),
+    })
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          GOROOT: { fallback: { path: "go" } },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "go/bin/go"),
+    );
 }
 
 export async function test() {

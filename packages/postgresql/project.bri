@@ -18,7 +18,7 @@ const source = Brioche.download(
   .peel();
 
 export default function postgresql(): std.Recipe<std.Directory> {
-  let postgresql = std.runBash`
+  return std.runBash`
     ./configure \\
       --prefix=/ \\
       --disable-rpath \\
@@ -32,17 +32,14 @@ export default function postgresql(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain, icu, openssl, libxml, libxslt)
-    .toDirectory();
-
-  postgresql = makePkgConfigPathsRelative(postgresql);
-
-  postgresql = std.setEnv(postgresql, {
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    CPATH: { append: [{ path: "include" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-  });
-
-  return postgresql;
+    .toDirectory()
+    .pipe(makePkgConfigPathsRelative, (recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        CPATH: { append: [{ path: "include" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
 }
 
 export async function test() {

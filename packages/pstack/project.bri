@@ -15,7 +15,7 @@ const gitRef = await Brioche.gitRef({
 
 const source = gitCheckout(gitRef);
 
-export default async function pstack(): Promise<std.Recipe<std.Directory>> {
+export default function pstack(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
     config: "RelWithDebInfo",

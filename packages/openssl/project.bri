@@ -13,7 +13,7 @@ const source = Brioche.download(
   .peel();
 
 export default function openssl(): std.Recipe<std.Directory> {
-  let openssl = std.runBash`
+  return std.runBash`
     ./config \\
       --prefix=/ \\
       --openssldir=/etc/ssl \\
@@ -23,17 +23,18 @@ export default function openssl(): std.Recipe<std.Directory> {
   `
     .dependencies(std.toolchain)
     .workDir(source)
-    .toDirectory();
-
-  openssl = std.setEnv(openssl, {
-    CPATH: { append: [{ path: "include" }] },
-    LIBRARY_PATH: { append: [{ path: "lib" }] },
-    PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-    CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
-    OPENSSL_ROOT_DIR: { fallback: { path: "." } },
-  });
-
-  return std.withRunnableLink(openssl, "bin/openssl");
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+          OPENSSL_ROOT_DIR: { fallback: { path: "." } },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/openssl"),
+    );
 }
 
 export async function test() {
