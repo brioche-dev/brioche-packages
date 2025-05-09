@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/derailed/k9s.git": {
-      "v0.50.4": "e4e38161857a202f09488c7ab3603a27de464ad4"
+      "v0.50.5": "ccebaa604ef66dd77b9ddc4d2142798a414275ee"
     }
   }
 }

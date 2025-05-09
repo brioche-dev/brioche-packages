@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "k9s",
-  version: "0.50.4",
+  version: "0.50.5",
   repository: "https://github.com/derailed/k9s.git",
 };
 
