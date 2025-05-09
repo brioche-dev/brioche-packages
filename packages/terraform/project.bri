@@ -22,7 +22,7 @@ const source = Brioche.gitCheckout({
 
 export default function terraform(): std.Recipe<std.Directory> {
   return goBuild({
-    source: source,
+    source,
     buildParams: {
       ldflags: [
         "-s",
