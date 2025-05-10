@@ -1,0 +1,54 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "fzf",
+  version: "0.62.0",
+  repository: "https://github.com/junegunn/fzf.git",
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+const source = gitCheckout(gitRef);
+
+export default function fzf(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `main.version=${project.version}`,
+        "-X",
+        `main.revision=${gitRef.commit}`,
+      ],
+    },
+    path: ".",
+    runnable: "bin/fzf",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    fzf --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(fzf)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version} (${gitRef.commit})`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
