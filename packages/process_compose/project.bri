@@ -7,7 +7,7 @@ export const project = {
   name: "process_compose",
   version: "1.46.0",
   extra: {
-    releaseDate: "20241220221126",
+    releaseDate: "2024-12-20",
   },
 };
 
@@ -70,7 +70,7 @@ export function liveUpdate() {
     let releaseDate = $releaseData
       | get created_at
       | into datetime
-      | format date "%Y%m%d%H%M%S"
+      | format date "%Y-%m-%d"
 
     $env.project
       | from json
