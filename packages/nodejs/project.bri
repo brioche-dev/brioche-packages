@@ -1,10 +1,11 @@
 import * as std from "std";
 import nushell from "nushell";
+import python from "python";
 import * as typer from "typer";
 
 export const project = {
   name: "nodejs",
-  version: "23.11.0",
+  version: "24.0.1",
 };
 
 /**
@@ -13,7 +14,7 @@ export const project = {
  * - `bin/node`
  * - `bin/npm`
  */
-function nodejs(): std.Recipe<std.Directory> {
+export default function nodejs(): std.Recipe<std.Directory> {
   let node = Brioche.download(
     `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
   )
@@ -25,11 +26,6 @@ function nodejs(): std.Recipe<std.Directory> {
   });
 
   return std.withRunnableLink(node, "bin/node");
-}
-export default nodejs;
-
-interface NpmInstallOptions {
-  source: std.RecipeLike<std.Directory>;
 }
 
 export async function test() {
@@ -75,6 +71,10 @@ export function liveUpdate() {
   });
 }
 
+interface NpmInstallOptions {
+  source: std.RecipeLike<std.Directory>;
+}
+
 /**
  * Install the dependencies from an NPM package. Returns a recipe containing
  * everything from the package, plus a `node_modules` directory.
@@ -113,7 +113,7 @@ export function npmInstall(
     cd "$BRIOCHE_OUTPUT"
     npm clean-install
   `
-    .dependencies(nodejs)
+    .dependencies(std.toolchain, nodejs, python)
     .outputScaffold(options.source)
     .unsafe({ networking: true })
     .toDirectory();
@@ -170,7 +170,7 @@ export function npmInstallGlobal(
 
       npm install --global "\${package_name}@\${version}"
     `
-      .dependencies(nodejs)
+      .dependencies(std.toolchain, nodejs, python)
       .outputScaffold(std.directory())
       .env({
         package_name: packageName,
