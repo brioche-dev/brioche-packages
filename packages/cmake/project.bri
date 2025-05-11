@@ -61,7 +61,7 @@ export default function cmake(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, curl)
+    .dependencies(std.toolchain, openssl, curl({ minimal: true }))
     .toDirectory()
     .pipe(
       (recipe) =>
