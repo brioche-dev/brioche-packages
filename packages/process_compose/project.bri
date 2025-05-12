@@ -7,7 +7,7 @@ export const project = {
   name: "process_compose",
   version: "1.46.0",
   extra: {
-    lastModifiedDate: "20241220221126",
+    releaseDate: "2024-12-20",
   },
 };
 
@@ -27,7 +27,7 @@ export default function processCompose(): std.Recipe<std.Directory> {
         "-X",
         `github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
         "-X",
-        `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.lastModifiedDate}`,
+        `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.releaseDate}`,
         "-X",
         `github.com/f1bonacc1/process-compose/src/config.Commit=${gitRef.commit}`,
       ],
@@ -67,15 +67,15 @@ export function liveUpdate() {
       | get tag_name
       | str replace --regex '^v' ''
 
-    let lastModifiedDate = $releaseData
+    let releaseDate = $releaseData
       | get created_at
       | into datetime
-      | format date "%Y%m%d%H%M%S"
+      | format date "%Y-%m-%d"
 
     $env.project
       | from json
       | update version $version
-      | update extra.lastModifiedDate $lastModifiedDate
+      | update extra.releaseDate $releaseDate
       | to json
   `);
 

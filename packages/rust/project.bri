@@ -168,6 +168,7 @@ export interface CargoBuildOptions {
   dependencies?: std.RecipeLike<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   unsafe?: std.ProcessUnsafeOptions;
+  cargoChefPrepare?: boolean;
   buildParams?: CargoBuildParameters;
 }
 
@@ -188,6 +189,11 @@ export interface CargoBuildOptions {
  *   passing `{ networking: true }` will allow a `build.rs` script to
  *   download files during the build. You must take extra care to ensure
  *   the build is hermetic when setting these options!
+ * - `cargoChefPrepare`: Controls if the crate from `source` should get
+ *   pre-processed by `cargo chef prepare` before being built, which avoids
+ *   unnecessarily re-downloading dependencies when the source changes.
+ *   Defaults to `true` (should only be disabled when there's an upstream
+ *   issue with `cargo chef`).
  * - `buildParams`: Optional build parameters:
  *   - `features`: An array of features to enable.
  *   - `defaultFeatures`: Set to `false` to opt out of the crate's
@@ -222,7 +228,10 @@ export interface CargoBuildOptions {
  */
 export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
-  const crate = vendorCrate({ source: options.source });
+  const crate = vendorCrate({
+    source: options.source,
+    cargoChefPrepare: options.cargoChefPrepare,
+  });
 
   const extraArgs: string[] = [];
   const features = options.buildParams?.features ?? [];
@@ -357,6 +366,7 @@ export function createSkeletonCrate(
 
 interface VendorCrateOptions {
   source: std.RecipeLike<std.Directory>;
+  cargoChefPrepare?: boolean;
 }
 
 /**
@@ -367,13 +377,20 @@ interface VendorCrateOptions {
  * ## Options
  *
  * - `source`: The crate to build.
+ * - `cargoChefPrepare`: Controls if the crate from `source` should get
+ *   pre-processed by `cargo chef prepare` before being built, which avoids
+ *   unnecessarily re-downloading dependencies when the source changes.
+ *   Defaults to `true` (should only be disabled when there's an upstream
+ *   issue with `cargo chef`).
  */
 export function vendorCrate(
   options: VendorCrateOptions,
 ): std.Recipe<std.Directory> {
+  const { source, cargoChefPrepare = true } = options;
+
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
-  const skeletonCrate = createSkeletonCrate(options.source);
+  const skeletonCrate = cargoChefPrepare ? createSkeletonCrate(source) : source;
 
   // Vendor the dependencies with network access and save the Cargo config.toml
   // file, so the vendored dependencies are used
@@ -403,7 +420,9 @@ export function vendorCrate(
     .toDirectory();
 
   // Combine the original crate with the vendored dependencies
-  let crate = std.merge(vendoredSkeletonCrate, options.source);
+  let crate = cargoChefPrepare
+    ? std.merge(vendoredSkeletonCrate, source)
+    : vendoredSkeletonCrate;
 
   // Copy the updated Cargo config.toml file into the crate
   crate = crate.insert(
