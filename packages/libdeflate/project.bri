@@ -1,0 +1,51 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "libdeflate",
+  version: "1.24",
+  repository: "https://github.com/ebiggers/libdeflate",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function libdeflate(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      // Disable the building of the gzip program, since it's not recommended to use it as such
+      // See: https://github.com/ebiggers/libdeflate/blob/96836d7d9d10e3e0d53e6edb54eb908514e336c4/README.md?plain=1#L20
+      LIBDEFLATE_BUILD_GZIP: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test() {
+  const script = std.runBash`
+    pkg-config --modversion libdeflate | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libdeflate)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
