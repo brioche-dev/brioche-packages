@@ -36,7 +36,10 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Publish packages
         run: |
-          for package in packages/*; do
+          packages_glob="packages/*"
+          packages=( $packages_glob )
+
+          for package in "${packages[@]}"; do
             echo "::group::$package"
             brioche publish -p "$package"
             echo "::endgroup::"

@@ -28,7 +28,10 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
       - name: Build packages
         run: |
-          for package in packages/*; do
+          packages_glob="packages/*"
+          packages=( $packages_glob )
+
+          for package in "${packages[@]}"; do
             echo "::group::$package"
             brioche build -p "$package" --sync --locked --display plain-reduced
             echo "::endgroup::"
@@ -44,7 +47,10 @@ jobs:
           AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
       - name: Run package tests
         run: |
-          for package in packages/*; do
+          packages_glob="packages/*"
+          packages=( $packages_glob )
+
+          for package in "${packages[@]}"; do
             if grep -q 'export.*test' "$package/project.bri"; then
               echo "::group::$package"
               brioche build -p "$package" -e test --sync --locked
