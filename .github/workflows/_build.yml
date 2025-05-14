@@ -20,12 +20,14 @@ jobs:
           sudo apt-get install -y curl
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Install Brioche
         run: |
           mkdir -p ~/.local/bin
           curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Build packages
         run: |
           packages_glob="packages/*"
@@ -45,6 +47,7 @@ jobs:
           AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
           AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
           AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
+
       - name: Run package tests
         run: |
           packages_glob="packages/*"
@@ -68,6 +71,7 @@ jobs:
           AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
           AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
           AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
+
       - name: Save failed processes
         if: failure()
         uses: actions/upload-artifact@v4
