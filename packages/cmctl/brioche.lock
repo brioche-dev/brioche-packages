@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/cert-manager/cmctl.git": {
+      "v2.2.0": "b222de33a335dcff615f08ea760c896fbeba8184"
+    }
+  }
+}
