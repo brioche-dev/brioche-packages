@@ -8,7 +8,7 @@ on:
 jobs:
   live-update-packages:
     name: Live-update packages
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
@@ -41,6 +41,9 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Update packages
+        env:
+          # Authenticate for GitHub API requests for increased rate limits
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git_head="$(git rev-parse HEAD)"
 

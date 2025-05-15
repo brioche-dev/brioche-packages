@@ -58,7 +58,13 @@ export function liveUpdateFromGithubReleases(
     const { default: nushell } = await import("nushell");
 
     const src = std.file(std.indoc`
-      let tagName = http get $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
+      # Include GitHub Token if present (for increased rate limits)
+      mut gh_headers = []
+      if ($env.GITHUB_TOKEN? | default "") != "" {
+        $gh_headers ++= [Authorization $'Bearer $($env.GITHUB_TOKEN)']
+      }
+
+      let tagName = http get --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
         | get tag_name
 
       let parsedTagName = $tagName | parse --regex $env.matchTag
