@@ -1,0 +1,44 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "jjui",
+  version: "0.8.8",
+  repository: "https://github.com/idursun/jjui.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function jjui(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.Version=${project.version}`],
+    },
+    path: "./cmd/jjui",
+    runnable: "bin/jjui",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    jjui --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(jjui)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
