@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - 'build/**'
+      - "build/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,15 +28,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Install Brioche
         run: |
           mkdir -p ~/.local/bin
           curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Publish packages
         run: |
-          for package in packages/*; do
+          packages_glob="packages/*"
+          packages=( $packages_glob )
+
+          for package in "${packages[@]}"; do
             echo "::group::$package"
             brioche publish -p "$package"
             echo "::endgroup::"

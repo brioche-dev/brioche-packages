@@ -3,7 +3,7 @@ name: Live updates
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 12 * * FRI' # Every Friday at 12:17pm UTC
+    - cron: "17 12 * * FRI" # Every Friday at 12:17pm UTC
 
 jobs:
   live-update-packages:
@@ -43,9 +43,13 @@ jobs:
       - name: Update packages
         run: |
           git_head="$(git rev-parse HEAD)"
+
+          packages_glob="packages/*"
+          packages=( $packages_glob )
+          mapfile -t packages < <(printf '%s\n' "${packages[@]}" | sort -R) # Shuffle the packages
           failed_packages=()
 
-          for package in packages/*; do
+          for package in "${packages[@]}"; do
             branch_name="live-update/$(basename "$package")"
             if grep -q 'export.*liveUpdate' "$package/project.bri"; then
               echo "::group::$package"
