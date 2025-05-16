@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/securego/gosec.git": {
+      "v2.22.4": "6decf96c3d272d5a8bbdcf9fddb5789d0be16a8d"
+    }
+  }
+}
