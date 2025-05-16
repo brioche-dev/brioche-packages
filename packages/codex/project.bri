@@ -4,7 +4,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "codex",
-  version: "0.1.2504301751",
+  version: "0.1.2505140839",
   packageName: "@openai/codex",
 };
 
