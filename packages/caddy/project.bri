@@ -1,19 +1,15 @@
 import * as std from "std";
-import go, { goBuild } from "go";
-import nushell from "nushell";
+import go from "go";
+import xcaddy from "xcaddy";
 
 export const project = {
   name: "caddy",
   version: "2.10.0",
-  extra: {
-    xcaddy: {
-      version: "0.4.4",
-    },
-  },
+  repository: "https://github.com/caddyserver/caddy.git",
 };
 
 const sourceRef = Brioche.gitRef({
-  repository: "https://github.com/caddyserver/caddy.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 
@@ -44,19 +40,6 @@ export default function caddy(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/caddy"));
 }
 
-function xcaddy(): std.Recipe<std.Directory> {
-  const source = Brioche.gitCheckout({
-    repository: "https://github.com/caddyserver/xcaddy.git",
-    ref: `v${project.extra.xcaddy.version}`,
-  });
-
-  return goBuild({
-    source,
-    path: "./cmd/xcaddy",
-    runnable: "bin/xcaddy",
-  });
-}
-
 export async function test() {
   const script = std.runBash`
     caddy version | tee "$BRIOCHE_OUTPUT"
@@ -66,39 +49,16 @@ export async function test() {
 
   const result = (await script.read()).trim();
 
+  // Check that the result contains the expected version
+  const expected = `v${project.version} `;
   std.assert(
-    result.startsWith(`v${project.version} `),
-    `expected '${project.version}', got '${result}'`,
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;
 }
 
 export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/caddyserver/caddy/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    let xcaddyReleaseData = http get https://api.github.com/repos/caddyserver/xcaddy/releases/latest
-
-    let xcaddyVersion = $xcaddyReleaseData
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | update extra.xcaddy.version $xcaddyVersion
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }
