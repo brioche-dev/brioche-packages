@@ -1,0 +1,35 @@
+diff --git a/cmd/main.go b/cmd/main.go
+index 9a898d3..552ed54 100644
+--- a/cmd/main.go
++++ b/cmd/main.go
+@@ -41,6 +41,7 @@ var (
+ 	buildDebugOutput = os.Getenv("XCADDY_DEBUG") == "1"
+ 	buildFlags       = os.Getenv("XCADDY_GO_BUILD_FLAGS")
+ 	modFlags         = os.Getenv("XCADDY_GO_MOD_FLAGS")
++	Version          string
+ )
+ 
+ func Main() {
+@@ -207,21 +208,7 @@ func splitWith(arg string) (module, version, replace string, err error) {
+ 
+ // xcaddyVersion returns a detailed version string, if available.
+ func xcaddyVersion() string {
+-	mod := goModule()
+-	ver := mod.Version
+-	if mod.Sum != "" {
+-		ver += " " + mod.Sum
+-	}
+-	if mod.Replace != nil {
+-		ver += " => " + mod.Replace.Path
+-		if mod.Replace.Version != "" {
+-			ver += "@" + mod.Replace.Version
+-		}
+-		if mod.Replace.Sum != "" {
+-			ver += " " + mod.Replace.Sum
+-		}
+-	}
+-	return ver
++	return Version
+ }
+ 
+ func goModule() *debug.Module {

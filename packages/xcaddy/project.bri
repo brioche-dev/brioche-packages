@@ -1,0 +1,57 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "xcaddy",
+  version: "0.4.4",
+  repository: "https://github.com/caddyserver/xcaddy.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Patch the source to properly inject version information
+  // Inspired from: https://github.com/NixOS/nixpkgs/blob/d89fc19e405cb2d55ce7cc114356846a0ee5e956/pkgs/by-name/xc/xcaddy/inject_version_info.diff
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("inject-version-information.patch"),
+    strip: 1,
+  }),
+);
+
+export default function xcaddy(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/caddyserver/xcaddy/cmd.Version=${project.version}`,
+      ],
+    },
+    path: "./cmd/xcaddy",
+    runnable: "bin/xcaddy",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    xcaddy version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(xcaddy)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
