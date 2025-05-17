@@ -61,7 +61,7 @@ export function liveUpdateFromGithubReleases(
       # Include GitHub Token if present (for increased rate limits)
       mut gh_headers = []
       if ($env.GITHUB_TOKEN? | default "") != "" {
-        $gh_headers ++= [Authorization $'Bearer $($env.GITHUB_TOKEN)']
+        $gh_headers ++= [Authorization $'Bearer ($env.GITHUB_TOKEN)']
       }
 
       let tagName = http get --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
@@ -73,7 +73,7 @@ export function liveUpdateFromGithubReleases(
       }
 
       let version = $parsedTagName.0.version?
-      if version == null {
+      if $version == null {
         error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
       }
 
