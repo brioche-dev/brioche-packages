@@ -1,0 +1,49 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "trivy",
+  version: "0.62.1",
+  repository: "https://github.com/aquasecurity/trivy.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function trivy(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/aquasecurity/trivy/pkg/version/app.ver=${project.version}`,
+      ],
+    },
+    path: "./cmd/trivy",
+    runnable: "bin/trivy",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    trivy --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(trivy)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version: ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
