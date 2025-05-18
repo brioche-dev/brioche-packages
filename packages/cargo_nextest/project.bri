@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_nextest",
-  version: "0.9.95",
+  version: "0.9.96",
   repository: "https://github.com/nextest-rs/nextest.git",
 };
 
