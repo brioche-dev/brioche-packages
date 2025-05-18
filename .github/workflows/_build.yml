@@ -30,11 +30,13 @@ jobs:
 
       - name: Build packages
         run: |
-          packages_glob="packages/*"
-          packages=( $packages_glob )
+          packages=(packages/*)
 
+          n=1
           for package in "${packages[@]}"; do
-            echo "::group::$package"
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+            echo "::group::$label"
             brioche build -p "$package" --sync --locked --display plain-reduced
             echo "::endgroup::"
           done
@@ -50,16 +52,19 @@ jobs:
 
       - name: Run package tests
         run: |
-          packages_glob="packages/*"
-          packages=( $packages_glob )
+          packages=(packages/*)
 
+          n=1
           for package in "${packages[@]}"; do
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+
             if grep -q 'export.*test' "$package/project.bri"; then
-              echo "::group::$package"
+              echo "::group::$label"
               brioche build -p "$package" -e test --sync --locked
               echo "::endgroup::"
             else
-              echo "$package: no tests found"
+              echo "$label: no tests found"
             fi
           done
         env:
@@ -79,3 +84,24 @@ jobs:
           name: process-events
           path: ~/.local/share/brioche/process-temp/*/events.bin.zst
           compression-level: 0
+
+      - name: Show failed processes
+        if: failure()
+        run: |
+          process_events=(~/.local/share/brioche/process-temp/*/events.bin.zst)
+          process_event="${process_events[0]}"
+
+          if [ -f "$process_event" ]; then
+            truncated_line_count="$(brioche jobs logs "$process_event" --limit 200 | wc -l)"
+            if [ "$truncated_line_count" -gt 190 ]; then
+              # Looks like the output might be long, so show the first 80
+              # lines and the last 80 lines
+
+              brioche jobs logs "$process_event" --limit 80 | head -n80
+              echo "..."
+              brioche jobs logs "$process_event" | tail -n80
+            else
+              # Looks like the output might be short, so show the whole file
+              brioche jobs logs "$process_event"
+            fi
+          fi

@@ -20,11 +20,13 @@ jobs:
 
       - name: Check packages
         run: |
-          packages_glob="packages/*"
-          packages=( $packages_glob )
+          packages=(packages/*)
 
+          n=1
           for package in "${packages[@]}"; do
-            echo "::group::$package"
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+            echo "::group::$label"
             brioche check -p "$package" --locked
             brioche fmt -p "$package" --check
             echo "::endgroup::"
