@@ -46,16 +46,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git_head="$(git rev-parse HEAD)"
-
-          packages_glob="packages/*"
-          packages=( $packages_glob )
+          packages=(packages/*)
           mapfile -t packages < <(printf '%s\n' "${packages[@]}" | sort -R) # Shuffle the packages
           failed_packages=()
 
+          n=1
           for package in "${packages[@]}"; do
             branch_name="live-update/$(basename "$package")"
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+
             if grep -q 'export.*liveUpdate' "$package/project.bri"; then
-              echo "::group::$package"
+              echo "::group::$label"
 
               git fetch --depth=1 origin "$branch_name" || echo "No existing branch for package $package"
               git checkout "origin/${branch_name}" || git checkout "${git_head}"
@@ -78,7 +80,7 @@ jobs:
 
               echo "::endgroup::"
             else
-              echo "$package: no live-update found"
+              echo "$label: no live-update found"
             fi
           done
 

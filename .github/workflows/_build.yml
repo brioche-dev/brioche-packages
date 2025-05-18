@@ -30,11 +30,13 @@ jobs:
 
       - name: Build packages
         run: |
-          packages_glob="packages/*"
-          packages=( $packages_glob )
+          packages=(packages/*)
 
+          n=1
           for package in "${packages[@]}"; do
-            echo "::group::$package"
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+            echo "::group::$label"
             brioche build -p "$package" --sync --locked --display plain-reduced
             echo "::endgroup::"
           done
@@ -50,16 +52,19 @@ jobs:
 
       - name: Run package tests
         run: |
-          packages_glob="packages/*"
-          packages=( $packages_glob )
+          packages=(packages/*)
 
+          n=1
           for package in "${packages[@]}"; do
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+
             if grep -q 'export.*test' "$package/project.bri"; then
-              echo "::group::$package"
+              echo "::group::$label"
               brioche build -p "$package" -e test --sync --locked
               echo "::endgroup::"
             else
-              echo "$package: no tests found"
+              echo "$label: no tests found"
             fi
           done
         env:
