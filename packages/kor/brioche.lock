@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/yonahd/kor.git": {
+      "v0.6.1": "096b9d811fc5033cfb46de10f6dc534afdf33ccf"
+    }
+  }
+}
