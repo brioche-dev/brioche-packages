@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/EmbarkStudios/cargo-about.git": {
+      "0.7.1": "7ea949142cb071a60d4361ca8e0c3ff4f35f5ab9"
+    }
+  }
+}
