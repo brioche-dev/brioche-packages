@@ -1,0 +1,42 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "uv",
+  version: "0.7.6",
+  repository: "https://github.com/astral-sh/uv.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function uv(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/uv",
+    cargoChefPrepare: false,
+    runnable: "bin/uv",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    uv --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(uv)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `uv ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
