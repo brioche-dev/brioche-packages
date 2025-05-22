@@ -1,0 +1,91 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+import nushell from "nushell";
+
+export const project = {
+  name: "cosign",
+  version: "2.5.0",
+  repository: "https://github.com/sigstore/cosign.git",
+  extra: {
+    releaseDate: "2025-04-07",
+  },
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function cosign(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitVersion=v${project.version}`,
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitCommit=${gitRef.commit}`,
+        "-X",
+        "sigs.k8s.io/release-utils/version.gitTreeState=clean",
+        "-X",
+        `sigs.k8s.io/release-utils/version.buildDate=${project.extra.releaseDate}`,
+      ],
+    },
+    path: "./cmd/cosign",
+    runnable: "bin/cosign",
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    cosign version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(cosign)
+    .toFile();
+
+  const result = (await script.read()).trim();
+  const versionMatch = result.match(/^GitVersion:\s+(v[0-9\.]+)$/m);
+  std.assert(
+    versionMatch != null,
+    `'cosign version' output did not match regex: ${result}`,
+  );
+
+  // Check that the result contains the expected version
+  const version = versionMatch[1];
+  const expected = `v${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  const src = std.file(std.indoc`
+    let releaseData = http get https://api.github.com/repos/sigstore/cosign/releases/latest
+
+    let version = $releaseData
+      | get tag_name
+      | str replace --regex '^v' ''
+
+    let releaseDate = $releaseData
+      | get created_at
+      | into datetime
+      | format date "%Y-%m-%d"
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.releaseDate $releaseDate
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell],
+  });
+}

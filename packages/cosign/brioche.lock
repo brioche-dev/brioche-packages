@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/sigstore/cosign.git": {
+      "v2.5.0": "38bb98697005cdc5c092f031594c0e45d039f4a0"
+    }
+  }
+}
