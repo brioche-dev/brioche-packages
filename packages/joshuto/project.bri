@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "joshuto",
-  version: "0.9.8",
+  version: "0.9.9",
 };
 
 const source = Brioche.gitCheckout({
