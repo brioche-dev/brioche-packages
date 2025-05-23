@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "ca_certificates",
-  version: "2025-02-25",
+  version: "2025-05-20",
 };
 
 const source = Brioche.download(
