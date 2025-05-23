@@ -3,7 +3,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "libarchive",
-  version: "3.7.9",
+  version: "3.8.0",
 };
 
 const source = Brioche.download(
