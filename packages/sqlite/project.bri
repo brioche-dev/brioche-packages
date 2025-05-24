@@ -101,8 +101,7 @@ function encodeVersionNumber(version: string): string {
   return `${major}${xx}${yy}${zz}`;
 }
 
-// TODO: This is duplicated from the `std.toolchain()` build, we should
-// figure out how to generalize this
+// TODO: Figure out where to move this, this is copied from `std`
 function makePkgConfigPathsRelative(
   recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {

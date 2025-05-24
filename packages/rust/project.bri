@@ -321,7 +321,7 @@ export function cargoBuild(options: CargoBuildOptions) {
 
         ...options.env,
       },
-      dependencies: [rust(), std.toolchain(), ...(options.dependencies ?? [])],
+      dependencies: [rust, std.toolchain, ...(options.dependencies ?? [])],
       workDir: crate,
       unsafe: options.unsafe,
     })
