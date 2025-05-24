@@ -1,0 +1,42 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+import openssl from "openssl";
+
+export const project = {
+  name: "sccache",
+  version: "0.10.0",
+  repository: "https://github.com/mozilla/sccache.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function sccache(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/sccache",
+    dependencies: [openssl],
+  });
+}
+
+export async function test() {
+  const script = std.runBash`
+    sccache --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sccache)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `sccache ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
