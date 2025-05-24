@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/RazrFalcon/cargo-bloat.git": {
+      "v0.12.1": "69ccabda2b1671c4fd675e9a660af29ee985506f"
+    }
+  }
+}
