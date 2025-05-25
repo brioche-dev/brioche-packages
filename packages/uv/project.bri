@@ -16,8 +16,11 @@ export default function uv(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     path: "crates/uv",
-    cargoChefPrepare: false,
     runnable: "bin/uv",
+
+    // cargo-chef makes the lockfile out-of-date, see this issue:
+    // https://github.com/LukeMathWalker/cargo-chef/issues/305
+    cargoChefPrepare: false,
   });
 }
 
