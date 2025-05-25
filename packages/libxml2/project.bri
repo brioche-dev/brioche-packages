@@ -56,7 +56,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let sourceUrl = http get https://download.gnome.org/sources/libxml2
       | lines

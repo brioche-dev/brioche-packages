@@ -121,7 +121,7 @@ export default function linux(
     .toDirectory();
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let sourceUrl = http get https://cdn.kernel.org/pub/linux/kernel
       | lines
