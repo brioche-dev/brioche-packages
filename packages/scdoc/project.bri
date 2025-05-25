@@ -26,7 +26,7 @@ export default function scdoc(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const exampleFile = std.file(std.indoc`
     SCDOC_TEST(7)
 

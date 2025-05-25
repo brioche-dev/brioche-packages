@@ -40,7 +40,7 @@ interface LiveUpdateFromGithubReleasesOptions {
  *   repository: "https://github.com/brioche-dev/brioche.git",
  * };
  *
- * export function liveUpdate() {
+ * export function liveUpdate(): std.Recipe<std.Directory> {
  *   return std.liveUpdateFromGithubReleases({
  *     project,
  *     matchTag: /^v(?<version>.*)$/, // Strip "v" prefix from tags

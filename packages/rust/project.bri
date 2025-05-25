@@ -107,7 +107,7 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     rustc --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -126,7 +126,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/rust-lang/rust/git/matching-refs/tags
       | get ref

@@ -23,7 +23,7 @@ export default function delve(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     dlv version | tee "$BRIOCHE_OUTPUT"
   `

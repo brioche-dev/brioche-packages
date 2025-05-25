@@ -29,7 +29,7 @@ export default function goMockery(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     mockery version | tee "$BRIOCHE_OUTPUT"
   `

@@ -15,7 +15,7 @@ export default function codex(): std.Recipe<std.Directory> {
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     codex --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -31,7 +31,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let releaseData = http get https://registry.npmjs.org/${project.packageName}/latest
 

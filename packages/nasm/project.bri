@@ -26,7 +26,7 @@ export default function nasm(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     nasm --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -45,7 +45,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/netwide-assembler/nasm/git/matching-refs/tags
       | get ref

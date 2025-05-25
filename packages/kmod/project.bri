@@ -27,7 +27,7 @@ export default function kmod(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     kmod --version | tee -a "$BRIOCHE_OUTPUT"
   `
@@ -46,7 +46,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let version = http get https://www.kernel.org/pub/linux/utils/kernel/kmod
       | lines

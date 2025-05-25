@@ -14,7 +14,7 @@ export default function zx(): std.Recipe<std.Directory> {
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/zx"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     zx --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -33,7 +33,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let releaseData = http get https://registry.npmjs.org/${project.name}/latest
 

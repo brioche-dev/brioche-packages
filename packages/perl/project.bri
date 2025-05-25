@@ -42,7 +42,7 @@ export default function perl(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     perl --version | tee "$BRIOCHE_OUTPUT"
   `

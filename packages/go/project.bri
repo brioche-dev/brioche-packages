@@ -42,7 +42,7 @@ export default function go(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     go version | tee "$BRIOCHE_OUTPUT"
   `
@@ -61,7 +61,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/golang/go/git/matching-refs/
       | get ref

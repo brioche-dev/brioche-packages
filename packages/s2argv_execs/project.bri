@@ -24,7 +24,7 @@ export default function s2argvExecs(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   // Create a simple C program that uses s2argv_execs to execute a command passed via stdin
   const src = std.file(std.indoc`
       #include <stdio.h>
@@ -71,7 +71,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/virtualsquare/s2argv-execs/git/matching-refs/tags
       | get ref

@@ -40,7 +40,7 @@ export default function caddy(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/caddy"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     caddy version | tee "$BRIOCHE_OUTPUT"
   `
@@ -59,6 +59,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

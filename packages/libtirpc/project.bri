@@ -35,7 +35,7 @@ export default function libtirpc(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libtirpc | tee "$BRIOCHE_OUTPUT"
   `
@@ -51,7 +51,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let sourceUrl = http get https://sourceforge.net/projects/libtirpc/files/libtirpc
       | lines

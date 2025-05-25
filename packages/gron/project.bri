@@ -22,7 +22,7 @@ export default function gron(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     gron --version | tee "$BRIOCHE_OUTPUT"
   `

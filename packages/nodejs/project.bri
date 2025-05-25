@@ -28,7 +28,7 @@ export default function nodejs(): std.Recipe<std.Directory> {
   return std.withRunnableLink(node, "bin/node");
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     node --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -44,7 +44,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let version = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
       | get ref

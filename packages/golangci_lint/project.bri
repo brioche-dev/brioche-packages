@@ -39,7 +39,7 @@ export default function golangciLint(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     golangci-lint --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -58,7 +58,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let releaseData = http get https://api.github.com/repos/golangci/golangci-lint/releases/latest
 
