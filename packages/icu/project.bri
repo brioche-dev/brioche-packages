@@ -61,7 +61,7 @@ export default function icu(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     icuinfo | tee "$BRIOCHE_OUTPUT"
   `

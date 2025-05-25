@@ -65,7 +65,7 @@ export default function nushell(): std.Recipe<std.Directory> {
   return std.merge(nushell, ...plugins);
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     nu --version | tee "$BRIOCHE_OUTPUT"
   `

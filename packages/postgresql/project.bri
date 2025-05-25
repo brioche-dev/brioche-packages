@@ -42,7 +42,7 @@ export default function postgresql(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     postgres --version | tee "$BRIOCHE_OUTPUT"
   `

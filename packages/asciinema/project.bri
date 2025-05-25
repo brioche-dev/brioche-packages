@@ -70,7 +70,7 @@ export default function asciinema(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   // Generate a locale which is required by asciinema to run properly
   const locale = std.runBash`
     mkdir -p "$BRIOCHE_OUTPUT"/C.UTF-8

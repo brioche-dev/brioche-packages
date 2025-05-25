@@ -30,7 +30,7 @@ export default function zlib(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion zlib | tee "$BRIOCHE_OUTPUT"
   `

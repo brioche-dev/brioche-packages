@@ -24,7 +24,7 @@ export default function s2argvExecs(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   // Create a simple C program that uses s2argv_execs to execute a command passed via stdin
   const src = std.file(std.indoc`
       #include <stdio.h>

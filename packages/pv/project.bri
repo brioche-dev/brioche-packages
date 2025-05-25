@@ -24,7 +24,7 @@ export default function pv(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/pv"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pv --version | tee "$BRIOCHE_OUTPUT"
   `

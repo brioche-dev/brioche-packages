@@ -30,7 +30,7 @@ export default function libpng(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libpng | tee "$BRIOCHE_OUTPUT"
   `

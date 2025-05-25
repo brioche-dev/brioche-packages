@@ -26,7 +26,7 @@ export default function brotli(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libbrotlicommon | tee "$BRIOCHE_OUTPUT"
   `

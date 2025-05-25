@@ -66,7 +66,7 @@ export function llvmToolchain(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     llvm-config --version | tee "$BRIOCHE_OUTPUT"
   `

@@ -29,7 +29,7 @@ export default function alsaLib(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const src = std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>

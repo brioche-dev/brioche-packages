@@ -22,7 +22,7 @@ export default function jujutsu(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     jj version | tee "$BRIOCHE_OUTPUT"
   `

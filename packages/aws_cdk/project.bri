@@ -15,7 +15,7 @@ export default function awsCdk(): std.Recipe<std.Directory> {
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/cdk"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     cdk --version | tee "$BRIOCHE_OUTPUT"
   `

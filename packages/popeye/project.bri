@@ -31,7 +31,7 @@ export default function popeye(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     # Remove ANSI color codes from the output, before extracting the version
     popeye version | sed -r 's/\x1B\[[0-9;]*[mK]//g' | awk '/^Version:/ { print $2 }' | tee "$BRIOCHE_OUTPUT"

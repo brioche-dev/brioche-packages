@@ -37,7 +37,7 @@ export default function pcre(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libpcre | tee -a "$BRIOCHE_OUTPUT"
     pkg-config --modversion libpcre16 | tee -a "$BRIOCHE_OUTPUT"

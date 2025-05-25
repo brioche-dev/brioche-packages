@@ -25,7 +25,7 @@ export default function tcsh(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/tcsh"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     tcsh --version | tee "$BRIOCHE_OUTPUT"
   `

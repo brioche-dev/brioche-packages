@@ -33,7 +33,7 @@ export default function cmctl(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     cmctl version --client | tee "$BRIOCHE_OUTPUT"
   `

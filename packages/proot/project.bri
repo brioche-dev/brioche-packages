@@ -37,7 +37,7 @@ export default function proot(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/proot"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   // No version is outputted, only the short hash of the commit version is displayed
   const script = std.runBash`
     proot --version | tee "$BRIOCHE_OUTPUT"

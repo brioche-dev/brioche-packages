@@ -14,7 +14,7 @@ export default function zx(): std.Recipe<std.Directory> {
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/zx"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     zx --version | tee "$BRIOCHE_OUTPUT"
   `

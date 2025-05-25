@@ -142,7 +142,7 @@ export default async function python(options: PythonOptions = {}) {
   );
 }
 
-export function test() {
+export function test(): std.Recipe<std.Directory> {
   const pythonVersions = Object.keys(
     project.extra.minorVersions,
   ) as PythonVersion[];

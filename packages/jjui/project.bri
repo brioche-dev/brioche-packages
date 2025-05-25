@@ -23,7 +23,7 @@ export default function jjui(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     jjui --version | tee "$BRIOCHE_OUTPUT"
   `

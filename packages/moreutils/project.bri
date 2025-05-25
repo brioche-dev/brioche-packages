@@ -35,7 +35,7 @@ export default function moreutils(): std.Recipe<std.Directory> {
     .pipe(wrapPerlShebangs);
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     errno 13 | tee "$BRIOCHE_OUTPUT"
   `

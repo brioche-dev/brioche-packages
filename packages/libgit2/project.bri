@@ -33,7 +33,7 @@ export default function libgit2(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libgit2 | tee "$BRIOCHE_OUTPUT"
   `

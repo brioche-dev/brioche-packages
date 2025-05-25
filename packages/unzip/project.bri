@@ -29,7 +29,7 @@ export default function unzip(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     unzip --help | tee "$BRIOCHE_OUTPUT"
   `

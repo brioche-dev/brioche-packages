@@ -31,7 +31,7 @@ export default function talloc(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion talloc | tee "$BRIOCHE_OUTPUT"
   `

@@ -24,7 +24,7 @@ export default function htop(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/htop"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     htop --version | tee "$BRIOCHE_OUTPUT"
   `

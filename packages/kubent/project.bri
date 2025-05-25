@@ -23,7 +23,7 @@ export default function kubent(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     kubent --version 2>&1 | tee "$BRIOCHE_OUTPUT"
   `

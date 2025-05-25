@@ -28,7 +28,7 @@ export default function caCertificates(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     openssl x509 -in $SSL_CERT_FILE -noout -text | tee "$BRIOCHE_OUTPUT"
   `

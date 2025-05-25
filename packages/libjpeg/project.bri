@@ -31,7 +31,7 @@ export default function libjpeg(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libjpeg | tee "$BRIOCHE_OUTPUT"
   `

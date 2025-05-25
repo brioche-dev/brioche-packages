@@ -15,7 +15,7 @@ export default function claudeCode(): std.Recipe<std.Directory> {
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/claude"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     claude --version | tee "$BRIOCHE_OUTPUT"
   `

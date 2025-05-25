@@ -24,7 +24,7 @@ export default function strace(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/strace"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     strace --version | tee "$BRIOCHE_OUTPUT"
   `

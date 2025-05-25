@@ -29,7 +29,7 @@ export default function zlibNg(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion zlib-ng | tee "$BRIOCHE_OUTPUT"
   `

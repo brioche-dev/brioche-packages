@@ -24,7 +24,7 @@ export default function uv(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     uv --version | tee "$BRIOCHE_OUTPUT"
   `

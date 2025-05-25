@@ -34,7 +34,7 @@ export default function re2c(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     re2c --version | tee "$BRIOCHE_OUTPUT"
   `

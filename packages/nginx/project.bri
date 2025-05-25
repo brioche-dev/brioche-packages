@@ -27,7 +27,7 @@ export default function nginx(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/nginx"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     nginx -v 2>&1 | tee "$BRIOCHE_OUTPUT"
   `

@@ -200,7 +200,7 @@ export function cmakeBuild(
   return result;
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     # Only retrieve the first line of the output, other lines are not relevant for the version check
     cmake --version | head -n 1 | tee "$BRIOCHE_OUTPUT"

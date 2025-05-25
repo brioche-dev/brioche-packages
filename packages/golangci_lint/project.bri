@@ -39,7 +39,7 @@ export default function golangciLint(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     golangci-lint --version | tee "$BRIOCHE_OUTPUT"
   `

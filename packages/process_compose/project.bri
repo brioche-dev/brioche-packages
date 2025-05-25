@@ -41,7 +41,7 @@ export default function processCompose(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     process-compose version | tee "$BRIOCHE_OUTPUT"
   `
