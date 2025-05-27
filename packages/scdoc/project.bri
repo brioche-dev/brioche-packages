@@ -1,5 +1,4 @@
 import * as std from "std";
-import git from "git";
 import nushell from "nushell";
 
 export const project = {
@@ -75,6 +74,6 @@ export function liveUpdate(): std.WithRunnable {
     command: "nu",
     args: [src],
     env: { project: JSON.stringify(project) },
-    dependencies: [git, nushell],
+    dependencies: [nushell],
   });
 }
