@@ -1,0 +1,42 @@
+import * as std from "std";
+import openssl from "openssl";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_udeps",
+  version: "0.1.55",
+  repository: "https://github.com/est31/cargo-udeps.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cargoUdeps(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/cargo-udeps",
+    dependencies: [openssl],
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo udeps --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoUdeps)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cargo-udeps ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
