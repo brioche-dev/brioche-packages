@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/gdraheim/zziplib.git": {
+      "v0.13.79": "c4927d0ca8e3d653c6f433dfb32e957a326a52ab"
+    }
+  }
+}
