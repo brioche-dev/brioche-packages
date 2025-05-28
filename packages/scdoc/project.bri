@@ -1,4 +1,5 @@
 import * as std from "std";
+import nushell from "nushell";
 
 export const project = {
   name: "scdoc",
@@ -52,4 +53,27 @@ export async function test(): Promise<std.Recipe<std.File>> {
   );
 
   return script;
+}
+
+export function liveUpdate(): std.WithRunnable {
+  const src = std.file(std.indoc`
+    let version = http get https://git.sr.ht/~sircmpwn/scdoc/refs
+      | lines
+      | where {|it| $it | str contains "~sircmpwn/scdoc/refs/" }
+      | parse --regex '<a href="/~sircmpwn/scdoc/refs/(?<version>.+)">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell],
+  });
 }
