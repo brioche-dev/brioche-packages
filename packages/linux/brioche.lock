@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.14.8.tar.xz": {
+    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.15.tar.xz": {
       "type": "sha256",
-      "value": "62b12ecd3075a357eb320935657de84e01552803717dad383fa7cc3aa4aa2905"
+      "value": "7586962547803be7ecc4056efc927fb25214548722bd28171172f3599abb9764"
     }
   }
 }
