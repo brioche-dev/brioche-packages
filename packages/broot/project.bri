@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "broot",
-  version: "1.46.4",
+  version: "1.46.5",
   repository: "https://github.com/Canop/broot.git",
 };
 
