@@ -8,7 +8,7 @@ export const project = {
   version: "12.12.0",
   repository: "https://github.com/tsenart/vegeta.git",
   extra: {
-    releaseDate: "2025-04-07",
+    releaseDate: "2024-07-29",
   },
 };
 
