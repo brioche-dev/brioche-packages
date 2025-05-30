@@ -5,7 +5,7 @@ import python from "python";
 
 export const project = {
   name: "zziplib",
-  version: "0.13.79",
+  version: "0.13.80",
   repository: "https://github.com/gdraheim/zziplib.git",
 };
 
