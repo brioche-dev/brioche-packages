@@ -25,13 +25,14 @@ export default function libtirpc(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
         }),
-      makePkgConfigPathsRelative,
+      std.pkgConfigMakePathsRelative,
     );
 }
 
@@ -79,20 +80,4 @@ export function liveUpdate(): std.WithRunnable {
     env: { project: JSON.stringify(project) },
     dependencies: [nushell],
   });
-}
-
-// TODO: Figure out where to move this, this is copied from `std`
-function makePkgConfigPathsRelative(
-  recipe: std.RecipeLike<std.Directory>,
-): std.Recipe<std.Directory> {
-  // Replaces things that look like absolute paths in pkg-config files with
-  // relative paths (using the `${pcfiledir}` variable)
-  return std.runBash`
-    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
-      | while IFS= read -r -d $'\\0' file; do
-        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
-      done
-  `
-    .outputScaffold(recipe)
-    .toDirectory();
 }

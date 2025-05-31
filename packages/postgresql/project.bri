@@ -33,7 +33,7 @@ export default function postgresql(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, icu, openssl, libxml, libxslt)
     .toDirectory()
-    .pipe(makePkgConfigPathsRelative, (recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         CPATH: { append: [{ path: "include" }] },
@@ -80,20 +80,4 @@ export function liveUpdate(): std.WithRunnable {
     env: { project: JSON.stringify(project) },
     dependencies: [nushell, curl],
   });
-}
-
-// TODO: Figure out where to move this, this is copied from `std`
-function makePkgConfigPathsRelative(
-  recipe: std.RecipeLike<std.Directory>,
-): std.Recipe<std.Directory> {
-  // Replaces things that look like absolute paths in pkg-config files with
-  // relative paths (using the `${pcfiledir}` variable)
-  return std.runBash`
-    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
-      | while IFS= read -r -d $'\\0' file; do
-        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
-      done
-  `
-    .outputScaffold(recipe)
-    .toDirectory();
 }
