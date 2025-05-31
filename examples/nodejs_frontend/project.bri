@@ -23,7 +23,7 @@ export function staticSite(): std.Recipe<std.Directory> {
     npm run build
     mv dist "$BRIOCHE_OUTPUT"
   `
-    .dependencies(nodejs())
+    .dependencies(nodejs)
     .workDir(npmPackage)
     .env({
       // NOTE: Rollup needs a dynamic library provided by the toolchain.
@@ -40,6 +40,6 @@ export default () => {
   return std.bashRunnable`
     miniserve --spa --index index.html -- "$root"
   `
-    .dependencies(miniserve())
+    .dependencies(miniserve)
     .root(staticSite());
 };
