@@ -59,6 +59,7 @@ export default function curl(
     })
     .toDirectory()
     .pipe(
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },

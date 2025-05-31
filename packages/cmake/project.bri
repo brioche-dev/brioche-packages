@@ -71,6 +71,7 @@ export default function cmake(): std.Recipe<std.Directory> {
           "libexec/cmake/brioche-packer",
           std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
         ),
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },

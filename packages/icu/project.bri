@@ -35,6 +35,7 @@ export default function icu(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           LIBRARY_PATH: { append: [{ path: "lib" }] },

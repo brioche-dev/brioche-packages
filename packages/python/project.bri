@@ -125,13 +125,13 @@ export default async function python(options: PythonOptions = {}) {
     // Some binaries under `/bin` are shebang scripts. These need to be wrapped
     // to avoid issues with absolute paths
     (recipe) => std.recipe(fixShebangs(recipe)),
-    // Fix absolute paths in pkg-config files
-    (recipe) => std.pkgConfigMakePathsRelative(recipe),
     (recipe) =>
       recipe
         .insert("bin/python", std.symlink({ target: "python3" }))
         .insert("bin/python-config", std.symlink({ target: "python3-config" }))
         .insert("bin/pydoc", std.symlink({ target: "pydoc3" })),
+    // Fix absolute paths in pkg-config files
+    std.pkgConfigMakePathsRelative,
     (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },

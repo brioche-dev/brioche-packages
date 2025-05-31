@@ -25,6 +25,7 @@ export default function libtirpc(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },
