@@ -15,7 +15,7 @@ const source = Brioche.gitCheckout({
 
 export default function mitmproxy(): std.Recipe<std.Directory> {
   return std.runBash`
-    uv tool install mitmproxy
+    uv tool install .
   `
     .workDir(source)
     .dependencies(python, uv)
