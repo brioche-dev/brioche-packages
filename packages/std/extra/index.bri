@@ -7,5 +7,6 @@ export * from "./set_env.bri";
 export * from "./with_runnable_link.bri";
 export * from "./apply_patch.bri";
 export * from "./live_update_from_github_releases.bri";
+export * from "./pkg_config_make_paths_relative.bri";
 
 import "./extra_global.bri";
