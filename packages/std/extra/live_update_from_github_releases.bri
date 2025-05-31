@@ -1,17 +1,30 @@
 import * as std from "/core";
 import { withRunnable } from "./runnable.bri";
+import {
+  DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH_TAG,
+  type LiveUpdateStrategy,
+  type LiveUpdateBaseOptions,
+} from "./live_update.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
 // https://github.com/brioche-dev/brioche/issues/242
 
-// The default regex used for matching tags. Strips an optional "v" prefix,
-// then matches the rest if it looks like a version number (either semver or
-// a semver-like version)
-const DEFAULT_REGEX_MATCH_TAG =
-  /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:-(?:(?:[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
+/**
+ * Live update strategy for updating a project based on the latest release
+ * tag from a GitHub repository.
+ *
+ * @param strategy - The strategy of live update, which is
+ * `LiveUpdateStrategy.GithubRelease`.
+ * @param project - The project export that should be updated, which must
+ * include a `repository` property containing a GitHub repository URL.
+ * @param matchTag - An optional regex value to extract the version number
+ * from a tag name.
+ */
+export interface LiveUpdateFromGithubReleasesOptions
+  extends LiveUpdateBaseOptions {
+  readonly strategy: LiveUpdateStrategy.GithubRelease;
 
-interface LiveUpdateFromGithubReleasesOptions {
   project: { version: string; repository: string };
   matchTag?: RegExp;
 }
@@ -52,7 +65,8 @@ export function liveUpdateFromGithubReleases(
   options: LiveUpdateFromGithubReleasesOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
-  const matchTag = options.matchTag ?? DEFAULT_REGEX_MATCH_TAG;
+  const matchTag =
+    options.matchTag ?? DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH_TAG;
 
   return std.recipe(async () => {
     const { default: nushell } = await import("nushell");
