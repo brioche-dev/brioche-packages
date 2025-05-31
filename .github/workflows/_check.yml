@@ -20,14 +20,4 @@ jobs:
 
       - name: Check packages
         run: |
-          packages=(packages/*)
-
-          n=1
-          for package in "${packages[@]}"; do
-            label="$package ($n / ${#packages[@]})"
-            ((n++))
-            echo "::group::$label"
-            brioche check -p "$package" --locked
-            brioche fmt -p "$package" --check
-            echo "::endgroup::"
-          done
+          echo ./packages/* | xargs printf -- '-p %s\n' | xargs brioche check
