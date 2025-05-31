@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "mdbook",
-  version: "0.4.49",
+  version: "0.4.51",
   repository: "https://github.com/rust-lang/mdBook.git",
 };
 

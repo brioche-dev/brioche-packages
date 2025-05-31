@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/rust-lang/mdBook.git": {
-      "v0.4.49": "785ee564c562487898aa6bab50cb24b08c87d97d"
+      "v0.4.51": "f93b2675ffde5bf22a108a9d65725b65d5b153d4"
     }
   }
 }
