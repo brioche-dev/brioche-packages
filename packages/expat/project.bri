@@ -22,7 +22,6 @@ const source = Brioche.download(
 
 export default function expat(): std.Recipe<std.Directory> {
   return std.runBash`
-    ls
     ./configure --prefix=/
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
