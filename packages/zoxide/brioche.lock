@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/ajeetdsouza/zoxide.git": {
-      "v0.9.7": "d74bce3b7418ed965f5056297db8bb081a29121c"
+      "v0.9.8": "859268aec873465b6707f73001003a76adcafabd"
     }
   }
 }
