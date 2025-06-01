@@ -309,7 +309,7 @@ export const toolchain = std.memo(
     });
 
     toolchain = fixShebangs(toolchain);
-    toolchain = makePkgConfigPathsRelative(toolchain);
+    toolchain = pkgConfigMakePathsRelative(toolchain);
 
     return toolchain;
   },
@@ -399,7 +399,7 @@ function fixShebangs(
     .toDirectory();
 }
 
-function makePkgConfigPathsRelative(
+function pkgConfigMakePathsRelative(
   recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   // Replaces things that look like absolute paths in pkg-config files with

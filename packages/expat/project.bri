@@ -22,7 +22,6 @@ const source = Brioche.download(
 
 export default function expat(): std.Recipe<std.Directory> {
   return std.runBash`
-    ls
     ./configure --prefix=/
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -30,7 +29,7 @@ export default function expat(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe((recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },

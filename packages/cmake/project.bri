@@ -71,6 +71,7 @@ export default function cmake(): std.Recipe<std.Directory> {
           "libexec/cmake/brioche-packer",
           std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
         ),
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },
@@ -88,6 +89,7 @@ export interface CMakeBuildInstallOptions {
   config?: string;
   env?: Record<string, std.ProcessTemplateLike>;
   set?: Record<string, CMakeVariable>;
+  disablePostBuildSteps?: boolean;
   runnable?: string;
 }
 
@@ -126,6 +128,8 @@ export type CMakeVariableType =
  * - `env`: Optionally set environment variables for the build.
  * - `set`: Optionally set CMake cache variables during the build, as if
  *   by passing `-D...`.
+ * - `disablePostBuildSteps`: If set, the post build steps will not run. By
+ *   default, only `std.pkgConfigMakePathsRelative` will be executed.
  * - `runnable`: Optionally set a path to the binary to run by default
  *   (e.g. `bin/foo`).
  */
@@ -192,6 +196,10 @@ export function cmakeBuild(
       ...env,
     })
     .toDirectory();
+
+  if (options.disablePostBuildSteps == null || !options.disablePostBuildSteps) {
+    result = std.pkgConfigMakePathsRelative(result);
+  }
 
   if (options.runnable != null) {
     result = std.withRunnableLink(result, options.runnable);
