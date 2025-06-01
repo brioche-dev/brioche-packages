@@ -225,7 +225,7 @@ function goModDownload(
  * Wrapper function to escape ldflags for use in a shell command.
  * Escapes single quotes and double quotes.
  *
- * @param ldflags An array of ldflags to escape.
+ * @param ldflags - An array of ldflags to escape.
  * @returns A string of escaped ldflags.
  */
 function ldflagsWrapper(ldflags: string[]): string {
