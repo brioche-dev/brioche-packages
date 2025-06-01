@@ -62,10 +62,11 @@ jobs:
               git fetch --depth=1 origin "$branch_name" || echo "No existing branch for package $package"
               git checkout "origin/${branch_name}" || git checkout "${git_head}"
               git clean -ffdx
+              git restore .
               if ! brioche live-update -p "$package" --locked; then
                 echo "🔴 Failed to update $package"
                 echo "::error file=$package/project.bri::Failed to update $package"
-                failed_packages+=( "$package" )
+                failed_packages+=("$package")
                 continue
               fi
 
