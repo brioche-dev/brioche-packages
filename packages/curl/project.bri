@@ -65,7 +65,6 @@ export default function curl(
           CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
           CURL_ROOT: { fallback: { path: "." } },
         }),
       (recipe) => std.withRunnableLink(recipe, "bin/curl"),
