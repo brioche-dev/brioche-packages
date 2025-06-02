@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/libevent/libevent": {
+      "release-2.1.12-stable": "5df3037d10556bfcb675bc73e516978b75fc7bc7"
+    }
+  }
+}
