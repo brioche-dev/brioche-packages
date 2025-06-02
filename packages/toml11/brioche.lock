@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ToruNiina/toml11": {
+      "v4.4.0": "be08ba2be2a964edcdb3d3e3ea8d100abc26f286"
+    }
+  }
+}
