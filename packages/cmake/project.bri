@@ -183,13 +183,11 @@ export function cmakeBuild(
     cmake --install . --prefix="$BRIOCHE_OUTPUT"
 
     if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
-      if [ ! -d "$BRIOCHE_OUTPUT/lib" ]; then
-        ln -s lib64 "$BRIOCHE_OUTPUT/lib"
-      else
-        # If lib directory already exists, we symlink the contents
-        # of lib64 into it.
-        cp -as "$BRIOCHE_OUTPUT/lib64/." "$BRIOCHE_OUTPUT/lib/"
-      fi
+      # Ensure the lib folder exists
+      mkdir -p "$BRIOCHE_OUTPUT/lib"
+
+      # Create relative symlinks for lib64 contents to lib folder
+      ln --symbolic --relative "$BRIOCHE_OUTPUT"/lib64/* "$BRIOCHE_OUTPUT/lib/"
     fi
   `
     .dependencies(...dependencies, cmake)
