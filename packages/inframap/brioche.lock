@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/cycloidio/inframap.git": {
+      "v0.7.0": "dc691336094eabf79fffe223e1da7e9dc2dc6aa8"
+    }
+  }
+}
