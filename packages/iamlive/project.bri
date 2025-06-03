@@ -1,0 +1,38 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "iamlive",
+  version: "1.1.24",
+  repository: "https://github.com/iann0036/iamlive.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function iamlive(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/iamlive",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // iamlive does not provide any version command, so the help command is used to verify the installation.
+  const script = std.runBash`
+    iamlive -help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(iamlive)
+    .toFile();
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
