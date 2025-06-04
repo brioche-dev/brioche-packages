@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/iann0036/iamlive.git": {
+      "v1.1.24": "8c1356ea736c5b57cf8dbc98b64d76c1989ef5f2"
+    }
+  }
+}
