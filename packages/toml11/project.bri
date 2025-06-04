@@ -23,7 +23,7 @@ export default function toml11(): std.Recipe<std.Directory> {
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
-      CMAKE_PREFIX_PATH: { append: [{ path: "lib/cmake" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
 }

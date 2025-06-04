@@ -31,7 +31,7 @@ export default function openssl(): std.Recipe<std.Directory> {
           CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          CMAKE_PREFIX_PATH: { append: [{ path: "lib/cmake" }] },
+          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
           OPENSSL_ROOT_DIR: { fallback: { path: "." } },
         }),
       (recipe) => std.withRunnableLink(recipe, "bin/openssl"),
