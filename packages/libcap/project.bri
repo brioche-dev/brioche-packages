@@ -34,7 +34,7 @@ export default function libcap(): std.Recipe<std.Directory> {
       DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain(), std.runtimeUtils(), briocheObjcopy())
+    .dependencies(std.toolchain, std.runtimeUtils, briocheObjcopy)
     .toDirectory()
     .pipe(
       std.pkgConfigMakePathsRelative,
