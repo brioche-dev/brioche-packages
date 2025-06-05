@@ -183,7 +183,7 @@ export function process(options: ProcessOptions): Process {
         env: Object.fromEntries(envPairsSerialized),
         currentDir: currentDirSerialized ?? undefined,
         dependencies: dependenciesSerialized,
-        platform: "x86_64-linux",
+        platform: runtime.CURRENT_PLATFORM,
         workDir: workDirSerialized ?? {
           type: "create_directory",
           entries: {},
