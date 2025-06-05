@@ -1,0 +1,73 @@
+import * as std from "std";
+import cmake from "cmake";
+
+export const project = {
+  name: "boost",
+  version: "1.88.0",
+  repository: "https://github.com/boostorg/boost",
+};
+
+const source = Brioche.download(
+  `https://github.com/boostorg/boost/releases/download/boost-${project.version}/boost-${project.version}-b2-nodocs.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function boost(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./bootstrap.sh --prefix="$BRIOCHE_OUTPUT"
+    ./b2 \
+      --prefix="$BRIOCHE_OUTPUT" \
+      -j8 \
+      --layout=system \
+      install \
+      variant=release \
+      threading=multi
+  `
+    .dependencies(std.toolchain)
+    .workDir(source)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    cmake_minimum_required(VERSION 4.0)
+    project(QueryVersion)
+
+    find_package(Boost REQUIRED CONFIG)
+    message(STATUS "Boost version: \${Boost_VERSION}")
+  `);
+
+  const script = std.runBash`
+    cp "$src" CMakeLists.txt
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cmake, boost)
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Boost version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^boost-(?<version>.*)$/,
+  });
+}
