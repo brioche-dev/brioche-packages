@@ -27,7 +27,7 @@ export default function libzip(): std.Recipe<std.Directory> {
       CPATH: { append: [{ path: "include" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      CMAKE_PREFIX_PATH: { append: [{ path: "lib/cmake" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
 }
