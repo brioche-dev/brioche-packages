@@ -16,6 +16,11 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
+/**
+ * Options for the curl package.
+ *
+ * @property minimal - If set to true, will build curl with only the minimum required dependencies.
+ */
 interface CurlOptions {
   minimal?: boolean;
 }
@@ -24,9 +29,7 @@ interface CurlOptions {
  * Builds the curl package. By default, this will build with all the optional
  * dependencies enabled.
  *
- * ## Options
- *
- * - `minimal`: If set, will only build with the minimum required dependencies.
+ * @param options - Options to configure the build.
  */
 export default function curl(
   options: CurlOptions = {},
@@ -65,7 +68,6 @@ export default function curl(
           CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
           CURL_ROOT: { fallback: { path: "." } },
         }),
       (recipe) => std.withRunnableLink(recipe, "bin/curl"),
