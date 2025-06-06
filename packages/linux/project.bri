@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "linux",
-  version: "6.15",
+  version: "6.15.1",
   extra: {
     majorVersion: "6",
   },
