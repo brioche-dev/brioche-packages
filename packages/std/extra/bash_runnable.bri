@@ -42,7 +42,7 @@ export interface BashRunnableUtils {
  * import * as std from "std";
  *
  * // Running `brioche run` will print "Hello, world!"
- * export default function () {
+ * export default function (): std.BashRunnable {
  *   return std.bashRunnable`
  *     echo "Hello, world!"
  *   `;

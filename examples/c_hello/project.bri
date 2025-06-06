@@ -1,6 +1,6 @@
 import * as std from "std";
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   // Compile main.c to bin/hello:
   // - gcc comes from `std.toolchain`
   // - `workDir` is used to bring in the `src` directory
@@ -11,5 +11,6 @@ export default () => {
     ln -s "bin/hello" "$BRIOCHE_OUTPUT/brioche-run"
   `
     .dependencies(std.toolchain)
-    .workDir(Brioche.glob("src"));
+    .workDir(Brioche.glob("src"))
+    .toDirectory();
 };

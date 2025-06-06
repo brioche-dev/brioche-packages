@@ -34,7 +34,7 @@ export function staticSite(): std.Recipe<std.Directory> {
 }
 
 // Build the static site and serve it
-export default () => {
+export default function (): std.BashRunnable {
   // This script gets called when using `brioche run`. This will serve
   // the static site locally using miniserve
   return std.bashRunnable`
