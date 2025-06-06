@@ -3,7 +3,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "go",
-  version: "1.24.3",
+  version: "1.24.4",
 };
 
 const source = Brioche.download(
