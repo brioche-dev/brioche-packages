@@ -7,7 +7,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "curl",
-  version: "8.14.0",
+  version: "8.14.1",
 };
 
 const source = Brioche.download(
