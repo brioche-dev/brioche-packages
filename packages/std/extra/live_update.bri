@@ -1,0 +1,49 @@
+import * as std from "/core";
+import {
+  liveUpdateFromGithubReleases,
+  LiveUpdateFromGithubReleasesOptions,
+} from "./live_update_from_github_releases.bri";
+
+// The default regex used for matching tags. Strips an optional "v" prefix,
+// then matches the rest if it looks like a version number (either semver or
+// a semver-like version)
+export const DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH_TAG =
+  /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:-(?:(?:[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
+
+export enum LiveUpdateStrategy {
+  GithubRelease,
+}
+
+/**
+ * This interface represents the base strategy for live-updating a project.
+ * It has to be extended to support different live-update strategies.
+ *
+ * @param strategy - A enum that identifies the strategy of live-update.
+ */
+export interface LiveUpdateBaseOptions {
+  readonly strategy: LiveUpdateStrategy;
+}
+
+/**
+ * This type represents a strategy for live-updating a project.
+ * It can be extended to support different live-update strategies.
+ */
+export type LiveUpdateOptions = LiveUpdateFromGithubReleasesOptions;
+
+/**
+ * Return a runnable recipe to live-update a project.
+ *
+ * @param options - The live update strategy to use.
+ * @returns A recipe that updates the project based on the specified strategy.
+ */
+export function liveUpdate(
+  options: LiveUpdateOptions,
+): std.Recipe<std.Directory> {
+  switch (options.strategy) {
+    case LiveUpdateStrategy.GithubRelease:
+      return liveUpdateFromGithubReleases(options);
+
+    case undefined:
+      throw new Error(`Unknown live update strategy`);
+  }
+}
