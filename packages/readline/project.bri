@@ -1,0 +1,71 @@
+import nushell from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "readline",
+  version: "8.2.13",
+};
+
+const source = Brioche.download(
+  `https://ftp.gnu.org/gnu/readline/readline-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function readline(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/ \
+      --with-curses
+    make install SHLIB_LIBS="-lncursesw" DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion readline | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, readline)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const idx = project.version.lastIndexOf(".");
+  const expected = idx === -1 ? project.version : project.version.slice(0, idx);
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.WithRunnable {
+  const src = std.file(std.indoc`
+    let version = http get https://ftp.gnu.org/gnu/readline
+      | lines
+      | where {|it| ($it | str contains "readline-") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="readline-(?<version>[0-9]+.[0-9]+(.[0-9]+)?)\.tar\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell],
+  });
+}
