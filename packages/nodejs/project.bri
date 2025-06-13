@@ -5,7 +5,7 @@ import * as typer from "typer";
 
 export const project = {
   name: "nodejs",
-  version: "24.1.0",
+  version: "24.2.0",
 };
 
 /**
