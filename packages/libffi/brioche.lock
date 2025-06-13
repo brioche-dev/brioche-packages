@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/libffi/libffi/releases/download/v3.4.8/libffi-3.4.8.tar.gz": {
+    "https://github.com/libffi/libffi/releases/download/v3.5.1/libffi-3.5.1.tar.gz": {
       "type": "sha256",
-      "value": "bc9842a18898bfacb0ed1252c4febcc7e78fa139fd27fdc7a3e30d9d9356119b"
+      "value": "f99eb68a67c7d54866b7706af245e87ba060d419a062474b456d3bc8d4abdbd1"
     }
   }
 }
