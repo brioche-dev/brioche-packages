@@ -50,7 +50,6 @@ export default function nushell(): std.Recipe<std.Directory> {
   const nushell = cargoBuild({
     source,
     runnable: "bin/nu",
-    dependencies: [openssl],
   });
 
   // Build the Nushell plugins
