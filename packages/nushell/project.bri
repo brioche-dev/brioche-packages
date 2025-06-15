@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "nushell",
-  version: "0.104.1",
+  version: "0.105.1",
   repository: "https://github.com/nushell/nushell.git",
 };
 
@@ -50,7 +50,6 @@ export default function nushell(): std.Recipe<std.Directory> {
   const nushell = cargoBuild({
     source,
     runnable: "bin/nu",
-    dependencies: [openssl],
   });
 
   // Build the Nushell plugins
