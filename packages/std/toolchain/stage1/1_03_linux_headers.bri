@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { bootstrapRun } from "/toolchain/stage0";
+import { bootstrapRun, currentPlatformInfo } from "/toolchain/stage0";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   const source = Brioche.download(
@@ -22,7 +22,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     `,
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: `${currentPlatformInfo().arch}-lfs-linux-gnu`,
     },
     workDir: source,
   });

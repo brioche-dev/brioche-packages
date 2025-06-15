@@ -1,5 +1,6 @@
 import * as std from "/core";
 import { useBriocheCc } from "../utils.bri";
+import { currentPlatformInfo } from "../stage0";
 import linuxHeaders from "./linux_headers.bri";
 import stage2 from "/toolchain/stage2";
 import glibc from "./glibc.bri";
@@ -11,6 +12,7 @@ import mpc from "./mpc.bri";
 import libxcrypt from "./libxcrypt.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
+  const platformInfo = currentPlatformInfo();
   let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
   )
@@ -92,7 +94,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
       ],
       env: {
         PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
-        CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/x86_64-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
+        CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/${
+          platformInfo.arch
+        }-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
         LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
         buildSysroot,
         gmp: gmp(),
@@ -105,10 +109,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   gcc = useBriocheCc(gcc, {
     ccPaths: [
-      "bin/x86_64-pc-linux-gnu-c++",
-      "bin/x86_64-pc-linux-gnu-g++",
-      "bin/x86_64-pc-linux-gnu-gcc",
-      "bin/x86_64-pc-linux-gnu-gcc-13.2.0",
+      `bin/${toolchainTriple()}-c++`,
+      `bin/${toolchainTriple()}-g++`,
+      `bin/${toolchainTriple()}-gcc`,
+      `bin/${toolchainTriple()}-gcc-13.2.0`,
       "bin/c++",
       "bin/g++",
       "bin/gcc",
@@ -118,3 +122,16 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return gcc;
 });
+
+function toolchainTriple(): string {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return "x86_64-pc-linux-gnu";
+    case "aarch64-linux":
+      return "aarch64-unknown-linux-gnu";
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is not handled by this version of std`,
+      );
+  }
+}

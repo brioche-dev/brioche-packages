@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { bootstrapRun } from "/toolchain/stage0";
+import { bootstrapRun, currentPlatformInfo } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
@@ -75,7 +75,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     `,
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: `${currentPlatformInfo().arch}-lfs-linux-gnu`,
       stage1,
     },
     workDir: source,
