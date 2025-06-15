@@ -1,0 +1,66 @@
+import nushell from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "patch",
+  version: "2.8",
+};
+
+const source = Brioche.download(
+  `https://ftp.gnu.org/gnu/patch/patch-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function patch(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/patch"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    patch --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(patch)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `GNU patch ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.WithRunnable {
+  const src = std.file(std.indoc`
+    let version = http get https://ftp.gnu.org/gnu/patch
+      | lines
+      | where {|it| ($it | str contains "patch-") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="patch-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell],
+  });
+}
