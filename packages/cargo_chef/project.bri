@@ -1,0 +1,44 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_chef",
+  version: "0.1.71",
+  repository: "https://github.com/LukeMathWalker/cargo-chef.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cargoChef(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    // Disable using cargo-chef while building cargo-chef to avoid
+    // infinite recursion
+    cargoChefPrepare: false,
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo chef --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoChef)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const version = result.split("\n").at(0);
+
+  // Check that the result contains the expected version
+  const expected = `cargo-chef-chef ${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
