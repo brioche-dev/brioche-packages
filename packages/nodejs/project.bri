@@ -8,6 +8,27 @@ export const project = {
   version: "24.1.0",
 };
 
+function nodejsPrebuilt(): std.Recipe<std.Directory> {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return Brioche.download(
+        `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
+      )
+        .unarchive("tar", "xz")
+        .peel();
+    case "aarch64-linux":
+      return Brioche.download(
+        `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-arm64.tar.xz`,
+      )
+        .unarchive("tar", "xz")
+        .peel();
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the nodejs package`,
+      );
+  }
+}
+
 /**
  * The main Node.js recipe. Returns a recipe containing the following:
  *
@@ -15,17 +36,13 @@ export const project = {
  * - `bin/npm`
  */
 export default function nodejs(): std.Recipe<std.Directory> {
-  let node = Brioche.download(
-    `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
-  )
-    .unarchive("tar", "xz")
-    .peel();
-
-  node = std.autopack(node, {
-    globs: ["bin/**"],
-  });
-
-  return std.withRunnableLink(node, "bin/node");
+  return nodejsPrebuilt()
+    .pipe((node) =>
+      std.autopack(node, {
+        globs: ["bin/**"],
+      }),
+    )
+    .pipe((node) => std.withRunnableLink(node, "bin/node"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

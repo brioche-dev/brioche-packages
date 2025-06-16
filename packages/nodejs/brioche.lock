@@ -1,6 +1,10 @@
 {
   "dependencies": {},
   "downloads": {
+    "https://nodejs.org/dist/v24.1.0/node-v24.1.0-linux-arm64.tar.xz": {
+      "type": "sha256",
+      "value": "ff5a3a68781794a473f59a727f35314723785eff6f48aaf983361fadf0eadf36"
+    },
     "https://nodejs.org/dist/v24.1.0/node-v24.1.0-linux-x64.tar.xz": {
       "type": "sha256",
       "value": "76b77c43f97a7c4cf60917e24c5e212faaf8ca664e433759ef98d12f268b6b49"
