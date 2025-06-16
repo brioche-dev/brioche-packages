@@ -6,11 +6,26 @@ export const project = {
   version: "1.24.3",
 };
 
-const source = Brioche.download(
-  `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+function goPrebuilt(): std.Recipe<std.Directory> {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return Brioche.download(
+        `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
+      )
+        .unarchive("tar", "gzip")
+        .peel();
+    case "aarch64-linux":
+      return Brioche.download(
+        `https://go.dev/dl/go${project.version}.linux-arm64.tar.gz`,
+      )
+        .unarchive("tar", "gzip")
+        .peel();
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the go package`,
+      );
+  }
+}
 
 /**
  * The Go programming language.
@@ -27,7 +42,7 @@ const source = Brioche.download(
 export default function go(): std.Recipe<std.Directory> {
   return std
     .directory({
-      go: source,
+      go: goPrebuilt(),
       bin: std.directory({
         go: std.symlink({ target: "../go/bin/go" }),
         gofmt: std.symlink({ target: "../go/bin/gofmt" }),
