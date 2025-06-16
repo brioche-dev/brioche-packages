@@ -1,4 +1,5 @@
 import * as std from "std";
+import cargoChef from "cargo_chef";
 import * as TOML from "smol_toml";
 import * as t from "typer";
 import nushell from "nushell";
@@ -435,14 +436,4 @@ export function vendorCrate(
   crate = crate.remove(".cargo/config");
 
   return crate;
-}
-
-function cargoChef(): std.Recipe<std.Directory> {
-  const pkg = Brioche.download(
-    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.71/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
-  );
-
-  return std.directory({
-    bin: pkg.unarchive("tar", "gzip"),
-  });
 }
