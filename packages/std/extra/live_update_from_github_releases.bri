@@ -22,17 +22,16 @@ interface LiveUpdateFromGithubReleasesOptions {
  * regex match against the latest tag name. The repository is inferrred from the
  * `repository` field of the project.
  *
- * ## Options
- *
- * - `project`: The project export that should be updated. Must include a
+ * @param project - The project export that should be updated. Must include a
  *   `repository` property containing a GitHub repository URL.
- * - `matchTag`: A regex value (`/.../`) to extract the version number from
+ * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
  *   tag will be checked if it's a semver or semver-like version number.
  *
- * ## Example
+ * @returns A runnable recipe to live-update the project
  *
+ * @example
  * ```typescript
  * export const project = {
  *   name: "brioche",

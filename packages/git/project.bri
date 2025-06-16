@@ -89,19 +89,18 @@ export interface GitCheckoutOptions {
  * Checkout a git repository at a specific commit. The specified commit will
  * be cloned without any history.
  *
- * See also the `Brioche.gitRef` function, which can be used with `gitCheckout`
+ * @description See also the `Brioche.gitRef` function, which can be used with `gitCheckout`
  * to get a commit hash from a git ref (such as a branch or tag name), and
  * then record the commit hash in the lockfile.
  *
- * ## Options
+ * @param repository - The URL of the git repository to checkout.
+ * @param commit - The full commit hash to checkout.
+ * @param options - Extra options for the checkout.
+ * @param options.submodules - Set to true to recursively checkout git submodules too.
  *
- * - `repository`: The URL of the git repository to checkout.
- * - `commit`: The full commit hash to checkout.
- * - `options`: Extra options for the checkout.
- *   - `submodules`: Set to true to recursively checkout git submodules too.
+ * @returns The checked out repository as an artifact
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import { gitCheckout } from "git";
  *

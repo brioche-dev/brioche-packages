@@ -110,23 +110,22 @@ interface GoBuildOptions {
  * Build a Go module. Calls `go install` in the module directory, and
  * returns a recipe with the results stored in the `bin/` directory.
  *
- * ## Options
- *
- * - `source`: The Go module to build. Should include `go.mod`, as well as
+ * @param source - The Go module to build. Should include `go.mod`, as well as
  *   `go.sum` if external dependencies are needed.
- * - `buildParams`: Optional build parameters:
- *   - `generate`: Run `go generate` before building.
- *   - `ldflags`: An array of ldflags to pass to the `go install` command.
- *   - `trimpath`: Set the `-trimpath` flag.
- *   - `mod`: Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
- * - `dependencies`: Optionally add additional dependencies to the build.
- * - `env`: Optionally set environment variables for the build.
- * - `path`: Optionally set the package path to build (e.g. `./cmd/foo`).
- * - `runnable`: Optionally set a path to the binary to run
+ * @param buildParams - Optional build parameters:
+ * @param buildParams.generate - Run `go generate` before building.
+ * @param buildParams.ldflags - An array of ldflags to pass to the `go install` command.
+ * @param buildParams.trimpath - Set the `-trimpath` flag.
+ * @param buildParams.mod - Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param path - Optionally set the package path to build (e.g. `./cmd/foo`).
+ * @param runnable - Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  *
- * ## Example
+ * @returns A recipe with the built Go binaries stored in the `bin/` directory
  *
+ * @example
  * ```typescript
  * import { goBuild } from "go";
  * import openssl from "openssl";

@@ -79,12 +79,11 @@ interface NpmInstallOptions {
  * Install the dependencies from an NPM package. Returns a recipe containing
  * everything from the package, plus a `node_modules` directory.
  *
- * ## Options
+ * @param source - The NPM package dependencies to install.
  *
- * - `source`: The NPM package dependencies to install.
+ * @returns A recipe containing everything from the package, plus a `node_modules` directory
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import * as std from "std";
  * import nodejs, { npmInstall } from "nodejs";
@@ -135,13 +134,12 @@ const BinList = typer.array(
 /**
  * Installs a global NPM package. Returns a recipe containing the package
  *
- * ## Options
+ * @param packageName - The NPM package dependencies to install.
+ * @param version - The version of the package to install.
  *
- * - `packageName`: The NPM package dependencies to install.
- * - `version`: The version of the package to install.
+ * @returns A recipe containing the package
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import * as std from "std";
  * import { npmInstallGlobal } from "nodejs";

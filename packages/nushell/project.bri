@@ -16,10 +16,10 @@ const source = Brioche.gitCheckout({
 /**
  * Represents a Nushell plugin.
  *
- * ## Options
+ * @param name - The name of the plugin.
+ * @param dependencies - The dependencies of the plugin.
  *
- * `name`: The name of the plugin.
- * `dependencies`: The dependencies of the plugin.
+ * @returns A Nushell plugin representation
  */
 interface NushellPlugin {
   name: string;

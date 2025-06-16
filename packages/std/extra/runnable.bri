@@ -32,11 +32,19 @@ export interface RunnableOptions {
  * Brioche, such as by calling `brioche run` or by putting it into an OCI
  * container image.
  *
- * See also `std.bashRunnable`, which allows running a full Bash script instead
+ * @description See also `std.bashRunnable`, which allows running a full Bash script instead
  * of a single command.
  *
- * ## Example
+ * @param recipe - The base recipe to add the runnable to
+ * @param options - Configuration for the runnable command
+ * @param options.command - The command to run
+ * @param options.args - Arguments to pass to the command
+ * @param options.env - Environment variables to set
+ * @param options.dependencies - Additional dependencies
  *
+ * @returns A runnable recipe with `brioche-run` executable
+ *
+ * @example
  * ```typescript
  * import * as std from "std";
  *
@@ -79,8 +87,17 @@ export function withRunnable(
  * Return a new recipe with an executable at `path` that runs the specified
  * command. This wraps the command so it can be run outside Brioche.
  *
- * ## Example
+ * @param recipe - The base recipe to add the executable to
+ * @param path - The path where the executable should be placed
+ * @param options - Configuration for the runnable command
+ * @param options.command - The command to run
+ * @param options.args - Arguments to pass to the command
+ * @param options.env - Environment variables to set
+ * @param options.dependencies - Additional dependencies
  *
+ * @returns A new recipe with an executable at the specified path
+ *
+ * @example
  * ```typescript
  * import * as std from "std";
  *

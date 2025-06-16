@@ -5,11 +5,15 @@ import * as std from "/core";
  * run with `brioche run` or when the recipe is put into an OCI container
  * image.
  *
- * This will add a symlink from `brioche-run` to the specified path, which
+ * @description This will add a symlink from `brioche-run` to the specified path, which
  * is used by `brioche run` to determine the executable to run.
  *
- * ## Example
+ * @param recipe - The recipe to add the runnable link to
+ * @param path - The path to the executable within the recipe
  *
+ * @returns A new recipe with a `brioche-run` symlink pointing to the specified path
+ *
+ * @example
  * ```typescript
  * import * as std from "std";
  *

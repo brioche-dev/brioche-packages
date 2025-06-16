@@ -10,9 +10,9 @@ export interface SymlinkOptions {
 /**
  * Create a new symlink pointing at a provided path.
  *
- * ## Options
+ * @param target - The target path of the symlink.
  *
- * - `target`: The target path of the symlink.
+ * @returns A new symlink pointing to the target path
  */
 export function symlink(opts: SymlinkOptions): Symlink {
   return new Symlink({

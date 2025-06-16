@@ -17,18 +17,17 @@ declare global {
      * will be saved in the lockfile, so the same commit hash will be used
      * until the lockfile is updated.
      *
-     * See also the function `Brioche.gitRef`, which directly returns the
+     * @description See also the function `Brioche.gitRef`, which directly returns the
      * resolved commit hash instead.
      *
-     * ## Options
-     *
-     * - `repository`: A git repository URL.
-     * - `ref`: A git ref, such as a branch or tag name. Example: `main`
-     * - `options`: Extra options for the checkout. See the `gitCheckout`
+     * @param repository - A git repository URL.
+     * @param ref - A git ref, such as a branch or tag name. Example: `main`
+     * @param options - Extra options for the checkout. See the `gitCheckout`
      *   function from the `git` package for all available extra options.
      *
-     * ## Example
+     * @returns The checked out repository without history
      *
+     * @example
      * ```typescript
      * import * as std from "std";
      *

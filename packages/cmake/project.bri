@@ -110,28 +110,28 @@ export type CMakeVariableType =
 /**
  * Generate and build a CMake project.
  *
- * A project buildsystem will be generated out-of-tree from the source project,
+ * @description A project buildsystem will be generated out-of-tree from the source project,
  * and will be built and installed automatically with the chosen build
  * generator.
  *
  * If the result includes a `lib64/`, the symlink `lib/` will be added
  * automatically to follow the standard Brioche conventions.
  *
- * ## Options
- *
- * - `source`: The CMake project to build.
- * - `path`: Optional subpath containing the root CMake project to build,
+ * @param source - The CMake project to build.
+ * @param path - Optional subpath containing the root CMake project to build,
  *   relative to `source`. This can be useful for monorepos with multiple
  *   CMake projects that reference each other.
- * - `dependencies`: Optionally add dependencies to the build. Most projects
+ * @param dependencies - Optionally add dependencies to the build. Most projects
  *   will want to include `std.toolchain()` or a similar toolchain.
- * - `env`: Optionally set environment variables for the build.
- * - `set`: Optionally set CMake cache variables during the build, as if
+ * @param env - Optionally set environment variables for the build.
+ * @param set - Optionally set CMake cache variables during the build, as if
  *   by passing `-D...`.
- * - `disablePostBuildSteps`: If set, the post build steps will not run. By
+ * @param disablePostBuildSteps - If set, the post build steps will not run. By
  *   default, only `std.pkgConfigMakePathsRelative` will be executed.
- * - `runnable`: Optionally set a path to the binary to run by default
+ * @param runnable - Optionally set a path to the binary to run by default
  *   (e.g. `bin/foo`).
+ *
+ * @returns The built CMake project artifact
  */
 export function cmakeBuild(
   options: CMakeBuildInstallOptions,
