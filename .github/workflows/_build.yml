@@ -9,9 +9,17 @@ on:
 
 jobs:
   build:
-    name: Build packages
+    name: Build packages [${{ matrix.host.platform }}]
     if: inputs.enabled
-    runs-on: brioche-dev-builder-runner
+    strategy:
+      matrix:
+        host:
+          - platform: x86_64-linux
+            runs-on: brioche-dev-builder-runner
+          - platform: aarch64-linux
+            runs-on: brioche-dev-builder-runner-aarch64
+
+    runs-on: ${{ matrix.host.runs-on }}
     timeout-minutes: 720
     steps:
       - name: Install system packages
@@ -24,9 +32,11 @@ jobs:
       - name: Install Brioche
         run: |
           mkdir -p ~/.local/bin
-          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
+          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/$PLATFORM/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+        env:
+          PLATFORM: ${{ matrix.host.platform }}
 
       - name: Build packages
         run: |
