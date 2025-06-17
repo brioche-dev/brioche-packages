@@ -1,0 +1,48 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "asdf",
+  version: "0.18.0",
+  repository: "https://github.com/asdf-vm/asdf",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function asdf(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      generate: true,
+      ldflags: ["-s", "-w"],
+    },
+    path: "./cmd/asdf",
+    runnable: "bin/asdf",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    asdf version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(asdf)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate() {
+  return std.liveUpdateFromGithubReleases({ project });
+}
