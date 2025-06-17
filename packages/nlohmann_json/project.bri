@@ -17,8 +17,6 @@ export default function nlohmannJson(): std.Recipe<std.Directory> {
     source,
     dependencies: [std.toolchain],
     set: {
-      // By default, the data directory will be set to "share", but we want it to be "lib"
-      CMAKE_INSTALL_DATADIR: "lib",
       JSON_BuildTests: "OFF",
       JSON_MultipleHeaders: "ON",
     },
@@ -26,7 +24,7 @@ export default function nlohmannJson(): std.Recipe<std.Directory> {
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
-      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
