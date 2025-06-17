@@ -23,7 +23,6 @@ export default function nlohmannJson(): std.Recipe<std.Directory> {
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
-      LIBRARY_PATH: { append: [{ path: "lib" }] },
       PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
