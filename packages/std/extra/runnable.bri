@@ -19,6 +19,14 @@ export interface WithRunnableUtils {
   dependencies(...dependencies: std.RecipeLike<std.Directory>[]): WithRunnable;
 }
 
+/**
+ * Options for configuring a runnable command.
+ *
+ * @param command - The command to run
+ * @param args - Arguments to pass to the command
+ * @param env - Environment variables to set when running the command
+ * @param dependencies - Additional dependencies to include in the `$PATH`
+ */
 export interface RunnableOptions {
   command: RunnableTemplateValue;
   args?: RunnableTemplateValue[];
@@ -35,12 +43,8 @@ export interface RunnableOptions {
  * @description See also `std.bashRunnable`, which allows running a full Bash script instead
  * of a single command.
  *
- * @param recipe - The base recipe to add the runnable to
- * @param options - Configuration for the runnable command
- * @param options.command - The command to run
- * @param options.args - Arguments to pass to the command
- * @param options.env - Environment variables to set
- * @param options.dependencies - Additional dependencies
+ * @param recipe - The base recipe to add the runnable to.
+ * @param options - Options for the runnable command.
  *
  * @returns A runnable recipe with `brioche-run` executable
  *
@@ -87,13 +91,9 @@ export function withRunnable(
  * Return a new recipe with an executable at `path` that runs the specified
  * command. This wraps the command so it can be run outside Brioche.
  *
- * @param recipe - The base recipe to add the executable to
- * @param path - The path where the executable should be placed
- * @param options - Configuration for the runnable command
- * @param options.command - The command to run
- * @param options.args - Arguments to pass to the command
- * @param options.env - Environment variables to set
- * @param options.dependencies - Additional dependencies
+ * @param recipe - The base recipe to add the executable to.
+ * @param path - The path where the executable should be placed.
+ * @param options - Options for the runnable command.
  *
  * @returns A new recipe with an executable at the specified path
  *

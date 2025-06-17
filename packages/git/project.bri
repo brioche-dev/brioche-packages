@@ -75,12 +75,24 @@ export function liveUpdate(): std.WithRunnable {
   });
 }
 
+/**
+ * Options for checking out a git repository.
+ *
+ * @param repository - The URL of the git repository to checkout.
+ * @param commit - The full commit hash to checkout.
+ * @param options - Extra options for the checkout.
+ */
 interface GitCheckoutInit {
   repository: string;
   commit: string;
   options?: GitCheckoutOptions;
 }
 
+/**
+ * Specific git checkout options.
+ *
+ * @param submodules - Set to true to recursively checkout git submodules too.
+ */
 export interface GitCheckoutOptions {
   submodules?: boolean;
 }
@@ -93,10 +105,8 @@ export interface GitCheckoutOptions {
  * to get a commit hash from a git ref (such as a branch or tag name), and
  * then record the commit hash in the lockfile.
  *
- * @param repository - The URL of the git repository to checkout.
- * @param commit - The full commit hash to checkout.
- * @param options - Extra options for the checkout.
- * @param options.submodules - Set to true to recursively checkout git submodules too.
+ * @param init - An object containing the repository URL and commit hash to checkout.
+ * @param options - Options for the checkout, such as whether to include submodules.
  *
  * @returns The checked out repository as an artifact
  *

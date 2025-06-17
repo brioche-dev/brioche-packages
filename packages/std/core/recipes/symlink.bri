@@ -3,6 +3,11 @@ import { source as briocheSource } from "../source.bri";
 import { assert } from "../utils.bri";
 import { type Recipe, symlinkRecipeUtils } from "./recipe.bri";
 
+/**
+ * Options for creating a symlink.
+ *
+ * @param target - The target path of the symlink
+ */
 export interface SymlinkOptions {
   target: string;
 }
@@ -10,7 +15,7 @@ export interface SymlinkOptions {
 /**
  * Create a new symlink pointing at a provided path.
  *
- * @param target - The target path of the symlink.
+ * @param opts - Options for the symlink target.
  *
  * @returns A new symlink pointing to the target path
  */

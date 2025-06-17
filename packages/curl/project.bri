@@ -19,7 +19,7 @@ const source = Brioche.download(
 /**
  * Options for the curl package.
  *
- * @property minimal - If set to true, will build curl with only the minimum required dependencies.
+ * @param minimal - If set to true, will build curl with only the minimum required dependencies.
  */
 interface CurlOptions {
   minimal?: boolean;

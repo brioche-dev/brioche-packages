@@ -90,6 +90,14 @@ export function liveUpdate(): std.WithRunnable {
 
 type ModOptions = "readonly" | "vendor" | "mod";
 
+/**
+ * Build options when building and installing a Go module.
+ *
+ * @param generate - Run `go generate` before building.
+ * @param ldflags - An array of ldflags to pass to the `go install` command.
+ * @param trimpath - Set the `-trimpath` flag.
+ * @param mod - Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
+ */
 interface GoBuildParameters {
   generate?: boolean;
   ldflags?: string[];
@@ -97,6 +105,18 @@ interface GoBuildParameters {
   mod?: ModOptions;
 }
 
+/**
+ * Options for building and installing a Go module.
+ *
+ * @param source - The Go module to build. Should include `go.mod`, as well as
+ *   `go.sum` if external dependencies are needed.
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param buildParams - Optional build parameters.
+ * @param path - Optionally set the package path to build (e.g. `./cmd/foo`).
+ * @param runnable - Optionally set a path to the binary to run
+ *   by default (e.g. `bin/foo`).
+ */
 interface GoBuildOptions {
   source: std.RecipeLike<std.Directory>;
   dependencies?: std.RecipeLike<std.Directory>[];
@@ -110,18 +130,7 @@ interface GoBuildOptions {
  * Build a Go module. Calls `go install` in the module directory, and
  * returns a recipe with the results stored in the `bin/` directory.
  *
- * @param source - The Go module to build. Should include `go.mod`, as well as
- *   `go.sum` if external dependencies are needed.
- * @param buildParams - Optional build parameters:
- * @param buildParams.generate - Run `go generate` before building.
- * @param buildParams.ldflags - An array of ldflags to pass to the `go install` command.
- * @param buildParams.trimpath - Set the `-trimpath` flag.
- * @param buildParams.mod - Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
- * @param dependencies - Optionally add additional dependencies to the build.
- * @param env - Optionally set environment variables for the build.
- * @param path - Optionally set the package path to build (e.g. `./cmd/foo`).
- * @param runnable - Optionally set a path to the binary to run
- *   by default (e.g. `bin/foo`).
+ * @param options - Options for building the Go module.
  *
  * @returns A recipe with the built Go binaries stored in the `bin/` directory
  *

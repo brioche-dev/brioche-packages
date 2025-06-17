@@ -1,6 +1,15 @@
 import * as std from "/core";
 import { tools } from "/toolchain";
 
+/**
+ * Options for applying a patch to a directory.
+ *
+ * @param source - The input directory recipe to patch.
+ * @param patch - The patch file to apply.
+ * @param strip - The number of components to strip from the patch's path.
+ *   Corresponds to the `-p` (`--strip`) flag of the `patch` command. Using
+ *   `null` corresponds to leaving the `-p` flag off.
+ */
 interface ApplyPatchOptions {
   source: std.RecipeLike<std.Directory>;
   patch: std.RecipeLike<std.File>;
@@ -10,11 +19,7 @@ interface ApplyPatchOptions {
 /**
  * Create a recipe that applies a patch to the provided directory.
  *
- * @param source - The input directory recipe to patch
- * @param patch - The patch file to apply
- * @param strip - The number of components to strip from the patch's path.
- * Corresponds to the `-p` (`--strip`) flag of the `patch` command. Using
- * `null` corresponds to leaving the `-p` flag off.
+ * @param opts - Options for applying the patch.
  *
  * @returns A recipe with the patch applied to the source directory
  *

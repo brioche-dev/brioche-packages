@@ -1,6 +1,13 @@
 import * as std from "/core";
 import { runBash } from "./run_bash.bri";
 
+/**
+ * Options for creating an OCI container image.
+ *
+ * @param recipe - The recipe to use as the image layer.
+ * @param entrypoint - The entrypoint to use for the image.
+ *   Defaults to `["/brioche-run"]`.
+ */
 interface OciContainerImageOptions {
   recipe: std.RecipeLike<std.Directory>;
   entrypoint?: string[];
@@ -10,9 +17,7 @@ interface OciContainerImageOptions {
  * Create an OCI container image from a recipe. The recipe
  * will be included as a layer in the image.
  *
- * @param recipe - The recipe to use as the image layer.
- * @param entrypoint - The entrypoint to use for the image.
- *   Defaults to `["/brioche-run"]`.
+ * @param options - Options for the OCI container image.
  *
  * @returns An OCI container image with the recipe as a layer
  *

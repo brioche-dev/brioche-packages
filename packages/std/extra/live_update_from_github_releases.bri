@@ -11,6 +11,16 @@ import type {} from "nushell";
 const DEFAULT_REGEX_MATCH_TAG =
   /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:-(?:(?:[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
 
+/**
+ * Options for the live update from GitHub releases.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `repository` property containing a GitHub repository URL.
+ * @param matchTag - A regex value (`/.../`) to extract the version number from
+ *   a tag name. The regex must include a group named "version". If not
+ *   provided, an optional "v" prefix will be stripped and the rest of the
+ *   tag will be checked if it's a semver or semver-like version number.
+ */
 interface LiveUpdateFromGithubReleasesOptions {
   project: { version: string; repository: string };
   matchTag?: RegExp;
@@ -22,12 +32,7 @@ interface LiveUpdateFromGithubReleasesOptions {
  * regex match against the latest tag name. The repository is inferrred from the
  * `repository` field of the project.
  *
- * @param project - The project export that should be updated. Must include a
- *   `repository` property containing a GitHub repository URL.
- * @param matchTag - A regex value (`/.../`) to extract the version number from
- *   a tag name. The regex must include a group named "version". If not
- *   provided, an optional "v" prefix will be stripped and the rest of the
- *   tag will be checked if it's a semver or semver-like version number.
+ * @param options - Options for the live update from GitHub releases.
  *
  * @returns A runnable recipe to live-update the project
  *

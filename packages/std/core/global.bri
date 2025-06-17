@@ -9,6 +9,12 @@ import { BRIOCHE_VERSION } from "./runtime.bri";
 import { semverMatches } from "./semver.bri";
 import { assert } from "./utils.bri";
 
+/**
+ * Options for retrieving a git ref commit hash.
+ *
+ * @param repository - A git repository URL.
+ * @param ref - A git ref, such as a branch or tag name. Example: `main`
+ */
 export interface GitRefOptions {
   repository: string;
   ref: string;
@@ -132,10 +138,9 @@ declare global {
      * @description See also the `gitCheckout` function from the `git` package, which can
      * checkout a git repo from a commit hash returned from `Brioche.gitRef`.
      *
-     * @param repository - A git repository URL.
-     * @param ref - A git ref, such as a branch or tag name. Example: `main`
+     * @param options - Options for the git ref.
      *
-     * @returns The commit hash for the specified git ref
+     * @returns The commit hash for the specified git ref.
      *
      * @example
      * ```typescript

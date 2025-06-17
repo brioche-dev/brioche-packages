@@ -71,6 +71,11 @@ export function liveUpdate(): std.WithRunnable {
   });
 }
 
+/**
+ * Options for building and installing a NPM package.
+ * 
+ * @param source - The NPM package dependencies to install.
+ */
 interface NpmInstallOptions {
   source: std.RecipeLike<std.Directory>;
 }
@@ -79,7 +84,7 @@ interface NpmInstallOptions {
  * Install the dependencies from an NPM package. Returns a recipe containing
  * everything from the package, plus a `node_modules` directory.
  *
- * @param source - The NPM package dependencies to install.
+ * @param options - The options for installing the NPM package.
  *
  * @returns A recipe containing everything from the package, plus a `node_modules` directory
  *
@@ -118,6 +123,13 @@ export function npmInstall(
     .toDirectory();
 }
 
+/**
+ * Options for installing a global NPM package.
+ *
+ * @param packageName - The name of the NPM package to install.
+ * @param version - The version of the package to install.
+ * @param wrapBins - Whether to wrap the installed binaries.
+ */
 interface NpmInstallGlobalOptions {
   packageName: string;
   version: string;
@@ -134,8 +146,7 @@ const BinList = typer.array(
 /**
  * Installs a global NPM package. Returns a recipe containing the package
  *
- * @param packageName - The NPM package dependencies to install.
- * @param version - The version of the package to install.
+ * @param options - The options for installing the global NPM package.
  *
  * @returns A recipe containing the package
  *

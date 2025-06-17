@@ -3,6 +3,11 @@ import { source } from "/core/source.bri";
 import type { GitRefOptions } from "/core/global.bri";
 import type { GitCheckoutOptions } from "git";
 
+/**
+ * Options for checking out a git repository.
+ *
+ * @param options - Extra options for the checkout. See the `GitCheckoutOptions` interface.
+ */
 interface GitCheckoutInit extends GitRefOptions {
   options?: GitCheckoutOptions;
 }
@@ -20,10 +25,7 @@ declare global {
      * @description See also the function `Brioche.gitRef`, which directly returns the
      * resolved commit hash instead.
      *
-     * @param repository - A git repository URL.
-     * @param ref - A git ref, such as a branch or tag name. Example: `main`
-     * @param options - Extra options for the checkout. See the `gitCheckout`
-     *   function from the `git` package for all available extra options.
+     * @param options - Options for the git checkout.
      *
      * @returns The checked out repository without history
      *

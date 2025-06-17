@@ -9,7 +9,7 @@ import * as std from "/core";
  * is used by `brioche run` to determine the executable to run.
  *
  * @param recipe - The recipe to add the runnable link to
- * @param path - The path to the executable within the recipe
+ * @param runPath - The path to the executable within the recipe
  *
  * @returns A new recipe with a `brioche-run` symlink pointing to the specified path
  *

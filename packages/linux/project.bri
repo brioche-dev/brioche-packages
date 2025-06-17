@@ -54,6 +54,14 @@ export function linuxDefconfig(
     .toFile();
 }
 
+/**
+ * Options for the Linux kernel build.
+ *
+ * @param config - The kernel `.config` file to use for the build. Defaults
+ *   to the default configuration produced by `make defconfig`.
+ * @param dependencies - Additional build dependencies.
+ * @param env - Additional environment variables to set during the build.
+ */
 interface LinuxOptions {
   config?: std.RecipeLike<std.File>;
   dependencies?: std.RecipeLike<std.Directory>[];
@@ -69,10 +77,7 @@ interface LinuxOptions {
  * - `boot/System.map`: The kernel's system map.
  * - `lib/modules/${version}`: Built kernel modules.
  *
- * @param config - The kernel `.config` file to use for the build. Defaults
- *   to the default configuration produced by `make defconfig`.
- * @param dependencies - Additional build dependencies.
- * @param env - Additional environment variables to set during the build.
+ * @param options - Options for the Linux kernel build.
  *
  * @returns A recipe containing the built Linux kernel with boot files and modules
  */
