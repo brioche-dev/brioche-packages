@@ -30,13 +30,18 @@ export interface BashRunnableUtils {
  * run the Bash script, but allows it to be run outside of Brioche, such
  * as by calling `brioche run` or by putting it into an OCI container image.
  *
- * The Bash script will be called with the `-e`, `-u`, and `-o pipefail`
+ * @description The Bash script will be called with the `-e`, `-u`, and `-o pipefail`
  * settings. Extra arguments are accessible through `$@`, just like a normal
  * Bash script.
  *
  * See also `std.runBash` to run a Bash script while baking!
  *
- * ## Example
+ * @param strings - The template string parts for the Bash script
+ * @param values - The template string values
+ *
+ * @returns A self-contained runnable recipe containing the Bash script
+ *
+ * @example
  *
  * ```typescript
  * import * as std from "std";

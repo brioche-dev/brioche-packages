@@ -154,6 +154,19 @@ export function liveUpdate(): std.WithRunnable {
   });
 }
 
+/**
+ * Parameters for building a Rust crate.
+ *
+ * @param features - An array of features to enable.
+ * @param defaultFeatures - Set to `false` to opt out of the crate's
+ *   default features.
+ * @param allFeatures - Set to `true` to enable all of the crate's features.
+ * @param bins - Set to `true` to build all bin targets in the crate, or set
+ *   to an array of bin targets to build. Defaults to `true` if no other
+ *   targets are specified.
+ * @param examples - Set to `true` to build all example targets in the crate,
+ *   or set to an array of example targets to build.
+ */
 interface CargoBuildParameters {
   features?: string[];
   defaultFeatures?: boolean;
@@ -162,6 +175,27 @@ interface CargoBuildParameters {
   examples?: boolean | string[];
 }
 
+/**
+ * Options for building and installing a Rust crate.
+ *
+ * @param source - The crate to build.
+ * @param path - Optionally set a subpath to the crate to build. This is useful
+ *   when building a crate within a workspace.
+ * @param runnable - Optionally set a path to the binary to run
+ *   by default (e.g. `bin/foo`).
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param unsafe - Optional unsafe options to enable when building. For example,
+ *   passing `{ networking: true }` will allow a `build.rs` script to
+ *   download files during the build. You must take extra care to ensure
+ *   the build is hermetic when setting these options!
+ * @param cargoChefPrepare - Controls if the crate from `source` should get
+ *   pre-processed by `cargo chef prepare` before being built, which avoids
+ *   unnecessarily re-downloading dependencies when the source changes.
+ *   Defaults to `true` (should only be disabled when there's an upstream
+ *   issue with `cargo chef`).
+ * @param buildParams - Optional build parameters.
+ */
 export interface CargoBuildOptions {
   source: std.RecipeLike<std.Directory>;
   path?: string;
@@ -177,37 +211,11 @@ export interface CargoBuildOptions {
  * Build a Cargo crate. Defaults to the release profile. Calls
  * `cargo install` internally, and returns the contents of `$CARGO_INSTALL_ROOT`
  *
- * ## Options
+ * @param options - Options for building the crate.
  *
- * - `source`: The crate to build.
- * - `path`: Optionally set a subpath to the crate to build. This is useful
- *   when building a crate within a workspace.
- * - `runnable`: Optionally set a path to the binary to run
- *   by default (e.g. `bin/foo`).
- * - `dependencies`: Optionally add additional dependencies to the build.
- * - `env`: Optionally set environment variables for the build.
- * - `unsafe`: Optional unsafe options to enable when building. For example,
- *   passing `{ networking: true }` will allow a `build.rs` script to
- *   download files during the build. You must take extra care to ensure
- *   the build is hermetic when setting these options!
- * - `cargoChefPrepare`: Controls if the crate from `source` should get
- *   pre-processed by `cargo chef prepare` before being built, which avoids
- *   unnecessarily re-downloading dependencies when the source changes.
- *   Defaults to `true` (should only be disabled when there's an upstream
- *   issue with `cargo chef`).
- * - `buildParams`: Optional build parameters:
- *   - `features`: An array of features to enable.
- *   - `defaultFeatures`: Set to `false` to opt out of the crate's
- *     default features.
- *   - `allFeatures`: Set to `true` to enable all of the crate's features.
- *   - `bins`: Set to `true` to build all bin targets in the crate, or set
- *     to an array of bin targets to build. Defaults to `true` if no other
- *     targets are specified.
- *   - `examples`: Set to `true` to build all example targets in the crate,
- *     or set to an array of example targets to build.
+ * @returns The contents of `$CARGO_INSTALL_ROOT` containing the built crate
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import openssl from "openssl";
  * import { cargoBuild } from "rust";
@@ -365,6 +373,16 @@ export function createSkeletonCrate(
     .toDirectory();
 }
 
+/**
+ * Options for vendoring a Rust crate's dependencies.
+ *
+ * @param source - The crate to build.
+ * @param cargoChefPrepare - Controls if the crate from `source` should get
+ *   pre-processed by `cargo chef prepare` before being built, which avoids
+ *   unnecessarily re-downloading dependencies when the source changes.
+ *   Defaults to `true` (should only be disabled when there's an upstream
+ *   issue with `cargo chef`).
+ */
 interface VendorCrateOptions {
   source: std.RecipeLike<std.Directory>;
   cargoChefPrepare?: boolean;
@@ -375,14 +393,9 @@ interface VendorCrateOptions {
  * dependencies vendored using `cargo vendor`. `.cargo/config.toml` will
  * also be updated to use the vendored dependencies.
  *
- * ## Options
+ * @param options - Options for vendoring the crate's dependencies.
  *
- * - `source`: The crate to build.
- * - `cargoChefPrepare`: Controls if the crate from `source` should get
- *   pre-processed by `cargo chef prepare` before being built, which avoids
- *   unnecessarily re-downloading dependencies when the source changes.
- *   Defaults to `true` (should only be disabled when there's an upstream
- *   issue with `cargo chef`).
+ * @returns The same crate with dependencies vendored and `.cargo/config.toml` updated
  */
 export function vendorCrate(
   options: VendorCrateOptions,

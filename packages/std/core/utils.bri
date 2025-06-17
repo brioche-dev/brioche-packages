@@ -14,8 +14,11 @@ export function assert(
  * Used as a type-checked assertion that a codepath is unreachable, such
  * as for pattern matching. Throws an error if called.
  *
- * ## Example
+ * @param never - The value that should never be reached
  *
+ * @returns Never returns - always throws an error
+ *
+ * @example
  * ```ts
  * type Fizzbuzz = "fizz" | "buzz";
  *
@@ -29,6 +32,7 @@ export function assert(
  *       // This branch can never be reached
  *       // (if a new variant is added, this will become a type error)
  *       return unreachable(value);
+ *   }
  * }
  * ```
  */
@@ -173,11 +177,15 @@ export function jsonSerialize(value: Equatable): string {
  * A template function that strips extra indentation from a string, useful
  * for including multiline strings, such as shell scripts or patch files.
  *
- * The first and last lines are removed if they are empty, and the level
+ * @description The first and last lines are removed if they are empty, and the level
  * of indentation is determined by the line with the smallest indentation.
  *
- * ## Example
+ * @param strings - Template string parts
+ * @param values - Template string values
  *
+ * @returns The dedented string with extra indentation removed
+ *
+ * @example
  * ```
  * const script = std.indoc`
  *   #!/bin/bash
@@ -250,10 +258,14 @@ export function mixin<T extends object, U extends object>(
  * Pipe a value through a list of functions, feeding the previous value as
  * the input to the next function.
  *
- * For recipes, see also the equivalent `.pipe()` method.
+ * @description For recipes, see also the equivalent `.pipe()` method.
  *
- * ## Example
+ * @param value - The initial value to pipe through the functions
+ * @param functions - The functions to pipe the value through
  *
+ * @returns The result of piping the value through all the functions
+ *
+ * @example
  * ```typescript
  * const result = std.pipe(
  *   value,

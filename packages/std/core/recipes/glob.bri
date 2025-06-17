@@ -8,8 +8,12 @@ import type { Directory } from "./directory.bri";
  * Returns a directory recipe containing only files that match one of the
  * specified glob patterns.
  *
- * ## Example
+ * @param recipe - The directory recipe to filter
+ * @param patterns - An array of glob patterns to match files against
  *
+ * @returns A directory recipe containing only files matching the glob patterns
+ *
+ * @example
  * ```typescript
  * import * as std from "std";
  *

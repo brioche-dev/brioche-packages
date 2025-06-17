@@ -5,8 +5,11 @@ import { type Recipe, createRecipe, fileRecipeUtils } from "./recipe.bri";
 /**
  * Create a new file, which contains the provided content.
  *
- * ## Example
+ * @param content - The content for the file (string or Uint8Array)
  *
+ * @returns A file recipe containing the specified content
+ *
+ * @example
  * ```typescript
  * std.file("Hello, world!");
  * ```
