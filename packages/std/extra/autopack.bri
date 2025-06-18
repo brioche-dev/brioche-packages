@@ -34,7 +34,7 @@ export function autopack(
 
   return std
     .process({
-      command: std.tpl`${runtimeUtils()}/bin/brioche-packer`,
+      command: std.tpl`${runtimeUtils}/bin/brioche-packer`,
       args: [
         "autopack",
         std.outputPath,

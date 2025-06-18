@@ -4,7 +4,7 @@ import { type Recipe, createRecipe } from "./recipe.bri";
 
 /**
  * Options required to download a file from a URL.
- * 
+ *
  * @param url - The URL to download
  * @param hash - The hash to verify the downloaded content
  */

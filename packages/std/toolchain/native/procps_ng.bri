@@ -12,7 +12,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -27,13 +27,13 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin:${pkgconf()}/bin`,
-        MAGIC: std.tpl`${stage2()}/usr/share/misc/magic`,
-        CFLAGS: std.tpl`-I${ncurses()}/include`,
-        LDFLAGS: std.tpl`-L${ncurses()}/lib`,
-        NCURSES_CFLAGS: std.tpl`-I${ncurses()}/include`,
-        NCURSES_LIBS: std.tpl`-L${ncurses()}/lib -lncursesw`,
-        PKG_CONFIG_PATH: std.tpl`${ncurses()}/lib/pkgconfig`,
+        PATH: std.tpl`${stage2}/bin:${pkgconf}/bin`,
+        MAGIC: std.tpl`${stage2}/usr/share/misc/magic`,
+        CFLAGS: std.tpl`-I${ncurses}/include`,
+        LDFLAGS: std.tpl`-L${ncurses}/lib`,
+        NCURSES_CFLAGS: std.tpl`-I${ncurses}/include`,
+        NCURSES_LIBS: std.tpl`-L${ncurses}/lib -lncursesw`,
+        PKG_CONFIG_PATH: std.tpl`${ncurses}/lib/pkgconfig`,
       },
       workDir: source,
     })

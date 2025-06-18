@@ -306,7 +306,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std
     .process({
-      command: std.tpl`${rust()}/bin/cargo`,
+      command: std.tpl`${rust}/bin/cargo`,
       args: [
         "install",
 

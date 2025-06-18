@@ -44,7 +44,7 @@ export function runBash(
 ): std.Process {
   const script = std.indoc(strings, ...values);
   return std.process({
-    command: std.tpl`${tools()}/bin/bash`,
+    command: std.tpl`${tools}/bin/bash`,
     args: ["-e", "-u", "-o", "pipefail", "-c", script],
     dependencies: [tools],
   });
