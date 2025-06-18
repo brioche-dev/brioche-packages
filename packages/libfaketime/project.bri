@@ -23,7 +23,6 @@ export default function libfaketime(): std.Recipe<std.Directory> {
     .pipe(
       (recipe) =>
         std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
         }),
       (recipe) => std.withRunnableLink(recipe, "bin/faketime"),
