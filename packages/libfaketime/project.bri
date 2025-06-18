@@ -9,7 +9,14 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-});
+}).pipe((source) =>
+  // Patch the source to fix the finding of the library path
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("resolve-library-path.patch"),
+    strip: 1,
+  }),
+);
 
 export default function libfaketime(): std.Recipe<std.Directory> {
   return std.runBash`
