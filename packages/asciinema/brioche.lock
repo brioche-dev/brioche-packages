@@ -12,7 +12,7 @@
   },
   "git_refs": {
     "https://github.com/asciinema/asciinema.git": {
-      "v2.4.0": "1a71be26c4c29e7cd98b97a11233cf3fb724ba9b"
+      "v3.0.0-rc.4": "f77cdce2ccdc1584d7606264ae222c735829fd9a"
     }
   }
 }
