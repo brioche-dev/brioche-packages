@@ -1,0 +1,109 @@
+import * as std from "std";
+
+export const project = {
+  name: "libfaketime",
+  version: "0.9.11",
+  repository: "https://github.com/wolfcw/libfaketime",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Patch the source to fix the finding of the library path
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("resolve-library-path.patch"),
+    strip: 1,
+  }),
+);
+
+export default function libfaketime(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make install \
+      PREFIX=/ \
+      DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(
+      (recipe) =>
+        std.setEnv(recipe, {
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/faketime"),
+    );
+}
+
+export function test(): std.Recipe<std.Directory> {
+  const tests: (() => Promise<std.Recipe<std.Directory>>)[] = [];
+
+  // 1. Validate the library version
+  tests.push(async () => {
+    const script = std.runBash`
+    faketime --version | tee "$BRIOCHE_OUTPUT"
+  `
+      .dependencies(libfaketime)
+      .toFile();
+
+    const result = (await script.read()).trim();
+
+    // Check that the result contains the expected version
+    const expected = `Version ${project.version}`;
+    std.assert(
+      result.includes(expected),
+      `expected '${expected}', got '${result}'`,
+    );
+
+    return std.directory().insert("version-check", script);
+  });
+
+  // 2. Validate the binary functionality when used as standalone
+  tests.push(async () => {
+    const script = std.runBash`
+      faketime "2000-01-01 00:00:00" date | tee "$BRIOCHE_OUTPUT"
+  `
+      .dependencies(libfaketime)
+      .env({
+        // Needed because `date` dynamically opens `libm.so.6`,
+        // which is not directly a dependency
+        LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      })
+      .toFile();
+
+    const result = (await script.read()).trim();
+
+    // Check that the result contains the expected output
+    std.assert(result === "Sat Jan  1 00:00:00 UTC 2000");
+
+    return std.directory().insert("standalone-mode", script);
+  });
+
+  // 3. Validate the library functionality when used with LD_PRELOAD
+  tests.push(async () => {
+    const script = std.runBash`
+      FAKETIME="@2000-01-01 00:00:00" date | tee "$BRIOCHE_OUTPUT"
+    `
+      .env({
+        // Needed because `date` dynamically opens `libm.so.6`,
+        // which is not directly a dependency
+        LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+        LD_PRELOAD: std.tpl`${libfaketime}/lib/faketime/libfaketime.so.1`,
+      })
+      .toFile();
+
+    const result = (await script.read()).trim();
+
+    // Check that the result contains the expected output
+    std.assert(result === "Sat Jan  1 00:00:00 UTC 2000");
+
+    return std.directory().insert("ld-preload-mode", script);
+  });
+
+  return std.merge(...tests);
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
