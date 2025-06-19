@@ -127,7 +127,7 @@ export type CMakeVariableType =
 /**
  * Generate and build a CMake project.
  *
- * @description A project buildsystem will be generated out-of-tree from the source project,
+ * @description A project build system will be generated out-of-tree from the source project,
  * and will be built and installed automatically with the chosen build
  * generator.
  *
