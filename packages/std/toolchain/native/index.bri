@@ -336,7 +336,7 @@ function autopack(
 
   return std
     .process({
-      command: std.tpl`${runtimeUtils()}/bin/brioche-packer`,
+      command: std.tpl`${runtimeUtils}/bin/brioche-packer`,
       args: [
         "autopack",
         std.outputPath,
@@ -356,7 +356,7 @@ function fixShebangs(
   // `/usr/bin/env`. This currently duplicates the fix from stage 2
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -392,7 +392,7 @@ function fixShebangs(
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: recipe,
     })
@@ -406,7 +406,7 @@ function pkgConfigMakePathsRelative(
   // relative paths (using the `${pcfiledir}` variable)
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -419,7 +419,7 @@ function pkgConfigMakePathsRelative(
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: recipe,
     })

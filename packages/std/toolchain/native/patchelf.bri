@@ -13,7 +13,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -26,18 +26,18 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${autoconf()}/bin:${automake()}/bin:${stage2()}/bin`,
+        PATH: std.tpl`${autoconf}/bin:${automake}/bin:${stage2}/bin`,
         // TODO: Move these variables into `autoconf()` / `automake()`
-        M4: std.tpl`${m4()}/bin/m4`,
-        AUTOM4TE: std.tpl`${autoconf()}/bin/autom4te`,
-        trailer_m4: std.tpl`${autoconf()}/share/autoconf/autoconf/trailer.m4`,
-        PERL5LIB: std.tpl`${autoconf()}/share/autoconf:${automake()}/share/automake-1.16`,
-        autom4te_perllibdir: std.tpl`${autoconf()}/share/autoconf`,
-        AC_MACRODIR: std.tpl`${autoconf()}/share/autoconf`,
-        ACLOCAL_AUTOMAKE_DIR: std.tpl`${automake()}/share/aclocal-1.16`,
+        M4: std.tpl`${m4}/bin/m4`,
+        AUTOM4TE: std.tpl`${autoconf}/bin/autom4te`,
+        trailer_m4: std.tpl`${autoconf}/share/autoconf/autoconf/trailer.m4`,
+        PERL5LIB: std.tpl`${autoconf}/share/autoconf:${automake}/share/automake-1.16`,
+        autom4te_perllibdir: std.tpl`${autoconf}/share/autoconf`,
+        AC_MACRODIR: std.tpl`${autoconf}/share/autoconf`,
+        ACLOCAL_AUTOMAKE_DIR: std.tpl`${automake}/share/aclocal-1.16`,
         AUTOMAKE_UNINSTALLED: "1",
-        AUTOCONF: std.tpl`${autoconf()}/bin/autoconf`,
-        AUTOMAKE_LIBDIR: std.tpl`${automake()}/share/automake-1.16`,
+        AUTOCONF: std.tpl`${autoconf}/bin/autoconf`,
+        AUTOMAKE_LIBDIR: std.tpl`${automake}/share/automake-1.16`,
       },
       workDir: source,
     })

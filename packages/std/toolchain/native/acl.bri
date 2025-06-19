@@ -11,7 +11,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   let acl = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -25,9 +25,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
-        CPPFLAGS: std.tpl`-I${attr()}/include`,
-        LDFLAGS: std.tpl`-L${attr()}/lib`,
+        PATH: std.tpl`${stage2}/bin`,
+        CPPFLAGS: std.tpl`-I${attr}/include`,
+        LDFLAGS: std.tpl`-L${attr}/lib`,
       },
       workDir: source,
     })
@@ -35,7 +35,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   acl = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -46,7 +46,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: acl,
     })

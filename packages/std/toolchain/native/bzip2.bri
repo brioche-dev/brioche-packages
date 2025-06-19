@@ -13,7 +13,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   source = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -27,7 +27,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       ],
       env: {
         sourcePatch,
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: source,
     })
@@ -35,7 +35,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -54,7 +54,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       ],
       env: {
         sourcePatch,
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
       },
       workDir: source,
     })

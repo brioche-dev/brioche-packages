@@ -13,7 +13,7 @@ import { castToFile, castToDirectory, castToSymlink } from "./cast.bri";
 
 /**
  * Process options.
- * 
+ *
  * @param command - The command to run. Should either be a template, or a
  *   string referencing a command from `dependencies`.
  * @param args - An array of arguments to pass to the command.
@@ -40,10 +40,10 @@ export type ProcessOptions = {
 
 /**
  * Unsafe options for a process.
- * 
+ *
  * @remark You must take extra care to ensure that running the process is hermetic
  *   when using these options!
- * 
+ *
  * @param networking - Set to `true` to allow the process to access the network.
  */
 export interface ProcessUnsafeOptions {
@@ -122,7 +122,7 @@ export interface ProcessUtils {
  * ```typescript
  * // Call Bash and write "Hello world!" to the output path
  * std.process({
- *   command: std.tpl`${std.tools()}/bin/bash`,
+ *   command: std.tpl`${std.tools}/bin/bash`,
  *   args: ["-c", 'echo "Hello world!" > "$BRIOCHE_OUTPUT"'],
  * });
  * ```

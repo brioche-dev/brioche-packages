@@ -16,7 +16,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   source = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -28,7 +28,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
         sourcePatchFhs,
         sourcePatchMemalign,
       },
@@ -38,7 +38,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   let glibc = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -67,7 +67,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
         stage2: stage2(),
       },
       workDir: source,

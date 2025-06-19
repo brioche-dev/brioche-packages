@@ -193,7 +193,7 @@ export function npmInstallGlobal(
       // Use a Nushell script to get a list of installed bin symlinks to wrap
       const binsJson = await std
         .process({
-          command: std.tpl`${nushell()}/bin/nu`,
+          command: std.tpl`${nushell}/bin/nu`,
           args: [Brioche.includeFile("find-nodejs-bins.nu")],
           env: {
             recipe,

@@ -13,7 +13,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   let binutils = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -37,9 +37,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin:${flex()}/bin`,
-        CPPFLAGS: std.tpl`-I${zlib()}/include`,
-        LDFLAGS: std.tpl`-L${zlib()}/lib`,
+        PATH: std.tpl`${stage2}/bin:${flex}/bin`,
+        CPPFLAGS: std.tpl`-I${zlib}/include`,
+        LDFLAGS: std.tpl`-L${zlib}/lib`,
       },
       workDir: source,
     })
