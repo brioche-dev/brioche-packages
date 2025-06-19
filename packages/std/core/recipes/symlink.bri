@@ -6,7 +6,7 @@ import { type Recipe, symlinkRecipeUtils } from "./recipe.bri";
 /**
  * Options for creating a symlink.
  *
- * @param target - The target path of the symlink
+ * @param target - The target path of the symlink.
  */
 export interface SymlinkOptions {
   target: string;

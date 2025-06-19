@@ -156,7 +156,7 @@ interface RecipeUtils {
    * value as the input to the next function. This is a convenience method
    * around the `std.pipe()` utility function.
    *
-   * @param functions - Functions to pipe the recipe through
+   * @param functions - Functions to pipe the recipe through.
    *
    * @returns The result of piping the recipe through all the functions
    *
@@ -179,7 +179,7 @@ interface FileRecipeUtils extends RecipeUtils {
   /**
    * Returns a new file with the given permissions set.
    *
-   * @param permissions - The permissions to set on the file
+   * @param permissions - The permissions to set on the file.
    *
    * @returns A new file recipe with the specified permissions
    *

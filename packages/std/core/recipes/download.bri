@@ -5,8 +5,8 @@ import { type Recipe, createRecipe } from "./recipe.bri";
 /**
  * Options required to download a file from a URL.
  *
- * @param url - The URL to download
- * @param hash - The hash to verify the downloaded content
+ * @param url - The URL to download.
+ * @param hash - The hash to verify the downloaded content.
  */
 export interface DownloadOptions {
   url: string;
@@ -21,7 +21,7 @@ export interface DownloadOptions {
  * @description See also `Brioche.download`, which does not require specifying
  * a hash, but only works with a constant URL.
  *
- * @param opts - Download options including URL and hash
+ * @param opts - Download options including URL and hash.
  *
  * @returns A file recipe containing the downloaded content
  *

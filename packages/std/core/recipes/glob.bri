@@ -8,8 +8,8 @@ import type { Directory } from "./directory.bri";
  * Returns a directory recipe containing only files that match one of the
  * specified glob patterns.
  *
- * @param recipe - The directory recipe to filter
- * @param patterns - An array of glob patterns to match files against
+ * @param recipe - The directory recipe to filter.
+ * @param patterns - An array of glob patterns to match files against.
  *
  * @returns A directory recipe containing only files matching the glob patterns
  *

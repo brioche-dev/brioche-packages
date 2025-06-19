@@ -14,7 +14,7 @@ export function assert(
  * Used as a type-checked assertion that a codepath is unreachable, such
  * as for pattern matching. Throws an error if called.
  *
- * @param never - The value that should never be reached
+ * @param never - The value that should never be reached.
  *
  * @returns Never returns - always throws an error
  *
@@ -180,8 +180,8 @@ export function jsonSerialize(value: Equatable): string {
  * @description The first and last lines are removed if they are empty, and the level
  * of indentation is determined by the line with the smallest indentation.
  *
- * @param strings - Template string parts
- * @param values - Template string values
+ * @param strings - Template string parts.
+ * @param values - Template string values.
  *
  * @returns The dedented string with extra indentation removed
  *
@@ -260,8 +260,8 @@ export function mixin<T extends object, U extends object>(
  *
  * @description For recipes, see also the equivalent `.pipe()` method.
  *
- * @param value - The initial value to pipe through the functions
- * @param functions - The functions to pipe the value through
+ * @param value - The initial value to pipe through the functions.
+ * @param functions - The functions to pipe the value through.
  *
  * @returns The result of piping the value through all the functions
  *

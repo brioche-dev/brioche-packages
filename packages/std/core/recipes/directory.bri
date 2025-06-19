@@ -12,7 +12,7 @@ import {
  * Constructs a new directory. Takes an object argument, where each key
  * is a filename and each value is a recipe
  *
- * @param entries - An object mapping filenames to recipes
+ * @param entries - An object mapping filenames to recipes.
  *
  * @returns A directory recipe containing the specified entries
  *
