@@ -36,8 +36,8 @@ export interface BashRunnableUtils {
  *
  * See also `std.runBash` to run a Bash script while baking!
  *
- * @param strings - The template string parts for the Bash script
- * @param values - The template string values
+ * @param strings - The template string parts for the Bash script.
+ * @param values - The template string values.
  *
  * @returns A self-contained runnable recipe containing the Bash script
  *

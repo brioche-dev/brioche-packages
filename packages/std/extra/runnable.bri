@@ -22,10 +22,10 @@ export interface WithRunnableUtils {
 /**
  * Options for configuring a runnable command.
  *
- * @param command - The command to run
- * @param args - Arguments to pass to the command
- * @param env - Environment variables to set when running the command
- * @param dependencies - Additional dependencies to include in the `$PATH`
+ * @param command - The command to run.
+ * @param args - Arguments to pass to the command.
+ * @param env - Environment variables to set when running the command.
+ * @param dependencies - Additional dependencies to include in the `$PATH`.
  */
 export interface RunnableOptions {
   command: RunnableTemplateValue;

@@ -32,7 +32,7 @@ declare global {
      * Include a file from the filesystem. The path is relative to the
      * current Brioche module, and cannot go outside the project root.
      *
-     * @param path - The relative path to the file to include
+     * @param path - The relative path to the file to include.
      *
      * @returns A file recipe with the contents of the specified file
      *
@@ -56,7 +56,7 @@ declare global {
      * Include a directory from the filesystem. The path is relative to the
      * current Brioche module, and cannot go outside the project root.
      *
-     * @param path - The relative path to the directory to include
+     * @param path - The relative path to the directory to include.
      *
      * @returns A directory recipe containing all files in the specified directory
      *
@@ -84,7 +84,7 @@ declare global {
      * relative to the current Brioche module. The glob pattern will not
      * match any paths if it tries going outside the current module directory.
      *
-     * @param patterns - One or more glob patterns to match files
+     * @param patterns - One or more glob patterns to match files.
      *
      * @returns A directory recipe containing all files matching the glob patterns
      *

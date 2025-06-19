@@ -16,7 +16,7 @@ export type EnvValue =
  * (relative to the root of the recipe), or set a fallback path / value
  * if the environment variable is empty.
  *
- * @param recipe - The recipe to add environment variables to
+ * @param recipe - The recipe to add environment variables to.
  * @param env - An object mapping environment variable names to their configuration.
  *   Each value can be:
  *   - `{ append: [{ path: string }] }`: Append paths to the environment variable
