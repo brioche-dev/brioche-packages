@@ -1,0 +1,68 @@
+import * as std from "std";
+import cmake from "cmake";
+import python from "python";
+
+export const project = {
+  name: "wabt",
+  version: "1.0.37",
+  repository: "https://github.com/webassembly/wabt.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+  options: {
+    submodules: true,
+  },
+});
+
+export default function wabt(): std.Recipe<std.Directory> {
+  return std.runBash`
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build .
+    cmake --install . --prefix="$BRIOCHE_OUTPUT"
+
+    if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
+      # Ensure the lib folder exists
+      mkdir -p "$BRIOCHE_OUTPUT/lib"
+
+      # Create relative symlinks for lib64 contents to lib folder
+      ln --symbolic --relative "$BRIOCHE_OUTPUT"/lib64/* "$BRIOCHE_OUTPUT/lib/"
+    fi
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, python, cmake)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    wat2wasm --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, wabt)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  // HACK: Workaround for apparent issue with incorrect version number in
+  // upstream release: https://github.com/WebAssembly/wabt/issues/2550#issuecomment-2697494141
+  const expected = project.version === "1.0.37" ? "1.0.36" : project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

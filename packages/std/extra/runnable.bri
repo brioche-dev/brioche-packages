@@ -19,6 +19,14 @@ export interface WithRunnableUtils {
   dependencies(...dependencies: std.RecipeLike<std.Directory>[]): WithRunnable;
 }
 
+/**
+ * Options for configuring a runnable command.
+ *
+ * @param command - The command to run.
+ * @param args - Arguments to pass to the command.
+ * @param env - Environment variables to set when running the command.
+ * @param dependencies - Additional dependencies to include in the `$PATH`.
+ */
 export interface RunnableOptions {
   command: RunnableTemplateValue;
   args?: RunnableTemplateValue[];
@@ -32,11 +40,15 @@ export interface RunnableOptions {
  * Brioche, such as by calling `brioche run` or by putting it into an OCI
  * container image.
  *
- * See also `std.bashRunnable`, which allows running a full Bash script instead
+ * @description See also `std.bashRunnable`, which allows running a full Bash script instead
  * of a single command.
  *
- * ## Example
+ * @param recipe - The base recipe to add the runnable to.
+ * @param options - Options for the runnable command.
  *
+ * @returns A runnable recipe with `brioche-run` executable
+ *
+ * @example
  * ```typescript
  * import * as std from "std";
  *
@@ -79,8 +91,13 @@ export function withRunnable(
  * Return a new recipe with an executable at `path` that runs the specified
  * command. This wraps the command so it can be run outside Brioche.
  *
- * ## Example
+ * @param recipe - The base recipe to add the executable to.
+ * @param path - The path where the executable should be placed.
+ * @param options - Options for the runnable command.
  *
+ * @returns A new recipe with an executable at the specified path
+ *
+ * @example
  * ```typescript
  * import * as std from "std";
  *

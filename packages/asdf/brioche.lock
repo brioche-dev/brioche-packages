@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/asdf-vm/asdf": {
+      "v0.18.0": "80fffd86853fbfcc31e6a52aee99f8ab3d5fae9f"
+    }
+  }
+}

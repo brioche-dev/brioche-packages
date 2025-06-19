@@ -10,12 +10,16 @@ import { tools } from "/toolchain";
  * extra dependencies or environment variables using `.dependencies()`
  * or `.env()`, respectively, along with other process options.
  *
- * See also `std.bashRunnable,` which will return a recipe that packages
+ * @description See also `std.bashRunnable,` which will return a recipe that packages
  * up a Bash script that can be run outside of Brioche.
  *
- * ## Example
+ * @param strings - The template string parts for the Bash script.
+ * @param values - The template string values.
  *
- * ``` typescript
+ * @returns A process recipe that runs the Bash script
+ *
+ * @example
+ * ```typescript
  * import * as std from "std";
  *
  * // Running `brioche build -o output` will create a directory `output`
@@ -40,7 +44,7 @@ export function runBash(
 ): std.Process {
   const script = std.indoc(strings, ...values);
   return std.process({
-    command: std.tpl`${tools()}/bin/bash`,
+    command: std.tpl`${tools}/bin/bash`,
     args: ["-e", "-u", "-o", "pipefail", "-c", script],
     dependencies: [tools],
   });

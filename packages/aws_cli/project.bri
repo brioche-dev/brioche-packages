@@ -4,7 +4,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "aws_cli",
-  version: "2.27.26",
+  version: "2.27.35",
 };
 
 const source = Brioche.gitCheckout({
@@ -81,7 +81,7 @@ export default function awsCli(): std.Recipe<std.Directory> {
       PATH: std.tpl`${std.outputPath}/bin`,
       PIP_NO_INDEX: "1",
       PIP_FIND_LINKS: dependencies,
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain()}/lib`,
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
     })
     .outputScaffold(venv)
     .toDirectory();

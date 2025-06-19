@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/libgit2/libgit2.git": {
-      "v1.9.0": "338e6fb681369ff0537719095e22ce9dc602dbf0"
+      "v1.9.1": "0060d9cf5666f015b1067129bd874c6cc4c9c7ac"
     }
   }
 }

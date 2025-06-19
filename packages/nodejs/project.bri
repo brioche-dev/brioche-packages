@@ -5,7 +5,7 @@ import * as typer from "typer";
 
 export const project = {
   name: "nodejs",
-  version: "24.1.0",
+  version: "24.2.0",
 };
 
 function nodejsPrebuilt(): std.Recipe<std.Directory> {
@@ -88,6 +88,11 @@ export function liveUpdate(): std.WithRunnable {
   });
 }
 
+/**
+ * Options for building and installing a NPM package.
+ *
+ * @param source - The NPM package dependencies to install.
+ */
 interface NpmInstallOptions {
   source: std.RecipeLike<std.Directory>;
 }
@@ -96,12 +101,11 @@ interface NpmInstallOptions {
  * Install the dependencies from an NPM package. Returns a recipe containing
  * everything from the package, plus a `node_modules` directory.
  *
- * ## Options
+ * @param options - The options for installing the NPM package.
  *
- * - `source`: The NPM package dependencies to install.
+ * @returns A recipe containing everything from the package, plus a `node_modules` directory
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import * as std from "std";
  * import nodejs, { npmInstall } from "nodejs";
@@ -136,6 +140,13 @@ export function npmInstall(
     .toDirectory();
 }
 
+/**
+ * Options for installing a global NPM package.
+ *
+ * @param packageName - The name of the NPM package to install.
+ * @param version - The version of the package to install.
+ * @param wrapBins - Whether to wrap the installed binaries.
+ */
 interface NpmInstallGlobalOptions {
   packageName: string;
   version: string;
@@ -152,13 +163,11 @@ const BinList = typer.array(
 /**
  * Installs a global NPM package. Returns a recipe containing the package
  *
- * ## Options
+ * @param options - The options for installing the global NPM package.
  *
- * - `packageName`: The NPM package dependencies to install.
- * - `version`: The version of the package to install.
+ * @returns A recipe containing the package
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import * as std from "std";
  * import { npmInstallGlobal } from "nodejs";
@@ -201,7 +210,7 @@ export function npmInstallGlobal(
       // Use a Nushell script to get a list of installed bin symlinks to wrap
       const binsJson = await std
         .process({
-          command: std.tpl`${nushell()}/bin/nu`,
+          command: std.tpl`${nushell}/bin/nu`,
           args: [Brioche.includeFile("find-nodejs-bins.nu")],
           env: {
             recipe,

@@ -11,6 +11,22 @@ import {
 } from "./recipe.bri";
 import { castToFile, castToDirectory, castToSymlink } from "./cast.bri";
 
+/**
+ * Process options.
+ *
+ * @param command - The command to run. Should either be a template, or a
+ *   string referencing a command from `dependencies`.
+ * @param args - An array of arguments to pass to the command.
+ * @param env - An object containing environment variables to set for the process.
+ * @param currentDir - Set the process's current working directory.
+ * @param dependencies - An array of dependencies to call the process with.
+ *   Dependencies will be merged into the process's environment.
+ * @param workDir - Set to a directory recipe that will be copied into the
+ *   process's starting working directory.
+ * @param outputScaffold - Set to a recipe that will be be used to initialize
+ *   `$BRIOCHE_OUTPUT`, which the process can then manipulate.
+ * @param unsafe - A nested object with extra unsafe options that can be enabled.
+ */
 export type ProcessOptions = {
   command: ProcessTemplateLike;
   args?: ProcessTemplateLike[];
@@ -22,6 +38,14 @@ export type ProcessOptions = {
   unsafe?: ProcessUnsafeOptions;
 };
 
+/**
+ * Unsafe options for a process.
+ *
+ * @remark You must take extra care to ensure that running the process is hermetic
+ *   when using these options!
+ *
+ * @param networking - Set to `true` to allow the process to access the network.
+ */
 export interface ProcessUnsafeOptions {
   networking?: boolean;
 }
@@ -82,37 +106,23 @@ export interface ProcessUtils {
  * the process writes to the path `$BRIOCHE_OUTPUT`. The process can
  * write a file, directory, or symlink to this path.
  *
- * Most options can be passed as a string literal, or as a template using
+ * @description Most options can be passed as a string literal, or as a template using
  * the template function `std.tpl`. Recipes in the template will be
  * expanded to an absolute path when the process runs.
- *
- * ## Options
  *
  * These options can be passed when calling `std.process()`, or can be
  * set by calling methods on another process recipe (these methods are
  * **immutable**, so make sure to assign the result to a variable!)
  *
- * - `command`: The command to run. Should either be a template, or a
- *   string referencing a command from `dependencies`.
- * - `args`: An array of arguments to pass to the command.
- * - `env`: An object containing environment variables to set for the process.
- * - `dependencies`: An array of dependencies to call the process with.
- *   Dependencies will be merged into the process's environment.
- * - `workDir`: Set to a directory recipe that will be copied into the
- *   process's starting working directory.
- * - `outputScaffold`: Set to a recipe that will be be used to initialize
- *   `$BRIOCHE_OUTPUT`, which the process can then manipulate.
- * - `unsafe`: A nested object with extra unsafe options that can be enabled.
- *   You must take extra care to ensure that running the process is hermetic
- *   when using these options! The following options are available:
- *   - `networking`: Set to `true` to allow the process to access the network.
+ * @param options - The options for the process.
  *
- * ## Example
+ * @returns The contents that the process writes to `$BRIOCHE_OUTPUT`
  *
+ * @example
  * ```typescript
  * // Call Bash and write "Hello world!" to the output path
  * std.process({
- *   command: std.tpl`${std.tools()}/bin/bash`,
+ *   command: std.tpl`${std.tools}/bin/bash`,
  *   args: ["-c", 'echo "Hello world!" > "$BRIOCHE_OUTPUT"'],
  * });
  * ```

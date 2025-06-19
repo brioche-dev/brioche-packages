@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libjpeg_turbo",
-  version: "3.1.0",
+  version: "3.1.1",
   repository: "https://github.com/libjpeg-turbo/libjpeg-turbo.git",
 };
 

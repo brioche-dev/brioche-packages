@@ -13,13 +13,7 @@ export { default as libstdcpp } from "./1_05_libstdcpp.bri";
 
 export default std.memo(() => {
   const platformInfo = currentPlatformInfo();
-  let stage1 = std.merge(
-    binutils(),
-    gcc(),
-    linuxHeaders(),
-    glibc(),
-    libstdcpp(),
-  );
+  let stage1 = std.merge(binutils, gcc, linuxHeaders, glibc, libstdcpp);
 
   stage1 = stage1.insert("bin", std.symlink({ target: "usr/bin" }));
 

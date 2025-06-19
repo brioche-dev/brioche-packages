@@ -13,7 +13,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -30,14 +30,14 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin:${groff()}/bin`,
-        MAGIC: std.tpl`${stage2()}/usr/share/misc/magic`,
-        libpipeline_CFLAGS: std.tpl`-I${libpipeline()}/include`,
-        libpipeline_LIBS: std.tpl`-L${libpipeline()}/lib -lpipeline`,
-        CFLAGS: std.tpl`-I${gdbm()}/include`,
-        LDFLAGS: std.tpl`-L${gdbm()}/lib -lgdbm`,
-        GROFF_FONT_PATH: std.tpl`${groff()}/share/groff/current/font`,
-        GROFF_TMAC_PATH: std.tpl`${groff()}/share/groff/current/tmac`,
+        PATH: std.tpl`${stage2}/bin:${groff}/bin`,
+        MAGIC: std.tpl`${stage2}/usr/share/misc/magic`,
+        libpipeline_CFLAGS: std.tpl`-I${libpipeline}/include`,
+        libpipeline_LIBS: std.tpl`-L${libpipeline}/lib -lpipeline`,
+        CFLAGS: std.tpl`-I${gdbm}/include`,
+        LDFLAGS: std.tpl`-L${gdbm}/lib -lgdbm`,
+        GROFF_FONT_PATH: std.tpl`${groff}/share/groff/current/font`,
+        GROFF_TMAC_PATH: std.tpl`${groff}/share/groff/current/tmac`,
       },
       workDir: source,
     })

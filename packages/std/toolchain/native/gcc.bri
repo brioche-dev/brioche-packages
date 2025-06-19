@@ -21,7 +21,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   source = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -34,7 +34,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: source,
     })
@@ -57,7 +57,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
   // TODO: Enable NLS
   let gcc = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -93,11 +93,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${buildSysroot}/bin:${stage2()}/bin`,
-        CPPFLAGS: std.tpl`-I${zlib()}/include -I${gmp()}/include -I${mpfr()}/include -I${mpc()}/include -isystem ${stage2()}/usr/lib/gcc/${
-          platformInfo.arch
-        }-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
-        LDFLAGS: std.tpl`-L${zlib()}/lib -L${gmp()}/lib -L${mpfr()}/lib -L${mpc()}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
+        PATH: std.tpl`${buildSysroot}/bin:${stage2}/bin`,
+        CPPFLAGS: std.tpl`-I${zlib}/include -I${gmp}/include -I${mpfr}/include -I${mpc}/include -isystem ${stage2}/usr/lib/gcc/${platformInfo.arch}-lfs-linux-gnu/13.2.0/include -isystem ${buildSysroot}/include -isystem ${buildSysroot}/usr/include`,
+        LDFLAGS: std.tpl`-L${zlib}/lib -L${gmp}/lib -L${mpfr}/lib -L${mpc}/lib -L${buildSysroot}/lib -L${buildSysroot}/lib64 -lm --sysroot=${buildSysroot}`,
         buildSysroot,
         gmp: gmp(),
         mpfr: mpfr(),

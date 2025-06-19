@@ -12,7 +12,7 @@
   },
   "git_refs": {
     "https://github.com/mesonbuild/meson.git": {
-      "1.8.1": "bf17c66f63ed97566516057c2bf35131d1ef240d"
+      "1.8.2": "5a82ea0501736a666ca9cc003ea0774f8219fd65"
     }
   }
 }

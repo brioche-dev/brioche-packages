@@ -20,7 +20,7 @@ export default function perl(): std.Recipe<std.Directory> {
   `
     .dependencies(std.toolchain)
     .env({
-      I18NPATH: std.tpl`${std.toolchain()}/share/i18n`,
+      I18NPATH: std.tpl`${std.toolchain}/share/i18n`,
     })
     .toDirectory();
 

@@ -1,11 +1,10 @@
 import * as std from "std";
-import openssl from "openssl";
 import { cargoBuild } from "rust";
 
 export const project = {
   name: "jujutsu",
-  version: "0.29.0",
-  repository: "https://github.com/martinvonz/jj.git",
+  version: "0.30.0",
+  repository: "https://github.com/jj-vcs/jj.git",
 };
 
 const source = Brioche.gitCheckout({
@@ -18,7 +17,6 @@ export default function jujutsu(): std.Recipe<std.Directory> {
     source,
     runnable: "bin/jj",
     path: "cli",
-    dependencies: [openssl],
   });
 }
 
