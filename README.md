@@ -14,7 +14,7 @@ To contribute a new package, check out this repo, create a new project under `pa
 
 For example, if you were going to add a new package called "fizzbuzz", you would create the directory `packages/fizzbuzz/`, add the file `project.bri`, then write the build script. You could also test it locally by running `brioche build -p ./packages/fizzbuzz`.
 
-Every published package must include a `project` export setting it's name (and optionally a version number):
+Every published package must include a `project` export setting its name (and optionally a version number):
 
 ```ts
 export const project = {
