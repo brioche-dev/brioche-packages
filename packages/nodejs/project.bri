@@ -73,7 +73,7 @@ export function liveUpdate(): std.WithRunnable {
 
 /**
  * Options for building and installing a NPM package.
- * 
+ *
  * @param source - The NPM package dependencies to install.
  */
 interface NpmInstallOptions {
