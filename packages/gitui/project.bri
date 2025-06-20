@@ -12,7 +12,11 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-});
+})
+  // Remove upstream's custom Cargo `config.toml`, which overrides the linker
+  // for various targets (for cross-compilation). This can interfere with
+  // our default working linker configuration.
+  .remove(".cargo/config.toml");
 
 export default function gitui(): std.Recipe<std.Directory> {
   return cargoBuild({
