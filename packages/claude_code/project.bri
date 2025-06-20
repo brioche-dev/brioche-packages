@@ -4,7 +4,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "claude_code",
-  version: "1.0.22",
+  version: "1.0.30",
   packageName: "@anthropic-ai/claude-code",
 };
 
