@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/git/git/archive/refs/tags/v2.49.0.tar.gz": {
+    "https://github.com/git/git/archive/refs/tags/v2.50.0.tar.gz": {
       "type": "sha256",
-      "value": "1bfeeafc78036e78c7b422219473987a6fa79bfdc1da673fcf20e4901399e09f"
+      "value": "07d75fb5438d7bd2e3353a18abef34a2e143edcd62679f0907440d9529735d43"
     }
   }
 }
