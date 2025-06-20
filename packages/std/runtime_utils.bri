@@ -5,10 +5,10 @@ const PLATFORM_RUNTIME_UTILS: Record<
   std.Recipe<std.Directory> | undefined
 > = {
   "x86_64-linux": Brioche.download(
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/bd8af11dcd61855df38cc12401f5ddc4ff5466e0/x86_64-linux/brioche-runtime-utils.tar.zstd",
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/51a8c49dafca2ab1b91a80755eed03799c9cb10b/x86_64-linux/brioche-runtime-utils.tar.zstd",
   ).unarchive("tar", "zstd"),
   "aarch64-linux": Brioche.download(
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/bd8af11dcd61855df38cc12401f5ddc4ff5466e0/aarch64-linux/brioche-runtime-utils.tar.zstd",
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/51a8c49dafca2ab1b91a80755eed03799c9cb10b/aarch64-linux/brioche-runtime-utils.tar.zstd",
   ).unarchive("tar", "zstd"),
 };
 
