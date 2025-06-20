@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "git",
-  version: "2.49.0",
+  version: "2.50.0",
 };
 
 const source = Brioche.download(
