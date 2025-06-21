@@ -7,7 +7,7 @@ export const project = {
 };
 
 const source = Brioche.download(
-  `https://www.ivarch.com/programs/sources/pv-${project.version}.tar.gz`,
+  `https://www.ivarch.com/s/pv-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -47,8 +47,8 @@ export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
     let version = http get https://ivarch.com/programs/pv.shtml
       | lines
-      | where {|it| ($it | str contains "sources/pv") and (not ($it | str contains "sig")) }
-      | parse --regex '<a href="sources/pv-(?<version>.+)\.tar\.[^"]+">'
+      | where {|it| ($it | str contains "/s/pv") and (not ($it | str contains "sig")) }
+      | parse --regex '<a href="/s/pv-(?<version>.+)\.tar\.[^"]+">'
       | sort-by --natural --reverse version
       | get 0.version
 
