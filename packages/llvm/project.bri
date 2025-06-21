@@ -22,7 +22,11 @@ export default function llvm(): std.Recipe<std.Directory> {
       CMAKE_BUILD_TYPE: "Release",
     },
     env: {
-      CMAKE_BUILD_PARALLEL_LEVEL: "16",
+      // HACK: Building LLVM can use A LOT of memory, especially when building
+      // in parallel. These values are tuned based on the CI runners currently
+      // in use in the `brioche-packages` repo.
+      CMAKE_BUILD_PARALLEL_LEVEL:
+        std.CURRENT_PLATFORM === "x86_64-linux" ? "16" : "8",
     },
     dependencies: [std.toolchain, python],
   }).pipe((recipe) =>
