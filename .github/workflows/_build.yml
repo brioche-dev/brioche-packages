@@ -12,6 +12,7 @@ jobs:
     name: Build packages [${{ matrix.host.platform }}]
     if: inputs.enabled
     strategy:
+      fail-fast: false
       matrix:
         host:
           - platform: x86_64-linux
