@@ -2,39 +2,38 @@ import * as std from "std";
 import nushell from "nushell";
 
 export const project = {
-  name: "pv",
-  version: "1.9.31",
+  name: "gperf",
+  version: "3.3",
 };
 
 const source = Brioche.download(
-  `https://www.ivarch.com/s/pv-${project.version}.tar.gz`,
+  `https://ftp.gnu.org/gnu/gperf/gperf-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
 
-export default function pv(): std.Recipe<std.Directory> {
+export default function gperf(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure --prefix=/
-    make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/pv"));
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/gperf"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    pv --version | tee "$BRIOCHE_OUTPUT"
+    gperf --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(pv)
+    .dependencies(gperf)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `pv ${project.version}`;
+  const expected = `GNU gperf ${project.version}`;
   std.assert(
     result.startsWith(expected),
     `expected '${expected}', got '${result}'`,
@@ -45,10 +44,10 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
-    let version = http get https://ivarch.com/programs/pv.shtml
+    let version = http get https://ftp.gnu.org/gnu/gperf
       | lines
-      | where {|it| ($it | str contains "/s/pv") and (not ($it | str contains "sig")) }
-      | parse --regex '<a href="/s/pv-(?<version>.+)\.tar\.[^"]+">'
+      | where {|it| ($it | str contains "gperf-") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="gperf-(?<version>.+)\.tar\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
 

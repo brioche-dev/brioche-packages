@@ -5,10 +5,10 @@ import nushell from "nushell";
 
 export const project = {
   name: "cosign",
-  version: "2.5.0",
+  version: "2.5.2",
   repository: "https://github.com/sigstore/cosign.git",
   extra: {
-    releaseDate: "2025-04-07",
+    releaseDate: "2025-06-17",
   },
 };
 

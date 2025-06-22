@@ -4,7 +4,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "aws_cdk",
-  version: "2.1018.1",
+  version: "2.1019.1",
   packageName: "aws-cdk",
 };
 
