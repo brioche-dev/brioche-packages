@@ -76,9 +76,13 @@ jobs:
             ((n++))
 
             if grep -q 'export.*test' "$package/project.bri"; then
-              echo "::group::$label"
-              brioche build -p "$package" -e test --sync --locked
-              echo "::endgroup::"
+              if grep -q "@brioche-packages skip-platform $PLATFORM" "$package/project.bri"; then
+                echo "$label: skipping (does not support $PLATFORM)"
+              else
+                echo "::group::$label"
+                brioche build -p "$package" -e test --sync --locked
+                echo "::endgroup::"
+              fi
             else
               echo "$label: no tests found"
             fi
