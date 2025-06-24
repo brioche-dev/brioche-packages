@@ -22,7 +22,7 @@ export default function llvm(): std.Recipe<std.Directory> {
       CMAKE_BUILD_TYPE: "Release",
     },
     env: {
-      CMAKE_BUILD_PARALLEL_LEVEL: "16",
+      CMAKE_BUILD_PARALLEL_LEVEL: "8",
     },
     dependencies: [std.toolchain, python],
   }).pipe((recipe) =>
