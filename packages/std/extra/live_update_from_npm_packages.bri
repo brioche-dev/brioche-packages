@@ -1,0 +1,144 @@
+import * as std from "/core";
+import { withRunnable } from "./runnable.bri";
+import { DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH } from "./live_update.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Extra options for the live update from NPM packages.
+ *
+ * @param packageName - The name of the NPM package to update.
+ */
+interface LiveUpdateFromNpmPackagesExtraOptions {
+  packageName: string;
+}
+
+/**
+ * Options for the live update from NPM packages.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `extra.packageName` property containing the name of the NPM package.
+ * @param matchVersion - A regex value (`/.../`) to extract the version number from
+ *   a string. The regex must include a group named "version". If not
+ *   provided, an optional "v" prefix will be stripped and the rest of the
+ *   version will be checked if it's a semver or semver-like version number.
+ */
+interface LiveUpdateFromNpmPackagesOptions {
+  project: { version: string; extra: LiveUpdateFromNpmPackagesExtraOptions };
+  matchVersion?: RegExp;
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * version from the NPM registry. The project's version will be set based on a
+ * regex match against the latest version. The package name is inferred from the
+ * extra options of the project.
+ *
+ * @param options - Options for the live update from NPM packages.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   extra: {
+ *     packageName: "brioche",
+ *   },
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromNpmPackages({
+ *     project,
+ *     matchVersion: /^v(?<version>.*)$/, // Strip "v" prefix from tags
+ *   });
+ * }
+ * ```
+ */
+export function liveUpdateFromNpmPackages(
+  options: LiveUpdateFromNpmPackagesOptions,
+): std.Recipe<std.Directory> {
+  const { packageName } = parseNpmPackage(options.project.extra);
+  const matchVersion =
+    options.matchVersion ?? DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH;
+
+  return std.recipe(async () => {
+    const { default: nushell } = await import("nushell");
+
+    const src = std.file(std.indoc`
+      let version = http get $'https://registry.npmjs.org/($env.packageName)/latest'
+        | get version
+
+      let parsedVersion = $version | parse --regex $env.matchVersion
+      if ($parsedVersion | length) == 0 {
+        error make { msg: $'Latest release ($version) did not match regex ($env.matchVersion)' }
+      }
+
+      let version = $parsedVersion.0.version?
+      if $version == null {
+        error make { msg: $'Regex ($env.matchVersion) did not include version when matching latest release ($version)' }
+      }
+
+      $env.project
+        | from json
+        | update version $version
+        | to json
+    `);
+
+    return withRunnable(std.directory(), {
+      command: "nu",
+      args: [src],
+      env: {
+        project: JSON.stringify(options.project),
+        packageName,
+        matchVersion: matchVersion.source,
+      },
+      dependencies: [nushell],
+    });
+  });
+}
+
+/**
+ * Interface representing the parsed NPM package information.
+ */
+interface NpmPackageInfo {
+  packageName: string;
+}
+
+function tryParseNpmPackage(
+  extraOptions: LiveUpdateFromNpmPackagesExtraOptions,
+): NpmPackageInfo | null {
+  const match = extraOptions.packageName.match(/^(?<packageName>[\w\.-]+)$/);
+
+  const { packageName } = match?.groups ?? {};
+  if (packageName == null) {
+    return null;
+  }
+
+  return { packageName };
+}
+
+/**
+ * Parse the NPM package information to extract the package name.
+ *
+ * @param extraOptions - The extra options containing the package name.
+ *
+ * @returns An object containing the package name.
+ *
+ * @throws If the package name cannot be parsed.
+ */
+function parseNpmPackage(
+  extraOptions: LiveUpdateFromNpmPackagesExtraOptions,
+): NpmPackageInfo {
+  const info = tryParseNpmPackage(extraOptions);
+  if (info == null) {
+    throw new Error(
+      `Could not parse NPM package from ${JSON.stringify(extraOptions)}`,
+    );
+  }
+
+  return info;
+}

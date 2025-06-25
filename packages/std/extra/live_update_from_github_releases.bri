@@ -1,15 +1,10 @@
 import * as std from "/core";
 import { withRunnable } from "./runnable.bri";
+import { DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH } from "./live_update.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
 // https://github.com/brioche-dev/brioche/issues/242
-
-// The default regex used for matching tags. Strips an optional "v" prefix,
-// then matches the rest if it looks like a version number (either semver or
-// a semver-like version)
-const DEFAULT_REGEX_MATCH_TAG =
-  /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:-(?:(?:[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
 
 /**
  * Options for the live update from GitHub releases.
@@ -56,7 +51,8 @@ export function liveUpdateFromGithubReleases(
   options: LiveUpdateFromGithubReleasesOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
-  const matchTag = options.matchTag ?? DEFAULT_REGEX_MATCH_TAG;
+  const matchTag =
+    options.matchTag ?? DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH;
 
   return std.recipe(async () => {
     const { default: nushell } = await import("nushell");
@@ -101,6 +97,9 @@ export function liveUpdateFromGithubReleases(
   });
 }
 
+/**
+ * Interface representing the parsed GitHub repository information.
+ */
 interface GithubRepoInfo {
   repoOwner: string;
   repoName: string;
@@ -124,6 +123,15 @@ function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
   return { repoOwner, repoName };
 }
 
+/**
+ * Parse a GitHub repository URL to extract the repository owner and name.
+ *
+ * @param repo - The GitHub repository URL to parse.
+ *
+ * @returns An object containing the repository owner and name.
+ *
+ * @throws If the repository URL cannot be parsed.
+ */
 function parseGithubRepo(repo: string): GithubRepoInfo {
   const info = tryParseGithubRepo(repo);
   if (info == null) {
