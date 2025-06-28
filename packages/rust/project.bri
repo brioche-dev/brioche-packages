@@ -6,7 +6,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "rust",
-  version: "1.87.0",
+  version: "1.88.0",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
