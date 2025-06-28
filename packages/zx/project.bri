@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "zx",
-  version: "8.5.5",
+  version: "8.6.0",
   extra: {
     packageName: "zx",
   },
