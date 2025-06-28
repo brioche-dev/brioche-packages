@@ -12,7 +12,7 @@ import { runBash } from "./run_bash.bri";
  *
  * @returns A new recipe with the transformed pkg-config files.
  *
- * @remark This function looks for pkg-config files in the standard locations
+ * @remarks This function looks for pkg-config files in the standard locations
  *   `lib/pkgconfig` and `share/pkgconfig` relative to the `$BRIOCHE_OUTPUT`
  *   output directory.
  */
