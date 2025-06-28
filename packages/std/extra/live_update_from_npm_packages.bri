@@ -20,14 +20,9 @@ interface LiveUpdateFromNpmPackagesExtraOptions {
  *
  * @param project - The project export that should be updated. Must include a
  *   `extra.packageName` property containing the name of the NPM package.
- * @param matchVersion - A regex value (`/.../`) to extract the version number from
- *   a string. The regex must include a group named "version". If not
- *   provided, an optional "v" prefix will be stripped and the rest of the
- *   version will be checked if it's a semver or semver-like version number.
  */
 interface LiveUpdateFromNpmPackagesOptions {
   project: { version: string; extra: LiveUpdateFromNpmPackagesExtraOptions };
-  matchVersion?: RegExp;
 }
 
 /**
@@ -35,6 +30,9 @@ interface LiveUpdateFromNpmPackagesOptions {
  * version from the NPM registry. The project's version will be set based on a
  * regex match against the latest version. The package name is inferred from the
  * extra options of the project.
+ *
+ * @remarks The version schema of a NPM package should follow the SemVer
+ * specification.
  *
  * @param options - Options for the live update from NPM packages.
  *
@@ -51,10 +49,7 @@ interface LiveUpdateFromNpmPackagesOptions {
  * };
  *
  * export function liveUpdate(): std.Recipe<std.Directory> {
- *   return std.liveUpdateFromNpmPackages({
- *     project,
- *     matchVersion: /^v(?<version>.*)$/, // Strip "v" prefix from tags
- *   });
+ *   return std.liveUpdateFromNpmPackages({ project });
  * }
  * ```
  */
@@ -62,8 +57,6 @@ export function liveUpdateFromNpmPackages(
   options: LiveUpdateFromNpmPackagesOptions,
 ): std.Recipe<std.Directory> {
   const { packageName } = parseNpmPackage(options.project.extra);
-  const matchVersion =
-    options.matchVersion ?? DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH;
 
   return std.recipe(async () => {
     const { default: nushell } = await import("nushell");
@@ -94,7 +87,7 @@ export function liveUpdateFromNpmPackages(
       env: {
         project: JSON.stringify(options.project),
         packageName,
-        matchVersion: matchVersion.source,
+        matchVersion: DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH.source,
       },
       dependencies: [nushell],
     });
