@@ -1,15 +1,17 @@
 import * as std from "std";
 import { npmInstallGlobal } from "nodejs";
-import nushell from "nushell";
 
 export const project = {
   name: "renovate",
   version: "41.1.4",
+  extra: {
+    packageName: "renovate",
+  },
 };
 
 export default function renovate(): std.Recipe<std.Directory> {
   return npmInstallGlobal({
-    packageName: project.name,
+    packageName: project.extra.packageName,
     version: project.version,
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/renovate"));
 }
@@ -30,24 +32,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://registry.npmjs.org/${project.name}/latest
-
-    let version = $releaseData
-      | get version
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromNpmPackages({ project });
 }
