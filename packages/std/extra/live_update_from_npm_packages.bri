@@ -111,7 +111,7 @@ interface NpmPackageInfo {
 function tryParseNpmPackage(
   extraOptions: LiveUpdateFromNpmPackagesExtraOptions,
 ): NpmPackageInfo | null {
-  const match = extraOptions.packageName.match(/^(?<packageName>[\w\.-]+)$/);
+  const match = extraOptions.packageName.match(/^(?<packageName>[\w\.@/-]+)$/);
 
   const { packageName } = match?.groups ?? {};
   if (packageName == null) {
