@@ -114,13 +114,13 @@ jobs:
             echo "::group::$process_event"
 
             truncated_line_count="$(brioche jobs logs "$process_event" --limit 200 | wc -l)"
-            if [ "$truncated_line_count" -gt 190 ]; then
-              # Looks like the output might be long, so show the first 80
-              # lines and the last 80 lines
+            if [ "$truncated_line_count" -gt 1200 ]; then
+              # Looks like the output might be long, so show the first 500
+              # lines and the last 500 lines
 
-              brioche jobs logs "$process_event" --limit 80 | head -n80
+              brioche jobs logs "$process_event" --limit 500 | head -n500
               echo "..."
-              brioche jobs logs "$process_event" | tail -n80
+              brioche jobs logs "$process_event" | tail -n500
             else
               # Looks like the output might be short, so show the whole file
               brioche jobs logs "$process_event"
