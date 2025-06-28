@@ -125,3 +125,11 @@ jobs:
               brioche jobs logs "$process_event"
             fi
           fi
+
+  # Extra job that succeeds when all build jobs succeed (useful for PR requirements)
+  all-builds-passed:
+    name: All builds passed
+    needs: [build]
+    runs-on: ubuntu-24.04
+    steps:
+      - run: ':'
