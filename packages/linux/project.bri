@@ -1,6 +1,7 @@
 import * as std from "std";
 import kmod from "kmod";
 import openssl from "openssl";
+import python from "python";
 import nushell from "nushell";
 
 export const project = {
@@ -107,7 +108,14 @@ export default function linux(
     make modules_install
   `
     .workDir(source)
-    .dependencies(...dependencies, openssl, kmod, ldWrapper, std.toolchain)
+    .dependencies(
+      ...dependencies,
+      kmod,
+      openssl,
+      python,
+      ldWrapper,
+      std.toolchain,
+    )
     .env({
       INSTALL_MOD_PATH: std.outputPath,
 

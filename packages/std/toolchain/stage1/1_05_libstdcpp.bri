@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { bootstrapRun } from "/toolchain/stage0";
+import { bootstrapRun, currentPlatformInfo } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
@@ -7,6 +7,7 @@ import glibc from "./1_04_glibc.bri";
 import { wrapWithScript, useBriocheLd } from "../utils.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
+  const platformInfo = currentPlatformInfo();
   const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
   )
@@ -16,7 +17,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   let stage1 = std.merge(binutils(), gcc(), linuxHeaders(), glibc());
 
   stage1 = wrapWithScript(stage1, {
-    paths: ["usr/bin/x86_64-lfs-linux-gnu-gcc"],
+    paths: [`usr/bin/${platformInfo.arch}-lfs-linux-gnu-gcc`],
     renameSuffix: "-orig",
     script: std
       .file(std.indoc`
@@ -29,13 +30,13 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 
   stage1 = useBriocheLd(stage1, {
     ldPaths: [
-      "usr/bin/x86_64-lfs-linux-gnu-ld",
-      "usr/bin/x86_64-lfs-linux-gnu-ld.bfd",
-      "usr/x86_64-lfs-linux-gnu/bin/ld",
-      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
+      `usr/bin/${platformInfo.arch}-lfs-linux-gnu-ld`,
+      `usr/bin/${platformInfo.arch}-lfs-linux-gnu-ld.bfd`,
+      `usr/${platformInfo.arch}-lfs-linux-gnu/bin/ld`,
+      `usr/${platformInfo.arch}-lfs-linux-gnu/bin/ld.bfd`,
     ],
     interpreterPaths: {
-      "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
+      [platformInfo.dynamicLinkerPath]: platformInfo.dynamicLinkerPath,
     },
   });
 
@@ -66,7 +67,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     `,
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: `${platformInfo.arch}-lfs-linux-gnu`,
       stage1,
     },
     workDir: source,

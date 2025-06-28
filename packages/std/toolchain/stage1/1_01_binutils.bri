@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { bootstrapRun } from "/toolchain/stage0";
+import { bootstrapRun, currentPlatformInfo } from "/toolchain/stage0";
 
 const source = Brioche.download(
   "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
@@ -26,7 +26,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     `,
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: `${currentPlatformInfo().arch}-lfs-linux-gnu`,
     },
     workDir: source,
   });

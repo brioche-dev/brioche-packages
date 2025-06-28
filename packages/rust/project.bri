@@ -57,7 +57,7 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
       throw new Error(`Rustup package ${pkgName} not found`);
     }
 
-    const pkgTarget = pkg.target["x86_64-unknown-linux-gnu"];
+    const pkgTarget = pkg.target[targetTriple()];
     if (pkgTarget?.available !== true) {
       continue;
     }
@@ -449,4 +449,17 @@ export function vendorCrate(
   crate = crate.remove(".cargo/config");
 
   return crate;
+}
+
+function targetTriple(): string {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return "x86_64-unknown-linux-gnu";
+    case "aarch64-linux":
+      return "aarch64-unknown-linux-gnu";
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the rust package`,
+      );
+  }
 }

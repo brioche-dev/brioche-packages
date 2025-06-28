@@ -14,7 +14,18 @@ const source = Brioche.download(
 
 export default function strace(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix=/
+    case "$(uname -m)" in
+      aarch64)
+        # Disable multiple personality support for aarch64 for now
+        ./configure \\
+          --prefix=/ \\
+          --enable-mpers=no
+        ;;
+      *)
+        ./configure --prefix=/
+        ;;
+    esac
+
     make -j16
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `

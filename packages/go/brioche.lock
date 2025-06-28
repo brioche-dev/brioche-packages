@@ -4,6 +4,10 @@
     "https://go.dev/dl/go1.24.4.linux-amd64.tar.gz": {
       "type": "sha256",
       "value": "77e5da33bb72aeaef1ba4418b6fe511bc4d041873cbf82e5aa6318740df98717"
+    },
+    "https://go.dev/dl/go1.24.4.linux-arm64.tar.gz": {
+      "type": "sha256",
+      "value": "d5501ee5aca0f258d5fe9bfaed401958445014495dc115f202d43d5210b45241"
     }
   }
 }

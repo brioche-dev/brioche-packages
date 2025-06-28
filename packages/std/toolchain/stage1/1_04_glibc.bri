@@ -1,11 +1,12 @@
 import * as std from "/core";
 import { runtimeUtils } from "../utils.bri";
-import { bootstrapRun } from "/toolchain/stage0";
+import { bootstrapRun, currentPlatformInfo } from "/toolchain/stage0";
 import binutils from "./1_01_binutils.bri";
 import gcc from "./1_02_gcc.bri";
 import linuxHeaders from "./1_03_linux_headers.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
+  const platformInfo = currentPlatformInfo();
   let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
   )
@@ -68,8 +69,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
     `,
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
-      LD_LINUX: "/lib64/ld-linux-x86-64.so.2",
+      TARGET: `${platformInfo.arch}-lfs-linux-gnu`,
+      LD_LINUX: `/${platformInfo.dynamicLinkerPath}`,
       stage1,
     },
     workDir: source,

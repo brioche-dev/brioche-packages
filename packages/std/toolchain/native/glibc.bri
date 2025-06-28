@@ -1,7 +1,9 @@
 import * as std from "/core";
+import { currentPlatformInfo } from "/toolchain/stage0";
 import stage2 from "/toolchain/stage2";
 
 export default std.memo((): std.Recipe<std.Directory> => {
+  const platformInfo = currentPlatformInfo();
   let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/glibc-2.38.tar.xz",
   )
@@ -68,20 +70,22 @@ export default std.memo((): std.Recipe<std.Directory> => {
       ],
       env: {
         PATH: std.tpl`${stage2}/bin`,
-        stage2: stage2(),
+        stage2,
       },
       workDir: source,
     })
     .toDirectory();
 
-  glibc = glibc.insert(
-    "lib64",
-    std.directory({
-      "ld-linux-x86-64.so.2": std.symlink({
-        target: "../lib/ld-linux-x86-64.so.2",
+  if (platformInfo.arch === "x86_64") {
+    glibc = glibc.insert(
+      "lib64",
+      std.directory({
+        "ld-linux-x86-64.so.2": std.symlink({
+          target: "../lib/ld-linux-x86-64.so.2",
+        }),
       }),
-    }),
-  );
+    );
+  }
 
   return glibc;
 });

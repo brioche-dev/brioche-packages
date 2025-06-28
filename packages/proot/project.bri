@@ -27,7 +27,19 @@ const source = std.recipe(() => {
 
 export default function proot(): std.Recipe<std.Directory> {
   return std.runBash`
-    BRIOCHE_LD_AUTOPACK=false make -C src loader.elf loader-m32.elf build.h
+    case "$(uname -m)" in
+      x86_64)
+        BRIOCHE_LD_AUTOPACK=false make -C src loader.elf loader-m32.elf build.h
+        ;;
+      aarch64)
+        BRIOCHE_LD_AUTOPACK=false make -C src loader.elf build.h
+        ;;
+      *)
+        echo "Unhandled architecture for PRoot package"
+        exit 1
+        ;;
+    esac
+
     make -C src proot care
     make -C src install PREFIX="$BRIOCHE_OUTPUT"
   `

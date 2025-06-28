@@ -1,12 +1,28 @@
 import * as std from "/core";
 
+const PLATFORM_RUNTIME_UTILS: Record<
+  std.Platform,
+  std.Recipe<std.Directory> | undefined
+> = {
+  "x86_64-linux": Brioche.download(
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fa9ce0565ea067c84216838073c22176bb4a6399/x86_64-linux/brioche-runtime-utils.tar.zstd",
+  ).unarchive("tar", "zstd"),
+  "aarch64-linux": Brioche.download(
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fa9ce0565ea067c84216838073c22176bb4a6399/aarch64-linux/brioche-runtime-utils.tar.zstd",
+  ).unarchive("tar", "zstd"),
+};
+
 // NOTE: This download is just like the `runtimeUtils()` export, except
 // it's pinned to a specific version. It should only be updated if the
 // tools used for building the toolchain should be upgraded
 export function runtimeUtils(): std.Recipe<std.Directory> {
-  return Brioche.download(
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/bd8af11dcd61855df38cc12401f5ddc4ff5466e0/x86_64-linux/brioche-runtime-utils.tar.zstd",
-  ).unarchive("tar", "zstd");
+  const platformRuntimeUtils = PLATFORM_RUNTIME_UTILS[std.CURRENT_PLATFORM];
+  std.assert(
+    platformRuntimeUtils != null,
+    `The platform '${std.CURRENT_PLATFORM}' is not handled by this version of std`,
+  );
+
+  return platformRuntimeUtils;
 }
 
 interface UseBriocheLdOptions {
