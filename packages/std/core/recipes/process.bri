@@ -41,7 +41,7 @@ export type ProcessOptions = {
 /**
  * Unsafe options for a process.
  *
- * @remark You must take extra care to ensure that running the process is hermetic
+ * @remarks You must take extra care to ensure that running the process is hermetic
  *   when using these options!
  *
  * @param networking - Set to `true` to allow the process to access the network.

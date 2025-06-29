@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "lurk",
-  version: "0.3.9",
+  version: "0.3.10",
   repository: "https://github.com/JakWai01/lurk.git",
 };
 

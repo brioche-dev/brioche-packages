@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/svenstaro/miniserve.git": {
-      "v0.29.0": "dfa37fdfcb84bdedf72c72b278ea89592d1b293a"
+      "v0.31.0": "4599116bc2b96779acacb0edf0e3c89b80dc867b"
     }
   }
 }
