@@ -8,6 +8,7 @@ export * from "./with_runnable_link.bri";
 export * from "./apply_patch.bri";
 export * from "./live_update.bri";
 export * from "./live_update_from_github_releases.bri";
+export * from "./live_update_from_gitlab_releases.bri";
 export * from "./live_update_from_npm_packages.bri";
 export * from "./pkg_config_make_paths_relative.bri";
 

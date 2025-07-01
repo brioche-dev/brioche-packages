@@ -1,0 +1,137 @@
+import * as std from "/core";
+import { withRunnable } from "./runnable.bri";
+import { DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH } from "./live_update.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Options for the live update from GitLab releases.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `repository` property containing a GitLab repository URL.
+ * @param matchTag - A regex value (`/.../`) to extract the version number from
+ *   a tag name. The regex must include a group named "version". If not
+ *   provided, an optional "v" prefix will be stripped and the rest of the
+ *   tag will be checked if it's a semver or semver-like version number.
+ */
+interface LiveUpdateFromGitlabReleasesOptions {
+  project: { version: string; repository: string };
+  matchTag?: RegExp;
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * tag from a GitLab repository. The project's version will be set based on a
+ * regex match against the latest tag name. The repository is inferred from the
+ * `repository` field of the project.
+ *
+ * @param options - Options for the live update from GitLab releases.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   repository: "https://gitlab.com/brioche-dev/brioche.git",
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromGitlabReleases({
+ *     project,
+ *     matchTag: /^v(?<version>.*)$/, // Strip "v" prefix from tags
+ *   });
+ * }
+ * ```
+ */
+export function liveUpdateFromGitlabReleases(
+  options: LiveUpdateFromGitlabReleasesOptions,
+): std.Recipe<std.Directory> {
+  const { repoOwner, repoName } = parseGitlabRepo(options.project.repository);
+  const matchTag = options.matchTag ?? DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH;
+
+  return std.recipe(async () => {
+    const { default: nushell } = await import("nushell");
+
+    const src = std.file(std.indoc`
+      let tagName = http get $'https://gitlab.com/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases/permalink/latest'
+        | get tag_name
+
+      let parsedTagName = $tagName | parse --regex $env.matchTag
+      if ($parsedTagName | length) == 0 {
+        error make { msg: $'Latest release tag ($tagName) did not match regex ($env.matchTag)' }
+      }
+
+      let version = $parsedTagName.0.version?
+      if $version == null {
+        error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
+      }
+
+      $env.project
+        | from json
+        | update version $version
+        | to json
+    `);
+
+    return withRunnable(std.directory(), {
+      command: "nu",
+      args: [src],
+      env: {
+        project: JSON.stringify(options.project),
+        repoOwner,
+        repoName,
+        matchTag: matchTag.source,
+      },
+      dependencies: [nushell],
+    });
+  });
+}
+
+/**
+ * Interface representing the parsed GitLab repository information.
+ */
+interface GitlabRepoInfo {
+  repoOwner: string;
+  repoName: string;
+}
+
+function tryParseGitlabRepo(repo: string): GitlabRepoInfo | null {
+  const match = repo.match(
+    /^(?:https?:\/\/)?(www\.)?(?:gitlab\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
+  );
+
+  const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
+  if (repoOwner == null || matchedRepoName == null) {
+    return null;
+  }
+
+  let repoName = matchedRepoName;
+  if (repoName.endsWith(".git")) {
+    repoName = repoName.slice(0, -4);
+  }
+
+  return { repoOwner, repoName };
+}
+
+/**
+ * Parse a GitLab repository URL to extract the repository owner and name.
+ *
+ * @param repo - The GitLab repository URL to parse.
+ *
+ * @returns An object containing the repository owner and name.
+ *
+ * @throws If the repository URL cannot be parsed.
+ */
+function parseGitlabRepo(repo: string): GitlabRepoInfo {
+  const info = tryParseGitlabRepo(repo);
+  if (info == null) {
+    throw new Error(
+      `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
+    );
+  }
+
+  return info;
+}
