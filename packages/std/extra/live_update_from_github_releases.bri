@@ -24,7 +24,7 @@ interface LiveUpdateFromGithubReleasesOptions {
 /**
  * Return a runnable recipe to live-update a project based on the latest release
  * tag from a GitHub repository. The project's version will be set based on a
- * regex match against the latest tag name. The repository is inferrred from the
+ * regex match against the latest tag name. The repository is inferred from the
  * `repository` field of the project.
  *
  * @param options - Options for the live update from GitHub releases.
