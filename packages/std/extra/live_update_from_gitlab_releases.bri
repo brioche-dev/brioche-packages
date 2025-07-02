@@ -7,27 +7,27 @@ import type {} from "nushell";
 // https://github.com/brioche-dev/brioche/issues/242
 
 /**
- * Options for the live update from GitHub releases.
+ * Options for the live update from GitLab releases.
  *
  * @param project - The project export that should be updated. Must include a
- *   `repository` property containing a GitHub repository URL.
+ *   `repository` property containing a GitLab repository URL.
  * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
  *   tag will be checked if it's a semver or semver-like version number.
  */
-interface LiveUpdateFromGithubReleasesOptions {
+interface LiveUpdateFromGitlabReleasesOptions {
   project: { version: string; repository: string };
   matchTag?: RegExp;
 }
 
 /**
  * Return a runnable recipe to live-update a project based on the latest release
- * tag from a GitHub repository. The project's version will be set based on a
+ * tag from a GitLab repository. The project's version will be set based on a
  * regex match against the latest tag name. The repository is inferred from the
  * `repository` field of the project.
  *
- * @param options - Options for the live update from GitHub releases.
+ * @param options - Options for the live update from GitLab releases.
  *
  * @returns A runnable recipe to live-update the project
  *
@@ -36,34 +36,28 @@ interface LiveUpdateFromGithubReleasesOptions {
  * export const project = {
  *   name: "brioche",
  *   version: "0.1.0",
- *   repository: "https://github.com/brioche-dev/brioche.git",
+ *   repository: "https://gitlab.com/brioche-dev/brioche.git",
  * };
  *
  * export function liveUpdate(): std.Recipe<std.Directory> {
- *   return std.liveUpdateFromGithubReleases({
+ *   return std.liveUpdateFromGitlabReleases({
  *     project,
  *     matchTag: /^v(?<version>.*)$/, // Strip "v" prefix from tags
  *   });
  * }
  * ```
  */
-export function liveUpdateFromGithubReleases(
-  options: LiveUpdateFromGithubReleasesOptions,
+export function liveUpdateFromGitlabReleases(
+  options: LiveUpdateFromGitlabReleasesOptions,
 ): std.Recipe<std.Directory> {
-  const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
+  const { repoOwner, repoName } = parseGitlabRepo(options.project.repository);
   const matchTag = options.matchTag ?? DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH;
 
   return std.recipe(async () => {
     const { default: nushell } = await import("nushell");
 
     const src = std.file(std.indoc`
-      # Include GitHub Token if present (for increased rate limits)
-      mut gh_headers = []
-      if ($env.GITHUB_TOKEN? | default "") != "" {
-        $gh_headers ++= [Authorization $'Bearer ($env.GITHUB_TOKEN)']
-      }
-
-      let tagName = http get --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
+      let tagName = http get $'https://gitlab.com/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases/permalink/latest'
         | get tag_name
 
       let parsedTagName = $tagName | parse --regex $env.matchTag
@@ -97,16 +91,16 @@ export function liveUpdateFromGithubReleases(
 }
 
 /**
- * Interface representing the parsed GitHub repository information.
+ * Interface representing the parsed GitLab repository information.
  */
-interface GithubRepoInfo {
+interface GitlabRepoInfo {
   repoOwner: string;
   repoName: string;
 }
 
-function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
+function tryParseGitlabRepo(repo: string): GitlabRepoInfo | null {
   const match = repo.match(
-    /^(?:https?:\/\/)?(www\.)?(?:github\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
+    /^(?:https?:\/\/)?(www\.)?(?:gitlab\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
   );
 
   const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
@@ -123,16 +117,16 @@ function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
 }
 
 /**
- * Parse a GitHub repository URL to extract the repository owner and name.
+ * Parse a GitLab repository URL to extract the repository owner and name.
  *
- * @param repo - The GitHub repository URL to parse.
+ * @param repo - The GitLab repository URL to parse.
  *
  * @returns An object containing the repository owner and name.
  *
  * @throws If the repository URL cannot be parsed.
  */
-function parseGithubRepo(repo: string): GithubRepoInfo {
-  const info = tryParseGithubRepo(repo);
+function parseGitlabRepo(repo: string): GitlabRepoInfo {
+  const info = tryParseGitlabRepo(repo);
   if (info == null) {
     throw new Error(
       `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
