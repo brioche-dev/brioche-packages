@@ -3,7 +3,7 @@ import * as std from "std";
 
 export const project = {
   name: "readline",
-  version: "8.2.13",
+  version: "8.3",
 };
 
 const source = Brioche.download(
