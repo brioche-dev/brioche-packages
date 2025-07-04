@@ -3,7 +3,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "libpng",
-  version: "1.6.49",
+  version: "1.6.50",
 };
 
 const source = Brioche.download(
