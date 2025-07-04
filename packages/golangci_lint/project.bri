@@ -5,10 +5,10 @@ import nushell from "nushell";
 
 export const project = {
   name: "golangci_lint",
-  version: "2.2.0",
+  version: "2.2.1",
   repository: "https://github.com/golangci/golangci-lint.git",
   extra: {
-    releaseDate: "2025-06-28",
+    releaseDate: "2025-06-29",
   },
 };
 
