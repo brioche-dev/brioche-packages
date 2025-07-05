@@ -1,6 +1,6 @@
 import * as std from "/core";
-import { withRunnable } from "./runnable.bri";
-import { DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH } from "./live_update.bri";
+import { withRunnable } from "../runnable.bri";
+import { DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH } from "./index.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
@@ -56,29 +56,11 @@ export function liveUpdateFromGitlabReleases(
   return std.recipe(async () => {
     const { default: nushell } = await import("nushell");
 
-    const src = std.file(std.indoc`
-      let tagName = http get $'https://gitlab.com/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases/permalink/latest'
-        | get tag_name
-
-      let parsedTagName = $tagName | parse --regex $env.matchTag
-      if ($parsedTagName | length) == 0 {
-        error make { msg: $'Latest release tag ($tagName) did not match regex ($env.matchTag)' }
-      }
-
-      let version = $parsedTagName.0.version?
-      if $version == null {
-        error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
-      }
-
-      $env.project
-        | from json
-        | update version $version
-        | to json
-    `);
-
     return withRunnable(std.directory(), {
       command: "nu",
-      args: [src],
+      args: [
+        Brioche.includeFile("./scripts/live_update_from_gitlab_releases.nu"),
+      ],
       env: {
         project: JSON.stringify(options.project),
         repoOwner,
