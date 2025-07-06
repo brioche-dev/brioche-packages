@@ -17,13 +17,13 @@ export const project = {
 
 std.assert(
   project.extra.currentMajorVersion in project.extra.majorVersions,
-  "NodeJS package extra.currentVersion not found in extra.majorVersion",
+  "Node.js package extra.currentVersion not found in extra.majorVersion",
 );
 std.assert(
   Object.keys(project.extra.majorVersions).some((majorVersion) =>
     project.version.startsWith(`${majorVersion}.`),
   ),
-  "NodeJS package version not found in extra.minorVersions",
+  "Node.js package version not found in extra.minorVersions",
 );
 
 type NodeVersion = keyof typeof project.extra.majorVersions;
@@ -68,7 +68,7 @@ function prebuiltBinary(
   const prebuiltBinariesForVersion = prebuiltBinaries[version];
   std.assert(
     prebuiltBinariesForVersion != null,
-    `NodeJS version '${version}' is not supported, expected one of ${JSON.stringify(
+    `Node.js version '${version}' is not supported, expected one of ${JSON.stringify(
       Object.keys(prebuiltBinaries),
     )}`,
   );
@@ -76,7 +76,7 @@ function prebuiltBinary(
   const prebuilt = prebuiltBinariesForVersion[platform];
   std.assert(
     prebuilt != null,
-    `NodeJS ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
+    `Node.js ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
       Object.keys(prebuiltBinariesForVersion),
     )}`,
   );
@@ -236,11 +236,14 @@ export function npmInstall(
  * @param packageName - The name of the npm package to install.
  * @param version - The version of the package to install.
  * @param wrapBins - Whether to wrap the installed binaries.
+ * @param nodejs - The Node.js and npm recipe to use to install the package.
+ *   Can be used to use a specific version of Node.js.
  */
 interface NpmInstallGlobalOptions {
   packageName: string;
   version: string;
   wrapBins?: boolean;
+  nodejs?: std.RecipeLike<std.Directory>;
 }
 
 const BinList = typer.array(
@@ -276,7 +279,12 @@ export function npmInstallGlobal(
   options: NpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
   return std.recipe(async () => {
-    const { packageName, version, wrapBins = true } = options;
+    const {
+      packageName,
+      version,
+      wrapBins = true,
+      nodejs: nodejsDep = nodejs,
+    } = options;
 
     let recipe = std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
@@ -286,7 +294,7 @@ export function npmInstallGlobal(
 
       npm install --global "\${package_name}@\${version}"
     `
-      .dependencies(std.toolchain, nodejs, python)
+      .dependencies(std.toolchain, nodejsDep, python)
       .outputScaffold(std.directory())
       .env({
         package_name: packageName,
@@ -315,7 +323,7 @@ export function npmInstallGlobal(
         return std.addRunnable(std.directory(), name, {
           command: "node",
           args: [{ relativePath: target }],
-          dependencies: [nodejs],
+          dependencies: [nodejsDep],
         });
       });
 
