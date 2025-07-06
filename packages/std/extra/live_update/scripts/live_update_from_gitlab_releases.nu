@@ -1,4 +1,12 @@
-let tagName = http get $'https://gitlab.com/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases/permalink/latest'
+# Get project metadata
+mut project = $env.project
+  | from json
+
+# Retrieve the latest release information from GitLab
+let releaseInfo = http get $'https://gitlab.com/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases/permalink/latest'
+
+# Extract the version
+let tagName = $releaseInfo
   | get tag_name
 
 let parsedTagName = $tagName
@@ -12,7 +20,9 @@ if $version == null {
   error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
 }
 
-$env.project
-  | from json
+$project = $project
   | update version $version
+
+# Return back the project metadata encoded as JSON
+$project
   | to json
