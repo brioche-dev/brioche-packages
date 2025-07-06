@@ -42,11 +42,12 @@ export default function mitmproxy(): std.Recipe<std.Directory> {
           command: { relativePath: "brioche-run.d/python/bin/python" },
           args: [{ relativePath: `mitmproxy/bin/${binary}` }],
           env: {
-            PYTHONPATH: [
-              {
+            PYTHONPATH: {
+              prepend: {
                 relativePath: `mitmproxy/lib/python${pythonProject.extra.currentMinorVersion}/site-packages`,
               },
-            ],
+              separator: ":",
+            },
           },
         });
       }

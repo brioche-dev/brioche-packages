@@ -1,5 +1,5 @@
 /**
- * This is a manually vendored version of the `smol-toml` NPM package,
+ * This is a manually vendored version of the `smol-toml` npm package,
  * used for parsing TOML files. It has been tweaked slightly to be packaged
  * in Brioche.
  */

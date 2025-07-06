@@ -7,19 +7,19 @@ import type {} from "nushell";
 // https://github.com/brioche-dev/brioche/issues/242
 
 /**
- * Extra options for the live update from NPM packages.
+ * Extra options for the live update from npm packages.
  *
- * @param packageName - The name of the NPM package to update.
+ * @param packageName - The name of the npm package to update.
  */
 interface LiveUpdateFromNpmPackagesExtraOptions {
   packageName: string;
 }
 
 /**
- * Options for the live update from NPM packages.
+ * Options for the live update from npm packages.
  *
  * @param project - The project export that should be updated. Must include a
- *   `extra.packageName` property containing the name of the NPM package.
+ *   `extra.packageName` property containing the name of the npm package.
  */
 interface LiveUpdateFromNpmPackagesOptions {
   project: { version: string; extra: LiveUpdateFromNpmPackagesExtraOptions };
@@ -27,14 +27,14 @@ interface LiveUpdateFromNpmPackagesOptions {
 
 /**
  * Return a runnable recipe to live-update a project based on the latest release
- * version from the NPM registry. The project's version will be set based on a
+ * version from the npm registry. The project's version will be set based on a
  * regex match against the latest version. The package name is inferred from the
  * extra options of the project.
  *
- * @remarks The version schema of a NPM package should follow the SemVer
+ * @remarks The version schema of a npm package should follow the SemVer
  * specification.
  *
- * @param options - Options for the live update from NPM packages.
+ * @param options - Options for the live update from npm packages.
  *
  * @returns A runnable recipe to live-update the project
  *
@@ -75,7 +75,7 @@ export function liveUpdateFromNpmPackages(
 }
 
 /**
- * Interface representing the parsed NPM package information.
+ * Interface representing the parsed npm package information.
  */
 interface NpmPackageInfo {
   packageName: string;
@@ -95,7 +95,7 @@ function tryParseNpmPackage(
 }
 
 /**
- * Parse the NPM package information to extract the package name.
+ * Parse the npm package information to extract the package name.
  *
  * @param extraOptions - The extra options containing the package name.
  *
@@ -109,7 +109,7 @@ function parseNpmPackage(
   const info = tryParseNpmPackage(extraOptions);
   if (info == null) {
     throw new Error(
-      `Could not parse NPM package from ${JSON.stringify(extraOptions)}`,
+      `Could not parse npm package from ${JSON.stringify(extraOptions)}`,
     );
   }
 
