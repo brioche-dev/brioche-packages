@@ -10,14 +10,20 @@ import type {} from "nushell";
  * Options for the live update from GitHub releases.
  *
  * @param project - The project export that should be updated. Must include a
- *   `repository` property containing a GitHub repository URL.
+ *   `repository` property containing a GitHub repository URL. Optionally,
+ *   a release date can be provided in the extra field, it should
+ *   represent the date of the latest release in the format `YYYY-MM-DD`.
  * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
  *   tag will be checked if it's a semver or semver-like version number.
  */
 interface LiveUpdateFromGithubReleasesOptions {
-  project: { version: string; readonly repository: string };
+  project: {
+    version: string;
+    readonly repository: string;
+    extra?: { releaseDate?: string };
+  };
   readonly matchTag?: RegExp;
 }
 
