@@ -1,6 +1,9 @@
 import * as std from "/core";
 import {
   type RunnableTemplate,
+  type RunnableTemplateComponent,
+  type RunnableArgValue,
+  type RunnableEnvValue,
   makeRunnableExecutable,
 } from "/runtime_utils.bri";
 
@@ -10,7 +13,7 @@ export interface WithRunnableUtils {
   /**
    * Set environment variables when the command is run.
    */
-  env(values: Record<string, RunnableTemplateValue>): WithRunnable;
+  env(values: Record<string, RunnableTemplateEnvValue>): WithRunnable;
 
   /**
    * Include additonal dependencies when the command is run. This
@@ -30,7 +33,7 @@ export interface WithRunnableUtils {
 export interface RunnableOptions {
   command: RunnableTemplateValue;
   args?: RunnableTemplateValue[];
-  env?: Record<string, RunnableTemplateValue>;
+  env?: Record<string, RunnableTemplateEnvValue>;
   dependencies?: std.RecipeLike<std.Directory>[];
 }
 
@@ -69,7 +72,7 @@ export function withRunnable(
   recipe = addRunnable(recipe, "brioche-run", options);
 
   return std.mixin(recipe, {
-    env(values: Record<string, RunnableTemplateValue>): WithRunnable {
+    env(values: Record<string, RunnableTemplateEnvValue>): WithRunnable {
       return withRunnable(recipe, {
         ...options,
         env: { ...options.env, ...values },
@@ -147,26 +150,22 @@ export function addRunnable(
     n,
   );
 
-  const args: RunnableTemplate[] = [];
+  const argValues: RunnableTemplate[] = [];
   for (const arg of options.args ?? []) {
     let argTemplate: RunnableTemplate;
     [argTemplate, recipe, n] = buildTemplate(arg, recipe, pathToRecipeRoot, n);
-    args.push(argTemplate);
+    argValues.push(argTemplate);
   }
 
-  const env: Record<string, RunnableTemplate> = {};
-  for (const [key, value] of Object.entries(options.env ?? {})) {
-    let valueTemplate: RunnableTemplate;
-    [valueTemplate, recipe, n] = buildTemplate(
+  const args: RunnableArgValue[] = [
+    ...argValues.map<RunnableArgValue>((value) => ({
+      type: "arg",
       value,
-      recipe,
-      pathToRecipeRoot,
-      n,
-    );
-    env[key] = valueTemplate;
-  }
+    })),
+    { type: "rest" },
+  ];
 
-  const pathEnv = env["PATH"] ?? { components: [] };
+  const pathComponents: RunnableTemplateComponent[] = [];
   for (const dep of options.dependencies ?? []) {
     let depTemplate: RunnableTemplate;
     [depTemplate, recipe, n] = buildTemplate(
@@ -176,18 +175,30 @@ export function addRunnable(
       n,
     );
 
-    if (pathEnv.components.length > 0) {
-      pathEnv.components.push(
+    if (pathComponents.length > 0) {
+      pathComponents.push(
         { type: "literal", value: std.bstring(":") },
         ...depTemplate.components,
       );
     } else {
-      pathEnv.components.push(...depTemplate.components);
+      pathComponents.push(...depTemplate.components);
     }
   }
 
-  if (pathEnv.components.length > 0) {
-    env["PATH"] = pathEnv;
+  const env: Record<string, RunnableEnvValue> = {};
+  if (pathComponents.length > 0) {
+    env["PATH"] = {
+      type: "prepend",
+      separator: std.bstring(":"),
+      value: { components: pathComponents },
+    };
+  }
+
+  for (const [key, value] of Object.entries(options.env ?? {})) {
+    let envValue: RunnableEnvValue;
+    [envValue, recipe, n] = buildEnvValue(value, recipe, pathToRecipeRoot, n);
+
+    env[key] = mergeEnv(env[key], envValue, key);
   }
 
   const runnable = makeRunnableExecutable({
@@ -205,6 +216,15 @@ export type RunnableTemplateValue =
   | { relativePath: string }
   | std.RecipeLike
   | RunnableTemplateValue[];
+
+export type RunnableTemplateEnvValue =
+  | { append: RunnableTemplateValue; separator: string }
+  | { prepend: RunnableTemplateValue; separator: string }
+  | { fallback: RunnableTemplateValue }
+  | { set: RunnableTemplateValue }
+  | string
+  | undefined
+  | { relativePath: string };
 
 function buildTemplate(
   template: RunnableTemplateValue,
@@ -270,4 +290,171 @@ function buildTemplate(
       n + 1,
     ];
   }
+}
+
+function buildEnvValue(
+  value: RunnableTemplateEnvValue,
+  recipe: std.RecipeLike<std.Directory>,
+  pathToRecipeRoot: string | undefined,
+  n: number,
+): [RunnableEnvValue, std.Recipe<std.Directory>, number] {
+  if (typeof value === "object" && "append" in value) {
+    let templateValue: RunnableTemplate;
+    [templateValue, recipe, n] = buildTemplate(
+      value.append,
+      recipe,
+      pathToRecipeRoot,
+      n,
+    );
+    return [
+      {
+        type: "append",
+        separator: std.bstring(value.separator),
+        value: templateValue,
+      },
+      recipe,
+      n,
+    ];
+  } else if (typeof value === "object" && "prepend" in value) {
+    let templateValue: RunnableTemplate;
+    [templateValue, recipe, n] = buildTemplate(
+      value.prepend,
+      recipe,
+      pathToRecipeRoot,
+      n,
+    );
+    return [
+      {
+        type: "append",
+        separator: std.bstring(value.separator),
+        value: templateValue,
+      },
+      recipe,
+      n,
+    ];
+  } else if (typeof value === "object" && "fallback" in value) {
+    let templateValue: RunnableTemplate;
+    [templateValue, recipe, n] = buildTemplate(
+      value.fallback,
+      recipe,
+      pathToRecipeRoot,
+      n,
+    );
+    return [{ type: "fallback", value: templateValue }, recipe, n];
+  } else if (typeof value === "object" && "set" in value) {
+    let templateValue: RunnableTemplate;
+    [templateValue, recipe, n] = buildTemplate(
+      value.set,
+      recipe,
+      pathToRecipeRoot,
+      n,
+    );
+    return [{ type: "set", value: templateValue }, recipe, n];
+  } else if (
+    value === undefined ||
+    typeof value === "string" ||
+    (typeof value === "object" && "relativePath" in value)
+  ) {
+    let templateValue: RunnableTemplate;
+    [templateValue, recipe, n] = buildTemplate(
+      value,
+      recipe,
+      pathToRecipeRoot,
+      n,
+    );
+    return [{ type: "set", value: templateValue }, recipe, n];
+  } else {
+    return std.unreachable(value);
+  }
+}
+
+function mergeEnv(
+  current: RunnableEnvValue | undefined,
+  next: RunnableEnvValue,
+  envName: string,
+): RunnableEnvValue {
+  if (current == null) {
+    return next;
+  }
+
+  switch (next.type) {
+    case "append":
+      switch (current.type) {
+        case "append":
+          return {
+            type: "append",
+            separator: current.separator,
+            value: concatValues(current.value, next.separator, next.value),
+          };
+        case "clear":
+          return {
+            type: "set",
+            value: next.value,
+          };
+        case "inherit":
+          return next;
+        case "set":
+          return {
+            type: "set",
+            value: concatValues(current.value, next.separator, next.value),
+          };
+        case "prepend":
+        case "fallback":
+          throw new Error(
+            `Unsupported modes for env var $${envName}: ${current.type}, ${next.type}`,
+          );
+        default:
+          return std.unreachable(current);
+      }
+    case "prepend":
+      switch (current.type) {
+        case "prepend":
+          return {
+            type: "prepend",
+            separator: current.separator,
+            value: concatValues(next.value, next.separator, current.value),
+          };
+        case "clear":
+          return {
+            type: "set",
+            value: next.value,
+          };
+        case "inherit":
+          return next;
+        case "set":
+          return {
+            type: "set",
+            value: concatValues(current.value, next.separator, next.value),
+          };
+        case "append":
+        case "fallback":
+          throw new Error(
+            `Unsupported modes for env var $${envName}: ${current.type}, ${next.type}`,
+          );
+        default:
+          return std.unreachable(current);
+      }
+    case "clear":
+    case "set":
+      return next;
+    case "inherit":
+    case "fallback":
+      return current;
+    default:
+      return std.unreachable(next);
+  }
+}
+
+function concatValues(
+  ...values: (RunnableTemplate | std.BString)[]
+): RunnableTemplate {
+  return {
+    components: [
+      ...values.flatMap((value): RunnableTemplateComponent[] =>
+        typeof value === "object"
+          ? value.components
+          : [{ type: "literal", value }],
+      ),
+    ],
+  };
 }

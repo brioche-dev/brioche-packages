@@ -89,19 +89,19 @@ export function liveUpdate(): std.WithRunnable {
 }
 
 /**
- * Options for building and installing a NPM package.
+ * Options for building and installing a npm package.
  *
- * @param source - The NPM package dependencies to install.
+ * @param source - The npm package dependencies to install.
  */
 interface NpmInstallOptions {
   source: std.RecipeLike<std.Directory>;
 }
 
 /**
- * Install the dependencies from an NPM package. Returns a recipe containing
+ * Install the dependencies from an npm package. Returns a recipe containing
  * everything from the package, plus a `node_modules` directory.
  *
- * @param options - The options for installing the NPM package.
+ * @param options - The options for installing the npm package.
  *
  * @returns A recipe containing everything from the package, plus a `node_modules` directory
  *
@@ -111,7 +111,7 @@ interface NpmInstallOptions {
  * import nodejs, { npmInstall } from "nodejs";
  *
  * export default function (): std.Recipe<std.Directory> {
- *   // Get all the files for the NPM package
+ *   // Get all the files for the npm package
  *   const source = Brioche.glob("src", "package.lock", "package.json");
  *
  *   // Install the dependencies
@@ -141,9 +141,9 @@ export function npmInstall(
 }
 
 /**
- * Options for installing a global NPM package.
+ * Options for installing a global npm package.
  *
- * @param packageName - The name of the NPM package to install.
+ * @param packageName - The name of the npm package to install.
  * @param version - The version of the package to install.
  * @param wrapBins - Whether to wrap the installed binaries.
  */
@@ -161,9 +161,9 @@ const BinList = typer.array(
 );
 
 /**
- * Installs a global NPM package. Returns a recipe containing the package
+ * Installs a global npm package. Returns a recipe containing the package
  *
- * @param options - The options for installing the global NPM package.
+ * @param options - The options for installing the global npm package.
  *
  * @returns A recipe containing the package
  *
@@ -190,7 +190,7 @@ export function npmInstallGlobal(
 
     let recipe = std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
-        echo "The NPM package ($package_name) is not an exact version ($version), please ensure the version is more specific."
+        echo "The npm package ($package_name) is not an exact version ($version), please ensure the version is more specific."
         exit 1
       fi
 
