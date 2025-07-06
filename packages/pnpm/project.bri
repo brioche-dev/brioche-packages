@@ -83,7 +83,6 @@ export function pnpmInstall(
   `
     .dependencies(
       ...(options.dependencies ?? []),
-      std.toolchain,
       pnpm({
         nodejs: options.nodejs,
       }),
