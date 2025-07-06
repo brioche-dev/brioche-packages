@@ -15,7 +15,7 @@ export function staticSite(): std.Recipe<std.Directory> {
     "vite.config.ts",
   );
 
-  // Install the NPM dependencies
+  // Install the npm dependencies
   const npmPackage = npmInstall({ source });
 
   // Run the build script, then save the output from the `dist/` directory
@@ -42,4 +42,4 @@ export default function (): std.BashRunnable {
   `
     .dependencies(miniserve)
     .root(staticSite());
-};
+}
