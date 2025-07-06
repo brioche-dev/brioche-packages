@@ -56,11 +56,14 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  * Options for building and installing an npm package with pnpm.
  *
  * @param source - The pnpm package dependencies to install.
+ * @param dependencies - Extra dependencies to include while installing, such
+ *   as build dependencies used for postinstall scripts.
  * @param nodejs - The Node.js recipe to use when installing packages. This
  *   can be used to pick a different Node.js version.
  */
 interface PnpmInstallOptions {
   source: std.RecipeLike<std.Directory>;
+  dependencies?: std.RecipeLike<std.Directory>[];
   nodejs?: std.RecipeLike<std.Directory>;
 }
 
@@ -78,10 +81,18 @@ export function pnpmInstall(
   return std.runBash`
     pnpm install --frozen-lockfile
   `
-    .dependencies(std.toolchain, pnpm({ nodejs: options.nodejs }))
+    .dependencies(
+      ...(options.dependencies ?? []),
+      std.toolchain,
+      pnpm({
+        nodejs: options.nodejs,
+      }),
+    )
     .currentDir(std.outputPath)
     .outputScaffold(options.source)
-    .unsafe({ networking: true })
+    .unsafe({
+      networking: true,
+    })
     .toDirectory();
 }
 
