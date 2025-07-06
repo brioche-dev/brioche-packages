@@ -108,6 +108,10 @@ function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
  * @throws If the repository URL cannot be parsed.
  */
 function parseGithubRepo(repo: string): GithubRepoInfo {
+  if (repo == null) {
+    throw new Error("Repository URL cannot be null or undefined");
+  }
+
   const info = tryParseGithubRepo(repo);
   if (info == null) {
     throw new Error(

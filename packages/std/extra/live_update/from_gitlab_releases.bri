@@ -108,6 +108,10 @@ function tryParseGitlabRepo(repo: string): GitlabRepoInfo | null {
  * @throws If the repository URL cannot be parsed.
  */
 function parseGitlabRepo(repo: string): GitlabRepoInfo {
+  if (repo == null) {
+    throw new Error("Repository URL cannot be null or undefined");
+  }
+
   const info = tryParseGitlabRepo(repo);
   if (info == null) {
     throw new Error(
