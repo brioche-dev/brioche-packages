@@ -22,7 +22,7 @@ interface LiveUpdateFromGithubReleasesOptions {
   project: {
     version: string;
     repository: string;
-    extra?: { releaseDate: string };
+    extra?: { releaseDate?: string };
   };
   matchTag?: RegExp;
 }
