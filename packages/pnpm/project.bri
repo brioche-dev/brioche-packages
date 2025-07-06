@@ -37,6 +37,36 @@ export function liveUpdate(): std.Recipe<std.Directory> {
 }
 
 /**
+ * Options for building and installing an npm package with pnpm.
+ *
+ * @param source - The pnpm package dependencies to install.
+ */
+interface PnpmInstallOptions {
+  source: std.RecipeLike<std.Directory>;
+}
+
+/**
+ * Install the dependencies from an npm package with pnpm. Returns a recipe
+ * containing everything from the package, plus a `node_modules` directory.
+ *
+ * @param options - The options for installing the package.
+ *
+ * @returns A recipe containing everything from the package, plus a `node_modules` directory.
+ */
+export function pnpmInstall(
+  options: PnpmInstallOptions,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    pnpm install --frozen-lockfile
+  `
+    .dependencies(std.toolchain, nodejs, pnpm)
+    .currentDir(std.outputPath)
+    .outputScaffold(options.source)
+    .unsafe({ networking: true })
+    .toDirectory();
+}
+
+/**
  * Options for installing a global npm package with pnpm.
  *
  * @param packageName - The name of the npm package to install.
