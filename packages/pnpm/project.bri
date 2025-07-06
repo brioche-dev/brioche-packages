@@ -1,5 +1,7 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
+import * as typer from "typer";
+import nodejs, { npmInstallGlobal } from "nodejs";
+import nushell from "nushell";
 
 export const project = {
   name: "pnpm",
@@ -32,4 +34,114 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
+}
+
+/**
+ * Options for installing a global npm package with pnpm.
+ *
+ * @param packageName - The name of the npm package to install.
+ * @param version - The version of the package to install.
+ * @param wrapBins - Whether to wrap the installed binaries.
+ */
+interface PnpmInstallGlobalOptions {
+  packageName: string;
+  version: string;
+  wrapBins?: boolean;
+}
+
+const BinList = typer.array(
+  typer.object({
+    name: typer.string(),
+  }),
+);
+
+/**
+ * Installs a global npm package using pnpm, similar to running the command
+ * `pnpm add --global`. Returns a recipe containing the installed package.
+ *
+ * @param options - The options for installing the global package.
+ *
+ * @returns A recipe containing the package
+ *
+ * @example
+ * ```typescript
+ * import * as std from "std";
+ * import { pnpmInstallGlobal } from "pnpm";
+ *
+ * // Install the dependency and return the path to the binary to run
+ * export default function () {
+ *   return pnpmInstallGlobal({
+ *     packageName: "aws-cdk",
+ *     version: "2.150.0",
+ *   }).pipe((npmPackage) => std.withRunnableLink(npmPackage, "bin/cdk"));
+ * };
+ * ```
+ */
+export function pnpmInstallGlobal(
+  options: PnpmInstallGlobalOptions,
+): std.Recipe<std.Directory> {
+  return std.recipe(async () => {
+    const { packageName, version, wrapBins = true } = options;
+
+    // Install the npm package with `pnpm add --global`. If we need to
+    // wrap the scripts afterward, we install under `.bin/`, otherwise we
+    // install under `bin/`.
+    const pnpmInstallDir = wrapBins ? ".bin" : "bin";
+    let recipe = std.runBash`
+      if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
+        echo "The NPM package ($package_name) is not an exact version ($version), please ensure the version is more specific."
+        exit 1
+      fi
+
+      pnpm config set globalBinDir "$PNPM_HOME/$pnpm_install_dir"
+      pnpm add --global "\${package_name}@\${version}"
+    `
+      .dependencies(std.toolchain, nodejs, pnpm)
+      .outputScaffold(std.directory())
+      .env({
+        package_name: packageName,
+        version,
+        pnpm_install_dir: pnpmInstallDir,
+        PNPM_HOME: std.outputPath,
+        PATH: std.tpl`${std.outputPath}/${pnpmInstallDir}`,
+      })
+      .unsafe({ networking: true })
+      .toDirectory();
+
+    if (wrapBins) {
+      // pnpm installs bins using a shell script binstub. When we wrap
+      // binaries, we create a runnable for each binstub.
+
+      // First, get a list of installed binstubs using a Nushell script.
+      const binsJson = await std
+        .process({
+          command: std.tpl`${nushell}/bin/nu`,
+          args: [Brioche.includeFile("find-pnpm-binstubs.nu")],
+          env: {
+            recipe,
+          },
+        })
+        .toFile()
+        .read();
+      const bins = typer.parseJson(BinList, binsJson);
+
+      // Add a runnable binary for each installed binstub script
+      const wrappedBins = bins.map(({ name }) => {
+        // Add a runnable in `bin/` to call the binstub script under `.bin/`
+        std.assert(name.startsWith(".bin"), `unexpected bin name: ${name}`);
+        const targetName = name.slice(1);
+
+        return std.addRunnable(std.directory(), targetName, {
+          command: "bash",
+          args: [{ relativePath: name }],
+          dependencies: [std.bash, nodejs],
+        });
+      });
+
+      // Merge the runnables into the recipe
+      recipe = std.merge(recipe, ...wrappedBins);
+    }
+
+    return recipe;
+  });
 }
