@@ -24,8 +24,9 @@ export function runtimeUtils(): std.Recipe<std.Directory> {
 
 interface RunnableData {
   command: RunnableTemplate;
-  args: RunnableTemplate[];
-  env: Record<string, RunnableTemplate>;
+  args: RunnableArgValue[];
+  env: Record<string, RunnableEnvValue>;
+  clearEnv?: boolean;
 }
 
 export function makeRunnableExecutable(
@@ -33,21 +34,10 @@ export function makeRunnableExecutable(
 ): std.Recipe<std.File> {
   const metadata = {
     command: data.command,
-    args: [
-      ...data.args.map((value) => ({
-        type: "arg",
-        value,
-      })),
-      { type: "rest" },
-    ],
-    env: Object.fromEntries(
-      Object.entries(data.env).map(([key, value]) => [
-        key,
-        { type: "set", value },
-      ]),
-    ),
-    clearEnv: false,
-  };
+    args: data.args,
+    env: data.env,
+    clearEnv: data.clearEnv ?? false,
+  } satisfies RunnableMetadata;
   const pack = {
     type: "metadata",
     resourcePaths: [],
@@ -71,6 +61,18 @@ export function makeRunnableExecutable(
     .toFile();
 }
 
+export type RunnableArgValue =
+  | { type: "arg"; value: RunnableTemplate }
+  | { type: "rest" };
+
+export type RunnableEnvValue =
+  | { type: "clear" }
+  | { type: "inherit" }
+  | { type: "set"; value: RunnableTemplate }
+  | { type: "fallback"; value: RunnableTemplate }
+  | { type: "prepend"; value: RunnableTemplate; separator: std.BString }
+  | { type: "append"; value: RunnableTemplate; separator: std.BString };
+
 export interface RunnableTemplate {
   components: RunnableTemplateComponent[];
 }
@@ -78,3 +80,19 @@ export interface RunnableTemplate {
 export type RunnableTemplateComponent =
   | { type: "literal"; value: std.BString }
   | { type: "relative_path"; path: std.BString };
+
+interface RunnableMetadata {
+  command: RunnableTemplate;
+  args: RunnableArgValue[] | undefined;
+  env: Record<string, RunnableEnvValue> | undefined;
+  clearEnv: boolean;
+  source?: RunnableSource | null | undefined;
+}
+
+interface RunnableSource {
+  path: RunnablePath;
+}
+
+type RunnablePath =
+  | { type: "relative_path"; path: std.BString }
+  | { type: "resource"; resource: std.BString };
