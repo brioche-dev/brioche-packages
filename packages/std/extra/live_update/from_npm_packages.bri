@@ -12,7 +12,7 @@ import type {} from "nushell";
  * @param packageName - The name of the NPM package to update.
  */
 interface LiveUpdateFromNpmPackagesExtraOptions {
-  packageName: string;
+  readonly packageName: string;
 }
 
 /**
@@ -22,7 +22,10 @@ interface LiveUpdateFromNpmPackagesExtraOptions {
  *   `extra.packageName` property containing the name of the NPM package.
  */
 interface LiveUpdateFromNpmPackagesOptions {
-  project: { version: string; extra: LiveUpdateFromNpmPackagesExtraOptions };
+  project: {
+    version: string;
+    readonly extra: LiveUpdateFromNpmPackagesExtraOptions;
+  };
 }
 
 /**
@@ -78,7 +81,7 @@ export function liveUpdateFromNpmPackages(
  * Interface representing the parsed NPM package information.
  */
 interface NpmPackageInfo {
-  packageName: string;
+  readonly packageName: string;
 }
 
 function tryParseNpmPackage(

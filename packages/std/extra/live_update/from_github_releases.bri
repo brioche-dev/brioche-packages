@@ -17,8 +17,8 @@ import type {} from "nushell";
  *   tag will be checked if it's a semver or semver-like version number.
  */
 interface LiveUpdateFromGithubReleasesOptions {
-  project: { version: string; repository: string };
-  matchTag?: RegExp;
+  project: { version: string; readonly repository: string };
+  readonly matchTag?: RegExp;
 }
 
 /**
@@ -76,8 +76,8 @@ export function liveUpdateFromGithubReleases(
  * Interface representing the parsed GitHub repository information.
  */
 interface GithubRepoInfo {
-  repoOwner: string;
-  repoName: string;
+  readonly repoOwner: string;
+  readonly repoName: string;
 }
 
 function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
@@ -108,10 +108,6 @@ function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
  * @throws If the repository URL cannot be parsed.
  */
 function parseGithubRepo(repo: string): GithubRepoInfo {
-  if (repo == null) {
-    throw new Error("Repository URL cannot be null or undefined");
-  }
-
   const info = tryParseGithubRepo(repo);
   if (info == null) {
     throw new Error(
