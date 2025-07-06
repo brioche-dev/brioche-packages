@@ -6,37 +6,109 @@ import * as typer from "typer";
 export const project = {
   name: "nodejs",
   version: "24.2.0",
-};
+  extra: {
+    currentMajorVersion: "24",
+    majorVersions: {
+      "24": "24.2.0",
+      "22": "22.17.0",
+    },
+  },
+} as const;
 
-function nodejsPrebuilt(): std.Recipe<std.Directory> {
-  switch (std.CURRENT_PLATFORM) {
-    case "x86_64-linux":
-      return Brioche.download(
-        `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
-      )
-        .unarchive("tar", "xz")
-        .peel();
-    case "aarch64-linux":
-      return Brioche.download(
-        `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-arm64.tar.xz`,
-      )
-        .unarchive("tar", "xz")
-        .peel();
-    default:
-      throw new Error(
-        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the nodejs package`,
-      );
-  }
+std.assert(
+  project.extra.currentMajorVersion in project.extra.majorVersions,
+  "NodeJS package extra.currentVersion not found in extra.majorVersion",
+);
+std.assert(
+  Object.keys(project.extra.majorVersions).some((majorVersion) =>
+    project.version.startsWith(`${majorVersion}.`),
+  ),
+  "NodeJS package version not found in extra.minorVersions",
+);
+
+type NodeVersion = keyof typeof project.extra.majorVersions;
+
+const prebuiltBinaries: Record<
+  string,
+  Record<string, std.Recipe<std.Directory>>
+> = {
+  "22": {
+    "x86_64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["22"]}/node-v${project.extra.majorVersions["22"]}-linux-x64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["22"]}/node-v${project.extra.majorVersions["22"]}-linux-arm64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
+  "24": {
+    "x86_64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-x64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-arm64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
+} satisfies Record<
+  NodeVersion,
+  Record<std.Platform, std.Recipe<std.Directory>>
+>;
+
+function prebuiltBinary(
+  version: NodeVersion,
+  platform: std.Platform,
+): std.Recipe<std.Directory> {
+  const prebuiltBinariesForVersion = prebuiltBinaries[version];
+  std.assert(
+    prebuiltBinariesForVersion != null,
+    `NodeJS version '${version}' is not supported, expected one of ${JSON.stringify(
+      Object.keys(prebuiltBinaries),
+    )}`,
+  );
+
+  const prebuilt = prebuiltBinariesForVersion[platform];
+  std.assert(
+    prebuilt != null,
+    `NodeJS ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
+      Object.keys(prebuiltBinariesForVersion),
+    )}`,
+  );
+
+  return prebuilt;
 }
 
 /**
- * The main Node.js recipe. Returns a recipe containing the following:
+ * Extra options for Node.js.
  *
- * - `bin/node`
- * - `bin/npm`
+ * @param version - The major version of Node.js to use. Defaults to the
+ *   current stable release (at the time the `nodejs` Brioche package was
+ *   last updated).
  */
-export default function nodejs(): std.Recipe<std.Directory> {
-  return nodejsPrebuilt()
+interface NodeOptions {
+  version?: NodeVersion;
+}
+
+/**
+ * The main Node.js recipe.
+ *
+ * @param options - Extra options for the Node.js recipe.
+ *
+ * @returns A recipe containing Node.js, including the binaries `bin/node`
+ *   and `bin/npm`.
+ */
+export default function nodejs(
+  options: NodeOptions = {},
+): std.Recipe<std.Directory> {
+  const { version = project.extra.currentMajorVersion } = options;
+
+  return prebuiltBinary(version, std.CURRENT_PLATFORM)
     .pipe((node) =>
       std.autopack(node, {
         globs: ["bin/**"],
