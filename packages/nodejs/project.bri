@@ -1,7 +1,7 @@
 import * as std from "std";
-import nushell from "nushell";
-import python from "python";
 import * as typer from "typer";
+import python from "python";
+import nushell, { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "nodejs",
@@ -133,8 +133,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     # Find Node.js releases by git tags
     let versionRefs = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
       | get ref
@@ -168,14 +168,7 @@ export function liveUpdate(): std.WithRunnable {
       # Set the current version
       | update version $latestVersionRef.tag
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
 /**

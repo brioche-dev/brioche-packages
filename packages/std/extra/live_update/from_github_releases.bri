@@ -1,5 +1,4 @@
 import * as std from "/core";
-import { withRunnable } from "../runnable.bri";
 import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
 import type {} from "nushell";
 
@@ -65,21 +64,16 @@ export function liveUpdateFromGithubReleases(
   const normalizeVersion = options.normalizeVersion ?? false;
 
   return std.recipe(async () => {
-    const { default: nushell } = await import("nushell");
+    const { nushellRunnable } = await import("nushell");
 
-    return withRunnable(std.directory(), {
-      command: "nu",
-      args: [
-        Brioche.includeFile("./scripts/live_update_from_github_releases.nu"),
-      ],
-      env: {
-        project: JSON.stringify(options.project),
-        repoOwner,
-        repoName,
-        matchTag: matchTag.source,
-        normalizeVersion: normalizeVersion.toString(),
-      },
-      dependencies: [nushell],
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_github_releases.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      repoOwner,
+      repoName,
+      matchTag: matchTag.source,
+      normalizeVersion: normalizeVersion.toString(),
     });
   });
 }
