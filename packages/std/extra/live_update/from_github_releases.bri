@@ -17,6 +17,9 @@ import type {} from "nushell";
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
  *   tag will be checked if it's a semver or semver-like version number.
+ * @param normalizeVersion - Whether to normalize the version number to
+ *   a semver-like version number. When enabled, the dashes and underscores
+ *   will be replaced with dots.
  */
 interface LiveUpdateFromGithubReleasesOptions {
   project: {
@@ -25,6 +28,7 @@ interface LiveUpdateFromGithubReleasesOptions {
     extra?: { releaseDate?: string };
   };
   readonly matchTag?: RegExp;
+  readonly normalizeVersion?: boolean;
 }
 
 /**
@@ -58,6 +62,7 @@ export function liveUpdateFromGithubReleases(
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
   const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
+  const normalizeVersion = options.normalizeVersion ?? false;
 
   return std.recipe(async () => {
     const { default: nushell } = await import("nushell");
@@ -72,6 +77,7 @@ export function liveUpdateFromGithubReleases(
         repoOwner,
         repoName,
         matchTag: matchTag.source,
+        normalizeVersion: normalizeVersion.toString(),
       },
       dependencies: [nushell],
     });
