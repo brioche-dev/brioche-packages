@@ -1,6 +1,6 @@
 import * as std from "/core";
 import { withRunnable } from "../runnable.bri";
-import { DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH } from "./index.bri";
+import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
@@ -70,7 +70,7 @@ export function liveUpdateFromNpmPackages(
       env: {
         project: JSON.stringify(options.project),
         packageName,
-        matchVersion: DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH.source,
+        matchVersion: DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH.source,
       },
       dependencies: [nushell],
     });
