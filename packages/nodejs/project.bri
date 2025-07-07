@@ -9,8 +9,8 @@ export const project = {
   extra: {
     currentMajorVersion: "24",
     majorVersions: {
-      "24": "24.2.0",
       "22": "22.17.0",
+      "24": "24.2.0",
     },
   },
 } as const;
@@ -135,7 +135,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
+    # Find Node.js releases by git tags
+    let versionRefs = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
@@ -143,12 +144,29 @@ export function liveUpdate(): std.WithRunnable {
         | get -i 0
       }
       | sort-by -n major minor patch
-      | last
-      | get tag
+    let latestVersionRef = $versionRefs | last
 
     $env.project
       | from json
-      | update version $version
+      | update extra.majorVersions {|project|
+        # Ensure the newest version is in the list of major versions, then
+        # update the newest minor/patch version of each major version
+        $project.extra.majorVersions
+          | upsert $latestVersionRef.major $latestVersionRef.tag
+          | transpose major version
+          | update version {|row|
+            $versionRefs
+              | where major == $row.major
+              | last
+              | get tag
+          }
+          | transpose -r
+          | into record
+      }
+      # Set the current major version
+      | update extra.currentMajorVersion $latestVersionRef.major
+      # Set the current version
+      | update version $latestVersionRef.tag
       | to json
   `);
 
