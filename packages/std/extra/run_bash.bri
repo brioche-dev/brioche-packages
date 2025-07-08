@@ -32,7 +32,7 @@ import { tools } from "/toolchain";
  *   // the absolute path of the file above
  *   return std.runBash`
  *     mkdir -p "$BRIOCHE_OUTPUT"
- *     cp "$file" > "$BRIOCHE_OUTPUT/hello.txt"
+ *     cat "$file" > "$BRIOCHE_OUTPUT/hello.txt"
  *   `
  *     .env({ file });
  * }
