@@ -21,9 +21,14 @@ if ($parsedTagName | length) == 0 {
   error make { msg: $'Latest release tag ($tagName) did not match regex ($env.matchTag)' }
 }
 
-let version = $parsedTagName.0.version?
+mut version = $parsedTagName.0.version?
 if $version == null {
   error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
+}
+
+if $env.normalizeVersion == "true" {
+  $version = $version
+    | str replace --all --regex "(-|_)" "."
 }
 
 $project = $project
