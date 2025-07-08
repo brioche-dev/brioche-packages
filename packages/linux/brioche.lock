@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.15.3.tar.xz": {
+    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.15.5.tar.xz": {
       "type": "sha256",
-      "value": "12b50c89925438d9cd7385a0cafc9c433e6562ac5df00a21889fce9f548d65b0"
+      "value": "2ca707939c14431232649874d438aa58f11b4b127290fa68d164f8bd79c688b5"
     }
   }
 }

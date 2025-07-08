@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/intel/tinycbor.git": {
+      "v0.6.1": "c0aad2fb2137a31b9845fbaae3653540c410f215"
+    }
+  }
+}

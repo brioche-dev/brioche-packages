@@ -1,6 +1,6 @@
 import * as std from "std";
 import python from "python";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libxml2",
@@ -57,8 +57,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let sourceUrl = http get https://download.gnome.org/sources/libxml2
       | lines
       | where {|it| $it | str contains 'href="' }
@@ -86,12 +86,5 @@ export function liveUpdate(): std.WithRunnable {
       | update extra.majorVersion $majorVersion
       | update extra.minorVersion $minorVersion
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }

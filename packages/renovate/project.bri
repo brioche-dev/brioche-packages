@@ -1,19 +1,74 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
+import nodejsRecipe from "nodejs";
+import pnpmRecipe, { pnpmInstall } from "pnpm";
+import python from "python";
+import { runNushell } from "nushell";
 
 export const project = {
   name: "renovate",
   version: "41.24.0",
-  extra: {
-    packageName: "renovate",
-  },
+  repository: "https://github.com/renovatebot/renovate.git",
 };
 
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+// Pin to Node.js v22
+const nodejs = nodejsRecipe({ version: "22" });
+const pnpm = pnpmRecipe({ nodejs });
+
 export default function renovate(): std.Recipe<std.Directory> {
-  return npmInstallGlobal({
-    packageName: project.extra.packageName,
-    version: project.version,
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/renovate"));
+  // Install dependencies using pnpm
+  // TODO: Can we get rid of dev dependencies (at least for the final output)?
+  const npmPackage = pnpmInstall({
+    source,
+    dependencies: [python],
+    nodejs,
+  });
+
+  // Run the Renovate build. We explicitly update the config to use the
+  // provided version of pnpm instead of trying to download Renovate's
+  // pinned version.
+  const dist = std.runBash`
+    pnpm --config.manage-package-manager-versions=false config set manage-package-manager-versions=false
+    pnpm build
+    mv dist "$BRIOCHE_OUTPUT"
+  `
+    .workDir(npmPackage)
+    .dependencies(pnpm)
+    .toDirectory();
+
+  // Set the release version number in `package.json`.
+  const packageJson = runNushell`
+      open --raw $env.BRIOCHE_OUTPUT
+      | from json
+      | update version $env.version
+      | to json
+      | save --force $env.BRIOCHE_OUTPUT
+  `
+    .outputScaffold(npmPackage.get("package.json"))
+    .env({ version: project.version })
+    .toFile();
+
+  // Create the final output. This includes the build output, `node_modules`
+  // for dependencies, and `package.json` for package metadata.
+  return std
+    .directory({
+      dist,
+      node_modules: npmPackage.get("node_modules"),
+      "package.json": packageJson,
+    })
+    .pipe((recipe) =>
+      // Add a runnable for the main Renovate CLI script
+      std.addRunnable(recipe, "bin/renovate", {
+        command: "node",
+        args: [{ relativePath: "dist/renovate.js" }],
+        dependencies: [nodejs],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/renovate"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -33,5 +88,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromNpmPackages({ project });
+  return std.liveUpdateFromGithubReleases({ project });
 }

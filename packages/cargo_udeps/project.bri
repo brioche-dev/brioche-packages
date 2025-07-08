@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_udeps",
-  version: "0.1.56",
+  version: "0.1.57",
   repository: "https://github.com/est31/cargo-udeps.git",
 };
 

@@ -1,6 +1,6 @@
 import * as std from "std";
 import jq from "jq";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libcap",
@@ -64,8 +64,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://git.kernel.org/pub/scm/libs/libcap/libcap.git/refs
       | lines
       | where {|it| ($it | str contains "/pub/scm/libs/libcap/libcap.git/tag/?h=cap") and (not ($it | str contains "-rc")) }
@@ -77,14 +77,7 @@ export function liveUpdate(): std.WithRunnable {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
 function briocheObjcopy(): std.Recipe<std.Directory> {

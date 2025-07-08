@@ -1,17 +1,17 @@
 import * as std from "std";
-import nushell from "nushell";
 import { goBuild } from "go";
 
 export const project = {
   name: "github_cli",
   version: "2.74.2",
+  repository: "https://github.com/cli/cli.git",
   extra: {
     releaseDate: "2025-06-17",
   },
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/cli/cli.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 
@@ -50,30 +50,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/cli/cli/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    let releaseDate = $releaseData
-      | get created_at
-      | into datetime
-      | format date "%Y-%m-%d"
-
-    $env.project
-      | from json
-      | update version $version
-      | update extra.releaseDate $releaseDate
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
 }

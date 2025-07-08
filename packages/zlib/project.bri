@@ -1,5 +1,5 @@
-import nushell from "nushell";
 import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "zlib",
@@ -46,8 +46,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://zlib.net
       | lines
       | where {|it| $it | str contains '<B> zlib ' }
@@ -59,12 +59,5 @@ export function liveUpdate(): std.WithRunnable {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }

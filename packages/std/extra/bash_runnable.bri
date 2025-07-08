@@ -1,6 +1,6 @@
 import * as std from "/core";
 import { tools } from "/toolchain";
-import { withRunnable, type RunnableTemplateValue } from "./runnable.bri";
+import { withRunnable, type RunnableTemplateEnvValue } from "./runnable.bri";
 
 export type BashRunnable = std.Recipe<std.Directory> & BashRunnableUtils;
 
@@ -16,10 +16,10 @@ export interface BashRunnableUtils {
   /**
    * Set environment variables when the Bash script gets run.
    */
-  env(values: Record<string, RunnableTemplateValue>): BashRunnable;
+  env(values: Record<string, RunnableTemplateEnvValue>): BashRunnable;
 
   /**
-   * Include additonal dependencies when the Bash script gets run. This
+   * Include additional dependencies when the Bash script gets run. This
    * will set the `$PATH` environment variable.
    */
   dependencies(...dependencies: std.RecipeLike<std.Directory>[]): BashRunnable;
@@ -72,7 +72,7 @@ export function bashRunnable(
 interface BashRunnableOptions {
   script: string;
   root: std.RecipeLike<std.Directory>;
-  env: Record<string, RunnableTemplateValue>;
+  env: Record<string, RunnableTemplateEnvValue>;
   dependencies: std.RecipeLike<std.Directory>[];
 }
 
@@ -85,7 +85,7 @@ function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
   });
 
   return std.mixin(recipe, {
-    env(values: Record<string, RunnableTemplateValue>): BashRunnable {
+    env(values: Record<string, RunnableTemplateEnvValue>): BashRunnable {
       return makeBashRunnable({
         ...options,
         env: { ...options.env, ...values },

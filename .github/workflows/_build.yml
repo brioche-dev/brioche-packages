@@ -101,7 +101,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: process-events
+          name: process-events-${{ github.run_id }}-${{ matrix.host.platform }}
           path: ~/.local/share/brioche/process-temp/*/events.bin.zst
           compression-level: 0
 
@@ -135,4 +135,4 @@ jobs:
     needs: [build]
     runs-on: ubuntu-24.04
     steps:
-      - run: ':'
+      - run: ":"

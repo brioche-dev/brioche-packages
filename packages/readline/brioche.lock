@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftp.gnu.org/gnu/readline/readline-8.2.13.tar.gz": {
+    "https://ftp.gnu.org/gnu/readline/readline-8.3.tar.gz": {
       "type": "sha256",
-      "value": "0e5be4d2937e8bd9b7cd60d46721ce79f88a33415dd68c2d738fb5924638f656"
+      "value": "fe5383204467828cd495ee8d1d3c037a7eba1389c22bc6a041f627976f9061cc"
     }
   }
 }
