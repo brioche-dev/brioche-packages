@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "renovate",
-  version: "41.20.0",
+  version: "41.24.0",
   extra: {
     packageName: "renovate",
   },
