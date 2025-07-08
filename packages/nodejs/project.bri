@@ -6,37 +6,109 @@ import * as typer from "typer";
 export const project = {
   name: "nodejs",
   version: "24.2.0",
-};
+  extra: {
+    currentMajorVersion: "24",
+    majorVersions: {
+      "22": "22.17.0",
+      "24": "24.2.0",
+    },
+  },
+} as const;
 
-function nodejsPrebuilt(): std.Recipe<std.Directory> {
-  switch (std.CURRENT_PLATFORM) {
-    case "x86_64-linux":
-      return Brioche.download(
-        `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
-      )
-        .unarchive("tar", "xz")
-        .peel();
-    case "aarch64-linux":
-      return Brioche.download(
-        `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-arm64.tar.xz`,
-      )
-        .unarchive("tar", "xz")
-        .peel();
-    default:
-      throw new Error(
-        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the nodejs package`,
-      );
-  }
+std.assert(
+  project.extra.currentMajorVersion in project.extra.majorVersions,
+  "Node.js package extra.currentVersion not found in extra.majorVersion",
+);
+std.assert(
+  Object.keys(project.extra.majorVersions).some((majorVersion) =>
+    project.version.startsWith(`${majorVersion}.`),
+  ),
+  "Node.js package version not found in extra.minorVersions",
+);
+
+type NodeVersion = keyof typeof project.extra.majorVersions;
+
+const prebuiltBinaries: Record<
+  string,
+  Record<string, std.Recipe<std.Directory>>
+> = {
+  "22": {
+    "x86_64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["22"]}/node-v${project.extra.majorVersions["22"]}-linux-x64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["22"]}/node-v${project.extra.majorVersions["22"]}-linux-arm64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
+  "24": {
+    "x86_64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-x64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-arm64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
+} satisfies Record<
+  NodeVersion,
+  Record<std.Platform, std.Recipe<std.Directory>>
+>;
+
+function prebuiltBinary(
+  version: NodeVersion,
+  platform: std.Platform,
+): std.Recipe<std.Directory> {
+  const prebuiltBinariesForVersion = prebuiltBinaries[version];
+  std.assert(
+    prebuiltBinariesForVersion != null,
+    `Node.js version '${version}' is not supported, expected one of ${JSON.stringify(
+      Object.keys(prebuiltBinaries),
+    )}`,
+  );
+
+  const prebuilt = prebuiltBinariesForVersion[platform];
+  std.assert(
+    prebuilt != null,
+    `Node.js ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
+      Object.keys(prebuiltBinariesForVersion),
+    )}`,
+  );
+
+  return prebuilt;
 }
 
 /**
- * The main Node.js recipe. Returns a recipe containing the following:
+ * Extra options for Node.js.
  *
- * - `bin/node`
- * - `bin/npm`
+ * @param version - The major version of Node.js to use. Defaults to the
+ *   current stable release (at the time the `nodejs` Brioche package was
+ *   last updated).
  */
-export default function nodejs(): std.Recipe<std.Directory> {
-  return nodejsPrebuilt()
+interface NodeOptions {
+  version?: NodeVersion;
+}
+
+/**
+ * The main Node.js recipe.
+ *
+ * @param options - Extra options for the Node.js recipe.
+ *
+ * @returns A recipe containing Node.js, including the binaries `bin/node`
+ *   and `bin/npm`.
+ */
+export default function nodejs(
+  options: NodeOptions = {},
+): std.Recipe<std.Directory> {
+  const { version = project.extra.currentMajorVersion } = options;
+
+  return prebuiltBinary(version, std.CURRENT_PLATFORM)
     .pipe((node) =>
       std.autopack(node, {
         globs: ["bin/**"],
@@ -63,7 +135,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): std.WithRunnable {
   const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
+    # Find Node.js releases by git tags
+    let versionRefs = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
@@ -71,12 +144,29 @@ export function liveUpdate(): std.WithRunnable {
         | get -i 0
       }
       | sort-by -n major minor patch
-      | last
-      | get tag
+    let latestVersionRef = $versionRefs | last
 
     $env.project
       | from json
-      | update version $version
+      | update extra.majorVersions {|project|
+        # Ensure the newest version is in the list of major versions, then
+        # update the newest minor/patch version of each major version
+        $project.extra.majorVersions
+          | upsert $latestVersionRef.major $latestVersionRef.tag
+          | transpose major version
+          | update version {|row|
+            $versionRefs
+              | where major == $row.major
+              | last
+              | get tag
+          }
+          | transpose -r
+          | into record
+      }
+      # Set the current major version
+      | update extra.currentMajorVersion $latestVersionRef.major
+      # Set the current version
+      | update version $latestVersionRef.tag
       | to json
   `);
 
@@ -146,11 +236,14 @@ export function npmInstall(
  * @param packageName - The name of the npm package to install.
  * @param version - The version of the package to install.
  * @param wrapBins - Whether to wrap the installed binaries.
+ * @param nodejs - The Node.js and npm recipe to use to install the package.
+ *   Can be used to use a specific version of Node.js.
  */
 interface NpmInstallGlobalOptions {
   packageName: string;
   version: string;
   wrapBins?: boolean;
+  nodejs?: std.RecipeLike<std.Directory>;
 }
 
 const BinList = typer.array(
@@ -186,7 +279,12 @@ export function npmInstallGlobal(
   options: NpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
   return std.recipe(async () => {
-    const { packageName, version, wrapBins = true } = options;
+    const {
+      packageName,
+      version,
+      wrapBins = true,
+      nodejs: nodejsDep = nodejs,
+    } = options;
 
     let recipe = std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
@@ -196,7 +294,7 @@ export function npmInstallGlobal(
 
       npm install --global "\${package_name}@\${version}"
     `
-      .dependencies(std.toolchain, nodejs, python)
+      .dependencies(std.toolchain, nodejsDep, python)
       .outputScaffold(std.directory())
       .env({
         package_name: packageName,
@@ -225,7 +323,7 @@ export function npmInstallGlobal(
         return std.addRunnable(std.directory(), name, {
           command: "node",
           args: [{ relativePath: target }],
-          dependencies: [nodejs],
+          dependencies: [nodejsDep],
         });
       });
 
