@@ -44,7 +44,7 @@ export default function renovate(): std.Recipe<std.Directory> {
   const packageJson = runNushell`
       open --raw $env.BRIOCHE_OUTPUT
       | from json
-      | update version { $env.version }
+      | update version $env.version
       | to json
       | save --force $env.BRIOCHE_OUTPUT
   `
