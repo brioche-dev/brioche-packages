@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "codex",
-  version: "0.1.2505172129",
+  version: "0.3.0",
   extra: {
     packageName: "@openai/codex",
   },
