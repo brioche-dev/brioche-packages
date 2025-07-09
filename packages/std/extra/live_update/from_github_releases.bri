@@ -6,12 +6,23 @@ import type {} from "nushell";
 // https://github.com/brioche-dev/brioche/issues/242
 
 /**
+ * Additional options for the project to update.
+ *
+ * @param versionDash - The version of the project (converted in dash format).
+ * @param versionUnderscore - The version of the project (converted in underscore format).
+ * @param releaseDate - The release date of the project in the format `YYYY-MM-DD`
+ */
+interface LiveUpdateFromGithubReleasesProjectExtraOptions {
+  versionDash?: string;
+  versionUnderscore?: string;
+  releaseDate?: string;
+}
+
+/**
  * Options for the live update from GitHub releases.
  *
  * @param project - The project export that should be updated. Must include a
- *   `repository` property containing a GitHub repository URL. Optionally,
- *   a release date can be provided in the extra field, it should
- *   represent the date of the latest release in the format `YYYY-MM-DD`.
+ *   `repository` property containing a GitHub repository URL.
  * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
@@ -24,7 +35,7 @@ interface LiveUpdateFromGithubReleasesOptions {
   project: {
     version: string;
     readonly repository: string;
-    extra?: { releaseDate?: string };
+    extra?: LiveUpdateFromGithubReleasesProjectExtraOptions;
   };
   readonly matchTag?: RegExp;
   readonly normalizeVersion?: boolean;
