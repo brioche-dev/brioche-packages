@@ -6,11 +6,11 @@ import type {} from "nushell";
 // https://github.com/brioche-dev/brioche/issues/242
 
 /**
- * Extra options for the live update from npm packages.
+ * Additional options for the project to update.
  *
  * @param packageName - The name of the npm package to update.
  */
-interface LiveUpdateFromNpmPackagesExtraOptions {
+interface LiveUpdateFromNpmPackagesProjectExtraOptions {
   readonly packageName: string;
 }
 
@@ -23,7 +23,7 @@ interface LiveUpdateFromNpmPackagesExtraOptions {
 interface LiveUpdateFromNpmPackagesOptions {
   project: {
     version: string;
-    readonly extra: LiveUpdateFromNpmPackagesExtraOptions;
+    readonly extra: LiveUpdateFromNpmPackagesProjectExtraOptions;
   };
 }
 
@@ -81,7 +81,7 @@ interface NpmPackageInfo {
 }
 
 function tryParseNpmPackage(
-  extraOptions: LiveUpdateFromNpmPackagesExtraOptions,
+  extraOptions: LiveUpdateFromNpmPackagesProjectExtraOptions,
 ): NpmPackageInfo | null {
   const match = extraOptions.packageName.match(/^(?<packageName>[\w\.@/-]+)$/);
 
@@ -103,7 +103,7 @@ function tryParseNpmPackage(
  * @throws If the package name cannot be parsed.
  */
 function parseNpmPackage(
-  extraOptions: LiveUpdateFromNpmPackagesExtraOptions,
+  extraOptions: LiveUpdateFromNpmPackagesProjectExtraOptions,
 ): NpmPackageInfo {
   const info = tryParseNpmPackage(extraOptions);
   if (info == null) {
