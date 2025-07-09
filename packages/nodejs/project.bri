@@ -130,20 +130,28 @@ export default function nodejs(
     .pipe((node) => std.withRunnableLink(node, "bin/node"));
 }
 
-export async function test(): Promise<std.Recipe<std.File>> {
-  const script = std.runBash`
-    node --version | tee "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(nodejs)
-    .toFile();
+export function test(): std.Recipe<std.Directory> {
+  const nodeVersions = Object.keys(
+    project.extra.majorVersions,
+  ) as NodeVersion[];
 
-  const result = (await script.read()).trim();
+  const tests = nodeVersions.map(async (version) => {
+    const script = std.runBash`
+      node --version | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(nodejs({ version }))
+      .toFile();
 
-  // Check that the result contains the expected version
-  const expected = `v${project.version}`;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+    const result = (await script.read()).trim();
 
-  return script;
+    // Check that the result contains the expected version
+    const expected = `v${project.extra.majorVersions[version]}`;
+    std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
 }
 
 export function liveUpdate(): NushellRunnable {
