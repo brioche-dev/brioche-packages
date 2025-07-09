@@ -9,8 +9,9 @@ export const project = {
   extra: {
     currentMajorVersion: "24",
     majorVersions: {
-      "22": "22.17.0",
       "24": "24.2.0",
+      "22": "22.17.0",
+      "20": "20.19.3",
     },
   },
 } as const;
@@ -32,6 +33,18 @@ const prebuiltBinaries: Record<
   string,
   Record<string, std.Recipe<std.Directory>>
 > = {
+  "24": {
+    "x86_64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-x64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-arm64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
   "22": {
     "x86_64-linux": Brioche.download(
       `https://nodejs.org/dist/v${project.extra.majorVersions["22"]}/node-v${project.extra.majorVersions["22"]}-linux-x64.tar.xz`,
@@ -44,14 +57,14 @@ const prebuiltBinaries: Record<
       .unarchive("tar", "xz")
       .peel(),
   },
-  "24": {
+  "20": {
     "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-x64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.majorVersions["20"]}/node-v${project.extra.majorVersions["20"]}-linux-x64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-arm64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.majorVersions["20"]}/node-v${project.extra.majorVersions["20"]}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
@@ -162,6 +175,7 @@ export function liveUpdate(): NushellRunnable {
           }
           | transpose -r
           | into record
+          | sort -r
       }
       # Set the current major version
       | update extra.currentMajorVersion $latestVersionRef.major
