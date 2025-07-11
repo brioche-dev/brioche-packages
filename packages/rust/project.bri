@@ -2,7 +2,7 @@ import * as std from "std";
 import cargoChef from "cargo_chef";
 import * as TOML from "smol_toml";
 import * as t from "typer";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "rust",
@@ -127,8 +127,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://api.github.com/repos/rust-lang/rust/git/matching-refs/tags
       | get ref
       | each {|ref|
@@ -144,14 +144,7 @@ export function liveUpdate(): std.WithRunnable {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
 /**

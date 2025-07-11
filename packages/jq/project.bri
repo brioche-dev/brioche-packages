@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "jq",
-  version: "1.8.0",
+  version: "1.8.1",
   repository: "https://github.com/jqlang/jq",
 };
 

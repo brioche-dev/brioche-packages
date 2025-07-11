@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/axodotdev/cargo-dist.git": {
+      "v0.28.0": "b96f4b7d6f3e9e5c36e25b08a63306df83d8893f"
+    }
+  }
+}

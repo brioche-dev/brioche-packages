@@ -1,10 +1,22 @@
 import * as std from "/core";
-import { withRunnable } from "./runnable.bri";
-import { DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH } from "./live_update.bri";
+import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
 // https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param versionDash - The version of the project (converted in dash format).
+ * @param versionUnderscore - The version of the project (converted in underscore format).
+ * @param releaseDate - The release date of the project in the format `YYYY-MM-DD`
+ */
+interface LiveUpdateFromGithubReleasesProjectExtraOptions {
+  versionDash?: string;
+  versionUnderscore?: string;
+  releaseDate?: string;
+}
 
 /**
  * Options for the live update from GitHub releases.
@@ -15,16 +27,24 @@ import type {} from "nushell";
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
  *   tag will be checked if it's a semver or semver-like version number.
+ * @param normalizeVersion - Whether to normalize the version number to
+ *   a semver-like version number. When enabled, the dashes and underscores
+ *   will be replaced with dots.
  */
 interface LiveUpdateFromGithubReleasesOptions {
-  project: { version: string; repository: string };
-  matchTag?: RegExp;
+  project: {
+    version: string;
+    readonly repository: string;
+    extra?: LiveUpdateFromGithubReleasesProjectExtraOptions;
+  };
+  readonly matchTag?: RegExp;
+  readonly normalizeVersion?: boolean;
 }
 
 /**
  * Return a runnable recipe to live-update a project based on the latest release
  * tag from a GitHub repository. The project's version will be set based on a
- * regex match against the latest tag name. The repository is inferrred from the
+ * regex match against the latest tag name. The repository is inferred from the
  * `repository` field of the project.
  *
  * @param options - Options for the live update from GitHub releases.
@@ -51,47 +71,20 @@ export function liveUpdateFromGithubReleases(
   options: LiveUpdateFromGithubReleasesOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
-  const matchTag = options.matchTag ?? DEFAULT_LIVE_UDPATE_REGEX_VERSION_MATCH;
+  const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
+  const normalizeVersion = options.normalizeVersion ?? false;
 
   return std.recipe(async () => {
-    const { default: nushell } = await import("nushell");
+    const { nushellRunnable } = await import("nushell");
 
-    const src = std.file(std.indoc`
-      # Include GitHub Token if present (for increased rate limits)
-      mut gh_headers = []
-      if ($env.GITHUB_TOKEN? | default "") != "" {
-        $gh_headers ++= [Authorization $'Bearer ($env.GITHUB_TOKEN)']
-      }
-
-      let tagName = http get --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
-        | get tag_name
-
-      let parsedTagName = $tagName | parse --regex $env.matchTag
-      if ($parsedTagName | length) == 0 {
-        error make { msg: $'Latest release tag ($tagName) did not match regex ($env.matchTag)' }
-      }
-
-      let version = $parsedTagName.0.version?
-      if $version == null {
-        error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
-      }
-
-      $env.project
-        | from json
-        | update version $version
-        | to json
-    `);
-
-    return withRunnable(std.directory(), {
-      command: "nu",
-      args: [src],
-      env: {
-        project: JSON.stringify(options.project),
-        repoOwner,
-        repoName,
-        matchTag: matchTag.source,
-      },
-      dependencies: [nushell],
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_github_releases.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      repoOwner,
+      repoName,
+      matchTag: matchTag.source,
+      normalizeVersion: normalizeVersion.toString(),
     });
   });
 }
@@ -100,8 +93,8 @@ export function liveUpdateFromGithubReleases(
  * Interface representing the parsed GitHub repository information.
  */
 interface GithubRepoInfo {
-  repoOwner: string;
-  repoName: string;
+  readonly repoOwner: string;
+  readonly repoName: string;
 }
 
 function tryParseGithubRepo(repo: string): GithubRepoInfo | null {

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.com/libeigen/eigen.git": {
+      "3.4.0": "3147391d946bb4b6c68edd901f2add6ac1f31f8c"
+    }
+  }
+}

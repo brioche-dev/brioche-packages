@@ -1,0 +1,52 @@
+import * as std from "std";
+import nushell from "/";
+
+/**
+ * Create a process recipe that runs the provided Nushell script when baked.
+ * The Nushell script should create the path `$env.BRIOCHE_OUTPUT`, which
+ * will be used as the output of the recipe.
+ *
+ * This function returns `std.Process`, which can be used for passing in
+ * extra dependencies or environment variables using `.dependencies()`
+ * or `.env()`, respectively, along with other process options.
+ *
+ * @description See also `nushellRunnable,` which will return a recipe that
+ * packages up a Nushell script that can be run outside of Brioche.
+ *
+ * @param strings - The template string parts for the Nushell script.
+ * @param values - The template string values.
+ *
+ * @returns A process recipe that runs the Nushell script.
+ *
+ * @example
+ * ```typescript
+ * import * as std from "std";
+ * import { runNushell } from "nushell";
+ *
+ * // Running `brioche build -o output` will create a directory `output`
+ * // with the file `hello.txt`. The result is cached, so the script won't
+ * // re-run unless the script changes or its inputs change.
+ * export default function () {
+ *   const file = std.file("Hello, world!");
+ *
+ *   // Return a recipe that will call the script, with `$file` set to
+ *   // the absolute path of the file above
+ *   return std.runNushell`
+ *     mkdir $env.BRIOCHE_OUTPUT
+ *     open $env.file | save $'($env.BRIOCHE_OUTPUT)/hello.txt'
+ *   `
+ *     .env({ file });
+ * }
+ * ```
+ */
+export function runNushell(
+  strings: TemplateStringsArray,
+  ...values: string[]
+): std.Process {
+  const script = std.indoc(strings, ...values);
+  return std.process({
+    command: "nu",
+    args: ["-c", script],
+    dependencies: [std.tools, nushell],
+  });
+}

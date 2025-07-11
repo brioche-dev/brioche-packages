@@ -2,11 +2,11 @@ import * as std from "std";
 import kmod from "kmod";
 import openssl from "openssl";
 import python from "python";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "linux",
-  version: "6.15.4",
+  version: "6.15.5",
   extra: {
     majorVersion: "6",
   },
@@ -133,8 +133,8 @@ export default function linux(
     .toDirectory();
 }
 
-export function liveUpdate(): std.WithRunnable {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let sourceUrl = http get https://cdn.kernel.org/pub/linux/kernel
       | lines
       | parse --regex '<a href="v(?<version>.+)/">'
@@ -157,14 +157,7 @@ export function liveUpdate(): std.WithRunnable {
       | update version $version
       | update extra.majorVersion $majorVersion
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
 type LinuxUpdateConfigValue =

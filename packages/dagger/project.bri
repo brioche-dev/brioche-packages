@@ -1,0 +1,57 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "dagger",
+  version: "0.18.12",
+  repository: "https://github.com/dagger/dagger.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function dagger(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/dagger/dagger/engine.Version=v${project.version}`,
+        // The engine can be downloaded from `docker-image://registry.dagger.io/engine`.
+        // Here, we need to enforce the correct tag for the engine.
+        // Which is the same as the CLI version.
+        "-X",
+        `github.com/dagger/dagger/engine.Tag=v${project.version}`,
+      ],
+    },
+    path: "./cmd/dagger",
+    runnable: "bin/dagger",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    dagger version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(dagger)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `dagger v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

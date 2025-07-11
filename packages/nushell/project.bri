@@ -2,6 +2,9 @@ import * as std from "std";
 import openssl from "openssl";
 import { cargoBuild } from "rust";
 
+export { nushellRunnable, type NushellRunnable } from "./nushell_runnable.bri";
+export { runNushell } from "./run_nushell.bri";
+
 export const project = {
   name: "nushell",
   version: "0.105.1",

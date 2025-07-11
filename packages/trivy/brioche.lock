@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/aquasecurity/trivy.git": {
-      "v0.63.0": "69093d2c23b275d79a69acfa604c5d159c7c2904"
+      "v0.64.1": "86ee3c1176d4707536914dfa65ac8eca452e14cd"
     }
   }
 }
