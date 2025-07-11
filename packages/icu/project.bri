@@ -1,9 +1,9 @@
 import * as std from "std";
-import { nushellRunnable, NushellRunnable } from "nushell";
 
 export const project = {
   name: "icu",
   version: "77.1",
+  repository: "https://github.com/unicode-org/icu",
   extra: {
     versionDash: "77-1",
     versionUnderscore: "77_1",
@@ -11,16 +11,17 @@ export const project = {
 };
 
 std.assert(
-  project.extra.versionDash === project.version.replaceAll(".", "-"),
+  project.extra.versionDash === std.projectVersionToDashFormat({ project }),
   `expected 'project.extra.versionDash' field '${project.extra.versionDash}' to match version '${project.version}'`,
 );
 std.assert(
-  project.extra.versionUnderscore === project.version.replaceAll(".", "_"),
+  project.extra.versionUnderscore ===
+    std.projectVersionToUnderscoreFormat({ project }),
   `expected 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
 );
 
 const source = Brioche.download(
-  `https://github.com/unicode-org/icu/releases/download/release-${project.extra.versionDash}/icu4c-${project.extra.versionUnderscore}-src.tgz`,
+  `${project.repository}/releases/download/release-${project.extra.versionDash}/icu4c-${project.extra.versionUnderscore}-src.tgz`,
 ).unarchive("tar", "gzip");
 
 export default function icu(): std.Recipe<std.Directory> {
@@ -89,25 +90,10 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): NushellRunnable {
-  return nushellRunnable`
-    let releaseData = http get https://api.github.com/repos/unicode-org/icu/releases/latest
-
-    let versionDash = $releaseData
-      | get tag_name
-      | str replace --regex '^release-' ''
-
-    let versionUnderscore = $versionDash
-      | str replace '-' '_'
-
-    let version = $versionDash
-      | str replace '-' '.'
-
-    $env.project
-      | from json
-      | update version $version
-      | update extra.versionDash $versionDash
-      | update extra.versionUnderscore $versionUnderscore
-      | to json
-  `.env({ project: JSON.stringify(project) });
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>.*)$/,
+    normalizeVersion: true,
+  });
 }

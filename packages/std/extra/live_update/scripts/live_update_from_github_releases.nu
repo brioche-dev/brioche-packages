@@ -34,10 +34,24 @@ if $env.normalizeVersion == "true" {
 $project = $project
   | update version $version
 
+if ($project | get extra?.versionDash?) != null {
+  let $versionDash = $version
+    | str replace --all "." "-"
+
+  $project = $project
+    | update extra.versionDash $versionDash
+}
+
+if ($project | get extra?.versionUnderscore?) != null {
+  let $versionUnderscore = $version
+    | str replace --all "." "_"
+
+  $project = $project
+    | update extra.versionUnderscore $versionUnderscore
+}
+
 # Extract the release date (if needed by the project)
-let releaseDate = $project
-  | get extra?.releaseDate?
-if $releaseDate != null {
+if ($project | get extra?.releaseDate?) != null {
   let $createdDate = $releaseInfo
     | get created_at
     | into datetime

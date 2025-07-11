@@ -1,0 +1,139 @@
+import { PROJECT_VERSION_SEMVER_MATCH } from "./index.bri";
+
+/**
+ * All the possible project version format type.
+ */
+ const ProjectVersionFormatType = {
+   DOT: ".",
+   DASH: "-",
+   UNDERSCORE: "_",
+ } as const;
+
+/**
+ * Options for the project version format.
+ */
+export interface ProjectVersionFormatOptions {
+  project: {
+    version: string;
+  };
+}
+
+/**
+ * Formats the project version to a dash format.
+ *
+ * @param options - Options for the project version format.
+ *
+ * @returns The formatted project version.
+ *
+ * @throws Error if the project version is not a semver-like version.
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   extra: {
+ *     versionDash: "0-1-0",
+ *   },
+ * };
+ *
+ * std.assert(
+ *   project.extra.versionDash === std.projectVersionToDashFormat({ project })
+ * };
+ * ```
+ */
+export function projectVersionToDashFormat(
+  options: ProjectVersionFormatOptions,
+): string {
+  const { version: matchedVersion, metadata: matchedMetadata } =
+    extractProjectVersion(options.project.version);
+
+  let finalVersion = matchedVersion.replaceAll(
+    ProjectVersionFormatType.DOT.toString(),
+    ProjectVersionFormatType.DASH.toString(),
+  );
+
+  if (matchedMetadata != null) {
+    finalVersion += `-${matchedMetadata}`;
+  }
+
+  return finalVersion;
+}
+
+/**
+ * Formats the project version to a underscore format.
+ *
+ * @param options - Options for the project version format.
+ *
+ * @returns The formatted project version.
+ *
+ * @throws Error if the project version is not a semver-like version.
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   extra: {
+ *     versionUnderscore: "0_1_0",
+ *   },
+ * };
+ *
+ * std.assert(
+ *   project.extra.versionUnderscore === std.projectVersionToUnderscoreFormat({ project })
+ * };
+ * ```
+ */
+export function projectVersionToUnderscoreFormat(
+  options: ProjectVersionFormatOptions,
+): string {
+  const { version: matchedVersion, metadata: matchedMetadata } =
+    extractProjectVersion(options.project.version);
+
+  let finalVersion = matchedVersion.replaceAll(
+    ProjectVersionFormatType.DOT.toString(),
+    ProjectVersionFormatType.UNDERSCORE.toString(),
+  );
+
+  if (matchedMetadata != null) {
+    finalVersion += `-${matchedMetadata}`;
+  }
+
+  return finalVersion;
+}
+
+/**
+ * Interface representing the project verions information.
+ */
+interface ProjectVersionInformation {
+  version: string;
+  metadata: string | undefined;
+}
+
+/**
+ * Extracts the project version information from a string.
+ *
+ * @param projectVersion - The project version string to extract information from.
+ *
+ * @returns An object containing the version and metadata.
+ *
+ * @throws Error if the project version is not a semver-like version.
+ */
+function extractProjectVersion(
+  projectVersion: string,
+): ProjectVersionInformation {
+  const match = projectVersion.match(PROJECT_VERSION_SEMVER_MATCH);
+
+  const { version: matchedVersion, metadata: matchedMetadata } =
+    match?.groups ?? {};
+  if (matchedVersion == null) {
+    throw new Error(
+      `Project version '${projectVersion}' is not a semver-like version`,
+    );
+  }
+
+  return {
+    version: matchedVersion,
+    metadata: matchedMetadata,
+  };
+}

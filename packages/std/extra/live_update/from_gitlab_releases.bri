@@ -6,6 +6,17 @@ import type {} from "nushell";
 // https://github.com/brioche-dev/brioche/issues/242
 
 /**
+ * Additional options for the project to update.
+ *
+ * @param versionDash - The version of the project (converted in dash format).
+ * @param versionUnderscore - The version of the project (converted in underscore format).
+ */
+interface LiveUpdateFromGitlabReleasesProjectExtraOptions {
+  versionDash?: string;
+  versionUnderscore?: string;
+}
+
+/**
  * Options for the live update from GitLab releases.
  *
  * @param project - The project export that should be updated. Must include a
@@ -19,7 +30,11 @@ import type {} from "nushell";
  *   will be replaced with dots.
  */
 interface LiveUpdateFromGitlabReleasesOptions {
-  project: { version: string; readonly repository: string };
+  project: {
+    version: string;
+    readonly repository: string;
+    extra?: LiveUpdateFromGitlabReleasesProjectExtraOptions;
+  };
   readonly matchTag?: RegExp;
   readonly normalizeVersion?: boolean;
 }
