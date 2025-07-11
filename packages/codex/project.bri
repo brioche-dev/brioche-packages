@@ -1,4 +1,5 @@
 import * as std from "std";
+import openssl from "openssl";
 import { cargoBuild } from "rust";
 
 export const project = {
@@ -7,15 +8,23 @@ export const project = {
   repository: "https://github.com/openai/codex.git",
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `rust-v${project.version}`,
+const source = std.recipe(() => {
+  const source = Brioche.gitCheckout({
+    repository: project.repository,
+    ref: `rust-v${project.version}`,
+  });
+
+  // The Rust source code of the package is located in
+  // the codex-rs directory. Meaning the Cargo.toml file
+  // is not located at the root folder of the repository.
+  return std.glob(source, ["codex-rs/*"]).peel();
 });
 
 export default function codex(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    path: "codex-rs/cli",
+    path: "cli",
+    dependencies: [openssl],
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
 }
 
@@ -29,7 +38,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  const expected = `codex-cli ${project.version}`;
   std.assert(result === expected, `expected ${expected}, got ${result}`);
 
   return script;
