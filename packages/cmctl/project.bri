@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "cmctl",
-  version: "2.2.0",
+  version: "2.3.0",
   repository: "https://github.com/cert-manager/cmctl.git",
 };
 
