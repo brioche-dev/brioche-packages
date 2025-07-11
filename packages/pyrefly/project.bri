@@ -4,7 +4,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "pyrefly",
-  version: "0.23.0",
+  version: "0.23.1",
   repository: "https://github.com/facebook/pyrefly.git",
 };
 
