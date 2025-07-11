@@ -38,7 +38,7 @@ export default function steampipe(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    steampipe --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+    steampipe --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(steampipe)
     .toFile();
