@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "steampipe",
-  version: "2.0.1",
+  version: "2.1.0",
   repository: "https://github.com/turbot/steampipe.git",
 };
 
