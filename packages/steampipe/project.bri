@@ -1,22 +1,36 @@
 import * as std from "std";
+import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
   name: "steampipe",
   version: "2.1.0",
   repository: "https://github.com/turbot/steampipe.git",
+  extra: {
+    releaseDate: "2025-07-09",
+  },
 };
 
-const source = Brioche.gitCheckout({
+const gitRef = await Brioche.gitRef({
   repository: project.repository,
   ref: `v${project.version}`,
 });
+const source = gitCheckout(gitRef);
 
 export default function steampipe(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
-      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `main.version=${project.version}`,
+        "-X",
+        `main.commit=${gitRef.commit}`,
+        "-X",
+        `main.date=${project.extra.releaseDate}`,
+      ],
     },
     runnable: "bin/steampipe",
   });
