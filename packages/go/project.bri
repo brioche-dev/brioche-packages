@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "go",
-  version: "1.24.4",
+  version: "1.24.5",
 };
 
 function goPrebuilt(): std.Recipe<std.Directory> {
