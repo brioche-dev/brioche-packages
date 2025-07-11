@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://nodejs.org/dist/v24.3.0/node-v24.3.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v24.4.0/node-v24.4.0-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "9729d0ecc69fad6591e4e19b46854881e8cc9d865cf03fc951a8abc567854f5e"
+      "value": "48ecb7ee501f69e2a27d9b4b724c05e82bbd1cf03df7152ce37628956b8303a7"
     },
-    "https://nodejs.org/dist/v24.3.0/node-v24.3.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v24.4.0/node-v24.4.0-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "a962afadaa8b94bae8bff87ddd6c11f7aae621032424ef05c0a4fe2537fa4de0"
+      "value": "af59f88ed35c68f7196dc94938e74327e3abe62055b831746de5b23bd7e1670a"
     }
   }
 }
