@@ -134,26 +134,43 @@ export function gitCheckout(
 
     // Clone and fetch only the specified commit. See this article:
     // https://about.gitlab.com/blog/whats-new-in-git-2-49-0/#thin-clone-using---revision
-    let repo = std.runBash`
-      git -c advice.detachedHead=false clone --depth 1 --revision "$commit" "$repository" "$BRIOCHE_OUTPUT"
-    `
-      .dependencies(git)
-      .env({
-        repository,
-        commit,
+    let repo = std
+      .process({
+        command: "git",
+        args: [
+          "-c",
+          "advice.detachedHead=false",
+          "clone",
+          "--depth",
+          "1",
+          "--revision",
+          commit,
+          repository,
+          // Clone into the output directory
+          std.outputPath,
+        ],
+        dependencies: [git],
+        unsafe: { networking: true },
       })
-      .outputScaffold(std.directory())
-      .unsafe({ networking: true })
       .toDirectory();
 
     if (options.submodules === true) {
-      repo = std.runBash`
-        cd "$BRIOCHE_OUTPUT"
-        git submodule update --init --recursive
-      `
-        .dependencies(git)
-        .outputScaffold(repo)
-        .unsafe({ networking: true })
+      repo = std
+        .process({
+          command: "git",
+          args: [
+            "-C",
+            std.outputPath,
+            "submodule",
+            "update",
+            "--init",
+            "--recursive",
+          ],
+          // std.toolchain() is required for git submodules (to access tools like sed, basename, ...)
+          dependencies: [std.toolchain, git],
+          outputScaffold: repo,
+          unsafe: { networking: true },
+        })
         .toDirectory();
     }
 
