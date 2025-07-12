@@ -1,18 +1,30 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
+import openssl from "openssl";
+import { cargoBuild } from "rust";
 
 export const project = {
   name: "codex",
-  version: "0.1.2505172129",
-  extra: {
-    packageName: "@openai/codex",
-  },
+  version: "0.5.0",
+  repository: "https://github.com/openai/codex.git",
 };
 
+const source = std.recipe(() => {
+  const source = Brioche.gitCheckout({
+    repository: project.repository,
+    ref: `rust-v${project.version}`,
+  });
+
+  // The Rust source code of the package is located in
+  // the codex-rs directory. Meaning the Cargo.toml file
+  // is not located at the root folder of the repository.
+  return std.glob(source, ["codex-rs/*"]).peel();
+});
+
 export default function codex(): std.Recipe<std.Directory> {
-  return npmInstallGlobal({
-    packageName: project.extra.packageName,
-    version: project.version,
+  return cargoBuild({
+    source,
+    path: "cli",
+    dependencies: [openssl],
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
 }
 
@@ -26,12 +38,15 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  const expected = `codex-cli ${project.version}`;
   std.assert(result === expected, `expected ${expected}, got ${result}`);
 
   return script;
 }
 
-export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromNpmPackages({ project });
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^rust-v(?<version>.*)$/,
+  });
 }
