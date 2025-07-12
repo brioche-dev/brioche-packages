@@ -5,7 +5,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "git",
-  version: "2.50.0",
+  version: "2.50.1",
 };
 
 const source = Brioche.download(
