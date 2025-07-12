@@ -5,11 +5,11 @@ import nushell, { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "24.2.0",
+  version: "24.4.0",
   extra: {
     currentMajorVersion: "24",
     majorVersions: {
-      "24": "24.2.0",
+      "24": "24.4.0",
       "22": "22.17.0",
       "20": "20.19.3",
     },
