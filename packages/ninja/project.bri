@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "ninja",
-  version: "1.13.0",
+  version: "1.13.1",
   repository: "https://github.com/ninja-build/ninja.git",
 };
 
