@@ -342,6 +342,31 @@ export function cargoBuild(options: CargoBuildOptions) {
 }
 
 /**
+ * Ensure that Cargo.lock file exists, and if it doesn't, generate it.
+ * Warning: if this file is missing from the upstream source, it breaks
+ * reproducible builds, but we need it to vendor the dependencies.
+ *
+ * @param crate - The crate to ensure the lock file exists for.
+ *
+ * @return The source crate with the lock file.
+ */
+function ensureLockFileExists(
+  crate: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd "$BRIOCHE_OUTPUT"
+
+    if [ ! -f Cargo.lock ]; then
+      cargo generate-lockfile
+    fi
+  `
+    .dependencies(rust)
+    .outputScaffold(crate)
+    .unsafe({ networking: true })
+    .toDirectory();
+}
+
+/**
  * Create a "skeleton crate" for a Rust crate. This is a crate that has
  * the minimal set of files needed for Cargo to consider it a valid crate,
  * namely so we can vendor dependencies. Without doing this, we would need
@@ -395,9 +420,14 @@ export function vendorCrate(
 ): std.Recipe<std.Directory> {
   const { source, cargoChefPrepare = true } = options;
 
+  // Generate the Cargo.lock file exists if it doesn't exist
+  const completeSource = ensureLockFileExists(source);
+
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
-  const skeletonCrate = cargoChefPrepare ? createSkeletonCrate(source) : source;
+  const skeletonCrate = cargoChefPrepare
+    ? createSkeletonCrate(completeSource)
+    : completeSource;
 
   // Vendor the dependencies with network access and save the Cargo config.toml
   // file, so the vendored dependencies are used
