@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/taiki-e/cargo-hack.git": {
+      "v0.6.37": "4be27a4bdd7f7ca9ee05d579ecb38246f983ec40"
+    }
+  }
+}
