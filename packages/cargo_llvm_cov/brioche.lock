@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/taiki-e/cargo-llvm-cov.git": {
+      "v0.6.17": "6c8640e8d2ddb8a4d072a4c16c1b5ff47ac0c210"
+    }
+  }
+}

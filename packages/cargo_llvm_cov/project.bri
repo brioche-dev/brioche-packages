@@ -1,0 +1,40 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_llvm_cov",
+  version: "0.6.17",
+  repository: "https://github.com/taiki-e/cargo-llvm-cov.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cargoLlvmCov(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/cargo-llvm-cov",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo llvm-cov --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoLlvmCov)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cargo-llvm-cov ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
