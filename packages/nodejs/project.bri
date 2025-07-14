@@ -194,7 +194,7 @@ export function liveUpdate(): NushellRunnable {
 }
 
 /**
- * Options for building and installing a npm package.
+ * Options for building and installing an npm package.
  *
  * @param source - The npm package dependencies to install.
  */

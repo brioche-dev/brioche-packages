@@ -33,7 +33,7 @@ interface LiveUpdateFromNpmPackagesOptions {
  * regex match against the latest version. The package name is inferred from the
  * extra options of the project.
  *
- * @remarks The version schema of a npm package should follow the SemVer
+ * @remarks The version schema of an npm package should follow the SemVer
  * specification.
  *
  * @param options - Options for the live update from npm packages.
