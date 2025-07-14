@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/taiki-e/cargo-hack.git": {
-      "v0.6.37": "4be27a4bdd7f7ca9ee05d579ecb38246f983ec40"
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-hack/0.6.37/download": {
+      "type": "sha256",
+      "value": "576e581d39dd89c9be7d54c0b8d810d31f2e132a021797edfd3a81a0ab788cdb"
     }
   }
 }

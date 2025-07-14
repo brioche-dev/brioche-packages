@@ -5,12 +5,16 @@ export const project = {
   name: "cargo_hack",
   version: "0.6.37",
   repository: "https://github.com/taiki-e/cargo-hack.git",
+  extra: {
+    crateName: "cargo-hack",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function cargoHack(): std.Recipe<std.Directory> {
   return cargoBuild({
