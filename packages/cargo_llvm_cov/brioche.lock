@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/taiki-e/cargo-llvm-cov.git": {
-      "v0.6.17": "6c8640e8d2ddb8a4d072a4c16c1b5ff47ac0c210"
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-llvm-cov/0.6.17/download": {
+      "type": "sha256",
+      "value": "5d99e575343630676845541dad8d99b46706b58df7438c1b1297a5472faf6ce4"
     }
   }
 }

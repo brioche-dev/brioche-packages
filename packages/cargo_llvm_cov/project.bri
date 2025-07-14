@@ -5,12 +5,16 @@ export const project = {
   name: "cargo_llvm_cov",
   version: "0.6.17",
   repository: "https://github.com/taiki-e/cargo-llvm-cov.git",
+  extra: {
+    crateName: "cargo-llvm-cov",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function cargoLlvmCov(): std.Recipe<std.Directory> {
   return cargoBuild({
