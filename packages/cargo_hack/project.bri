@@ -4,7 +4,6 @@ import rust, { cargoBuild } from "rust";
 export const project = {
   name: "cargo_hack",
   version: "0.6.37",
-  repository: "https://github.com/taiki-e/cargo-hack.git",
   extra: {
     crateName: "cargo-hack",
   },
@@ -40,5 +39,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromRustCrates({ project });
 }
