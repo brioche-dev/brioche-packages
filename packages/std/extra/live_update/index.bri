@@ -1,6 +1,7 @@
 export * from "./from_github_releases.bri";
 export * from "./from_gitlab_releases.bri";
 export * from "./from_npm_packages.bri";
+export * from "./from_rust_crates.bri";
 
 // The default regex used for matching versions. Strips an optional "v" prefix,
 // then matches the rest if it looks like a version number (either semver or
