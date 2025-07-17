@@ -187,7 +187,7 @@ interface CargoBuildParameters {
  *   unnecessarily re-downloading dependencies when the source changes.
  *   Defaults to `true` (should only be disabled when there's an upstream
  *   issue with `cargo chef`).
- * @param generateLockFile - Controls if the crate from `source` should
+ * @param generateLockfile - Controls if the crate from `source` should
  *   generate a `Cargo.lock` file before the build. Defaults to `false`.
  * @param buildParams - Optional build parameters.
  */
@@ -199,7 +199,7 @@ export interface CargoBuildOptions {
   env?: Record<string, std.ProcessTemplateLike>;
   unsafe?: std.ProcessUnsafeOptions;
   cargoChefPrepare?: boolean;
-  generateLockFile?: boolean;
+  generateLockfile?: boolean;
   buildParams?: CargoBuildParameters;
 }
 
@@ -235,7 +235,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
   const crate = vendorCrate({
     source: options.source,
-    generateLockFile: options.generateLockFile,
+    generateLockfile: options.generateLockfile,
     cargoChefPrepare: options.cargoChefPrepare,
   });
 
@@ -350,17 +350,17 @@ export function cargoBuild(options: CargoBuildOptions) {
  * Warning: if this file is missing from the upstream source, it breaks
  * reproducible builds, but we need it to vendor the dependencies.
  *
- * @param crate - The crate to ensure the lock file will be generated for.
- * @param allowLockFileGeneration - Whether to generate the lock file.
+ * @param crate - The crate to ensure the lockfile will be generated for.
+ * @param allowLockfileGeneration - Whether to generate the lockfile.
  *
- * @return The source crate with the lock file.
+ * @return The source crate with the lockfile.
  */
-function createLockFile(
+function createLockfile(
   crate: std.RecipeLike<std.Directory>,
-  allowLockFileGeneration: boolean,
+  allowLockfileGeneration: boolean,
 ): std.Recipe<std.Directory> {
   return std.runBash`
-    if [ "$allowLockFileGeneration" = "true" ]; then
+    if [ "$allowLockfileGeneration" = "true" ]; then
       cd "$BRIOCHE_OUTPUT"
 
       # Check if the Cargo.lock file exists, if yes, exit on error
@@ -374,7 +374,7 @@ function createLockFile(
   `
     .dependencies(rust)
     .outputScaffold(crate)
-    .env({ allowLockFileGeneration: allowLockFileGeneration.toString() })
+    .env({ allowLockfileGeneration: allowLockfileGeneration.toString() })
     .unsafe({ networking: true })
     .toDirectory();
 }
@@ -408,7 +408,7 @@ export function createSkeletonCrate(
  * Options for vendoring a Rust crate's dependencies.
  *
  * @param source - The crate to build.
- * @param generateLockFile - Generate a lock file if the crate has no
+ * @param generateLockfile - Generate a lockfile if the crate has no
  *   `Cargo.lock` file. Defaults to `false`.
  * @param cargoChefPrepare - Controls if the crate from `source` should get
  *   pre-processed by `cargo chef prepare` before being built, which avoids
@@ -418,7 +418,7 @@ export function createSkeletonCrate(
  */
 interface VendorCrateOptions {
   source: std.RecipeLike<std.Directory>;
-  generateLockFile?: boolean;
+  generateLockfile?: boolean;
   cargoChefPrepare?: boolean;
 }
 
@@ -434,10 +434,10 @@ interface VendorCrateOptions {
 export function vendorCrate(
   options: VendorCrateOptions,
 ): std.Recipe<std.Directory> {
-  const { source, cargoChefPrepare = true, generateLockFile = false } = options;
+  const { source, cargoChefPrepare = true, generateLockfile = false } = options;
 
   // Generate the Cargo.lock file exists if not already generated
-  const completeSource = createLockFile(source, generateLockFile);
+  const completeSource = createLockfile(source, generateLockfile);
 
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
