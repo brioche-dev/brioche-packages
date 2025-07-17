@@ -187,7 +187,7 @@ interface CargoBuildParameters {
  *   unnecessarily re-downloading dependencies when the source changes.
  *   Defaults to `true` (should only be disabled when there's an upstream
  *   issue with `cargo chef`).
- * @param generateLockfile - Controls if the crate from `source` should
+ * @param unsafeGenerateLockfile - Controls if the crate from `source` should
  *   generate a `Cargo.lock` file before the build. Defaults to `false`.
  * @param buildParams - Optional build parameters.
  */
@@ -199,7 +199,7 @@ export interface CargoBuildOptions {
   env?: Record<string, std.ProcessTemplateLike>;
   unsafe?: std.ProcessUnsafeOptions;
   cargoChefPrepare?: boolean;
-  generateLockfile?: boolean;
+  unsafeGenerateLockfile?: boolean;
   buildParams?: CargoBuildParameters;
 }
 
@@ -235,7 +235,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
   const crate = vendorCrate({
     source: options.source,
-    generateLockfile: options.generateLockfile,
+    unsafeGenerateLockfile: options.unsafeGenerateLockfile,
     cargoChefPrepare: options.cargoChefPrepare,
   });
 
@@ -408,7 +408,7 @@ export function createSkeletonCrate(
  * Options for vendoring a Rust crate's dependencies.
  *
  * @param source - The crate to build.
- * @param generateLockfile - Generate a lockfile if the crate has no
+ * @param unsafeGenerateLockfile - Generate a lockfile if the crate has no
  *   `Cargo.lock` file. Defaults to `false`.
  * @param cargoChefPrepare - Controls if the crate from `source` should get
  *   pre-processed by `cargo chef prepare` before being built, which avoids
@@ -418,7 +418,7 @@ export function createSkeletonCrate(
  */
 interface VendorCrateOptions {
   source: std.RecipeLike<std.Directory>;
-  generateLockfile?: boolean;
+  unsafeGenerateLockfile?: boolean;
   cargoChefPrepare?: boolean;
 }
 
@@ -434,10 +434,14 @@ interface VendorCrateOptions {
 export function vendorCrate(
   options: VendorCrateOptions,
 ): std.Recipe<std.Directory> {
-  const { source, cargoChefPrepare = true, generateLockfile = false } = options;
+  const {
+    source,
+    cargoChefPrepare = true,
+    unsafeGenerateLockfile = false,
+  } = options;
 
   // Generate the Cargo.lock file exists if not already generated
-  const completeSource = createLockfile(source, generateLockfile);
+  const completeSource = createLockfile(source, unsafeGenerateLockfile);
 
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
