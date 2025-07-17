@@ -1,0 +1,40 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_sort",
+  version: "2.0.1",
+  repository: "https://github.com/DevinR528/cargo-sort.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cargoSort(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/cargo-sort",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo sort --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoSort)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cargo-sort ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
