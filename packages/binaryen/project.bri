@@ -1,0 +1,55 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import git from "git";
+
+export const project = {
+  name: "binaryen",
+  version: "123",
+  repository: "https://github.com/WebAssembly/binaryen.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `version_${project.version}`,
+});
+
+export default function binaryen(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, git],
+    set: {
+      BUILD_TESTS: "OFF",
+    },
+    env: {
+      CMAKE_BUILD_PARALLEL_LEVEL: "16",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    wasm-shell --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(binaryen)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `wasm-shell version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^version_(?<version>.*)$/,
+  });
+}
