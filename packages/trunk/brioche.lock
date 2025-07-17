@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/trunk/0.21.14/download": {
+      "type": "sha256",
+      "value": "4f7fe1b23957a580be9a7a8b305c331b2977989f33695128d663380d09eaea37"
+    }
+  }
+}
