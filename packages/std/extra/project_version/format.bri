@@ -3,11 +3,11 @@ import { PROJECT_VERSION_SEMVER_MATCH } from "./index.bri";
 /**
  * All the possible project version format type.
  */
- const ProjectVersionFormatType = {
-   DOT: ".",
-   DASH: "-",
-   UNDERSCORE: "_",
- } as const;
+const ProjectVersionFormatType = {
+  DOT: ".",
+  DASH: "-",
+  UNDERSCORE: "_",
+} as const;
 
 /**
  * Options for the project version format.

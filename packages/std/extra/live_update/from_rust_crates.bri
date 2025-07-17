@@ -1,0 +1,116 @@
+import * as std from "/core";
+import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param crateName - The name of the rust crate to update.
+ */
+interface LiveUpdateFromRustCratesProjectExtraOptions {
+  readonly crateName: string;
+}
+
+/**
+ * Options for the live update from Rust crates.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `extra.crateName` property containing the name of the Rust crate.
+ */
+interface LiveUpdateFromRustCratesOptions {
+  project: {
+    version: string;
+    readonly extra: LiveUpdateFromRustCratesProjectExtraOptions;
+  };
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * version from the crates.io registry. The project's version will be set based on a
+ * regex match against the latest version. The crate name is inferred from the
+ * extra options of the project.
+ *
+ * @remarks The version schema of a Rust crate should follow the SemVer
+ * specification.
+ *
+ * @param options - Options for the live update from Rust crates.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   extra: {
+ *     crateName: "brioche",
+ *   },
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromRustCrates({ project });
+ * }
+ * ```
+ */
+export function liveUpdateFromRustCrates(
+  options: LiveUpdateFromRustCratesOptions,
+): std.Recipe<std.Directory> {
+  const { crateName } = parseRustCrate(options.project.extra);
+
+  return std.recipe(async () => {
+    const { nushellRunnable } = await import("nushell");
+
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_rust_crates.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      crateName,
+      matchVersion: DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH.source,
+    });
+  });
+}
+
+/**
+ * Interface representing the parsed Rust crate information.
+ */
+interface RustCrateInfo {
+  readonly crateName: string;
+}
+
+function tryParseRustCrate(
+  extraOptions: LiveUpdateFromRustCratesProjectExtraOptions,
+): RustCrateInfo | null {
+  const match = extraOptions.crateName.match(/^(?<crateName>[\w\.@/-]+)$/);
+
+  const { crateName } = match?.groups ?? {};
+  if (crateName == null) {
+    return null;
+  }
+
+  return { crateName };
+}
+
+/**
+ * Parse the Rust crate information to extract the crate name.
+ *
+ * @param extraOptions - The extra options containing the crate name.
+ *
+ * @returns An object containing the crate name.
+ *
+ * @throws If the crate name cannot be parsed.
+ */
+function parseRustCrate(
+  extraOptions: LiveUpdateFromRustCratesProjectExtraOptions,
+): RustCrateInfo {
+  const info = tryParseRustCrate(extraOptions);
+  if (info == null) {
+    throw new Error(
+      `Could not parse Rust crate from ${JSON.stringify(extraOptions)}`,
+    );
+  }
+
+  return info;
+}
