@@ -1,0 +1,45 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "wasm_server_runner",
+  version: "1.0.0",
+  extra: {
+    crateName: "wasm-server-runner",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function wasmServerRunner(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/wasm-server-runner",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no command line interface, so just checking that the binary exists
+  // and returns the expected error message
+  const script = std.runBash`
+    (wasm-server-runner --help 2>&1 || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(wasmServerRunner)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = `Error: expected to be run with a wasm target`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}
