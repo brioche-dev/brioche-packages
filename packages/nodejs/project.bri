@@ -14,7 +14,7 @@ export const project = {
       "20": "20.19.4",
     },
   },
-};
+} as const;
 
 std.assert(
   project.extra.currentMajorVersion in project.extra.majorVersions,
