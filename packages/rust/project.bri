@@ -1,11 +1,12 @@
 import * as std from "std";
+import cargoChef from "cargo_chef";
 import * as TOML from "smol_toml";
 import * as t from "typer";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "rust",
-  version: "1.86.0",
+  version: "1.88.0",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -56,7 +57,7 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
       throw new Error(`Rustup package ${pkgName} not found`);
     }
 
-    const pkgTarget = pkg.target["x86_64-unknown-linux-gnu"];
+    const pkgTarget = pkg.target[targetTriple()];
     if (pkgTarget?.available !== true) {
       continue;
     }
@@ -107,7 +108,7 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     rustc --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -126,13 +127,13 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://api.github.com/repos/rust-lang/rust/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
-        | parse --regex '^refs/tags/(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | parse --regex '^refs/tags/(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
         | get -i 0
       }
       | sort-by -n major minor patch
@@ -143,16 +144,22 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
+/**
+ * Parameters for building a Rust crate.
+ *
+ * @param features - An array of features to enable.
+ * @param defaultFeatures - Set to `false` to opt out of the crate's
+ *   default features.
+ * @param allFeatures - Set to `true` to enable all of the crate's features.
+ * @param bins - Set to `true` to build all bin targets in the crate, or set
+ *   to an array of bin targets to build. Defaults to `true` if no other
+ *   targets are specified.
+ * @param examples - Set to `true` to build all example targets in the crate,
+ *   or set to an array of example targets to build.
+ */
 interface CargoBuildParameters {
   features?: string[];
   defaultFeatures?: boolean;
@@ -161,6 +168,29 @@ interface CargoBuildParameters {
   examples?: boolean | string[];
 }
 
+/**
+ * Options for building and installing a Rust crate.
+ *
+ * @param source - The crate to build.
+ * @param path - Optionally set a subpath to the crate to build. This is useful
+ *   when building a crate within a workspace.
+ * @param runnable - Optionally set a path to the binary to run
+ *   by default (e.g. `bin/foo`).
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param unsafe - Optional unsafe options to enable when building. For example,
+ *   passing `{ networking: true }` will allow a `build.rs` script to
+ *   download files during the build. You must take extra care to ensure
+ *   the build is hermetic when setting these options!
+ * @param cargoChefPrepare - Controls if the crate from `source` should get
+ *   pre-processed by `cargo chef prepare` before being built, which avoids
+ *   unnecessarily re-downloading dependencies when the source changes.
+ *   Defaults to `true` (should only be disabled when there's an upstream
+ *   issue with `cargo chef`).
+ * @param unsafeGenerateLockfile - Controls if the crate from `source` should
+ *   generate a `Cargo.lock` file before the build. Defaults to `false`.
+ * @param buildParams - Optional build parameters.
+ */
 export interface CargoBuildOptions {
   source: std.RecipeLike<std.Directory>;
   path?: string;
@@ -168,6 +198,8 @@ export interface CargoBuildOptions {
   dependencies?: std.RecipeLike<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
   unsafe?: std.ProcessUnsafeOptions;
+  cargoChefPrepare?: boolean;
+  unsafeGenerateLockfile?: boolean;
   buildParams?: CargoBuildParameters;
 }
 
@@ -175,32 +207,11 @@ export interface CargoBuildOptions {
  * Build a Cargo crate. Defaults to the release profile. Calls
  * `cargo install` internally, and returns the contents of `$CARGO_INSTALL_ROOT`
  *
- * ## Options
+ * @param options - Options for building the crate.
  *
- * - `source`: The crate to build.
- * - `path`: Optionally set a subpath to the crate to build. This is useful
- *   when building a crate within a workspace.
- * - `runnable`: Optionally set a path to the binary to run
- *   by default (e.g. `bin/foo`).
- * - `dependencies`: Optionally add additional dependencies to the build.
- * - `env`: Optionally set environment variables for the build.
- * - `unsafe`: Optional unsafe options to enable when building. For example,
- *   passing `{ networking: true }` will allow a `build.rs` script to
- *   download files during the build. You must take extra care to ensure
- *   the build is hermetic when setting these options!
- * - `buildParams`: Optional build parameters:
- *   - `features`: An array of features to enable.
- *   - `defaultFeatures`: Set to `false` to opt out of the crate's
- *     default features.
- *   - `allFeatures`: Set to `true` to enable all of the crate's features.
- *   - `bins`: Set to `true` to build all bin targets in the crate, or set
- *     to an array of bin targets to build. Defaults to `true` if no other
- *     targets are specified.
- *   - `examples`: Set to `true` to build all example targets in the crate,
- *     or set to an array of example targets to build.
+ * @returns The contents of `$CARGO_INSTALL_ROOT` containing the built crate
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import openssl from "openssl";
  * import { cargoBuild } from "rust";
@@ -222,7 +233,11 @@ export interface CargoBuildOptions {
  */
 export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
-  const crate = vendorCrate({ source: options.source });
+  const crate = vendorCrate({
+    source: options.source,
+    unsafeGenerateLockfile: options.unsafeGenerateLockfile,
+    cargoChefPrepare: options.cargoChefPrepare,
+  });
 
   const extraArgs: string[] = [];
   const features = options.buildParams?.features ?? [];
@@ -288,7 +303,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
   let buildResult = std
     .process({
-      command: std.tpl`${rust()}/bin/cargo`,
+      command: std.tpl`${rust}/bin/cargo`,
       args: [
         "install",
 
@@ -312,7 +327,7 @@ export function cargoBuild(options: CargoBuildOptions) {
 
         ...options.env,
       },
-      dependencies: [rust(), std.toolchain(), ...(options.dependencies ?? [])],
+      dependencies: [rust, std.toolchain, ...(options.dependencies ?? [])],
       workDir: crate,
       unsafe: options.unsafe,
     })
@@ -328,6 +343,40 @@ export function cargoBuild(options: CargoBuildOptions) {
   }
 
   return buildResult;
+}
+
+/**
+ * Generate the Cargo.lock file if it doesn't exist.
+ * Warning: if this file is missing from the upstream source, it breaks
+ * reproducible builds, but we need it to vendor the dependencies.
+ *
+ * @param crate - The crate to ensure the lockfile will be generated for.
+ * @param allowLockfileGeneration - Whether to generate the lockfile.
+ *
+ * @return The source crate with the lockfile.
+ */
+function createLockfile(
+  crate: std.RecipeLike<std.Directory>,
+  allowLockfileGeneration: boolean,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    if [ "$allowLockfileGeneration" = "true" ]; then
+      cd "$BRIOCHE_OUTPUT"
+
+      # Check if the Cargo.lock file exists, if yes, exit on error
+      if [ -f Cargo.lock ]; then
+        echo "Cannot generate Cargo.lock file because it already exists"
+        exit 1
+      fi
+
+      cargo generate-lockfile
+    fi
+  `
+    .dependencies(rust)
+    .outputScaffold(crate)
+    .env({ allowLockfileGeneration: allowLockfileGeneration.toString() })
+    .unsafe({ networking: true })
+    .toDirectory();
 }
 
 /**
@@ -355,8 +404,22 @@ export function createSkeletonCrate(
     .toDirectory();
 }
 
+/**
+ * Options for vendoring a Rust crate's dependencies.
+ *
+ * @param source - The crate to build.
+ * @param unsafeGenerateLockfile - Generate a lockfile if the crate has no
+ *   `Cargo.lock` file. Defaults to `false`.
+ * @param cargoChefPrepare - Controls if the crate from `source` should get
+ *   pre-processed by `cargo chef prepare` before being built, which avoids
+ *   unnecessarily re-downloading dependencies when the source changes.
+ *   Defaults to `true` (should only be disabled when there's an upstream
+ *   issue with `cargo chef`).
+ */
 interface VendorCrateOptions {
   source: std.RecipeLike<std.Directory>;
+  unsafeGenerateLockfile?: boolean;
+  cargoChefPrepare?: boolean;
 }
 
 /**
@@ -364,16 +427,27 @@ interface VendorCrateOptions {
  * dependencies vendored using `cargo vendor`. `.cargo/config.toml` will
  * also be updated to use the vendored dependencies.
  *
- * ## Options
+ * @param options - Options for vendoring the crate's dependencies.
  *
- * - `source`: The crate to build.
+ * @returns The same crate with dependencies vendored and `.cargo/config.toml` updated
  */
 export function vendorCrate(
   options: VendorCrateOptions,
 ): std.Recipe<std.Directory> {
+  const {
+    source,
+    cargoChefPrepare = true,
+    unsafeGenerateLockfile = false,
+  } = options;
+
+  // Generate the Cargo.lock file exists if not already generated
+  const completeSource = createLockfile(source, unsafeGenerateLockfile);
+
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
-  const skeletonCrate = createSkeletonCrate(options.source);
+  const skeletonCrate = cargoChefPrepare
+    ? createSkeletonCrate(completeSource)
+    : completeSource;
 
   // Vendor the dependencies with network access and save the Cargo config.toml
   // file, so the vendored dependencies are used
@@ -403,7 +477,9 @@ export function vendorCrate(
     .toDirectory();
 
   // Combine the original crate with the vendored dependencies
-  let crate = std.merge(vendoredSkeletonCrate, options.source);
+  let crate = cargoChefPrepare
+    ? std.merge(vendoredSkeletonCrate, source)
+    : vendoredSkeletonCrate;
 
   // Copy the updated Cargo config.toml file into the crate
   crate = crate.insert(
@@ -418,12 +494,15 @@ export function vendorCrate(
   return crate;
 }
 
-function cargoChef(): std.Recipe<std.Directory> {
-  const pkg = Brioche.download(
-    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.71/cargo-chef-x86_64-unknown-linux-musl.tar.gz",
-  );
-
-  return std.directory({
-    bin: pkg.unarchive("tar", "gzip"),
-  });
+function targetTriple(): string {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return "x86_64-unknown-linux-gnu";
+    case "aarch64-linux":
+      return "aarch64-unknown-linux-gnu";
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the rust package`,
+      );
+  }
 }

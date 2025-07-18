@@ -1,5 +1,5 @@
 import * as std from "std";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libpcap",
@@ -20,7 +20,7 @@ export default function libpcap(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe((recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
@@ -29,7 +29,7 @@ export default function libpcap(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libpcap | tee "$BRIOCHE_OUTPUT"
   `
@@ -45,8 +45,8 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://www.tcpdump.org/release
       | lines
       | where {|it| ($it | str contains "libpcap") and (not ($it | str contains ".sig")) }
@@ -58,12 +58,5 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }

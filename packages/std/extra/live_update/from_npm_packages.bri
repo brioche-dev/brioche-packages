@@ -1,0 +1,116 @@
+import * as std from "/core";
+import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param packageName - The name of the npm package to update.
+ */
+interface LiveUpdateFromNpmPackagesProjectExtraOptions {
+  readonly packageName: string;
+}
+
+/**
+ * Options for the live update from npm packages.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `extra.packageName` property containing the name of the npm package.
+ */
+interface LiveUpdateFromNpmPackagesOptions {
+  project: {
+    version: string;
+    readonly extra: LiveUpdateFromNpmPackagesProjectExtraOptions;
+  };
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * version from the npm registry. The project's version will be set based on a
+ * regex match against the latest version. The package name is inferred from the
+ * extra options of the project.
+ *
+ * @remarks The version schema of an npm package should follow the SemVer
+ * specification.
+ *
+ * @param options - Options for the live update from npm packages.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   extra: {
+ *     packageName: "brioche",
+ *   },
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromNpmPackages({ project });
+ * }
+ * ```
+ */
+export function liveUpdateFromNpmPackages(
+  options: LiveUpdateFromNpmPackagesOptions,
+): std.Recipe<std.Directory> {
+  const { packageName } = parseNpmPackage(options.project.extra);
+
+  return std.recipe(async () => {
+    const { nushellRunnable } = await import("nushell");
+
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_npm_packages.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      packageName,
+      matchVersion: DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH.source,
+    });
+  });
+}
+
+/**
+ * Interface representing the parsed npm package information.
+ */
+interface NpmPackageInfo {
+  readonly packageName: string;
+}
+
+function tryParseNpmPackage(
+  extraOptions: LiveUpdateFromNpmPackagesProjectExtraOptions,
+): NpmPackageInfo | null {
+  const match = extraOptions.packageName.match(/^(?<packageName>[\w\.@/-]+)$/);
+
+  const { packageName } = match?.groups ?? {};
+  if (packageName == null) {
+    return null;
+  }
+
+  return { packageName };
+}
+
+/**
+ * Parse the npm package information to extract the package name.
+ *
+ * @param extraOptions - The extra options containing the package name.
+ *
+ * @returns An object containing the package name.
+ *
+ * @throws If the package name cannot be parsed.
+ */
+function parseNpmPackage(
+  extraOptions: LiveUpdateFromNpmPackagesProjectExtraOptions,
+): NpmPackageInfo {
+  const info = tryParseNpmPackage(extraOptions);
+  if (info == null) {
+    throw new Error(
+      `Could not parse npm package from ${JSON.stringify(extraOptions)}`,
+    );
+  }
+
+  return info;
+}

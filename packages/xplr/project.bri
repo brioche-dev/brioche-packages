@@ -3,25 +3,26 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "xplr",
-  version: "1.0.0",
+  version: "1.0.1",
   repository: "https://github.com/sayanarijit/xplr.git",
 };
 
-const source = (() => {
-  let source = Brioche.gitCheckout({
-    repository: project.repository,
-    ref: `v${project.version}`,
-  });
-
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+})
+  // Remove upstream's custom Cargo `config.toml`, which overrides the linker
+  // for various targets (for cross-compilation). This can interfere with
+  // our default working linker configuration.
+  .remove(".cargo/config.toml")
   // HACK: Workaround for https://github.com/LukeMathWalker/cargo-chef/issues/295#issuecomment-2619963413
-  source = std.runBash`
-    sed -i "s|path = './benches/|path = 'benches/|g" "$BRIOCHE_OUTPUT/Cargo.toml"
-  `
-    .outputScaffold(source)
-    .toDirectory();
-
-  return source;
-})();
+  .pipe((source) =>
+    std.runBash`
+      sed -i "s|path = './benches/|path = 'benches/|g" "$BRIOCHE_OUTPUT/Cargo.toml"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
 
 export default function xplr(): std.Recipe<std.Directory> {
   return cargoBuild({
@@ -30,7 +31,7 @@ export default function xplr(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     xplr --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -46,6 +47,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

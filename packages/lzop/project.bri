@@ -1,0 +1,59 @@
+import lzo from "lzo";
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "lzop",
+  version: "1.04",
+};
+
+const source = Brioche.download(
+  `https://www.lzop.org/download/lzop-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function lzop(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, lzo)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lzop --version| tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(lzop)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `lzop ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.lzop.org/download
+      | lines
+      | where {|it| ($it | str contains "lzop-") }
+      | parse --regex '<a href="lzop-(?<version>.+)\.tar\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

@@ -1,8 +1,8 @@
 import * as std from "std";
 
-export default () => {
+export default function (): std.Recipe<std.Directory> {
   // Compile main.c to bin/hello:
-  // - gcc comes from `std.toolchain()`
+  // - gcc comes from `std.toolchain`
   // - `workDir` is used to bring in the `src` directory
   // - The symlink is used when calling `brioche run`
   return std.runBash`
@@ -10,6 +10,7 @@ export default () => {
     gcc -o "$BRIOCHE_OUTPUT/bin/hello" src/main.c
     ln -s "bin/hello" "$BRIOCHE_OUTPUT/brioche-run"
   `
-    .dependencies(std.toolchain())
-    .workDir(Brioche.glob("src"));
+    .dependencies(std.toolchain)
+    .workDir(Brioche.glob("src"))
+    .toDirectory();
 };

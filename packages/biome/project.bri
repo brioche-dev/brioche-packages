@@ -3,13 +3,13 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "biome",
-  version: "1.9.4",
+  version: "2.1.1",
   repository: "https://github.com/biomejs/biome.git",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
-  ref: `cli/v${project.version}`,
+  ref: `@biomejs/biome@${project.version}`,
 });
 
 export default function biome(): std.Recipe<std.Directory> {
@@ -23,7 +23,7 @@ export default function biome(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     biome --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -39,9 +39,9 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
-    matchTag: /^cli\/v(?<version>.*)$/,
+    matchTag: /^@biomejs\/biome@(?<version>.*)$/,
   });
 }

@@ -1,4 +1,4 @@
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 import * as std from "std";
 
 export const project = {
@@ -20,7 +20,7 @@ export default function alsaLib(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe((recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
@@ -29,7 +29,7 @@ export default function alsaLib(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const src = std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>
@@ -62,8 +62,8 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://www.alsa-project.org/files/pub/lib
       | lines
       | where {|it| ($it | str contains "alsa-lib") and (not ($it | str contains ".sig")) }
@@ -75,12 +75,5 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }

@@ -1,5 +1,5 @@
 import * as std from "std";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libtirpc",
@@ -24,18 +24,16 @@ export default function libtirpc(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        }),
-      makePkgConfigPathsRelative,
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libtirpc | tee "$BRIOCHE_OUTPUT"
   `
@@ -51,8 +49,8 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let sourceUrl = http get https://sourceforge.net/projects/libtirpc/files/libtirpc
       | lines
       | where {|it| $it | str contains 'href="/projects/libtirpc/files/libtirpc/' }
@@ -71,28 +69,5 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
-}
-
-// TODO: Figure out where to move this, this is copied from `std`
-function makePkgConfigPathsRelative(
-  recipe: std.RecipeLike<std.Directory>,
-): std.Recipe<std.Directory> {
-  // Replaces things that look like absolute paths in pkg-config files with
-  // relative paths (using the `${pcfiledir}` variable)
-  return std.runBash`
-    find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
-      | while IFS= read -r -d $'\\0' file; do
-        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
-      done
-  `
-    .outputScaffold(recipe)
-    .toDirectory();
+  `.env({ project: JSON.stringify(project) });
 }

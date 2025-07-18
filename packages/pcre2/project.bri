@@ -29,7 +29,7 @@ export default function pcre2(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory()
-    .pipe((recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
@@ -38,7 +38,7 @@ export default function pcre2(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libpcre2-8 | tee -a "$BRIOCHE_OUTPUT"
     pkg-config --modversion libpcre2-16 | tee -a "$BRIOCHE_OUTPUT"
@@ -61,7 +61,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
     matchTag: /^pcre2-(?<version>.*)$/,

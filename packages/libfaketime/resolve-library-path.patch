@@ -1,0 +1,53 @@
+diff --git a/src/faketime.c b/src/faketime.c
+index ce7925b..d443950 100644
+--- a/src/faketime.c
++++ b/src/faketime.c
+@@ -40,6 +40,7 @@
+ #include <string.h>
+ #include <time.h>
+ #include <fcntl.h>
++#include <libgen.h>
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <sys/wait.h>
+@@ -368,23 +369,33 @@ int main (int argc, char **argv)
+          * on MultiArch platforms, such as Debian, we put a literal $LIB into LD_PRELOAD.
+          */
+ #ifndef MULTI_ARCH
+-        ftpl_path = PREFIX LIBDIRNAME "/libfaketimeMT.so.1";
++        ftpl_path = "/.." LIBDIRNAME "/libfaketimeMT.so.1";
+ #else
+-        ftpl_path = PREFIX "/$LIB/faketime/libfaketimeMT.so.1";
++        ftpl_path = "/.." "/$LIB/faketime/libfaketimeMT.so.1";
+ #endif
+       }
+       else
+       {
+ #ifndef MULTI_ARCH
+-        ftpl_path = PREFIX LIBDIRNAME "/libfaketime.so.1";
++        ftpl_path = "/.." LIBDIRNAME "/libfaketime.so.1";
+ #else
+-        ftpl_path = PREFIX "/$LIB/faketime/libfaketime.so.1";
++        ftpl_path = "/.." "/$LIB/faketime/libfaketime.so.1";
+ #endif
+       }
+-      len = ((ld_preload)?strlen(ld_preload) + 1: 0) + 1 + strlen(ftpl_path);
++      char directory_path[PATH_BUFSIZE];
++      ssize_t directory_path_len = readlink("/proc/self/exe", directory_path, PATH_BUFSIZE - 1);
++      if (directory_path_len == -1 || directory_path_len >= (ssize_t)PATH_BUFSIZE)
++      {
++          perror("faketime: readlink");
++          exit(EXIT_FAILURE);
++      }
++      directory_path[directory_path_len] = '\0';
++      (void)dirname(directory_path);
++
++      len = ((ld_preload)?strlen(ld_preload) + 1: 0) + 1 + strlen(directory_path) + strlen(ftpl_path);
+       ld_preload_new = malloc(len);
+-      snprintf(ld_preload_new, len ,"%s%s%s", (ld_preload)?ld_preload:"",
+-              (ld_preload)?":":"", ftpl_path);
++      snprintf(ld_preload_new, len ,"%s%s%s%s", (ld_preload)?ld_preload:"",
++              (ld_preload)?":":"", directory_path, ftpl_path);
+       setenv("LD_PRELOAD", ld_preload_new, true);
+       free(ld_preload_new);
+     }

@@ -1,0 +1,78 @@
+import * as std from "std";
+import python, { project as pythonProject } from "python";
+import uv from "uv";
+
+export const project = {
+  name: "mitmproxy",
+  version: "12.1.1",
+  repository: "https://github.com/mitmproxy/mitmproxy.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function mitmproxy(): std.Recipe<std.Directory> {
+  return std.runBash`
+    uv tool install .
+  `
+    .workDir(source)
+    .dependencies(python, uv)
+    .env({
+      UV_NO_MANAGED_PYTHON: "1",
+      UV_LINK_MODE: "copy",
+      UV_LOCKED: "1",
+      UV_TOOL_DIR: std.outputPath,
+    })
+    .unsafe({ networking: true })
+    .toDirectory()
+    .pipe((recipe) => {
+      // TODO: Clean this up! We should find a way to not hardcode the
+      // list of binaries and the Python version for `$PYTHONPATH`
+      recipe = recipe.insert("brioche-run.d/python", python);
+      const binaries = [
+        "mitmproxy",
+        "mitmdump",
+        "mitmweb",
+        "mitmproxy-linux-redirector",
+      ];
+      for (const binary of binaries) {
+        recipe = std.addRunnable(recipe, `bin/${binary}`, {
+          command: { relativePath: "brioche-run.d/python/bin/python" },
+          args: [{ relativePath: `mitmproxy/bin/${binary}` }],
+          env: {
+            PYTHONPATH: {
+              prepend: {
+                relativePath: `mitmproxy/lib/python${pythonProject.extra.currentMinorVersion}/site-packages`,
+              },
+              separator: ":",
+            },
+          },
+        });
+      }
+
+      return recipe;
+    })
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/mitmproxy"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    mitmproxy --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(mitmproxy)
+    .toFile();
+
+  const result = (await script.read()).trim().split("\n").at(0);
+
+  // Check that the result contains the expected version
+  const expected = `Mitmproxy: ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

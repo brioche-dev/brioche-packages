@@ -1,6 +1,6 @@
 import * as std from "/core";
 import { tools } from "/toolchain";
-import { withRunnable, type RunnableTemplateValue } from "./runnable.bri";
+import { withRunnable, type RunnableTemplateEnvValue } from "./runnable.bri";
 
 export type BashRunnable = std.Recipe<std.Directory> & BashRunnableUtils;
 
@@ -16,10 +16,10 @@ export interface BashRunnableUtils {
   /**
    * Set environment variables when the Bash script gets run.
    */
-  env(values: Record<string, RunnableTemplateValue>): BashRunnable;
+  env(values: Record<string, RunnableTemplateEnvValue>): BashRunnable;
 
   /**
-   * Include additonal dependencies when the Bash script gets run. This
+   * Include additional dependencies when the Bash script gets run. This
    * will set the `$PATH` environment variable.
    */
   dependencies(...dependencies: std.RecipeLike<std.Directory>[]): BashRunnable;
@@ -30,19 +30,24 @@ export interface BashRunnableUtils {
  * run the Bash script, but allows it to be run outside of Brioche, such
  * as by calling `brioche run` or by putting it into an OCI container image.
  *
- * The Bash script will be called with the `-e`, `-u`, and `-o pipefail`
+ * @description The Bash script will be called with the `-e`, `-u`, and `-o pipefail`
  * settings. Extra arguments are accessible through `$@`, just like a normal
  * Bash script.
  *
  * See also `std.runBash` to run a Bash script while baking!
  *
- * ## Example
+ * @param strings - The template string parts for the Bash script.
+ * @param values - The template string values.
+ *
+ * @returns A self-contained runnable recipe containing the Bash script
+ *
+ * @example
  *
  * ```typescript
  * import * as std from "std";
  *
  * // Running `brioche run` will print "Hello, world!"
- * export default function () {
+ * export default function (): std.BashRunnable {
  *   return std.bashRunnable`
  *     echo "Hello, world!"
  *   `;
@@ -67,7 +72,7 @@ export function bashRunnable(
 interface BashRunnableOptions {
   script: string;
   root: std.RecipeLike<std.Directory>;
-  env: Record<string, RunnableTemplateValue>;
+  env: Record<string, RunnableTemplateEnvValue>;
   dependencies: std.RecipeLike<std.Directory>[];
 }
 
@@ -80,7 +85,7 @@ function makeBashRunnable(options: BashRunnableOptions): BashRunnable {
   });
 
   return std.mixin(recipe, {
-    env(values: Record<string, RunnableTemplateValue>): BashRunnable {
+    env(values: Record<string, RunnableTemplateEnvValue>): BashRunnable {
       return makeBashRunnable({
         ...options,
         env: { ...options.env, ...values },

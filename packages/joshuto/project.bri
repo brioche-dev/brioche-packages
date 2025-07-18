@@ -1,25 +1,16 @@
-import nushell from "nushell";
 import * as std from "std";
 import { cargoBuild } from "rust";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "joshuto",
-  version: "0.9.8",
+  version: "0.9.9",
 };
 
 const source = Brioche.gitCheckout({
   repository: "https://github.com/kamiyaa/joshuto.git",
   ref: `v${project.version}`,
-}).pipe((source) =>
-  // Patch `Cargo.lock` to fix builds with Rust >= 1.80. This patch is derived
-  // from the `Cargo.lock` from this commit in Joshuto:
-  // https://github.com/kamiyaa/joshuto/commit/1245124fcd264e25becfd75258840708d7b8b4bb
-  std.applyPatch({
-    source,
-    patch: Brioche.includeFile("joshuto-v0.9.8.patch"),
-    strip: 1,
-  }),
-);
+});
 
 export default function joshuto(): std.Recipe<std.Directory> {
   return cargoBuild({
@@ -28,7 +19,7 @@ export default function joshuto(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     joshuto --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -47,14 +38,14 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     # Version can either be prefixed with 'v' or not
     let version = http get https://api.github.com/repos/kamiyaa/joshuto/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
-        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
         | get -i 0
       }
       | sort-by -n major minor patch
@@ -65,12 +56,5 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }

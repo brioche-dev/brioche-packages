@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "llvm",
-  version: "20.1.4",
+  version: "20.1.8",
   repository: "https://github.com/llvm/llvm-project.git",
 };
 
@@ -22,7 +22,11 @@ export default function llvm(): std.Recipe<std.Directory> {
       CMAKE_BUILD_TYPE: "Release",
     },
     env: {
-      CMAKE_BUILD_PARALLEL_LEVEL: "16",
+      // HACK: Building LLVM can use A LOT of memory, especially when building
+      // in parallel. These values are tuned based on the CI runners currently
+      // in use in the `brioche-packages` repo.
+      CMAKE_BUILD_PARALLEL_LEVEL:
+        std.CURRENT_PLATFORM === "x86_64-linux" ? "16" : "8",
     },
     dependencies: [std.toolchain, python],
   }).pipe((recipe) =>
@@ -66,7 +70,7 @@ export function llvmToolchain(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     llvm-config --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -82,7 +86,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
     matchTag: /^llvmorg-(?<version>.*)$/,

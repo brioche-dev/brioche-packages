@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/idursun/jjui.git": {
+      "v0.8.12": "dad9f6c5618eb8df375e239c164fda1a40ad74da"
+    }
+  }
+}

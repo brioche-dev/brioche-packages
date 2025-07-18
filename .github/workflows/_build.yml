@@ -9,10 +9,19 @@ on:
 
 jobs:
   build:
-    name: Build packages
+    name: Build packages [${{ matrix.host.platform }}]
     if: inputs.enabled
-    runs-on: brioche-dev-builder-runner
-    timeout-minutes: 720
+    strategy:
+      fail-fast: false
+      matrix:
+        host:
+          - platform: x86_64-linux
+            runs-on: brioche-dev-builder-runner
+          - platform: aarch64-linux
+            runs-on: brioche-dev-builder-runner-aarch64
+
+    runs-on: ${{ matrix.host.runs-on }}
+    timeout-minutes: 1440
     steps:
       - name: Install system packages
         run: |
@@ -20,20 +29,34 @@ jobs:
           sudo apt-get install -y curl
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Install Brioche
         run: |
           mkdir -p ~/.local/bin
-          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
+          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/$PLATFORM/brioche -o ~/.local/bin/brioche
           chmod +x ~/.local/bin/brioche
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+        env:
+          PLATFORM: ${{ matrix.host.platform }}
+
       - name: Build packages
         run: |
-          for package in packages/*; do
-            echo "::group::$package"
-            brioche build -p "$package" --sync --locked --display plain-reduced
-            echo "::endgroup::"
+          packages=(packages/*)
+
+          n=1
+          for package in "${packages[@]}"; do
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+            if grep -q "@brioche-packages skip-platform $PLATFORM" "$package/project.bri"; then
+              echo "$label: skipping (does not support $PLATFORM)"
+            else
+              echo "::group::$label"
+              brioche build -p "$package" --sync --locked --display plain-reduced
+              echo "::endgroup::"
+            fi
           done
         env:
+          PLATFORM: ${{ matrix.host.platform }}
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
           BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
@@ -42,15 +65,26 @@ jobs:
           AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
           AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
           AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
+
       - name: Run package tests
         run: |
-          for package in packages/*; do
+          packages=(packages/*)
+
+          n=1
+          for package in "${packages[@]}"; do
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+
             if grep -q 'export.*test' "$package/project.bri"; then
-              echo "::group::$package"
-              brioche build -p "$package" -e test --sync --locked
-              echo "::endgroup::"
+              if grep -q "@brioche-packages skip-platform $PLATFORM" "$package/project.bri"; then
+                echo "$label: skipping (does not support $PLATFORM)"
+              else
+                echo "::group::$label"
+                brioche build -p "$package" -e test --sync --locked
+                echo "::endgroup::"
+              fi
             else
-              echo "$package: no tests found"
+              echo "$label: no tests found"
             fi
           done
         env:
@@ -62,10 +96,43 @@ jobs:
           AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
           AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
           AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED
+
       - name: Save failed processes
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: process-events
+          name: process-events-${{ github.run_id }}-${{ matrix.host.platform }}
           path: ~/.local/share/brioche/process-temp/*/events.bin.zst
           compression-level: 0
+
+      - name: Show failed processes
+        if: failure()
+        run: |
+          process_events=(~/.local/share/brioche/process-temp/*/events.bin.zst)
+
+          for process_event in "${process_events[@]}"; do
+            echo "::group::$process_event"
+
+            truncated_line_count="$(brioche jobs logs "$process_event" --limit 200 | wc -l)"
+            if [ "$truncated_line_count" -gt 1200 ]; then
+              # Looks like the output might be long, so show the first 500
+              # lines and the last 500 lines
+
+              brioche jobs logs "$process_event" --limit 500 | head -n500
+              echo "..."
+              brioche jobs logs "$process_event" | tail -n500
+            else
+              # Looks like the output might be short, so show the whole file
+              brioche jobs logs "$process_event"
+            fi
+
+            echo "::endgroup::"
+          done
+
+  # Extra job that succeeds when all build jobs succeed (useful for PR requirements)
+  all-builds-passed:
+    name: All builds passed
+    needs: [build]
+    runs-on: ubuntu-24.04
+    steps:
+      - run: ":"

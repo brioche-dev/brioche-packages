@@ -1,11 +1,12 @@
 import * as std from "std";
 import kmod from "kmod";
 import openssl from "openssl";
-import nushell from "nushell";
+import python from "python";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "linux",
-  version: "6.12.9",
+  version: "6.15.6",
   extra: {
     majorVersion: "6",
   },
@@ -54,6 +55,14 @@ export function linuxDefconfig(
     .toFile();
 }
 
+/**
+ * Options for the Linux kernel build.
+ *
+ * @param config - The kernel `.config` file to use for the build. Defaults
+ *   to the default configuration produced by `make defconfig`.
+ * @param dependencies - Additional build dependencies.
+ * @param env - Additional environment variables to set during the build.
+ */
 interface LinuxOptions {
   config?: std.RecipeLike<std.File>;
   dependencies?: std.RecipeLike<std.Directory>[];
@@ -64,18 +73,14 @@ interface LinuxOptions {
  * A recipe that builds the Linux kernel. Defaults to using a default
  * configuration using `make defconfig`.
  *
- * The output will contain the following paths:
- *
+ * @description The output will contain the following paths:
  * - `boot/linux`: A symlink to the kernel image within `boot/`.
  * - `boot/System.map`: The kernel's system map.
  * - `lib/modules/${version}`: Built kernel modules.
  *
- * ## Options
+ * @param options - Options for the Linux kernel build.
  *
- * - `config`: The kernel `.config` file to use for the build. Defaults
- *   to the default configuration produced by `make defconfig`.
- * - `dependencies`: Additional build dependencies.
- * - `env`: Additional environment variables to set during the build.
+ * @returns A recipe containing the built Linux kernel with boot files and modules
  */
 export default function linux(
   options: LinuxOptions = {},
@@ -103,26 +108,33 @@ export default function linux(
     make modules_install
   `
     .workDir(source)
-    .dependencies(...dependencies, openssl, kmod, ldWrapper, std.toolchain)
+    .dependencies(
+      ...dependencies,
+      kmod,
+      openssl,
+      python,
+      ldWrapper,
+      std.toolchain,
+    )
     .env({
       INSTALL_MOD_PATH: std.outputPath,
 
       // Needed since we're using `ld.bfd`, which tries to resolve transitive
       // dependencies for libraries, so it needs to know where to look
-      HOSTLDFLAGS: std.tpl`-Wl,-rpath-link,${std.toolchain()}/lib`,
+      HOSTLDFLAGS: std.tpl`-Wl,-rpath-link,${std.toolchain}/lib`,
 
       // Needed because tools from the kernel build use `pthread_exit`, which
       // dynamically opens `libgcc_s.so.1`, which is not directly a dependency
       // of glibc
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain()}/lib`,
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
 
       ...env,
     })
     .toDirectory();
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let sourceUrl = http get https://cdn.kernel.org/pub/linux/kernel
       | lines
       | parse --regex '<a href="v(?<version>.+)/">'
@@ -145,14 +157,7 @@ export function liveUpdate() {
       | update version $version
       | update extra.majorVersion $majorVersion
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
 type LinuxUpdateConfigValue =
@@ -169,10 +174,8 @@ type LinuxUpdateConfigValue =
  * Update a Linux kernel configuration file by setting (or un-setting)
  * various configuration values.
  *
- * ## Arguments
- *
- * - `config`: The base kernel configuration file to start with.
- * - `values`: An object mapping configuration options to their values. Each
+ * @param config - The base kernel configuration file to start with.
+ * @param values - An object mapping configuration options to their values. Each
  *   value can be one of the following:
  *   - `true`: Enable the option
  *   - `false`: Disable the option
@@ -186,8 +189,9 @@ type LinuxUpdateConfigValue =
  *   - `{ moduleAfter: string }`: Enable the option as a module after
  *      another option is enabled
  *
- * ## Example
+ * @returns An updated Linux kernel configuration file
  *
+ * @example
  * ```typescript
  * const config = linuxUpdateConfig(linuxDefconfig(), {
  *   VIRTIO: true, // enable CONFIG_VIRTIO
@@ -196,7 +200,6 @@ type LinuxUpdateConfigValue =
  *   DEFAULT_INIT: { value: "/example" }, // override the default init path
  * });
  * ```
- *
  */
 export function linuxUpdateConfig(
   config: std.RecipeLike<std.File>,
@@ -230,7 +233,7 @@ export function linuxUpdateConfig(
 
   return std
     .process({
-      command: std.tpl`${linuxSource()}/scripts/config`,
+      command: std.tpl`${linuxSource}/scripts/config`,
       args: ["--file", std.outputPath, ...args],
       dependencies: [std.tools],
       outputScaffold: config,

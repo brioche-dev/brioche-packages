@@ -1,0 +1,143 @@
+import * as std from "std";
+import nushell from "/";
+
+export type NushellRunnable = std.Recipe<std.Directory> & NushellRunnableUtils;
+
+interface NushellRunnableUtils {
+  /**
+   * Set environment variables when the Nushell script gets run.
+   */
+  env(values: Record<string, std.RunnableTemplateEnvValue>): NushellRunnable;
+
+  /**
+   * Include additional dependencies when the Nushell script gets run. This
+   * will set the `$PATH` environment variable.
+   */
+  dependencies(
+    ...dependencies: std.RecipeLike<std.Directory>[]
+  ): NushellRunnable;
+}
+
+/**
+ * Build a Nushell script into a self-contained runnable recipe. This does not
+ * run the Nushell script, but allows it to be run outside of Brioche, such
+ * as by calling `brioche run` or by putting it into an OCI container image.
+ *
+ * Can either be used as a tagged template (like 'nushellRunnable`...`')
+ * or called as a function with the script as a string or file recipe.
+ *
+ * @param strings - The template string parts for the Nushell script.
+ * @param values - The template string values.
+ *
+ * @returns A self-contained runnable recipe containing the Nushell script
+ *
+ * @example
+ *
+ * ```typescript
+ * import * as std from "std";
+ * import { nushellRunnable } from "nushell";
+ *
+ * // Running `brioche run` will print "Hello, world!"
+ * export default function (): std.NushellRunnable {
+ *   return nushellRunnable`
+ *     echo "Hello, world!"
+ *   `;
+ * }
+ * ```
+ */
+export function nushellRunnable(
+  strings: TemplateStringsArray,
+  ...values: string[]
+): NushellRunnable;
+
+/**
+ * Build a Nushell script into a self-contained runnable recipe. This does not
+ * run the Nushell script, but allows it to be run outside of Brioche, such
+ * as by calling `brioche run` or by putting it into an OCI container image.
+ *
+ * Can either be used as a tagged template (like 'nushellRunnable`...`')
+ * or called as a function with the script as a string or file recipe.
+ *
+ * @param script - The script to run, either a string or
+ *   a file recipe.
+ *
+ * @returns A self-contained runnable recipe containing the Nushell script
+ *
+ * @example
+ *
+ * ```typescript
+ * import * as std from "std";
+ * import { nushellRunnable } from "nushell";
+ *
+ * // Running `brioche run` will print "Hello, world!"
+ * export default function (): std.NushellRunnable {
+ *   return nushellRunnable`
+ *     echo "Hello, world!"
+ *   `;
+ * }
+ * ```
+ */
+export function nushellRunnable(
+  script: string | std.RecipeLike<std.File>,
+): NushellRunnable;
+
+export function nushellRunnable(
+  stringsOrScript: TemplateStringsArray | string | std.RecipeLike<std.File>,
+  ...values: string[]
+): NushellRunnable {
+  function isTemplateStringsArray(
+    x: TemplateStringsArray | string | std.RecipeLike<std.File>,
+  ): x is TemplateStringsArray {
+    return Array.isArray(x);
+  }
+
+  const script = isTemplateStringsArray(stringsOrScript)
+    ? std.indoc(stringsOrScript, ...values)
+    : stringsOrScript;
+
+  return makeNushellRunnable({
+    script,
+    root: std.directory(),
+    env: {
+      root: { relativePath: "." },
+    },
+    dependencies: [nushell],
+  });
+}
+
+interface NushellRunnableOptions {
+  script: string | std.RecipeLike<std.File>;
+  root: std.RecipeLike<std.Directory>;
+  env: Record<string, std.RunnableTemplateEnvValue>;
+  dependencies: std.RecipeLike<std.Directory>[];
+}
+
+function makeNushellRunnable(options: NushellRunnableOptions): NushellRunnable {
+  const recipe = std.withRunnable(options.root, {
+    command: "nu",
+    args:
+      typeof options.script === "string"
+        ? ["-c", options.script]
+        : [options.script],
+    env: options.env,
+    dependencies: options.dependencies,
+  });
+
+  return std.mixin(recipe, {
+    env(values: Record<string, std.RunnableTemplateEnvValue>): NushellRunnable {
+      return makeNushellRunnable({
+        ...options,
+        env: { ...options.env, ...values },
+      });
+    },
+
+    dependencies(
+      ...dependencies: std.RecipeLike<std.Directory>[]
+    ): NushellRunnable {
+      return makeNushellRunnable({
+        ...options,
+        dependencies: [...options.dependencies, ...dependencies],
+      });
+    },
+  });
+}

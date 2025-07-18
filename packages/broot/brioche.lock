@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/Canop/broot.git": {
-      "v1.46.3": "c72c1200e45943e8e327a5afaac4561ac440cae2"
+      "v1.47.0": "707e554015b3b0af7feed23d5db7d96975d308b4"
     }
   }
 }

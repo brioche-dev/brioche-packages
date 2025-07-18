@@ -4,7 +4,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "php",
-  version: "8.4.7",
+  version: "8.4.10",
   repository: "https://github.com/php/php-src",
 };
 
@@ -33,7 +33,7 @@ export default function php(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     php --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -52,7 +52,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
     matchTag: /^php-(?<version>.*)$/,

@@ -1,0 +1,57 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "kor",
+  version: "0.6.2",
+  repository: "https://github.com/yonahd/kor.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Apply patch file
+  std.applyPatch({
+    source,
+    patch: Brioche.download(
+      "https://github.com/yonahd/kor/commit/6c02951894e587c023e57a7ab2654136024bff70.patch",
+    ),
+    strip: 1,
+  }),
+);
+
+export default function kor(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/yonahd/kor/pkg/utils.Version=${project.version}`,
+      ],
+    },
+    runnable: "bin/kor",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    kor version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(kor)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `kor version: v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

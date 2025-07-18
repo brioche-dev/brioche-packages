@@ -1,0 +1,65 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import openssl from "openssl";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libzip",
+  version: "1.11.4",
+};
+
+const source = Brioche.download(
+  `https://libzip.org/download/libzip-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libzip(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl],
+    set: {
+      BUILD_REGRESS: "OFF",
+      BUILD_EXAMPLES: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libzip | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libzip)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://libzip.org/download
+      | lines
+      | where {|it| $it | str contains 'href="libzip-' }
+      | parse --regex '<a href="libzip-(?<version>.+).tar.gz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

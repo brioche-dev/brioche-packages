@@ -1,0 +1,47 @@
+import * as std from "/core";
+import { runBash } from "./run_bash.bri";
+
+/**
+ * Create a recipe that replaces absolute paths in pkg-config files with
+ * relative paths using the `${pcfiledir}` variable.
+ *
+ * This is useful for ensuring that pkg-config files can be used in different
+ * environments without needing to modify them manually.
+ *
+ * @param recipe - The recipe to apply the transformation to.
+ *
+ * @returns A new recipe with the transformed pkg-config files.
+ *
+ * @remarks This function looks for pkg-config files in the standard locations
+ *   `lib/pkgconfig` and `share/pkgconfig` relative to the `$BRIOCHE_OUTPUT`
+ *   output directory.
+ */
+export function pkgConfigMakePathsRelative(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return runBash`
+    # Candidate pkg-config directories relative to $BRIOCHE_OUTPUT
+    pkg_dirs=(lib/pkgconfig share/pkgconfig)
+
+    # Collect only those that are present
+    find_roots=()
+    for rel in "\${pkg_dirs[@]}"; do
+      dir="$BRIOCHE_OUTPUT/$rel"
+      if [[ -d "$dir" ]]; then
+        find_roots+=("$dir")
+      fi
+    done
+
+    # No pkg-config dir found, exit
+    if [[ \${#find_roots[@]} -eq 0 ]]; then
+      exit 0
+    fi
+
+    find "\${find_roots[@]}" -name '*.pc' -type f -print0 \
+      | while IFS= read -r -d $'\\0' file; do
+        sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+      done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}

@@ -1,0 +1,81 @@
+import brotli from "brotli";
+import libpng from "libpng";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "freetype",
+  version: "2.13.3",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/freetype/freetype2/${project.version}/freetype-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function freetype(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/ \
+      --enable-freetype-config
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, brotli, libpng)
+    .toDirectory()
+    .pipe(
+      std.pkgConfigMakePathsRelative,
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+          ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/freetype-config"),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    freetype-config --prefix=$prefix --ftversion | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(freetype)
+    .env({
+      prefix: std.tpl`${freetype}`,
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let sourceUrl = http get https://sourceforge.net/projects/freetype/files/freetype2
+      | lines
+      | where {|it| $it | str contains 'href="/projects/freetype/files/freetype2' }
+      | parse --regex '<a href="/projects/freetype/files/freetype2/(?<version>.+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let version = http get $"https://sourceforge.net/projects/freetype/files/freetype2/($sourceUrl)"
+      | lines
+      | where {|it| ($it | str contains '<a href="https://sourceforge.net') and ($it | str contains '.tar.xz') }
+      | parse --regex ($"<a href=\\"https://sourceforge.net/projects/freetype/files/freetype2/($sourceUrl)/freetype-" + '(?<version>[^"]+)\.tar\.xz/')
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

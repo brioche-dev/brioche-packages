@@ -1,6 +1,77 @@
 import * as std from "/core";
 import { runtimeUtils } from "../utils.bri";
 
+interface PlatformInfo {
+  bootstrapToolchain: std.Recipe<std.Directory>;
+  bootstrapToolchainTargetTriple: string;
+  bootstrapToolchainDynamicLinkerName: string;
+  bootstrapUtils: std.Recipe<std.Directory>;
+  bootstrapRootfs: std.Recipe<std.Directory>;
+  bootstrapRootfsSystemToolchainPath: string;
+  busybox: std.Recipe<std.Directory>;
+  libDir: string;
+  dynamicLinkerPath: string;
+  arch: string;
+  os: string;
+}
+
+export const PLATFORM_INFO: Record<std.Platform, PlatformInfo | undefined> = {
+  "x86_64-linux": {
+    bootstrapToolchain: Brioche.download(
+      "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd",
+    ).unarchive("tar", "zstd"),
+    bootstrapToolchainTargetTriple: "x86_64-linux-musl",
+    bootstrapToolchainDynamicLinkerName: "ld-musl-x86_64.so.1",
+    bootstrapUtils: Brioche.download(
+      "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
+    ).unarchive("tar", "zstd"),
+    bootstrapRootfs: Brioche.download(
+      "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/x86_64-linux/brioche-bootstrap.tar.zstd",
+    ).unarchive("tar", "zstd"),
+    bootstrapRootfsSystemToolchainPath: "/usr/lib/gcc/x86_64-linux-gnu/12",
+    busybox: Brioche.download(
+      "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz",
+    ).unarchive("tar", "xz"),
+    libDir: "lib64",
+    dynamicLinkerPath: "lib64/ld-linux-x86-64.so.2",
+    arch: "x86_64",
+    os: "linux",
+  },
+  "aarch64-linux": {
+    bootstrapToolchain: Brioche.download(
+      "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_arm64_linux.tar.zstd",
+    ).unarchive("tar", "zstd"),
+    bootstrapToolchainTargetTriple: "aarch64-linux-musl",
+    bootstrapToolchainDynamicLinkerName: "ld-musl-aarch64.so.1",
+    bootstrapUtils: Brioche.download(
+      "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_arm64_linux.tar.zstd",
+    ).unarchive("tar", "zstd"),
+    bootstrapRootfs: Brioche.download(
+      "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/aarch64-linux/brioche-bootstrap.tar.zstd",
+    ).unarchive("tar", "zstd"),
+    bootstrapRootfsSystemToolchainPath: "/usr/lib/gcc/aarch64-linux-gnu/12",
+    busybox: Brioche.download(
+      "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_arm64_linux.tar.xz",
+    )
+      .unarchive("tar", "xz")
+      .peel(1),
+    libDir: "lib",
+    dynamicLinkerPath: "lib/ld-linux-aarch64.so.1",
+    arch: "aarch64",
+    os: "linux",
+  },
+};
+
+export function currentPlatformInfo(): PlatformInfo {
+  const platformInfo = PLATFORM_INFO[std.CURRENT_PLATFORM];
+  std.assert(
+    platformInfo != null,
+    `The platform '${std.CURRENT_PLATFORM}' is not handled by this version of std`,
+  );
+
+  return platformInfo;
+}
+
 interface BootstrapRunOptions {
   script: string;
   env?: Record<string, std.ProcessTemplateLike>;
@@ -11,14 +82,7 @@ interface BootstrapRunOptions {
 export function bootstrapRun(
   options: BootstrapRunOptions,
 ): std.Recipe<std.Directory> {
-  const bootstrapRootfs = Brioche.download(
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-bootstrap/99ab9787d5ee27eb613227131e23d2c651de318a/x86_64-linux/brioche-bootstrap.tar.zstd",
-  ).unarchive("tar", "zstd");
-
-  const busybox = Brioche.download(
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz",
-  ).unarchive("tar", "xz");
-
+  const platformInfo = currentPlatformInfo();
   const briocheLd = runtimeUtils().get("bin/brioche-ld");
   const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");
 
@@ -50,13 +114,13 @@ export function bootstrapRun(
       "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_OUTPUT" "$(pwd)/rootfs/$BRIOCHE_OUTPUT"
       "$BUSYBOX/bin/busybox" mount --rbind "$BRIOCHE_RESOURCE_DIR" "$(pwd)/rootfs/$BRIOCHE_RESOURCE_DIR"
 
-      "$BUSYBOX/bin/busybox" mkdir -p "$HOME/.local/libexec/brioche-toolchain/bin" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64"
+      "$BUSYBOX/bin/busybox" mkdir -p "$HOME/.local/libexec/brioche-toolchain/bin" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/$lib_dir"
       "$BUSYBOX/bin/busybox" cp "$BRIOCHE_LD" "$HOME/.local/libexec/brioche-toolchain/bin/ld"
       "$BUSYBOX/bin/busybox" cp "$BRIOCHE_PACKED" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
       "$BUSYBOX/bin/busybox" chmod +x "$HOME/.local/libexec/brioche-toolchain/bin/ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/brioche-packed"
       "$BUSYBOX/bin/busybox" ln -s "/usr/bin/ld" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/ld"
-      "$BUSYBOX/bin/busybox" ln -s "/lib64/ld-linux-x86-64.so.2" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/lib64/"
-      "$BUSYBOX/bin/busybox" ln -s "ld" "$HOME/.local/libexec/brioche-toolchain/bin/x86_64-linux-gnu-ld"
+      "$BUSYBOX/bin/busybox" ln -s "/$dynamic_linker_path" "$HOME/.local/libexec/brioche-toolchain/libexec/brioche-ld/$lib_dir/"
+      "$BUSYBOX/bin/busybox" ln -s "ld" "$HOME/.local/libexec/brioche-toolchain/bin/$ld_name"
 
       export PATH="$HOME/.local/libexec/brioche-toolchain/bin\${PATH:+:$PATH}"
 
@@ -67,19 +131,26 @@ export function bootstrapRun(
     `)
     .withPermissions({ executable: true });
 
+  const ldName = `${platformInfo.arch}-${platformInfo.os}-gnu-ld`;
   return std
     .process({
-      command: std.tpl`${busybox}/bin/busybox`,
+      command: std.tpl`${platformInfo.busybox}/bin/busybox`,
       args: ["unshare", "-Umfr", enterBootstrapChrootScript],
       env: {
-        BUSYBOX: busybox,
+        BUSYBOX: platformInfo.busybox,
         BRIOCHE_LD: briocheLd,
         BRIOCHE_PACKED: briochePacked,
-        SYSTEM_TOOLCHAIN_PATH: "/usr/lib/gcc/x86_64-linux-gnu/12",
+        SYSTEM_TOOLCHAIN_PATH: platformInfo.bootstrapRootfsSystemToolchainPath,
+        dynamic_linker_path: platformInfo.dynamicLinkerPath,
+        lib_dir: platformInfo.libDir,
+        ld_name: ldName,
         ...options.env,
       },
       workDir: std.directory({
-        rootfs: bootstrapRootfs.insert("bootstrap.sh", bootstrapScript),
+        rootfs: platformInfo.bootstrapRootfs.insert(
+          "bootstrap.sh",
+          bootstrapScript,
+        ),
         work: options.workDir ?? std.directory(),
       }),
       outputScaffold: options.outputScaffold,
@@ -88,19 +159,17 @@ export function bootstrapRun(
 }
 
 export default async (): Promise<std.Recipe> => {
-  const utils = Brioche.download(
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/utils_amd64_linux.tar.zstd",
-  ).unarchive("tar", "zstd");
-
-  const toolchain = Brioche.download(
-    "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2023-07-06/toolchain_amd64_linux.tar.zstd",
-  ).unarchive("tar", "zstd");
+  const platformInfo = PLATFORM_INFO[std.CURRENT_PLATFORM];
+  std.assert(
+    platformInfo != null,
+    `The platform '${std.CURRENT_PLATFORM}' is not handled by this version of std`,
+  );
 
   const briocheLd = runtimeUtils().get("bin/brioche-ld");
   const briochePacked = runtimeUtils().get("bin/brioche-packed-exec");
 
   const briochePack = std.directory({
-    "x86_64-linux-musl": std.directory({
+    [platformInfo.bootstrapToolchainTargetTriple]: std.directory({
       bin: std.directory({
         "brioche-ld": briocheLd,
       }),
@@ -109,8 +178,8 @@ export default async (): Promise<std.Recipe> => {
           ld: std.symlink({ target: "../../bin/system-ld" }),
           "brioche-packed": briochePacked,
           lib: std.directory({
-            "ld-musl-x86_64.so.1": std.symlink({
-              target: "../../../../lib/ld-musl-x86_64.so.1",
+            [platformInfo.bootstrapToolchainDynamicLinkerName]: std.symlink({
+              target: `../../../../lib/${platformInfo.bootstrapToolchainDynamicLinkerName}`,
             }),
           }),
         }),
@@ -118,17 +187,28 @@ export default async (): Promise<std.Recipe> => {
     }),
   });
 
-  let stage0 = std.merge(utils, toolchain, briochePack);
+  let stage0 = std.merge(
+    platformInfo.bootstrapUtils,
+    platformInfo.bootstrapToolchain,
+    briochePack,
+  );
 
-  const systemLd = stage0.get("x86_64-linux-musl/bin/ld");
-  stage0 = stage0.insert("x86_64-linux-musl/bin/system-ld", systemLd);
+  const systemLd = stage0.get(
+    `${platformInfo.bootstrapToolchainTargetTriple}/bin/ld`,
+  );
   stage0 = stage0.insert(
-    "x86_64-linux-musl/bin/ld",
+    `${platformInfo.bootstrapToolchainTargetTriple}/bin/system-ld`,
+    systemLd,
+  );
+  stage0 = stage0.insert(
+    `${platformInfo.bootstrapToolchainTargetTriple}/bin/ld`,
     std.symlink({ target: "brioche-ld" }),
   );
   stage0 = stage0.insert(
     "bin/ld",
-    std.symlink({ target: "../x86_64-linux-musl/bin/ld" }),
+    std.symlink({
+      target: `../${platformInfo.bootstrapToolchainTargetTriple}/bin/ld`,
+    }),
   );
 
   return stage0;

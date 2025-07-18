@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "strace",
-  version: "6.14",
+  version: "6.15",
   repository: "https://github.com/strace/strace",
 };
 
@@ -14,7 +14,18 @@ const source = Brioche.download(
 
 export default function strace(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix=/
+    case "$(uname -m)" in
+      aarch64)
+        # Disable multiple personality support for aarch64 for now
+        ./configure \\
+          --prefix=/ \\
+          --enable-mpers=no
+        ;;
+      *)
+        ./configure --prefix=/
+        ;;
+    esac
+
     make -j16
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -24,7 +35,7 @@ export default function strace(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/strace"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     strace --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -42,6 +53,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

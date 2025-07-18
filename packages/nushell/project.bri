@@ -2,9 +2,12 @@ import * as std from "std";
 import openssl from "openssl";
 import { cargoBuild } from "rust";
 
+export { nushellRunnable, type NushellRunnable } from "./nushell_runnable.bri";
+export { runNushell } from "./run_nushell.bri";
+
 export const project = {
   name: "nushell",
-  version: "0.104.0",
+  version: "0.105.1",
   repository: "https://github.com/nushell/nushell.git",
 };
 
@@ -16,10 +19,10 @@ const source = Brioche.gitCheckout({
 /**
  * Represents a Nushell plugin.
  *
- * ## Options
+ * @param name - The name of the plugin.
+ * @param dependencies - The dependencies of the plugin.
  *
- * `name`: The name of the plugin.
- * `dependencies`: The dependencies of the plugin.
+ * @returns A Nushell plugin representation
  */
 interface NushellPlugin {
   name: string;
@@ -50,7 +53,6 @@ export default function nushell(): std.Recipe<std.Directory> {
   const nushell = cargoBuild({
     source,
     runnable: "bin/nu",
-    dependencies: [openssl],
   });
 
   // Build the Nushell plugins
@@ -65,7 +67,7 @@ export default function nushell(): std.Recipe<std.Directory> {
   return std.merge(nushell, ...plugins);
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     nu --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -81,6 +83,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

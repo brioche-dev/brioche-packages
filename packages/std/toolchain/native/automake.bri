@@ -12,7 +12,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -27,13 +27,13 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${autoconf()}/bin:${stage2()}/bin`,
-        M4: std.tpl`${m4()}/bin/m4`,
-        AUTOM4TE: std.tpl`${autoconf()}/bin/autom4te`,
-        trailer_m4: std.tpl`${autoconf()}/share/autoconf/autoconf/trailer.m4`,
-        PERL5LIB: std.tpl`${autoconf()}/share/autoconf`,
-        autom4te_perllibdir: std.tpl`${autoconf()}/share/autoconf`,
-        AC_MACRODIR: std.tpl`${autoconf()}/share/autoconf`,
+        PATH: std.tpl`${autoconf}/bin:${stage2}/bin`,
+        M4: std.tpl`${m4}/bin/m4`,
+        AUTOM4TE: std.tpl`${autoconf}/bin/autom4te`,
+        trailer_m4: std.tpl`${autoconf}/share/autoconf/autoconf/trailer.m4`,
+        PERL5LIB: std.tpl`${autoconf}/share/autoconf`,
+        autom4te_perllibdir: std.tpl`${autoconf}/share/autoconf`,
+        AC_MACRODIR: std.tpl`${autoconf}/share/autoconf`,
       },
       workDir: source,
     })

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/tsenart/vegeta.git": {
+      "v12.12.0": "03ca49e9b419c106db29d687827c4c823d8b8ece"
+    }
+  }
+}

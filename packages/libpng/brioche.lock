@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.sourceforge.net/project/libpng/libpng16/1.6.50/libpng-1.6.50.tar.xz": {
+      "type": "sha256",
+      "value": "4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307"
+    }
+  }
+}

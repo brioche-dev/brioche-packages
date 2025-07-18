@@ -237,8 +237,12 @@ function semverCompareConstraint(
  * Returns true if the given semantic version is compatible with the
  * given constraints. Multiple constraints can be separated with a comma.
  *
- * ## Example
+ * @param version - The semantic version to check.
+ * @param constraints - The version constraints to match against.
  *
+ * @returns True if the version matches the constraints, false otherwise
+ *
+ * @example
  * ```typescript
  * import * as std from "std";
  *

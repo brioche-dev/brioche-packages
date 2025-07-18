@@ -1,0 +1,46 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "tflint",
+  version: "0.58.0",
+  repository: "https://github.com/terraform-linters/tflint.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function tflint(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/tflint",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tflint --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tflint)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `TFLint version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

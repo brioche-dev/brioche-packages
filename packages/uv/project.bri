@@ -1,0 +1,45 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "uv",
+  version: "0.7.20",
+  repository: "https://github.com/astral-sh/uv.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function uv(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/uv",
+    runnable: "bin/uv",
+
+    // cargo-chef makes the lockfile out-of-date, see this issue:
+    // https://github.com/LukeMathWalker/cargo-chef/issues/305
+    cargoChefPrepare: false,
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    uv --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(uv)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `uv ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

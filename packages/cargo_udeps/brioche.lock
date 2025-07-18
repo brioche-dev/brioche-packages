@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/est31/cargo-udeps.git": {
+      "v0.1.57": "74dbfaeea15c799456260ee8b396c07334537370"
+    }
+  }
+}

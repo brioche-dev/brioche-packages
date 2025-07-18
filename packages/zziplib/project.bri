@@ -1,0 +1,74 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import python from "python";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "zziplib",
+  version: "0.13.80",
+  repository: "https://github.com/gdraheim/zziplib.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function zziplib(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, python],
+    set: {
+      ZZIP_TESTCVE: "OFF",
+      BUILD_TESTS: "OFF",
+      ZZIPSDL: "OFF",
+      ZZIPTEST: "OFF",
+      BUILDTESTS: "OFF",
+      ZZIPDOCS: "OFF",
+    },
+    runnable: "bin/unzzip",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion zzipwrap | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, zziplib)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://api.github.com/repos/gdraheim/zziplib/git/matching-refs/tags
+      | get ref
+      | each {|ref|
+        $ref
+        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
+        | get -i 0
+      }
+      | sort-by -n major minor patch
+      | last
+      | get tag
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

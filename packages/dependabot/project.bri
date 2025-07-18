@@ -1,0 +1,50 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "dependabot",
+  version: "1.68.0",
+  repository: "https://github.com/dependabot/cli",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function dependabot(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      generate: true,
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/dependabot/cli/cmd/dependabot/internal/cmd.version=${project.version}`,
+      ],
+    },
+    path: "./cmd/dependabot",
+    runnable: "bin/dependabot",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    dependabot --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(dependabot)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `dependabot version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

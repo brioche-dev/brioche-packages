@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/launchbadge/sqlx": {
+      "v0.8.6": "bab1b022bd56a64f9a08b46b36b97c5cff19d77e"
+    }
+  }
+}

@@ -1,0 +1,84 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "krb5",
+  version: "1.21.3",
+  extra: {
+    majorVersion: "1",
+    minorVersion: "21",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
+const source = Brioche.download(
+  `https://kerberos.org/dist/krb5/${project.extra.majorVersion}.${project.extra.minorVersion}/krb5-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function krb5(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./src/configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(
+      std.pkgConfigMakePathsRelative,
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/krb5-config"),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion krb5 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, krb5)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://web.mit.edu/Kerberos/
+      | lines
+      | where {|it| $it | str contains 'Current release: <A HREF="krb5-' }
+      | parse --regex '<A HREF="krb5-.+/">krb5-(?<version>.+)</A>'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+      let majorVersion = $version
+        | split words
+        | get 0
+      let minorVersion = $version
+        | split words
+        | get 1
+
+      $env.project
+        | from json
+        | update version $version
+        | update extra.majorVersion $majorVersion
+        | update extra.minorVersion $minorVersion
+        | to json
+  `.env({ project: JSON.stringify(project) });
+}

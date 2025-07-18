@@ -70,7 +70,7 @@ export default function asciinema(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   // Generate a locale which is required by asciinema to run properly
   const locale = std.runBash`
     mkdir -p "$BRIOCHE_OUTPUT"/C.UTF-8
@@ -78,7 +78,7 @@ export async function test() {
   `
     .dependencies(std.toolchain)
     .env({
-      I18NPATH: std.tpl`${std.toolchain()}/share/i18n`,
+      I18NPATH: std.tpl`${std.toolchain}/share/i18n`,
     })
     .toDirectory();
 
@@ -101,6 +101,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

@@ -1,0 +1,60 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "util_macros",
+  version: "1.20.2",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/util/util-macros-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function utilMacros(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain)
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+      std.setEnv(recipe, {
+        PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xorg-macros | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, utilMacros)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/util
+      | lines
+      | where {|it| ($it | str contains "util-macros") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="util-macros-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

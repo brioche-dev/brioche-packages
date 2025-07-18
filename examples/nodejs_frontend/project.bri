@@ -15,7 +15,7 @@ export function staticSite(): std.Recipe<std.Directory> {
     "vite.config.ts",
   );
 
-  // Install the NPM dependencies
+  // Install the npm dependencies
   const npmPackage = npmInstall({ source });
 
   // Run the build script, then save the output from the `dist/` directory
@@ -23,23 +23,23 @@ export function staticSite(): std.Recipe<std.Directory> {
     npm run build
     mv dist "$BRIOCHE_OUTPUT"
   `
-    .dependencies(nodejs())
+    .dependencies(nodejs)
     .workDir(npmPackage)
     .env({
       // NOTE: Rollup needs a dynamic library provided by the toolchain.
       // Setting `$LD_LIBRARY_PATH` allows Node.js to find this library.
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain()}/lib`,
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
     })
     .toDirectory();
 }
 
 // Build the static site and serve it
-export default () => {
+export default function (): std.BashRunnable {
   // This script gets called when using `brioche run`. This will serve
   // the static site locally using miniserve
   return std.bashRunnable`
     miniserve --spa --index index.html -- "$root"
   `
-    .dependencies(miniserve())
+    .dependencies(miniserve)
     .root(staticSite());
-};
+}

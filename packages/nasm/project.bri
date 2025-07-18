@@ -1,5 +1,5 @@
-import nushell from "nushell";
 import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "nasm",
@@ -26,7 +26,7 @@ export default function nasm(): std.Recipe<std.Directory> {
     .toDirectory();
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     nasm --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -45,13 +45,13 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://api.github.com/repos/netwide-assembler/nasm/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
-        | parse --regex '^refs/tags/nasm-(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | parse --regex '^refs/tags/nasm-(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
         | get -i 0
       }
       | sort-by -n major minor patch
@@ -62,12 +62,5 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }

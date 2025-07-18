@@ -1,6 +1,6 @@
-import nushell from "nushell";
 import * as std from "std";
 import { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "s2argv_execs",
@@ -24,7 +24,7 @@ export default function s2argvExecs(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   // Create a simple C program that uses s2argv_execs to execute a command passed via stdin
   const src = std.file(std.indoc`
       #include <stdio.h>
@@ -71,13 +71,13 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
     let version = http get https://api.github.com/repos/virtualsquare/s2argv-execs/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
-        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)(\\.(?P<patch>[\\d]+))?)'
+        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)(\\.(?P<patch>[\\d]+))?)$'
         | get -i 0
       }
       | sort-by -n major minor patch
@@ -88,12 +88,5 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }

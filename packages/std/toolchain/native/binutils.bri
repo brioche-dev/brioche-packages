@@ -1,10 +1,12 @@
 import * as std from "/core";
-import stage2 from "/toolchain/stage2";
 import { useBriocheLd } from "/toolchain/utils.bri";
+import { currentPlatformInfo } from "/toolchain/stage0";
+import stage2 from "/toolchain/stage2";
 import flex from "./flex.bri";
 import zlib from "./zlib.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
+  const platformInfo = currentPlatformInfo();
   const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/binutils-2.41.tar.xz",
   )
@@ -13,7 +15,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   let binutils = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -37,9 +39,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin:${flex()}/bin`,
-        CPPFLAGS: std.tpl`-I${zlib()}/include`,
-        LDFLAGS: std.tpl`-L${zlib()}/lib`,
+        PATH: std.tpl`${stage2}/bin:${flex}/bin`,
+        CPPFLAGS: std.tpl`-I${zlib}/include`,
+        LDFLAGS: std.tpl`-L${zlib}/lib`,
       },
       workDir: source,
     })
@@ -50,7 +52,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
   binutils = useBriocheLd(binutils, {
     ldPaths: ["bin/ld.bfd", "bin/ld.gold"],
     interpreterPaths: {
-      "lib64/ld-linux-x86-64.so.2": "lib64/ld-linux-x86-64.so.2",
+      [platformInfo.dynamicLinkerPath]: platformInfo.dynamicLinkerPath,
     },
   });
 

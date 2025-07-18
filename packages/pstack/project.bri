@@ -4,7 +4,7 @@ import { gitCheckout } from "git";
 
 export const project = {
   name: "pstack",
-  version: "2.10",
+  version: "2.12.2",
   repository: "https://github.com/peadar/pstack.git",
 };
 
@@ -30,7 +30,7 @@ export default function pstack(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pstack --version 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
@@ -46,6 +46,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

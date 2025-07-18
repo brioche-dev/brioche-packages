@@ -1,0 +1,40 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_mutants",
+  version: "25.2.1",
+  repository: "https://github.com/sourcefrog/cargo-mutants.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cargoMutants(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/cargo-mutants",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo mutants --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoMutants)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cargo-mutants ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

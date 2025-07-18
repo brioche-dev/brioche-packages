@@ -1,0 +1,57 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "cargo_bloat",
+  version: "0.12.1",
+  repository: "https://github.com/RazrFalcon/cargo-bloat.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cargoBloat(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/cargo-bloat",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo bloat --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoBloat)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://api.github.com/repos/RazrFalcon/cargo-bloat/git/matching-refs/tags
+      | get ref
+      | each {|ref|
+        $ref
+        | parse --regex '^refs/tags/v(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
+        | get -i 0
+      }
+      | sort-by -n major minor patch
+      | last
+      | get tag
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

@@ -5,7 +5,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libgit2",
-  version: "1.9.0",
+  version: "1.9.1",
   repository: "https://github.com/libgit2/libgit2.git",
 };
 
@@ -27,13 +27,14 @@ export default function libgit2(): std.Recipe<std.Directory> {
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
-      LIBRARY_PATH: { append: [{ path: "lib64" }] },
-      PKG_CONFIG_PATH: { append: [{ path: "lib64/pkgconfig" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion libgit2 | tee "$BRIOCHE_OUTPUT"
   `
@@ -49,6 +50,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

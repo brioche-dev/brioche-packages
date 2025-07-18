@@ -1,21 +1,34 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
-import nushell from "nushell";
+import openssl from "openssl";
+import { cargoBuild } from "rust";
 
 export const project = {
   name: "codex",
-  version: "0.1.2504301751",
-  packageName: "@openai/codex",
+  version: "0.5.0",
+  repository: "https://github.com/openai/codex.git",
 };
 
+const source = std.recipe(() => {
+  const source = Brioche.gitCheckout({
+    repository: project.repository,
+    ref: `rust-v${project.version}`,
+  });
+
+  // The Rust source code of the package is located in
+  // the codex-rs directory. Meaning the Cargo.toml file
+  // is not located at the root folder of the repository.
+  return std.glob(source, ["codex-rs/*"]).peel();
+});
+
 export default function codex(): std.Recipe<std.Directory> {
-  return npmInstallGlobal({
-    packageName: project.packageName,
-    version: project.version,
+  return cargoBuild({
+    source,
+    path: "cli",
+    dependencies: [openssl],
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     codex --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -25,30 +38,15 @@ export async function test() {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  const expected = `codex-cli ${project.version}`;
   std.assert(result === expected, `expected ${expected}, got ${result}`);
 
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://registry.npmjs.org/${project.packageName}/latest
-
-    let version = $releaseData
-      | get version
-      | str replace --regex '^v' ''
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^rust-v(?<version>.*)$/,
   });
 }

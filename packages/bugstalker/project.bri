@@ -2,9 +2,11 @@ import * as std from "std";
 import libunwind from "libunwind";
 import { cargoBuild } from "rust";
 
+// Currently, BugStalker only support x86-64 Linux
+// @brioche-packages skip-platform aarch64-linux
 export const project = {
   name: "bugstalker",
-  version: "0.3.0",
+  version: "0.3.2",
   repository: "https://github.com/godzie44/BugStalker.git",
 };
 
@@ -14,6 +16,11 @@ const source = Brioche.gitCheckout({
 });
 
 export default function bugstalker(): std.Recipe<std.Directory> {
+  std.assert(
+    std.CURRENT_PLATFORM === "x86_64-linux",
+    `BugStalker does not currently support the platform '${std.CURRENT_PLATFORM}'`,
+  );
+
   return cargoBuild({
     source,
     runnable: "bin/bs",
@@ -21,7 +28,7 @@ export default function bugstalker(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     bs --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -37,6 +44,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

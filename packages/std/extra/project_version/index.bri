@@ -1,0 +1,6 @@
+export * from "./format.bri";
+
+// The default regex used for checking if a project version is a either semver or
+// a semver-like version.
+export const PROJECT_VERSION_SEMVER_MATCH =
+  /^(?<version>(?<major_version>(?:0|[1-9]\d*))\.(?<minor_version>(?:0|[1-9]\d*))(?:\.(?<patch_version>(?:0|[1-9]\d*)))?)(?<metadata>(?:-(?:(?:[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)))?$/;

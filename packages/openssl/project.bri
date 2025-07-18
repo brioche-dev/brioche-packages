@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "openssl",
-  version: "3.5.0",
+  version: "3.5.1",
   repository: "https://github.com/openssl/openssl",
 };
 
@@ -25,6 +25,7 @@ export default function openssl(): std.Recipe<std.Directory> {
     .workDir(source)
     .toDirectory()
     .pipe(
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },
@@ -37,7 +38,7 @@ export default function openssl(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     openssl version | tee "$BRIOCHE_OUTPUT"
   `
@@ -56,7 +57,7 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
     matchTag: /^openssl-(?<version>.*)$/,

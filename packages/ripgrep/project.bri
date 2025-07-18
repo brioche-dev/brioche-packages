@@ -22,7 +22,7 @@ export default function ripgrep(): std.Recipe<std.Directory> {
   });
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     rg --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -40,6 +40,6 @@ export async function test() {
   return script;
 }
 
-export async function liveUpdate() {
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
   return std.liveUpdateFromGithubReleases({ project });
 }

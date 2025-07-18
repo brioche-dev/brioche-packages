@@ -1,0 +1,90 @@
+import * as std from "std";
+import nushell from "nushell";
+
+export const project = {
+  name: "libunistring",
+  version: "1.3",
+};
+
+const source = Brioche.download(
+  `https://ftp.gnu.org/gnu/libunistring/libunistring-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libunistring(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <unistring/version.h>
+
+      int main(void)
+      {
+          int version = _libunistring_version;
+
+          printf("%d.%d.%d", version >> 16, (version >> 8) & 0xff, version & 0xff);
+
+          return EXIT_SUCCESS;
+      }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -lunistring
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libunistring)
+    .env({ src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version}.`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.WithRunnable {
+  const src = std.file(std.indoc`
+    let version = http get https://ftp.gnu.org/gnu/libunistring
+      | lines
+      | where {|it| ($it | str contains "libunistring-") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="libunistring-(?<version>[0-9.]+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `);
+
+  return std.withRunnable(std.directory(), {
+    command: "nu",
+    args: [src],
+    env: { project: JSON.stringify(project) },
+    dependencies: [nushell],
+  });
+}

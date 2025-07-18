@@ -1,11 +1,11 @@
 import * as std from "std";
 import openssl from "openssl";
 import curl from "curl";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "git",
-  version: "2.49.0",
+  version: "2.50.1",
 };
 
 const source = Brioche.download(
@@ -20,7 +20,7 @@ export default function git(): std.Recipe<std.Directory> {
     make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, curl)
+    .dependencies(std.toolchain, openssl, curl({ minimal: true }))
     .toDirectory()
     .pipe(
       (recipe) =>
@@ -32,7 +32,7 @@ export default function git(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     git --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -48,13 +48,13 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/git/git/git/matching-refs/
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://api.github.com/repos/git/git/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
-        | parse --regex '^refs/tags/v(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | parse --regex '^refs/tags/v(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
         | get -i 0
       }
       | sort-by -n major minor patch
@@ -65,22 +65,27 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
+/**
+ * Options for checking out a git repository.
+ *
+ * @param repository - The URL of the git repository to checkout.
+ * @param commit - The full commit hash to checkout.
+ * @param options - Extra options for the checkout.
+ */
 interface GitCheckoutInit {
   repository: string;
   commit: string;
   options?: GitCheckoutOptions;
 }
 
+/**
+ * Specific git checkout options.
+ *
+ * @param submodules - Set to true to recursively checkout git submodules too.
+ */
 export interface GitCheckoutOptions {
   submodules?: boolean;
 }
@@ -89,19 +94,16 @@ export interface GitCheckoutOptions {
  * Checkout a git repository at a specific commit. The specified commit will
  * be cloned without any history.
  *
- * See also the `Brioche.gitRef` function, which can be used with `gitCheckout`
+ * @description See also the `Brioche.gitRef` function, which can be used with `gitCheckout`
  * to get a commit hash from a git ref (such as a branch or tag name), and
  * then record the commit hash in the lockfile.
  *
- * ## Options
+ * @param init - An object containing the repository URL and commit hash to checkout.
+ * @param options - Options for the checkout, such as whether to include submodules.
  *
- * - `repository`: The URL of the git repository to checkout.
- * - `commit`: The full commit hash to checkout.
- * - `options`: Extra options for the checkout.
- *   - `submodules`: Set to true to recursively checkout git submodules too.
+ * @returns The checked out repository as an artifact
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import { gitCheckout } from "git";
  *
@@ -131,31 +133,44 @@ export function gitCheckout(
     );
 
     // Clone and fetch only the specified commit. See this article:
-    // https://blog.hartwork.org/posts/clone-arbitrary-single-git-commit/
-    let repo = std.runBash`
-      cd "$BRIOCHE_OUTPUT"
-      git -c init.defaultBranch=main init
-      git remote add origin "$repository"
-      git fetch --depth 1 origin "$commit"
-      git -c advice.detachedHead=false checkout FETCH_HEAD
-    `
-      .dependencies(git)
-      .env({
-        repository,
-        commit,
+    // https://about.gitlab.com/blog/whats-new-in-git-2-49-0/#thin-clone-using---revision
+    let repo = std
+      .process({
+        command: "git",
+        args: [
+          "-c",
+          "advice.detachedHead=false",
+          "clone",
+          "--depth",
+          "1",
+          "--revision",
+          commit,
+          repository,
+          // Clone into the output directory
+          std.outputPath,
+        ],
+        dependencies: [git],
+        unsafe: { networking: true },
       })
-      .outputScaffold(std.directory())
-      .unsafe({ networking: true })
       .toDirectory();
 
     if (options.submodules === true) {
-      repo = std.runBash`
-        cd "$BRIOCHE_OUTPUT"
-        git submodule update --init --recursive
-      `
-        .dependencies(git)
-        .outputScaffold(repo)
-        .unsafe({ networking: true })
+      repo = std
+        .process({
+          command: "git",
+          args: [
+            "-C",
+            std.outputPath,
+            "submodule",
+            "update",
+            "--init",
+            "--recursive",
+          ],
+          // std.toolchain() is required for git submodules (to access tools like sed, basename, ...)
+          dependencies: [std.toolchain, git],
+          outputScaffold: repo,
+          unsafe: { networking: true },
+        })
         .toDirectory();
     }
 

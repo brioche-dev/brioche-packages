@@ -1,0 +1,40 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_msrv",
+  version: "0.18.4",
+  repository: "https://github.com/foresterre/cargo-msrv.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cargoMsrv(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/cargo-mrsv",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo msrv --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoMsrv)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cargo-msrv ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

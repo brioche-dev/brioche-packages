@@ -9,6 +9,12 @@ import { BRIOCHE_VERSION } from "./runtime.bri";
 import { semverMatches } from "./semver.bri";
 import { assert } from "./utils.bri";
 
+/**
+ * Options for retrieving a git ref commit hash.
+ *
+ * @param repository - A git repository URL.
+ * @param ref - A git ref, such as a branch or tag name. Example: `main`
+ */
 export interface GitRefOptions {
   repository: string;
   ref: string;
@@ -26,8 +32,11 @@ declare global {
      * Include a file from the filesystem. The path is relative to the
      * current Brioche module, and cannot go outside the project root.
      *
-     * ## Example
+     * @param path - The relative path to the file to include.
      *
+     * @returns A file recipe with the contents of the specified file
+     *
+     * @example
      * ```
      * project/
      * ├── project.bri
@@ -47,8 +56,11 @@ declare global {
      * Include a directory from the filesystem. The path is relative to the
      * current Brioche module, and cannot go outside the project root.
      *
-     * ## Example
+     * @param path - The relative path to the directory to include.
      *
+     * @returns A directory recipe containing all files in the specified directory
+     *
+     * @example
      * ```
      * project/
      * ├── project.bri
@@ -72,8 +84,11 @@ declare global {
      * relative to the current Brioche module. The glob pattern will not
      * match any paths if it tries going outside the current module directory.
      *
-     * ## Example
+     * @param patterns - One or more glob patterns to match files.
      *
+     * @returns A directory recipe containing all files matching the glob patterns
+     *
+     * @example
      * ```
      * project/
      * ├── project.bri
@@ -101,10 +116,13 @@ declare global {
      * not take a hash, and it **must** be called with a constant string URL.
      * The hash of the downloaded file will be saved in the lockfile.
      *
-     * See also `std.download`, which can be used even if URL is not constant.
+     * @description See also `std.download`, which can be used even if URL is not constant.
      *
-     * ## Example
+     * @param url - The URL to download (must be a constant string)
      *
+     * @returns A file recipe containing the downloaded content
+     *
+     * @example
      * ```typescript
      * const file = Brioche.download("http://example.com/");
      * ```
@@ -117,16 +135,14 @@ declare global {
      * commit hash will be saved in the lockfile, so the same commit hash
      * will be used until the lockfile is updated.
      *
-     * See also the `gitCheckout` function from the `git` package, which can
+     * @description See also the `gitCheckout` function from the `git` package, which can
      * checkout a git repo from a commit hash returned from `Brioche.gitRef`.
      *
-     * ## Options
+     * @param options - Options for the git ref.
      *
-     * - `repository`: A git repository URL.
-     * - `ref`: A git ref, such as a branch or tag name. Example: `main`
+     * @returns The commit hash for the specified git ref.
      *
-     * ## Example
-     *
+     * @example
      * ```typescript
      * import { gitCheckout } from "git";
      *

@@ -24,8 +24,8 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${toolchain()}/bin`,
-        GCONV_PATH: std.tpl`${toolchain()}/usr/lib/gconv`,
+        PATH: std.tpl`${toolchain}/bin`,
+        GCONV_PATH: std.tpl`${toolchain}/usr/lib/gconv`,
       },
       workDir: source,
     })

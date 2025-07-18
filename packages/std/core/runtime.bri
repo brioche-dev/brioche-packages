@@ -11,6 +11,18 @@ function getBriocheVersion(): string {
 
 export const BRIOCHE_VERSION = getBriocheVersion();
 
+function getCurrentPlatform(): Platform {
+  const { op_brioche_current_platform } = (globalThis as any).Deno.core.ops;
+
+  if (op_brioche_current_platform === undefined) {
+    return "x86_64-linux";
+  }
+
+  return op_brioche_current_platform();
+}
+
+export const CURRENT_PLATFORM = getCurrentPlatform();
+
 export async function bakeAll(recipes: []): Promise<[]>;
 export async function bakeAll(recipes: [Recipe]): Promise<[Artifact]>;
 export async function bakeAll(

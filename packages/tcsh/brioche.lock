@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://astron.com/pub/tcsh/tcsh-6.24.15.tar.gz": {
+    "https://astron.com/pub/tcsh/tcsh-6.24.16.tar.gz": {
       "type": "sha256",
-      "value": "d4d0b2a4df320f57a518e44c359ef36bbcf85d64f5146d0cb8ff34984e0d23fd"
+      "value": "4208cf4630fb64d91d81987f854f9570a5a0e8a001a92827def37d0ed8f37364"
     }
   }
 }

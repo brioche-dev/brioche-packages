@@ -1,13 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/LukeMathWalker/cargo-chef/releases/download/v0.1.71/cargo-chef-x86_64-unknown-linux-musl.tar.gz": {
+    "https://static.rust-lang.org/dist/channel-rust-1.88.0.toml": {
       "type": "sha256",
-      "value": "bc601a12f1e086a995690e9eed86353b23d9e0429509bfaae1db2e39b41cde52"
-    },
-    "https://static.rust-lang.org/dist/channel-rust-1.86.0.toml": {
-      "type": "sha256",
-      "value": "5ffe190473b7896d1f39e9d0ddfa04bec72000f25897669bb296814e10ceba42"
+      "value": "431b7c5c0b9a511d8e31d29b378bbc74124e8521f14beb92d3a5a5f7e7e55449"
     }
   }
 }

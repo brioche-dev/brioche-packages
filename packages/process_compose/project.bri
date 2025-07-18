@@ -1,18 +1,18 @@
 import * as std from "std";
 import { gitCheckout } from "git";
-import nushell from "nushell";
 import { goBuild } from "go";
 
 export const project = {
   name: "process_compose",
-  version: "1.46.0",
+  version: "1.64.1",
+  repository: "https://github.com/F1bonacc1/process-compose.git",
   extra: {
-    lastModifiedDate: "20241220221126",
+    releaseDate: "2025-05-10",
   },
 };
 
 const gitRef = await Brioche.gitRef({
-  repository: "https://github.com/F1bonacc1/process-compose.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 const source = gitCheckout(gitRef);
@@ -27,7 +27,7 @@ export default function processCompose(): std.Recipe<std.Directory> {
         "-X",
         `github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
         "-X",
-        `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.lastModifiedDate}`,
+        `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.releaseDate}`,
         "-X",
         `github.com/f1bonacc1/process-compose/src/config.Commit=${gitRef.commit}`,
       ],
@@ -41,7 +41,7 @@ export default function processCompose(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     process-compose version | tee "$BRIOCHE_OUTPUT"
   `
@@ -59,30 +59,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let releaseData = http get https://api.github.com/repos/F1bonacc1/process-compose/releases/latest
-
-    let version = $releaseData
-      | get tag_name
-      | str replace --regex '^v' ''
-
-    let lastModifiedDate = $releaseData
-      | get created_at
-      | into datetime
-      | format date "%Y%m%d%H%M%S"
-
-    $env.project
-      | from json
-      | update version $version
-      | update extra.lastModifiedDate $lastModifiedDate
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
 }

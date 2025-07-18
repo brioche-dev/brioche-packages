@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/BLAKE3-team/BLAKE3.git": {
+      "1.8.2": "df610ddc3b93841ffc59a87e3da659a15910eb46"
+    }
+  }
+}

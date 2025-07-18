@@ -3,6 +3,11 @@ import { source } from "/core/source.bri";
 import type { GitRefOptions } from "/core/global.bri";
 import type { GitCheckoutOptions } from "git";
 
+/**
+ * Options for checking out a git repository.
+ *
+ * @param options - Extra options for the checkout. See the `GitCheckoutOptions` interface.
+ */
 interface GitCheckoutInit extends GitRefOptions {
   options?: GitCheckoutOptions;
 }
@@ -17,18 +22,14 @@ declare global {
      * will be saved in the lockfile, so the same commit hash will be used
      * until the lockfile is updated.
      *
-     * See also the function `Brioche.gitRef`, which directly returns the
+     * @description See also the function `Brioche.gitRef`, which directly returns the
      * resolved commit hash instead.
      *
-     * ## Options
+     * @param options - Options for the git checkout.
      *
-     * - `repository`: A git repository URL.
-     * - `ref`: A git ref, such as a branch or tag name. Example: `main`
-     * - `options`: Extra options for the checkout. See the `gitCheckout`
-     *   function from the `git` package for all available extra options.
+     * @returns The checked out repository without history
      *
-     * ## Example
-     *
+     * @example
      * ```typescript
      * import * as std from "std";
      *

@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "re2c",
-  version: "4.2",
+  version: "4.3",
   repository: "https://github.com/skvadrik/re2c",
 };
 
@@ -24,6 +24,7 @@ export default function re2c(): std.Recipe<std.Directory> {
     .workDir(source)
     .toDirectory()
     .pipe(
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },
@@ -34,7 +35,7 @@ export default function re2c(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     re2c --version | tee "$BRIOCHE_OUTPUT"
   `
@@ -50,6 +51,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

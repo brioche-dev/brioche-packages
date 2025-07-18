@@ -1,0 +1,56 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "gosec",
+  version: "2.22.5",
+  repository: "https://github.com/securego/gosec.git",
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function gosec(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `main.Version=${project.version}`,
+        "-X",
+        `main.GitTag=${gitRef.commit}`,
+      ],
+    },
+    path: "./cmd/gosec",
+    runnable: "bin/gosec",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    gosec --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gosec)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version: ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

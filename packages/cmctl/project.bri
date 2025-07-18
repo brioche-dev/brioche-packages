@@ -1,0 +1,57 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "cmctl",
+  version: "2.3.0",
+  repository: "https://github.com/cert-manager/cmctl.git",
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function cmctl(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        "github.com/cert-manager/cmctl/v2/pkg/build.name=cmctl",
+        "-X",
+        `github.com/cert-manager/cert-manager/pkg/util.AppVersion=${project.version}`,
+        "-X",
+        `github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${gitRef.commit}`,
+      ],
+    },
+    runnable: "bin/cmctl",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cmctl version --client | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(cmctl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `GitVersion:"${project.version}"`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

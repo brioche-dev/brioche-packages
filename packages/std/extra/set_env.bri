@@ -12,12 +12,20 @@ export type EnvValue =
  * variables will be set when the recipe is included as a dependency for a
  * process recipe.
  *
- * Each environment variable can be set to either append one or more paths
+ * @description Each environment variable can be set to either append one or more paths
  * (relative to the root of the recipe), or set a fallback path / value
  * if the environment variable is empty.
  *
- * ## Example
+ * @param recipe - The recipe to add environment variables to.
+ * @param env - An object mapping environment variable names to their configuration.
+ *   Each value can be:
+ *   - `{ append: [{ path: string }] }`: Append paths to the environment variable
+ *   - `{ fallback: { path: string } }`: Set a fallback path if the variable is empty
+ *   - `{ fallback: { value: string } }`: Set a fallback value if the variable is empty
  *
+ * @returns A new recipe with the specified environment variables configured
+ *
+ * @example
  * ```typescript
  * let myLibrary = std.runBash`
  *   mkdir -p "$BRIOCHE_OUTPUT/lib"

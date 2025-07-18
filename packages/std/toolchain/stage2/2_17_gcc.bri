@@ -1,6 +1,6 @@
 import * as std from "/core";
 import { useBriocheLd } from "../utils.bri";
-import { bootstrapRun } from "../stage0";
+import { bootstrapRun, currentPlatformInfo } from "../stage0";
 import stage1 from "../stage1";
 import m4 from "./2_01_m4.bri";
 import ncurses from "./2_02_ncurses.bri";
@@ -20,6 +20,7 @@ import xz from "./2_15_xz.bri";
 import binutils from "./2_16_binutils.bri";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
+  const platformInfo = currentPlatformInfo();
   let source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/gcc-13.2.0.tar.xz",
   )
@@ -59,34 +60,34 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   });
 
   let stage2 = std.merge(
-    stage1(),
-    m4(),
-    ncurses(),
-    bash(),
-    coreutils(),
-    diffutils(),
-    file(),
-    findutils(),
-    gawk(),
-    grep(),
-    gzip(),
-    make(),
-    patch(),
-    sed(),
-    tar(),
-    xz(),
-    binutils(),
+    stage1,
+    m4,
+    ncurses,
+    bash,
+    coreutils,
+    diffutils,
+    file,
+    findutils,
+    gawk,
+    grep,
+    gzip,
+    make,
+    patch,
+    sed,
+    tar,
+    xz,
+    binutils,
   );
 
   stage2 = useBriocheLd(stage2, {
     ldPaths: [
       "usr/bin/ld",
       "usr/bin/ld.bfd",
-      "usr/x86_64-lfs-linux-gnu/bin/ld",
-      "usr/x86_64-lfs-linux-gnu/bin/ld.bfd",
+      `usr/${platformInfo.arch}-lfs-linux-gnu/bin/ld`,
+      `usr/${platformInfo.arch}-lfs-linux-gnu/bin/ld.bfd`,
     ],
     interpreterPaths: {
-      "lib64/ld-linux-x86-64.so.2": "lib/ld-linux-x86-64.so.2",
+      [platformInfo.dynamicLinkerPath]: platformInfo.dynamicLinkerPath,
     },
   });
 
@@ -94,7 +95,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   for (const tool of prefixedTools) {
     stage2 = stage2.insert(
       `usr/bin/${tool}`,
-      std.symlink({ target: `x86_64-lfs-linux-gnu-${tool}` }),
+      std.symlink({ target: `${platformInfo.arch}-lfs-linux-gnu-${tool}` }),
     );
   }
 
@@ -138,7 +139,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     `,
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
+      TARGET: `${platformInfo.arch}-lfs-linux-gnu`,
       stage2,
     },
     workDir: source,

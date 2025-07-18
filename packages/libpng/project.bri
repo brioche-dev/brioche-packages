@@ -1,0 +1,70 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libpng",
+  version: "1.6.50",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/libpng/libpng16/${project.version}/libpng-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libpng(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libpng | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libpng)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let sourceUrl = http get https://sourceforge.net/projects/libpng/files/libpng16
+      | lines
+      | where {|it| ($it | str contains 'href="/projects/libpng/files/libpng16') and (not ($it | str contains 'older-releases')) }
+      | parse --regex '<a href="/projects/libpng/files/libpng16/(?<version>.+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let version = http get $"https://sourceforge.net/projects/libpng/files/libpng16/($sourceUrl)"
+      | lines
+      | where {|it| ($it | str contains '<a href="https://sourceforge.net') and ($it | str contains '.tar.xz') }
+      | parse --regex ($"<a href=\\"https://sourceforge.net/projects/libpng/files/libpng16/($sourceUrl)/libpng-" + '(?<version>[^"]+)\.tar\.xz/')
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

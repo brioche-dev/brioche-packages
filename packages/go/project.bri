@@ -1,16 +1,31 @@
 import * as std from "std";
-import nushell from "nushell";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "go",
-  version: "1.24.3",
+  version: "1.24.5",
 };
 
-const source = Brioche.download(
-  `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+function goPrebuilt(): std.Recipe<std.Directory> {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return Brioche.download(
+        `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
+      )
+        .unarchive("tar", "gzip")
+        .peel();
+    case "aarch64-linux":
+      return Brioche.download(
+        `https://go.dev/dl/go${project.version}.linux-arm64.tar.gz`,
+      )
+        .unarchive("tar", "gzip")
+        .peel();
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the go package`,
+      );
+  }
+}
 
 /**
  * The Go programming language.
@@ -27,7 +42,7 @@ const source = Brioche.download(
 export default function go(): std.Recipe<std.Directory> {
   return std
     .directory({
-      go: source,
+      go: goPrebuilt(),
       bin: std.directory({
         go: std.symlink({ target: "../go/bin/go" }),
         gofmt: std.symlink({ target: "../go/bin/gofmt" }),
@@ -42,7 +57,7 @@ export default function go(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     go version | tee "$BRIOCHE_OUTPUT"
   `
@@ -61,13 +76,13 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/golang/go/git/matching-refs/
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://api.github.com/repos/golang/go/git/matching-refs/tags
       | get ref
       | each {|ref|
         $ref
-        | parse --regex '^refs/tags/go(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))'
+        | parse --regex '^refs/tags/go(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
         | get -i 0
       }
       | sort-by -n major minor patch
@@ -78,18 +93,19 @@ export function liveUpdate() {
       | from json
       | update version $version
       | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
-  });
+  `.env({ project: JSON.stringify(project) });
 }
 
 type ModOptions = "readonly" | "vendor" | "mod";
 
+/**
+ * Build options when building and installing a Go module.
+ *
+ * @param generate - Run `go generate` before building.
+ * @param ldflags - An array of ldflags to pass to the `go install` command.
+ * @param trimpath - Set the `-trimpath` flag.
+ * @param mod - Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
+ */
 interface GoBuildParameters {
   generate?: boolean;
   ldflags?: string[];
@@ -97,6 +113,18 @@ interface GoBuildParameters {
   mod?: ModOptions;
 }
 
+/**
+ * Options for building and installing a Go module.
+ *
+ * @param source - The Go module to build. Should include `go.mod`, as well as
+ *   `go.sum` if external dependencies are needed.
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param buildParams - Optional build parameters.
+ * @param path - Optionally set the package path to build (e.g. `./cmd/foo`).
+ * @param runnable - Optionally set a path to the binary to run
+ *   by default (e.g. `bin/foo`).
+ */
 interface GoBuildOptions {
   source: std.RecipeLike<std.Directory>;
   dependencies?: std.RecipeLike<std.Directory>[];
@@ -110,23 +138,11 @@ interface GoBuildOptions {
  * Build a Go module. Calls `go install` in the module directory, and
  * returns a recipe with the results stored in the `bin/` directory.
  *
- * ## Options
+ * @param options - Options for building the Go module.
  *
- * - `source`: The Go module to build. Should include `go.mod`, as well as
- *   `go.sum` if external dependencies are needed.
- * - `buildParams`: Optional build parameters:
- *   - `generate`: Run `go generate` before building.
- *   - `ldflags`: An array of ldflags to pass to the `go install` command.
- *   - `trimpath`: Set the `-trimpath` flag.
- *   - `mod`: Set the `-mod` flag to one of `"readonly"`, `"vendor"`, or `"mod"`.
- * - `dependencies`: Optionally add additional dependencies to the build.
- * - `env`: Optionally set environment variables for the build.
- * - `path`: Optionally set the package path to build (e.g. `./cmd/foo`).
- * - `runnable`: Optionally set a path to the binary to run
- *   by default (e.g. `bin/foo`).
+ * @returns A recipe with the built Go binaries stored in the `bin/` directory
  *
- * ## Example
- *
+ * @example
  * ```typescript
  * import { goBuild } from "go";
  * import openssl from "openssl";
@@ -225,7 +241,7 @@ function goModDownload(
  * Wrapper function to escape ldflags for use in a shell command.
  * Escapes single quotes and double quotes.
  *
- * @param ldflags An array of ldflags to escape.
+ * @param ldflags - An array of ldflags to escape.
  * @returns A string of escaped ldflags.
  */
 function ldflagsWrapper(ldflags: string[]): string {

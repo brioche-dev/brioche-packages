@@ -21,7 +21,7 @@ export default function libPsl(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, python)
     .toDirectory()
-    .pipe((recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
@@ -30,7 +30,7 @@ export default function libPsl(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const src = std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>
@@ -63,6 +63,6 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

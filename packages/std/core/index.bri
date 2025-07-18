@@ -11,6 +11,7 @@ export {
 } from "./utils.bri";
 export {
   BRIOCHE_VERSION,
+  CURRENT_PLATFORM,
   utf8Encode,
   utf8Decode,
   tickEncode,
@@ -19,6 +20,7 @@ export {
   bstringToBytes,
   bstringToString,
   type BString,
+  type Platform,
 } from "./runtime.bri";
 
 import "./console.bri";

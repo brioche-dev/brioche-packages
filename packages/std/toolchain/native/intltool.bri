@@ -13,7 +13,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   source = std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -24,7 +24,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${stage2()}/bin`,
+        PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: source,
     })
@@ -34,7 +34,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
   return std
     .process({
-      command: std.tpl`${stage2()}/bin/bash`,
+      command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
@@ -46,10 +46,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${perlDep}/bin:${stage2()}/bin`,
+        PATH: std.tpl`${perlDep}/bin:${stage2}/bin`,
 
         // expat is dynamically loaded by the Perl XML::Parser module
-        LD_LIBRARY_PATH: std.tpl`${expat()}/lib`,
+        LD_LIBRARY_PATH: std.tpl`${expat}/lib`,
       },
       workDir: source,
     })

@@ -1,28 +1,28 @@
-import nushell from "nushell";
 import * as std from "std";
 
 export const project = {
   name: "expat",
   version: "2.7.1",
+  repository: "https://github.com/libexpat/libexpat",
   extra: {
     versionUnderscore: "2_7_1",
   },
 };
 
 std.assert(
-  project.extra.versionUnderscore === project.version.replaceAll(".", "_"),
+  project.extra.versionUnderscore ===
+    std.projectVersionToUnderscoreFormat({ project }),
   `expected 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
 );
 
 const source = Brioche.download(
-  `https://github.com/libexpat/libexpat/releases/download/R_${project.extra.versionUnderscore}/expat-${project.version}.tar.xz`,
+  `${project.repository}/releases/download/R_${project.extra.versionUnderscore}/expat-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
 
 export default function expat(): std.Recipe<std.Directory> {
   return std.runBash`
-    ls
     ./configure --prefix=/
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -30,16 +30,17 @@ export default function expat(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe((recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
       }),
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     pkg-config --modversion expat | tee "$BRIOCHE_OUTPUT"
   `
@@ -55,26 +56,10 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let versionUnderscore = http get https://api.github.com/repos/libexpat/libexpat/releases/latest
-      | get tag_name
-      | str replace --regex '^R_' ''
-
-    let version = $versionUnderscore
-      | str replace --all '_' '.'
-
-    $env.project
-      | from json
-      | update version $version
-      | update extra.versionUnderscore $versionUnderscore
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^R_(?<version>.*)$/,
+    normalizeVersion: true,
   });
 }

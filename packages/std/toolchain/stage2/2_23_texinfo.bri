@@ -24,7 +24,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         `,
       ],
       env: {
-        PATH: std.tpl`${toolchain()}/bin:${perl()}/usr/bin`,
+        PATH: std.tpl`${toolchain}/bin:${perl}/usr/bin`,
       },
       workDir: source,
     })

@@ -1,12 +1,13 @@
 import * as std from "std";
+import brotli from "brotli";
 import libpsl from "libpsl";
 import libssh2 from "libssh2";
-import nushell from "nushell";
 import openssl from "openssl";
 
 export const project = {
   name: "curl",
-  version: "8.13.0",
+  version: "8.14.1",
+  repository: "https://github.com/curl/curl.git",
 };
 
 const source = Brioche.download(
@@ -15,40 +16,72 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default function curl(): std.Recipe<std.Directory> {
+/**
+ * Options for the curl package.
+ *
+ * @param minimal - If set to true, will build curl with only the minimum required dependencies.
+ */
+interface CurlOptions {
+  minimal?: boolean;
+}
+
+/**
+ * Builds the curl package. By default, this will build with all the optional
+ * dependencies enabled.
+ *
+ * @param options - Options to configure the build.
+ */
+export default function curl(
+  options: CurlOptions = {},
+): std.Recipe<std.Directory> {
+  const { minimal = false } = options;
+
+  const curlDependencies = [std.toolchain, openssl];
+  const curlBuildFlags = ["--with-openssl"];
+  if (!minimal) {
+    curlDependencies.push(brotli, libpsl, libssh2);
+    curlBuildFlags.push("--with-libssh2");
+  } else {
+    curlBuildFlags.push("--without-libpsl");
+  }
+
   return std.runBash`
     ./configure \\
       --prefix=/ \\
-      --with-openssl \\
-      --with-libssh2 \\
       --without-ca-bundle \\
       --without-ca-path \\
-      --with-ca-fallback
+      --with-ca-fallback \\
+      $buildFlags
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, libpsl, libssh2)
+    .dependencies(...curlDependencies)
+    .env({
+      buildFlags: curlBuildFlags.join(" "),
+    })
     .toDirectory()
     .pipe(
+      std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
           CURL_ROOT: { fallback: { path: "." } },
         }),
       (recipe) => std.withRunnableLink(recipe, "bin/curl"),
     );
 }
 
-export async function test() {
+export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     curl --version | tee "$BRIOCHE_OUTPUT"
-  `.dependencies(curl);
+  `
+    .dependencies(curl)
+    .toFile();
 
-  const result = (await script.toFile().read()).trim();
+  const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
   const expected = `curl ${project.version}`;
@@ -60,24 +93,10 @@ export async function test() {
   return script;
 }
 
-export function liveUpdate() {
-  const src = std.file(std.indoc`
-    let version = http get https://api.github.com/repos/curl/curl/releases/latest
-      | get tag_name
-      | str replace --regex '^curl-' ''
-      | str replace --regex '^v' ''
-      | str replace --all '_' '.'
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `);
-
-  return std.withRunnable(std.directory(), {
-    command: "nu",
-    args: [src],
-    env: { project: JSON.stringify(project) },
-    dependencies: [nushell],
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^curl-(?<version>.*)$/,
+    normalizeVersion: true,
   });
 }

@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { bootstrapRun } from "../stage0";
+import { bootstrapRun, currentPlatformInfo } from "../stage0";
 import stage1 from "../stage1";
 
 export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
@@ -25,8 +25,8 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     `,
     env: {
       BRIOCHE_OUTPUT: std.outputPath,
-      TARGET: "x86_64-lfs-linux-gnu",
-      stage1: stage1(),
+      TARGET: `${currentPlatformInfo().arch}-lfs-linux-gnu`,
+      stage1,
     },
     workDir: source,
   });
