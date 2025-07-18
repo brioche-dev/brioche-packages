@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/eza-community/eza.git": {
-      "v0.22.0": "96845c5d06cd07aa995ca68d080b4bf274e4d861"
+      "v0.22.1": "a362025dd5d905a90a5410927842b75ac6623aff"
     }
   }
 }
