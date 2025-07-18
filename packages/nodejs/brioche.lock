@@ -1,29 +1,29 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://nodejs.org/dist/v20.19.3/node-v20.19.3-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v20.19.4/node-v20.19.4-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "72a3036618fb47d8aaa3050477d9577747a9e550c39be46b53202a3b3e797e83"
+      "value": "4492c29882f604eb4cba6ce52ad2e6436f4eeb2b2917a74b0f85e6e42e261252"
     },
-    "https://nodejs.org/dist/v20.19.3/node-v20.19.3-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v20.19.4/node-v20.19.4-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "c210e1a547efad55e93af1e04fb80d2f7131b13872f2de4e9ebdfecb8e06caad"
+      "value": "7a488a09e2fc02fbd1bc4ae084bea8a589314f741c182fc02c5f3f07c79a29d4"
     },
-    "https://nodejs.org/dist/v22.17.0/node-v22.17.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v22.17.1/node-v22.17.1-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "140aee84be6774f5fb3f404be72adbe8420b523f824de82daeb5ab218dab7b18"
+      "value": "a5bb879af2fe70e7b5dc5e0bbadecba88e87f45bd8e62c0c57b5c815a4cbbaa6"
     },
-    "https://nodejs.org/dist/v22.17.0/node-v22.17.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v22.17.1/node-v22.17.1-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "325c0f1261e0c61bcae369a1274028e9cfb7ab7949c05512c5b1e630f7e80e12"
+      "value": "ff04bc7c3ed7699ceb708dbaaf3580d899ff8bf67f17114f979e83aa74fc5a49"
     },
-    "https://nodejs.org/dist/v24.4.0/node-v24.4.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v24.4.1/node-v24.4.1-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "48ecb7ee501f69e2a27d9b4b724c05e82bbd1cf03df7152ce37628956b8303a7"
+      "value": "555659c36fc72d0617e278b5d26ffcaebc3760a3de354926b1e5f1b0bfd66083"
     },
-    "https://nodejs.org/dist/v24.4.0/node-v24.4.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v24.4.1/node-v24.4.1-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "af59f88ed35c68f7196dc94938e74327e3abe62055b831746de5b23bd7e1670a"
+      "value": "7e067b13cd0dc7ee8b239f4ebe1ae54f3bba3a6e904553fcb5f581530eb8306d"
     }
   }
 }
