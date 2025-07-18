@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/boostorg/boost/releases/download/boost-1.89.0.beta1/boost-1.89.0.beta1-b2-nodocs.tar.xz": {
+    "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-b2-nodocs.tar.xz": {
       "type": "sha256",
-      "value": "496a3c8c41609d1411a5337aa6b62348ef7996523647a9ae27572ae5e0113dd4"
+      "value": "ad9ce2c91bc0977a7adc92d51558f3b9c53596bb88246a280175ebb475da1762"
     }
   }
 }

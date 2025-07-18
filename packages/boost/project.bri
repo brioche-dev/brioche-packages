@@ -1,9 +1,10 @@
 import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 import cmake from "cmake";
 
 export const project = {
   name: "boost",
-  version: "1.89.0.beta1",
+  version: "1.88.0",
   repository: "https://github.com/boostorg/boost",
 };
 
@@ -65,9 +66,22 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({
-    project,
-    matchTag: /^boost-(?<version>.*)$/,
-  });
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://api.github.com/repos/boostorg/boost/git/matching-refs/tags
+      | get ref
+      | each {|ref|
+        $ref
+        | parse --regex '^refs/tags/boost-(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
+        | get -i 0
+      }
+      | sort-by -n major minor patch
+      | last
+      | get tag
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
 }
