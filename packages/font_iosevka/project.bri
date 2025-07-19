@@ -1,0 +1,20 @@
+import * as std from "std";
+
+export const project = {
+  name: "iosevka",
+  repository: "https://github.com/be5invis/Iosevka",
+  version: "33.2.6",
+};
+
+export const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/PkgTTC-Iosevka-${project.version}.zip`,
+);
+
+export default function fontIosevka(): std.Recipe<std.Directory> {
+  const unzipped = source.unarchive("zip");
+  return std.directory({
+    share: std.directory({
+      fonts: std.glob(unzipped, ["**/*.ttc"]),
+    }),
+  });
+}
