@@ -1,0 +1,58 @@
+import * as std from "std";
+import git from "git";
+import { nushellRunnable } from "nushell";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "helix",
+  version: "25.07.1",
+  repository: "https://github.com/helix-editor/helix.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function helix(): std.Recipe<std.Directory> {
+  // TODO: https://docs.helix-editor.com/building-from-source.html#note-to-packagers
+  // - set HELIX_DEFAULT_RUNTIME to $BRIOCHE_OUTPUT/lib/helix/runtime
+  // TODO: https://docs.helix-editor.com/building-from-source.html#configure-the-desktop-shortcut
+  // - setup desktop shortcut and icon
+  // TODO: parse languages.toml with `nu`, `std.download()` grammar sources
+  return std.merge(
+    cargoBuild({
+      env: {
+        HELIX_DISABLE_AUTO_GRAMMAR_BUILD: "1",
+      },
+      path: "helix-term",
+      runnable: "bin/hx",
+      source,
+    }),
+    std.directory({
+      lib: std.directory({
+        helix: std.directory({
+          runtime: std.directory({
+            queries: source.get('runtime/queries'),
+            themes: source.get('runtime/themes'),
+          }),
+        }),
+      }),
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  return nushellRunnable`
+    use std/assert
+    assert (((^hx --version | complete).stdout | str trim) == 'helix ${project.version}')
+  `
+    .dependencies(helix);
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({
+    matchTag: /^(?<version>\d+\.\d+(?:\.\d+)?)$/,
+    project,
+  });
+}
