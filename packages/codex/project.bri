@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "codex",
-  version: "0.5.0",
+  version: "0.7.0",
   repository: "https://github.com/openai/codex.git",
 };
 
