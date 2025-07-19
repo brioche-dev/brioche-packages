@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/terraform-linters/tflint.git": {
-      "v0.58.0": "65effd5f53a9247b550ede916c626b4ba20935c5"
+      "v0.58.1": "b5c7dcdab2bd3766093a2dfd964299003d5503e8"
     }
   }
 }
