@@ -9,7 +9,22 @@ if ($env.GITHUB_TOKEN? | default "") != "" {
   $gh_headers ++= [Authorization $'Bearer ($env.GITHUB_TOKEN)']
 }
 
-let releaseInfo = http get --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
+let httpResponse = http get --full --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
+match $httpResponse.status {
+  200 => {
+    # Success
+  }
+  401 => {
+    error make { msg: $'Unauthorized access to GitHub API' }
+  }
+  403 | 429 => {
+    error make { msg: $'GitHub API rate limit exceeded' }
+  }
+  _ => {
+    error make { msg: $'Failed to call GitHub API: ($httpResponse.status)' }
+  }
+}
+let releaseInfo = $httpResponse.body
 
 # Extract the version
 let tagName = $releaseInfo
