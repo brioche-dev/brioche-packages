@@ -60,7 +60,7 @@ interface LiveUpdateFromGitlabReleasesOptions {
  * export function liveUpdate(): std.Recipe<std.Directory> {
  *   return std.liveUpdateFromGitlabReleases({
  *     project,
- *     matchTag: /^v(?<version>.*)$/, // Strip "v" prefix from tags
+ *     matchTag: /^v(?<version>.+)$/, // Strip "v" prefix from tags
  *   });
  * }
  * ```
