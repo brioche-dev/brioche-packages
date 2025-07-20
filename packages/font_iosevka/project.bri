@@ -1,0 +1,23 @@
+import * as std from "std";
+
+export const project = {
+  name: "font_iosevka",
+  repository: "https://github.com/be5invis/Iosevka",
+  version: "33.2.7",
+};
+
+export const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/PkgTTC-Iosevka-${project.version}.zip`,
+).unarchive("zip");
+
+export default function fontIosevka(): std.Recipe<std.Directory> {
+  return std.directory({
+    share: std.directory({
+      fonts: std.glob(source, ["**/*.ttc"]),
+    }),
+  });
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
