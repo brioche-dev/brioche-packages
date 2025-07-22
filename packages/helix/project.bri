@@ -1,0 +1,64 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "helix",
+  version: "25.07.1",
+  repository: "https://github.com/helix-editor/helix.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function helix(): std.Recipe<std.Directory> {
+  // TODO: https://docs.helix-editor.com/building-from-source.html#note-to-packagers
+  // - set HELIX_DEFAULT_RUNTIME to $BRIOCHE_OUTPUT/lib/helix/runtime
+  // TODO: https://docs.helix-editor.com/building-from-source.html#configure-the-desktop-shortcut
+  // - setup desktop shortcut and icon
+  // TODO: parse languages.toml with `nu`, `std.download()` grammar sources
+  return std.merge(
+    cargoBuild({
+      env: {
+        HELIX_DISABLE_AUTO_GRAMMAR_BUILD: "1",
+      },
+      path: "helix-term",
+      runnable: "bin/hx",
+      source,
+    }),
+    std.directory({
+      lib: std.directory({
+        helix: std.directory({
+          runtime: std.directory({
+            queries: source.get("runtime/queries"),
+            themes: source.get("runtime/themes"),
+          }),
+        }),
+      }),
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    hx --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(helix)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `helix ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({
+    matchTag: /^(?<version>\d+\.\d+(?:\.\d+)?)$/,
+    project,
+  });
+}
