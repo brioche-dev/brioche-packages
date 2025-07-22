@@ -1,0 +1,52 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "actionlint",
+  version: "1.7.7",
+  repository: "https://github.com/rhysd/actionlint.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function actionlint(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/rhysd/actionlint.version=${project.version}`,
+      ],
+    },
+    path: "./cmd/actionlint",
+    runnable: "bin/actionlint",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    actionlint -version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(actionlint)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
