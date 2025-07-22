@@ -1,7 +1,5 @@
 import * as std from "std";
-import git from "git";
-import { nushellRunnable } from "nushell";
-import rust, { cargoBuild } from "rust";
+import { cargoBuild } from "rust";
 
 export const project = {
   name: "helix",
@@ -33,8 +31,8 @@ export default function helix(): std.Recipe<std.Directory> {
       lib: std.directory({
         helix: std.directory({
           runtime: std.directory({
-            queries: source.get('runtime/queries'),
-            themes: source.get('runtime/themes'),
+            queries: source.get("runtime/queries"),
+            themes: source.get("runtime/themes"),
           }),
         }),
       }),
