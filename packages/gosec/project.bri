@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "gosec",
-  version: "2.22.5",
+  version: "2.22.7",
   repository: "https://github.com/securego/gosec.git",
 };
 
