@@ -6,10 +6,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "git",
   version: "2.50.1",
+  repository: "https://github.com/git/git",
 };
 
 const source = Brioche.download(
-  `https://github.com/git/git/archive/refs/tags/v${project.version}.tar.gz`,
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();

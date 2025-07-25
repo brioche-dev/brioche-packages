@@ -3,11 +3,11 @@ import * as std from "std";
 export const project = {
   name: "rpcsvc_proto",
   version: "1.4.4",
-  repository: "https://github.com/thkukuk/rpcsvc-proto.git",
+  repository: "https://github.com/thkukuk/rpcsvc-proto",
 };
 
 const source = Brioche.download(
-  `https://github.com/thkukuk/rpcsvc-proto/releases/download/v${project.version}/rpcsvc-proto-${project.version}.tar.xz`,
+  `${project.repository}/releases/download/v${project.version}/rpcsvc-proto-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
