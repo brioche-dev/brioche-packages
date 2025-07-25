@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "jjui",
-  version: "0.8.12",
+  version: "0.9.0",
   repository: "https://github.com/idursun/jjui.git",
 };
 
