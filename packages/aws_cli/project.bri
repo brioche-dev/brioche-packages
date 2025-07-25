@@ -5,10 +5,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "aws_cli",
   version: "2.27.50",
+  repository: "https://github.com/aws/aws-cli",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/aws/aws-cli.git",
+  repository: project.repository,
   ref: project.version,
 }).pipe((source) =>
   // Patch the source to fix unresolvable `packaging` dependencies

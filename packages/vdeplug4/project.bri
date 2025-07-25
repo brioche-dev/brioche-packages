@@ -6,10 +6,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "vdeplug4",
   version: "4.0.1",
+  repository: "https://github.com/rd235/vdeplug4",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/rd235/vdeplug4.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 

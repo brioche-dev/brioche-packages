@@ -5,10 +5,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "joshuto",
   version: "0.9.9",
+  repository: "https://github.com/kamiyaa/joshuto",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/kamiyaa/joshuto.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 

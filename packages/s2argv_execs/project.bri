@@ -5,10 +5,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "s2argv_execs",
   version: "1.4",
+  repository: "https://github.com/virtualsquare/s2argv-execs",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/virtualsquare/s2argv-execs.git",
+  repository: project.repository,
   ref: project.version,
 });
 
