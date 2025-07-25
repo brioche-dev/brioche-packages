@@ -4,7 +4,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "aws_cli",
-  version: "2.27.50",
+  version: "2.27.59",
 };
 
 const source = Brioche.gitCheckout({
