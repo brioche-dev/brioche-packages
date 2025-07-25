@@ -4,10 +4,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "golangci_lint",
-  version: "2.2.2",
+  version: "2.3.0",
   repository: "https://github.com/golangci/golangci-lint.git",
   extra: {
-    releaseDate: "2025-07-11",
+    releaseDate: "2025-07-21",
   },
 };
 
