@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/chmouel/snazy.git": {
-      "0.57.1": "a99adae76d661014f95d067ed1f5bb86132e39cc"
+      "0.57.3": "e5ead092607ee3cbe6b520822f1c2ba57744a688"
     }
   }
 }
