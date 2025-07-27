@@ -9,7 +9,7 @@ export const project = {
 };
 
 const source = Brioche.download(
-  `https://github.com/boostorg/boost/releases/download/boost-${project.version}/boost-${project.version}-b2-nodocs.tar.xz`,
+  `${project.repository}/releases/download/boost-${project.version}/boost-${project.version}-b2-nodocs.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();

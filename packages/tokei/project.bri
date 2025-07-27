@@ -5,10 +5,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "tokei",
   version: "12.1.2",
+  repository: "https://github.com/XAMPPRocky/tokei",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/XAMPPRocky/tokei.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 

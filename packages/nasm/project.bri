@@ -4,10 +4,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "nasm",
   version: "2.16.03",
+  repository: "https://github.com/netwide-assembler/nasm",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/netwide-assembler/nasm.git",
+  repository: project.repository,
   ref: `nasm-${project.version}`,
 });
 

@@ -7,10 +7,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "moreutils",
   version: "0.70",
+  repository: "git://git.joeyh.name/moreutils",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "git://git.joeyh.name/moreutils",
+  repository: project.repository,
   ref: project.version,
 });
 

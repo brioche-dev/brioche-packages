@@ -4,10 +4,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "uthash",
   version: "2.3.0",
+  repository: "https://github.com/troydhanson/uthash",
 };
 
 const source = Brioche.gitCheckout({
-  repository: "https://github.com/troydhanson/uthash.git",
+  repository: project.repository,
   ref: `v${project.version}`,
 });
 
