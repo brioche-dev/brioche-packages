@@ -130,7 +130,7 @@ export function liveUpdate(): NushellRunnable {
       | each {|ref|
         $ref
         | parse --regex '^refs/tags/(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
-        | get -i 0
+        | get -o 0
       }
       | sort-by -n major minor patch
       | last
