@@ -2,32 +2,32 @@ import * as std from "std";
 import { npmInstallGlobal } from "nodejs";
 
 export const project = {
-  name: "claude_code",
-  version: "1.0.60",
+  name: "wrangler",
+  version: "4.25.1",
   extra: {
-    packageName: "@anthropic-ai/claude-code",
+    packageName: "wrangler",
   },
 };
 
-export default function claudeCode(): std.Recipe<std.Directory> {
+export default function wrangler(): std.Recipe<std.Directory> {
   return npmInstallGlobal({
     packageName: project.extra.packageName,
     version: project.version,
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/claude"));
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/wrangler"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    claude --version | tee "$BRIOCHE_OUTPUT"
+    wrangler --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(claudeCode)
+    .dependencies(wrangler)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `${project.version} (Claude Code)`;
-  std.assert(result === expected, `expected ${project.version}, got ${result}`);
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }

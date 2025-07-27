@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/securego/gosec.git": {
-      "v2.22.5": "d2d3ae66bd8d340b78b5142b6fe610691783c2fe"
+      "v2.22.7": "32975f4bab0d7b683a88756aaf3fa5502188b476"
     }
   }
 }
