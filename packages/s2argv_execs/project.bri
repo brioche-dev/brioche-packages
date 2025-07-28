@@ -1,6 +1,5 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
-import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "s2argv_execs",
@@ -72,22 +71,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): NushellRunnable {
-  return nushellRunnable`
-    let version = http get https://api.github.com/repos/virtualsquare/s2argv-execs/git/matching-refs/tags
-      | get ref
-      | each {|ref|
-        $ref
-        | parse --regex '^refs/tags/v?(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)(\\.(?P<patch>[\\d]+))?)$'
-        | get -o 0
-      }
-      | sort-by -n major minor patch
-      | last
-      | get tag
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `.env({ project: JSON.stringify(project) });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
 }
