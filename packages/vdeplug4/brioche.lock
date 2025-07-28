@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "git_refs": {
-    "https://github.com/rd235/vdeplug4.git": {
+    "https://github.com/rd235/vdeplug4": {
       "v4.0.1": "d482de1719ba198d020e756a9c81fb436f601267"
     }
   }

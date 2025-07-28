@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "git_refs": {
-    "https://github.com/netwide-assembler/nasm.git": {
+    "https://github.com/netwide-assembler/nasm": {
       "nasm-2.16.03": "cd37b81b320ead83ca5a6bbce5da0a6456663bc6"
     }
   }
