@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "git_refs": {
-    "https://github.com/troydhanson/uthash.git": {
+    "https://github.com/troydhanson/uthash": {
       "v2.3.0": "e493aa90a2833b4655927598f169c31cfcdf7861"
     }
   }

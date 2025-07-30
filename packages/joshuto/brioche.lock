@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "git_refs": {
-    "https://github.com/kamiyaa/joshuto.git": {
+    "https://github.com/kamiyaa/joshuto": {
       "v0.9.9": "b8f870fc328fc5c3f4e010683901a5082a6b0790"
     }
   }
