@@ -1,5 +1,4 @@
 import * as std from "std";
-import { nushellRunnable, type NushellRunnable } from "nushell";
 import cmake from "cmake";
 
 export const project = {
@@ -66,22 +65,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): NushellRunnable {
-  return nushellRunnable`
-    let version = http get https://api.github.com/repos/boostorg/boost/git/matching-refs/tags
-      | get ref
-      | each {|ref|
-        $ref
-        | parse --regex '^refs/tags/boost-(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
-        | get -o 0
-      }
-      | sort-by -n major minor patch
-      | last
-      | get tag
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `.env({ project: JSON.stringify(project) });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  // TODO: to be later replaced with `std.liveUpdateFromGithubReleases()`, once
+  // GitHub releases live method is able to retrieve a list of releases
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^boost-(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
+  });
 }

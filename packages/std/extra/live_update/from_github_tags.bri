@@ -11,16 +11,14 @@ import type {} from "nushell";
  *
  * @param versionDash - The version of the project (converted in dash format).
  * @param versionUnderscore - The version of the project (converted in underscore format).
- * @param releaseDate - The release date of the project in the format `YYYY-MM-DD`
  */
-interface LiveUpdateFromGithubReleasesProjectExtraOptions {
+interface LiveUpdateFromGithubTagsProjectExtraOptions {
   versionDash?: string;
   versionUnderscore?: string;
-  releaseDate?: string;
 }
 
 /**
- * Options for the live update from GitHub releases.
+ * Options for the live update from GitHub tags.
  *
  * @param project - The project export that should be updated. Must include a
  *   `repository` property containing a GitHub repository URL.
@@ -32,23 +30,23 @@ interface LiveUpdateFromGithubReleasesProjectExtraOptions {
  *   a semver-like version number. When enabled, the dashes and underscores
  *   will be replaced with dots.
  */
-interface LiveUpdateFromGithubReleasesOptions {
+interface LiveUpdateFromGithubTagsOptions {
   project: {
     version: string;
     readonly repository: string;
-    extra?: LiveUpdateFromGithubReleasesProjectExtraOptions;
+    extra?: LiveUpdateFromGithubTagsProjectExtraOptions;
   };
   readonly matchTag?: RegExp;
   readonly normalizeVersion?: boolean;
 }
 
 /**
- * Return a runnable recipe to live-update a project based on the latest release
- * tag from a GitHub repository. The project's version will be set based on a
- * regex match against the latest tag name. The repository is inferred from the
+ * Return a runnable recipe to live-update a project based on the latest tag
+ * from a GitHub repository. The project's version will be set based on a regex
+ * match against the latest tag name. The repository is inferred from the
  * `repository` field of the project.
  *
- * @param options - Options for the live update from GitHub releases.
+ * @param options - Options for the live update from GitHub tags.
  *
  * @returns A runnable recipe to live-update the project
  *
@@ -61,15 +59,15 @@ interface LiveUpdateFromGithubReleasesOptions {
  * };
  *
  * export function liveUpdate(): std.Recipe<std.Directory> {
- *   return std.liveUpdateFromGithubReleases({
+ *   return std.liveUpdateFromGithubTags({
  *     project,
  *     matchTag: /^v(?<version>.+)$/, // Strip "v" prefix from tags
  *   });
  * }
  * ```
  */
-export function liveUpdateFromGithubReleases(
-  options: LiveUpdateFromGithubReleasesOptions,
+export function liveUpdateFromGithubTags(
+  options: LiveUpdateFromGithubTagsOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
   const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
@@ -79,7 +77,7 @@ export function liveUpdateFromGithubReleases(
     const { nushellRunnable } = await import("nushell");
 
     return nushellRunnable(
-      Brioche.includeFile("./scripts/live_update_from_github_releases.nu"),
+      Brioche.includeFile("./scripts/live_update_from_github_tags.nu"),
     ).env({
       project: JSON.stringify(options.project),
       repoOwner,

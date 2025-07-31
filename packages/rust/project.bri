@@ -2,11 +2,11 @@ import * as std from "std";
 import cargoChef from "cargo_chef";
 import * as TOML from "smol_toml";
 import * as t from "typer";
-import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "rust",
   version: "1.88.0",
+  repository: "https://github.com/rust-lang/rust",
 };
 
 const ManifestPkgTarget = t.discriminatedUnion("available", [
@@ -127,24 +127,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): NushellRunnable {
-  return nushellRunnable`
-    let version = http get https://api.github.com/repos/rust-lang/rust/git/matching-refs/tags
-      | get ref
-      | each {|ref|
-        $ref
-        | parse --regex '^refs/tags/(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
-        | get -o 0
-      }
-      | sort-by -n major minor patch
-      | last
-      | get tag
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `.env({ project: JSON.stringify(project) });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
 }
 
 /**

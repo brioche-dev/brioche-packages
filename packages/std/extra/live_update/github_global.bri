@@ -1,0 +1,45 @@
+/**
+ * Interface representing the parsed GitHub repository information.
+ */
+interface GithubRepoInfo {
+  readonly repoOwner: string;
+  readonly repoName: string;
+}
+
+function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
+  const match = repo.match(
+    /^(?:https?:\/\/)?(www\.)?(?:github\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
+  );
+
+  const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
+  if (repoOwner == null || matchedRepoName == null) {
+    return null;
+  }
+
+  let repoName = matchedRepoName;
+  if (repoName.endsWith(".git")) {
+    repoName = repoName.slice(0, -4);
+  }
+
+  return { repoOwner, repoName };
+}
+
+/**
+ * Parse a GitHub repository URL to extract the repository owner and name.
+ *
+ * @param repo - The GitHub repository URL to parse.
+ *
+ * @returns An object containing the repository owner and name.
+ *
+ * @throws If the repository URL cannot be parsed.
+ */
+export function parseGithubRepo(repo: string): GithubRepoInfo {
+  const info = tryParseGithubRepo(repo);
+  if (info == null) {
+    throw new Error(
+      `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
+    );
+  }
+
+  return info;
+}
