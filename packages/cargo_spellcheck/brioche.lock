@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-spellcheck/0.15.5/download": {
+      "type": "sha256",
+      "value": "d51b887cbe54a21927501426aea66d9a4a4c93fea880e971d06d6d39d60bc1c6"
+    }
+  }
+}
