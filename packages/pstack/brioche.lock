@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/peadar/pstack.git": {
-      "v2.12.2": "98c4ddb7f0faa5221ea0a5f38105fc2a2f5cbfe7"
+      "v2.14": "8058aacd96cb219ebed97d07b8a600dae9ee168e"
     }
   }
 }
