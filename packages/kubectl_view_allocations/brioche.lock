@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/davidB/kubectl-view-allocations.git": {
-      "0.22.1": "342414b148e064396cc06adc7025c32e7e6d37f9"
+      "0.23.4": "e01e5a2adacaa5b5796077a72c1a63b786cf2d70"
     }
   }
 }
