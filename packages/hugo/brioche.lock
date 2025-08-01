@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/gohugoio/hugo.git": {
+      "v0.148.1": "98ba786f2f5dca0866f47ab79f394370bcb77d2f"
+    }
+  }
+}
