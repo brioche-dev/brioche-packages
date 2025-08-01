@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/nushell/nushell.git": {
-      "0.106.0": "1b01625e1e9af2a1e3e51b3c26565644975c8228"
+      "0.106.1": "682d593d3f53e5337dceedf98c9603a698af6a64"
     }
   }
 }
