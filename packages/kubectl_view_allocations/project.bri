@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "kubectl_view_allocations",
-  version: "0.22.1",
+  version: "0.23.4",
   repository: "https://github.com/davidB/kubectl-view-allocations.git",
 };
 
