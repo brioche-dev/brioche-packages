@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "xcaddy",
-  version: "0.4.4",
+  version: "0.4.5",
   repository: "https://github.com/caddyserver/xcaddy.git",
 };
 
