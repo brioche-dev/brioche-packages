@@ -39,6 +39,7 @@ export default function icu(): std.Recipe<std.Directory> {
       std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
+          ICU_ROOT: { fallback: { path: "." } },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           CPATH: { append: [{ path: "include" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
