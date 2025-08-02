@@ -92,6 +92,10 @@ export default function cmake(): std.Recipe<std.Directory> {
  * @param dependencies - Optionally add dependencies to the build. Most projects
  *   will want to include `std.toolchain()` or a similar toolchain.
  * @param env - Optionally set environment variables for the build.
+ * @param unsafe - Optional unsafe options to enable when building. For example,
+ *   passing `{ networking: true }` will allow to download files during the build.
+ *   You must take extra care to ensure the build is hermetic when setting these
+ *   options!
  * @param set - Optionally set CMake cache variables during the build, as if
  *   by passing `-D...`.
  * @param disablePostBuildSteps - If set, the post build steps will not run. By
@@ -105,6 +109,7 @@ export interface CMakeBuildInstallOptions {
   dependencies?: std.RecipeLike<std.Directory>[];
   config?: string;
   env?: Record<string, std.ProcessTemplateLike>;
+  unsafe?: std.ProcessUnsafeOptions;
   set?: Record<string, CMakeVariable>;
   disablePostBuildSteps?: boolean;
   runnable?: string;
@@ -204,6 +209,7 @@ export function cmakeBuild(
       cmake_num_set_entries: setEntriesWithIndices.length.toString(),
       ...env,
     })
+    .unsafe(options.unsafe)
     .toDirectory();
 
   if (options.disablePostBuildSteps == null || !options.disablePostBuildSteps) {
