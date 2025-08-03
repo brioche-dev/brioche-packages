@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/denoland/deno.git": {
+      "v2.2.12": "81da8139af85a0cb7efa9050ae6b5461b3614077"
+    }
+  }
+}

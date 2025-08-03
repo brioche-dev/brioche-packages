@@ -1,0 +1,44 @@
+import * as std from "std";
+import cmake from "cmake";
+import python from "python";
+import ninja from "ninja";
+import llvm from "llvm";
+
+import { gitCheckout } from "git";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "deno",
+  version: "2.2.12",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: "https://github.com/denoland/deno.git",
+    ref: `v${project.version}`,
+  }),
+);
+
+const rusty_v8 = std.download({
+  url: "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz",
+  hash: std.sha256Hash(
+    "406a453645473bd8f8b9a818342e57dc95627fcd1155ace9eb7a2aadd5985285",
+  ),
+})  .unarchive("tar", "gzip")
+.peel();;
+
+
+const deno = (): std.Recipe<std.Directory> => {
+  return cargoBuild({
+    source,
+		path: "cli",
+    env: {
+      CARGO_TARGET_DIR: "deno_target",
+      RUSTY_V8_ARCHIVE: rusty_v8,
+    },
+    runnable: "bin/deno",
+    dependencies: [std.toolchain(), cmake(), python(), ninja(), llvm()],
+  });
+}
+
+export default deno;
