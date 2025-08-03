@@ -26,8 +26,13 @@ const rustyV8Archive = std
       "406a453645473bd8f8b9a818342e57dc95627fcd1155ace9eb7a2aadd5985285",
     ),
   })
-  .unarchive("tar", "gzip")
-  .peel();
+  .pipe((gzip) =>
+    std.runBash`
+      zcat "$gzip" > "$BRIOCHE_OUTPUT"
+    `
+      .env({ gzip })
+      .toFile(),
+  );
 
 export default function deno(): std.Recipe<std.Directory> {
   return cargoBuild({
