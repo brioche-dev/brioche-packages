@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/nuspell/nuspell": {
+      "v5.1.6": "9d7686de0c1656c5a3f0a33c91f0afdd6994cd5e"
+    }
+  }
+}
