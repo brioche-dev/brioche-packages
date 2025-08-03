@@ -19,26 +19,25 @@ const source = gitCheckout(
   }),
 );
 
-const rusty_v8 = std.download({
-  url: "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz",
-  hash: std.sha256Hash(
-    "406a453645473bd8f8b9a818342e57dc95627fcd1155ace9eb7a2aadd5985285",
-  ),
-})  .unarchive("tar", "gzip")
-.peel();;
+const rustyV8Archive = std
+  .download({
+    url: "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz",
+    hash: std.sha256Hash(
+      "406a453645473bd8f8b9a818342e57dc95627fcd1155ace9eb7a2aadd5985285",
+    ),
+  })
+  .unarchive("tar", "gzip")
+  .peel();
 
-
-const deno = (): std.Recipe<std.Directory> => {
+export default function deno(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-		path: "cli",
+    path: "cli",
     env: {
       CARGO_TARGET_DIR: "deno_target",
-      RUSTY_V8_ARCHIVE: rusty_v8,
+      RUSTY_V8_ARCHIVE: rustyV8Archive,
     },
     runnable: "bin/deno",
-    dependencies: [std.toolchain(), cmake(), python(), ninja(), llvm()],
+    dependencies: [std.toolchain, cmake, python, ninja, llvm],
   });
 }
-
-export default deno;
