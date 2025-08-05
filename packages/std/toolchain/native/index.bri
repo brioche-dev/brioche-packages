@@ -188,7 +188,7 @@ export const toolchain = std.memo(
     );
     toolchain = toolchain.insert(
       "lib/libblkid.so",
-      std.symlink({ target: "libblk.id.so.1" }),
+      std.symlink({ target: "libblkid.so.1" }),
     );
     toolchain = toolchain.insert(
       "lib/libsmartcols.so",
