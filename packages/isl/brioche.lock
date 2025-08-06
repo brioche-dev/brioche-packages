@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://libisl.sourceforge.io/isl-0.27.tar.xz": {
+      "type": "sha256",
+      "value": "6d8babb59e7b672e8cb7870e874f3f7b813b6e00e6af3f8b04f7579965643d5c"
+    }
+  }
+}
