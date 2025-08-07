@@ -1,6 +1,9 @@
 import * as std from "/core";
 import { parseGithubRepo } from "./github_global.bri";
-import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
+import {
+  DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH,
+  validateMatchTag,
+} from "./index.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
@@ -72,6 +75,8 @@ export function liveUpdateFromGithubTags(
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
   const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
   const normalizeVersion = options.normalizeVersion ?? false;
+
+  validateMatchTag(matchTag);
 
   return std.recipe(async () => {
     const { nushellRunnable } = await import("nushell");
