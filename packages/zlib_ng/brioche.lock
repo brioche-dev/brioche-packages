@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/zlib-ng/zlib-ng.git": {
-      "2.2.4": "860e4cff7917d93f54f5d7f0bc1d0e8b1a3cb988"
+      "2.2.5": "425439062b114a0f6cf625022c41d929c7e879f9"
     }
   }
 }
