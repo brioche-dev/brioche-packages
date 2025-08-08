@@ -15,10 +15,7 @@ if ($parsedTagName | length) == 0 {
   error make { msg: $'Latest release tag ($tagName) did not match regex ($env.matchTag)' }
 }
 
-mut version = $parsedTagName.0.version?
-if $version == null {
-  error make { msg: $'Regex ($env.matchTag) did not include version when matching latest release tag ($tagName)' }
-}
+mut version = $parsedTagName.0.version
 
 if $env.normalizeVersion == "true" {
   $version = $version
