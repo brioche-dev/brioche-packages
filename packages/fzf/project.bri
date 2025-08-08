@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "fzf",
-  version: "0.65.0",
+  version: "0.65.1",
   repository: "https://github.com/junegunn/fzf.git",
 };
 
