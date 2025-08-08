@@ -21,7 +21,7 @@ export default function tofu(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/opentofu/opentofu/version.dev=no`,
+        "github.com/opentofu/opentofu/version.dev=no",
       ],
       mod: "readonly",
       trimpath: true,

@@ -28,7 +28,7 @@ export default function terraform(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/hashicorp/terraform/version.dev=no`,
+        "github.com/hashicorp/terraform/version.dev=no",
       ],
       mod: "readonly",
     },
