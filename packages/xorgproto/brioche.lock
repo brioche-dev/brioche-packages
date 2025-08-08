@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/proto/xorgproto-2024.1.tar.xz": {
+      "type": "sha256",
+      "value": "372225fd40815b8423547f5d890c5debc72e88b91088fbfb13158c20495ccb59"
+    }
+  }
+}
