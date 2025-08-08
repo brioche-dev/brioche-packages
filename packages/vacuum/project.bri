@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "vacuum",
-  version: "0.17.7",
+  version: "0.17.8",
   repository: "https://github.com/daveshanley/vacuum.git",
 };
 
