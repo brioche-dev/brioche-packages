@@ -41,8 +41,24 @@ export default function deno(): std.Recipe<std.Directory> {
     env: {
       CARGO_TARGET_DIR: "deno_target",
       RUSTY_V8_ARCHIVE: rustyV8Archive,
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      [`CARGO_TARGET_${targetTripleEnvVar()}_RUSTFLAGS`]:
+        "-Clink-arg=-fuse-ld=bfd",
     },
     runnable: "bin/deno",
     dependencies: [std.toolchain, cmake, python, ninja, llvm],
   });
+}
+
+function targetTripleEnvVar(): string {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return "X86_64_UNKNOWN_LINUX_GNU";
+    case "aarch64-linux":
+      return "AARCH64_UNKNOWN_LINUX_GNU";
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the deno package`,
+      );
+  }
 }
