@@ -19,7 +19,7 @@ export const DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH =
  * @throws If the parameter does not declare a named "version" group.
  */
 export function validateMatchTag(matchTag: RegExp): void {
-  if (!matchTag.source.includes('(?<version>')) {
+  if (!matchTag.source.includes("(?<version>")) {
     throw new Error('matchTag must declare a named "version" group');
   }
 }
