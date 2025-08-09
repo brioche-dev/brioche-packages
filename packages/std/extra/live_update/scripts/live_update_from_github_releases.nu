@@ -28,7 +28,7 @@ let releases = $httpResponse.body
 
 # Extract the version
 let releasesInfo = $releases
-  | where {|release| not $release.prerelease }
+  | where {|release| ($env.includePrerelease == "true") or (not $release.prerelease) }
   | each {|release|
     let parsedTag = $release.tag_name
       | parse --regex $env.matchTag

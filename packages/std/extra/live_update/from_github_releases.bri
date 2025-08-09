@@ -27,6 +27,7 @@ interface LiveUpdateFromGithubReleasesProjectExtraOptions {
  *
  * @param project - The project export that should be updated. Must include a
  *   `repository` property containing a GitHub repository URL.
+ * @param includePrerelease - Whether to include prerelease versions.
  * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
@@ -41,6 +42,7 @@ interface LiveUpdateFromGithubReleasesOptions {
     readonly repository: string;
     extra?: LiveUpdateFromGithubReleasesProjectExtraOptions;
   };
+  readonly includePrerelease?: boolean;
   readonly matchTag?: RegExp;
   readonly normalizeVersion?: boolean;
 }
@@ -75,6 +77,7 @@ export function liveUpdateFromGithubReleases(
   options: LiveUpdateFromGithubReleasesOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
+  const includePrerelease = options.includePrerelease ?? false;
   const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
   const normalizeVersion = options.normalizeVersion ?? false;
 
@@ -89,6 +92,7 @@ export function liveUpdateFromGithubReleases(
       project: JSON.stringify(options.project),
       repoOwner,
       repoName,
+      includePrerelease: includePrerelease.toString(),
       matchTag: matchTag.source,
       normalizeVersion: normalizeVersion.toString(),
     });
