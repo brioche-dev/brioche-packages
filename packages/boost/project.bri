@@ -66,9 +66,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  // TODO: to be later replaced with `std.liveUpdateFromGithubReleases()`, once
-  // GitHub releases live method is able to retrieve a list of releases
-  return std.liveUpdateFromGithubTags({
+  return std.liveUpdateFromGithubReleases({
     project,
     matchTag: /^boost-(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
   });
