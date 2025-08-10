@@ -132,7 +132,10 @@ jobs:
   # Extra job that succeeds when all build jobs succeed (useful for PR requirements)
   all-builds-passed:
     name: All builds passed
+    if: always() && inputs.enabled && (needs.build.result == 'success' || needs.build.result != 'failed')
     needs: [build]
     runs-on: ubuntu-24.04
     steps:
-      - run: ":"
+      - run: test "$BUILD_RESULT" = "success"
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
