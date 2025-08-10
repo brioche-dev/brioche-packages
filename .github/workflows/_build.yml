@@ -80,7 +80,7 @@ jobs:
                 echo "$label: skipping (does not support $PLATFORM)"
               else
                 echo "::group::$label"
-                brioche build -p "$package" -e test --sync --locked
+                brioche build -p "$package" -e test --sync --locked --display plain-reduced
                 echo "::endgroup::"
               fi
             else
