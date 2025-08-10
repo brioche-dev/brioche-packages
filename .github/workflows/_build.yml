@@ -51,7 +51,7 @@ jobs:
               echo "$label: skipping (does not support $PLATFORM)"
             else
               echo "::group::$label"
-              brioche build -p "$package" --sync --locked --display plain-reduced
+              brioche build -p "$package" --sync --locked --display plain-reduced --experimental-lazy
               echo "::endgroup::"
             fi
           done
@@ -80,7 +80,7 @@ jobs:
                 echo "$label: skipping (does not support $PLATFORM)"
               else
                 echo "::group::$label"
-                brioche build -p "$package" -e test --sync --locked
+                brioche build -p "$package" -e test --sync --locked --display plain-reduced --experimental-lazy
                 echo "::endgroup::"
               fi
             else
