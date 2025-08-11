@@ -7,7 +7,7 @@
     }
   },
   "git_refs": {
-    "https://github.com/yonahd/kor.git": {
+    "https://github.com/yonahd/kor": {
       "v0.6.3": "a2b421a346b85e38df40b7cf57666701de6e2558"
     }
   }
