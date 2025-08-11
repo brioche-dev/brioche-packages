@@ -1,0 +1,56 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  check:
+    uses: ./.github/workflows/_check.yml
+
+  build:
+    needs: [check]
+    uses: ./.github/workflows/_build.yml
+    secrets: inherit
+
+  publish:
+    name: Publish packages
+    needs: [build]
+    if: github.repository == 'brioche-dev/brioche-packages' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Brioche
+        run: |
+          mkdir -p ~/.local/bin
+          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/x86_64-linux/brioche -o ~/.local/bin/brioche
+          chmod +x ~/.local/bin/brioche
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Publish packages
+        run: |
+          packages=(packages/*)
+
+          n=1
+          for package in "${packages[@]}"; do
+            label="$package ($n / ${#packages[@]})"
+            ((n++))
+            echo "::group::$label"
+            brioche publish -p "$package"
+            echo "::endgroup::"
+          done
+        env:
+          BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
+          BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_AWS_SECRET_ACCESS_KEY }}
+          AWS_ENDPOINT_URL_S3: ${{ secrets.CACHE_AWS_ENDPOINT_URL_S3 }}
+          AWS_REGION: ${{ vars.CACHE_AWS_REGION }}
+          AWS_REQUEST_CHECKSUM_CALCULATION: WHEN_REQUIRED
+          AWS_RESPONSE_CHECKSUM_CALCULATION: WHEN_REQUIRED

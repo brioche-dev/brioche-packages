@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "grcov",
-  version: "0.10.3",
+  version: "0.10.5",
   repository: "https://github.com/mozilla/grcov.git",
 };
 
