@@ -3,8 +3,8 @@ import { goBuild } from "go";
 
 export const project = {
   name: "kor",
-  version: "0.6.2",
-  repository: "https://github.com/yonahd/kor.git",
+  version: "0.6.3",
+  repository: "https://github.com/yonahd/kor",
 };
 
 const source = Brioche.gitCheckout({
@@ -15,7 +15,7 @@ const source = Brioche.gitCheckout({
   std.applyPatch({
     source,
     patch: Brioche.download(
-      "https://github.com/yonahd/kor/commit/6c02951894e587c023e57a7ab2654136024bff70.patch",
+      `${project.repository}/commit/6c02951894e587c023e57a7ab2654136024bff70.patch`,
     ),
     strip: 1,
   }),

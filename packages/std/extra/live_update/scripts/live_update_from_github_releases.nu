@@ -9,7 +9,7 @@ if ($env.GITHUB_TOKEN? | default "") != "" {
   $gh_headers ++= [Authorization $'Bearer ($env.GITHUB_TOKEN)']
 }
 
-let httpResponse = http get --full --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases/latest'
+let httpResponse = http get --full --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases'
 match $httpResponse.status {
   200 => {
     # Success
@@ -24,19 +24,31 @@ match $httpResponse.status {
     error make { msg: $'Failed to call GitHub API: ($httpResponse.status)' }
   }
 }
-let releaseInfo = $httpResponse.body
+let releases = $httpResponse.body
 
 # Extract the version
-let tagName = $releaseInfo
-  | get tag_name
+let releasesInfo = $releases
+  | where {|release| ($env.includePrerelease == "true") or (not $release.prerelease) }
+  | each {|release|
+    let parsedTag = $release.tag_name
+      | parse --regex $env.matchTag
 
-let parsedTagName = $tagName
-  | parse --regex $env.matchTag
-if ($parsedTagName | length) == 0 {
-  error make { msg: $'Latest release tag ($tagName) did not match regex ($env.matchTag)' }
+    # If no tag is matched, a nil value will be returned
+    # and this value will be ignored by 'each'
+    if ($parsedTag | length) != 0 {
+      { version: $parsedTag.0.version, created_at: $release.created_at }
+    }
+  }
+  | sort-by --natural version
+
+if ($releasesInfo | length) == 0 {
+  error make { msg: $'No tag did match regex ($env.matchTag)' }
 }
 
-mut version = $parsedTagName.0.version
+let releaseInfo = $releasesInfo
+  | last
+
+mut version = $releaseInfo.version
 
 if $env.normalizeVersion == "true" {
   $version = $version

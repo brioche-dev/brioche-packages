@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/mozilla/grcov.git": {
-      "v0.10.3": "3e52d1b3b9e0e8159156811963c57277237d9cd5"
+      "v0.10.5": "c42a09f29de605fa896a6848fd3d6d6c7163ee64"
     }
   }
 }

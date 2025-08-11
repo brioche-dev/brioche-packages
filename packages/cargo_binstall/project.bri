@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_binstall",
-  version: "1.14.2",
+  version: "1.14.3",
   extra: {
     crateName: "cargo-binstall",
   },
