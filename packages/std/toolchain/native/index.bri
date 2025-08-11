@@ -414,7 +414,7 @@ function pkgConfigMakePathsRelative(
         std.indoc`
           find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
             | while IFS= read -r -d $'\\0' file; do
-              sed -i 's|=/|=\${pcfiledir}/../../|' "$file"
+              sed -i 's|=/|=\${pcfiledir}/../..|' "$file"
             done
         `,
       ],
