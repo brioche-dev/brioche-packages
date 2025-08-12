@@ -1,15 +1,15 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/Kitware/CMake/releases/download/v4.0.3/cmake-4.0.3.tar.gz": {
+    "https://github.com/Kitware/CMake/releases/download/v4.1.0/cmake-4.1.0.tar.gz": {
       "type": "sha256",
-      "value": "8d3537b7b7732660ea247398f166be892fe6131d63cc291944b45b91279f3ffb"
+      "value": "81ee8170028865581a8e10eaf055afb620fa4baa0beb6387241241a975033508"
     }
   },
   "git_refs": {
     "https://github.com/brioche-dev/CMake.git": {
-      "base/brioche-patches": "ee515b2aa837ce9ccbd067b345625323b9149b51",
-      "brioche-patches": "8de9f6abfc49f2fbd3cc870e638f1c679be48a3d"
+      "base/brioche-patches": "2a2c2e0b2658f7c07e00fcf649882fd5578c2fc1",
+      "brioche-patches": "76d73a62c1f3d6e203af983c9cfb91264fad8c67"
     }
   }
 }
