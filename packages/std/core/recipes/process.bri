@@ -58,6 +58,9 @@ export interface ProcessUtils {
    */
   env(values: Record<string, ProcessTemplateLike>): Process;
 
+  /**
+   * Returns a new process with a different working directory.
+   */
   currentDir(currentDir: ProcessTemplateLike): Process;
 
   /**
@@ -67,7 +70,7 @@ export interface ProcessUtils {
   dependencies(...dependencies: RecipeLike<Directory>[]): Process;
 
   /**
-   * Returns a new process with a different working directory.
+   * Returns a new process with a different starting working directory.
    */
   workDir(workDir: RecipeLike<Directory>): Process;
 
