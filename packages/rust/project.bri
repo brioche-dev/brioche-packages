@@ -12,8 +12,8 @@ export const project = {
 const ManifestPkgTarget = t.discriminatedUnion("available", [
   t.object({
     available: t.literal(true),
-    hash: t.string(),
-    url: t.string(),
+    xz_hash: t.string(),
+    xz_url: t.string(),
   }),
   t.object({
     available: t.literal(false),
@@ -62,20 +62,20 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
       continue;
     }
 
-    // FIXME: We unarchive within the process because unarchiving `rust-docs`
-    // fails for some reason
-    const pkgTargetArchive = std.download({
-      url: pkgTarget.url,
-      hash: std.sha256Hash(pkgTarget.hash),
-    });
+    const pkgTargetSource = std
+      .download({
+        url: pkgTarget.xz_url,
+        hash: std.sha256Hash(pkgTarget.xz_hash),
+      })
+      .unarchive("tar", "xz")
+      .peel();
 
     const installedPkg = std.runBash`
-      tar -xf $pkgTargetArchive --strip-components=1
       ./install.sh \\
         --prefix="$BRIOCHE_OUTPUT" \\
         --disable-ldconfig
     `
-      .env({ pkgTargetArchive })
+      .workDir(pkgTargetSource)
       .toDirectory();
 
     recipe = std.merge(recipe, installedPkg);
