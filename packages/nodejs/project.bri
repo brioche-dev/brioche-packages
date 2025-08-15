@@ -5,16 +5,16 @@ import nushell, { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "24.5.0",
+  version: "24.6.0",
   extra: {
     currentMajorVersion: "24",
     majorVersions: {
-      "24": "24.5.0",
+      "24": "24.6.0",
       "22": "22.18.0",
       "20": "20.19.4",
     },
   },
-} as const;
+};
 
 std.assert(
   project.extra.currentMajorVersion in project.extra.majorVersions,

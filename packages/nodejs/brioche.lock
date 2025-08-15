@@ -17,13 +17,13 @@
       "type": "sha256",
       "value": "c1bfeecf1d7404fa74728f9db72e697decbd8119ccc6f5a294d795756dfcfca7"
     },
-    "https://nodejs.org/dist/v24.5.0/node-v24.5.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v24.6.0/node-v24.6.0-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "313367534186a8551d68b39fbc2a6cc36638e583fb5dc75dcf5da3c6582bff3b"
+      "value": "e514b8b0fa389c10fe3f4278c68fae03df4b7ba61bbde6cae936de3f6ca3b17c"
     },
-    "https://nodejs.org/dist/v24.5.0/node-v24.5.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v24.6.0/node-v24.6.0-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "32edb1f2aeaf8ea0d484af33bf3b5d8330d7d33c9cd8c70f811b8a643822e613"
+      "value": "fda6f6a00759eea0a27e34fcdfdd09c2b0413855edaa7f746246cf81c0186e26"
     }
   }
 }
