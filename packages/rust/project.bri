@@ -156,8 +156,11 @@ interface CargoBuildParameters {
  * Options for building and installing a Rust crate.
  *
  * @param source - The crate to build.
- * @param path - Optionally set a subpath to the crate to build. This is useful
- *   when building a crate within a workspace.
+ * @param currentDir - Optionally set a subpath to use as the starting directory
+ *   relative to `source`. This is useful when building a Cargo workspace within
+ *   a monorepo project that references resources outside the workspace root.
+ * @param path - Optionally set a subpath to the crate to build relative to
+ *   the workspace root. This is useful when building a crate in a workspace.
  * @param runnable - Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  * @param dependencies - Optionally add additional dependencies to the build.
@@ -177,6 +180,7 @@ interface CargoBuildParameters {
  */
 export interface CargoBuildOptions {
   source: std.RecipeLike<std.Directory>;
+  currentDir?: string;
   path?: string;
   runnable?: string;
   dependencies?: std.RecipeLike<std.Directory>[];
@@ -219,6 +223,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   // Vendor the crate's dependencies
   const crate = vendorCrate({
     source: options.source,
+    currentDir: options.currentDir,
     unsafeGenerateLockfile: options.unsafeGenerateLockfile,
     cargoChefPrepare: options.cargoChefPrepare,
   });
@@ -313,6 +318,10 @@ export function cargoBuild(options: CargoBuildOptions) {
       },
       dependencies: [rust, std.toolchain, ...(options.dependencies ?? [])],
       workDir: crate,
+      currentDir:
+        options.currentDir != null
+          ? std.tpl`${std.workDir}/${options.currentDir}`
+          : std.workDir,
       unsafe: options.unsafe,
     })
     .toDirectory();
@@ -364,27 +373,48 @@ function createLockfile(
 }
 
 /**
+ * Options for creating a skeleton crate from a full a Rust crate.
+ *
+ * @param source - The crate to make into a skeleton crate.
+ * @param currentDir - Optionally set a subpath to use as the starting directory
+ *   relative to `source`. This is useful when building a Cargo workspace within
+ *   a monorepo project. The result will keep the same shape, meaning the
+ *   skeleton crate will be nested under the path specified by `currentDir`.
+ */
+interface CreateSkeletonCrateOptions {
+  source: std.RecipeLike<std.Directory>;
+  currentDir?: string;
+}
+
+/**
  * Create a "skeleton crate" for a Rust crate. This is a crate that has
  * the minimal set of files needed for Cargo to consider it a valid crate,
  * namely so we can vendor dependencies. Without doing this, we would need
  * to re-vendor the crates any time the source code changes!
  */
 export function createSkeletonCrate(
-  crate: std.RecipeLike<std.Directory>,
+  options: CreateSkeletonCrateOptions,
 ): std.Recipe<std.Directory> {
+  const { currentDir } = options;
+
   const recipe = std.runBash`
     cargo chef prepare --recipe-path "$BRIOCHE_OUTPUT"
   `
     .dependencies(rust, cargoChef)
-    .workDir(crate)
+    .workDir(options.source)
+    .currentDir(
+      options.currentDir != null
+        ? std.tpl`${std.workDir}/${options.currentDir}`
+        : std.workDir,
+    )
     .toFile();
   return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
+    mkdir -p "$BRIOCHE_OUTPUT/$current_dir"
+    cd "$BRIOCHE_OUTPUT/$current_dir"
     cargo chef cook --recipe-path "$recipe" --no-build
   `
     .dependencies(rust, cargoChef)
-    .env({ recipe })
-    .outputScaffold(std.directory())
+    .env({ recipe, current_dir: currentDir ?? "" })
     .toDirectory();
 }
 
@@ -392,6 +422,11 @@ export function createSkeletonCrate(
  * Options for vendoring a Rust crate's dependencies.
  *
  * @param source - The crate to build.
+ * @param currentDir - Optionally set a subpath to use as the starting directory
+ *   relative to `source`. This is useful when building a Cargo workspace within
+ *   a monorepo project. The result will have the same shape as `source`,
+ *   meaning the vendored crate will be nested under the path specified by
+ *   `currentDir`.
  * @param unsafeGenerateLockfile - Generate a lockfile if the crate has no
  *   `Cargo.lock` file. Defaults to `false`.
  * @param cargoChefPrepare - Controls if the crate from `source` should get
@@ -402,6 +437,7 @@ export function createSkeletonCrate(
  */
 interface VendorCrateOptions {
   source: std.RecipeLike<std.Directory>;
+  currentDir?: string;
   unsafeGenerateLockfile?: boolean;
   cargoChefPrepare?: boolean;
 }
@@ -420,6 +456,7 @@ export function vendorCrate(
 ): std.Recipe<std.Directory> {
   const {
     source,
+    currentDir,
     cargoChefPrepare = true,
     unsafeGenerateLockfile = false,
   } = options;
@@ -430,13 +467,12 @@ export function vendorCrate(
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
   const skeletonCrate = cargoChefPrepare
-    ? createSkeletonCrate(completeSource)
+    ? createSkeletonCrate({ source: completeSource, currentDir })
     : completeSource;
 
   // Vendor the dependencies with network access and save the Cargo config.toml
   // file, so the vendored dependencies are used
   const vendoredSkeletonCrate = std.runBash`
-    cd "$BRIOCHE_OUTPUT"
     mkdir -p .cargo
 
     # If the crate has a .cargo/config file, then move it to .cargo/config.toml
@@ -457,6 +493,11 @@ export function vendorCrate(
   `
     .dependencies(rust)
     .outputScaffold(skeletonCrate)
+    .currentDir(
+      currentDir != null
+        ? std.tpl`${std.outputPath}/${currentDir}`
+        : std.outputPath,
+    )
     .unsafe({ networking: true })
     .toDirectory();
 
@@ -467,13 +508,13 @@ export function vendorCrate(
 
   // Copy the updated Cargo config.toml file into the crate
   crate = crate.insert(
-    ".cargo/config.toml",
-    vendoredSkeletonCrate.get(".cargo/config.toml"),
+    `${currentDir ?? "."}/.cargo/config.toml`,
+    vendoredSkeletonCrate.get(`${currentDir ?? "."}/.cargo/config.toml`),
   );
 
   // Remove the conflicting `cargo/config` file if it existed in the original
   // crate. It will have already been copied over to `.cargo/config.toml`
-  crate = crate.remove(".cargo/config");
+  crate = crate.remove(`${currentDir ?? "."}/.cargo/config`);
 
   return crate;
 }
