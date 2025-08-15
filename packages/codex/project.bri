@@ -8,21 +8,15 @@ export const project = {
   repository: "https://github.com/openai/codex.git",
 };
 
-const source = std.recipe(() => {
-  const source = Brioche.gitCheckout({
-    repository: project.repository,
-    ref: `rust-v${project.version}`,
-  });
-
-  // The Rust source code of the package is located in
-  // the codex-rs directory. Meaning the Cargo.toml file
-  // is not located at the root folder of the repository.
-  return std.glob(source, ["codex-rs/*"]).peel();
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `rust-v${project.version}`,
 });
 
 export default function codex(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
+    currentDir: "codex-rs",
     path: "cli",
     dependencies: [openssl],
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
