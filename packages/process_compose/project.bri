@@ -4,10 +4,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "process_compose",
-  version: "1.64.1",
+  version: "1.73.0",
   repository: "https://github.com/F1bonacc1/process-compose.git",
   extra: {
-    releaseDate: "2025-05-10",
+    releaseDate: "2025-08-09",
   },
 };
 
