@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftp.postgresql.org/pub/source/v17.5/postgresql-17.5.tar.bz2": {
+    "https://ftp.postgresql.org/pub/source/v17.6/postgresql-17.6.tar.bz2": {
       "type": "sha256",
-      "value": "fcb7ab38e23b264d1902cb25e6adafb4525a6ebcbd015434aeef9eda80f528d8"
+      "value": "e0630a3600aea27511715563259ec2111cd5f4353a4b040e0be827f94cd7a8b0"
     }
   }
 }
