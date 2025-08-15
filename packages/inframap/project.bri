@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "inframap",
-  version: "0.7.0",
+  version: "0.8.0",
   repository: "https://github.com/cycloidio/inframap.git",
 };
 
