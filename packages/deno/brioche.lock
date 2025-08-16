@@ -1,5 +1,15 @@
 {
   "dependencies": {},
+  "downloads": {
+    "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_aarch64-unknown-linux-gnu.a.gz": {
+      "type": "sha256",
+      "value": "278137daa64dcaa989c85281b94fba7684582f765268431206530bfa14a48fea"
+    },
+    "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz": {
+      "type": "sha256",
+      "value": "406a453645473bd8f8b9a818342e57dc95627fcd1155ace9eb7a2aadd5985285"
+    }
+  },
   "git_refs": {
     "https://github.com/denoland/deno.git": {
       "v2.2.12": "81da8139af85a0cb7efa9050ae6b5461b3614077"

@@ -19,21 +19,6 @@ const source = gitCheckout(
   }),
 );
 
-const rustyV8Archive = std
-  .download({
-    url: "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz",
-    hash: std.sha256Hash(
-      "406a453645473bd8f8b9a818342e57dc95627fcd1155ace9eb7a2aadd5985285",
-    ),
-  })
-  .pipe((gzip) =>
-    std.runBash`
-      zcat "$gzip" > "$BRIOCHE_OUTPUT"
-    `
-      .env({ gzip })
-      .toFile(),
-  );
-
 export default function deno(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
@@ -48,6 +33,31 @@ export default function deno(): std.Recipe<std.Directory> {
     runnable: "bin/deno",
     dependencies: [std.toolchain, cmake, python, ninja, llvm],
   });
+}
+
+function rustyV8Archive(): std.Recipe<std.File> {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return Brioche.download(
+        "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz",
+      ).pipe(gunzip);
+    case "aarch64-linux":
+      return Brioche.download(
+        "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_aarch64-unknown-linux-gnu.a.gz",
+      ).pipe(gunzip);
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the deno package`,
+      );
+  }
+}
+
+function gunzip(file: std.RecipeLike<std.File>): std.Recipe<std.File> {
+  return std.runBash`
+    gunzip -c "$file" > "$BRIOCHE_OUTPUT"
+  `
+    .env({ file })
+    .toFile();
 }
 
 function targetTripleEnvVar(): string {
