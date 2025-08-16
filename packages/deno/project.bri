@@ -24,10 +24,9 @@ export default function deno(): std.Recipe<std.Directory> {
     source,
     path: "cli",
     env: {
-      CARGO_TARGET_DIR: "deno_target",
       RUSTY_V8_ARCHIVE: rustyV8Archive,
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
-      [`CARGO_TARGET_${targetTripleEnvVar()}_RUSTFLAGS`]:
+      [`CARGO_TARGET_${cargoTargetTripleEnvVar()}_RUSTFLAGS`]:
         "-Clink-arg=-fuse-ld=bfd",
     },
     runnable: "bin/deno",
@@ -60,7 +59,7 @@ function gunzip(file: std.RecipeLike<std.File>): std.Recipe<std.File> {
     .toFile();
 }
 
-function targetTripleEnvVar(): string {
+function cargoTargetTripleEnvVar(): string {
   switch (std.CURRENT_PLATFORM) {
     case "x86_64-linux":
       return "X86_64_UNKNOWN_LINUX_GNU";
