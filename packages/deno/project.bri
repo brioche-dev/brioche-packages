@@ -10,11 +10,12 @@ import { cargoBuild } from "rust";
 export const project = {
   name: "deno",
   version: "2.2.12",
+  repository: "https://github.com/denoland/deno",
 };
 
 const source = gitCheckout(
   Brioche.gitRef({
-    repository: "https://github.com/denoland/deno.git",
+    repository: project.repository,
     ref: `v${project.version}`,
   }),
 );
@@ -40,6 +41,29 @@ export default function deno(): std.Recipe<std.Directory> {
     runnable: "bin/deno",
     dependencies: [std.toolchain, cmake, python, ninja, llvm],
   });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    deno --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(deno)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `deno ${project.version} `;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
 }
 
 function rustyV8Archive(): std.Recipe<std.File> {
