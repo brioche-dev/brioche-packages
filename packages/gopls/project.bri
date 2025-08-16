@@ -1,0 +1,47 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "gopls",
+  version: "0.19.1",
+  repository: "https://github.com/golang/tools.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `gopls/v${project.version}`,
+});
+
+export default function gopls(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    currentDir: "./gopls",
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+    runnable: "bin/gopls",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    gopls version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gopls)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `golang.org/x/tools/gopls ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^gopls\/v(?<version>.*)$/,
+  });
+}

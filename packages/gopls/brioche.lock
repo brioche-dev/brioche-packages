@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/golang/tools.git": {
+      "gopls/v0.19.1": "f795b4104f92bdc4966a4e4d75f6c7803d87b7cb"
+    }
+  }
+}

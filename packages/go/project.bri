@@ -107,6 +107,7 @@ interface GoBuildParameters {
  *   `go.sum` if external dependencies are needed.
  * @param dependencies - Optionally add additional dependencies to the build.
  * @param env - Optionally set environment variables for the build.
+ * @param currentDir - Optionally set the current working directory for the build.
  * @param buildParams - Optional build parameters.
  * @param path - Optionally set the package path to build (e.g. `./cmd/foo`).
  * @param runnable - Optionally set a path to the binary to run
@@ -116,6 +117,7 @@ interface GoBuildOptions {
   source: std.RecipeLike<std.Directory>;
   dependencies?: std.RecipeLike<std.Directory>[];
   env?: Record<string, std.ProcessTemplateLike>;
+  currentDir?: string;
   buildParams?: GoBuildParameters;
   path?: string;
   runnable?: string;
@@ -157,7 +159,7 @@ interface GoBuildOptions {
  * ```
  */
 export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
-  const modules = goModDownload(options.source);
+  const modules = goModDownload(options.source, options.currentDir);
 
   let buildResult = std.runBash`
     # Run generate if requested
@@ -182,6 +184,11 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
     go install "\${goargs[@]}" "$package_path"
   `
     .workDir(options.source)
+    .currentDir(
+      options.currentDir != null
+        ? std.tpl`${std.workDir}/${options.currentDir}`
+        : std.workDir,
+    )
     .dependencies(go, ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
@@ -204,6 +211,7 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
 
 function goModDownload(
   goModule: std.RecipeLike<std.Directory>,
+  currentDir: string | undefined,
 ): std.Recipe<std.Directory> {
   // Includes all the modules in the specified directory and its subdirectories
   // If a workspace file exists also include it
@@ -219,7 +227,12 @@ function goModDownload(
       ]),
     )
     .dependencies(go)
-    .env({ GOMODCACHE: std.outputPath })
+    .env({
+      GOMODCACHE: std.outputPath,
+    })
+    .currentDir(
+      currentDir != null ? std.tpl`${std.workDir}/${currentDir}` : std.workDir,
+    )
     .unsafe({ networking: true })
     .toDirectory();
 }
