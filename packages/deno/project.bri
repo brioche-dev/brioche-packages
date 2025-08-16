@@ -9,7 +9,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "deno",
-  version: "2.2.12",
+  version: "2.4.4",
   repository: "https://github.com/denoland/deno",
 };
 

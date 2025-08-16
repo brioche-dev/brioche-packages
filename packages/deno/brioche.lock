@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/denoland/deno": {
-      "v2.2.12": "81da8139af85a0cb7efa9050ae6b5461b3614077"
+      "v2.4.4": "5129d036ebd51b229adb7579e2c805859e3f95c0"
     }
   }
 }
