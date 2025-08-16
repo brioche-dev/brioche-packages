@@ -10,16 +10,7 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-}).pipe((source) =>
-  // Apply patch file
-  std.applyPatch({
-    source,
-    patch: Brioche.download(
-      `${project.repository}/commit/6c02951894e587c023e57a7ab2654136024bff70.patch`,
-    ),
-    strip: 1,
-  }),
-);
+});
 
 export default function kor(): std.Recipe<std.Directory> {
   return goBuild({
