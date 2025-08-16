@@ -25,9 +25,6 @@ export default function deno(): std.Recipe<std.Directory> {
     source,
     path: "cli",
     env: {
-      // Pre-built V8 library used for building Deno
-      RUSTY_V8_ARCHIVE: rustyV8Archive,
-
       // Build-time scripts dynamically load `libclang`, so ensure the standard
       // system libraries can be dynamically loaded
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
@@ -37,6 +34,9 @@ export default function deno(): std.Recipe<std.Directory> {
       // the time of writing)
       [`CARGO_TARGET_${cargoTargetTripleEnvVar()}_RUSTFLAGS`]:
         "-Clink-arg=-fuse-ld=bfd",
+    },
+    unsafe: {
+      networking: true,
     },
     runnable: "bin/deno",
     dependencies: [std.toolchain, cmake, python, ninja, llvm],
@@ -64,34 +64,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
-}
-
-function rustyV8Archive(): std.Recipe<std.File> {
-  switch (std.CURRENT_PLATFORM) {
-    case "x86_64-linux":
-      return Brioche.download(
-        "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_x86_64-unknown-linux-gnu.a.gz",
-      ).pipe(gunzip);
-    case "aarch64-linux":
-      return Brioche.download(
-        "https://github.com/denoland/rusty_v8/releases/download/v135.1.0/librusty_v8_release_aarch64-unknown-linux-gnu.a.gz",
-      ).pipe(gunzip);
-    default:
-      throw new Error(
-        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the deno package`,
-      );
-  }
-}
-
-/**
- * Decompress a gzip-compressed recipe.
- */
-function gunzip(file: std.RecipeLike<std.File>): std.Recipe<std.File> {
-  return std.runBash`
-    gunzip -c "$file" > "$BRIOCHE_OUTPUT"
-  `
-    .env({ file })
-    .toFile();
 }
 
 /**
