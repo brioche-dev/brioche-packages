@@ -24,8 +24,16 @@ export default function deno(): std.Recipe<std.Directory> {
     source,
     path: "cli",
     env: {
+      // Pre-built V8 library used for building Deno
       RUSTY_V8_ARCHIVE: rustyV8Archive,
+
+      // Build-time scripts dynamically load `libclang`, so ensure the standard
+      // system libraries can be dynamically loaded
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+
+      // Deno currently uses the linker flag `--export-dynamic-symbol-list`, so
+      // ensure we use ld.bfd since ld.gold doesn't support this flag (at
+      // the time of writing)
       [`CARGO_TARGET_${cargoTargetTripleEnvVar()}_RUSTFLAGS`]:
         "-Clink-arg=-fuse-ld=bfd",
     },
@@ -51,6 +59,9 @@ function rustyV8Archive(): std.Recipe<std.File> {
   }
 }
 
+/**
+ * Decompress a gzip-compressed recipe.
+ */
 function gunzip(file: std.RecipeLike<std.File>): std.Recipe<std.File> {
   return std.runBash`
     gunzip -c "$file" > "$BRIOCHE_OUTPUT"
@@ -59,6 +70,10 @@ function gunzip(file: std.RecipeLike<std.File>): std.Recipe<std.File> {
     .toFile();
 }
 
+/**
+ * Return the current platform's target triple in `SCREAMING_SNAKE_CASE`, which
+ * Cargo uses for target-specific environment variables.
+ */
 function cargoTargetTripleEnvVar(): string {
   switch (std.CURRENT_PLATFORM) {
     case "x86_64-linux":
