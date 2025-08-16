@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "fx",
-  version: "38.0.0",
+  version: "39.0.1",
   repository: "https://github.com/antonmedv/fx.git",
 };
 

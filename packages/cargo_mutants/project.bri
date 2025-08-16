@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_mutants",
-  version: "25.2.2",
+  version: "25.3.1",
   repository: "https://github.com/sourcefrog/cargo-mutants.git",
 };
 
