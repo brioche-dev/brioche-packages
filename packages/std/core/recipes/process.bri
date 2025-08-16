@@ -18,11 +18,14 @@ import { castToFile, castToDirectory, castToSymlink } from "./cast.bri";
  *   string referencing a command from `dependencies`.
  * @param args - An array of arguments to pass to the command.
  * @param env - An object containing environment variables to set for the process.
- * @param currentDir - Set the process's current working directory.
+ * @param currentDir - Set starting working directory for a process. Defaults
+ *   to the work directory, which can be populated with the `workDir` option.
  * @param dependencies - An array of dependencies to call the process with.
  *   Dependencies will be merged into the process's environment.
  * @param workDir - Set to a directory recipe that will be copied into the
- *   process's starting working directory.
+ *   process's work directory. This is the default starting working
+ *   directory for the process, unless overridden with the `currentDir`
+ *   option.
  * @param outputScaffold - Set to a recipe that will be be used to initialize
  *   `$BRIOCHE_OUTPUT`, which the process can then manipulate.
  * @param unsafe - A nested object with extra unsafe options that can be enabled.
@@ -59,7 +62,9 @@ export interface ProcessUtils {
   env(values: Record<string, ProcessTemplateLike>): Process;
 
   /**
-   * Returns a new process with a different working directory.
+   * Returns a new process with a different starting working directory.
+   * Defaults to the work directory, which can be populated with the
+   * `.workDir()` method.
    */
   currentDir(currentDir: ProcessTemplateLike): Process;
 
@@ -70,7 +75,9 @@ export interface ProcessUtils {
   dependencies(...dependencies: RecipeLike<Directory>[]): Process;
 
   /**
-   * Returns a new process with a different starting working directory.
+   * Returns a new process with a different work directory. This is the
+   * default starting working directory for the process, unless overridden
+   * with `.currentDir()`.
    */
   workDir(workDir: RecipeLike<Directory>): Process;
 
