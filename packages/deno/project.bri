@@ -1,11 +1,10 @@
 import * as std from "std";
+import { gitCheckout } from "git";
+import { cargoBuild } from "rust";
 import cmake from "cmake";
 import python from "python";
 import ninja from "ninja";
 import llvm from "llvm";
-
-import { gitCheckout } from "git";
-import { cargoBuild } from "rust";
 
 export const project = {
   name: "deno",
