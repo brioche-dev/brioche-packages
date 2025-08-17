@@ -1,14 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/yonahd/kor/commit/6c02951894e587c023e57a7ab2654136024bff70.patch": {
-      "type": "sha256",
-      "value": "a5b88c9defd2239657729bf51a7f5c7e6b27683eb68014235cb84e6b389bd963"
-    }
-  },
   "git_refs": {
     "https://github.com/yonahd/kor": {
-      "v0.6.3": "a2b421a346b85e38df40b7cf57666701de6e2558"
+      "v0.6.4": "be1a071119f62058cb9b05206cf80a012afd7669"
     }
   }
 }
