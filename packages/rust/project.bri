@@ -148,6 +148,7 @@ interface CargoBuildParameters {
   features?: string[];
   defaultFeatures?: boolean;
   allFeatures?: boolean;
+  profile?: string;
   bins?: boolean | string[];
   examples?: boolean | string[];
 }
@@ -247,6 +248,10 @@ export function cargoBuild(options: CargoBuildOptions) {
 
   if (options.buildParams?.allFeatures ?? false) {
     extraArgs.push("--all-features");
+  }
+
+  if (options.buildParams?.profile != null) {
+    extraArgs.push("--profile", options.buildParams.profile);
   }
 
   const bins = options.buildParams?.bins;

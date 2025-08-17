@@ -1,0 +1,90 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { cargoBuild } from "rust";
+import cmake from "cmake";
+import python from "python";
+import ninja from "ninja";
+import llvm from "llvm";
+
+export const project = {
+  name: "deno",
+  version: "2.4.4",
+  repository: "https://github.com/denoland/deno",
+};
+
+const source = gitCheckout(
+  Brioche.gitRef({
+    repository: project.repository,
+    ref: `v${project.version}`,
+  }),
+);
+
+export default function deno(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "cli",
+    env: {
+      // Build-time scripts dynamically load `libclang`, so ensure the standard
+      // system libraries can be dynamically loaded
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+
+      // Deno currently uses the linker flag `--export-dynamic-symbol-list`, so
+      // ensure we use ld.bfd since ld.gold doesn't support this flag (at
+      // the time of writing)
+      [`CARGO_TARGET_${cargoTargetTripleEnvVar()}_RUSTFLAGS`]:
+        "-Clink-arg=-fuse-ld=bfd",
+    },
+    buildParams: {
+      // The `release` profile builds with full LTO, which uses more memory
+      // than what's available on Brioche's aarch64 runner for CI builds. So
+      // we use the `release-lite` profile instead, which uses thin LTO,
+      // which uses way less memory and builds a lot faster
+      profile: "release-lite",
+    },
+    unsafe: {
+      networking: true,
+    },
+    runnable: "bin/deno",
+    dependencies: [std.toolchain, cmake, python, ninja, llvm],
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    deno --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(deno)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `deno ${project.version} `;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
+
+/**
+ * Return the current platform's target triple in `SCREAMING_SNAKE_CASE`, which
+ * Cargo uses for target-specific environment variables.
+ */
+function cargoTargetTripleEnvVar(): string {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return "X86_64_UNKNOWN_LINUX_GNU";
+    case "aarch64-linux":
+      return "AARCH64_UNKNOWN_LINUX_GNU";
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the deno package`,
+      );
+  }
+}
