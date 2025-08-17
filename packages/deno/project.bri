@@ -34,6 +34,13 @@ export default function deno(): std.Recipe<std.Directory> {
       [`CARGO_TARGET_${cargoTargetTripleEnvVar()}_RUSTFLAGS`]:
         "-Clink-arg=-fuse-ld=bfd",
     },
+    buildParams: {
+      // The `release` profile builds with full LTO, which uses more memory
+      // than what's available on Brioche's aarch64 runner for CI builds. So
+      // we use the `release-lite` profile instead, which uses thin LTO,
+      // which uses way less memory and builds a lot faster
+      profile: "release-lite",
+    },
     unsafe: {
       networking: true,
     },
