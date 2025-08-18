@@ -1,5 +1,4 @@
 import * as std from "std";
-import { gitCheckout } from "git";
 import { cargoBuild } from "rust";
 import cmake from "cmake";
 import python from "python";
@@ -12,12 +11,10 @@ export const project = {
   repository: "https://github.com/denoland/deno",
 };
 
-const source = gitCheckout(
-  Brioche.gitRef({
-    repository: project.repository,
-    ref: `v${project.version}`,
-  }),
-);
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
 
 export default function deno(): std.Recipe<std.Directory> {
   return cargoBuild({
