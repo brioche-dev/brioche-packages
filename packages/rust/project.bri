@@ -138,6 +138,7 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  * @param defaultFeatures - Set to `false` to opt out of the crate's
  *   default features.
  * @param allFeatures - Set to `true` to enable all of the crate's features.
+ * @param profile - Build the crate with the specified profile.
  * @param bins - Set to `true` to build all bin targets in the crate, or set
  *   to an array of bin targets to build. Defaults to `true` if no other
  *   targets are specified.
