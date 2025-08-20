@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/lib/libSM-1.2.6.tar.xz": {
+      "type": "sha256",
+      "value": "be7c0abdb15cbfd29ac62573c1c82e877f9d4047ad15321e7ea97d1e43d835be"
+    }
+  }
+}
