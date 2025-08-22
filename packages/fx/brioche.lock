@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/antonmedv/fx.git": {
-      "39.0.1": "d3483a2e32ceb2973a33444ee7f64617f787669b"
+      "39.0.2": "f8406ef237d98d175c8f3449108a21a8a76b9772"
     }
   }
 }
