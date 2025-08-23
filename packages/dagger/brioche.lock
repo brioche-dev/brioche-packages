@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/dagger/dagger.git": {
-      "v0.18.14": "5175b4adf3cc762e6f019dc4746e774d15a6cefb"
+      "v0.18.16": "bacd3329bc501d0f11c7a117129f1ed1d0211fa3"
     }
   }
 }
