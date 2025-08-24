@@ -1,0 +1,55 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libevent from "libevent";
+import openssl from "openssl";
+
+export const project = {
+  name: "coturn",
+  version: "4.7.0",
+  repository: "https://github.com/coturn/coturn.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function coturn(): std.Recipe<std.Directory> {
+  return (
+    cmakeBuild({
+      source,
+      dependencies: [std.toolchain, libevent, openssl],
+    })
+      // Fix broken absolute-path symlink
+      .insert("bin/turnadmin", std.symlink({ target: "turnserver" }))
+      .pipe((recipe) =>
+        // Ensure all binaries are marked as executable
+        std.runBash`
+          find bin -type f -exec chmod +x {} +
+        `
+          .outputScaffold(recipe)
+          .currentDir(std.outputPath)
+          .toDirectory(),
+      )
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    turnserver --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(coturn)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
