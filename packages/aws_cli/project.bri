@@ -22,7 +22,7 @@ const source = Brioche.gitCheckout({
 
 export default function awsCli(): std.Recipe<std.Directory> {
   // Create a venv
-  let venv = std.recipe(python({ version: "3.12" }));
+  let venv = std.recipe(python);
 
   // Download dependencies from PyPI
   // SAFETY: the `requirements-*-lock.txt` files have hashes, and the
