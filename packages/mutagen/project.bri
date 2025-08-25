@@ -1,0 +1,51 @@
+import * as std from "std";
+import go from "go";
+
+export const project = {
+  name: "mutagen",
+  version: "0.18.1",
+  repository: "https://github.com/mutagen-io/mutagen.git",
+};
+
+export const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function mutagen(): std.Recipe<std.Directory> {
+  // Run Mutagen's custom build script, which builds the main CLI and
+  // cross-compiles the agent for many different architectures
+  return std.runBash`
+    go run scripts/build.go
+
+    mkdir -p "$BRIOCHE_OUTPUT/bin"
+    mv build/mutagen build/mutagen-agents.tar.gz "$BRIOCHE_OUTPUT/bin"
+  `
+    .dependencies(go)
+    .unsafe({ networking: true })
+    .workDir(source)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/mutagen"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    mutagen --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(mutagen)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const version = result.split("\n").at(0);
+
+  // Check that the result contains the expected version
+  const expected = `Mutagen version ${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
