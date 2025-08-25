@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mutagen-io/mutagen.git": {
+      "v0.18.1": "a225ae50aee3d7ebb59139203cb84e8a6a3ff4bf"
+    }
+  }
+}
