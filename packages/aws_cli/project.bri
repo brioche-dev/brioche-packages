@@ -106,7 +106,7 @@ export default function awsCli(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    aws --version | tr -d '\n' | tee "$BRIOCHE_OUTPUT"
+    aws --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(awsCli)
     .toFile();
