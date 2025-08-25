@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/lib/libXau-1.0.12.tar.xz": {
+      "type": "sha256",
+      "value": "74d0e4dfa3d39ad8939e99bda37f5967aba528211076828464d2777d477fc0fb"
+    }
+  }
+}
