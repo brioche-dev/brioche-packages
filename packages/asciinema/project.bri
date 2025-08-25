@@ -23,7 +23,7 @@ const pipDependencies = std.directory({
 
 export default function asciinema(): std.Recipe<std.Directory> {
   // Create a venv
-  let venv = std.recipe(python());
+  let venv = std.recipe(python);
 
   // Install setuptools from the archive we downloaded. Setuptools is the
   // only dependency we need installed in the venv, the rest will be installed
