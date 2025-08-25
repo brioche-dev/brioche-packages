@@ -1,0 +1,67 @@
+import * as std from "std";
+import openssl from "openssl";
+import { nushellRunnable } from "nushell";
+
+export const project = {
+  name: "socat",
+  version: "1.8.0.3",
+};
+
+const source = Brioche.download(
+  `http://www.dest-unreach.org/socat/download/socat-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function socat(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, openssl)
+    .workDir(source)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/socat"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    socat -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(socat)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `socat version ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got: ${result}`,
+  );
+
+  // Check that the result includes OpenSSL support
+  std.assert(
+    result.includes("#define WITH_OPENSSL 1"),
+    "expected OpenSSL support",
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return nushellRunnable`
+    let version = http get http://www.dest-unreach.org/socat/
+      | lines
+      | where {|it| $it | str contains 'href="download/socat-' }
+      | parse --regex '<a href="download/socat-(?<version>(?<major>[\\d]+)\\.(?<minor>[\\d]+)(?:\\.(?<patch>[\\d]+)(?:\\.(?<extra>[\\d]+))?)?)\\.tar.gz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
