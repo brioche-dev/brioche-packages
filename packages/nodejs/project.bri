@@ -22,6 +22,9 @@ std.assert(
   "Node.js package version not found in extra.minorVersions",
 );
 
+/**
+ * The Node.js version.
+ */
 type NodeVersion = keyof typeof project.extra.otherVersions;
 
 function getLatestVersion(): NodeVersion {

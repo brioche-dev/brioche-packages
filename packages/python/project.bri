@@ -21,9 +21,17 @@ std.assert(
   "Python package version not found in extra.otherVersions",
 );
 
-type PythonVersion = keyof typeof project.extra.otherVersions;
+/**
+ * The Python version.
+ */
+export type PythonVersion = keyof typeof project.extra.otherVersions;
 
-function getLatestVersion(): PythonVersion {
+/**
+ * Get the latest version of Python.
+ *
+ * @returns The latest version of Python.
+ */
+export function getLatestVersion(): PythonVersion {
   const versions = Object.keys(project.extra.otherVersions);
   versions.sort((a, b) => parseInt(b) - parseInt(a));
 
