@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://files.pythonhosted.org/packages/1b/d1/9babe2ccaecff775992753d8686970b1e2755d21c8a63be73aba7a4e7d77/wheel-0.44.0-py3-none-any.whl": {
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl": {
       "type": "sha256",
-      "value": "2376a90c98cc337d18623527a97c31797bd02bad0033d41547043a1cbfbe448f"
+      "value": "708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248"
     },
-    "https://files.pythonhosted.org/packages/ff/ae/f19306b5a221f6a436d8f2238d5b80925004093fa3edea59835b514d9057/setuptools-75.1.0-py3-none-any.whl": {
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl": {
       "type": "sha256",
-      "value": "35ab7fd3bcd95e6b7fd704e4a1539513edad446c097797f2985e0e4b960772f2"
+      "value": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"
     }
   },
   "git_refs": {
