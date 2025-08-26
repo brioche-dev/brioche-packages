@@ -80,7 +80,6 @@ export default function awsCli(): std.Recipe<std.Directory> {
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
       PIP_FIND_LINKS: dependencies,
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
       PIP_NO_INDEX: "1",
     })
     .outputScaffold(venv)
