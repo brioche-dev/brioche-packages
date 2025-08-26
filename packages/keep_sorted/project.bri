@@ -17,6 +17,7 @@ const gitRef = await Brioche.gitRef({
 });
 
 const source = gitCheckout(gitRef).pipe((recipe) =>
+  // Create a git tag in the repo, which is used as the version number
   std.runBash`
     git tag "$revision"
   `
