@@ -6,9 +6,6 @@ export const project = {
   name: "keep_sorted",
   version: "0.7.1",
   repository: "https://github.com/google/keep-sorted.git",
-  extra: {
-    releaseDate: "2025-08-20T21:05:58Z",
-  },
 };
 
 const gitRef = await Brioche.gitRef({
@@ -49,7 +46,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `v${project.version} (${project.extra.releaseDate})`;
+  const expected = `v${project.version}`;
   std.assert(
     result.startsWith(expected),
     `expected '${expected}', got '${result}'`,
