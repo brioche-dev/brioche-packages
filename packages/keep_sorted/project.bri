@@ -3,7 +3,7 @@ import git, { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
-  name: "keep-sorted",
+  name: "keep_sorted",
   version: "0.7.1",
   repository: "https://github.com/google/keep-sorted.git",
   extra: {
