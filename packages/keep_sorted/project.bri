@@ -1,0 +1,60 @@
+import * as std from "std";
+import git, { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "keep_sorted",
+  version: "0.7.1",
+  repository: "https://github.com/google/keep-sorted.git",
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+const source = gitCheckout(gitRef).pipe((recipe) =>
+  // Create a git tag in the repo, which is used as the version number
+  std.runBash`
+    git tag "$revision"
+  `
+    .dependencies(git)
+    .env({ revision: `v${project.version}` })
+    .outputScaffold(recipe)
+    .currentDir(std.outputPath)
+    .toDirectory(),
+);
+
+export default function keepSorted(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/keep-sorted",
+    dependencies: [git],
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    keep-sorted --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(keepSorted)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
