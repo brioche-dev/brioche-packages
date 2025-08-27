@@ -61,8 +61,8 @@ export default function awsCli(): std.Recipe<std.Directory> {
     )
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
-      PIP_NO_INDEX: "1",
       PIP_FIND_LINKS: dependencies,
+      PIP_NO_INDEX: "1",
     })
     .outputScaffold(venv)
     .toDirectory();
@@ -79,9 +79,8 @@ export default function awsCli(): std.Recipe<std.Directory> {
     .workDir(source)
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
-      PIP_NO_INDEX: "1",
       PIP_FIND_LINKS: dependencies,
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      PIP_NO_INDEX: "1",
     })
     .outputScaffold(venv)
     .toDirectory();
