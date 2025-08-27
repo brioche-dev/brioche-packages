@@ -38,7 +38,15 @@ export function assert(
  */
 export function unreachable(never: never): never {
   const value: any = never;
-  throw new Error(`reached unreachable code with value: ${value}`);
+
+  // If this is an object, stringify it. Otherwise, print it as a string
+  if (typeof value === "object") {
+    throw new Error(
+      `reached unreachable code with object value: ${JSON.stringify(value)}`,
+    );
+  } else {
+    throw new Error(`reached unreachable code with value: ${value}`);
+  }
 }
 
 export type Awaitable<T> = T | Promise<T>;
