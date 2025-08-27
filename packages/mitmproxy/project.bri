@@ -1,5 +1,5 @@
 import * as std from "std";
-import python, { project as pythonProject } from "python";
+import python, { getLatestVersion as getPythonVersion } from "python";
 import uv from "uv";
 
 export const project = {
@@ -44,7 +44,7 @@ export default function mitmproxy(): std.Recipe<std.Directory> {
           env: {
             PYTHONPATH: {
               prepend: {
-                relativePath: `mitmproxy/lib/python${pythonProject.extra.currentMinorVersion}/site-packages`,
+                relativePath: `mitmproxy/lib/python${getPythonVersion()}/site-packages`,
               },
               separator: ":",
             },

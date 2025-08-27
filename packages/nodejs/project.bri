@@ -7,8 +7,7 @@ export const project = {
   name: "nodejs",
   version: "24.6.0",
   extra: {
-    currentMajorVersion: "24",
-    majorVersions: {
+    otherVersions: {
       "24": "24.6.0",
       "22": "22.18.0",
       "20": "20.19.4",
@@ -17,17 +16,23 @@ export const project = {
 } as const;
 
 std.assert(
-  project.extra.currentMajorVersion in project.extra.majorVersions,
-  "Node.js package extra.currentVersion not found in extra.majorVersion",
-);
-std.assert(
-  Object.keys(project.extra.majorVersions).some((majorVersion) =>
+  Object.keys(project.extra.otherVersions).some((majorVersion) =>
     project.version.startsWith(`${majorVersion}.`),
   ),
   "Node.js package version not found in extra.minorVersions",
 );
 
-type NodeVersion = keyof typeof project.extra.majorVersions;
+/**
+ * The Node.js version.
+ */
+type NodeVersion = keyof typeof project.extra.otherVersions;
+
+function getLatestVersion(): NodeVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  versions.sort((a, b) => parseInt(b) - parseInt(a));
+
+  return versions[0] as NodeVersion;
+}
 
 const prebuiltBinaries: Record<
   string,
@@ -35,36 +40,36 @@ const prebuiltBinaries: Record<
 > = {
   "24": {
     "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-x64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["24"]}/node-v${project.extra.otherVersions["24"]}-linux-x64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["24"]}/node-v${project.extra.majorVersions["24"]}-linux-arm64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["24"]}/node-v${project.extra.otherVersions["24"]}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
   },
   "22": {
     "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["22"]}/node-v${project.extra.majorVersions["22"]}-linux-x64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["22"]}/node-v${project.extra.otherVersions["22"]}-linux-x64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["22"]}/node-v${project.extra.majorVersions["22"]}-linux-arm64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["22"]}/node-v${project.extra.otherVersions["22"]}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
   },
   "20": {
     "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["20"]}/node-v${project.extra.majorVersions["20"]}-linux-x64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["20"]}/node-v${project.extra.otherVersions["20"]}-linux-x64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.majorVersions["20"]}/node-v${project.extra.majorVersions["20"]}-linux-arm64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["20"]}/node-v${project.extra.otherVersions["20"]}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
@@ -119,7 +124,7 @@ interface NodeOptions {
 export default function nodejs(
   options: NodeOptions = {},
 ): std.Recipe<std.Directory> {
-  const { version = project.extra.currentMajorVersion } = options;
+  const { version = getLatestVersion() } = options;
 
   return prebuiltBinary(version, std.CURRENT_PLATFORM)
     .pipe((node) =>
@@ -132,7 +137,7 @@ export default function nodejs(
 
 export function test(): std.Recipe<std.Directory> {
   const nodeVersions = Object.keys(
-    project.extra.majorVersions,
+    project.extra.otherVersions,
   ) as NodeVersion[];
 
   const tests = nodeVersions.map(async (version) => {
@@ -145,7 +150,7 @@ export function test(): std.Recipe<std.Directory> {
     const result = (await script.read()).trim();
 
     // Check that the result contains the expected version
-    const expected = `v${project.extra.majorVersions[version]}`;
+    const expected = `v${project.extra.otherVersions[version]}`;
     std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
     return std.directory().insert(version, script);
@@ -169,10 +174,10 @@ export function liveUpdate(): NushellRunnable {
 
     $env.project
       | from json
-      | update extra.majorVersions {|project|
+      | update extra.otherVersions {|project|
         # Ensure the newest version is in the list of major versions, then
         # update the newest minor/patch version of each major version
-        $project.extra.majorVersions
+        $project.extra.otherVersions
           | upsert $latestVersionRef.major $latestVersionRef.tag
           | transpose major version
           | update version {|row|
@@ -185,8 +190,6 @@ export function liveUpdate(): NushellRunnable {
           | into record
           | sort -r
       }
-      # Set the current major version
-      | update extra.currentMajorVersion $latestVersionRef.major
       # Set the current version
       | update version $latestVersionRef.tag
       | to json
