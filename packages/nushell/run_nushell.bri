@@ -10,7 +10,7 @@ import nushell from "/";
  * extra dependencies or environment variables using `.dependencies()`
  * or `.env()`, respectively, along with other process options.
  *
- * @description See also `nushellRunnable,` which will return a recipe that
+ * @description See also `nushellRunnable` which will return a recipe that
  * packages up a Nushell script that can be run outside of Brioche.
  *
  * @param strings - The template string parts for the Nushell script.
