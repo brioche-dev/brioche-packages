@@ -26,7 +26,7 @@ match $httpResponse.status {
 }
 let tags = $httpResponse.body
 
-# Exract the tag
+# Exract the tag(s)
 let parsedTags = $tags
   | get ref
   | each {|ref|
@@ -69,6 +69,25 @@ if ($project | get extra?.versionUnderscore?) != null {
 
   $project = $project
     | update extra.versionUnderscore $versionUnderscore
+}
+
+if ($project | get extra?.otherVersions?) != null {
+  # Ensure the newest version is in the list of other versions, then
+  # update the metadata of each other version
+  let otherVersions = $project.extra.otherVersions
+    | items {|key, value|
+      let latestVersion = $parsedTags
+        | where { |parsedTag| $parsedTag.version | str starts-with $key }
+        | last
+        | get version
+
+      { $key: $latestVersion }
+    }
+    | into record
+    | sort -r
+
+  $project = $project
+    | update extra.otherVersions $otherVersions
 }
 
 # Return back the project metadata encoded as JSON
