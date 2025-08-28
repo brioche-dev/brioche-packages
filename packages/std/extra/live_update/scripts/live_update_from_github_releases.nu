@@ -26,7 +26,7 @@ match $httpResponse.status {
 }
 let releases = $httpResponse.body
 
-# Extract the version
+# Extract the version(s)
 let releasesInfo = $releases
   | where {|release| ($env.includePrerelease == "true") or (not $release.prerelease) }
   | each {|release|
@@ -45,10 +45,10 @@ if ($releasesInfo | length) == 0 {
   error make { msg: $'No tag did match regex ($env.matchTag)' }
 }
 
-let releaseInfo = $releasesInfo
+let latestReleaseInfo = $releasesInfo
   | last
 
-mut version = $releaseInfo.version
+mut version = $latestReleaseInfo.version
 
 if $env.normalizeVersion == "true" {
   $version = $version
@@ -74,9 +74,28 @@ if ($project | get extra?.versionUnderscore?) != null {
     | update extra.versionUnderscore $versionUnderscore
 }
 
+if ($project | get extra?.otherVersions?) != null {
+  # Ensure the newest version is in the list of other versions, then
+  # update the metadata of each other version
+  let otherVersions = $project.extra.otherVersions
+    | items {|key, value|
+      let latestVersion = $releasesInfo
+        | where { |releaseInfo| $releaseInfo.version | str starts-with $key }
+        | last
+        | get version
+
+      { $key: $latestVersion }
+    }
+    | into record
+    | sort -r
+
+  $project = $project
+    | update extra.otherVersions $otherVersions
+}
+
 # Extract the release date (if needed by the project)
 if ($project | get extra?.releaseDate?) != null {
-  let $createdDate = $releaseInfo
+  let $createdDate = $latestReleaseInfo
     | get created_at
     | into datetime
     | format date "%Y-%m-%d"
