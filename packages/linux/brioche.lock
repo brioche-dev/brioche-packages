@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.16.2.tar.xz": {
+    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.16.4.tar.xz": {
       "type": "sha256",
-      "value": "b760a6fa793d774fbd3b7fa0bea3efd5c4f5294dfb98ef1bd5f6d5f7cef4f06d"
+      "value": "d6a5e3c71a10b533a756251387cc8bf48bbd5c76d842ba5e957d8b1c316ab622"
     }
   }
 }
