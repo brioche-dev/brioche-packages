@@ -6,6 +6,7 @@ import sqlite from "sqlite";
 export const project = {
   name: "python",
   version: "3.13.1",
+  repository: "https://github.com/python/cpython",
   extra: {
     otherVersions: {
       "3.13": "3.13.1",
@@ -174,6 +175,10 @@ export function test(): std.Recipe<std.Directory> {
   });
 
   return std.merge(...tests);
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
 }
 
 async function fixShebangs(
