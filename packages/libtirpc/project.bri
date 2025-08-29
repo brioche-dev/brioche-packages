@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libtirpc",
-  version: "1.3.6",
+  version: "1.3.7",
 };
 
 const source = Brioche.download(
