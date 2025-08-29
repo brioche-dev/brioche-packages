@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/daveshanley/vacuum.git": {
-      "v0.17.9": "0415b4a01712151587531b6eb84333fbd5cf29c7"
+      "v0.17.10": "1db130a281b9e06e102f2ec776817b66e7ee738e"
     }
   }
 }
