@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/gohugoio/hugo.git": {
-      "v0.148.2": "40c3d8233d4b123eff74725e5766fc6272f0a84d"
+      "v0.149.0": "66240338f1b908ca3b163384c8229943e74eb290"
     }
   }
 }
