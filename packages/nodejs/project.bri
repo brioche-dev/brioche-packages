@@ -1,11 +1,12 @@
 import * as std from "std";
 import * as typer from "typer";
 import python from "python";
-import nushell, { nushellRunnable, type NushellRunnable } from "nushell";
+import nushell from "nushell";
 
 export const project = {
   name: "nodejs",
   version: "24.6.0",
+  repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
       "24": "24.6.0",
@@ -159,41 +160,8 @@ export function test(): std.Recipe<std.Directory> {
   return std.merge(...tests);
 }
 
-export function liveUpdate(): NushellRunnable {
-  return nushellRunnable`
-    # Find Node.js releases by git tags
-    let versionRefs = http get https://api.github.com/repos/nodejs/node/git/matching-refs/tags
-      | get ref
-      | each {|ref|
-        $ref
-        | parse --regex '^refs/tags/v(?P<tag>(?P<major>[\\d]+)\\.(?P<minor>[\\d]+)\\.(?P<patch>[\\d]+))$'
-        | get -o 0
-      }
-      | sort-by -n major minor patch
-    let latestVersionRef = $versionRefs | last
-
-    $env.project
-      | from json
-      | update extra.otherVersions {|project|
-        # Ensure the newest version is in the list of major versions, then
-        # update the newest minor/patch version of each major version
-        $project.extra.otherVersions
-          | upsert $latestVersionRef.major $latestVersionRef.tag
-          | transpose major version
-          | update version {|row|
-            $versionRefs
-              | where major == $row.major
-              | last
-              | get tag
-          }
-          | transpose -r
-          | into record
-          | sort -r
-      }
-      # Set the current version
-      | update version $latestVersionRef.tag
-      | to json
-  `.env({ project: JSON.stringify(project) });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
 }
 
 /**
