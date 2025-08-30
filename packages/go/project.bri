@@ -4,33 +4,103 @@ export const project = {
   name: "go",
   version: "1.25.0",
   repository: "https://github.com/golang/go",
+  extra: {
+    otherVersions: {
+      "1.25": "1.25.0",
+      "1.24": "1.24.6",
+    },
+  },
 };
 
-function goPrebuilt(): std.Recipe<std.Directory> {
-  switch (std.CURRENT_PLATFORM) {
-    case "x86_64-linux":
-      return Brioche.download(
-        `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
-      )
-        .unarchive("tar", "gzip")
-        .peel();
-    case "aarch64-linux":
-      return Brioche.download(
-        `https://go.dev/dl/go${project.version}.linux-arm64.tar.gz`,
-      )
-        .unarchive("tar", "gzip")
-        .peel();
-    default:
-      throw new Error(
-        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the go package`,
-      );
-  }
+std.assert(
+  Object.keys(project.extra.otherVersions).some((minorVersion) =>
+    project.version.startsWith(`${minorVersion}.`),
+  ),
+  "Go package version not found in extra.otherVersions",
+);
+
+/**
+ * The Go version.
+ */
+export type GoVersion = keyof typeof project.extra.otherVersions;
+
+function getLatestVersion(): GoVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  versions.sort((a, b) => parseInt(b) - parseInt(a));
+
+  return versions[0] as GoVersion;
+}
+
+const prebuiltBinaries: Record<
+  string,
+  Record<string, std.Recipe<std.Directory>>
+> = {
+  "1.25": {
+    "x86_64-linux": Brioche.download(
+      `https://go.dev/dl/go${project.extra.otherVersions["1.25"]}.linux-amd64.tar.gz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://go.dev/dl/go${project.extra.otherVersions["1.25"]}.linux-arm64.tar.gz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
+  "1.24": {
+    "x86_64-linux": Brioche.download(
+      `https://go.dev/dl/go${project.extra.otherVersions["1.24"]}.linux-amd64.tar.gz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://go.dev/dl/go${project.extra.otherVersions["1.24"]}.linux-arm64.tar.gz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
+} satisfies Record<GoVersion, Record<std.Platform, std.Recipe<std.Directory>>>;
+
+function prebuiltBinary(
+  version: GoVersion,
+  platform: std.Platform,
+): std.Recipe<std.Directory> {
+  const prebuiltBinariesForVersion = prebuiltBinaries[version];
+  std.assert(
+    prebuiltBinariesForVersion != null,
+    `Go version '${version}' is not supported, expected one of ${JSON.stringify(
+      Object.keys(prebuiltBinaries),
+    )}`,
+  );
+
+  const prebuilt = prebuiltBinariesForVersion[platform];
+  std.assert(
+    prebuilt != null,
+    `Go ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
+      Object.keys(prebuiltBinariesForVersion),
+    )}`,
+  );
+
+  return prebuilt;
+}
+
+/**
+ * Extra options for Go.
+ *
+ * @param version - The major version of Go to use. Defaults to the
+ *   current stable release (at the time the `go` Brioche package was
+ *   last updated).
+ */
+interface GoOptions {
+  version?: GoVersion;
 }
 
 /**
  * The Go programming language.
  *
- * Returns a recipe containing the standard Go tools, including:
+ * @param options - The options for installing the go package.
+ *
+ * @returns a recipe containing the standard Go tools, including:
  *
  * - `go/bin/go`
  * - `go/bin/gofmt`
@@ -39,10 +109,12 @@ function goPrebuilt(): std.Recipe<std.Directory> {
  *
  * The directory `go` is intended to be used as the `$GOROOT` env var.
  */
-export default function go(): std.Recipe<std.Directory> {
+export default function go(options: GoOptions = {}): std.Recipe<std.Directory> {
+  const { version = getLatestVersion() } = options;
+
   return std
     .directory({
-      go: goPrebuilt(),
+      go: prebuiltBinary(version, std.CURRENT_PLATFORM),
       bin: std.directory({
         go: std.symlink({ target: "../go/bin/go" }),
         gofmt: std.symlink({ target: "../go/bin/gofmt" }),
@@ -57,23 +129,29 @@ export default function go(): std.Recipe<std.Directory> {
     );
 }
 
-export async function test(): Promise<std.Recipe<std.File>> {
-  const script = std.runBash`
-    go version | tee "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(go)
-    .toFile();
+export function test(): std.Recipe<std.Directory> {
+  const goVersions = Object.keys(project.extra.otherVersions) as GoVersion[];
 
-  const result = (await script.read()).trim();
+  const tests = goVersions.map(async (version) => {
+    const script = std.runBash`
+      go version | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(go)
+      .toFile();
 
-  // Check that the result contains the expected version
-  const expected = `go version go${project.version}`;
-  std.assert(
-    result.startsWith(expected),
-    `expected '${expected}', got '${result}'`,
-  );
+    const result = (await script.read()).trim();
 
-  return script;
+    // Check that the result contains the expected version
+    const expected = `go version go${project.version}`;
+    std.assert(
+      result.startsWith(expected),
+      `expected '${expected}', got '${result}'`,
+    );
+
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
