@@ -1,0 +1,65 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "libxdmcp",
+  version: "1.1.5",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/lib/libXdmcp-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libxdmcp(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/ \
+      --enable-docs=no
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xorgproto)
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xdmcp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libxdmcp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/lib
+      | lines
+      | where {|it| ($it | str contains "libXdmcp") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="libXdmcp-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
