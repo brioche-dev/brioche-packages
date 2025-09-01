@@ -188,7 +188,7 @@ export function cmakeBuild(
       fi
     done
 
-    cmake "$source/$path" "\${cmake_args[@]}"
+    cmake "$path" "\${cmake_args[@]}"
     cmake --build . --config "$config"
     cmake --install . --prefix="$BRIOCHE_OUTPUT"
 
@@ -201,9 +201,9 @@ export function cmakeBuild(
     fi
   `
     .dependencies(...dependencies, cmake)
+    .workDir(source)
     .env({
       ...options.env,
-      source,
       path: options.path ?? ".",
       config,
       cmake_num_set_entries: setEntriesWithIndices.length.toString(),
