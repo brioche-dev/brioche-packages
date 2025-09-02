@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "llvm",
-  version: "20.1.8",
+  version: "21.1.0",
   repository: "https://github.com/llvm/llvm-project.git",
 };
 
