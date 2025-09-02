@@ -39,24 +39,24 @@ const prebuiltBinaries: Record<
     "x86_64-linux": Brioche.download(
       `https://go.dev/dl/go${project.extra.otherVersions["1.25"]}.linux-amd64.tar.gz`,
     )
-      .unarchive("tar", "xz")
+      .unarchive("tar", "gzip")
       .peel(),
     "aarch64-linux": Brioche.download(
       `https://go.dev/dl/go${project.extra.otherVersions["1.25"]}.linux-arm64.tar.gz`,
     )
-      .unarchive("tar", "xz")
+      .unarchive("tar", "gzip")
       .peel(),
   },
   "1.24": {
     "x86_64-linux": Brioche.download(
       `https://go.dev/dl/go${project.extra.otherVersions["1.24"]}.linux-amd64.tar.gz`,
     )
-      .unarchive("tar", "xz")
+      .unarchive("tar", "gzip")
       .peel(),
     "aarch64-linux": Brioche.download(
       `https://go.dev/dl/go${project.extra.otherVersions["1.24"]}.linux-arm64.tar.gz`,
     )
-      .unarchive("tar", "xz")
+      .unarchive("tar", "gzip")
       .peel(),
   },
 } satisfies Record<GoVersion, Record<std.Platform, std.Recipe<std.Directory>>>;
