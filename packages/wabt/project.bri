@@ -1,5 +1,5 @@
 import * as std from "std";
-import cmake from "cmake";
+import { cmakeBuild } from "cmake";
 import python from "python";
 
 export const project = {
@@ -17,32 +17,16 @@ const source = Brioche.gitCheckout({
 });
 
 export default function wabt(): std.Recipe<std.Directory> {
-  return std.runBash`
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build .
-    cmake --install . --prefix="$BRIOCHE_OUTPUT"
-
-    if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
-      # Ensure the lib folder exists
-      mkdir -p "$BRIOCHE_OUTPUT/lib"
-
-      # Create relative symlinks for lib64 contents to lib folder
-      ln --symbolic --relative "$BRIOCHE_OUTPUT"/lib64/* "$BRIOCHE_OUTPUT/lib/"
-    fi
-  `
-    .workDir(source)
-    .dependencies(std.toolchain, python, cmake)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
-      }),
-    );
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, python],
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

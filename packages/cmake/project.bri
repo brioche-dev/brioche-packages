@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "cmake",
-  version: "4.1.0",
+  version: "4.1.1",
   repository: "https://github.com/Kitware/CMake",
 };
 
@@ -188,9 +188,11 @@ export function cmakeBuild(
       fi
     done
 
-    cmake "$source/$path" "\${cmake_args[@]}"
-    cmake --build . --config "$config"
-    cmake --install . --prefix="$BRIOCHE_OUTPUT"
+    BUILD_DIR=$(mktemp -p . -d build.XXXXXX)
+
+    cmake -S "$path" -B "$BUILD_DIR" "\${cmake_args[@]}"
+    cmake --build "$BUILD_DIR" --config "$config"
+    cmake --install "$BUILD_DIR" --prefix="$BRIOCHE_OUTPUT"
 
     if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
       # Ensure the lib folder exists
@@ -201,9 +203,9 @@ export function cmakeBuild(
     fi
   `
     .dependencies(...dependencies, cmake)
+    .workDir(source)
     .env({
       ...options.env,
-      source,
       path: options.path ?? ".",
       config,
       cmake_num_set_entries: setEntriesWithIndices.length.toString(),

@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/gruntwork-io/terragrunt.git": {
-      "v0.86.0": "bcc8037977c85c5a7eb9e4eb33bf38c6b631652e"
+      "v0.86.2": "2b5680a449f36928b2c0067453ede0d47c20d008"
     }
   }
 }
