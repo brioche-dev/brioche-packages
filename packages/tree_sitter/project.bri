@@ -1,0 +1,41 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "tree_sitter",
+  version: "0.25.8",
+  repository: "https://github.com/tree-sitter/tree-sitter",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function treeSitter(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "cli",
+    runnable: "bin/tree-sitter",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tree-sitter --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(treeSitter)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tree-sitter ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
