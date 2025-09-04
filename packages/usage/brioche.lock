@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jdx/usage.git": {
+      "v2.2.2": "d5cdaf592f7e0266ad65db8f40c0bc6618f7beed"
+    }
+  }
+}
