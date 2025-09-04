@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/konradsz/igrep.git": {
+      "v1.3.0": "00b309dd164f5a00371cd77c76cc5181ddf427db"
+    }
+  }
+}
