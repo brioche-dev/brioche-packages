@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://nodejs.org/dist/v20.19.4/node-v20.19.4-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v20.19.5/node-v20.19.5-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "4492c29882f604eb4cba6ce52ad2e6436f4eeb2b2917a74b0f85e6e42e261252"
+      "value": "d462267863ae8ee556039ebdf559055a8ec562c633889ef1403f3adb449ba1dd"
     },
-    "https://nodejs.org/dist/v20.19.4/node-v20.19.4-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v20.19.5/node-v20.19.5-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "7a488a09e2fc02fbd1bc4ae084bea8a589314f741c182fc02c5f3f07c79a29d4"
+      "value": "315046739a513a70e03a4a55a8afda8cf979f30852e576075c340084e3f8ac0f"
     },
     "https://nodejs.org/dist/v22.19.0/node-v22.19.0-linux-arm64.tar.xz": {
       "type": "sha256",
