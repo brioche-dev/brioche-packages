@@ -18,6 +18,7 @@ export default function libxdmcp(): std.Recipe<std.Directory> {
     ./configure \
       --prefix=/ \
       --enable-docs=no
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, xorgproto)

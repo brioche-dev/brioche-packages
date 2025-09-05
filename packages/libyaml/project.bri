@@ -15,6 +15,7 @@ export default function libyaml(): std.Recipe<std.Directory> {
   return std.runBash`
     ./bootstrap
     ./configure --prefix=/
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
