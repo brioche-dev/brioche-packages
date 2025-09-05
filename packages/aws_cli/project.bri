@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "aws_cli",
-  version: "2.28.20",
+  version: "2.28.24",
   repository: "https://github.com/aws/aws-cli",
 };
 
