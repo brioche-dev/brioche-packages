@@ -26,7 +26,7 @@ export default function libint(): std.Recipe<std.Directory> {
     ./configure \
       --prefix=/ \
       --enable-shared
-    make -j8
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
