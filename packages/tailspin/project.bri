@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "tailspin",
-  version: "5.4.5",
+  version: "5.5.0",
   repository: "https://github.com/bensadeh/tailspin.git",
 };
 
