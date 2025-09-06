@@ -72,7 +72,7 @@ export default async function python(options: PythonOptions = {}) {
       --prefix=/ \\
       --enable-shared \\
       --without-ensurepip
-    make -j8
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
 
     python3 -m ensurepip --default-pip

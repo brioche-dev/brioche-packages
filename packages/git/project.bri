@@ -16,8 +16,14 @@ const source = Brioche.download(
 
 export default function git(): std.Recipe<std.Directory> {
   return std.runBash`
-    make prefix=/ all
-    make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
+    make \
+      -j "$(nproc)" \
+      prefix=/ \
+      all
+    make \
+      prefix=/ \
+      install \
+      DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain, openssl, curl({ minimal: true }))

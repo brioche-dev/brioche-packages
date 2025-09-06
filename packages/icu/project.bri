@@ -29,7 +29,7 @@ export default function icu(): std.Recipe<std.Directory> {
     cd icu/source
     ./runConfigureICU Linux \\
       --prefix=/
-    make -j16
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

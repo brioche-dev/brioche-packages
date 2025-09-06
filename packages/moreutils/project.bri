@@ -17,7 +17,7 @@ const source = Brioche.gitCheckout({
 
 export default function moreutils(): std.Recipe<std.Directory> {
   return std.runBash`
-    make
+    make -j "$(nproc)"
     make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, libxml2, libxslt)
@@ -137,7 +137,7 @@ function perlEnv(): std.Recipe<std.Directory> {
 
   perlEnv = std.runBash`
     perl Makefile.PL
-    make
+    make -j "$(nproc)"
     make install
   `
     .workDir(ipcRun)

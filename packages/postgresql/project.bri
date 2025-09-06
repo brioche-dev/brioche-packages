@@ -27,11 +27,15 @@ export default function postgresql(): std.Recipe<std.Directory> {
       --with-uuid=e2fs \\
       --with-libxml \\
       --with-libxslt
-    make world-bin -j16
+    make -j "$(nproc)" world-bin
     make install-world-bin DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain, icu, openssl, libxml, libxslt)
+    .env({
+      // Set the number of threads to use during compilation
+      OMP_NUM_THREADS: "16",
+    })
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {

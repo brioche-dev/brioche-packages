@@ -93,7 +93,7 @@ export default function linux(
   // and `System.map` because not all architectures have a `make install`
   // target
   return std.runBash`
-    make -j16
+    make -j "$(nproc)"
 
     image_path="$(make image_name)"
     image_name="$(basename "$image_path")"
@@ -117,6 +117,9 @@ export default function linux(
       std.toolchain,
     )
     .env({
+      // Set the number of threads to use during compilation
+      OMP_NUM_THREADS: "16",
+
       INSTALL_MOD_PATH: std.outputPath,
 
       // Needed since we're using `ld.bfd`, which tries to resolve transitive

@@ -15,7 +15,7 @@ export default function nasm(): std.Recipe<std.Directory> {
   return std.runBash`
     ./autogen.sh
     ./configure
-    make
+    make -j "$(nproc)"
     make strip
     mkdir -p "$BRIOCHE_OUTPUT/bin"
     cp nasm "$BRIOCHE_OUTPUT/bin/nasm"

@@ -23,7 +23,7 @@ export default function pcre2(): std.Recipe<std.Directory> {
       --enable-pcre2-8 \\
       --enable-pcre2-16 \\
       --enable-pcre2-32
-    make
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain)

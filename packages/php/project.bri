@@ -17,11 +17,15 @@ const source = Brioche.download(
 export default function php(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
-    make -j16
+    make -j "$(nproc)"
     make install
   `
-    .dependencies(std.toolchain, libxml2, sqlite)
     .workDir(source)
+    .dependencies(std.toolchain, libxml2, sqlite)
+    .env({
+      // Set the number of threads to use during compilation
+      OMP_NUM_THREADS: "16",
+    })
     .toDirectory()
     .pipe(
       (recipe) =>

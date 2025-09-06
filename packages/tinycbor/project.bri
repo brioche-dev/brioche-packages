@@ -13,7 +13,7 @@ const source = Brioche.gitCheckout({
 
 export default function tinycbor(): std.Recipe<std.Directory> {
   return std.runBash`
-    make
+    make -j "$(nproc)"
     make install "prefix=/" DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

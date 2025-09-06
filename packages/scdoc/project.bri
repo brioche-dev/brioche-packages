@@ -14,7 +14,7 @@ const source = Brioche.download(
 
 export default function scdoc(): std.Recipe<std.Directory> {
   return std.runBash`
-    make PREFIX=/
+    make -j "$(nproc)" PREFIX=/
     make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
