@@ -18,6 +18,7 @@ export default function libssh2(): std.Recipe<std.Directory> {
     ./configure \\
       --prefix=/ \\
       --disable-examples-build
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

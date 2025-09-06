@@ -25,6 +25,7 @@ export default function ncurses(): std.Recipe<std.Directory> {
       --enable-pc-files \
       --enable-widec \
       --with-pkg-config-libdir=/lib/pkgconfig
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

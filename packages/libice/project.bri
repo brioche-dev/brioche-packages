@@ -17,6 +17,7 @@ const source = Brioche.download(
 export default function libice(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure --prefix=/
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, xorgproto, xtrans)
