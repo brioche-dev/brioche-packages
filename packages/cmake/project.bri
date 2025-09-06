@@ -56,12 +56,16 @@ export default function cmake(): std.Recipe<std.Directory> {
     ./bootstrap \\
       --prefix=/ \\
       --system-curl \\
-      --parallel=16
+      --parallel="$(nproc)"
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain, openssl, curl({ minimal: true }))
+    .env({
+      // Set the number of threads to use during compilation
+      OMP_NUM_THREADS: "16",
+    })
     .toDirectory()
     .pipe(
       (recipe) =>

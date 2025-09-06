@@ -15,7 +15,7 @@ const source = Brioche.download(
 export default function rpcsvcProto(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure --prefix=/
-    make -j16
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

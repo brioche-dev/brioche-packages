@@ -18,7 +18,7 @@ export default function libtirpc(): std.Recipe<std.Directory> {
     ./configure \\
       --prefix=/ \\
       --disable-gssapi
-    make -j16
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

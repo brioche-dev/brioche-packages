@@ -22,7 +22,7 @@ export default function pcre(): std.Recipe<std.Directory> {
       --enable-pcre16 \\
       --enable-pcre32 \\
       --enable-unicode-properties
-    make
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain)

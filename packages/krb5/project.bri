@@ -24,7 +24,7 @@ const source = Brioche.download(
 export default function krb5(): std.Recipe<std.Directory> {
   return std.runBash`
     ./src/configure --prefix=/
-    make
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

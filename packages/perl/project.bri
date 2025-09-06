@@ -30,7 +30,7 @@ export default function perl(): std.Recipe<std.Directory> {
       -Dprefix=/ \\
       -Duserelocatableinc \\
       -Dusethreads
-    make
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

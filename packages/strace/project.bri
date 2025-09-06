@@ -26,7 +26,7 @@ export default function strace(): std.Recipe<std.Directory> {
         ;;
     esac
 
-    make -j16
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
