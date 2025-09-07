@@ -23,9 +23,6 @@ export default function pstack(): std.Recipe<std.Directory> {
     set: {
       VERSION_TAG: gitRef.commit,
     },
-    env: {
-      CMAKE_BUILD_PARALLEL_LEVEL: "16",
-    },
     runnable: "bin/pstack",
   });
 }

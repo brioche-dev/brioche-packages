@@ -137,11 +137,14 @@ export type CMakeVariableType =
  * Generate and build a CMake project.
  *
  * @description A project build system will be generated out-of-tree from the source project,
- * and will be built and installed automatically with the chosen build
+ * and will be built using parallel jobs and installed automatically with the chosen build
  * generator.
  *
  * If the result includes a `lib64/`, the symlink `lib/` will be added
  * automatically to follow the standard Brioche conventions.
+ *
+ * @remarks To override the number of parallel jobs, set the environment variable `CMAKE_BUILD_PARALLEL_LEVEL`
+ * to the desired number. Setting it to `1` will disable parallelism.
  *
  * @param options - The options for building the CMake project.
  *
@@ -192,11 +195,15 @@ export function cmakeBuild(
       fi
     done
 
-    BUILD_DIR=$(mktemp -p . -d build.XXXXXX)
+    if [ -z "\${CMAKE_BUILD_PARALLEL_LEVEL:-}" ]; then
+      export CMAKE_BUILD_PARALLEL_LEVEL="$(nproc)"
+    fi
 
-    cmake -S "$path" -B "$BUILD_DIR" "\${cmake_args[@]}"
-    cmake --build "$BUILD_DIR" --config "$config"
-    cmake --install "$BUILD_DIR" --prefix="$BRIOCHE_OUTPUT"
+    build_dir=$(mktemp -p . -d build.XXXXXX)
+
+    cmake -S "$path" -B "$build_dir" "\${cmake_args[@]}"
+    cmake --build "$build_dir" --config "$config"
+    cmake --install "$build_dir" --prefix="$BRIOCHE_OUTPUT"
 
     if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
       # Ensure the lib folder exists
