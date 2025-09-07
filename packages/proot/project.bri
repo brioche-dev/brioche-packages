@@ -40,7 +40,7 @@ export default function proot(): std.Recipe<std.Directory> {
         ;;
     esac
 
-    make -C src proot care
+    make -j "$(nproc)" -C src proot care
     make -C src install PREFIX="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

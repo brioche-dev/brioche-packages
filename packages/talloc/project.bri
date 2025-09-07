@@ -16,7 +16,7 @@ const source = Brioche.download(
 export default function talloc(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure --prefix="$BRIOCHE_OUTPUT"
-    make
+    make -j "$(nproc)"
     make install
   `
     .workDir(source)

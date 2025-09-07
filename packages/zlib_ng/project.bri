@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
 export default function zlibNg(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure --prefix=/
-    make
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

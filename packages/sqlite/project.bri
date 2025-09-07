@@ -32,7 +32,7 @@ export default function sqlite(): std.Recipe<std.Directory> {
       --enable-readline \\
       --enable-fts3 \\
       --enable-session
-    make
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)

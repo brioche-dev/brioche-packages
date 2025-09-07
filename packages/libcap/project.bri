@@ -23,6 +23,7 @@ const source = std.recipe(() => {
 export default function libcap(): std.Recipe<std.Directory> {
   return std.runBash`
     make \\
+      -j "$(nproc)" \\
       prefix=/ \\
       lib=lib \\
       sbin=bin \\

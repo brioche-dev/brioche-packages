@@ -19,7 +19,7 @@ export default function freetype(): std.Recipe<std.Directory> {
     ./configure \
       --prefix=/ \
       --enable-freetype-config
-    make
+    make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
