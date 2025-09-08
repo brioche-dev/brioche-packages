@@ -17,6 +17,7 @@ import type {} from "nushell";
 interface LiveUpdateFromGitlabReleasesProjectExtraOptions {
   versionDash?: string;
   versionUnderscore?: string;
+  [key: string]: unknown; // Ignore unknown properties
 }
 
 /**
