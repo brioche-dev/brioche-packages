@@ -103,7 +103,7 @@ export function projectVersionToUnderscoreFormat(
 }
 
 /**
- * Interface representing the project verions information.
+ * Interface representing the project versions information.
  */
 interface ProjectVersionInformation {
   version: string;
