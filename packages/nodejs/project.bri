@@ -17,8 +17,8 @@ export const project = {
 } as const;
 
 std.assert(
-  Object.keys(project.extra.otherVersions).some((majorVersion) =>
-    project.version.startsWith(`${majorVersion}.`),
+  Object.keys(project.extra.otherVersions).some((version) =>
+    project.version.startsWith(`${version}.`),
   ),
   "Node.js package version not found in extra.minorVersions",
 );
