@@ -1,5 +1,6 @@
 import * as std from "std";
-import python from "python";
+import { cmakeBuild } from "cmake";
+import python, { getLatestVersion as getPythonVersion } from "python";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
@@ -23,22 +24,35 @@ const source = Brioche.download(
   .peel();
 
 export default function libxml2(): std.Recipe<std.Directory> {
-  return std.runBash`
-    ./configure --prefix=/
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
+  let libxml2 = cmakeBuild({
+    source,
+    dependencies: [std.toolchain, python],
+    set: {
+      // TODO: `LIBXML2_PYTHON_INSTALL_DIR` is set to resolved an upstream issue (see https://gitlab.gnome.org/GNOME/libxml2/-/issues/977)
+      // Remove it once the Python binding is suppressed (see https://gitlab.gnome.org/GNOME/libxml2/-/issues/891)
+      LIBXML2_PYTHON_INSTALL_DIR: std.tpl`${
+        std.outputPath
+      }/lib/python${getPythonVersion()}/site-packages`,
+      LIBXML2_WITH_TESTS: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+
+  // Remove a bunch of `*.tmp*` files left over in the build
+  // TODO: Figure out where these temp files are coming from!
+  libxml2 = std.runBash`
+    find "$BRIOCHE_OUTPUT/lib" -name '*.tmp*' -delete
   `
-    .workDir(source)
-    .dependencies(std.toolchain, python)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
-      }),
-    );
+    .outputScaffold(libxml2)
+    .toDirectory();
+
+  return libxml2;
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
