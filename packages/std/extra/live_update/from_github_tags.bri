@@ -20,6 +20,7 @@ interface LiveUpdateFromGithubTagsProjectExtraOptions {
   versionDash?: string;
   versionUnderscore?: string;
   otherVersions?: { [key: string]: string };
+  [key: string]: unknown; // Ignore unknown properties
 }
 
 /**

@@ -22,6 +22,7 @@ interface LiveUpdateFromGithubReleasesProjectExtraOptions {
   versionUnderscore?: string;
   releaseDate?: string;
   otherVersions?: { [key: string]: string };
+  [key: string]: unknown; // Ignore unknown properties
 }
 
 /**
