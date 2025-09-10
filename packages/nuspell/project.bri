@@ -25,7 +25,7 @@ export default function nuspell(): std.Recipe<std.Directory> {
       networking: true,
     },
     runnable: "bin/nuspell",
-  }).pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+  }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
