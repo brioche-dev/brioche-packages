@@ -31,7 +31,7 @@ import nushell from "/";
  *
  *   // Return a recipe that will call the script, with `$file` set to
  *   // the absolute path of the file above
- *   return std.runNushell`
+ *   return runNushell`
  *     mkdir $env.BRIOCHE_OUTPUT
  *     open $env.file | save $'($env.BRIOCHE_OUTPUT)/hello.txt'
  *   `
