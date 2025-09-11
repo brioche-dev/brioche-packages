@@ -38,7 +38,7 @@ interface NushellRunnableUtils {
  * import { nushellRunnable } from "nushell";
  *
  * // Running `brioche run` will print "Hello, world!"
- * export default function (): std.NushellRunnable {
+ * export default function (): NushellRunnable {
  *   return nushellRunnable`
  *     echo "Hello, world!"
  *   `;
@@ -70,7 +70,7 @@ export function nushellRunnable(
  * import { nushellRunnable } from "nushell";
  *
  * // Running `brioche run` will print "Hello, world!"
- * export default function (): std.NushellRunnable {
+ * export default function (): NushellRunnable {
  *   return nushellRunnable`
  *     echo "Hello, world!"
  *   `;
