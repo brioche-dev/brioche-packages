@@ -1,0 +1,59 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "traefik",
+  version: "3.5.2",
+  repository: "https://github.com/traefik/traefik",
+  extra: {
+    majorVersion: 3,
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+
+// Download the source code from the GitHub release, since it contains some additional files
+// than are not present in the git repository (ie: 'static' folder for webui)
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/traefik-v${project.version}.src.tar.gz`,
+).unarchive("tar", "gzip");
+
+export default function traefik(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/traefik/traefik/v${project.extra.majorVersion}/pkg/version.Version=${project.version}`,
+      ],
+    },
+    path: "./cmd/traefik",
+    runnable: "bin/traefik",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    traefik version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(traefik)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version:      ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
