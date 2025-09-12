@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "wrangler",
-  version: "4.34.0",
+  version: "4.36.0",
   extra: {
     packageName: "wrangler",
   },
