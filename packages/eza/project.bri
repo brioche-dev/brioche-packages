@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "eza",
-  version: "0.23.1",
+  version: "0.23.2",
   repository: "https://github.com/eza-community/eza.git",
 };
 
