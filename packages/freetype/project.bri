@@ -5,7 +5,7 @@ import * as std from "std";
 
 export const project = {
   name: "freetype",
-  version: "2.13.3",
+  version: "2.14.1",
 };
 
 const source = Brioche.download(

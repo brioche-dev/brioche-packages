@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://downloads.sourceforge.net/project/freetype/freetype2/2.13.3/freetype-2.13.3.tar.xz": {
+    "https://downloads.sourceforge.net/project/freetype/freetype2/2.14.1/freetype-2.14.1.tar.xz": {
       "type": "sha256",
-      "value": "0550350666d427c74daeb85d5ac7bb353acba5f76956395995311a9c6f063289"
+      "value": "32427e8c471ac095853212a37aef816c60b42052d4d9e48230bab3bdf2936ccc"
     }
   }
 }
