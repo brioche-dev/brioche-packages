@@ -98,7 +98,12 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
     })
     .pipe((recipe) =>
       std.autopack(recipe, {
-        globs: ["bin/**", "libexec/**", "lib/librustc_driver-*.so"],
+        globs: [
+          "bin/**",
+          "libexec/**",
+          "lib/librustc_driver-*.so",
+          "lib/rustlib/*/bin/**",
+        ],
         selfDependency: true,
         dynamicBinaryConfig: {
           skipLibraries: localLibNames,
