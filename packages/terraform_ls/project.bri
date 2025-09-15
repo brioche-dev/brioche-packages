@@ -1,0 +1,44 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "terraform_ls",
+  version: "0.37.0",
+  repository: "https://github.com/hashicorp/terraform-ls.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function terraformLs(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    path: ".",
+    runnable: "bin/terraform-ls",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    terraform-ls --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(terraformLs)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
