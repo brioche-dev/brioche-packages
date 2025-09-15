@@ -1,10 +1,10 @@
 import * as std from "std";
-import { cargoBuild } from "rust";
+import { goBuild } from "go";
 
 export const project = {
-  name: "oha",
-  version: "1.10.0",
-  repository: "https://github.com/hatoo/oha.git",
+  name: "terraform_ls",
+  version: "0.37.0",
+  repository: "https://github.com/hashicorp/terraform-ls.git",
 };
 
 const source = Brioche.gitCheckout({
@@ -12,29 +12,33 @@ const source = Brioche.gitCheckout({
   ref: `v${project.version}`,
 });
 
-export default function oha(): std.Recipe<std.Directory> {
-  return cargoBuild({
+export default function terraformLs(): std.Recipe<std.Directory> {
+  return goBuild({
     source,
-    runnable: "bin/oha",
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    path: ".",
+    runnable: "bin/terraform-ls",
   });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    oha --version | tee "$BRIOCHE_OUTPUT"
+    terraform-ls --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(oha)
+    .dependencies(terraformLs)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `oha ${project.version}`;
+  const expected = project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
 
-export function liveUpdate(): std.Recipe<std.Directory> {
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
   return std.liveUpdateFromGithubReleases({ project });
 }
