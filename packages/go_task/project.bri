@@ -1,0 +1,55 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "go_task",
+  version: "3.45.3",
+  repository: "https://github.com/go-task/task.git",
+  extra: {
+    majorVersion: "3",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function goTask(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/go-task/task/v${project.extra.majorVersion}/internal/version.version=${project.version}`,
+      ],
+    },
+    path: "./cmd/task",
+    runnable: "bin/task",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    task --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(goTask)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
