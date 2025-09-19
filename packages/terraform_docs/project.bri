@@ -1,0 +1,47 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "terraform_docs",
+  version: "0.20.0",
+  repository: "https://github.com/terraform-docs/terraform-docs.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function terraformDocs(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    path: ".",
+    runnable: "bin/terraform-docs",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    terraform-docs --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(terraformDocs)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `terraform-docs version v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

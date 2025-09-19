@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/terraform-docs/terraform-docs.git": {
+      "v0.20.0": "cf462c5da36feb66051cf0a6f1124594ed9adc7c"
+    }
+  }
+}
