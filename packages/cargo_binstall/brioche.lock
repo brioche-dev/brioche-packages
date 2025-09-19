@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-binstall/1.15.4/download": {
+    "https://crates.io/api/v1/crates/cargo-binstall/1.15.5/download": {
       "type": "sha256",
-      "value": "5bce8065aa2a37a4ae8dfc0315f0273c3e2e8a5cb61220c886fc449b7e5edbdc"
+      "value": "ff156eede7b2af902f66ef3f1fdeff58545b4c20cd033dde14119cf986e9dae2"
     }
   }
 }
