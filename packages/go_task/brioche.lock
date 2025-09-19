@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/go-task/task.git": {
-      "v3.45.3": "17db402e4bf1d816d4b3d0770b0d97ae962b41a4"
+      "v3.45.4": "048d92709aaa10c0cf8acc54fb59c163627ff9f4"
     }
   }
 }
