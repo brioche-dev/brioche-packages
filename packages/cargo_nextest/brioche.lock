@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/nextest-rs/nextest.git": {
-      "cargo-nextest-0.9.103": "d2e7b879fb79975e8b47a8e3ce569b651e6381c0"
+      "cargo-nextest-0.9.104": "87857ddf299a42c9cb5822422aeba77bd8fb74e8"
     }
   }
 }
