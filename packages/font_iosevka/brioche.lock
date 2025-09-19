@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/be5invis/Iosevka/releases/download/v33.2.9/PkgTTC-Iosevka-33.2.9.zip": {
+    "https://github.com/be5invis/Iosevka/releases/download/v33.3.0/PkgTTC-Iosevka-33.3.0.zip": {
       "type": "sha256",
-      "value": "9ea4f9e4eb6dab0433a2cb9a063a9a2beb354fd1d73058193962b8cc1a22f300"
+      "value": "350704092b3f56adb551153c70937d7cc9365dfc8f361494833afa7c54d1df64"
     }
   }
 }
