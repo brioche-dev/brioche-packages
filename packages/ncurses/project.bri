@@ -24,6 +24,7 @@ export default function ncurses(): std.Recipe<std.Directory> {
       --enable-symlinks \
       --enable-pc-files \
       --enable-widec \
+      --with-termlib \
       --with-pkg-config-libdir=/lib/pkgconfig
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
