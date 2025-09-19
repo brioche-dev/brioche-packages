@@ -110,6 +110,20 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
           extraRuntimeLibraryPaths: ["lib"],
         },
       }),
+    )
+    .pipe((recipe) =>
+      useBriocheLd(recipe, {
+        ldPaths: [`lib/rustlib/${targetTriple()}/bin/rust-lld`],
+        interpreterPaths: {
+          [dynamicLinkerPath()]: `lib/rustlib/${targetTriple()}/libexec/brioche-ld/ld-linux.so`,
+        },
+      }),
+    )
+    .pipe((recipe) =>
+      recipe.insert(
+        `lib/rustlib/${targetTriple()}/libexec/brioche-ld/ld-linux.so`,
+        dynamicLinker,
+      ),
     );
 }
 
@@ -541,4 +555,89 @@ function targetTriple(): string {
         `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the rust package`,
       );
   }
+}
+
+function dynamicLinkerPath(): string {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return "lib64/ld-linux-x86-64.so.2";
+    case "aarch64-linux":
+      return "lib/ld-linux-aarch64.so.1";
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the rust package`,
+      );
+  }
+}
+
+function dynamicLinker(): std.Recipe<std.File> {
+  return std
+    .process({
+      command: "cp",
+      args: [std.tpl`${std.toolchain}/${dynamicLinkerPath()}`, std.outputPath],
+      dependencies: [std.tools],
+    })
+    .toFile();
+}
+
+interface UseBriocheLdOptions {
+  ldPaths: string[];
+  interpreterPaths: Record<string, string>;
+}
+
+// TODO: This was copy/pasted from `std/toolchain/utils.bri`, we should figure
+// out a good place to put this
+export function useBriocheLd(
+  dir: std.Recipe<std.Directory>,
+  options: UseBriocheLdOptions,
+): std.Recipe<std.Directory> {
+  const briocheLd = std.runtimeUtils().get("bin/brioche-ld");
+  const briochePacked = std.runtimeUtils().get("bin/brioche-packed-exec");
+
+  for (const ldPath of options.ldPaths) {
+    const systemLd = dir.get(ldPath);
+
+    const ldDir = ldPath.split("/").slice(0, -1).join("/");
+    const ldParentDirComponents = ldDir.split("/").slice(0, -1);
+    const ldName = ldPath.split("/").at(-1);
+    const ldParentDirName = ldDir.split("/").at(-1);
+    std.assert(ldName != null && ldParentDirName != null);
+
+    const libexecBriocheLdDir = [
+      ...ldParentDirComponents,
+      "libexec",
+      "brioche-ld",
+    ].join("/");
+
+    for (const [interpreterPath, interpreterTargetPath] of Object.entries(
+      options.interpreterPaths,
+    )) {
+      const interpreterDir = interpreterPath.split("/").slice(0, -1).join("/");
+      const pathToBriocheLd = interpreterDir
+        .split("/")
+        .map(() => "..")
+        .join("/");
+      const pathToRoot = libexecBriocheLdDir
+        .split("/")
+        .map(() => "..")
+        .join("/");
+      const interpreterTarget = `${pathToBriocheLd}/${pathToRoot}/${interpreterTargetPath}`;
+      dir = dir.insert(
+        `${libexecBriocheLdDir}/${interpreterPath}`,
+        std.symlink({ target: interpreterTarget }),
+      );
+    }
+
+    dir = dir.insert(
+      `${libexecBriocheLdDir}/${ldName}`,
+      std.symlink({
+        target: `../../${ldParentDirName}/.brioche-ld-orig-${ldName}`,
+      }),
+    );
+    dir = dir.insert(`${libexecBriocheLdDir}/brioche-packed`, briochePacked);
+    dir = dir.insert(`${ldDir}/.brioche-ld-orig-${ldName}`, systemLd);
+    dir = dir.insert(ldPath, briocheLd);
+  }
+
+  return dir;
 }
