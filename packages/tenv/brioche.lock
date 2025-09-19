@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/tofuutils/tenv.git": {
+      "v4.7.21": "75176f712496d3f6ddd21f87604e504354c9531d"
+    }
+  }
+}

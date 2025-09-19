@@ -1,0 +1,44 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "tenv",
+  version: "4.7.21",
+  repository: "https://github.com/tofuutils/tenv.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function tenv(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+    path: "./cmd/tenv",
+    runnable: "bin/tenv",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tenv --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tenv)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tenv version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
