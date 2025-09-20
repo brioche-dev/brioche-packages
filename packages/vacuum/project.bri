@@ -1,22 +1,43 @@
 import * as std from "std";
+import { gitCheckout } from "git";
 import { goBuild } from "go";
 
 export const project = {
   name: "vacuum",
   version: "0.18.3",
   repository: "https://github.com/daveshanley/vacuum.git",
+  extra: {
+    releaseDate: "2025-09-16",
+  },
 };
 
-const source = Brioche.gitCheckout({
+const gitRef = await Brioche.gitRef({
   repository: project.repository,
   ref: `v${project.version}`,
 });
+const source = gitCheckout(gitRef).pipe((source) =>
+  // Patch the source to add build information injection
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("inject-build-information.patch"),
+    strip: 1,
+  }),
+);
 
 export default function vacuum(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
-      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/daveshanley/vacuum/cmd.VersionOverride=${project.version}`,
+        "-X",
+        `github.com/daveshanley/vacuum/cmd.CommitOverride=${gitRef.commit}`,
+        "-X",
+        `github.com/daveshanley/vacuum/cmd.DateOverride=${project.extra.releaseDate}`,
+      ],
     },
     path: "./vacuum.go",
     runnable: "bin/vacuum",
