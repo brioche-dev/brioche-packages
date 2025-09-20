@@ -41,7 +41,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          sed -i 's|//lib/lib\\([^\\s]*\\).la|-l\\1|g' "$BRIOCHE_OUTPUT"/lib/*.la
+          sed -i 's|//lib/lib\\([^\\s]*\\)\\.la|-l\\1|g' "$BRIOCHE_OUTPUT"/lib/*.la
         `,
       ],
       env: {
