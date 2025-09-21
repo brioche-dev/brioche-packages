@@ -1,95 +1,32 @@
 import * as std from "std";
-import python from "python";
+import { cargoBuild } from "rust";
 
 export const project = {
   name: "asciinema",
-  version: "2.4.0",
-  repository: "https://github.com/asciinema/asciinema.git",
+  version: "3.0.0",
+  extra: {
+    crateName: "asciinema",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
-
-const pipDependencies = std.directory({
-  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
-    `https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl`,
-  ),
-  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
-    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
-  ),
-});
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function asciinema(): std.Recipe<std.Directory> {
-  // Create a venv
-  let venv = std.recipe(python);
-
-  // Install setuptools from the archive we downloaded. Setuptools is the
-  // only dependency we need installed in the venv, the rest will be installed
-  // by setuptools itself
-  venv = std.runBash`
-    pip install setuptools
-  `
-    .env({
-      PATH: std.tpl`${std.outputPath}/bin`,
-      PIP_FIND_LINKS: pipDependencies,
-      PIP_NO_INDEX: "1",
-    })
-    .outputScaffold(venv)
-    .toDirectory();
-
-  // Install the application into the venv
-  venv = std.runBash`
-    pip install .
-  `
-    .workDir(source)
-    .env({
-      PATH: std.tpl`${std.outputPath}/bin`,
-      PIP_FIND_LINKS: pipDependencies,
-      PIP_NO_INDEX: "1",
-    })
-    .outputScaffold(venv)
-    .toDirectory();
-
-  // Create the final recipe with the venv under `venv`
-  return (
-    std
-      .directory({
-        venv,
-      })
-      // Add `bin/asciinema` to run the main script
-      .pipe(
-        (recipe) =>
-          std.addRunnable(recipe, "bin/asciinema", {
-            command: { relativePath: "venv/bin/python" },
-            args: [{ relativePath: "venv/bin/asciinema" }],
-          }),
-        (recipe) => std.withRunnableLink(recipe, "bin/asciinema"),
-      )
-  );
+  return cargoBuild({
+    source: source,
+    runnable: "bin/asciinema",
+  });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  // Generate a locale which is required by asciinema to run properly
-  const locale = std.runBash`
-    mkdir -p "$BRIOCHE_OUTPUT"/C.UTF-8
-    localedef -i POSIX -f UTF-8 "$BRIOCHE_OUTPUT"/C.UTF-8 || true
-  `
-    .dependencies(std.toolchain)
-    .env({
-      I18NPATH: std.tpl`${std.toolchain}/share/i18n`,
-    })
-    .toDirectory();
-
   const script = std.runBash`
     asciinema --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(asciinema)
-    .env({
-      LOCPATH: locale,
-      LANG: "C.UTF-8",
-    })
     .toFile();
 
   const result = (await script.read()).trim();
@@ -101,9 +38,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({
-    project,
-    matchTag: /^v(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
-  });
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromRustCrates({ project });
 }
