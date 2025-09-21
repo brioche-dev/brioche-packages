@@ -1,0 +1,27 @@
+import * as std from "/core";
+import { runBash } from "./run_bash.bri";
+
+/**
+ * Create a recipe that replaces dependencies absolute paths in libtool files
+ * with the corresponding linker flag.
+ *
+ * This is useful for ensuring that libtool files can be used in different
+ * environments without needing to modify them manually.
+ *
+ * @param recipe - The recipe to apply the transformation to.
+ *
+ * @returns A new recipe with the transformed libtool files.
+ *
+ * @remarks This function looks for libtool files in the standard locations
+ *   `lib` relative to the `$BRIOCHE_OUTPUT` output directory, and updates
+ *   the variable `dependency_libs`.
+ */
+export function libtoolSanitizeDependencies(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return runBash`
+    sed -i -e "/^dependency_libs='/,/'/ s#//lib/lib\\([^\\s]*\\)\\.la#-l\\1#g" "$BRIOCHE_OUTPUT"/lib/*.la
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
