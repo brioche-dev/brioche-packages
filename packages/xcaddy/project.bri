@@ -11,7 +11,7 @@ const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
 }).pipe((source) =>
-  // Patch the source to properly inject version information
+  // Patch the source to add version information injection
   // Inspired from: https://github.com/NixOS/nixpkgs/blob/d89fc19e405cb2d55ce7cc114356846a0ee5e956/pkgs/by-name/xc/xcaddy/inject_version_info.diff
   std.applyPatch({
     source,
