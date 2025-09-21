@@ -24,6 +24,7 @@ export default function hunspell(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(
+      std.libtoolSanitizeDependencies,
       std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {

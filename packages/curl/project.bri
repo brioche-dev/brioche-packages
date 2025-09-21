@@ -62,6 +62,7 @@ export default function curl(
     })
     .toDirectory()
     .pipe(
+      std.libtoolSanitizeDependencies,
       std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {

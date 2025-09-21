@@ -25,6 +25,7 @@ export default function unixodbc(): std.Recipe<std.Directory> {
     .workDir(source)
     .toDirectory()
     .pipe(
+      std.libtoolSanitizeDependencies,
       std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {

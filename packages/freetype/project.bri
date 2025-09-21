@@ -26,6 +26,7 @@ export default function freetype(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain, brotli, libpng)
     .toDirectory()
     .pipe(
+      std.libtoolSanitizeDependencies,
       std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
