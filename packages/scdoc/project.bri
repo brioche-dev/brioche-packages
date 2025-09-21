@@ -24,7 +24,15 @@ export default function scdoc(): std.Recipe<std.Directory> {
       // TODO: Remove this and make it so brioche-ld handles this properly
       BRIOCHE_LD_AUTOPACK: "false",
     })
-    .toDirectory();
+    .toDirectory()
+    .pipe(
+      std.pkgConfigMakePathsRelative,
+      (recipe) =>
+        std.setEnv(recipe, {
+          PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/scdoc"),
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
