@@ -32,13 +32,16 @@ export default function libxslt(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, python, libxml2)
     .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
-      }),
+    .pipe(
+      std.libtoolSanitizeDependencies,
+      std.pkgConfigMakePathsRelative,
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+        }),
     );
 }
 

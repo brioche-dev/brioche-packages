@@ -21,12 +21,15 @@ export default function libarchive(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      }),
+    .pipe(
+      std.libtoolSanitizeDependencies,
+      std.pkgConfigMakePathsRelative,
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
     );
 }
 

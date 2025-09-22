@@ -21,7 +21,7 @@ export default function libunistring(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe((recipe) =>
+    .pipe(std.libtoolSanitizeDependencies, (recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },

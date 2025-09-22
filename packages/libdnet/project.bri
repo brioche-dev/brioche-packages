@@ -24,6 +24,7 @@ export default function libdnet(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(
+      std.libtoolSanitizeDependencies,
       (recipe) =>
         std.setEnv(recipe, {
           CPATH: { append: [{ path: "include" }] },

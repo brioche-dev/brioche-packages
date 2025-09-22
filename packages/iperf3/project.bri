@@ -19,7 +19,16 @@ export default function iperf3(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .toDirectory();
+    .toDirectory()
+    .pipe(
+      std.libtoolSanitizeDependencies,
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/iperf3"),
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

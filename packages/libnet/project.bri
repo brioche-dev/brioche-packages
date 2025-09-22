@@ -22,6 +22,7 @@ export default function libnet(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(
+      std.libtoolSanitizeDependencies,
       std.pkgConfigMakePathsRelative,
       (recipe) =>
         std.setEnv(recipe, {
