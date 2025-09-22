@@ -20,7 +20,7 @@ export function libtoolSanitizeDependencies(
   recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
   return runBash`
-    sed -i -e "/^dependency_libs='/,/'/ s#//lib/lib\\([^\\s]*\\)\\.la#-l\\1#g" "$BRIOCHE_OUTPUT"/lib/*.la
+    sed -i -e "/^dependency_libs='/,/'/ s|//lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$BRIOCHE_OUTPUT"/lib/*.la
   `
     .outputScaffold(recipe)
     .toDirectory();
