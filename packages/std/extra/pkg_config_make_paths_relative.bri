@@ -1,6 +1,30 @@
 import * as std from "/core";
 import { runBash } from "./run_bash.bri";
 
+export const PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
+  # Candidate pkg-config directories relative to $BRIOCHE_OUTPUT
+  pkg_dirs=(lib/pkgconfig share/pkgconfig)
+
+  # Collect only those that are present
+  find_roots=()
+  for rel in "\${pkg_dirs[@]}"; do
+    dir="$BRIOCHE_OUTPUT/$rel"
+    if [[ -d "$dir" ]]; then
+      find_roots+=("$dir")
+    fi
+  done
+
+  # No pkg-config dir found, exit
+  if [[ \${#find_roots[@]} -eq 0 ]]; then
+    exit 0
+  fi
+
+  find "\${find_roots[@]}" -name '*.pc' -type f -print0 \
+    | while IFS= read -r -d $'\\0' file; do
+      sed -i 's|=/|=\${pcfiledir}/../..|' "$file"
+    done
+`;
+
 /**
  * Create a recipe that replaces absolute paths in pkg-config files with
  * relative paths using the `${pcfiledir}` variable.
@@ -19,29 +43,7 @@ import { runBash } from "./run_bash.bri";
 export function pkgConfigMakePathsRelative(
   recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
-  return runBash`
-    # Candidate pkg-config directories relative to $BRIOCHE_OUTPUT
-    pkg_dirs=(lib/pkgconfig share/pkgconfig)
-
-    # Collect only those that are present
-    find_roots=()
-    for rel in "\${pkg_dirs[@]}"; do
-      dir="$BRIOCHE_OUTPUT/$rel"
-      if [[ -d "$dir" ]]; then
-        find_roots+=("$dir")
-      fi
-    done
-
-    # No pkg-config dir found, exit
-    if [[ \${#find_roots[@]} -eq 0 ]]; then
-      exit 0
-    fi
-
-    find "\${find_roots[@]}" -name '*.pc' -type f -print0 \
-      | while IFS= read -r -d $'\\0' file; do
-        sed -i 's|=/|=\${pcfiledir}/../..|' "$file"
-      done
-  `
+  return runBash(PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT)
     .outputScaffold(recipe)
     .toDirectory();
 }

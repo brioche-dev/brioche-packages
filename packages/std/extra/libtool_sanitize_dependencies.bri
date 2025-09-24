@@ -1,6 +1,10 @@
 import * as std from "/core";
 import { runBash } from "./run_bash.bri";
 
+export const LIBTOOL_SANITIZE_DEPENDENCIES_SCRIPT = std.indoc`
+  sed -i -e "/^dependency_libs='/,/'/ s|//lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$BRIOCHE_OUTPUT"/lib/*.la
+`;
+
 /**
  * Create a recipe that replaces dependencies absolute paths in libtool files
  * with the corresponding linker flag.
@@ -19,9 +23,7 @@ import { runBash } from "./run_bash.bri";
 export function libtoolSanitizeDependencies(
   recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
-  return runBash`
-    sed -i -e "/^dependency_libs='/,/'/ s|//lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$BRIOCHE_OUTPUT"/lib/*.la
-  `
+  return runBash(LIBTOOL_SANITIZE_DEPENDENCIES_SCRIPT)
     .outputScaffold(recipe)
     .toDirectory();
 }
