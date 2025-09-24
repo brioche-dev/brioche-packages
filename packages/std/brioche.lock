@@ -13,13 +13,13 @@
       "type": "sha256",
       "value": "0cabcd0a074e08ac132281f711f884777b47def17fbeff2a82ba011836b83d11"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fa9ce0565ea067c84216838073c22176bb4a6399/aarch64-linux/brioche-runtime-utils.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/669ae3ed4658b463f9e64608d0e99dfa33192e06/aarch64-linux/brioche-runtime-utils.tar.zstd": {
       "type": "sha256",
-      "value": "3a5aef8493d087ff42bc178c5f56a77867d11e2429556dfe6768257248fd74b6"
+      "value": "5950949d551502fcb272ec0e5aed271897b67ad4acce75106ec9e30638a1bb37"
     },
-    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/fa9ce0565ea067c84216838073c22176bb4a6399/x86_64-linux/brioche-runtime-utils.tar.zstd": {
+    "https://development-content.brioche.dev/github.com/brioche-dev/brioche-runtime-utils/commits/669ae3ed4658b463f9e64608d0e99dfa33192e06/x86_64-linux/brioche-runtime-utils.tar.zstd": {
       "type": "sha256",
-      "value": "1ea74d7c2ea1e806876bac4cc3c210f15197195f7c9a2943a2fced35d55a3c43"
+      "value": "0538c35db5f4e86bae6731c09bc4e36bc428bbc06331524e7a9340e572947502"
     },
     "https://development-content.brioche.dev/github.com/tangramdotdev/bootstrap/2022-10-31/busybox_amd64_linux.tar.xz": {
       "type": "sha256",

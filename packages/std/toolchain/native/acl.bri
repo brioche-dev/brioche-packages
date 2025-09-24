@@ -33,23 +33,26 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
-  acl = std
+  let libtoolArchive = acl.get("lib/libacl.la");
+  libtoolArchive = std
     .process({
       command: std.tpl`${stage2}/bin/bash`,
       args: [
         "-euo",
         "pipefail",
         "-c",
-        std.indoc`
-          sed -i 's|//lib/lib\\([^\\s]*\\)\\.la|-l\\1|g' "$BRIOCHE_OUTPUT"/lib/*.la
+        `
+          sed 's|//lib/libattr.la|-lattr|' "$libtoolArchive" > "$BRIOCHE_OUTPUT"
         `,
       ],
       env: {
         PATH: std.tpl`${stage2}/bin`,
+        libtoolArchive,
       },
-      outputScaffold: acl,
     })
-    .toDirectory();
+    .toFile();
+
+  acl = acl.insert("lib/libacl.la", libtoolArchive);
 
   return acl;
 });
