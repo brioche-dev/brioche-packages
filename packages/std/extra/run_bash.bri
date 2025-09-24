@@ -38,9 +38,9 @@ import { tools } from "/toolchain";
  * }
  * ```
  */
-export function runBash(
-  strings: TemplateStringsArray,
-  ...values: string[]
+export function runBash<S extends string | TemplateStringsArray>(
+  strings: S,
+  ...values: S extends TemplateStringsArray ? string[] : never[]
 ): std.Process {
   const script = std.indoc(strings, ...values);
   return std.process({

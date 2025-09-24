@@ -212,20 +212,23 @@ export function jsonSerialize(value: Equatable): string {
  * fi
  * ```
  */
-export function indoc(
-  strings: TemplateStringsArray,
-  ...values: string[]
+export function indoc<S extends string | TemplateStringsArray>(
+  strings: S,
+  ...values: S extends TemplateStringsArray ? string[] : never[]
 ): string {
-  const string = strings
-    .flatMap((str, i): string[] => {
-      const value = values[i];
-      if (value != null) {
-        return [str, value];
-      } else {
-        return [str];
-      }
-    })
-    .join("");
+  const string =
+    typeof strings === "string"
+      ? strings
+      : strings
+          .flatMap((str, i): string[] => {
+            const value = values[i];
+            if (value != null) {
+              return [str, value];
+            } else {
+              return [str];
+            }
+          })
+          .join("");
 
   let lines = string.split("\n");
 
