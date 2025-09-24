@@ -2,6 +2,7 @@ import * as std from "/core";
 import { setEnv } from "/extra/set_env.bri";
 import stage2 from "/toolchain/stage2";
 import { buildAutopackConfig, AutopackOptions } from "/extra/autopack.bri";
+import { PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT } from "/extra/pkg_config_make_paths_relative.bri";
 import { runtimeUtils, useBriocheStrip } from "/toolchain/utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
@@ -402,22 +403,12 @@ function fixShebangs(
 function pkgConfigMakePathsRelative(
   recipe: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
-  // Replaces things that look like absolute paths in pkg-config files with
-  // relative paths (using the `${pcfiledir}` variable)
+  // Like the public `pkgConfigMakePathsRelative` function, but uses
+  // stage2 tools
   return std
     .process({
       command: std.tpl`${stage2}/bin/bash`,
-      args: [
-        "-euo",
-        "pipefail",
-        "-c",
-        std.indoc`
-          find "$BRIOCHE_OUTPUT"/lib/pkgconfig -name '*.pc' -type f -print0 \
-            | while IFS= read -r -d $'\\0' file; do
-              sed -i 's|=/|=\${pcfiledir}/../..|' "$file"
-            done
-        `,
-      ],
+      args: ["-euo", "pipefail", "-c", PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT],
       env: {
         PATH: std.tpl`${stage2}/bin`,
       },
