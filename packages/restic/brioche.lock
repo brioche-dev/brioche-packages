@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/restic/restic.git": {
-      "v0.18.0": "d401ad6c1ec93a8fbcfcd9f6855a7a4468878ec2"
+      "v0.18.1": "7d0aa7f2e30546fba7c8f1c0bae4d6704e3d8423"
     }
   }
 }
