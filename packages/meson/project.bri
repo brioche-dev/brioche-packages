@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "meson",
-  version: "1.9.0",
+  version: "1.9.1",
   repository: "https://github.com/mesonbuild/meson.git",
 };
 
