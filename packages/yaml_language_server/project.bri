@@ -3,10 +3,10 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "yaml_language_server",
-  version: "1.18.0",
+  version: "1.19.1",
   extra: {
     packageName: "yaml-language-server",
-  }
+  },
 };
 
 export default function yamlLanguageServer(): std.Recipe<std.Directory> {
