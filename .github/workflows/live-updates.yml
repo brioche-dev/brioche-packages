@@ -10,7 +10,7 @@ jobs:
     name: Live-update packages
     runs-on: ubuntu-24.04
     steps:
-      - name: Create GitHub App Token
+      - name: Create GitHub app token
         uses: actions/create-github-app-token@v2
         id: app-token
         with:
@@ -88,10 +88,20 @@ jobs:
           git checkout "$git_head"
           printf "%s\n" "${failed_packages[@]}" > failed-packages.txt
 
+      # Create a fresh GitHub app token to authenticate PR pushes, in case
+      # the previous token expired already (at the time of writing, tokens
+      # are valid for 1 hour)
+      - name: Create GitHub app token
+        uses: actions/create-github-app-token@v2
+        id: app-token-2
+        with:
+          app-id: ${{ vars.LIVE_UPDATE_APP_ID }}
+          private-key: ${{ secrets.LIVE_UPDATE_PRIVATE_KEY }}
+
       - name: Configure git credentials
         run: git remote set-url origin "$auth_url"
         env:
-          auth_url: https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
+          auth_url: https://x-access-token:${{ steps.app-token-2.outputs.token }}@github.com/${{ github.repository }}.git
 
       - name: Push branches
         run: |
@@ -112,7 +122,7 @@ jobs:
         env:
           run_label: "${{ github.workflow }} #${{ github.run_number}}"
           run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token-2.outputs.token }}
 
       - name: Check for failed packages
         run: |
