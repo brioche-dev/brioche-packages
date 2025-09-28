@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "eigen",
-  version: "3.4.0",
+  version: "5.0.0",
   repository: "https://gitlab.com/libeigen/eigen.git",
 };
 
