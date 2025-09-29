@@ -1,0 +1,85 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libice from "libice";
+import libsm from "libsm";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxext from "libxext";
+import libxt from "libxt";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "libxmu",
+  version: "1.2.1",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/lib/libXmu-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libxmu(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(
+      std.toolchain,
+      xorgproto,
+      libice,
+      libsm,
+      libx11,
+      libxau,
+      libxcb,
+      libxext,
+      libxt,
+    )
+    .workDir(source)
+    .toDirectory()
+    .pipe(
+      std.libtoolSanitizeDependencies,
+      std.pkgConfigMakePathsRelative,
+      (recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xmu | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libxmu)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/lib
+      | lines
+      | where {|it| ($it | str contains "libXmu") and (not ($it | str contains ".sig")) }
+      | parse --regex '<a href="libXmu-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
