@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/dependabot/cli": {
-      "v1.73.0": "2e15d2af40d9a4665f519d5d9e2fc947fa577091"
+      "v1.74.0": "a9245d6e68759e7bbc2e8acdd1187e0e3a83de12"
     }
   }
 }
