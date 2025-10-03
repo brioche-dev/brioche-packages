@@ -4,10 +4,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "cosign",
-  version: "2.6.0",
+  version: "2.6.1",
   repository: "https://github.com/sigstore/cosign.git",
   extra: {
-    releaseDate: "2025-09-12",
+    releaseDate: "2025-10-02",
   },
 };
 
