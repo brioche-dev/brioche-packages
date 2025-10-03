@@ -1,0 +1,66 @@
+import * as std from "std";
+import boost from "boost";
+import eigen from "eigen";
+
+export const project = {
+  name: "libint",
+  version: "2.11.1",
+  repository: "https://github.com/evaleev/libint",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Patch the source to update rm path to not use absolute paths
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("update-rm-path.patch"),
+    strip: 1,
+  }),
+);
+
+export default function libint(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./autogen.sh
+    ./configure \
+      --prefix=/ \
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, boost, eigen)
+    .env({
+      // FIXME: Move this flag directly to eigen recipe
+      CPPFLAGS: std.tpl`-I${eigen}/include/eigen3`,
+    })
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libint2 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libint)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
