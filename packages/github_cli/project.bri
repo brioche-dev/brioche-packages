@@ -3,10 +3,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "github_cli",
-  version: "2.80.0",
+  version: "2.81.0",
   repository: "https://github.com/cli/cli.git",
   extra: {
-    releaseDate: "2025-09-23",
+    releaseDate: "2025-09-30",
   },
 };
 
