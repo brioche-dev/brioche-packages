@@ -1,7 +1,6 @@
 import * as std from "std";
 import meson from "meson";
 import ninja from "ninja";
-import cmake from "cmake";
 import libcap from "libcap";
 
 export const project = {
@@ -22,7 +21,7 @@ export default function bubblewrap(): std.Recipe<std.Directory> {
     meson compile -C _builddir
     meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, meson, ninja, cmake, libcap)
+    .dependencies(std.toolchain, meson, ninja, libcap)
     .workDir(source)
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/bwrap"));
