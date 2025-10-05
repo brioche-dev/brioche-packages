@@ -26,18 +26,15 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl
+          sudo apt-get install -y curl gettext
+
       - name: Checkout code
         uses: actions/checkout@v5
 
       - name: Install Brioche
-        run: |
-          mkdir -p ~/.local/bin
-          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/$PLATFORM/brioche -o ~/.local/bin/brioche
-          chmod +x ~/.local/bin/brioche
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-        env:
-          PLATFORM: ${{ matrix.platform }}
+        uses: brioche-dev/setup-brioche@v1
+        with:
+          version: "nightly"
 
       - name: Build packages
         run: |
