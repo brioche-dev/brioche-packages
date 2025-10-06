@@ -6,24 +6,22 @@ export const project = {
   repository: "https://github.com/netwide-assembler/nasm",
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `nasm-${project.version}`,
-});
+const source = Brioche.download(
+  `https://www.nasm.us/pub/nasm/releasebuilds/${project.version}/nasm-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
 
 export default function nasm(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./autogen.sh
-    ./configure
+    ./configure --prefix=/
     make -j "$(nproc)"
-    make strip
-    mkdir -p "$BRIOCHE_OUTPUT/bin"
-    cp nasm "$BRIOCHE_OUTPUT/bin/nasm"
-    ln -s "bin/nasm" "$BRIOCHE_OUTPUT/brioche-run"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain)
     .workDir(source)
-    .toDirectory();
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nasm"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

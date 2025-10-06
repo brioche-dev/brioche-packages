@@ -9,35 +9,32 @@ on:
 
 jobs:
   build:
-    name: Build packages [${{ matrix.host.platform }}]
+    name: Build packages [${{ matrix.platform }}]
     if: inputs.enabled
     strategy:
       fail-fast: false
       matrix:
-        host:
+        include:
           - platform: x86_64-linux
             runs-on: brioche-dev-builder-runner
           - platform: aarch64-linux
             runs-on: brioche-dev-builder-runner-aarch64
 
-    runs-on: ${{ matrix.host.runs-on }}
+    runs-on: ${{ matrix.runs-on }}
     timeout-minutes: 1440
     steps:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl
+          sudo apt-get install -y curl gettext
+
       - name: Checkout code
         uses: actions/checkout@v5
 
       - name: Install Brioche
-        run: |
-          mkdir -p ~/.local/bin
-          curl -L https://development-content.brioche.dev/github.com/brioche-dev/brioche/branches/main/$PLATFORM/brioche -o ~/.local/bin/brioche
-          chmod +x ~/.local/bin/brioche
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-        env:
-          PLATFORM: ${{ matrix.host.platform }}
+        uses: brioche-dev/setup-brioche@v1
+        with:
+          version: "nightly"
 
       - name: Build packages
         run: |
@@ -56,7 +53,7 @@ jobs:
             fi
           done
         env:
-          PLATFORM: ${{ matrix.host.platform }}
+          PLATFORM: ${{ matrix.platform }}
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
           BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
@@ -101,7 +98,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: process-events-${{ github.run_id }}-${{ matrix.host.platform }}
+          name: process-events-${{ github.run_id }}-${{ matrix.platform }}
           path: ~/.local/share/brioche/process-temp/*/events.bin.zst
           compression-level: 0
 

@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "cmake",
-  version: "4.1.1",
+  version: "4.1.2",
   repository: "https://github.com/Kitware/CMake",
 };
 
@@ -18,17 +18,6 @@ const source = Brioche.download(
     std.applyPatch({
       source,
       patch,
-      strip: 1,
-    }),
-  )
-  .pipe((source) =>
-    // Apply commit patch to fix build issue between CMake and curl (as of
-    // CMake v4.1.1 and curl v8.16.0)
-    std.applyPatch({
-      source,
-      patch: Brioche.download(
-        "https://gitlab.kitware.com/cmake/cmake/-/commit/c92268f91b30e6d52b82d1ffad227cadafcf4dbf.patch",
-      ),
       strip: 1,
     }),
   );
