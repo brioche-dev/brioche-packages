@@ -21,6 +21,11 @@ export default function kmod(): std.Recipe<std.Directory> {
     meson setup build --prefix=/ -Dmanpages=false
     meson compile -C build
     DESTDIR="$BRIOCHE_OUTPUT" meson install -C build
+
+    # Symlink kmod to other programs
+    for program in lsmod rmmod insmod modinfo modprobe depmod; do
+      ln -s -r "$BRIOCHE_OUTPUT/bin/kmod" "$BRIOCHE_OUTPUT/bin/$program"
+    done
   `
     .workDir(source)
     .dependencies(std.toolchain, meson, ninja, scdoc, openssl)
