@@ -136,6 +136,38 @@ export default function linux(
     .toDirectory();
 }
 
+export async function test(): Promise<std.Recipe<std.File>> {
+  // Make sure the version is valid for kmod tools by always using the format
+  // 'X.Y.Z'
+  let linuxVersion = project.version;
+  if (project.version.split(".").length === 2) {
+    linuxVersion += ".0";
+  }
+
+  // There are plenty of modules built-in, just pick one that should stay
+  // in the tree across kernel updates
+  const script = std.runBash`
+    modinfo "$linux_path/lib/modules/$linux_version/kernel/fs/fuse/fuse.ko" | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(kmod)
+    .env({
+      linux_path: linux,
+      linux_version: linuxVersion,
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const versionMatch = result.match(/vermagic:\s+([^\s]+)\s+(.*)/);
+  const version = versionMatch?.[1] ?? "";
+
+  // Check that the result contains the expected version
+  const expected = linuxVersion;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let sourceUrl = http get https://cdn.kernel.org/pub/linux/kernel
