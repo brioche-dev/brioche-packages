@@ -33,7 +33,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   const versionMatch = result.match(/version v([^\s]+)/);
-  const version = versionMatch == null ? null : versionMatch[1];
+  const version = versionMatch?.[1] ?? "";
 
   // Check that the result contains the expected version
   const expected = project.version;
