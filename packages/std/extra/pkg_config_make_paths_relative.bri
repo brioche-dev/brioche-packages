@@ -2,6 +2,28 @@ import * as std from "/core";
 import { runBash } from "./run_bash.bri";
 
 export const PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
+  make_pkg_config_paths_relative () {
+    local -r file="$1"
+
+    # Update prefix, exec_prefix, libdir and includedir variables
+    sed -i 's|^prefix[[:space:]]*=.*|prefix=\${pcfiledir}/../..|' "$file"
+    sed -i 's|^exec_prefix[[:space:]]*=.*|exec_prefix=\${prefix}|' "$file"
+    sed -i 's|^libdir[[:space:]]*=.*|libdir=\${prefix}/lib|' "$file"
+    # Check if there is an include subdirectory in includedir
+    includedir=$(sed -n 's/^includedir=//p' "$file")
+    if [[ "$includedir" =~ /include/.* ]]; then
+      subdir=$(echo "$includedir" | sed 's|.*/include/||')
+      sed -i "s|^includedir=.*|includedir=\\\${prefix}/include/\${subdir}|" "$file"
+    else
+      sed -i 's|^includedir=.*|includedir=\${prefix}/include|' "$file"
+    fi
+
+    # Find and replace common patterns in Libs and Cflags variables
+    sed -i -e "/^Libs:/ s|-L/[^[:space:]]*/lib|-L\\\${libdir}|g" "$file"
+    sed -i -e "/^Libs:/ s|-Wl,-rpath,/[^[:space:]]*/lib|-Wl,-rpath,\\\${libdir}|g" "$file"
+    sed -i -e "/^Cflags:/ s|-I/[^[:space:]]*/include|-I\\\${includedir}|g" "$file"
+  }
+
   # Candidate pkg-config directories relative to $BRIOCHE_OUTPUT
   pkg_dirs=(lib/pkgconfig share/pkgconfig)
 
@@ -21,7 +43,7 @@ export const PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
 
   find "\${find_roots[@]}" -name '*.pc' -type f -print0 \
     | while IFS= read -r -d $'\\0' file; do
-      sed -i 's|=/|=\${pcfiledir}/../..|' "$file"
+      make_pkg_config_paths_relative "$file"
     done
 `;
 
