@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-binutils/0.4.0/download": {
+      "type": "sha256",
+      "value": "1656b16634e00e0b9f55bebc83f2c6f021cead99cb08aec52a7b9395563674b8"
+    }
+  }
+}
