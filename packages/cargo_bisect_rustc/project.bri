@@ -18,7 +18,7 @@ const source = Brioche.download(
 
 export default function cargoBisectRustc(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     dependencies: [openssl],
     runnable: "bin/cargo-bisect-rustc",
   });
