@@ -15,7 +15,7 @@ const source = Brioche.download(
 
 export default function boost(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./bootstrap.sh --prefix="$BRIOCHE_OUTPUT"
+    ./bootstrap.sh
     ./b2 \
       --prefix="$BRIOCHE_OUTPUT" \
       -j8 \
