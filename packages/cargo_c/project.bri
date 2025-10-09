@@ -18,7 +18,7 @@ const source = Brioche.download(
 
 export default function cargoC(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     dependencies: [openssl],
     runnable: "bin/cargo-cinstall",
   });

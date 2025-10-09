@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
 
 export default function cargoMsrv(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     runnable: "bin/cargo-mrsv",
   });
 }
