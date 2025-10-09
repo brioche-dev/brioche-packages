@@ -14,9 +14,9 @@ const source = Brioche.download(
 
 export default function libarchive(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix="$BRIOCHE_OUTPUT"
+    ./configure --prefix=/
     make -j "$(nproc)"
-    make install
+    make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
