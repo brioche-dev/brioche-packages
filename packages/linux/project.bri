@@ -144,10 +144,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
     linuxVersion += ".0";
   }
 
-  // There are plenty of modules built-in, just pick one that should stay
-  // in the tree across kernel updates
+  // The default list of kernel modules differ from one architecture to another,
+  // and it can be quite different. Here, just pick one that should stay hopefully
+  // in the tree across kernel updates regardless of the architecture.
   const script = std.runBash`
-    modinfo "$linux_path/lib/modules/$linux_version/kernel/fs/fuse/fuse.ko" | tee "$BRIOCHE_OUTPUT"
+    modinfo "$linux_path/lib/modules/$linux_version/kernel/net/netfilter/nf_log_syslog.ko" | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(kmod)
     .env({
