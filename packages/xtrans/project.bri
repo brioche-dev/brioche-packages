@@ -27,6 +27,7 @@ export default function xtrans(): std.Recipe<std.Directory> {
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
       }),
     );
 }

@@ -81,6 +81,7 @@ export default function cmake(): std.Recipe<std.Directory> {
           CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+          ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
         }),
       (recipe) => std.withRunnableLink(recipe, "bin/cmake"),
     );
