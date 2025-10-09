@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
 
 export default function miniserve(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     runnable: "bin/miniserve",
   });
 }

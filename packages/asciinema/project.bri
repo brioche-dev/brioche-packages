@@ -17,7 +17,7 @@ const source = Brioche.download(
 
 export default function asciinema(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     runnable: "bin/asciinema",
   });
 }

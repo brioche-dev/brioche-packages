@@ -17,7 +17,7 @@ const source = Brioche.download(
 
 export default function cargoLlvmLines(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     runnable: "bin/cargo-llvm-lines",
   });
 }

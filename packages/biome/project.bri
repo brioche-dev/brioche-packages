@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
 
 export default function biome(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     runnable: "bin/biome",
     path: "crates/biome_cli",
     env: {

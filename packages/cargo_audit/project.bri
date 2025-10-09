@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
 
 export default function cargoAudit(): std.Recipe<std.Directory> {
   return cargoBuild({
-    source: source,
+    source,
     runnable: "bin/cargo-audit",
     path: "cargo-audit",
   });
