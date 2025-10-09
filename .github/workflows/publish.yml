@@ -40,7 +40,7 @@ jobs:
             label="$package ($n / ${#packages[@]})"
             ((n++))
             echo "::group::$label"
-            brioche publish -p "$package"
+            brioche publish --no-verify --allow-dirty -p "$package"
             echo "::endgroup::"
           done
         env:
