@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-machete/0.9.1/download": {
+      "type": "sha256",
+      "value": "58666d6421d1fc50f0e635a88c1286a6ab73bf3978839e5ac35762cdecf84073"
+    }
+  }
+}
