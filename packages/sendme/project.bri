@@ -1,0 +1,43 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "sendme",
+  version: "0.29.0",
+  extra: {
+    crateName: "sendme",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sendme(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source: source,
+    runnable: "bin/sendme",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    sendme --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sendme)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `sendme ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromRustCrates({ project });
+}
