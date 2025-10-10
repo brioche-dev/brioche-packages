@@ -1,0 +1,46 @@
+import * as std from "std";
+import openssl from "openssl";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_smart_release",
+  version: "0.21.8",
+  extra: {
+    crateName: "cargo-smart-release",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cargoSmartRelease(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl],
+    runnable: "bin/cargo-smart-release",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    cargo smart-release --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoSmartRelease)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromRustCrates({ project });
+}
