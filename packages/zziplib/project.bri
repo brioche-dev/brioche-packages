@@ -31,6 +31,7 @@ export default function zziplib(): std.Recipe<std.Directory> {
       CPATH: { append: [{ path: "include" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );

@@ -24,6 +24,7 @@ export default function utilMacros(): std.Recipe<std.Directory> {
     .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
         PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
       }),
     );
 }

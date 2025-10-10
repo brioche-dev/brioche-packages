@@ -69,6 +69,7 @@ export default function curl(
           CPATH: { append: [{ path: "include" }] },
           LIBRARY_PATH: { append: [{ path: "lib" }] },
           PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+          ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
           CURL_ROOT: { fallback: { path: "." } },
         }),
       (recipe) => std.withRunnableLink(recipe, "bin/curl"),
