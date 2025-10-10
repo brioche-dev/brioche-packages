@@ -19,3 +19,7 @@ jobs:
       - name: Check packages
         run: |
           echo ./packages/* | xargs printf -- '-p %s\n' | xargs brioche check
+
+      - name: Check formatting
+        run: |
+          echo ./packages/* | xargs printf -- '-p %s\n' | xargs brioche fmt --check

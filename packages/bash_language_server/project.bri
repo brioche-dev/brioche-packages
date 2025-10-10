@@ -6,7 +6,7 @@ export const project = {
   version: "5.6.0",
   extra: {
     packageName: "bash-language-server",
-  }
+  },
 };
 
 export default function bashLanguageServer(): std.Recipe<std.Directory> {

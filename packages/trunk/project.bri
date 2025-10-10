@@ -6,7 +6,7 @@ export const project = {
   version: "0.21.14",
   extra: {
     crateName: "trunk",
-  }
+  },
 };
 
 const source = Brioche.download(
