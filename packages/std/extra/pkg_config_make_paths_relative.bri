@@ -9,14 +9,7 @@ export const PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
     sed -i 's|^prefix[[:space:]]*=.*|prefix=\${pcfiledir}/../..|' "$file"
     sed -i 's|^exec_prefix[[:space:]]*=.*|exec_prefix=\${prefix}|' "$file"
     sed -i 's|^libdir[[:space:]]*=.*|libdir=\${prefix}/lib|' "$file"
-    # Check if there is an include subdirectory in includedir
-    includedir=$(sed -n 's/^includedir=//p' "$file")
-    if [[ "$includedir" =~ /include/.* ]]; then
-      subdir=$(echo "$includedir" | sed 's|.*/include/||')
-      sed -i "s|^includedir=.*|includedir=\\\${prefix}/include/\${subdir}|" "$file"
-    else
-      sed -i 's|^includedir=.*|includedir=\${prefix}/include|' "$file"
-    fi
+    sed -i 's|^includedir[[:space:]]*=.*/include\\([^"]*\\)"\\?|includedir=\${prefix}/include\\1|' "$file"
 
     # Find and replace common patterns in Libs and Cflags variables
     sed -i -e "/^Libs:/ s|-L/[^[:space:]]*/lib|-L\\\${libdir}|g" "$file"
