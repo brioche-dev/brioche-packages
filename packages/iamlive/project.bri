@@ -23,7 +23,8 @@ export default function iamlive(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  // iamlive does not provide any version command, so the help command is used to verify the installation.
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
   const script = std.runBash`
     iamlive -help 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
