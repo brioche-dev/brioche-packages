@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/wakatime/wakatime-cli.git": {
+      "v1.131.0": "71f75a0bc9521a950fde6d4b10dd378d1491c7be"
+    }
+  }
+}

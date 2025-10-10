@@ -1,0 +1,48 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "wakatime_cli",
+  version: "1.131.0",
+  repository: "https://github.com/wakatime/wakatime-cli.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function wakatimeCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/wakatime/wakatime-cli/pkg/version.Version=${project.version}`,
+      ],
+    },
+    runnable: "bin/wakatime-cli",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    wakatime-cli --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(wakatimeCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
