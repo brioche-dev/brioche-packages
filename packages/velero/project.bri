@@ -1,0 +1,58 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "velero",
+  version: "1.17.0",
+  repository: "https://github.com/vmware-tanzu/velero.git",
+};
+
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function velero(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/vmware-tanzu/velero/pkg/buildinfo.Version=${project.version}`,
+        "-X",
+        `github.com/vmware-tanzu/velero/pkg/buildinfo.GitSHA=${gitRef.commit}`,
+        "-X",
+        "github.com/vmware-tanzu/velero/pkg/buildinfo.GitTreeState=clean",
+      ],
+    },
+    path: "./cmd/velero",
+    runnable: "bin/velero",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    velero version --client-only | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(velero)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
