@@ -1,0 +1,43 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_flamegraph",
+  version: "0.6.9",
+  extra: {
+    crateName: "flamegraph",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cargoFlamegraph(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/cargo-flamegraph",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo flamegraph --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoFlamegraph)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `flamegraph-flamegraph ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromRustCrates({ project });
+}
