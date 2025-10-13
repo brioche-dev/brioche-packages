@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/sigstore/cosign.git": {
-      "v2.6.1": "634fabe54f9fbbab55d821a83ba93b2d25bdba5f"
+      "v3.0.2": "84449696f0658a5ef5f2abba87fdd3f8b17ca1be"
     }
   }
 }
