@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.unixodbc.org/unixODBC-2.3.13.tar.gz": {
+    "https://www.unixodbc.org/unixODBC-2.3.14.tar.gz": {
       "type": "sha256",
-      "value": "119afef5f4cb04e780ca6cf763265b9fb2b99c4c11349a3f9cab14069d2c7c2b"
+      "value": "4e2814de3e01fc30b0b9f75e83bb5aba91ab0384ee951286504bb70205524771"
     }
   }
 }
