@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/junegunn/fzf.git": {
-      "v0.65.2": "416aff86e9d550d0a34af9d3cc12dfede25354c3"
+      "v0.66.0": "8cdfb23df69df0a991d122185b00e8900875a8cf"
     }
   }
 }
