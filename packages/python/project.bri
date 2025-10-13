@@ -5,12 +5,12 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "python",
-  version: "3.13.7",
+  version: "3.14.0",
   repository: "https://github.com/python/cpython",
   extra: {
     otherVersions: {
-      "3.13": "3.13.7",
-      "3.12": "3.12.11",
+      "3.13": "3.13.8",
+      "3.12": "3.12.12",
     },
   },
 };
