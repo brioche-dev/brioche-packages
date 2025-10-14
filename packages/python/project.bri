@@ -72,6 +72,8 @@ export default async function python(options: PythonOptions = {}) {
     export LD_LIBRARY_PATH="$LIBRARY_PATH"
     export PATH="$BRIOCHE_OUTPUT/bin\${PATH:+:$PATH}"
 
+    # Assume little-endian for the endianness of the system
+    env ax_cv_c_float_words_bigendian=no \\
     ./configure \\
       --prefix=/ \\
       --enable-shared \\
