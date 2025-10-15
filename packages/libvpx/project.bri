@@ -1,4 +1,5 @@
 import * as std from "std";
+import nasm from "nasm";
 
 export const project = {
   name: "libvpx",
@@ -28,7 +29,7 @@ export default function libvpx(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain)
+    .dependencies(std.toolchain, nasm)
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
