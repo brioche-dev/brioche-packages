@@ -122,15 +122,6 @@ export default function linux(
 
       INSTALL_MOD_PATH: std.outputPath,
 
-      // Needed since we're using `ld.bfd`, which tries to resolve transitive
-      // dependencies for libraries, so it needs to know where to look
-      HOSTLDFLAGS: std.tpl`-Wl,-rpath-link,${std.toolchain}/lib`,
-
-      // Needed because tools from the kernel build use `pthread_exit`, which
-      // dynamically opens `libgcc_s.so.1`, which is not directly a dependency
-      // of glibc
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
-
       ...env,
     })
     .toDirectory();
