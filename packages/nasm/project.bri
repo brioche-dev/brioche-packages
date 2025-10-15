@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "nasm",
-  version: "2.16.03",
+  version: "3.01",
   repository: "https://github.com/netwide-assembler/nasm",
 };
 
