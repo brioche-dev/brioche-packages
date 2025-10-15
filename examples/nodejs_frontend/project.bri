@@ -25,11 +25,6 @@ export function staticSite(): std.Recipe<std.Directory> {
   `
     .dependencies(nodejs)
     .workDir(npmPackage)
-    .env({
-      // NOTE: Rollup needs a dynamic library provided by the toolchain.
-      // Setting `$LD_LIBRARY_PATH` allows Node.js to find this library.
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
-    })
     .toDirectory();
 }
 
