@@ -157,7 +157,7 @@ export function test(): std.Recipe<std.Directory> {
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubTags({
     project,
-    matchTag: /^go(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
+    matchTag: /^go(?<version>\d+\.\d+\.\d+)$/,
   });
 }
 
