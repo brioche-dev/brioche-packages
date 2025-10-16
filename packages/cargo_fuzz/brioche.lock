@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-fuzz/0.13.1/download": {
+      "type": "sha256",
+      "value": "990e4e600e695b730ae23c2f4e6336ee63e9efe6527273f557f86d37eac724e7"
+    }
+  }
+}
