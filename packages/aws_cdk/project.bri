@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "aws_cdk",
-  version: "2.1029.4",
+  version: "2.1030.0",
   extra: {
     packageName: "aws-cdk",
   },

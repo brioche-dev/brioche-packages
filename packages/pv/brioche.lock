@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.ivarch.com/s/pv-1.9.34.tar.gz": {
+    "https://www.ivarch.com/s/pv-1.9.42.tar.gz": {
       "type": "sha256",
-      "value": "c0626bed6cbef5006b53d3281e8e3ae4b2838729462b21eccf28140eefef6bb1"
+      "value": "fbd7d1b04efee62c8241255a3fe1c5f5236f1a6e1ed85f02730b0c6448810175"
     }
   }
 }

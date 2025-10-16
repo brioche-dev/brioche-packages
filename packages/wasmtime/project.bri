@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "wasmtime",
-  version: "37.0.1",
+  version: "37.0.2",
   repository: "https://github.com/bytecodealliance/wasmtime.git",
 };
 
