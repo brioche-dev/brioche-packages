@@ -31,10 +31,6 @@ export default function libint(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain, boost, eigen)
-    .env({
-      // FIXME: Move this flag directly to eigen recipe
-      CPPFLAGS: std.tpl`-I${eigen}/include/eigen3`,
-    })
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
       std.setEnv(recipe, {
