@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/webmproject/libvpx/archive/refs/tags/v1.15.2.tar.gz": {
+      "type": "sha256",
+      "value": "26fcd3db88045dee380e581862a6ef106f49b74b6396ee95c2993a260b4636aa"
+    }
+  }
+}
