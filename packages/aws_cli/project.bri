@@ -22,7 +22,9 @@ const source = Brioche.gitCheckout({
 
 export default function awsCli(): std.Recipe<std.Directory> {
   // Create a venv
-  let venv = std.recipe(python);
+  // FIXME: Remove setting Python version once https://github.com/aws/aws-cli/pull/9790
+  // lands in the next release
+  let venv = std.recipe(python({ version: "3.13" }));
 
   // Download dependencies from PyPI
   // SAFETY: the `requirements-*-lock.txt` files have hashes, and the
