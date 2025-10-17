@@ -12,12 +12,13 @@ const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
 }).pipe((source) =>
-  // Patch the source to update rm path to not use absolute paths
-  std.applyPatch({
-    source,
-    patch: Brioche.includeFile("update-rm-path.patch"),
-    strip: 1,
-  }),
+  std.runBash`
+    sed -i -e "s|/bin/rm|rm|" "$BRIOCHE_OUTPUT/configure.ac"
+    sed -i -e "s|/bin/rm|rm|" "$BRIOCHE_OUTPUT/src/bin/libint/Makefile"
+    sed -i -e "s|/bin/rm|rm|" "$BRIOCHE_OUTPUT/src/lib/libint/Makefile.library"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
 );
 
 export default function libint(): std.Recipe<std.Directory> {
