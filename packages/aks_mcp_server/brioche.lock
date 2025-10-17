@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Azure/aks-mcp.git": {
+      "v0.0.9": "10d9e83c6aecafabf1daa4c2f5496229702f5e41"
+    }
+  }
+}
