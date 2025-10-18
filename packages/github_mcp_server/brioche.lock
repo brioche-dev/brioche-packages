@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/github/github-mcp-server.git": {
+      "v0.18.0": "f9343e62fd825d77ff741c7909016c461402783b"
+    }
+  }
+}
