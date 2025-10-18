@@ -4,7 +4,7 @@ import uv from "uv";
 
 export const project = {
   name: "mitmproxy",
-  version: "12.1.2",
+  version: "12.2.0",
   repository: "https://github.com/mitmproxy/mitmproxy.git",
 };
 
