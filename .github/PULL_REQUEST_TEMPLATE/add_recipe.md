@@ -30,7 +30,7 @@ This Pull Request adds a new recipe to the registry.
 <details><summary>Test output (click to expand)</summary>
 <p>
 
-```bash
+```
 TODO: paste the relevant output here
 ```
 
