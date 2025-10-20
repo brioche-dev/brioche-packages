@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "24.10.0",
+  version: "25.0.0",
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
