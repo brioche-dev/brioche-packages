@@ -24,6 +24,14 @@
     "https://nodejs.org/dist/v24.10.0/node-v24.10.0-linux-x64.tar.xz": {
       "type": "sha256",
       "value": "2642f4428869aca32443660fd71b3918e2be1277a899bdcaeb64c93b54b5af17"
+    },
+    "https://nodejs.org/dist/v25.0.0/node-v25.0.0-linux-arm64.tar.xz": {
+      "type": "sha256",
+      "value": "036d6aa6808e9e4ef5f419cbd9c5ba4de5e0b6046f380d4f228173459f2fbf1c"
+    },
+    "https://nodejs.org/dist/v25.0.0/node-v25.0.0-linux-x64.tar.xz": {
+      "type": "sha256",
+      "value": "14dd807cb4f1dbc2136849a668101a28446de6415fa20d46d776125deecb68e3"
     }
   }
 }
