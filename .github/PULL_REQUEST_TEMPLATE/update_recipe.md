@@ -37,7 +37,7 @@ brioche run -e liveUpdate -p RECIPE_PATH
 <details><summary>Live-update output (click to expand)</summary>
 <p>
 
-```bash
+```
 TODO: paste the relevant output here
 ```
 
