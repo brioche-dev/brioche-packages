@@ -8,7 +8,7 @@ This Pull Request adds a new recipe to the registry.
 - **Website / repository:** `TODO: link`
 - **Short description:** `TODO: one-line description`
 
-# Related issue(s) or discussion(s)
+## Related issue(s) or discussion(s)
 
 `TODO: Link to the issue or discussion if relevant.`
 
@@ -30,7 +30,9 @@ This Pull Request adds a new recipe to the registry.
 <details><summary>Test output (click to expand)</summary>
 <p>
 
+```
 TODO: paste the relevant output here
+```
 
 </p>
 </details>
@@ -44,7 +46,9 @@ brioche run -e liveUpdate -p RECIPE_PATH
 <details><summary>Live-update output (click to expand)</summary>
 <p>
 
+```
 TODO: paste the relevant output here
+```
 
 </p>
 </details>

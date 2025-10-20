@@ -4,7 +4,7 @@
 
 `TODO: Explain the changes made to the recipe, and why they are necessary.`
 
-# Related issue(s) or discussion(s)
+## Related issue(s) or discussion(s)
 
 `TODO: Link to the issue or discussion if relevant.`
 
@@ -21,7 +21,9 @@
 <details><summary>Test output (click to expand)</summary>
 <p>
 
+```
 TODO: paste the relevant output here
+```
 
 </p>
 </details>
@@ -35,7 +37,9 @@ brioche run -e liveUpdate -p RECIPE_PATH
 <details><summary>Live-update output (click to expand)</summary>
 <p>
 
+```
 TODO: paste the relevant output here
+```
 
 </p>
 </details>
