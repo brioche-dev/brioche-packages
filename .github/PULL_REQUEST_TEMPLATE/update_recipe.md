@@ -21,7 +21,7 @@
 <details><summary>Test output (click to expand)</summary>
 <p>
 
-```bash
+```
 TODO: paste the relevant output here
 ```
 
