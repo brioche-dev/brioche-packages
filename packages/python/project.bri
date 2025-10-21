@@ -72,6 +72,8 @@ export default async function python(options: PythonOptions = {}) {
     ./configure \\
       --prefix=/ \\
       --enable-shared \\
+      --enable-optimizations \\
+      --with-lto \\
       --without-ensurepip
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
