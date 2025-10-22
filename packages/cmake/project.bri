@@ -202,9 +202,9 @@ export function cmakeBuild(
 
     build_dir=$(mktemp -p . -d build.XXXXXX)
 
-    cmake -S "$path" -B "$build_dir" "\${cmake_args[@]}"
+    cmake -S "$path" -B "$build_dir" --install-prefix "$BRIOCHE_OUTPUT" "\${cmake_args[@]}"
     cmake --build "$build_dir" --config "$config"
-    cmake --install "$build_dir" --prefix="$BRIOCHE_OUTPUT"
+    cmake --install "$build_dir"
 
     if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
       # Ensure the lib folder exists
