@@ -2,7 +2,7 @@
 mut project = $env.project
   | from json
 
-# Retrieve the latest release information from Gitea
+# Retrieve the most recent releases from Gitea
 let releases = http get $'https://gitea.com/api/v1/repos/($env.repoOwner)/($env.repoName)/releases'
 
 # Extract the version(s)
@@ -23,6 +23,7 @@ if ($releasesInfo | length) == 0 {
   error make { msg: $'No tag did match regex ($env.matchTag)' }
 }
 
+# Extract the latest version
 let latestReleaseInfo = $releasesInfo
   | last
 

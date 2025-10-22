@@ -2,7 +2,7 @@
 mut project = $env.project
   | from json
 
-# Retrieve the list of tags from GitHub
+# Retrieve the most recent tags from GitHub
 # Include GitHub Token if present (for increased rate limits)
 mut gh_headers = []
 if ($env.GITHUB_TOKEN? | default "") != "" {
@@ -43,6 +43,7 @@ if ($parsedTags | length) == 0 {
   error make { msg: $'No tag did match regex ($env.matchTag)' }
 }
 
+# Extract the latest version
 mut version = $parsedTags
   | last
   | get version

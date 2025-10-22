@@ -2,7 +2,7 @@
 mut project = $env.project
   | from json
 
-# Retrieve the latest release information from GitHub
+# Retrieve the most recent releases from GitHub
 # Include GitHub Token if present (for increased rate limits)
 mut gh_headers = []
 if ($env.GITHUB_TOKEN? | default "") != "" {
@@ -45,6 +45,7 @@ if ($releasesInfo | length) == 0 {
   error make { msg: $'No tag did match regex ($env.matchTag)' }
 }
 
+# Extract the latest version
 let latestReleaseInfo = $releasesInfo
   | last
 
