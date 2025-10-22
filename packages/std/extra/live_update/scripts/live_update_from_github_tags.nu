@@ -9,22 +9,23 @@ if ($env.GITHUB_TOKEN? | default "") != "" {
   $gh_headers ++= [Authorization $'Bearer ($env.GITHUB_TOKEN)']
 }
 
-let httpResponse = http get --full --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/git/matching-refs/tags'
-match $httpResponse.status {
-  200 => {
-    # Success
+let tags = http get --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/git/matching-refs/tags'
+  | metadata access {|meta|
+    match $meta.http_response.status {
+      200 => {
+        # Success
+      }
+      401 => {
+        error make { msg: $'Unauthorized access to GitHub API' }
+      }
+      403 | 429 => {
+        error make { msg: $'GitHub API rate limit exceeded' }
+      }
+      _ => {
+        error make { msg: $'Failed to call GitHub API: ($meta.http_response.status)' }
+      }
+    }
   }
-  401 => {
-    error make { msg: $'Unauthorized access to GitHub API' }
-  }
-  403 | 429 => {
-    error make { msg: $'GitHub API rate limit exceeded' }
-  }
-  _ => {
-    error make { msg: $'Failed to call GitHub API: ($httpResponse.status)' }
-  }
-}
-let tags = $httpResponse.body
 
 # Exract the tag(s)
 let parsedTags = $tags
