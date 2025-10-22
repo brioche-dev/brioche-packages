@@ -18,8 +18,7 @@ const source = std.recipe(() => {
   const source = gitCheckout(gitRef);
 
   return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    sed -i 's|/bin/echo|/usr/bin/env echo|g' src/GNUmakefile
+    sed -i 's|/bin/echo|/usr/bin/env echo|g' "$BRIOCHE_OUTPUT/src/GNUmakefile"
   `
     .outputScaffold(source)
     .toDirectory();
