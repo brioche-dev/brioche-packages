@@ -2,11 +2,11 @@
 mut project = $env.project
   | from json
 
-# Retrieve the most recent releases from crates.io registry
-let releaseInfo = http get $'https://crates.io/api/v1/crates/($env.crateName)'
+# Retrieve the crate information from crates.io registry
+let crateInfo = http get $'https://crates.io/api/v1/crates/($env.crateName)'
 
-# Extract the latest version
-let version = $releaseInfo
+# Get the version
+let version = $crateInfo
   | get crate.max_version
 
 let parsedVersion = $version

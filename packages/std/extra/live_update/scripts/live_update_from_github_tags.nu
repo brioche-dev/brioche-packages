@@ -10,6 +10,7 @@ if ($env.GITHUB_TOKEN? | default "") != "" {
 }
 
 let tags = http get --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/git/matching-refs/tags'
+  # Check the response status
   | metadata access {|meta|
     match $meta.http_response.status {
       200 => {
@@ -26,9 +27,7 @@ let tags = http get --allow-errors --headers $gh_headers $'https://api.github.co
       }
     }
   }
-
-# Exract the tag(s)
-let parsedTags = $tags
+  # Extract the tag(s)
   | get ref
   | each {|ref|
     $ref
@@ -40,13 +39,16 @@ let parsedTags = $tags
   }
   | sort-by --natural version
 
-if ($parsedTags | length) == 0 {
+if ($tags | length) == 0 {
   error make { msg: $'No tag did match regex ($env.matchTag)' }
 }
 
-# Extract the latest version
-mut version = $parsedTags
+# Get the latest tag
+mut latestTag = $tags
   | last
+
+# Get the version
+mut version = $latestTag
   | get version
 
 if $env.normalizeVersion == "true" {
@@ -78,7 +80,7 @@ if ($project | get extra?.otherVersions?) != null {
   # update the metadata of each other version
   let otherVersions = $project.extra.otherVersions
     | items {|key, value|
-      let latestVersion = $parsedTags
+      let latestVersion = $tags
         | where { |parsedTag| $parsedTag.version | str starts-with $key }
         | last
         | get version
