@@ -96,6 +96,7 @@ export default function cmake(): std.Recipe<std.Directory> {
  *   CMake projects that reference each other.
  * @param dependencies - Optionally add dependencies to the build. Most projects
  *   will want to include `std.toolchain()` or a similar toolchain.
+ * @param config - Optionally set the build type on single-configuration generators.
  * @param env - Optionally set environment variables for the build.
  * @param unsafe - Optional unsafe options to enable when building. For example,
  *   passing `{ networking: true }` will allow to download files during the build.
@@ -196,6 +197,12 @@ export function cmakeBuild(
       fi
     done
 
+    # If not set, set the build type to the config
+    if [ -z "\${CMAKE_BUILD_TYPE:-}" ]; then
+      cmake_args+=("-DCMAKE_BUILD_TYPE=$config")
+    fi
+
+    # If not set, set the parallel build level to the number of cores
     if [ -z "\${CMAKE_BUILD_PARALLEL_LEVEL:-}" ]; then
       export CMAKE_BUILD_PARALLEL_LEVEL="$(nproc)"
     fi
@@ -203,7 +210,7 @@ export function cmakeBuild(
     build_dir=$(mktemp -p . -d build.XXXXXX)
 
     cmake -S "$path" -B "$build_dir" --install-prefix "$BRIOCHE_OUTPUT" "\${cmake_args[@]}"
-    cmake --build "$build_dir" --config "$config"
+    cmake --build "$build_dir"
     cmake --install "$build_dir"
 
     if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
