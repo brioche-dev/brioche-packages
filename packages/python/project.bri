@@ -136,7 +136,7 @@ export default async function python(options: PythonOptions = {}) {
       }),
     // Some binaries under `/bin` are shebang scripts. These need to be wrapped
     // to avoid issues with absolute paths
-    (recipe) => std.recipe(fixShebangs(recipe)),
+    (recipe) => std.recipe(fixScriptShebangs(recipe)),
     (recipe) =>
       recipe
         .insert("bin/python", std.symlink({ target: "python3" }))
@@ -182,7 +182,15 @@ export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubTags({ project });
 }
 
-async function fixShebangs(
+/**
+ * Fix shebang in Python scripts to use the correct path to the Python
+ * interpreter.
+ *
+ * @remarks The scripts are assumed to be found under `bin` folder.
+ *
+ * @returns The recipe with the shebang fixed.
+ */
+export async function fixScriptShebangs(
   recipe: std.Recipe<std.Directory>,
 ): Promise<std.Recipe<std.Directory>> {
   // Get all Python shebang scripts under `bin/`. We assume _all_ shebang
