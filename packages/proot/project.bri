@@ -14,15 +14,13 @@ const gitRef = await Brioche.gitRef({
   repository: project.repository,
   ref: `v${project.version}`,
 });
-const source = std.recipe(() => {
-  const source = gitCheckout(gitRef);
-
-  return std.runBash`
-    sed -i 's|/bin/echo|/usr/bin/env echo|g' "$BRIOCHE_OUTPUT/src/GNUmakefile"
-  `
+const source = gitCheckout(gitRef).pipe((source) =>
+  std.runBash`
+      sed -i 's|/bin/echo|/usr/bin/env echo|g' "$BRIOCHE_OUTPUT/src/GNUmakefile"
+    `
     .outputScaffold(source)
-    .toDirectory();
-});
+    .toDirectory(),
+);
 
 export default function proot(): std.Recipe<std.Directory> {
   return std.runBash`
