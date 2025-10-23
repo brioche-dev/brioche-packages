@@ -1,4 +1,5 @@
 import * as std from "/core";
+import { parseGiteaRepo } from "./gitea_global.bri";
 import {
   DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH,
   validateMatchTag,
@@ -91,50 +92,4 @@ export function liveUpdateFromGiteaReleases(
       normalizeVersion: normalizeVersion.toString(),
     });
   });
-}
-
-/**
- * Interface representing the parsed Gitea repository information.
- */
-interface GiteaRepoInfo {
-  readonly repoOwner: string;
-  readonly repoName: string;
-}
-
-function tryParseGiteaRepo(repo: string): GiteaRepoInfo | null {
-  const match = repo.match(
-    /^(?:https?:\/\/)?(www\.)?(?:gitea\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
-  );
-
-  const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
-  if (repoOwner == null || matchedRepoName == null) {
-    return null;
-  }
-
-  let repoName = matchedRepoName;
-  if (repoName.endsWith(".git")) {
-    repoName = repoName.slice(0, -4);
-  }
-
-  return { repoOwner, repoName };
-}
-
-/**
- * Parse a Gitea repository URL to extract the repository owner and name.
- *
- * @param repo - The Gitea repository URL to parse.
- *
- * @returns An object containing the repository owner and name.
- *
- * @throws If the repository URL cannot be parsed.
- */
-function parseGiteaRepo(repo: string): GiteaRepoInfo {
-  const info = tryParseGiteaRepo(repo);
-  if (info == null) {
-    throw new Error(
-      `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
-    );
-  }
-
-  return info;
 }

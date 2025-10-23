@@ -1,0 +1,116 @@
+import * as std from "/core";
+import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param moduleName - The name of the Go module to update.
+ */
+interface LiveUpdateFromGoModulesProjectExtraOptions {
+  readonly moduleName: string;
+}
+
+/**
+ * Options for the live update from Go modules.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `extra.moduleName` property containing the name of the Go module.
+ */
+interface LiveUpdateFromGoModulesOptions {
+  project: {
+    version: string;
+    readonly extra: LiveUpdateFromGoModulesProjectExtraOptions;
+  };
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * version from the Go proxy registry. The project's version will be set based on a
+ * regex match against the latest version. The module name is inferred from the
+ * extra options of the project.
+ *
+ * @remarks The version schema of an Go module should follow the SemVer
+ * specification.
+ *
+ * @param options - Options for the live update from Go modules.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   extra: {
+ *     moduleName: "brioche",
+ *   },
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromGoModules({ project });
+ * }
+ * ```
+ */
+export function liveUpdateFromGoModules(
+  options: LiveUpdateFromGoModulesOptions,
+): std.Recipe<std.Directory> {
+  const { moduleName } = parseGoModule(options.project.extra);
+
+  return std.recipe(async () => {
+    const { nushellRunnable } = await import("nushell");
+
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_go_modules.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      moduleName,
+      matchVersion: DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH.source,
+    });
+  });
+}
+
+/**
+ * Interface representing the parsed Go module information.
+ */
+interface GoModuleInfo {
+  readonly moduleName: string;
+}
+
+function tryParseGoModule(
+  extraOptions: LiveUpdateFromGoModulesProjectExtraOptions,
+): GoModuleInfo | null {
+  const match = extraOptions.moduleName.match(/^(?<moduleName>[\w\./-]+)$/);
+
+  const { moduleName } = match?.groups ?? {};
+  if (moduleName == null) {
+    return null;
+  }
+
+  return { moduleName };
+}
+
+/**
+ * Parse the Go module information to extract the module name.
+ *
+ * @param extraOptions - The extra options containing the module name.
+ *
+ * @returns An object containing the module name.
+ *
+ * @throws If the module name cannot be parsed.
+ */
+function parseGoModule(
+  extraOptions: LiveUpdateFromGoModulesProjectExtraOptions,
+): GoModuleInfo {
+  const info = tryParseGoModule(extraOptions);
+  if (info == null) {
+    throw new Error(
+      `Could not parse Go module from ${JSON.stringify(extraOptions)}`,
+    );
+  }
+
+  return info;
+}

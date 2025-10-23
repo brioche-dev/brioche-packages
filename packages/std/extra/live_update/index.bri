@@ -1,10 +1,16 @@
 export * from "./from_gitea_releases.bri";
+export * from "./from_gitea_tags.bri";
 export * from "./from_github_releases.bri";
 export * from "./from_github_tags.bri";
 export * from "./from_gitlab_releases.bri";
+export * from "./from_gitlab_tags.bri";
+export * from "./from_go_modules.bri";
 export * from "./from_npm_packages.bri";
+export * from "./from_python_packages.bri";
 export * from "./from_rust_crates.bri";
+export * from "./gitea_global.bri";
 export * from "./github_global.bri";
+export * from "./gitlab_global.bri";
 
 // The default regex used for matching versions. Strips an optional "v" prefix,
 // then matches the rest if it looks like a version number (either semver or

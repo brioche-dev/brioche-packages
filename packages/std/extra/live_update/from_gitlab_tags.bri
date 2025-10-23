@@ -15,14 +15,14 @@ import type {} from "nushell";
  * @param versionDash - The version of the project (converted in dash format).
  * @param versionUnderscore - The version of the project (converted in underscore format).
  */
-interface LiveUpdateFromGitlabReleasesProjectExtraOptions {
+interface LiveUpdateFromGitlabTagsProjectExtraOptions {
   versionDash?: string;
   versionUnderscore?: string;
   [key: string]: unknown; // Ignore unknown properties
 }
 
 /**
- * Options for the live update from GitLab releases.
+ * Options for the live update from GitLab tags.
  *
  * @param project - The project export that should be updated. Must include a
  *   `repository` property containing a GitLab repository URL.
@@ -34,23 +34,23 @@ interface LiveUpdateFromGitlabReleasesProjectExtraOptions {
  *   a semver-like version number. When enabled, the dashes and underscores
  *   will be replaced with dots.
  */
-interface LiveUpdateFromGitlabReleasesOptions {
+interface LiveUpdateFromGitlabTagsOptions {
   project: {
     version: string;
     readonly repository: string;
-    extra?: LiveUpdateFromGitlabReleasesProjectExtraOptions;
+    extra?: LiveUpdateFromGitlabTagsProjectExtraOptions;
   };
   readonly matchTag?: RegExp;
   readonly normalizeVersion?: boolean;
 }
 
 /**
- * Return a runnable recipe to live-update a project based on the latest release
- * tag from a GitLab repository. The project's version will be set based on a
- * regex match against the latest tag name. The repository is inferred from the
+ * Return a runnable recipe to live-update a project based on the latest tag
+ * from a GitLab repository. The project's version will be set based on a regex
+ *  match against the latest tag name. The repository is inferred from the
  * `repository` field of the project.
  *
- * @param options - Options for the live update from GitLab releases.
+ * @param options - Options for the live update from GitLab tags.
  *
  * @returns A runnable recipe to live-update the project
  *
@@ -63,15 +63,15 @@ interface LiveUpdateFromGitlabReleasesOptions {
  * };
  *
  * export function liveUpdate(): std.Recipe<std.Directory> {
- *   return std.liveUpdateFromGitlabReleases({
+ *   return std.liveUpdateFromGitlabTags({
  *     project,
  *     matchTag: /^v(?<version>.+)$/, // Strip "v" prefix from tags
  *   });
  * }
  * ```
  */
-export function liveUpdateFromGitlabReleases(
-  options: LiveUpdateFromGitlabReleasesOptions,
+export function liveUpdateFromGitlabTags(
+  options: LiveUpdateFromGitlabTagsOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGitlabRepo(options.project.repository);
   const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
@@ -83,7 +83,7 @@ export function liveUpdateFromGitlabReleases(
     const { nushellRunnable } = await import("nushell");
 
     return nushellRunnable(
-      Brioche.includeFile("./scripts/live_update_from_gitlab_releases.nu"),
+      Brioche.includeFile("./scripts/live_update_from_gitlab_tags.nu"),
     ).env({
       project: JSON.stringify(options.project),
       repoOwner,
