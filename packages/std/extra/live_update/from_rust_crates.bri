@@ -83,7 +83,7 @@ interface RustCrateInfo {
 function tryParseRustCrate(
   extraOptions: LiveUpdateFromRustCratesProjectExtraOptions,
 ): RustCrateInfo | null {
-  const match = extraOptions.crateName.match(/^(?<crateName>[\w\.@/-]+)$/);
+  const match = extraOptions.crateName.match(/^(?<crateName>[\w-]+)$/);
 
   const { crateName } = match?.groups ?? {};
   if (crateName == null) {
