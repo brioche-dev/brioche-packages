@@ -16,8 +16,8 @@ const gitRef = await Brioche.gitRef({
 });
 const source = gitCheckout(gitRef).pipe((source) =>
   std.runBash`
-      sed -i 's|/bin/echo|/usr/bin/env echo|g' "$BRIOCHE_OUTPUT/src/GNUmakefile"
-    `
+    sed -i 's|/bin/echo|/usr/bin/env echo|g' "$BRIOCHE_OUTPUT/src/GNUmakefile"
+  `
     .outputScaffold(source)
     .toDirectory(),
 );
