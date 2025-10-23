@@ -16,7 +16,7 @@ export interface WithRunnableUtils {
   env(values: Record<string, RunnableTemplateEnvValue>): WithRunnable;
 
   /**
-   * Include additonal dependencies when the command is run. This
+   * Include additional dependencies when the command is run. This
    * will set the `$PATH` environment variable.
    */
   dependencies(...dependencies: std.RecipeLike<std.Directory>[]): WithRunnable;
