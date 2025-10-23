@@ -6,6 +6,7 @@ export * from "./from_gitlab_releases.bri";
 export * from "./from_gitlab_tags.bri";
 export * from "./from_go_modules.bri";
 export * from "./from_npm_packages.bri";
+export * from "./from_python_packages.bri";
 export * from "./from_rust_crates.bri";
 export * from "./gitea_global.bri";
 export * from "./github_global.bri";
