@@ -1,0 +1,95 @@
+import * as std from "/core";
+import { parseGitlabRepo } from "./gitlab_global.bri";
+import {
+  DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH,
+  validateMatchTag,
+} from "./index.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param versionDash - The version of the project (converted in dash format).
+ * @param versionUnderscore - The version of the project (converted in underscore format).
+ */
+interface LiveUpdateFromGitlabTagsProjectExtraOptions {
+  versionDash?: string;
+  versionUnderscore?: string;
+  [key: string]: unknown; // Ignore unknown properties
+}
+
+/**
+ * Options for the live update from GitLab tags.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `repository` property containing a GitLab repository URL.
+ * @param matchTag - A regex value (`/.../`) to extract the version number from
+ *   a tag name. The regex must include a group named "version". If not
+ *   provided, an optional "v" prefix will be stripped and the rest of the
+ *   tag will be checked if it's a semver or semver-like version number.
+ * @param normalizeVersion - Whether to normalize the version number to
+ *   a semver-like version number. When enabled, the dashes and underscores
+ *   will be replaced with dots.
+ */
+interface LiveUpdateFromGitlabTagsOptions {
+  project: {
+    version: string;
+    readonly repository: string;
+    extra?: LiveUpdateFromGitlabTagsProjectExtraOptions;
+  };
+  readonly matchTag?: RegExp;
+  readonly normalizeVersion?: boolean;
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest tag
+ * from a GitLab repository. The project's version will be set based on a regex
+ *  match against the latest tag name. The repository is inferred from the
+ * `repository` field of the project.
+ *
+ * @param options - Options for the live update from GitLab tags.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   repository: "https://gitlab.com/brioche-dev/brioche.git",
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromGitlabTags({
+ *     project,
+ *     matchTag: /^v(?<version>.+)$/, // Strip "v" prefix from tags
+ *   });
+ * }
+ * ```
+ */
+export function liveUpdateFromGitlabTags(
+  options: LiveUpdateFromGitlabTagsOptions,
+): std.Recipe<std.Directory> {
+  const { repoOwner, repoName } = parseGitlabRepo(options.project.repository);
+  const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
+  const normalizeVersion = options.normalizeVersion ?? false;
+
+  validateMatchTag(matchTag);
+
+  return std.recipe(async () => {
+    const { nushellRunnable } = await import("nushell");
+
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_gitlab_tags.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      repoOwner,
+      repoName,
+      matchTag: matchTag.source,
+      normalizeVersion: normalizeVersion.toString(),
+    });
+  });
+}
