@@ -7,18 +7,16 @@ export const project = {
   version: "1.2.76",
 };
 
-const source = std.recipe(() => {
-  const source = Brioche.gitCheckout({
-    repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
-    ref: `v${project.version}`,
-  });
-
-  return std.runBash`
+const source = Brioche.gitCheckout({
+  repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  std.runBash`
     sed -i 's|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT/progs/mkcapshdoc.sh"
   `
     .outputScaffold(source)
-    .toDirectory();
-});
+    .toDirectory(),
+);
 
 export default function libcap(): std.Recipe<std.Directory> {
   return std.runBash`
