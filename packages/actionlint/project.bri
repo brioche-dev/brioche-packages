@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "actionlint",
-  version: "1.7.7",
+  version: "1.7.8",
   repository: "https://github.com/rhysd/actionlint.git",
 };
 

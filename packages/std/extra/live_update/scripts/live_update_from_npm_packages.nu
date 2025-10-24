@@ -2,11 +2,11 @@
 mut project = $env.project
   | from json
 
-# Retrieve the latest release information from npm registry
-let releaseInfo = http get $'https://registry.npmjs.org/($env.packageName)/latest'
+# Retrieve the latest release from npm registry
+let latestReleaseInfo = http get $'https://registry.npmjs.org/($env.packageName)/latest'
 
-# Extract the version
-let version = $releaseInfo
+# Get the version
+let version = $latestReleaseInfo
   | get version
 
 let parsedVersion = $version

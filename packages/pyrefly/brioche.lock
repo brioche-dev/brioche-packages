@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/facebook/pyrefly.git": {
-      "0.35.0": "9fb9a051a26372c0093fa23763c08a0d8a438665"
+      "0.37.0": "f22790c4b13b17af5a44d854d819135a6bbba0bc"
     }
   }
 }

@@ -240,7 +240,9 @@ export interface CargoBuildOptions {
  * };
  * ```
  */
-export function cargoBuild(options: CargoBuildOptions) {
+export function cargoBuild(
+  options: CargoBuildOptions,
+): std.Recipe<std.Directory> {
   // Vendor the crate's dependencies
   const crate = vendorCrate({
     source: options.source,

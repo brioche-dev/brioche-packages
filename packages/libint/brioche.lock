@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/evaleev/libint": {
+      "v2.11.2": "5518eb9ae257b0f6c3821e4bf4b6de9060e24313"
+    }
+  }
+}

@@ -1,0 +1,116 @@
+import * as std from "/core";
+import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param packageName - The name of the Python package to update.
+ */
+interface LiveUpdateFromPythonPackagesProjectExtraOptions {
+  readonly packageName: string;
+}
+
+/**
+ * Options for the live update from Python packages.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `extra.packageName` property containing the name of the Python package.
+ */
+interface LiveUpdateFromPythonPackagesOptions {
+  project: {
+    version: string;
+    readonly extra: LiveUpdateFromPythonPackagesProjectExtraOptions;
+  };
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * version from the PyPI registry. The project's version will be set based on a
+ * regex match against the latest version. The package name is inferred from the
+ * extra options of the project.
+ *
+ * @remarks The version schema of an Python package should follow the SemVer
+ * specification.
+ *
+ * @param options - Options for the live update from Python packages.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "brioche",
+ *   version: "0.1.0",
+ *   extra: {
+ *     packageName: "brioche",
+ *   },
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromPythonPackages({ project });
+ * }
+ * ```
+ */
+export function liveUpdateFromPythonPackages(
+  options: LiveUpdateFromPythonPackagesOptions,
+): std.Recipe<std.Directory> {
+  const { packageName } = parsePythonPackage(options.project.extra);
+
+  return std.recipe(async () => {
+    const { nushellRunnable } = await import("nushell");
+
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_python_packages.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      packageName,
+      matchVersion: DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH.source,
+    });
+  });
+}
+
+/**
+ * Interface representing the parsed Python package information.
+ */
+interface PythonPackageInfo {
+  readonly packageName: string;
+}
+
+function tryParsePythonPackage(
+  extraOptions: LiveUpdateFromPythonPackagesProjectExtraOptions,
+): PythonPackageInfo | null {
+  const match = extraOptions.packageName.match(/^(?<packageName>[\w\.-]+)$/);
+
+  const { packageName } = match?.groups ?? {};
+  if (packageName == null) {
+    return null;
+  }
+
+  return { packageName };
+}
+
+/**
+ * Parse the Python package information to extract the package name.
+ *
+ * @param extraOptions - The extra options containing the package name.
+ *
+ * @returns An object containing the package name.
+ *
+ * @throws If the package name cannot be parsed.
+ */
+function parsePythonPackage(
+  extraOptions: LiveUpdateFromPythonPackagesProjectExtraOptions,
+): PythonPackageInfo {
+  const info = tryParsePythonPackage(extraOptions);
+  if (info == null) {
+    throw new Error(
+      `Could not parse Python package from ${JSON.stringify(extraOptions)}`,
+    );
+  }
+
+  return info;
+}

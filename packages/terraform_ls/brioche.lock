@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/hashicorp/terraform-ls.git": {
-      "v0.38.0": "48f1c3b4b97c90206b236aa48c232d1d18ba747e"
+      "v0.38.2": "a8eadc6277b76f02b69e5dfd7fd842715f9da9af"
     }
   }
 }

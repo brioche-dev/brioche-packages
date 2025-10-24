@@ -1,0 +1,44 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "gitea_mcp_server",
+  version: "0.4.0",
+  repository: "https://gitea.com/gitea/gitea-mcp",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function giteaMcpServer(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/gitea-mcp",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    gitea-mcp --help 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(giteaMcpServer)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGiteaReleases({ project });
+}

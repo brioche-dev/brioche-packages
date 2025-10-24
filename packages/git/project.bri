@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "git",
-  version: "2.51.0",
+  version: "2.51.1",
   repository: "https://github.com/git/git",
 };
 
@@ -57,7 +57,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubTags({
     project,
-    matchTag: /^v(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
+    matchTag: /^v(?<version>\d+\.\d+\.\d+)$/,
   });
 }
 

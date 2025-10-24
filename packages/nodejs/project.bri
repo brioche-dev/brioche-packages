@@ -5,11 +5,12 @@ import nushell from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "24.9.0",
+  version: "25.0.0",
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
-      "24": "24.9.0",
+      "25": "25.0.0",
+      "24": "24.10.0",
       "22": "22.20.0",
       "20": "20.19.5",
     },
@@ -39,6 +40,18 @@ const prebuiltBinaries: Record<
   string,
   Record<string, std.Recipe<std.Directory>>
 > = {
+  "25": {
+    "x86_64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-arm64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
   "24": {
     "x86_64-linux": Brioche.download(
       `https://nodejs.org/dist/v${project.extra.otherVersions["24"]}/node-v${project.extra.otherVersions["24"]}-linux-x64.tar.xz`,
