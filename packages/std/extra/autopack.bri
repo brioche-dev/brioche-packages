@@ -55,7 +55,7 @@ export interface AutopackOptions {
   paths?: string[];
 
   /**
-   * A list of glob pattenrs to autopack. If a matched file cannot be packed,
+   * A list of glob patterns to autopack. If a matched file cannot be packed,
    * it will be skipped. Mutually exclusive with `paths`
    */
   globs?: string[];
