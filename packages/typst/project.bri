@@ -1,0 +1,48 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+import openssl from "openssl";
+
+export const project = {
+  name: "typst",
+  version: "0.14.0",
+  extra: {
+    crateName: "typst-cli",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function typst(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl],
+    runnable: "bin/typst",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    typst --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(typst)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `typst ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}
