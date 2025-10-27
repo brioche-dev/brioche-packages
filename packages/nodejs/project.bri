@@ -303,32 +303,45 @@ export function npmInstallGlobal(
       .toDirectory();
 
     if (wrapBins) {
-      // Use a Nushell script to get a list of installed bin symlinks to wrap
-      const binsJson = await std
-        .process({
-          command: std.tpl`${nushell}/bin/nu`,
-          args: [Brioche.includeFile("find-nodejs-bins.nu")],
-          env: {
-            recipe,
-          },
-        })
-        .toFile()
-        .read();
-      const bins = typer.parseJson(BinList, binsJson);
-
-      // Add a runnable binary for each installed bin symlink
-      const wrappedBins = bins.map(({ name, target }) => {
-        return std.addRunnable(std.directory(), name, {
-          command: "node",
-          args: [{ relativePath: target }],
-          dependencies: [nodejsDep],
-        });
-      });
-
-      // Merge the wrapped binaries into the recipe
-      recipe = std.merge(recipe, ...wrappedBins);
+      recipe = wrapNodejsBins(result, nodejs);
     }
 
     return recipe;
   });
+}
+
+/*
+ * Wraps the binaries of a nodejs package with the nodejs interpreter.
+ *
+ * @param recipe The recipe to wrap the binaries of.
+ * @param nodejs The Node.js recipe to use.
+ */
+async function wrapNodejsBins(
+  recipe: std.RecipeLike<std.Directory>,
+  nodejs: std.RecipeLike<std.Directory>,
+): Promise<std.Recipe<std.Directory>> {
+  // Use a Nushell script to get a list of installed bin symlinks to wrap
+  const binsJson = await std
+    .process({
+      command: std.tpl`${nushell}/bin/nu`,
+      args: [Brioche.includeFile("find-nodejs-bins.nu")],
+      env: {
+        recipe,
+      },
+    })
+    .toFile()
+    .read();
+  const bins = typer.parseJson(BinList, binsJson);
+
+  // Add a runnable binary for each installed bin symlink
+  const wrappedBins = bins.map(({ name, target }) => {
+    return std.addRunnable(std.directory(), name, {
+      command: "node",
+      args: [{ relativePath: target }],
+      dependencies: [nodejs],
+    });
+  });
+
+  // Merge the wrapped binaries into the recipe
+  return std.merge(recipe, ...wrappedBins);
 }
