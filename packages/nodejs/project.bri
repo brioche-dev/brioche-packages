@@ -140,13 +140,13 @@ export default function nodejs(
 ): std.Recipe<std.Directory> {
   const { version = getLatestVersion() } = options;
 
-  return prebuiltBinary(version, std.CURRENT_PLATFORM)
-    .pipe((node) =>
-      std.autopack(node, {
+  return prebuiltBinary(version, std.CURRENT_PLATFORM).pipe(
+    (recipe) =>
+      std.autopack(recipe, {
         globs: ["bin/**"],
       }),
-    )
-    .pipe((node) => std.withRunnableLink(node, "bin/node"));
+    (recipe) => std.withRunnableLink(recipe, "bin/node"),
+  );
 }
 
 export function test(): std.Recipe<std.Directory> {
