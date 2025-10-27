@@ -159,7 +159,7 @@ export function pnpmInstallGlobal(
     // wrap the scripts afterward, we install under `.bin/`, otherwise we
     // install under `bin/`.
     const pnpmInstallDir = wrapBins ? ".bin" : "bin";
-    let recipe = std.runBash`
+    return std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
         echo "The npm package ($package_name) is not an exact version ($version), please ensure the version is more specific."
         exit 1
@@ -178,13 +178,10 @@ export function pnpmInstallGlobal(
         extra_args: extraArgs.join(" "),
       })
       .unsafe({ networking: true })
-      .toDirectory();
-
-    if (wrapBins) {
-      recipe = wrapBinstubs(recipe, nodejs);
-    }
-
-    return recipe;
+      .toDirectory()
+      .pipe((recipe) => {
+        return wrapBins ? wrapBinstubs(recipe, nodejs) : recipe;
+      });
   });
 }
 
