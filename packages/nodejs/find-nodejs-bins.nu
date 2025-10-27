@@ -1,5 +1,3 @@
-cd $env.recipe
-
 ls bin/**/*
   | where type == symlink
   | each {|bin|
@@ -11,6 +9,7 @@ ls bin/**/*
     let firstLine = $contents
       | split row -r '\n'
       | first
+
     { name: $bin.name, target: $target, firstLine: $firstLine }
   }
   | where {|bin| $bin.firstLine | str contains "node"}

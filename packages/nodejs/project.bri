@@ -322,9 +322,7 @@ async function wrapNodejsBins(
     .process({
       command: std.tpl`${nushell}/bin/nu`,
       args: [Brioche.includeFile("find-nodejs-bins.nu")],
-      env: {
-        recipe,
-      },
+      workDir: recipe,
     })
     .toFile()
     .read();
