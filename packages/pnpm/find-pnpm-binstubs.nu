@@ -3,8 +3,7 @@ cd $env.recipe
 ls .bin/**/*
   | where type == file
   | each {|bin|
-    let contents = open $bin.name --raw
-    let firstLine = $contents
+    let firstLine = open $bin.name --raw
       | split row -r '\n'
       | first
     { name: $bin.name, firstLine: $firstLine }

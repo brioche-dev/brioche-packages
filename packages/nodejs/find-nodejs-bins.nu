@@ -5,8 +5,7 @@ ls bin/**/*
       | path expand
       | path relative-to (pwd --physical)
 
-    let contents = open $bin.name --raw
-    let firstLine = $contents
+    let firstLine = open $bin.name --raw
       | split row -r '\n'
       | first
 
