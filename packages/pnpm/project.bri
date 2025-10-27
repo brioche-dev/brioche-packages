@@ -189,9 +189,7 @@ export function pnpmInstallGlobal(
         .process({
           command: std.tpl`${nushell}/bin/nu`,
           args: [Brioche.includeFile("find-pnpm-binstubs.nu")],
-          env: {
-            recipe,
-          },
+          workDir: recipe,
         })
         .toFile()
         .read();
