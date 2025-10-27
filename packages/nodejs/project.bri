@@ -285,7 +285,7 @@ export function npmInstallGlobal(
       nodejs: nodejsDep = nodejs,
     } = options;
 
-    let recipe = std.runBash`
+    return std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
         echo "The npm package ($package_name) is not an exact version ($version), please ensure the version is more specific."
         exit 1
@@ -300,13 +300,10 @@ export function npmInstallGlobal(
         npm_config_prefix: std.outputPath,
       })
       .unsafe({ networking: true })
-      .toDirectory();
-
-    if (wrapBins) {
-      recipe = wrapNodejsBins(result, nodejs);
-    }
-
-    return recipe;
+      .toDirectory()
+      .pipe((recipe) => {
+        return wrapBins ? wrapNodejsBins(recipe, nodejsDep) : recipe;
+      });
   });
 }
 
