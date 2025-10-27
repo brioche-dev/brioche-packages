@@ -181,37 +181,49 @@ export function pnpmInstallGlobal(
       .toDirectory();
 
     if (wrapBins) {
-      // pnpm installs bins using a shell script binstub. When we wrap
-      // binaries, we create a runnable for each binstub.
-
-      // First, get a list of installed binstubs using a Nushell script.
-      const binsJson = await std
-        .process({
-          command: std.tpl`${nushell}/bin/nu`,
-          args: [Brioche.includeFile("find-pnpm-binstubs.nu")],
-          workDir: recipe,
-        })
-        .toFile()
-        .read();
-      const bins = typer.parseJson(BinList, binsJson);
-
-      // Add a runnable binary for each installed binstub script
-      const wrappedBins = bins.map(({ name }) => {
-        // Add a runnable in `bin/` to call the binstub script under `.bin/`
-        std.assert(name.startsWith(".bin"), `unexpected bin name: ${name}`);
-        const targetName = name.slice(1);
-
-        return std.addRunnable(std.directory(), targetName, {
-          command: "bash",
-          args: [{ relativePath: name }],
-          dependencies: [std.bash, nodejs],
-        });
-      });
-
-      // Merge the runnables into the recipe
-      recipe = std.merge(recipe, ...wrappedBins);
+      recipe = wrapBinstubs(recipe, nodejs);
     }
 
     return recipe;
   });
+}
+
+/**
+ * Wraps each binstub as a runnable.
+ *
+ * @remark pnpm installs bins using a shell script binstub.
+ *
+ * @param recipe The recipe to wrap binstubs for.
+ * @param nodejs The Node.js recipe to use.
+ */
+async function wrapBinstubs(
+  recipe: std.RecipeLike<std.Directory>,
+  nodejs: std.RecipeLike<std.Directory>,
+): Promise<std.Recipe<std.Directory>> {
+  // First, get a list of installed binstubs using a Nushell script.
+  const binsJson = await std
+    .process({
+      command: std.tpl`${nushell}/bin/nu`,
+      args: [Brioche.includeFile("find-pnpm-binstubs.nu")],
+      workDir: recipe,
+    })
+    .toFile()
+    .read();
+  const bins = typer.parseJson(BinList, binsJson);
+
+  // Add a runnable binary for each installed binstub script
+  const wrappedBins = bins.map(({ name }) => {
+    // Add a runnable in `bin/` to call the binstub script under `.bin/`
+    std.assert(name.startsWith(".bin"), `unexpected bin name: ${name}`);
+    const targetName = name.slice(1);
+
+    return std.addRunnable(std.directory(), targetName, {
+      command: "bash",
+      args: [{ relativePath: name }],
+      dependencies: [std.bash, nodejs],
+    });
+  });
+
+  // Merge the runnables into the recipe
+  return std.merge(recipe, ...wrappedBins);
 }
