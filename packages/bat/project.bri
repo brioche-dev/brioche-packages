@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "bat",
-  version: "0.25.0",
+  version: "0.26.0",
   repository: "https://github.com/sharkdp/bat.git",
 };
 
