@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/rclone/rclone.git": {
-      "v1.71.1": "1a98c36a73581c43142385a396f29e8e923041a7"
+      "v1.71.2": "84a85367111c84061c959e01e0c320618e492dc6"
     }
   }
 }
