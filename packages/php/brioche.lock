@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.php.net/distributions/php-8.4.13.tar.gz": {
+    "https://www.php.net/distributions/php-8.4.14.tar.gz": {
       "type": "sha256",
-      "value": "ba323619b322125dbd7bf09eefbd572863797359c7d127f986c58a71c872d531"
+      "value": "40341f3e03a36d48facdb6cc2ec600ff887a1af9a5e5fee0b40f40b61488afae"
     }
   }
 }
