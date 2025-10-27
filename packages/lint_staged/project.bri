@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "lint_staged",
-  version: "16.2.5",
+  version: "16.2.6",
   extra: {
     packageName: "lint-staged",
   },
