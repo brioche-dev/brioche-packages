@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/hashicorp/terraform-mcp-server.git": {
-      "v0.3.1": "5d06867d2318a729906db1abbed51011beb076a9"
+      "v0.3.2": "9696fa398403b5ed25089aaf23d5ad15e5bc87f8"
     }
   }
 }
