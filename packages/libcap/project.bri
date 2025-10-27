@@ -4,7 +4,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libcap",
-  version: "1.2.76",
+  version: "1.2.77",
 };
 
 const source = Brioche.gitCheckout({
