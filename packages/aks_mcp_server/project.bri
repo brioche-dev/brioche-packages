@@ -4,10 +4,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "aks_mcp_server",
-  version: "0.0.9",
+  version: "0.0.10",
   repository: "https://github.com/Azure/aks-mcp.git",
   extra: {
-    releaseDate: "2025-09-24",
+    releaseDate: "2025-10-21",
   },
 };
 
