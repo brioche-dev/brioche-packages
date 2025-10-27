@@ -66,15 +66,16 @@ export default function renovate(): std.Recipe<std.Directory> {
       node_modules: npmPackage.get("node_modules"),
       "package.json": packageJson,
     })
-    .pipe((recipe) =>
-      // Add a runnable for the main Renovate CLI script
-      std.addRunnable(recipe, "bin/renovate", {
-        command: "node",
-        args: [{ relativePath: "dist/renovate.js" }],
-        dependencies: [nodejs],
-      }),
-    )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/renovate"));
+    .pipe(
+      (recipe) =>
+        // Add a runnable for the main Renovate CLI script
+        std.addRunnable(recipe, "bin/renovate", {
+          command: "node",
+          args: [{ relativePath: "dist/renovate.js" }],
+          dependencies: [nodejs],
+        }),
+      (recipe) => std.withRunnableLink(recipe, "bin/renovate"),
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
