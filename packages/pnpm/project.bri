@@ -169,7 +169,6 @@ export function pnpmInstallGlobal(
       pnpm add --global "\${package_name}@\${version}" $extra_args
     `
       .dependencies(std.toolchain, nodejs, pnpm)
-      .outputScaffold(std.directory())
       .env({
         package_name: packageName,
         version,

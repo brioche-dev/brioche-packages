@@ -294,7 +294,6 @@ export function npmInstallGlobal(
       npm install --global "\${package_name}@\${version}"
     `
       .dependencies(std.toolchain, nodejsDep, python)
-      .outputScaffold(std.directory())
       .env({
         package_name: packageName,
         version,
