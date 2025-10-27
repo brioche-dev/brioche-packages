@@ -4,10 +4,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "terraform_mcp_server",
-  version: "0.3.1",
+  version: "0.3.2",
   repository: "https://github.com/hashicorp/terraform-mcp-server.git",
   extra: {
-    releaseDate: "2025-10-04",
+    releaseDate: "2025-10-24",
   },
 };
 
