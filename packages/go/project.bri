@@ -1,4 +1,5 @@
 import * as std from "std";
+import * as typer from "typer";
 
 export const project = {
   name: "go",
@@ -325,3 +326,19 @@ function goModDownload(
 function ldflagsWrapper(ldflags: string[]): string {
   return ldflags.map((ldflag) => ldflag.replace(/['"]/g, "\\$&")).join(" ");
 }
+
+/**
+ * Type definition for module information.
+ *
+ * @remarks The information of the module is obtained from the Go proxy registry.
+ */
+export const ModuleInfo = typer.object({
+  Version: typer.string(),
+  Time: typer.string(),
+  Origin: typer.object({
+    VCS: typer.string(),
+    URL: typer.string(),
+    Hash: typer.string(),
+    Ref: typer.string(),
+  }),
+});
