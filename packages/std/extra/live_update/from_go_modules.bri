@@ -83,7 +83,7 @@ interface GoModuleInfo {
 function tryParseGoModule(
   extraOptions: LiveUpdateFromGoModulesProjectExtraOptions,
 ): GoModuleInfo | null {
-  const match = extraOptions.moduleName.match(/^(?<moduleName>[\w\./-]+)$/);
+  const match = extraOptions.moduleName.match(/^(?<moduleName>[\w\./!-]+)$/);
 
   const { moduleName } = match?.groups ?? {};
   if (moduleName == null) {
