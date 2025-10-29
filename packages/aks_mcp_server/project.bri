@@ -36,7 +36,7 @@ export default function aksMcpServer(): std.Recipe<std.Directory> {
         "-X",
         "github.com/Azure/aks-mcp/internal/version.GitTreeState=clean",
         "-X",
-        `github.com/Azure/aks-mcp/internal/version.BuildDte=${manifest.Time}`,
+        `github.com/Azure/aks-mcp/internal/version.BuildDate=${manifest.Time}`,
       ],
     },
     path: "./cmd/aks-mcp",
