@@ -23,7 +23,8 @@ export default function xtrans(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },

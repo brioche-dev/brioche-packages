@@ -67,24 +67,25 @@ export default function cmake(): std.Recipe<std.Directory> {
       OMP_NUM_THREADS: "16",
     })
     .toDirectory()
-    .pipe(
-      (recipe) =>
-        recipe.insert("libexec/cmake/runtime-utils", std.runtimeUtils),
-      (recipe) =>
-        recipe.insert(
-          "libexec/cmake/brioche-packer",
-          std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
-        ),
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/cmake"),
-    );
+    .pipe((recipe) =>
+      recipe.insert("libexec/cmake/runtime-utils", std.runtimeUtils),
+    )
+    .pipe((recipe) =>
+      recipe.insert(
+        "libexec/cmake/brioche-packer",
+        std.symlink({ target: "runtime-utils/bin/brioche-packer" }),
+      ),
+    )
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/cmake"));
 }
 
 /**
@@ -224,20 +225,18 @@ export function cmakeBuild(
     })
     .unsafe(options.unsafe)
     .toDirectory()
-    .pipe(
-      libFolderMakeRelativeSymlink,
-      (recipe) => {
-        return options.disablePostBuildSteps == null ||
-          !options.disablePostBuildSteps
-          ? std.pkgConfigMakePathsRelative(recipe)
-          : recipe;
-      },
-      (recipe) => {
-        return options.runnable != null
-          ? std.withRunnableLink(recipe, options.runnable)
-          : recipe;
-      },
-    );
+    .pipe(libFolderMakeRelativeSymlink)
+    .pipe((recipe) => {
+      return options.disablePostBuildSteps == null ||
+        !options.disablePostBuildSteps
+        ? std.pkgConfigMakePathsRelative(recipe)
+        : recipe;
+    })
+    .pipe((recipe) => {
+      return options.runnable != null
+        ? std.withRunnableLink(recipe, options.runnable)
+        : recipe;
+    });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

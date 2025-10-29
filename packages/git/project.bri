@@ -28,14 +28,13 @@ export default function git(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, openssl, curl({ minimal: true }))
     .toDirectory()
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          GIT_EXEC_PATH: { fallback: { path: "libexec/git-core" } },
-          GIT_TEMPLATE_DIR: { fallback: { path: "share/git-core/templates" } },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/git"),
-    );
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        GIT_EXEC_PATH: { fallback: { path: "libexec/git-core" } },
+        GIT_TEMPLATE_DIR: { fallback: { path: "share/git-core/templates" } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/git"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

@@ -19,16 +19,15 @@ export default function tinycbor(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/cbordump"),
-    );
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/cbordump"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

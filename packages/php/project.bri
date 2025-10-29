@@ -27,14 +27,13 @@ export default function php(): std.Recipe<std.Directory> {
       OMP_NUM_THREADS: "16",
     })
     .toDirectory()
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/php"),
-    );
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/php"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

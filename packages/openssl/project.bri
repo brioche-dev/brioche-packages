@@ -24,18 +24,17 @@ export default function openssl(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .workDir(source)
     .toDirectory()
-    .pipe(
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
-          OPENSSL_ROOT_DIR: { fallback: { path: "." } },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/openssl"),
-    );
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+        OPENSSL_ROOT_DIR: { fallback: { path: "." } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/openssl"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

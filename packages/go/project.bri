@@ -121,13 +121,12 @@ export default function go(options: GoOptions = {}): std.Recipe<std.Directory> {
         gofmt: std.symlink({ target: "../go/bin/gofmt" }),
       }),
     })
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          GOROOT: { fallback: { path: "go" } },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "go/bin/go"),
-    );
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        GOROOT: { fallback: { path: "go" } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "go/bin/go"));
 }
 
 export function test(): std.Recipe<std.Directory> {
@@ -240,7 +239,7 @@ interface GoBuildOptions {
 export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
   const modules = goModDownload(options.source, options.currentDir);
 
-  let buildResult = std.runBash`
+  return std.runBash`
     # Run generate if requested
     if [ "$go_generate" = "true" ]; then
       go generate ./...
@@ -279,13 +278,12 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
       package_path: options.path ?? ".",
       ...options.env,
     })
-    .toDirectory();
-
-  if (options.runnable != null) {
-    buildResult = std.withRunnableLink(buildResult, options.runnable);
-  }
-
-  return buildResult;
+    .toDirectory()
+    .pipe((recipe) => {
+      return options.runnable != null
+        ? std.withRunnableLink(recipe, options.runnable)
+        : recipe;
+    });
 }
 
 function goModDownload(

@@ -30,16 +30,15 @@ export default function expat(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(
-      std.libtoolSanitizeDependencies,
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
-        }),
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
     );
 }
 

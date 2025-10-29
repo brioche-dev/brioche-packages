@@ -22,7 +22,8 @@ export default function xcbProto(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain, python)
     .workDir(source)
     .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
       std.setEnv(recipe, {
         PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
       }),

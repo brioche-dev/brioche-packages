@@ -20,7 +20,8 @@ export default function zlibNg(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative, (recipe) =>
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
