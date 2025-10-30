@@ -226,17 +226,16 @@ export function cmakeBuild(
     .unsafe(options.unsafe)
     .toDirectory()
     .pipe(libFolderMakeRelativeSymlink)
-    .pipe((recipe) => {
-      return options.disablePostBuildSteps == null ||
-        !options.disablePostBuildSteps
+    .pipe((recipe) =>
+      options.disablePostBuildSteps == null || !options.disablePostBuildSteps
         ? std.pkgConfigMakePathsRelative(recipe)
-        : recipe;
-    })
-    .pipe((recipe) => {
-      return options.runnable != null
+        : recipe,
+    )
+    .pipe((recipe) =>
+      options.runnable != null
         ? std.withRunnableLink(recipe, options.runnable)
-        : recipe;
-    });
+        : recipe,
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
