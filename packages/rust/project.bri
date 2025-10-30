@@ -96,33 +96,34 @@ export default async function rust(): Promise<std.Recipe<std.Directory>> {
     .setEnv(recipe, {
       LIBRARY_PATH: { append: [{ path: "lib" }] },
     })
-    .pipe(
-      (recipe) =>
-        std.autopack(recipe, {
-          globs: [
-            "bin/**",
-            "libexec/**",
-            "lib/librustc_driver-*.so",
-            "lib/rustlib/*/bin/**",
-          ],
-          selfDependency: true,
-          dynamicBinaryConfig: {
-            skipLibraries: localLibNames,
-            extraRuntimeLibraryPaths: ["lib"],
-          },
-        }),
-      (recipe) =>
-        useBriocheLd(recipe, {
-          ldPaths: [`lib/rustlib/${targetTriple()}/bin/rust-lld`],
-          interpreterPaths: {
-            [dynamicLinkerPath()]: `lib/rustlib/${targetTriple()}/libexec/brioche-ld/ld-linux.so`,
-          },
-        }),
-      (recipe) =>
-        recipe.insert(
-          `lib/rustlib/${targetTriple()}/libexec/brioche-ld/ld-linux.so`,
-          dynamicLinker,
-        ),
+    .pipe((recipe) =>
+      std.autopack(recipe, {
+        globs: [
+          "bin/**",
+          "libexec/**",
+          "lib/librustc_driver-*.so",
+          "lib/rustlib/*/bin/**",
+        ],
+        selfDependency: true,
+        dynamicBinaryConfig: {
+          skipLibraries: localLibNames,
+          extraRuntimeLibraryPaths: ["lib"],
+        },
+      }),
+    )
+    .pipe((recipe) =>
+      useBriocheLd(recipe, {
+        ldPaths: [`lib/rustlib/${targetTriple()}/bin/rust-lld`],
+        interpreterPaths: {
+          [dynamicLinkerPath()]: `lib/rustlib/${targetTriple()}/libexec/brioche-ld/ld-linux.so`,
+        },
+      }),
+    )
+    .pipe((recipe) =>
+      recipe.insert(
+        `lib/rustlib/${targetTriple()}/libexec/brioche-ld/ld-linux.so`,
+        dynamicLinker,
+      ),
     );
 }
 

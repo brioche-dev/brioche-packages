@@ -33,28 +33,28 @@ export default function freetype(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, brotli, libpng)
     .toDirectory()
-    .pipe(
-      (source) =>
-        // Fix absolute paths in the script freetype-config
-        std.runBash`
-          sed -i 's|  prefix=".*"|  prefix=\`dirname "\$0"\`/..|' "$BRIOCHE_OUTPUT/bin/freetype-config"
-          sed -i 's|  exec_prefix=".*"|  exec_prefix=\${prefix}|' "$BRIOCHE_OUTPUT/bin/freetype-config"
-          sed -i 's|  libdir=".*"|  libdir=\${prefix}/lib|' "$BRIOCHE_OUTPUT/bin/freetype-config"
-          sed -i 's|  includedir=".*"|  includedir=\${prefix}/include|' "$BRIOCHE_OUTPUT/bin/freetype-config"
+    .pipe((source) =>
+      // Fix absolute paths in the script freetype-config
+      std.runBash`
+        sed -i 's|  prefix=".*"|  prefix=\`dirname "\$0"\`/..|' "$BRIOCHE_OUTPUT/bin/freetype-config"
+        sed -i 's|  exec_prefix=".*"|  exec_prefix=\${prefix}|' "$BRIOCHE_OUTPUT/bin/freetype-config"
+        sed -i 's|  libdir=".*"|  libdir=\${prefix}/lib|' "$BRIOCHE_OUTPUT/bin/freetype-config"
+        sed -i 's|  includedir=".*"|  includedir=\${prefix}/include|' "$BRIOCHE_OUTPUT/bin/freetype-config"
         `
-          .outputScaffold(source)
-          .toDirectory(),
-      std.libtoolSanitizeDependencies,
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/freetype-config"),
-    );
+        .outputScaffold(source)
+        .toDirectory(),
+    )
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/freetype-config"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

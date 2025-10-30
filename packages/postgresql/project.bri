@@ -37,16 +37,15 @@ export default function postgresql(): std.Recipe<std.Directory> {
       OMP_NUM_THREADS: "16",
     })
     .toDirectory()
-    .pipe(
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          CPATH: { append: [{ path: "include" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/postgres"),
-    );
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        CPATH: { append: [{ path: "include" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/postgres"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

@@ -60,13 +60,13 @@ export function llvmToolchain(): std.Recipe<std.Directory> {
     --sysroot <CFGDIR>/../toolchain
   `);
 
-  return llvm().pipe(
-    (recipe) => recipe.insert("toolchain", std.toolchain()),
-    (recipe) =>
+  return llvm()
+    .pipe((recipe) => recipe.insert("toolchain", std.toolchain()))
+    .pipe((recipe) =>
       recipe.insert("bin/ld", std.symlink({ target: "../toolchain/bin/ld" })),
-    (recipe) => recipe.insert("bin/clang.cfg", clangConfig),
-    (recipe) => recipe.insert("bin/clang++.cfg", clangConfig),
-  );
+    )
+    .pipe((recipe) => recipe.insert("bin/clang.cfg", clangConfig))
+    .pipe((recipe) => recipe.insert("bin/clang++.cfg", clangConfig));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

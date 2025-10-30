@@ -86,21 +86,18 @@ export default function awsCli(): std.Recipe<std.Directory> {
     .toDirectory();
 
   // Create the final recipe with the venv under `venv`
-  return (
-    std
-      .directory({
-        venv,
-      })
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
       // Add `bin/aws` to run the main script
-      .pipe(
-        (recipe) =>
-          std.addRunnable(recipe, "bin/aws", {
-            command: { relativePath: "venv/bin/python" },
-            args: [{ relativePath: "venv/bin/aws" }],
-          }),
-        (recipe) => std.withRunnableLink(recipe, "bin/aws"),
-      )
-  );
+      std.addRunnable(recipe, "bin/aws", {
+        command: { relativePath: "venv/bin/python" },
+        args: [{ relativePath: "venv/bin/aws" }],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/aws"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

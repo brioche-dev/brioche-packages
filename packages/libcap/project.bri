@@ -35,16 +35,15 @@ export default function libcap(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, std.runtimeUtils, briocheObjcopy)
     .toDirectory()
-    .pipe(
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        }),
-      fixSharedObjects,
-    );
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe(fixSharedObjects);
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

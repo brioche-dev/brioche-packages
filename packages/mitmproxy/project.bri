@@ -27,36 +27,34 @@ export default function mitmproxy(): std.Recipe<std.Directory> {
     })
     .unsafe({ networking: true })
     .toDirectory()
-    .pipe(
-      (recipe) => {
-        // TODO: Clean this up! We should find a way to not hardcode the
-        // list of binaries and the Python version for `$PYTHONPATH`
-        recipe = recipe.insert("brioche-run.d/python", python);
-        const binaries = [
-          "mitmproxy",
-          "mitmdump",
-          "mitmweb",
-          "mitmproxy-linux-redirector",
-        ];
-        for (const binary of binaries) {
-          recipe = std.addRunnable(recipe, `bin/${binary}`, {
-            command: { relativePath: "brioche-run.d/python/bin/python" },
-            args: [{ relativePath: `mitmproxy/bin/${binary}` }],
-            env: {
-              PYTHONPATH: {
-                prepend: {
-                  relativePath: `mitmproxy/lib/python${getPythonVersion()}/site-packages`,
-                },
-                separator: ":",
+    .pipe((recipe) => {
+      // TODO: Clean this up! We should find a way to not hardcode the
+      // list of binaries and the Python version for `$PYTHONPATH`
+      recipe = recipe.insert("brioche-run.d/python", python);
+      const binaries = [
+        "mitmproxy",
+        "mitmdump",
+        "mitmweb",
+        "mitmproxy-linux-redirector",
+      ];
+      for (const binary of binaries) {
+        recipe = std.addRunnable(recipe, `bin/${binary}`, {
+          command: { relativePath: "brioche-run.d/python/bin/python" },
+          args: [{ relativePath: `mitmproxy/bin/${binary}` }],
+          env: {
+            PYTHONPATH: {
+              prepend: {
+                relativePath: `mitmproxy/lib/python${getPythonVersion()}/site-packages`,
               },
+              separator: ":",
             },
-          });
-        }
+          },
+        });
+      }
 
-        return recipe;
-      },
-      (recipe) => std.withRunnableLink(recipe, "bin/mitmproxy"),
-    );
+      return recipe;
+    })
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/mitmproxy"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

@@ -98,62 +98,69 @@ export default async function python(options: PythonOptions = {}) {
     .split("\n")
     .filter((mod) => mod !== "");
 
-  return python.pipe(
-    // Repack Python with all the dynamic libraries needed for all the native
-    // modules. It isn't linked against the native modules directly, just
-    // tier transitive dependencies
-    (recipe) =>
-      std.autopack(recipe, {
-        globs: ["bin/python*"],
-        excludeGlobs: ["bin/python*-config"],
-        linkDependencies: [std.toolchain],
-        dynamicBinaryConfig: {
-          // Listing the modules both under `extraLibraries` and `skipLibraries`
-          // forces Python to be linked with the modules' transitive dependencies
-          extraLibraries: [
-            ...nativeModules,
+  return python
+    .pipe(
+      // Repack Python with all the dynamic libraries needed for all the native
+      // modules. It isn't linked against the native modules directly, just
+      // tier transitive dependencies
+      (recipe) =>
+        std.autopack(recipe, {
+          globs: ["bin/python*"],
+          excludeGlobs: ["bin/python*-config"],
+          linkDependencies: [std.toolchain],
+          dynamicBinaryConfig: {
+            // Listing the modules both under `extraLibraries` and `skipLibraries`
+            // forces Python to be linked with the modules' transitive dependencies
+            extraLibraries: [
+              ...nativeModules,
 
-            // Extra libraries used for FFI (needed for e.g. `aws_cli`)
-            // TODO: Figure out when/where/why these are used and how to simplify!
-            "librt.so.1",
-            "libpthread.so.0",
-            "libgcc_s.so.1",
-            "libdl.so.2",
-          ],
-          skipLibraries: nativeModules,
-          libraryPaths: [
-            std.glob(recipe, ["lib/python*/lib-dynload"]).peel(3),
-            std.glob(recipe, ["lib/libpython*"]).peel(),
-          ],
-        },
-        sharedLibraryConfig: {
-          enabled: false,
-        },
-        scriptConfig: {
-          enabled: false,
-        },
-        repackConfig: {
-          enabled: true,
-        },
-      }),
-    // Some binaries under `/bin` are shebang scripts. These need to be wrapped
-    // to avoid issues with absolute paths
-    (recipe) => std.recipe(fixScriptShebangs(recipe)),
-    (recipe) =>
+              // Extra libraries used for FFI (needed for e.g. `aws_cli`)
+              // TODO: Figure out when/where/why these are used and how to simplify!
+              "librt.so.1",
+              "libpthread.so.0",
+              "libgcc_s.so.1",
+              "libdl.so.2",
+            ],
+            skipLibraries: nativeModules,
+            libraryPaths: [
+              std.glob(recipe, ["lib/python*/lib-dynload"]).peel(3),
+              std.glob(recipe, ["lib/libpython*"]).peel(),
+            ],
+          },
+          sharedLibraryConfig: {
+            enabled: false,
+          },
+          scriptConfig: {
+            enabled: false,
+          },
+          repackConfig: {
+            enabled: true,
+          },
+        }),
+    )
+    .pipe(
+      // Some binaries under `/bin` are shebang scripts. These need to be wrapped
+      // to avoid issues with absolute paths
+      (recipe) => std.recipe(fixScriptShebangs(recipe)),
+    )
+    .pipe((recipe) =>
       recipe
         .insert("bin/python", std.symlink({ target: "python3" }))
         .insert("bin/python-config", std.symlink({ target: "python3-config" }))
         .insert("bin/pydoc", std.symlink({ target: "pydoc3" })),
-    // Fix absolute paths in pkg-config files
-    std.pkgConfigMakePathsRelative,
-    (recipe) =>
+    )
+    .pipe(
+      // Fix absolute paths in pkg-config files
+      std.pkgConfigMakePathsRelative,
+    )
+    .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       }),
-    (recipe) => std.withRunnableLink(recipe, "bin/python"),
-  );
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/python"));
 }
 
 export function test(): std.Recipe<std.Directory> {
