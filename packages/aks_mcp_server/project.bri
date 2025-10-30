@@ -1,6 +1,5 @@
 import * as std from "std";
-import * as typer from "typer";
-import { ModuleInfo, goBuild } from "go";
+import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "aks_mcp_server",
@@ -15,11 +14,10 @@ const source = Brioche.download(
 )
   .unarchive("zip")
   .peel(3);
-const manifest = typer.parseJson(
-  ModuleInfo,
-  await Brioche.download(
+const manifest = await goModuleManifest(
+  Brioche.download(
     `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
-  ).read(),
+  ),
 );
 
 export default function aksMcpServer(): std.Recipe<std.Directory> {
@@ -30,13 +28,13 @@ export default function aksMcpServer(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/Azure/aks-mcp/internal/version.GitVersion=${manifest.Version}`,
+        `github.com/Azure/aks-mcp/internal/version.GitVersion=${manifest.version}`,
         "-X",
-        `github.com/Azure/aks-mcp/internal/version.GitCommit=${manifest.Origin.Hash}`,
+        `github.com/Azure/aks-mcp/internal/version.GitCommit=${manifest.origin.hash}`,
         "-X",
         "github.com/Azure/aks-mcp/internal/version.GitTreeState=clean",
         "-X",
-        `github.com/Azure/aks-mcp/internal/version.BuildDate=${manifest.Time}`,
+        `github.com/Azure/aks-mcp/internal/version.BuildDate=${manifest.time}`,
       ],
     },
     path: "./cmd/aks-mcp",
