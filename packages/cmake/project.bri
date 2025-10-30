@@ -182,7 +182,7 @@ export function cmakeBuild(
     env[`cmake_type_${index}`] = type ?? "";
   }
 
-  let result = std.runBash`
+  return std.runBash`
     export LIB="$LIBRARY_PATH"
 
     cmake_args=()
@@ -212,14 +212,6 @@ export function cmakeBuild(
     cmake -S "$path" -B "$build_dir" --install-prefix "$BRIOCHE_OUTPUT" "\${cmake_args[@]}"
     cmake --build "$build_dir"
     cmake --install "$build_dir"
-
-    if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
-      # Ensure the lib folder exists
-      mkdir -p "$BRIOCHE_OUTPUT/lib"
-
-      # Create relative symlinks for lib64 contents to lib folder
-      ln --symbolic --relative "$BRIOCHE_OUTPUT"/lib64/* "$BRIOCHE_OUTPUT/lib/"
-    fi
   `
     .dependencies(...dependencies, cmake)
     .workDir(source)
@@ -231,17 +223,21 @@ export function cmakeBuild(
       ...env,
     })
     .unsafe(options.unsafe)
-    .toDirectory();
-
-  if (options.disablePostBuildSteps == null || !options.disablePostBuildSteps) {
-    result = std.pkgConfigMakePathsRelative(result);
-  }
-
-  if (options.runnable != null) {
-    result = std.withRunnableLink(result, options.runnable);
-  }
-
-  return result;
+    .toDirectory()
+    .pipe(
+      libFolderMakeRelativeSymlink,
+      (recipe) => {
+        return options.disablePostBuildSteps == null ||
+          !options.disablePostBuildSteps
+          ? std.pkgConfigMakePathsRelative(recipe)
+          : recipe;
+      },
+      (recipe) => {
+        return options.runnable != null
+          ? std.withRunnableLink(recipe, options.runnable)
+          : recipe;
+      },
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -287,4 +283,28 @@ function isCMakeVariableValue(
     default:
       return false;
   }
+}
+
+/**
+ * Creates a relative symlink from lib64 to lib folder if lib64 folder exists.
+ *
+ * @param recipe The recipe to create the symlink for.
+ *
+ * @returns The recipe with the symlink created.
+ */
+function libFolderMakeRelativeSymlink(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    if [ -d "$BRIOCHE_OUTPUT/lib64" ]; then
+      # Ensure the lib folder exists
+      mkdir -p "$BRIOCHE_OUTPUT/lib"
+
+      # Create relative symlinks for lib64 contents to lib folder
+      ln --symbolic --relative "$BRIOCHE_OUTPUT"/lib64/* "$BRIOCHE_OUTPUT/lib/"
+    fi
+  `
+    .dependencies(std.toolchain)
+    .outputScaffold(recipe)
+    .toDirectory();
 }
