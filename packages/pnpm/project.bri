@@ -83,10 +83,11 @@ export function pnpmInstall(
       command: "pnpm",
       args: ["install", "--frozen-lockfile"],
       dependencies: [
-        ...(options.dependencies ?? []),
+        std.toolchain,
         pnpm({
           nodejs: options.nodejs,
         }),
+        ...(options.dependencies ?? []),
       ],
       currentDir: std.outputPath,
       outputScaffold: options.source,
