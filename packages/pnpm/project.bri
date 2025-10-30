@@ -179,9 +179,7 @@ export function pnpmInstallGlobal(
       })
       .unsafe({ networking: true })
       .toDirectory()
-      .pipe((recipe) => {
-        return wrapBins ? wrapBinstubs(recipe, nodejs) : recipe;
-      });
+      .pipe((recipe) => (wrapBins ? wrapBinstubs(recipe, nodejs) : recipe));
   });
 }
 
