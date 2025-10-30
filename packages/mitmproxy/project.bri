@@ -41,11 +41,11 @@ export default function mitmproxy(): std.Recipe<std.Directory> {
         for (const binary of binaries) {
           recipe = std.addRunnable(recipe, `bin/${binary}`, {
             command: { relativePath: "brioche-run.d/python/bin/python" },
-            args: [{ relativePath: `venv/bin/${binary}` }],
+            args: [{ relativePath: `mitmproxy/bin/${binary}` }],
             env: {
               PYTHONPATH: {
                 prepend: {
-                  relativePath: `venv/mitmproxy/lib/python${getPythonVersion()}/site-packages`,
+                  relativePath: `mitmproxy/lib/python${getPythonVersion()}/site-packages`,
                 },
                 separator: ":",
               },
