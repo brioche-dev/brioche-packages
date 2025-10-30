@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Cyan4973/xxHash": {
+      "v0.8.3": "e626a72bc2321cd320e953a0ccf1584cad60f363"
+    }
+  }
+}
