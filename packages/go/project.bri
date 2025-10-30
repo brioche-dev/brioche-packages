@@ -279,11 +279,11 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
       ...options.env,
     })
     .toDirectory()
-    .pipe((recipe) => {
-      return options.runnable != null
+    .pipe((recipe) =>
+      options.runnable != null
         ? std.withRunnableLink(recipe, options.runnable)
-        : recipe;
-    });
+        : recipe,
+    );
 }
 
 function goModDownload(
