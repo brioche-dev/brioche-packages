@@ -301,9 +301,9 @@ export function npmInstallGlobal(
       })
       .unsafe({ networking: true })
       .toDirectory()
-      .pipe((recipe) => {
-        return wrapBins ? wrapNodejsBins(recipe, nodejsDep) : recipe;
-      });
+      .pipe((recipe) =>
+        wrapBins ? wrapNodejsBins(recipe, nodejsDep) : recipe,
+      );
   });
 }
 
