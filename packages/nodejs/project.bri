@@ -219,13 +219,15 @@ interface NpmInstallOptions {
 export function npmInstall(
   options: NpmInstallOptions,
 ): std.Recipe<std.Directory> {
-  return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    npm clean-install
-  `
-    .dependencies(std.toolchain, nodejs, python)
-    .outputScaffold(options.source)
-    .unsafe({ networking: true })
+  return std
+    .process({
+      command: "npm",
+      args: ["clean-install"],
+      dependencies: [std.toolchain, nodejs, python],
+      currentDir: std.outputPath,
+      outputScaffold: options.source,
+      unsafe: { networking: true },
+    })
     .toDirectory();
 }
 
