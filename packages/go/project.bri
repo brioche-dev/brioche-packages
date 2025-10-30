@@ -1,4 +1,5 @@
 import * as std from "std";
+import * as typer from "typer";
 
 export const project = {
   name: "go",
@@ -324,4 +325,76 @@ function goModDownload(
  */
 function ldflagsWrapper(ldflags: string[]): string {
   return ldflags.map((ldflag) => ldflag.replace(/['"]/g, "\\$&")).join(" ");
+}
+
+/**
+ * Type definition for module information (for private usage).
+ *
+ * @remarks The information of the module is obtained from the Go proxy registry.
+ */
+const ModuleInfo = typer.object({
+  Version: typer.string(),
+  Time: typer.string(),
+  Origin: typer.object({
+    VCS: typer.string(),
+    URL: typer.string(),
+    Hash: typer.string(),
+    Ref: typer.string(),
+  }),
+});
+
+/**
+ * Type definition for module origin information (for public usage).
+ *
+ * @remarks The information of the module's origin is obtained from the Go proxy registry.
+ *
+ * @param vcs - The version control system of the module.
+ * @param url - The URL of the module.
+ * @param hash - The hash of the module.
+ * @param ref - The reference of the module's version.
+ */
+interface GoModuleOriginInfo {
+  vcs: string;
+  url: string;
+  hash: string;
+  ref: string;
+}
+
+/**
+ * Type definition for module information (for public usage).
+ *
+ * @remarks The information of the module is obtained from the Go proxy registry.
+ *
+ * @param version - The version of the module.
+ * @param time - The time when the module was created.
+ * @param origin - The origin information of the module.
+ */
+interface GoModuleInfo {
+  version: string;
+  time: string;
+  origin: GoModuleOriginInfo;
+}
+
+export async function goModuleManifest(
+  manifestUrl: std.Recipe<std.File>,
+): Promise<GoModuleInfo> {
+  const rawManifest = typer.parseJson(ModuleInfo, await manifestUrl.read());
+
+  const moduleOrigin = {
+    vcs: rawManifest.Origin.VCS,
+    url: rawManifest.Origin.URL,
+    hash: rawManifest.Origin.Hash,
+    ref: rawManifest.Origin.Ref,
+  };
+
+  const manifest = {
+    // Remove the leading 'v' from the version string
+    version: rawManifest.Version.startsWith("v")
+      ? rawManifest.Version.slice(1)
+      : rawManifest.Version,
+    time: rawManifest.Time,
+    origin: moduleOrigin,
+  };
+
+  return manifest;
 }
