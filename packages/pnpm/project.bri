@@ -78,19 +78,19 @@ interface PnpmInstallOptions {
 export function pnpmInstall(
   options: PnpmInstallOptions,
 ): std.Recipe<std.Directory> {
-  return std.runBash`
-    pnpm install --frozen-lockfile
-  `
-    .dependencies(
-      ...(options.dependencies ?? []),
-      pnpm({
-        nodejs: options.nodejs,
-      }),
-    )
-    .currentDir(std.outputPath)
-    .outputScaffold(options.source)
-    .unsafe({
-      networking: true,
+  return std
+    .process({
+      command: "pnpm",
+      args: ["install", "--frozen-lockfile"],
+      dependencies: [
+        ...(options.dependencies ?? []),
+        pnpm({
+          nodejs: options.nodejs,
+        }),
+      ],
+      currentDir: std.outputPath,
+      outputScaffold: options.source,
+      unsafe: { networking: true },
     })
     .toDirectory();
 }
