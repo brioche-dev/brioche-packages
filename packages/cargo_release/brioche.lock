@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-release/0.25.20/download": {
+      "type": "sha256",
+      "value": "a4c19c10f6cda5f645a268885108b81a34d134d4a17e9053a7841a60949073d5"
+    }
+  }
+}
