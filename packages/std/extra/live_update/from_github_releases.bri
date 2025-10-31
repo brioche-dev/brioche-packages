@@ -95,7 +95,6 @@ export function liveUpdateFromGithubReleases(
       project: JSON.stringify(options.project),
       repoOwner,
       repoName,
-      includePrerelease: includePrerelease.toString(),
       matchTag: matchTag.source,
       normalizeVersion: normalizeVersion.toString(),
     });

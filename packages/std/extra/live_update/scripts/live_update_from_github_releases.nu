@@ -28,7 +28,6 @@ let releases = http get --allow-errors --headers $gh_headers $'https://api.githu
     }
   }
   # Extract the version(s)
-  | where {|release| ($env.includePrerelease == "true") or (not $release.prerelease) }
   | each {|release|
     let parsedTag = $release.tag_name
       | parse --regex $env.matchTag
