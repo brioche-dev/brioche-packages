@@ -15,11 +15,11 @@ const source = Brioche.gitCheckout({
   ref: project.version,
 });
 
-// Pin to Node.js v22
-const nodejs = nodejsRecipe({ version: "22" });
-const pnpm = pnpmRecipe({ nodejs });
-
 export default function renovate(): std.Recipe<std.Directory> {
+  // Pin to Node.js v22
+  const nodejs = nodejsRecipe({ version: "22" });
+  const pnpm = pnpmRecipe({ nodejs });
+
   // Install dependencies using pnpm
   // TODO: Can we get rid of dev dependencies (at least for the final output)?
   const npmPackage = pnpmInstall({
@@ -37,12 +37,6 @@ export default function renovate(): std.Recipe<std.Directory> {
     mv dist "$BRIOCHE_OUTPUT"
   `
     .workDir(npmPackage)
-    .env({
-      // NOTE: The Renovate build fails when Node.js type stripping is
-      // enabled (as of Renovate v41.48.0). Node.js enabled this option
-      // by default in v22.18.0. So for now, we manually disable it
-      NODE_OPTIONS: "--no-experimental-strip-types",
-    })
     .dependencies(pnpm)
     .toDirectory();
 
@@ -79,7 +73,7 @@ export default function renovate(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    renovate --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+    renovate --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(renovate)
     .toFile();
