@@ -403,7 +403,7 @@ function createLockfile(
 }
 
 /**
- * Options for creating a skeleton crate from a full a Rust crate.
+ * Options for creating a skeleton crate from a full Rust crate.
  *
  * @param source - The crate to make into a skeleton crate.
  * @param currentDir - Optionally set a subpath to use as the starting directory
