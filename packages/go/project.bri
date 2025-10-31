@@ -292,25 +292,25 @@ function goModDownload(
 ): std.Recipe<std.Directory> {
   // Includes all the modules in the specified directory and its subdirectories
   // If a workspace file exists also include it
-  return std.runBash`
-    go mod download all
-  `
-    .workDir(
-      std.glob(goModule, [
+  return std
+    .process({
+      command: std.tpl`${go}/bin/go`,
+      args: ["mod", "download", "all"],
+      workDir: std.glob(goModule, [
         "**/go.mod",
         "**/go.sum",
         "**/go.work",
         "**/go.work.sum",
       ]),
-    )
-    .dependencies(go)
-    .env({
-      GOMODCACHE: std.outputPath,
+      currentDir:
+        currentDir != null
+          ? std.tpl`${std.workDir}/${currentDir}`
+          : std.workDir,
+      env: {
+        GOMODCACHE: std.outputPath,
+      },
+      unsafe: { networking: true },
     })
-    .currentDir(
-      currentDir != null ? std.tpl`${std.workDir}/${currentDir}` : std.workDir,
-    )
-    .unsafe({ networking: true })
     .toDirectory();
 }
 
