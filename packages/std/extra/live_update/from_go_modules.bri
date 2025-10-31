@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH } from "./index.bri";
+import { liveUpdateVersionRegex } from "./index.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
@@ -19,12 +19,14 @@ interface LiveUpdateFromGoModulesProjectExtraOptions {
  *
  * @param project - The project export that should be updated. Must include a
  *   `extra.moduleName` property containing the name of the Go module.
+ * @param includePrerelease - Whether to include prerelease versions.
  */
 interface LiveUpdateFromGoModulesOptions {
   project: {
     version: string;
     readonly extra: LiveUpdateFromGoModulesProjectExtraOptions;
   };
+  readonly includePrerelease?: boolean;
 }
 
 /**
@@ -60,6 +62,8 @@ export function liveUpdateFromGoModules(
 ): std.Recipe<std.Directory> {
   const { moduleName } = parseGoModule(options.project.extra);
 
+  const matchTag = liveUpdateVersionRegex(options.includePrerelease, undefined);
+
   return std.recipe(async () => {
     const { nushellRunnable } = await import("nushell");
 
@@ -68,7 +72,7 @@ export function liveUpdateFromGoModules(
     ).env({
       project: JSON.stringify(options.project),
       moduleName,
-      matchVersion: DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH.source,
+      matchVersion: matchTag.source,
     });
   });
 }

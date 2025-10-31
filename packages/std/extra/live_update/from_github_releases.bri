@@ -1,9 +1,6 @@
 import * as std from "/core";
 import { parseGithubRepo } from "./github_global.bri";
-import {
-  DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH,
-  validateMatchTag,
-} from "./index.bri";
+import { liveUpdateVersionRegex } from "./index.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
@@ -38,6 +35,8 @@ interface LiveUpdateFromGithubReleasesProjectExtraOptions {
  * @param normalizeVersion - Whether to normalize the version number to
  *   a semver-like version number. When enabled, the dashes and underscores
  *   will be replaced with dots.
+ *
+ * @remarks `includePrerelease` and `matchTag` cannot be used together.
  */
 interface LiveUpdateFromGithubReleasesOptions {
   project: {
@@ -80,11 +79,12 @@ export function liveUpdateFromGithubReleases(
   options: LiveUpdateFromGithubReleasesOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
-  const includePrerelease = options.includePrerelease ?? false;
-  const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
   const normalizeVersion = options.normalizeVersion ?? false;
 
-  validateMatchTag(matchTag);
+  const matchTag = liveUpdateVersionRegex(
+    options.includePrerelease,
+    options.matchTag,
+  );
 
   return std.recipe(async () => {
     const { nushellRunnable } = await import("nushell");
