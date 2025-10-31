@@ -425,26 +425,35 @@ interface CreateSkeletonCrateOptions {
 export function createSkeletonCrate(
   options: CreateSkeletonCrateOptions,
 ): std.Recipe<std.Directory> {
-  const { currentDir } = options;
+  const { source, currentDir } = options;
 
-  const recipe = std.runBash`
-    cargo chef prepare --recipe-path "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(rust, cargoChef)
-    .workDir(options.source)
-    .currentDir(
-      options.currentDir != null
-        ? std.tpl`${std.workDir}/${options.currentDir}`
-        : std.workDir,
-    )
+  const recipe = std
+    .process({
+      command: "cargo",
+      args: ["chef", "prepare", "--recipe-path", std.outputPath],
+      dependencies: [rust, cargoChef],
+      workDir: source,
+      currentDir:
+        currentDir != null
+          ? std.tpl`${std.workDir}/${currentDir}`
+          : std.workDir,
+    })
     .toFile();
-  return std.runBash`
-    mkdir -p "$BRIOCHE_OUTPUT/$current_dir"
-    cd "$BRIOCHE_OUTPUT/$current_dir"
-    cargo chef cook --recipe-path "$recipe" --no-build
-  `
-    .dependencies(rust, cargoChef)
-    .env({ recipe, current_dir: currentDir ?? "" })
+
+  return std
+    .process({
+      command: "cargo",
+      args: ["chef", "cook", "--recipe-path", recipe, "--no-build"],
+      dependencies: [rust, cargoChef],
+      outputScaffold:
+        currentDir != null
+          ? std.directory({ [currentDir]: std.directory() })
+          : std.directory(),
+      currentDir:
+        currentDir != null
+          ? std.tpl`${std.outputPath}/${currentDir}`
+          : std.outputPath,
+    })
     .toDirectory();
 }
 
