@@ -15,11 +15,11 @@ const source = Brioche.gitCheckout({
   ref: project.version,
 });
 
-// Pin to Node.js v22
-const nodejs = nodejsRecipe({ version: "22" });
-const pnpm = pnpmRecipe({ nodejs });
-
 export default function renovate(): std.Recipe<std.Directory> {
+  // Pin to Node.js v22
+  const nodejs = nodejsRecipe({ version: "22" });
+  const pnpm = pnpmRecipe({ nodejs });
+
   // Install dependencies using pnpm
   // TODO: Can we get rid of dev dependencies (at least for the final output)?
   const npmPackage = pnpmInstall({
