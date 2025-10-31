@@ -79,7 +79,7 @@ export default function renovate(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    renovate --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+    renovate --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(renovate)
     .toFile();
