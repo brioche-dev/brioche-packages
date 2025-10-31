@@ -37,12 +37,6 @@ export default function renovate(): std.Recipe<std.Directory> {
     mv dist "$BRIOCHE_OUTPUT"
   `
     .workDir(npmPackage)
-    .env({
-      // NOTE: The Renovate build fails when Node.js type stripping is
-      // enabled (as of Renovate v41.48.0). Node.js enabled this option
-      // by default in v22.18.0. So for now, we manually disable it
-      NODE_OPTIONS: "--no-experimental-strip-types",
-    })
     .dependencies(pnpm)
     .toDirectory();
 
