@@ -1,9 +1,6 @@
 import * as std from "/core";
 import { parseGithubRepo } from "./github_global.bri";
-import {
-  DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH,
-  validateMatchTag,
-} from "./index.bri";
+import { liveUpdateVersionRegex } from "./index.bri";
 import type {} from "nushell";
 
 // HACK: The `import type` line above is a workaround for this issue:
@@ -28,6 +25,7 @@ interface LiveUpdateFromGithubTagsProjectExtraOptions {
  *
  * @param project - The project export that should be updated. Must include a
  *   `repository` property containing a GitHub repository URL.
+ * @param includePrerelease - Whether to include prerelease versions.
  * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
  *   provided, an optional "v" prefix will be stripped and the rest of the
@@ -35,6 +33,8 @@ interface LiveUpdateFromGithubTagsProjectExtraOptions {
  * @param normalizeVersion - Whether to normalize the version number to
  *   a semver-like version number. When enabled, the dashes and underscores
  *   will be replaced with dots.
+ *
+ * @remarks `includePrerelease` and `matchTag` cannot be used together.
  */
 interface LiveUpdateFromGithubTagsOptions {
   project: {
@@ -42,6 +42,7 @@ interface LiveUpdateFromGithubTagsOptions {
     readonly repository: string;
     extra?: LiveUpdateFromGithubTagsProjectExtraOptions;
   };
+  readonly includePrerelease?: boolean;
   readonly matchTag?: RegExp;
   readonly normalizeVersion?: boolean;
 }
@@ -76,10 +77,12 @@ export function liveUpdateFromGithubTags(
   options: LiveUpdateFromGithubTagsOptions,
 ): std.Recipe<std.Directory> {
   const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
-  const matchTag = options.matchTag ?? DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
   const normalizeVersion = options.normalizeVersion ?? false;
 
-  validateMatchTag(matchTag);
+  const matchTag = liveUpdateVersionRegex(
+    options.includePrerelease,
+    options.matchTag,
+  );
 
   return std.recipe(async () => {
     const { nushellRunnable } = await import("nushell");
