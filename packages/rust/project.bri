@@ -369,6 +369,21 @@ export function cargoBuild(
 }
 
 /**
+ * Options for creating a lock file from a Rust crate.
+ *
+ * @param source - The crate to create the lockfile for.
+ * @param currentDir - Optionally set a subpath to use as the starting directory
+ *   relative to `source`. This is useful when building a Cargo workspace within
+ *   a monorepo project.
+ * @param allowLockfileGeneration - Whether to allow generating the lockfile.
+ */
+interface CreateLockFileCrateOptions {
+  source: std.RecipeLike<std.Directory>;
+  currentDir?: string;
+  allowLockfileGeneration: boolean;
+}
+
+/**
  * Generate the Cargo.lock file if it doesn't exist.
  * Warning: if this file is missing from the upstream source, it breaks
  * reproducible builds, but we need it to vendor the dependencies.
@@ -379,31 +394,36 @@ export function cargoBuild(
  * @return The source crate with the lockfile.
  */
 function createLockfile(
-  crate: std.RecipeLike<std.Directory>,
-  allowLockfileGeneration: boolean,
+  options: CreateLockFileCrateOptions,
 ): std.Recipe<std.Directory> {
+  const { source, currentDir, allowLockfileGeneration } = options;
+
+  if (!allowLockfileGeneration) {
+    return std.recipe(source);
+  }
+
   return std.runBash`
-    if [ "$allowLockfileGeneration" = "true" ]; then
-      cd "$BRIOCHE_OUTPUT"
-
-      # Check if the Cargo.lock file exists, if yes, exit on error
-      if [ -f Cargo.lock ]; then
-        echo "Cannot generate Cargo.lock file because it already exists"
-        exit 1
-      fi
-
-      cargo generate-lockfile
+    # Check if the Cargo.lock file exists, if yes, exit on error
+    if [ -f Cargo.lock ]; then
+      echo "Cannot generate Cargo.lock file because it already exists"
+      exit 1
     fi
+
+    cargo generate-lockfile
   `
     .dependencies(rust)
-    .outputScaffold(crate)
-    .env({ allowLockfileGeneration: allowLockfileGeneration.toString() })
+    .outputScaffold(source)
+    .currentDir(
+      currentDir != null
+        ? std.tpl`${std.outputPath}/${currentDir}`
+        : std.outputPath,
+    )
     .unsafe({ networking: true })
     .toDirectory();
 }
 
 /**
- * Options for creating a skeleton crate from a full a Rust crate.
+ * Options for creating a skeleton crate from a full Rust crate.
  *
  * @param source - The crate to make into a skeleton crate.
  * @param currentDir - Optionally set a subpath to use as the starting directory
@@ -425,26 +445,35 @@ interface CreateSkeletonCrateOptions {
 export function createSkeletonCrate(
   options: CreateSkeletonCrateOptions,
 ): std.Recipe<std.Directory> {
-  const { currentDir } = options;
+  const { source, currentDir } = options;
 
-  const recipe = std.runBash`
-    cargo chef prepare --recipe-path "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(rust, cargoChef)
-    .workDir(options.source)
-    .currentDir(
-      options.currentDir != null
-        ? std.tpl`${std.workDir}/${options.currentDir}`
-        : std.workDir,
-    )
+  const recipe = std
+    .process({
+      command: "cargo",
+      args: ["chef", "prepare", "--recipe-path", std.outputPath],
+      dependencies: [rust, cargoChef],
+      workDir: source,
+      currentDir:
+        currentDir != null
+          ? std.tpl`${std.workDir}/${currentDir}`
+          : std.workDir,
+    })
     .toFile();
-  return std.runBash`
-    mkdir -p "$BRIOCHE_OUTPUT/$current_dir"
-    cd "$BRIOCHE_OUTPUT/$current_dir"
-    cargo chef cook --recipe-path "$recipe" --no-build
-  `
-    .dependencies(rust, cargoChef)
-    .env({ recipe, current_dir: currentDir ?? "" })
+
+  return std
+    .process({
+      command: "cargo",
+      args: ["chef", "cook", "--recipe-path", recipe, "--no-build"],
+      dependencies: [rust, cargoChef],
+      outputScaffold:
+        currentDir != null
+          ? std.directory({ [currentDir]: std.directory() })
+          : std.directory(),
+      currentDir:
+        currentDir != null
+          ? std.tpl`${std.outputPath}/${currentDir}`
+          : std.outputPath,
+    })
     .toDirectory();
 }
 
@@ -492,7 +521,11 @@ export function vendorCrate(
   } = options;
 
   // Generate the Cargo.lock file exists if not already generated
-  const completeSource = createLockfile(source, unsafeGenerateLockfile);
+  const completeSource = createLockfile({
+    source,
+    currentDir,
+    allowLockfileGeneration: unsafeGenerateLockfile,
+  });
 
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
