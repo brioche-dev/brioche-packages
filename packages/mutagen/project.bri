@@ -18,12 +18,12 @@ export default function mutagen(): std.Recipe<std.Directory> {
   return std.runBash`
     go run scripts/build.go
 
-    mkdir -p "$BRIOCHE_OUTPUT/bin"
     mv build/mutagen build/mutagen-agents.tar.gz "$BRIOCHE_OUTPUT/bin"
   `
     .dependencies(go)
-    .unsafe({ networking: true })
     .workDir(source)
+    .outputScaffold(std.directory({ bin: std.directory() }))
+    .unsafe({ networking: true })
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/mutagen"));
 }
