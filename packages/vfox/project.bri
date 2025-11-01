@@ -1,0 +1,46 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "vfox",
+  version: "0.9.2",
+  extra: {
+    moduleName: "github.com/version-fox/vfox",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function vfox(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/vfox",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    vfox --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(vfox)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `vfox version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGoModules({ project });
+}
