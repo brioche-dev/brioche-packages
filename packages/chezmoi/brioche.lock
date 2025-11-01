@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/twpayne/chezmoi.git": {
+      "v2.66.2": "7938c65ca55aaeaf6fc56d37b0b32073d2e5c461"
+    }
+  }
+}
