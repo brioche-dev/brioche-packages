@@ -16,7 +16,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          cd "$BRIOCHE_OUTPUT"
           sed -i "s/echo/#echo/" src/egrep.sh
         `,
       ],
@@ -24,6 +23,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: source,
+      currentDir: std.outputPath,
     })
     .toDirectory();
 
