@@ -280,12 +280,14 @@ export function linuxUpdateConfig(
 function distClean(
   source: std.RecipeLike<std.Directory>,
 ): std.Recipe<std.Directory> {
-  return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    make distclean
-  `
-    .dependencies(std.toolchain)
-    .outputScaffold(source)
+  return std
+    .process({
+      command: "make",
+      args: ["distclean"],
+      dependencies: [std.toolchain],
+      outputScaffold: source,
+      currentDir: std.outputPath,
+    })
     .toDirectory();
 }
 
