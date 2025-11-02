@@ -36,7 +36,7 @@ import * as std from "/core";
  */
 export function withRunnableLink(
   recipe: std.RecipeLike<std.Directory>,
-  runPath?: string,
+  runPath: string | null | undefined
 ): std.Recipe<std.Directory> {
   return std
     .recipe(recipe)
