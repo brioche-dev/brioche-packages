@@ -209,7 +209,6 @@ export async function fixScriptShebangs(
   // directly. See this function from Pip:
   // https://github.com/pypa/pip/blob/102d8187a1f5a4cd5de7a549fd8a9af34e89a54f/src/pip/_vendor/distlib/scripts.py#L154
   const pythonShebangPathList = await std.runBash`
-    cd "$recipe"
     find bin ! -name 'python*-config' -type f -executable \\
     | while read file; do
       if [[ "$(head -c 2 "$file")" == '#!' ]]; then
@@ -217,7 +216,7 @@ export async function fixScriptShebangs(
       fi
     done
   `
-    .env({ recipe })
+    .workDir(recipe)
     .toFile()
     .read();
   const pythonShebangPaths = pythonShebangPathList
@@ -227,7 +226,6 @@ export async function fixScriptShebangs(
   // Get the list of shebang shell scripts. We only handle the `python-config`
   // script.
   const shellShebangPathList = await std.runBash`
-    cd "$recipe"
     find bin -name 'python*-config' -type f -executable \\
     | while read file; do
       if [[ "$(head -c 2 "$file")" == '#!' ]]; then
@@ -235,7 +233,7 @@ export async function fixScriptShebangs(
       fi
     done
   `
-    .env({ recipe })
+    .workDir(recipe)
     .toFile()
     .read();
   const shellShebangPaths = shellShebangPathList
