@@ -28,7 +28,6 @@ export default function fzf(): std.Recipe<std.Directory> {
         `main.revision=${gitRef.commit}`,
       ],
     },
-    path: ".",
     runnable: "bin/fzf",
   });
 }

@@ -18,7 +18,6 @@ export default function chezmoi(): std.Recipe<std.Directory> {
     buildParams: {
       ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
     },
-    path: ".",
     runnable: "bin/chezmoi",
   });
 }

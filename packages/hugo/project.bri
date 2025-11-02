@@ -30,7 +30,6 @@ export default function hugo(): std.Recipe<std.Directory> {
         `github.com/gohugoio/hugo/common/hugo.buildDate=${project.extra.releaseDate}`,
       ],
     },
-    path: ".",
     runnable: "bin/hugo",
   });
 }
