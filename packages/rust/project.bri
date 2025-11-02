@@ -360,12 +360,7 @@ export function cargoBuild(
       // Remove extra metadata created by `cargo install`
       recipe.remove(".crates2.json"),
     )
-    .pipe((recipe) =>
-      // Add a runnable link if set in the options
-      options.runnable != null
-        ? std.withRunnableLink(recipe, options.runnable)
-        : recipe,
-    );
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
 
 /**

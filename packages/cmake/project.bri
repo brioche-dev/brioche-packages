@@ -231,11 +231,7 @@ export function cmakeBuild(
         ? std.pkgConfigMakePathsRelative(recipe)
         : recipe,
     )
-    .pipe((recipe) =>
-      options.runnable != null
-        ? std.withRunnableLink(recipe, options.runnable)
-        : recipe,
-    );
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
