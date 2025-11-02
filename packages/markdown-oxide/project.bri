@@ -1,0 +1,45 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "markdown-oxide",
+  version: "v0.25.8",
+  repository: "https://github.com/Feel-ix-343/markdown-oxide.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function markdownOxide(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    buildParams: {
+      features: [],
+    },
+    runnable: "bin/markdown-oxide",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    markdown-oxide --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(markdownOxide)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const version = result.split("\n").at(0);
+
+  // Check that the result contains the expected version
+  const expected = `markdown-oxide ${project.version}`;
+  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
