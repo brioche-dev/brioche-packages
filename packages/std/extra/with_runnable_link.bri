@@ -37,8 +37,7 @@ export function withRunnableLink(
   recipe: std.RecipeLike<std.Directory>,
   runPath: string,
 ): std.Recipe<std.Directory> {
-  let result = std.recipe(recipe);
-  result = result.insert("brioche-run", std.symlink({ target: runPath }));
-
-  return result;
+  return std
+    .recipe(recipe)
+    .pipe((recipe) => recipe.insert("brioche-run", std.symlink({ target: runPath })));
 }
