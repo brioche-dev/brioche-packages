@@ -18,7 +18,6 @@ export default function terraformLs(): std.Recipe<std.Directory> {
     buildParams: {
       ldflags: ["-s", "-w"],
     },
-    path: ".",
     runnable: "bin/terraform-ls",
   });
 }
