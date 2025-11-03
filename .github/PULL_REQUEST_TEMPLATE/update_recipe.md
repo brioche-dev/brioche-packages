@@ -15,7 +15,7 @@
 1. Run the **test** scenario:
 
 ```bash
-   brioche build -e test -p RECIPE_PATH
+brioche build -e test -p RECIPE_PATH
 ```
 
 <details><summary>Test output (click to expand)</summary>
