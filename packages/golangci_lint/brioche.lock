@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/golangci/golangci-lint.git": {
-      "v2.5.0": "ff63786c30d6c2926f99d677ab2ecf089e9390ad"
+      "v2.6.0": "fb09c3715aa607741924f220d6ce52692d012753"
     }
   }
 }
