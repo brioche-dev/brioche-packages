@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "markdown_oxide",
-  version: "0.25.8",
+  version: "0.25.10",
   repository: "https://github.com/Feel-ix-343/markdown-oxide.git",
 };
 
