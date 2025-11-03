@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/openssl/openssl/releases/download/openssl-3.6.0/openssl-3.6.0.tar.gz": {
+    "https://github.com/openssl/openssl/releases/download/openssl-3.6.0-beta1/openssl-3.6.0-beta1.tar.gz": {
       "type": "sha256",
-      "value": "b6a5f44b7eb69e3fa35dbf15524405b44837a481d43d81daddde3ff21fcbb8e9"
+      "value": "1cfcda5da5d7221861749113b5090038588784e82a3ba5f893e0c347e5bb1626"
     }
   }
 }
