@@ -262,11 +262,7 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
     go install "\${goargs[@]}" "$package_path"
   `
     .workDir(options.source)
-    .currentDir(
-      options.currentDir != null
-        ? std.tpl`${std.workDir}/${options.currentDir}`
-        : std.workDir,
-    )
+    .currentDir(std.tpl`${std.workDir}/${options.currentDir}`)
     .dependencies(go, ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
@@ -298,10 +294,7 @@ function goModDownload(
         "**/go.work",
         "**/go.work.sum",
       ]),
-      currentDir:
-        currentDir != null
-          ? std.tpl`${std.workDir}/${currentDir}`
-          : std.workDir,
+      currentDir: std.tpl`${std.workDir}/${currentDir}`,
       env: {
         GOMODCACHE: std.outputPath,
       },
