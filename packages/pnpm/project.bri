@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "pnpm",
-  version: "10.19.0",
+  version: "10.20.0",
   repository: "https://github.com/pnpm/pnpm",
 };
 
