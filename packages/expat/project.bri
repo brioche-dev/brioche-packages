@@ -61,7 +61,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
-    matchTag: /^R_(?<version>.+)$/,
+    matchTag: /^R_(?<version>\d+_\d+_\d+)$/,
     normalizeVersion: true,
   });
 }
