@@ -41,7 +41,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   // Check that the result contains the expected version
   // HACK: Workaround for apparent issue with incorrect version number in
   // upstream release: https://github.com/WebAssembly/wabt/issues/2550#issuecomment-2697494141
-  const expected = project.version === "1.0.37" ? "1.0.36" : project.version;
+  const expected = project.version === "1.0.38" ? "1.0.37" : project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
