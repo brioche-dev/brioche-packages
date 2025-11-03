@@ -4,22 +4,21 @@ import rust, { cargoBuild } from "rust";
 export const project = {
   name: "cargo_nextest",
   version: "0.9.110",
-  repository: "https://github.com/nextest-rs/nextest.git",
+  extra: {
+    crateName: "cargo-nextest",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `cargo-nextest-${project.version}`,
-});
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function cargoNextest(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    path: "cargo-nextest",
-
-    // cargo-chef makes the lockfile out-of-date, see this issue:
-    // https://github.com/LukeMathWalker/cargo-chef/issues/305
-    cargoChefPrepare: false,
+    runnable: "bin/cargo-nextest",
   });
 }
 
@@ -32,18 +31,16 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  const version = result.split("\n").at(0);
-
   // Check that the result contains the expected version
   const expected = `cargo-nextest ${project.version}`;
-  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({
-    project,
-    matchTag: /^cargo-nextest-(?<version>.+)$/,
-  });
+  return std.liveUpdateFromRustCrates({ project });
 }
