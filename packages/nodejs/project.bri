@@ -5,12 +5,13 @@ import nushell from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "24.10.0",
+  version: "25.1.0",
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
-      "24": "24.10.0",
-      "22": "22.20.0",
+      "25": "25.1.0",
+      "24": "24.11.0",
+      "22": "22.21.1",
       "20": "20.19.5",
     },
   },
@@ -39,6 +40,18 @@ const prebuiltBinaries: Record<
   string,
   Record<string, std.Recipe<std.Directory>>
 > = {
+  "25": {
+    "x86_64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-arm64.tar.xz`,
+    )
+      .unarchive("tar", "xz")
+      .peel(),
+  },
   "24": {
     "x86_64-linux": Brioche.download(
       `https://nodejs.org/dist/v${project.extra.otherVersions["24"]}/node-v${project.extra.otherVersions["24"]}-linux-x64.tar.xz`,
@@ -128,12 +141,12 @@ export default function nodejs(
   const { version = getLatestVersion() } = options;
 
   return prebuiltBinary(version, std.CURRENT_PLATFORM)
-    .pipe((node) =>
-      std.autopack(node, {
+    .pipe((recipe) =>
+      std.autopack(recipe, {
         globs: ["bin/**"],
       }),
     )
-    .pipe((node) => std.withRunnableLink(node, "bin/node"));
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/node"));
 }
 
 export function test(): std.Recipe<std.Directory> {
@@ -206,13 +219,15 @@ interface NpmInstallOptions {
 export function npmInstall(
   options: NpmInstallOptions,
 ): std.Recipe<std.Directory> {
-  return std.runBash`
-    cd "$BRIOCHE_OUTPUT"
-    npm clean-install
-  `
-    .dependencies(std.toolchain, nodejs, python)
-    .outputScaffold(options.source)
-    .unsafe({ networking: true })
+  return std
+    .process({
+      command: "npm",
+      args: ["clean-install"],
+      dependencies: [std.toolchain, nodejs, python],
+      currentDir: std.outputPath,
+      outputScaffold: options.source,
+      unsafe: { networking: true },
+    })
     .toDirectory();
 }
 
@@ -272,7 +287,7 @@ export function npmInstallGlobal(
       nodejs: nodejsDep = nodejs,
     } = options;
 
-    let recipe = std.runBash`
+    return std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
         echo "The npm package ($package_name) is not an exact version ($version), please ensure the version is more specific."
         exit 1
@@ -281,42 +296,49 @@ export function npmInstallGlobal(
       npm install --global "\${package_name}@\${version}"
     `
       .dependencies(std.toolchain, nodejsDep, python)
-      .outputScaffold(std.directory())
       .env({
         package_name: packageName,
         version,
         npm_config_prefix: std.outputPath,
       })
       .unsafe({ networking: true })
-      .toDirectory();
-
-    if (wrapBins) {
-      // Use a Nushell script to get a list of installed bin symlinks to wrap
-      const binsJson = await std
-        .process({
-          command: std.tpl`${nushell}/bin/nu`,
-          args: [Brioche.includeFile("find-nodejs-bins.nu")],
-          env: {
-            recipe,
-          },
-        })
-        .toFile()
-        .read();
-      const bins = typer.parseJson(BinList, binsJson);
-
-      // Add a runnable binary for each installed bin symlink
-      const wrappedBins = bins.map(({ name, target }) => {
-        return std.addRunnable(std.directory(), name, {
-          command: "node",
-          args: [{ relativePath: target }],
-          dependencies: [nodejsDep],
-        });
-      });
-
-      // Merge the wrapped binaries into the recipe
-      recipe = std.merge(recipe, ...wrappedBins);
-    }
-
-    return recipe;
+      .toDirectory()
+      .pipe((recipe) =>
+        wrapBins ? wrapNodejsBins(recipe, nodejsDep) : recipe,
+      );
   });
+}
+
+/*
+ * Wraps the binaries of a nodejs package with the nodejs interpreter.
+ *
+ * @param recipe The recipe to wrap the binaries of.
+ * @param nodejs The Node.js recipe to use.
+ */
+async function wrapNodejsBins(
+  recipe: std.RecipeLike<std.Directory>,
+  nodejs: std.RecipeLike<std.Directory>,
+): Promise<std.Recipe<std.Directory>> {
+  // Use a Nushell script to get a list of installed bin symlinks to wrap
+  const binsJson = await std
+    .process({
+      command: std.tpl`${nushell}/bin/nu`,
+      args: [Brioche.includeFile("find-nodejs-bins.nu")],
+      workDir: recipe,
+    })
+    .toFile()
+    .read();
+  const bins = typer.parseJson(BinList, binsJson);
+
+  // Add a runnable binary for each installed bin symlink
+  const wrappedBins = bins.map(({ name, target }) => {
+    return std.addRunnable(std.directory(), name, {
+      command: "node",
+      args: [{ relativePath: target }],
+      dependencies: [nodejs],
+    });
+  });
+
+  // Merge the wrapped binaries into the recipe
+  return std.merge(recipe, ...wrappedBins);
 }

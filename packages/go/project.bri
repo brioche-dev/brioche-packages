@@ -1,13 +1,14 @@
 import * as std from "std";
+import * as typer from "typer";
 
 export const project = {
   name: "go",
-  version: "1.25.2",
+  version: "1.25.3",
   repository: "https://github.com/golang/go",
   extra: {
     otherVersions: {
-      "1.25": "1.25.2",
-      "1.24": "1.24.8",
+      "1.25": "1.25.3",
+      "1.24": "1.24.9",
     },
   },
 };
@@ -120,13 +121,12 @@ export default function go(options: GoOptions = {}): std.Recipe<std.Directory> {
         gofmt: std.symlink({ target: "../go/bin/gofmt" }),
       }),
     })
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          GOROOT: { fallback: { path: "go" } },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "go/bin/go"),
-    );
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        GOROOT: { fallback: { path: "go" } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "go/bin/go"));
 }
 
 export function test(): std.Recipe<std.Directory> {
@@ -157,7 +157,7 @@ export function test(): std.Recipe<std.Directory> {
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubTags({
     project,
-    matchTag: /^go(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
+    matchTag: /^go(?<version>\d+\.\d+\.\d+)$/,
   });
 }
 
@@ -239,7 +239,7 @@ interface GoBuildOptions {
 export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
   const modules = goModDownload(options.source, options.currentDir);
 
-  let buildResult = std.runBash`
+  return std.runBash`
     # Run generate if requested
     if [ "$go_generate" = "true" ]; then
       go generate ./...
@@ -262,11 +262,7 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
     go install "\${goargs[@]}" "$package_path"
   `
     .workDir(options.source)
-    .currentDir(
-      options.currentDir != null
-        ? std.tpl`${std.workDir}/${options.currentDir}`
-        : std.workDir,
-    )
+    .currentDir(std.tpl`${std.workDir}/${options.currentDir}`)
     .dependencies(go, ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
@@ -278,13 +274,8 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
       package_path: options.path ?? ".",
       ...options.env,
     })
-    .toDirectory();
-
-  if (options.runnable != null) {
-    buildResult = std.withRunnableLink(buildResult, options.runnable);
-  }
-
-  return buildResult;
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
 
 function goModDownload(
@@ -293,25 +284,22 @@ function goModDownload(
 ): std.Recipe<std.Directory> {
   // Includes all the modules in the specified directory and its subdirectories
   // If a workspace file exists also include it
-  return std.runBash`
-    go mod download all
-  `
-    .workDir(
-      std.glob(goModule, [
+  return std
+    .process({
+      command: std.tpl`${go}/bin/go`,
+      args: ["mod", "download", "all"],
+      workDir: std.glob(goModule, [
         "**/go.mod",
         "**/go.sum",
         "**/go.work",
         "**/go.work.sum",
       ]),
-    )
-    .dependencies(go)
-    .env({
-      GOMODCACHE: std.outputPath,
+      currentDir: std.tpl`${std.workDir}/${currentDir}`,
+      env: {
+        GOMODCACHE: std.outputPath,
+      },
+      unsafe: { networking: true },
     })
-    .currentDir(
-      currentDir != null ? std.tpl`${std.workDir}/${currentDir}` : std.workDir,
-    )
-    .unsafe({ networking: true })
     .toDirectory();
 }
 
@@ -324,4 +312,76 @@ function goModDownload(
  */
 function ldflagsWrapper(ldflags: string[]): string {
   return ldflags.map((ldflag) => ldflag.replace(/['"]/g, "\\$&")).join(" ");
+}
+
+/**
+ * Type definition for module information (for private usage).
+ *
+ * @remarks The information of the module is obtained from the Go proxy registry.
+ */
+const ModuleInfo = typer.object({
+  Version: typer.string(),
+  Time: typer.string(),
+  Origin: typer.object({
+    VCS: typer.string(),
+    URL: typer.string(),
+    Hash: typer.string(),
+    Ref: typer.string(),
+  }),
+});
+
+/**
+ * Type definition for module origin information (for public usage).
+ *
+ * @remarks The information of the module's origin is obtained from the Go proxy registry.
+ *
+ * @param vcs - The version control system of the module.
+ * @param url - The URL of the module.
+ * @param hash - The hash of the module.
+ * @param ref - The reference of the module's version.
+ */
+interface GoModuleOriginInfo {
+  vcs: string;
+  url: string;
+  hash: string;
+  ref: string;
+}
+
+/**
+ * Type definition for module information (for public usage).
+ *
+ * @remarks The information of the module is obtained from the Go proxy registry.
+ *
+ * @param version - The version of the module.
+ * @param time - The time when the module was created.
+ * @param origin - The origin information of the module.
+ */
+interface GoModuleInfo {
+  version: string;
+  time: string;
+  origin: GoModuleOriginInfo;
+}
+
+export async function goModuleManifest(
+  manifestUrl: std.Recipe<std.File>,
+): Promise<GoModuleInfo> {
+  const rawManifest = typer.parseJson(ModuleInfo, await manifestUrl.read());
+
+  const moduleOrigin = {
+    vcs: rawManifest.Origin.VCS,
+    url: rawManifest.Origin.URL,
+    hash: rawManifest.Origin.Hash,
+    ref: rawManifest.Origin.Ref,
+  };
+
+  const manifest = {
+    // Remove the leading 'v' from the version string
+    version: rawManifest.Version.startsWith("v")
+      ? rawManifest.Version.slice(1)
+      : rawManifest.Version,
+    time: rawManifest.Time,
+    origin: moduleOrigin,
+  };
+
+  return manifest;
 }

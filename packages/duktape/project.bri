@@ -1,0 +1,56 @@
+import * as std from "std";
+
+export const project = {
+  name: "duktape",
+  version: "2.7.0",
+  repository: "https://github.com/svaarala/duktape",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/duktape-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function duktape(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -f Makefile.cmdline -j "$(nproc)"
+    mkdir -p "$BRIOCHE_OUTPUT/bin"
+    mv duk "$BRIOCHE_OUTPUT/bin"
+
+    make -f Makefile.sharedlibrary -j "$(nproc)"
+    make INSTALL_PREFIX="$BRIOCHE_OUTPUT" -f Makefile.sharedlibrary install
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/duk"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion duktape | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, duktape)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

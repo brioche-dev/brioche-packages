@@ -1,0 +1,45 @@
+import * as std from "std";
+import openssl from "openssl";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_generate",
+  version: "0.23.5",
+  extra: {
+    crateName: "cargo-generate",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cargoGenerate(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl],
+    runnable: "bin/cargo-generate",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo generate --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoGenerate)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cargo generate-generate ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromRustCrates({ project });
+}

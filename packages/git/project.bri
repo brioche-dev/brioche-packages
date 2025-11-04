@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "git",
-  version: "2.51.0",
+  version: "2.51.1",
   repository: "https://github.com/git/git",
 };
 
@@ -28,14 +28,13 @@ export default function git(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, openssl, curl({ minimal: true }))
     .toDirectory()
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          GIT_EXEC_PATH: { fallback: { path: "libexec/git-core" } },
-          GIT_TEMPLATE_DIR: { fallback: { path: "share/git-core/templates" } },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/git"),
-    );
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        GIT_EXEC_PATH: { fallback: { path: "libexec/git-core" } },
+        GIT_TEMPLATE_DIR: { fallback: { path: "share/git-core/templates" } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/git"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -55,10 +54,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubTags({
-    project,
-    matchTag: /^v(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
-  });
+  return std.liveUpdateFromGithubTags({ project });
 }
 
 /**

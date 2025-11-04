@@ -5,7 +5,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libxml2",
-  version: "2.15.0",
+  version: "2.15.1",
   extra: {
     majorVersion: "2",
     minorVersion: "15",

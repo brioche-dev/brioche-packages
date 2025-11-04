@@ -61,19 +61,18 @@ export default function curl(
       buildFlags: curlBuildFlags.join(" "),
     })
     .toDirectory()
-    .pipe(
-      std.libtoolSanitizeDependencies,
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-          ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
-          CURL_ROOT: { fallback: { path: "." } },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/curl"),
-    );
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+        CURL_ROOT: { fallback: { path: "." } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/curl"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

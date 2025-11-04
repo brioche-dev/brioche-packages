@@ -1,0 +1,98 @@
+import * as std from "/core";
+import { parseGiteaRepo } from "./gitea_global.bri";
+import { liveUpdateVersionRegex } from "./index.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param versionDash - The version of the project (converted in dash format).
+ * @param versionUnderscore - The version of the project (converted in underscore format).
+ */
+interface LiveUpdateFromGiteaTagsProjectExtraOptions {
+  versionDash?: string;
+  versionUnderscore?: string;
+  [key: string]: unknown; // Ignore unknown properties
+}
+
+/**
+ * Options for the live update from Gitea tags.
+ *
+ * @param project - The project export that should be updated. Must include a
+ *   `repository` property containing a Gitea repository URL.
+ * @param includePrerelease - Whether to include prerelease versions.
+ * @param matchTag - A regex value (`/.../`) to extract the version number from
+ *   a tag name. The regex must include a group named "version". If not
+ *   provided, an optional "v" prefix will be stripped and the rest of the
+ *   tag will be checked if it's a semver or semver-like version number.
+ * @param normalizeVersion - Whether to normalize the version number to
+ *   a semver-like version number. When enabled, the dashes and underscores
+ *   will be replaced with dots.
+ *
+ * @remarks `includePrerelease` and `matchTag` cannot be used together.
+ */
+interface LiveUpdateFromGiteaTagsOptions {
+  project: {
+    version: string;
+    readonly repository: string;
+    extra?: LiveUpdateFromGiteaTagsProjectExtraOptions;
+  };
+  readonly includePrerelease?: boolean;
+  readonly matchTag?: RegExp;
+  readonly normalizeVersion?: boolean;
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest tag
+ * from a Gitea repository. The project's version will be set based on a regex
+ * match against the latest tag name. The repository is inferred from the
+ * `repository` field of the project.
+ *
+ * @param options - Options for the live update from Gitea tags.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "gitea_docs",
+ *   version: "0.1.0",
+ *   repository: "https://gitea.com/gitea/docs.git",
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromGiteaTags({
+ *     project,
+ *     matchTag: /^v(?<version>.+)$/, // Strip "v" prefix from tags
+ *   });
+ * }
+ * ```
+ */
+export function liveUpdateFromGiteaTags(
+  options: LiveUpdateFromGiteaTagsOptions,
+): std.Recipe<std.Directory> {
+  const { repoOwner, repoName } = parseGiteaRepo(options.project.repository);
+  const normalizeVersion = options.normalizeVersion ?? false;
+
+  const matchTag = liveUpdateVersionRegex(
+    options.includePrerelease,
+    options.matchTag,
+  );
+
+  return std.recipe(async () => {
+    const { nushellRunnable } = await import("nushell");
+
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_gitea_tags.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      repoOwner,
+      repoName,
+      matchTag: matchTag.source,
+      normalizeVersion: normalizeVersion.toString(),
+    });
+  });
+}

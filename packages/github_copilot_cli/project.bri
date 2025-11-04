@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "github_copilot_cli",
-  version: "0.0.336",
+  version: "0.0.353",
   extra: {
     packageName: "@github/copilot",
   },
@@ -21,6 +21,12 @@ export async function test(): Promise<std.Recipe<std.File>> {
     copilot --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(githubCopilotCli)
+    .env({
+      // TODO: remove once https://github.com/github/copilot-cli/issues/16 is done
+      // Needed because the tool dynamically opens `libresolv.so.2`,
+      // through the `sharp` module which is not directly a dependency
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+    })
     .toFile();
 
   const result = (await script.read()).trim();

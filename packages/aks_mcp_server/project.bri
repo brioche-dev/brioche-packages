@@ -1,0 +1,66 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "aks_mcp_server",
+  version: "0.0.10",
+  extra: {
+    moduleName: "github.com/!azure/aks-mcp",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function aksMcpServer(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/Azure/aks-mcp/internal/version.GitVersion=${manifest.version}`,
+        "-X",
+        `github.com/Azure/aks-mcp/internal/version.GitCommit=${manifest.origin.hash}`,
+        "-X",
+        "github.com/Azure/aks-mcp/internal/version.GitTreeState=clean",
+        "-X",
+        `github.com/Azure/aks-mcp/internal/version.BuildDate=${manifest.time}`,
+      ],
+    },
+    path: "./cmd/aks-mcp",
+    runnable: "bin/aks-mcp",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    aks-mcp --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(aksMcpServer)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `aks-mcp version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGoModules({ project });
+}

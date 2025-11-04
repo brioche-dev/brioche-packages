@@ -9,7 +9,8 @@ import * as std from "/core";
  * is used by `brioche run` to determine the executable to run.
  *
  * @param recipe - The recipe to add the runnable link to.
- * @param runPath - The path to the executable within the recipe.
+ * @param runPath - The path to the executable within the recipe. If null, calling this
+ *   function is a no-op.
  *
  * @returns A new recipe with a `brioche-run` symlink pointing to the specified path
  *
@@ -35,10 +36,13 @@ import * as std from "/core";
  */
 export function withRunnableLink(
   recipe: std.RecipeLike<std.Directory>,
-  runPath: string,
+  runPath: string | null | undefined,
 ): std.Recipe<std.Directory> {
-  let result = std.recipe(recipe);
-  result = result.insert("brioche-run", std.symlink({ target: runPath }));
-
-  return result;
+  return std
+    .recipe(recipe)
+    .pipe((recipe) =>
+      runPath != null
+        ? recipe.insert("brioche-run", std.symlink({ target: runPath }))
+        : recipe,
+    );
 }

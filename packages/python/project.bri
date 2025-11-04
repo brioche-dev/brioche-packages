@@ -78,6 +78,8 @@ export default async function python(options: PythonOptions = {}) {
     ./configure \\
       --prefix=/ \\
       --enable-shared \\
+      --enable-optimizations \\
+      --with-lto \\
       --without-ensurepip
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -102,62 +104,69 @@ export default async function python(options: PythonOptions = {}) {
     .split("\n")
     .filter((mod) => mod !== "");
 
-  return python.pipe(
-    // Repack Python with all the dynamic libraries needed for all the native
-    // modules. It isn't linked against the native modules directly, just
-    // tier transitive dependencies
-    (recipe) =>
-      std.autopack(recipe, {
-        globs: ["bin/python*"],
-        excludeGlobs: ["bin/python*-config"],
-        linkDependencies: [std.toolchain],
-        dynamicBinaryConfig: {
-          // Listing the modules both under `extraLibraries` and `skipLibraries`
-          // forces Python to be linked with the modules' transitive dependencies
-          extraLibraries: [
-            ...nativeModules,
+  return python
+    .pipe(
+      // Repack Python with all the dynamic libraries needed for all the native
+      // modules. It isn't linked against the native modules directly, just
+      // tier transitive dependencies
+      (recipe) =>
+        std.autopack(recipe, {
+          globs: ["bin/python*"],
+          excludeGlobs: ["bin/python*-config"],
+          linkDependencies: [std.toolchain],
+          dynamicBinaryConfig: {
+            // Listing the modules both under `extraLibraries` and `skipLibraries`
+            // forces Python to be linked with the modules' transitive dependencies
+            extraLibraries: [
+              ...nativeModules,
 
-            // Extra libraries used for FFI (needed for e.g. `aws_cli`)
-            // TODO: Figure out when/where/why these are used and how to simplify!
-            "librt.so.1",
-            "libpthread.so.0",
-            "libgcc_s.so.1",
-            "libdl.so.2",
-          ],
-          skipLibraries: nativeModules,
-          libraryPaths: [
-            std.glob(recipe, ["lib/python*/lib-dynload"]).peel(3),
-            std.glob(recipe, ["lib/libpython*"]).peel(),
-          ],
-        },
-        sharedLibraryConfig: {
-          enabled: false,
-        },
-        scriptConfig: {
-          enabled: false,
-        },
-        repackConfig: {
-          enabled: true,
-        },
-      }),
-    // Some binaries under `/bin` are shebang scripts. These need to be wrapped
-    // to avoid issues with absolute paths
-    (recipe) => std.recipe(fixShebangs(recipe)),
-    (recipe) =>
+              // Extra libraries used for FFI (needed for e.g. `aws_cli`)
+              // TODO: Figure out when/where/why these are used and how to simplify!
+              "librt.so.1",
+              "libpthread.so.0",
+              "libgcc_s.so.1",
+              "libdl.so.2",
+            ],
+            skipLibraries: nativeModules,
+            libraryPaths: [
+              std.glob(recipe, ["lib/python*/lib-dynload"]).peel(3),
+              std.glob(recipe, ["lib/libpython*"]).peel(),
+            ],
+          },
+          sharedLibraryConfig: {
+            enabled: false,
+          },
+          scriptConfig: {
+            enabled: false,
+          },
+          repackConfig: {
+            enabled: true,
+          },
+        }),
+    )
+    .pipe(
+      // Some binaries under `/bin` are shebang scripts. These need to be wrapped
+      // to avoid issues with absolute paths
+      (recipe) => std.recipe(fixScriptShebangs(recipe)),
+    )
+    .pipe((recipe) =>
       recipe
         .insert("bin/python", std.symlink({ target: "python3" }))
         .insert("bin/python-config", std.symlink({ target: "python3-config" }))
         .insert("bin/pydoc", std.symlink({ target: "pydoc3" })),
-    // Fix absolute paths in pkg-config files
-    std.pkgConfigMakePathsRelative,
-    (recipe) =>
+    )
+    .pipe(
+      // Fix absolute paths in pkg-config files
+      std.pkgConfigMakePathsRelative,
+    )
+    .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       }),
-    (recipe) => std.withRunnableLink(recipe, "bin/python"),
-  );
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/python"));
 }
 
 export function test(): std.Recipe<std.Directory> {
@@ -188,7 +197,15 @@ export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubTags({ project });
 }
 
-async function fixShebangs(
+/**
+ * Fix shebang in Python scripts to use the correct path to the Python
+ * interpreter.
+ *
+ * @remarks The scripts are assumed to be found under `bin` folder.
+ *
+ * @returns The recipe with the shebang fixed.
+ */
+export async function fixScriptShebangs(
   recipe: std.Recipe<std.Directory>,
 ): Promise<std.Recipe<std.Directory>> {
   // Get all Python shebang scripts under `bin/`. We assume _all_ shebang
@@ -198,7 +215,6 @@ async function fixShebangs(
   // directly. See this function from Pip:
   // https://github.com/pypa/pip/blob/102d8187a1f5a4cd5de7a549fd8a9af34e89a54f/src/pip/_vendor/distlib/scripts.py#L154
   const pythonShebangPathList = await std.runBash`
-    cd "$recipe"
     find bin ! -name 'python*-config' -type f -executable \\
     | while read file; do
       if [[ "$(head -c 2 "$file")" == '#!' ]]; then
@@ -206,7 +222,7 @@ async function fixShebangs(
       fi
     done
   `
-    .env({ recipe })
+    .workDir(recipe)
     .toFile()
     .read();
   const pythonShebangPaths = pythonShebangPathList
@@ -216,7 +232,6 @@ async function fixShebangs(
   // Get the list of shebang shell scripts. We only handle the `python-config`
   // script.
   const shellShebangPathList = await std.runBash`
-    cd "$recipe"
     find bin -name 'python*-config' -type f -executable \\
     | while read file; do
       if [[ "$(head -c 2 "$file")" == '#!' ]]; then
@@ -224,7 +239,7 @@ async function fixShebangs(
       fi
     done
   `
-    .env({ recipe })
+    .workDir(recipe)
     .toFile()
     .read();
   const shellShebangPaths = shellShebangPathList

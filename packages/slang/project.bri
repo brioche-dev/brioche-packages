@@ -1,0 +1,94 @@
+import * as std from "std";
+import libpng from "libpng";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import oniguruma from "oniguruma";
+import pcre from "pcre";
+
+export const project = {
+  name: "slang",
+  version: "2.3.3",
+};
+
+const source = Brioche.download(
+  `https://www.jedsoft.org/releases/slang/slang-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel()
+  .pipe((source) =>
+    // Patch the source to properly build the recipe
+    // Inspired from: https://github.com/NixOS/nixpkgs/blob/d2ed99647a4b195f0bcc440f76edfa10aeb3b743/pkgs/by-name/sl/slang/package.nix#L29
+    std.runBash`
+      sed -i -e "s|/usr/lib/terminfo|$ncurses_path/lib/terminfo|" "$BRIOCHE_OUTPUT/configure"
+      sed -i -e "s|/usr/lib/terminfo|$ncurses_path/lib/terminfo|" "$BRIOCHE_OUTPUT/src/sltermin.c"
+      sed -i -e "s|/bin/ln|ln|" "$BRIOCHE_OUTPUT/src/Makefile.in"
+      sed -i -e "s|-ltermcap|-lncurses|" "$BRIOCHE_OUTPUT/configure"
+    `
+      .env({
+        ncurses_path: std.tpl`${std.toolchain}`,
+      })
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function slang(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/ \
+      --with-png=$libpng_path \
+      --with-onig=$oniguruma_path \
+      --with-pcre=$pcre_path \
+      --with-z=$zlib_path
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libpng, oniguruma, pcre)
+    .env({
+      libpng_path: std.tpl`${libpng}`,
+      oniguruma_path: std.tpl`${oniguruma}`,
+      pcre_path: std.tpl`${pcre}`,
+      zlib_path: std.tpl`${std.toolchain}`,
+    })
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/slsh"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion slang | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, slang)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.jedsoft.org/releases/slang
+      | lines
+      | where {|it| ($it | str contains '<a href="slang-') and (not ($it | str contains ".asc")) }
+      | parse --regex '<a href="slang-(?<version>.+)\.tar\.bz2">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

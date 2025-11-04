@@ -240,7 +240,9 @@ export interface CargoBuildOptions {
  * };
  * ```
  */
-export function cargoBuild(options: CargoBuildOptions) {
+export function cargoBuild(
+  options: CargoBuildOptions,
+): std.Recipe<std.Directory> {
   // Vendor the crate's dependencies
   const crate = vendorCrate({
     source: options.source,
@@ -315,7 +317,7 @@ export function cargoBuild(options: CargoBuildOptions) {
   }
 
   // Use `cargo install` to build and install the project to `$BRIOCHE_OUTPUT`
-  let buildResult = std
+  return std
     .process({
       command: std.tpl`${rust}/bin/cargo`,
       args: [
@@ -343,24 +345,34 @@ export function cargoBuild(options: CargoBuildOptions) {
       },
       dependencies: [rust, std.toolchain, ...(options.dependencies ?? [])],
       workDir: crate,
-      currentDir:
-        options.currentDir != null
-          ? std.tpl`${std.workDir}/${options.currentDir}`
-          : std.workDir,
+      currentDir: std.tpl`${std.workDir}/${options.currentDir}`,
       unsafe: options.unsafe,
     })
-    .toDirectory();
+    .toDirectory()
+    .pipe((recipe) =>
+      // Remove extra metadata created by `cargo install`
+      recipe.remove(".crates.toml"),
+    )
+    .pipe((recipe) =>
+      // Remove extra metadata created by `cargo install`
+      recipe.remove(".crates2.json"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
+}
 
-  // Remove extra metadata created by `cargo install`
-  buildResult = buildResult.remove(".crates.toml");
-  buildResult = buildResult.remove(".crates2.json");
-
-  // Add a runnable link if set in the options
-  if (options.runnable != null) {
-    buildResult = std.withRunnableLink(buildResult, options.runnable);
-  }
-
-  return buildResult;
+/**
+ * Options for creating a lock file from a Rust crate.
+ *
+ * @param source - The crate to create the lockfile for.
+ * @param currentDir - Optionally set a subpath to use as the starting directory
+ *   relative to `source`. This is useful when building a Cargo workspace within
+ *   a monorepo project.
+ * @param allowLockfileGeneration - Whether to allow generating the lockfile.
+ */
+interface CreateLockFileCrateOptions {
+  source: std.RecipeLike<std.Directory>;
+  currentDir?: string;
+  allowLockfileGeneration: boolean;
 }
 
 /**
@@ -374,31 +386,32 @@ export function cargoBuild(options: CargoBuildOptions) {
  * @return The source crate with the lockfile.
  */
 function createLockfile(
-  crate: std.RecipeLike<std.Directory>,
-  allowLockfileGeneration: boolean,
+  options: CreateLockFileCrateOptions,
 ): std.Recipe<std.Directory> {
+  const { source, currentDir, allowLockfileGeneration } = options;
+
+  if (!allowLockfileGeneration) {
+    return std.recipe(source);
+  }
+
   return std.runBash`
-    if [ "$allowLockfileGeneration" = "true" ]; then
-      cd "$BRIOCHE_OUTPUT"
-
-      # Check if the Cargo.lock file exists, if yes, exit on error
-      if [ -f Cargo.lock ]; then
-        echo "Cannot generate Cargo.lock file because it already exists"
-        exit 1
-      fi
-
-      cargo generate-lockfile
+    # Check if the Cargo.lock file exists, if yes, exit on error
+    if [ -f Cargo.lock ]; then
+      echo "Cannot generate Cargo.lock file because it already exists"
+      exit 1
     fi
+
+    cargo generate-lockfile
   `
     .dependencies(rust)
-    .outputScaffold(crate)
-    .env({ allowLockfileGeneration: allowLockfileGeneration.toString() })
+    .outputScaffold(source)
+    .currentDir(std.tpl`${std.outputPath}/${currentDir}`)
     .unsafe({ networking: true })
     .toDirectory();
 }
 
 /**
- * Options for creating a skeleton crate from a full a Rust crate.
+ * Options for creating a skeleton crate from a full Rust crate.
  *
  * @param source - The crate to make into a skeleton crate.
  * @param currentDir - Optionally set a subpath to use as the starting directory
@@ -420,26 +433,29 @@ interface CreateSkeletonCrateOptions {
 export function createSkeletonCrate(
   options: CreateSkeletonCrateOptions,
 ): std.Recipe<std.Directory> {
-  const { currentDir } = options;
+  const { source, currentDir } = options;
 
-  const recipe = std.runBash`
-    cargo chef prepare --recipe-path "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(rust, cargoChef)
-    .workDir(options.source)
-    .currentDir(
-      options.currentDir != null
-        ? std.tpl`${std.workDir}/${options.currentDir}`
-        : std.workDir,
-    )
+  const recipe = std
+    .process({
+      command: "cargo",
+      args: ["chef", "prepare", "--recipe-path", std.outputPath],
+      dependencies: [rust, cargoChef],
+      workDir: source,
+      currentDir: std.tpl`${std.workDir}/${currentDir}`,
+    })
     .toFile();
-  return std.runBash`
-    mkdir -p "$BRIOCHE_OUTPUT/$current_dir"
-    cd "$BRIOCHE_OUTPUT/$current_dir"
-    cargo chef cook --recipe-path "$recipe" --no-build
-  `
-    .dependencies(rust, cargoChef)
-    .env({ recipe, current_dir: currentDir ?? "" })
+
+  return std
+    .process({
+      command: "cargo",
+      args: ["chef", "cook", "--recipe-path", recipe, "--no-build"],
+      dependencies: [rust, cargoChef],
+      outputScaffold:
+        currentDir != null
+          ? std.directory({ [currentDir]: std.directory() })
+          : std.directory(),
+      currentDir: std.tpl`${std.outputPath}/${currentDir}`,
+    })
     .toDirectory();
 }
 
@@ -487,7 +503,11 @@ export function vendorCrate(
   } = options;
 
   // Generate the Cargo.lock file exists if not already generated
-  const completeSource = createLockfile(source, unsafeGenerateLockfile);
+  const completeSource = createLockfile({
+    source,
+    currentDir,
+    allowLockfileGeneration: unsafeGenerateLockfile,
+  });
 
   // Create a skeleton crate so we have enough information to vendor the
   // dependencies
@@ -518,11 +538,7 @@ export function vendorCrate(
   `
     .dependencies(rust)
     .outputScaffold(skeletonCrate)
-    .currentDir(
-      currentDir != null
-        ? std.tpl`${std.outputPath}/${currentDir}`
-        : std.outputPath,
-    )
+    .currentDir(std.tpl`${std.outputPath}/${currentDir}`)
     .unsafe({ networking: true })
     .toDirectory();
 

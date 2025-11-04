@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/mozilla/sccache.git": {
-      "v0.11.0": "5709f069514a775ddb6604a6e9f5f5c91c0e9821"
+      "v0.12.0": "de9895c2304b51e790d759dd6f97836a1a4a6204"
     }
   }
 }

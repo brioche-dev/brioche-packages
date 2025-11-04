@@ -1,16 +1,57 @@
 export * from "./from_gitea_releases.bri";
+export * from "./from_gitea_tags.bri";
 export * from "./from_github_releases.bri";
 export * from "./from_github_tags.bri";
 export * from "./from_gitlab_releases.bri";
+export * from "./from_gitlab_tags.bri";
+export * from "./from_go_modules.bri";
 export * from "./from_npm_packages.bri";
+export * from "./from_python_packages.bri";
 export * from "./from_rust_crates.bri";
+export * from "./gitea_global.bri";
 export * from "./github_global.bri";
+export * from "./gitlab_global.bri";
 
 // The default regex used for matching versions. Strips an optional "v" prefix,
 // then matches the rest if it looks like a version number (either semver or
 // a semver-like version)
 export const DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH =
+  /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
+
+// The extended regex used for matching versions (includes pre-release versions).
+// Strips an optional "v" prefix, then matches the rest if it looks like a
+// version number (either semver or a semver-like version)
+export const LIVE_UPDATE_REGEX_PRERELEASE_VERSION_MATCH =
   /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:-(?:(?:[0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
+
+/**
+ * Get the regex to use for matching versions.
+ *
+ * @param includePrerelease - Optionally, whether to include pre-release versions.
+ * @param matchTag - Optionally, a custom regex to use for matching versions.
+ *
+ * @throws If both `includePrerelease` and `matchTag` are provided.
+ */
+export function liveUpdateVersionRegex(
+  includePrerelease: boolean | undefined,
+  matchTag: RegExp | undefined,
+): RegExp {
+  if (includePrerelease != null && matchTag != null) {
+    throw new Error("Cannot provide both `includePrerelease` and `matchTag`");
+  }
+
+  if (matchTag != null) {
+    // Validate the custom matchTag parameter
+    validateMatchTag(matchTag);
+
+    return matchTag;
+  } else {
+    // There is no need to validate the default regexes
+    return includePrerelease === true
+      ? LIVE_UPDATE_REGEX_PRERELEASE_VERSION_MATCH
+      : DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH;
+  }
+}
 
 /**
  * Validate the matchTag parameter to ensure it declares a named "version" group.
@@ -19,7 +60,7 @@ export const DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH =
  *
  * @throws If the parameter does not declare a named "version" group.
  */
-export function validateMatchTag(matchTag: RegExp): void {
+function validateMatchTag(matchTag: RegExp): void {
   if (!matchTag.source.includes("(?<version>")) {
     throw new Error('matchTag must declare a named "version" group');
   }

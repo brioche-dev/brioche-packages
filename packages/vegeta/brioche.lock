@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/tsenart/vegeta.git": {
-      "v12.12.0": "03ca49e9b419c106db29d687827c4c823d8b8ece"
+      "v12.13.0": "507c4f028fbad80168f3b734dab9530d3aabfefa"
     }
   }
 }

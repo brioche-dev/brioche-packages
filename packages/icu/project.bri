@@ -35,15 +35,16 @@ export default function icu(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        ICU_ROOT: { fallback: { path: "." } },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        CPATH: { append: [{ path: "include" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
     .pipe(
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          ICU_ROOT: { fallback: { path: "." } },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          CPATH: { append: [{ path: "include" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        }),
       // During the build, ICU uses "stub" libraries for compilation. Re-pack
       // the artifact to use the final libraries after compilation instead
       (recipe) =>

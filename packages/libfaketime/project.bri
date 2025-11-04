@@ -28,13 +28,12 @@ export default function libfaketime(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/faketime"),
-    );
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/faketime"));
 }
 
 export function test(): std.Recipe<std.Directory> {

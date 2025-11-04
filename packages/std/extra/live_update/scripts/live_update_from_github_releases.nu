@@ -2,33 +2,32 @@
 mut project = $env.project
   | from json
 
-# Retrieve the latest release information from GitHub
+# Retrieve the most recent releases from GitHub
 # Include GitHub Token if present (for increased rate limits)
 mut gh_headers = []
 if ($env.GITHUB_TOKEN? | default "") != "" {
   $gh_headers ++= [Authorization $'Bearer ($env.GITHUB_TOKEN)']
 }
 
-let httpResponse = http get --full --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases'
-match $httpResponse.status {
-  200 => {
-    # Success
+let releases = http get --allow-errors --headers $gh_headers $'https://api.github.com/repos/($env.repoOwner)/($env.repoName)/releases'
+  # Check the response status
+  | metadata access {|meta|
+    match $meta.http_response.status {
+      200 => {
+        # Success
+      }
+      401 => {
+        error make { msg: $'Unauthorized access to GitHub API' }
+      }
+      403 | 429 => {
+        error make { msg: $'GitHub API rate limit exceeded' }
+      }
+      _ => {
+        error make { msg: $'Failed to call GitHub API: ($meta.http_response.status)' }
+      }
+    }
   }
-  401 => {
-    error make { msg: $'Unauthorized access to GitHub API' }
-  }
-  403 | 429 => {
-    error make { msg: $'GitHub API rate limit exceeded' }
-  }
-  _ => {
-    error make { msg: $'Failed to call GitHub API: ($httpResponse.status)' }
-  }
-}
-let releases = $httpResponse.body
-
-# Extract the version(s)
-let releasesInfo = $releases
-  | where {|release| ($env.includePrerelease == "true") or (not $release.prerelease) }
+  # Extract the version(s)
   | each {|release|
     let parsedTag = $release.tag_name
       | parse --regex $env.matchTag
@@ -41,13 +40,15 @@ let releasesInfo = $releases
   }
   | sort-by --natural version
 
-if ($releasesInfo | length) == 0 {
+if ($releases | length) == 0 {
   error make { msg: $'No tag did match regex ($env.matchTag)' }
 }
 
-let latestReleaseInfo = $releasesInfo
+# Get the latest release
+let latestReleaseInfo = $releases
   | last
 
+# Get the version
 mut version = $latestReleaseInfo.version
 
 if $env.normalizeVersion == "true" {
@@ -79,7 +80,7 @@ if ($project | get extra?.otherVersions?) != null {
   # update the metadata of each other version
   let otherVersions = $project.extra.otherVersions
     | items {|key, value|
-      let latestVersion = $releasesInfo
+      let latestVersion = $releases
         | where { |releaseInfo| $releaseInfo.version | str starts-with $key }
         | last
         | get version

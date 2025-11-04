@@ -21,13 +21,12 @@ export default function rpcsvcProto(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/rpcgen"),
-    );
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/rpcgen"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

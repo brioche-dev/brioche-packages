@@ -23,15 +23,14 @@ export default function libdnet(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
-    .pipe(
-      std.libtoolSanitizeDependencies,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-        }),
-      (recipe) => std.withRunnableLink(recipe, "bin/dnet"),
-    );
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/dnet"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -53,6 +52,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
-    matchTag: /^libdnet-(?<version>([\d]+)\.([\d]+)\.([\d]+))$/,
+    matchTag: /^libdnet-(?<version>\d+\.\d+\.\d+)$/,
   });
 }

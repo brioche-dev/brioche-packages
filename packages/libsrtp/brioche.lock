@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/cisco/libsrtp/archive/refs/tags/v2.7.0.tar.gz": {
+      "type": "sha256",
+      "value": "54facb1727a557c2a76b91194dcb2d0a453aaf8e2d0cbbf1e3c2848c323e28ad"
+    }
+  }
+}

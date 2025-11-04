@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "fzf",
-  version: "0.66.0",
+  version: "0.66.1",
   repository: "https://github.com/junegunn/fzf.git",
 };
 
@@ -28,7 +28,6 @@ export default function fzf(): std.Recipe<std.Directory> {
         `main.revision=${gitRef.commit}`,
       ],
     },
-    path: ".",
     runnable: "bin/fzf",
   });
 }

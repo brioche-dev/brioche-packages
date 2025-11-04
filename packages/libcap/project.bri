@@ -4,21 +4,19 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libcap",
-  version: "1.2.76",
+  version: "1.2.77",
 };
 
-const source = std.recipe(() => {
-  const source = Brioche.gitCheckout({
-    repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
-    ref: `v${project.version}`,
-  });
-
-  return std.runBash`
+const source = Brioche.gitCheckout({
+  repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  std.runBash`
     sed -i 's|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT/progs/mkcapshdoc.sh"
   `
     .outputScaffold(source)
-    .toDirectory();
-});
+    .toDirectory(),
+);
 
 export default function libcap(): std.Recipe<std.Directory> {
   return std.runBash`
@@ -37,16 +35,15 @@ export default function libcap(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, std.runtimeUtils, briocheObjcopy)
     .toDirectory()
-    .pipe(
-      std.pkgConfigMakePathsRelative,
-      (recipe) =>
-        std.setEnv(recipe, {
-          CPATH: { append: [{ path: "include" }] },
-          LIBRARY_PATH: { append: [{ path: "lib" }] },
-          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        }),
-      fixSharedObjects,
-    );
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe(fixSharedObjects);
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

@@ -1,9 +1,9 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
+import nodejs, { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "claude_code",
-  version: "2.0.14",
+  version: "2.0.31",
   extra: {
     packageName: "@anthropic-ai/claude-code",
   },
@@ -13,6 +13,8 @@ export default function claudeCode(): std.Recipe<std.Directory> {
   return npmInstallGlobal({
     packageName: project.extra.packageName,
     version: project.version,
+    // TODO: use latest Node.js when upstream issue is resolved: https://github.com/anthropics/claude-code/issues/9795
+    nodejs: nodejs({ version: "24" }),
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/claude"));
 }
 

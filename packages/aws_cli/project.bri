@@ -1,9 +1,9 @@
 import * as std from "std";
-import python from "python";
+import python, { fixScriptShebangs } from "python";
 
 export const project = {
   name: "aws_cli",
-  version: "2.31.16",
+  version: "2.31.27",
   repository: "https://github.com/aws/aws-cli",
 };
 
@@ -72,7 +72,7 @@ export default function awsCli(): std.Recipe<std.Directory> {
   // Fix shebangs in the venv. `pip install` could install a new version of
   // pip (depending on the requirements file), which can re-introduce a
   // shebang script that we need to re-fix
-  venv = std.recipe(fixShebangs(venv));
+  venv = std.recipe(fixScriptShebangs(venv));
 
   // Install the application into the venv
   venv = std.runBash`
@@ -88,21 +88,18 @@ export default function awsCli(): std.Recipe<std.Directory> {
     .toDirectory();
 
   // Create the final recipe with the venv under `venv`
-  return (
-    std
-      .directory({
-        venv,
-      })
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
       // Add `bin/aws` to run the main script
-      .pipe(
-        (recipe) =>
-          std.addRunnable(recipe, "bin/aws", {
-            command: { relativePath: "venv/bin/python" },
-            args: [{ relativePath: "venv/bin/aws" }],
-          }),
-        (recipe) => std.withRunnableLink(recipe, "bin/aws"),
-      )
-  );
+      std.addRunnable(recipe, "bin/aws", {
+        command: { relativePath: "venv/bin/python" },
+        args: [{ relativePath: "venv/bin/aws" }],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/aws"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -126,73 +123,4 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubTags({ project });
-}
-
-// Copied from `python.fixShebangs`
-async function fixShebangs(
-  recipe: std.Recipe<std.Directory>,
-): Promise<std.Recipe<std.Directory>> {
-  // Get all Python shebang scripts under `bin/`. We assume _all_ shebang
-  // scripts we can find are Python scripts, except for `python-config`. This
-  // is because Python may install shebang scripts using `#!/bin/sh` when
-  // paths are long, so they won't necessarily have a shebang to call Python
-  // directly. See this function from Pip:
-  // https://github.com/pypa/pip/blob/102d8187a1f5a4cd5de7a549fd8a9af34e89a54f/src/pip/_vendor/distlib/scripts.py#L154
-  const pythonShebangPathList = await std.runBash`
-    cd "$recipe"
-    find bin ! -name 'python*-config' -type f -executable \\
-    | while read file; do
-      if [[ "$(head -c 2 "$file")" == '#!' ]]; then
-        echo "$file" >> "$BRIOCHE_OUTPUT"
-      fi
-    done
-  `
-    .env({ recipe })
-    .toFile()
-    .read();
-  const pythonShebangPaths = pythonShebangPathList
-    .split("\n")
-    .filter((line) => line !== "");
-
-  // Get the list of shebang shell scripts. We only handle the `python-config`
-  // script.
-  const shellShebangPathList = await std.runBash`
-    cd "$recipe"
-    find bin -name 'python*-config' -type f -executable \\
-    | while read file; do
-      if [[ "$(head -c 2 "$file")" == '#!' ]]; then
-        echo "$file" >> "$BRIOCHE_OUTPUT"
-      fi
-    done
-  `
-    .env({ recipe })
-    .toFile()
-    .read();
-  const shellShebangPaths = shellShebangPathList
-    .split("\n")
-    .filter((line) => line !== "");
-
-  // Wrap each Python script using `std.addRunnable()`
-  const pythonWrappedShebangs = pythonShebangPaths.map((path) => {
-    return std.addRunnable(std.directory(), path, {
-      command: { relativePath: "bin/python" },
-      args: [[std.glob(recipe, [path]), `/${path}`]],
-    });
-  });
-
-  // Update each shell script by using `#!/usr/bin/env sh`. We can't
-  // use `std.addRunnable()` because `python-config` is sensitive to its
-  // path on disk.
-  const fixedShellShebangs = shellShebangPaths.map((path) => {
-    const fixedFile = std.runBash`
-      echo '#!/usr/bin/env sh' > "$BRIOCHE_OUTPUT"
-      tail -n+2 "$file" >> "$BRIOCHE_OUTPUT"
-      chmod +x "$BRIOCHE_OUTPUT"
-    `
-      .env({ file: recipe.get(path) })
-      .toFile();
-    return std.directory().insert(path, fixedFile);
-  });
-
-  return std.merge(recipe, ...pythonWrappedShebangs, ...fixedShellShebangs);
 }

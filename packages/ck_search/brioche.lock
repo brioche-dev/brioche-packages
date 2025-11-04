@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/ck-search/0.5.3/download": {
+    "https://crates.io/api/v1/crates/ck-search/0.7.0/download": {
       "type": "sha256",
-      "value": "cfe1c301c7ff642eebd543442db9eda814e24a9d898e0ddbe9436307ff58baa0"
+      "value": "170ead0b844bc1f12128c2aef294cf2af30575c311ac931ef9f17cb0c137cc1e"
     }
   }
 }

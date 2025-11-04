@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/BurntSushi/ripgrep.git": {
-      "14.1.1": "4649aa9700619f94cf9c66876e9549d83420e16c"
+      "15.1.0": "af60c2de9d85e7f3d81c78601669468cf02dabab"
     }
   }
 }

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitea.com/gitea/gitea-mcp": {
+      "v0.5.0": "058d4cd07f02e28eb5aca67656bd7d242282487b"
+    }
+  }
+}
