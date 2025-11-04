@@ -1,24 +1,16 @@
-# Get project metadata
-mut project = $env.project
-  | from json
-
 # Retrieve the most recent releases from Gitea
 let releases = http get $'https://gitea.com/api/v1/repos/($env.repoOwner)/($env.repoName)/releases'
   # Extract the version(s)
   | each {|release|
-    let parsedTag = $release.tag_name
+    $release.tag_name
       | parse --regex $env.matchTag
-
-    # If no tag is matched, a nil value will be returned
-    # and this value will be ignored by 'each'
-    if ($parsedTag | length) != 0 {
-      { version: $parsedTag.0.version }
-    }
+      | into record
   }
+  | where (($it | get -o version) | is-not-empty)
   | sort-by --natural version
 
-if ($releases | length) == 0 {
-  error make { msg: $'No tag did match regex ($env.matchTag)' }
+if ($releases | is-empty) {
+  error make { msg: $'No tag does match regex ($env.matchTag)' }
 }
 
 # Get the latest release
@@ -32,6 +24,10 @@ if $env.normalizeVersion == "true" {
   $version = $version
     | str replace --all --regex "(-|_)" "."
 }
+
+# Get project metadata, and update it
+mut project = $env.project
+  | from json
 
 $project = $project
   | update version $version
