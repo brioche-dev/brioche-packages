@@ -1,5 +1,5 @@
 import * as std from "std";
-import python, { fixScriptShebangs } from "python";
+import python, { fixScriptShebangs, wrapVenvScripts } from "python";
 
 export const project = {
   name: "aws_cli",
@@ -96,10 +96,9 @@ export default function awsCli(): std.Recipe<std.Directory> {
       venv,
     })
     .pipe((recipe) =>
-      // Add `bin/aws` to run the main script
-      std.addRunnable(recipe, "bin/aws", {
-        command: { relativePath: "venv/bin/python" },
-        args: [{ relativePath: "venv/bin/aws" }],
+      wrapVenvScripts(recipe, {
+        venvDir: "venv",
+        scripts: ["aws", "aws_completer"],
       }),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/aws"));
