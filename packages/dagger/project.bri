@@ -20,7 +20,7 @@ export default function dagger(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/dagger/dagger/engine.Version=v${project.version}`,
+        `github.com/dagger/dagger/engine.Version=${project.version}`,
         // The engine can be downloaded from `docker-image://registry.dagger.io/engine`.
         // Here, we need to enforce the correct tag for the engine.
         // Which is the same as the CLI version.
@@ -43,7 +43,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `dagger v${project.version}`;
+  const expected = `dagger ${project.version}`;
   std.assert(
     result.startsWith(expected),
     `expected '${expected}', got '${result}'`,
