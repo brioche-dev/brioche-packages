@@ -15,13 +15,13 @@ const source = Brioche.download(
 export default function duktape(): std.Recipe<std.Directory> {
   return std.runBash`
     make -f Makefile.cmdline -j "$(nproc)"
-    mkdir -p "$BRIOCHE_OUTPUT/bin"
     mv duk "$BRIOCHE_OUTPUT/bin"
 
     make -f Makefile.sharedlibrary -j "$(nproc)"
     make INSTALL_PREFIX="$BRIOCHE_OUTPUT" -f Makefile.sharedlibrary install
   `
     .workDir(source)
+    .outputScaffold(std.directory({ bin: std.directory() }))
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative)
