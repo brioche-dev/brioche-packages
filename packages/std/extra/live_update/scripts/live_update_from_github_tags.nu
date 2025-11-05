@@ -1,7 +1,3 @@
-# Get project metadata
-mut project = $env.project
-  | from json
-
 # Retrieve the most recent tags from GitHub
 # Include GitHub Token if present (for increased rate limits)
 mut gh_headers = []
@@ -35,12 +31,13 @@ let tags = http get --allow-errors --headers $gh_headers $'https://api.github.co
       # and is followed by the tag name, remove it
       | str substring 10..-1
       | parse --regex $env.matchTag
-      | get -o 0
+      | into record
   }
+  | where (($it | get -o version) | is-not-empty)
   | sort-by --natural version
 
-if ($tags | length) == 0 {
-  error make { msg: $'No tag did match regex ($env.matchTag)' }
+if ($tags | is-empty) {
+  error make { msg: $'No tag does match regex ($env.matchTag)' }
 }
 
 # Get the latest tag
@@ -55,6 +52,10 @@ if $env.normalizeVersion == "true" {
   $version = $version
     | str replace --all --regex "(-|_)" "."
 }
+
+# Get project metadata, and update it
+mut project = $env.project
+  | from json
 
 $project = $project
   | update version $version
