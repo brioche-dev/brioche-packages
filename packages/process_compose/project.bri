@@ -36,7 +36,10 @@ export default function processCompose(): std.Recipe<std.Directory> {
   })
     .pipe(
       // Rename main binary from `bin/src` to `bin/process-compose`
-      (recipe) => recipe.insert("bin/process-compose", recipe.get("bin/src")),
+      (recipe) =>
+        recipe
+          .insert("bin/process-compose", recipe.get("bin/src"))
+          .remove("bin/src"),
     )
     .pipe(
       // Add a link for `brioche run`
