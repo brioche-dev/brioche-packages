@@ -18,7 +18,10 @@ const source = Brioche.download(
 
 export default function kmod(): std.Recipe<std.Directory> {
   return std.runBash`
-    meson setup build --prefix=/ -Dmanpages=false
+    meson setup build \
+      -Dmanpages=false \
+      --buildtype=release \
+      --prefix=/
     meson compile -C build
     DESTDIR="$BRIOCHE_OUTPUT" meson install -C build
 
