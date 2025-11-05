@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/nextest-rs/nextest.git": {
-      "cargo-nextest-0.9.110": "83952e13433fa86c24e2cdef1aaddeacb6dd85f4"
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-nextest/0.9.110/download": {
+      "type": "sha256",
+      "value": "f6b114df12d9b2b59002fc41a82c25d98cea054cc11fbf66ad10be1d49b227c5"
     }
   }
 }
