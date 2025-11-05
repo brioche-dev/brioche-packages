@@ -1,0 +1,43 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "datafusion_cli",
+  version: "50.3.0",
+  extra: {
+    crateName: "datafusion-cli",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function datafusionCli(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/datafusion-cli",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    datafusion-cli --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(datafusionCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `datafusion-cli ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromRustCrates({ project });
+}
