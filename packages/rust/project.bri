@@ -351,11 +351,9 @@ export function cargoBuild(
     .toDirectory()
     .pipe((recipe) =>
       // Remove extra metadata created by `cargo install`
-      recipe.remove(".crates.toml"),
-    )
-    .pipe((recipe) =>
-      // Remove extra metadata created by `cargo install`
-      recipe.remove(".crates2.json"),
+      recipe
+        .remove(".crates.toml")
+        .remove(".crates2.json"),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
