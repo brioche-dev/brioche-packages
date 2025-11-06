@@ -56,7 +56,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://git.joeyh.name/git/moreutils.git/refs/tags
       | lines
-      | where {|it| ($it | str contains 'href="') and (not ($it | str contains 'sponge')) }
+      | where ($it | str contains 'href="') and (not ($it | str contains 'sponge'))
       | parse --regex '<a href="(?<version>[0-9.]+)"'
       | sort-by --natural --reverse version
       | get 0.version

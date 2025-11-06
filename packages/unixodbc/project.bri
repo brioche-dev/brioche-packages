@@ -56,7 +56,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://www.unixodbc.org/download.html
       | lines
-      | where {|it| $it | str contains "unixODBC" }
+      | where ($it | str contains "unixODBC")
       | parse --regex '<a  HREF="unixODBC-(?<version>.+)\.tar\.gz">'
       | sort-by --natural --reverse version
       | get 0.version

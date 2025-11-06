@@ -52,7 +52,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://www.libarchive.de/downloads
       | lines
-      | where {|it| $it | str contains "libarchive" }
+      | where ($it | str contains "libarchive")
       | parse --regex '<a href="./libarchive-(?<version>.+)\.tar\.gz">'
       | sort-by --natural --reverse version
       | get 0.version

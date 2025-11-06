@@ -52,7 +52,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://ftp.gnu.org/gnu/readline
       | lines
-      | where {|it| ($it | str contains "readline-") and (not ($it | str contains ".sig")) }
+      | where ($it | str contains "readline-") and (not ($it | str contains ".sig"))
       | parse --regex '<a href="readline-(?<version>[0-9]+.[0-9]+(.[0-9]+)?)\.tar\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
