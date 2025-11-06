@@ -25,7 +25,7 @@ export default function processCompose(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
+        `github.com/f1bonacc1/process-compose/src/config.Version=${project.version}`,
         "-X",
         `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.releaseDate}`,
         "-X",
@@ -53,7 +53,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  const version = result.match(/^Version:\s*v([\d.]+)$/m)?.at(1);
+  const version = result.match(/^Version:\s*([\d.]+)$/m)?.at(1);
 
   // Check that the result contains the expected version
   const expected = project.version;
