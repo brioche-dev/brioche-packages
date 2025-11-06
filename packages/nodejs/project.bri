@@ -9,7 +9,6 @@ export const project = {
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
-      "25": "25.2.0",
       "24": "24.11.1",
       "22": "22.21.1",
       "20": "20.19.5",
@@ -18,36 +17,68 @@ export const project = {
 } as const;
 
 std.assert(
-  Object.keys(project.extra.otherVersions).some((version) =>
-    project.version.startsWith(`${version}.`),
+  Object.keys(project.extra.otherVersions).every(
+    (minorVersion) => !project.version.startsWith(`${minorVersion}.`),
   ),
-  "Node.js package version not found in extra.minorVersions",
+  "Latest Node.js package version found in extra.otherVersions (should not be present)",
 );
 
 /**
  * The Node.js version.
  */
-type NodeVersion = keyof typeof project.extra.otherVersions;
+type NodeVersion = "latest" | keyof typeof project.extra.otherVersions;
 
-function getLatestVersion(): NodeVersion {
-  const versions = Object.keys(project.extra.otherVersions);
-  versions.sort((a, b) => parseInt(b) - parseInt(a));
+/**
+ * The request to retrieve the Node.js version.
+ *
+ * @param version - Optionally, the version of Node.js. Defaults to `"latest"`.
+ * @param full - Optionally, whether to return the version with the patch number.
+ *   Defaults to `true`.
+ */
+interface NodeVersionRequest {
+  version?: NodeVersion;
+  full?: boolean;
+}
 
-  return versions[0] as NodeVersion;
+/**
+ * Get the version of Node.js for the given `NodeVersion`.
+ *
+ * @param request - The request to retrieve the Node.js version.
+ *
+ * @returns The version of Node.js.
+ */
+export function getNodeVersion(request: NodeVersionRequest): string {
+  const { version = "latest", full = true } = request;
+
+  if (full) {
+    if (version === "latest") {
+      return project.version;
+    }
+
+    return project.extra.otherVersions[version];
+  }
+
+  const versions = (
+    version === "latest"
+      ? project.version
+      : project.extra.otherVersions[version]
+  ).split(".");
+
+  return `${versions[0]}.${versions[1]}`;
 }
 
 const prebuiltBinaries: Record<
   string,
   Record<string, std.Recipe<std.Directory>>
 > = {
-  "25": {
+  latest: {
     "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.otherVersions["25"]}/node-v${project.extra.otherVersions["25"]}-linux-x64.tar.xz`,
+      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.otherVersions["25"]}/node-v${project.extra.otherVersions["25"]}-linux-arm64.tar.xz`,
+      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
@@ -138,7 +169,7 @@ interface NodeOptions {
 export default function nodejs(
   options: NodeOptions = {},
 ): std.Recipe<std.Directory> {
-  const { version = getLatestVersion() } = options;
+  const { version = "latest" } = options;
 
   return prebuiltBinary(version, std.CURRENT_PLATFORM)
     .pipe((recipe) =>
@@ -150,9 +181,7 @@ export default function nodejs(
 }
 
 export function test(): std.Recipe<std.Directory> {
-  const nodeVersions = Object.keys(
-    project.extra.otherVersions,
-  ) as NodeVersion[];
+  const nodeVersions = Object.keys(prebuiltBinaries) as NodeVersion[];
 
   const tests = nodeVersions.map(async (version) => {
     const script = std.runBash`
@@ -164,7 +193,7 @@ export function test(): std.Recipe<std.Directory> {
     const result = (await script.read()).trim();
 
     // Check that the result contains the expected version
-    const expected = `v${project.extra.otherVersions[version]}`;
+    const expected = `v${getNodeVersion({ version })}`;
     std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
     return std.directory().insert(version, script);
