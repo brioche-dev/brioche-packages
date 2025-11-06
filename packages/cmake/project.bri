@@ -282,7 +282,7 @@ function isCMakeVariableValue(
 /**
  * Creates a relative symlink from lib64 to lib folder if lib64 folder exists.
  *
- * @param recipe The recipe to create the symlink for.
+ * @param recipe - The recipe to create the symlink for.
  *
  * @returns The recipe with the symlink created.
  */
