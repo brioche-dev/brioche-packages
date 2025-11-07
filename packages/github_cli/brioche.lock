@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/cli/cli.git": {
-      "v2.82.1": "40512a8f7b5933f6a349980957e682c8b6a13020"
+      "v2.83.0": "152d328db80d4d4d7318c7700b6644ee827618a7"
     }
   }
 }
