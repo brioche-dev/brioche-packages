@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "opentofu",
-  version: "1.10.6",
+  version: "1.10.7",
   repository: "https://github.com/opentofu/opentofu.git",
 };
 
