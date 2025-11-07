@@ -68,7 +68,7 @@ interface LiveUpdateFromGithubTagsOptions {
  * export function liveUpdate(): std.Recipe<std.Directory> {
  *   return std.liveUpdateFromGithubTags({
  *     project,
- *     matchTag: /^v(?<version>.+)$/, // Strip "v" prefix from tags
+ *     matchTag: /^v(?<version>\d+\.\d+\.\d+)$/, // Strip "v" prefix from tags
  *   });
  * }
  * ```

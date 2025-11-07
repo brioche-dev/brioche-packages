@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/httm/0.49.9/download": {
+      "type": "sha256",
+      "value": "a142edcfbf4f305c8329c078e63a71c660de1a432b81ecc2c8db2f7082119936"
+    }
+  }
+}

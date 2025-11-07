@@ -1,24 +1,20 @@
-# Get project metadata
-mut project = $env.project
-  | from json
-
 # Retrieve the latest release from npm registry
 let latestReleaseInfo = http get $'https://registry.npmjs.org/($env.packageName)/latest'
 
-# Get the version
-let version = $latestReleaseInfo
+let parsedVersion = $latestReleaseInfo
   | get version
-
-let parsedVersion = $version
   | parse --regex $env.matchVersion
-if ($parsedVersion | length) == 0 {
-  error make { msg: $'Latest release ($version) did not match regex ($env.matchVersion)' }
+  | into record
+if (($parsedVersion | get -o version) | is-empty) {
+  error make { msg: $'Latest release does not match regex ($env.matchVersion)' }
 }
 
-let version = $parsedVersion.0.version?
-if $version == null {
-  error make { msg: $'Regex ($env.matchVersion) did not include version when matching latest release ($version)' }
-}
+# Get the version
+let version = $parsedVersion.version
+
+# Get project metadata, and update it
+mut project = $env.project
+  | from json
 
 $project = $project
   | update version $version

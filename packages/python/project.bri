@@ -6,12 +6,13 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "python",
-  version: "3.13.7",
+  version: "3.14.0",
   repository: "https://github.com/python/cpython",
   extra: {
     otherVersions: {
-      "3.13": "3.13.7",
-      "3.12": "3.12.11",
+      "3.14": "3.14.0",
+      "3.13": "3.13.9",
+      "3.12": "3.12.12",
     },
   },
 };
@@ -41,8 +42,11 @@ export function getLatestVersion(): PythonVersion {
 }
 
 const sources: { [version: string]: std.Recipe<std.File> } = {
-  "3.13": Brioche.download(
+  "3.14": Brioche.download(
     `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
+  ),
+  "3.13": Brioche.download(
+    `https://www.python.org/ftp/python/${project.extra.otherVersions["3.13"]}/Python-${project.extra.otherVersions["3.13"]}.tar.xz`,
   ),
   "3.12": Brioche.download(
     `https://www.python.org/ftp/python/${project.extra.otherVersions["3.12"]}/Python-${project.extra.otherVersions["3.12"]}.tar.xz`,
@@ -69,6 +73,8 @@ export default async function python(options: PythonOptions = {}) {
     export LD_LIBRARY_PATH="$LIBRARY_PATH"
     export PATH="$BRIOCHE_OUTPUT/bin\${PATH:+:$PATH}"
 
+    # Assume little-endian for the endianness of the system
+    env ax_cv_c_float_words_bigendian=no \\
     ./configure \\
       --prefix=/ \\
       --enable-shared \\
@@ -209,7 +215,6 @@ export async function fixScriptShebangs(
   // directly. See this function from Pip:
   // https://github.com/pypa/pip/blob/102d8187a1f5a4cd5de7a549fd8a9af34e89a54f/src/pip/_vendor/distlib/scripts.py#L154
   const pythonShebangPathList = await std.runBash`
-    cd "$recipe"
     find bin ! -name 'python*-config' -type f -executable \\
     | while read file; do
       if [[ "$(head -c 2 "$file")" == '#!' ]]; then
@@ -217,7 +222,7 @@ export async function fixScriptShebangs(
       fi
     done
   `
-    .env({ recipe })
+    .workDir(recipe)
     .toFile()
     .read();
   const pythonShebangPaths = pythonShebangPathList
@@ -227,7 +232,6 @@ export async function fixScriptShebangs(
   // Get the list of shebang shell scripts. We only handle the `python-config`
   // script.
   const shellShebangPathList = await std.runBash`
-    cd "$recipe"
     find bin -name 'python*-config' -type f -executable \\
     | while read file; do
       if [[ "$(head -c 2 "$file")" == '#!' ]]; then
@@ -235,7 +239,7 @@ export async function fixScriptShebangs(
       fi
     done
   `
-    .env({ recipe })
+    .workDir(recipe)
     .toFile()
     .read();
   const shellShebangPaths = shellShebangPathList

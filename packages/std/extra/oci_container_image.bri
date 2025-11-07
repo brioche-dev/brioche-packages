@@ -44,7 +44,7 @@ export function ociContainerImage(
       ),
     );
 
-    const layerTar = tar(collectReferences(options.recipe));
+    const layerTar = tar(std.collectReferences(options.recipe));
     const { sha256Digest: layerSha256Digest } = await describeBlob(layerTar);
     const diffId = `sha256:${layerSha256Digest}`;
 
@@ -180,43 +180,6 @@ async function describeBlob(
   }
 
   return { sha256Digest, size: parseInt(size) };
-}
-
-// TODO: Remove once Brioche v0.1.0 is no longer supported
-function collectReferences(
-  recipe: std.RecipeLike<std.Directory>,
-): std.Recipe<std.Directory> {
-  if (std.semverMatches(std.BRIOCHE_VERSION, ">=0.1.1")) {
-    return std.collectReferences(recipe);
-  }
-
-  console.warn(
-    "Using fallback to collect references from artifact, container will be much larger than it should be! Run `brioche self-update` to upgrade to the latest version of Brioche",
-  );
-  return runBash`
-    if [ -d "$BRIOCHE_RESOURCE_DIR" -a -n "$(ls -A "$BRIOCHE_RESOURCE_DIR")" ]; then
-      mkdir -p "$BRIOCHE_OUTPUT"/brioche-resources.d/
-      cp \\
-        -dr \\
-        --no-preserve=mode,ownership,timestamps \\
-        "$BRIOCHE_RESOURCE_DIR"/* "$BRIOCHE_OUTPUT"/brioche-resources.d/
-    fi
-
-    oldifs="$IFS"
-    IFS=":"
-    for resource_dir in $BRIOCHE_INPUT_RESOURCE_DIRS; do
-      if [ -d "$resource_dir" -a -n "$(ls -A "$resource_dir")" ]; then
-        mkdir -p "$BRIOCHE_OUTPUT"/brioche-resources.d/
-        cp \\
-          -dr \\
-          --no-preserve=mode,ownership,timestamps \\
-          "$resource_dir"/* "$BRIOCHE_OUTPUT"/brioche-resources.d/
-      fi
-    done
-    IFS="$oldifs"
-  `
-    .outputScaffold(recipe)
-    .toDirectory();
 }
 
 function tar(recipe: std.RecipeLike<std.Directory>): std.Recipe<std.File> {

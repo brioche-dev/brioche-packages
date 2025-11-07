@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "markdown_oxide",
-  version: "0.25.8",
+  version: "0.25.10",
   repository: "https://github.com/Feel-ix-343/markdown-oxide.git",
 };
 
@@ -31,8 +31,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   // Check that the result contains the expected version
   // FIXME: See https://github.com/Feel-ix-343/markdown-oxide/issues/302
   let expected = `markdown-oxide v${project.version}`;
-  if (project.version === "0.25.8") {
-    expected = `markdown-oxide v0.25.6`;
+  if (project.version === "0.25.10") {
+    expected = `markdown-oxide v0.25.9`;
   }
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 

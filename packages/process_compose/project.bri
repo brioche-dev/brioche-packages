@@ -25,7 +25,7 @@ export default function processCompose(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/f1bonacc1/process-compose/src/config.Version=v${project.version}`,
+        `github.com/f1bonacc1/process-compose/src/config.Version=${project.version}`,
         "-X",
         `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.releaseDate}`,
         "-X",
@@ -36,7 +36,10 @@ export default function processCompose(): std.Recipe<std.Directory> {
   })
     .pipe(
       // Rename main binary from `bin/src` to `bin/process-compose`
-      (recipe) => recipe.insert("bin/process-compose", recipe.get("bin/src")),
+      (recipe) =>
+        recipe
+          .insert("bin/process-compose", recipe.get("bin/src"))
+          .remove("bin/src"),
     )
     .pipe(
       // Add a link for `brioche run`
@@ -53,7 +56,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  const version = result.match(/^Version:\s*v([\d.]+)$/m)?.at(1);
+  const version = result.match(/^Version:\s*([\d.]+)$/m)?.at(1);
 
   // Check that the result contains the expected version
   const expected = project.version;

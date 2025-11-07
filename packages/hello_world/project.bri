@@ -6,11 +6,11 @@ export const project = {
 
 export default function (): std.Recipe<std.Directory> {
   return std.runBash`
-    mkdir -p "$BRIOCHE_OUTPUT/bin"
     gcc src/main.c -o "$BRIOCHE_OUTPUT/bin/hello-world"
-    ln -s bin/hello-world "$BRIOCHE_OUTPUT/brioche-run"
   `
     .workDir(Brioche.glob("src"))
+    .outputScaffold(std.directory({ bin: std.directory() }))
     .dependencies(std.toolchain)
-    .toDirectory();
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/hello-world"));
 }

@@ -17,7 +17,7 @@ export default function kubent(): std.Recipe<std.Directory> {
     source,
     path: "./cmd/kubent",
     buildParams: {
-      ldflags: ["-s", "-w", "-X", `main.version=v${project.version}`],
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
     },
     runnable: "bin/kubent",
   });
@@ -32,7 +32,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  const versionMatch = result.match(/version v([^\s]+)/);
+  const versionMatch = result.match(/version ([^\s]+)/);
   const version = versionMatch?.[1] ?? "";
 
   // Check that the result contains the expected version

@@ -5,7 +5,7 @@ import nushell from "nushell";
 
 export const project = {
   name: "pnpm",
-  version: "10.19.0",
+  version: "10.20.0",
   repository: "https://github.com/pnpm/pnpm",
 };
 
@@ -189,8 +189,8 @@ export function pnpmInstallGlobal(
  *
  * @remark pnpm installs bins using a shell script binstub.
  *
- * @param recipe The recipe to wrap binstubs for.
- * @param nodejs The Node.js recipe to use.
+ * @param recipe - The recipe to wrap binstubs for.
+ * @param nodejs - The Node.js recipe to use.
  */
 async function wrapBinstubs(
   recipe: std.RecipeLike<std.Directory>,

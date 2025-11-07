@@ -19,7 +19,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          cd "$BRIOCHE_OUTPUT"
           patch -Np1 -i "$sourcePatch"
           sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' Makefile
           sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
@@ -30,6 +29,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         PATH: std.tpl`${stage2}/bin`,
       },
       outputScaffold: source,
+      currentDir: std.outputPath,
     })
     .toDirectory();
 

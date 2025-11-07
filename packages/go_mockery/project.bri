@@ -24,7 +24,6 @@ export default function goMockery(): std.Recipe<std.Directory> {
         `github.com/vektra/mockery/v3/internal/logging.SemVer=${project.version}`,
       ],
     },
-    path: ".",
     runnable: "bin/mockery",
   });
 }

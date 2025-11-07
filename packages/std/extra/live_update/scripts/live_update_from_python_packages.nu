@@ -1,24 +1,20 @@
-# Get project metadata
-mut project = $env.project
-  | from json
-
 # Retrieve the latest release from PyPI registry
 let packageInfo = http get $'https://pypi.org/pypi/($env.packageName)/json'
 
-# Get the version
-let version = $packageInfo
+let parsedVersion = $packageInfo
   | get info.version
-
-let parsedVersion = $version
   | parse --regex $env.matchVersion
-if ($parsedVersion | length) == 0 {
-  error make { msg: $'Latest release ($version) did not match regex ($env.matchVersion)' }
+  | into record
+if (($parsedVersion | get -o version) | is-empty) {
+  error make { msg: $'Latest release does not match regex ($env.matchVersion)' }
 }
 
-let version = $parsedVersion.0.version?
-if $version == null {
-  error make { msg: $'Regex ($env.matchVersion) did not include version when matching latest release ($version)' }
-}
+# Get the version
+let version = $parsedVersion.version
+
+# Get project metadata, and update it
+mut project = $env.project
+  | from json
 
 $project = $project
   | update version $version

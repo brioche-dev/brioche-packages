@@ -3,7 +3,7 @@ import python, { fixScriptShebangs } from "python";
 
 export const project = {
   name: "aws_cli",
-  version: "2.31.22",
+  version: "2.31.29",
   repository: "https://github.com/aws/aws-cli",
 };
 
@@ -21,8 +21,13 @@ const source = Brioche.gitCheckout({
 );
 
 export default function awsCli(): std.Recipe<std.Directory> {
+  // FIXME: Remove the override once the recipe supports the latest version of
+  // Python, basically once https://github.com/aws/aws-cli/pull/9790 lands on main)
+  const pythonVersion = "3.13";
+  const managedPython = python({ version: pythonVersion });
+
   // Create a venv
-  let venv = std.recipe(python);
+  let venv = std.recipe(managedPython);
 
   // Download dependencies from PyPI
   // SAFETY: the `requirements-*-lock.txt` files have hashes, and the

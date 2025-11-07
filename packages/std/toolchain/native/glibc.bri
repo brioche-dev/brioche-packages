@@ -24,7 +24,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          cd "$BRIOCHE_OUTPUT"
           patch -Np1 -i "$sourcePatchFhs"
           patch -Np1 -i "$sourcePatchMemalign"
         `,
@@ -35,6 +34,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         sourcePatchMemalign,
       },
       outputScaffold: source,
+      currentDir: std.outputPath,
     })
     .toDirectory();
 

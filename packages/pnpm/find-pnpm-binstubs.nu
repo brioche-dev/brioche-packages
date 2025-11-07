@@ -7,7 +7,7 @@ ls .bin/**/*
 
     { name: $bin.name, firstLine: $firstLine }
   }
-  | where {|bin| $bin.firstLine | str contains "bin/sh"}
+  | where ($it.firstLine | str contains "bin/sh")
   | select name
   | to json
   | save $env.BRIOCHE_OUTPUT

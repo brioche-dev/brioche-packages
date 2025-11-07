@@ -5,7 +5,7 @@ import * as t from "typer";
 
 export const project = {
   name: "rust",
-  version: "1.90.0",
+  version: "1.91.0",
   repository: "https://github.com/rust-lang/rust",
 };
 
@@ -345,27 +345,17 @@ export function cargoBuild(
       },
       dependencies: [rust, std.toolchain, ...(options.dependencies ?? [])],
       workDir: crate,
-      currentDir:
-        options.currentDir != null
-          ? std.tpl`${std.workDir}/${options.currentDir}`
-          : std.workDir,
+      currentDir: std.tpl`${std.workDir}/${options.currentDir}`,
       unsafe: options.unsafe,
     })
     .toDirectory()
     .pipe((recipe) =>
       // Remove extra metadata created by `cargo install`
-      recipe.remove(".crates.toml"),
+      recipe
+        .remove(".crates.toml")
+        .remove(".crates2.json"),
     )
-    .pipe((recipe) =>
-      // Remove extra metadata created by `cargo install`
-      recipe.remove(".crates2.json"),
-    )
-    .pipe((recipe) =>
-      // Add a runnable link if set in the options
-      options.runnable != null
-        ? std.withRunnableLink(recipe, options.runnable)
-        : recipe,
-    );
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
 
 /**
@@ -413,11 +403,7 @@ function createLockfile(
   `
     .dependencies(rust)
     .outputScaffold(source)
-    .currentDir(
-      currentDir != null
-        ? std.tpl`${std.outputPath}/${currentDir}`
-        : std.outputPath,
-    )
+    .currentDir(std.tpl`${std.outputPath}/${currentDir}`)
     .unsafe({ networking: true })
     .toDirectory();
 }
@@ -453,10 +439,7 @@ export function createSkeletonCrate(
       args: ["chef", "prepare", "--recipe-path", std.outputPath],
       dependencies: [rust, cargoChef],
       workDir: source,
-      currentDir:
-        currentDir != null
-          ? std.tpl`${std.workDir}/${currentDir}`
-          : std.workDir,
+      currentDir: std.tpl`${std.workDir}/${currentDir}`,
     })
     .toFile();
 
@@ -469,10 +452,7 @@ export function createSkeletonCrate(
         currentDir != null
           ? std.directory({ [currentDir]: std.directory() })
           : std.directory(),
-      currentDir:
-        currentDir != null
-          ? std.tpl`${std.outputPath}/${currentDir}`
-          : std.outputPath,
+      currentDir: std.tpl`${std.outputPath}/${currentDir}`,
     })
     .toDirectory();
 }
@@ -556,11 +536,7 @@ export function vendorCrate(
   `
     .dependencies(rust)
     .outputScaffold(skeletonCrate)
-    .currentDir(
-      currentDir != null
-        ? std.tpl`${std.outputPath}/${currentDir}`
-        : std.outputPath,
-    )
+    .currentDir(std.tpl`${std.outputPath}/${currentDir}`)
     .unsafe({ networking: true })
     .toDirectory();
 

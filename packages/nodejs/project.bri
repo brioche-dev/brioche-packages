@@ -5,13 +5,13 @@ import nushell from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "25.0.0",
+  version: "25.1.0",
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
-      "25": "25.0.0",
-      "24": "24.10.0",
-      "22": "22.21.0",
+      "25": "25.1.0",
+      "24": "24.11.0",
+      "22": "22.21.1",
       "20": "20.19.5",
     },
   },
@@ -312,8 +312,8 @@ export function npmInstallGlobal(
 /*
  * Wraps the binaries of a nodejs package with the nodejs interpreter.
  *
- * @param recipe The recipe to wrap the binaries of.
- * @param nodejs The Node.js recipe to use.
+ * @param recipe - The recipe to wrap the binaries of.
+ * @param nodejs - The Node.js recipe to use.
  */
 async function wrapNodejsBins(
   recipe: std.RecipeLike<std.Directory>,

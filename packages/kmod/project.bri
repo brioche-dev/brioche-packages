@@ -18,7 +18,10 @@ const source = Brioche.download(
 
 export default function kmod(): std.Recipe<std.Directory> {
   return std.runBash`
-    meson setup build --prefix=/ -Dmanpages=false
+    meson setup build \
+      -Dmanpages=false \
+      --buildtype=release \
+      --prefix=/
     meson compile -C build
     DESTDIR="$BRIOCHE_OUTPUT" meson install -C build
 
@@ -66,7 +69,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://www.kernel.org/pub/linux/utils/kernel/kmod
       | lines
-      | where {|it| ($it | str contains 'href="kmod-') and ($it | str contains '.tar.gz')}
+      | where ($it | str contains 'href="kmod-') and ($it | str contains '.tar.gz')
       | parse --regex '<a href="kmod-(?<version>.+).tar.gz"'
       | sort-by --natural --reverse version
       | get 0.version

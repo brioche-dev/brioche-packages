@@ -56,7 +56,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://git.joeyh.name/git/moreutils.git/refs/tags
       | lines
-      | where {|it| ($it | str contains 'href="') and (not ($it | str contains 'sponge')) }
+      | where ($it | str contains 'href="') and (not ($it | str contains 'sponge'))
       | parse --regex '<a href="(?<version>[0-9.]+)"'
       | sort-by --natural --reverse version
       | get 0.version
@@ -99,7 +99,6 @@ function wrapPerlShebangs(
     recipe = recipe.insert(".local/libexec/moreutils/perl", perlEnv());
 
     const perlShebangPathList = await std.runBash`
-      cd "$recipe"
       find bin -type f -executable \\
       | while read file; do
         if [[ "$(head -c 2 "$file")" == '#!' ]] && head -n1 "$file" | grep -q perl; then
@@ -107,7 +106,7 @@ function wrapPerlShebangs(
         fi
       done
     `
-      .env({ recipe })
+      .workDir(recipe)
       .toFile()
       .read();
     const perlShebangPaths = perlShebangPathList

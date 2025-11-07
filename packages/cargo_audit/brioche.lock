@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/rustsec/rustsec.git": {
-      "cargo-audit/v0.21.2": "18e58c28d9e6a542a167f19057c97554ec9b845f"
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-audit/0.21.2/download": {
+      "type": "sha256",
+      "value": "16e82b1e8f78af1aadf7cd98535a8ea0bbc20452f93c28e03788cfc92ef600a8"
     }
   }
 }

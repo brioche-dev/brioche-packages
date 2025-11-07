@@ -19,8 +19,6 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          cd "$BRIOCHE_OUTPUT"
-
           sed -i '/MV.*old/d' Makefile.in
           sed -i '/{OLDSUFF}/c:' support/shlib-install
 
@@ -32,6 +30,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         sourcePatch,
       },
       outputScaffold: source,
+      currentDir: std.outputPath,
     })
     .toDirectory();
 

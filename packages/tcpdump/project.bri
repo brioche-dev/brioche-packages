@@ -48,7 +48,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://www.tcpdump.org/release
       | lines
-      | where {|it| ($it | str contains "tcpdump") and (not ($it | str contains ".sig")) }
+      | where ($it | str contains "tcpdump") and (not ($it | str contains ".sig"))
       | parse --regex '<a href="tcpdump-(?<version>.+)\.tar\.[^"]+">'
       | sort-by --natural --reverse version
       | get 0.version

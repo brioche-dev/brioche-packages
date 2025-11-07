@@ -61,21 +61,11 @@ export function setEnv(
         );
       }
     } else if ("fallback" in value && "path" in value.fallback) {
-      std.assert(
-        std.semverMatches(std.BRIOCHE_VERSION, ">=0.1.2"),
-        "fallback env vars require Brioche v0.1.2 or later",
-      );
-
       result = result.insert(
         `brioche-env.d/env/${key}`,
         std.symlink({ target: `../../${value.fallback.path}` }),
       );
     } else if ("fallback" in value && "value" in value.fallback) {
-      std.assert(
-        std.semverMatches(std.BRIOCHE_VERSION, ">=0.1.2"),
-        "fallback env vars require Brioche v0.1.2 or later",
-      );
-
       result = result.insert(
         `brioche-env.d/env/${key}`,
         std.file(value.fallback.value),

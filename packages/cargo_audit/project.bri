@@ -4,19 +4,21 @@ import rust, { cargoBuild } from "rust";
 export const project = {
   name: "cargo_audit",
   version: "0.21.2",
-  repository: "https://github.com/rustsec/rustsec.git",
+  extra: {
+    crateName: "cargo-audit",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `cargo-audit/v${project.version}`,
-});
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function cargoAudit(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/cargo-audit",
-    path: "cargo-audit",
   });
 }
 
@@ -37,8 +39,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({
-    project,
-    matchTag: /^cargo-audit\/v(?<version>.+)$/,
-  });
+  return std.liveUpdateFromRustCrates({ project });
 }

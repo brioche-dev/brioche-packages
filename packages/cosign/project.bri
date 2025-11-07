@@ -25,7 +25,7 @@ export default function cosign(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `sigs.k8s.io/release-utils/version.gitVersion=v${project.version}`,
+        `sigs.k8s.io/release-utils/version.gitVersion=${project.version}`,
         "-X",
         `sigs.k8s.io/release-utils/version.gitCommit=${gitRef.commit}`,
         "-X",
@@ -47,7 +47,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
     .toFile();
 
   const result = (await script.read()).trim();
-  const versionMatch = result.match(/^GitVersion:\s+(v[0-9\.]+)$/m);
+  const versionMatch = result.match(/^GitVersion:\s+([0-9\.]+)$/m);
   std.assert(
     versionMatch != null,
     `'cosign version' output did not match regex: ${result}`,
@@ -55,7 +55,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   // Check that the result contains the expected version
   const version = versionMatch[1];
-  const expected = `v${project.version}`;
+  const expected = project.version;
   std.assert(version === expected, `expected '${expected}', got '${version}'`);
 
   return script;

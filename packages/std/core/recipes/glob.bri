@@ -1,6 +1,4 @@
 import * as runtime from "../runtime.bri";
-import { assert } from "../utils.bri";
-import { semverMatches } from "../semver.bri";
 import { type Recipe, type RecipeLike, createRecipe } from "./recipe.bri";
 import type { Directory } from "./directory.bri";
 
@@ -33,11 +31,6 @@ export function glob(
   return createRecipe<Directory>(["directory"], {
     sourceDepth: 1,
     briocheSerialize: async (meta) => {
-      assert(
-        semverMatches(runtime.BRIOCHE_VERSION, ">=0.1.2"),
-        "std.glob requires Brioche v0.1.2 or later",
-      );
-
       const recipeValue =
         typeof recipe === "function" ? await recipe() : await recipe;
       const serializedRecipe = await recipeValue.briocheSerialize();

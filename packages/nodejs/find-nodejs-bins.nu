@@ -11,7 +11,7 @@ ls bin/**/*
 
     { name: $bin.name, target: $target, firstLine: $firstLine }
   }
-  | where {|bin| $bin.firstLine | str contains "node"}
+  | where ($it.firstLine | str contains "node")
   | select name target
   | to json
   | save $env.BRIOCHE_OUTPUT

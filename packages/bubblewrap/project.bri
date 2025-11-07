@@ -17,7 +17,9 @@ const source = Brioche.download(
 
 export default function bubblewrap(): std.Recipe<std.Directory> {
   return std.runBash`
-    meson setup _builddir --prefix /
+    meson setup _builddir \
+      --buildtype=release \
+      --prefix=/
     meson compile -C _builddir
     meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
   `

@@ -55,7 +55,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://www.libssh2.org/download
       | lines
-      | where {|it| ($it | str contains "libssh2") and (not ($it | str contains ".sig")) }
+      | where ($it | str contains "libssh2") and (not ($it | str contains ".sig"))
       | parse --regex '<a href="libssh2-(?<version>.+)\.tar\.xz">'
       | sort-by --natural --reverse version
       | get 0.version

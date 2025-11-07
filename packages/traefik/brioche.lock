@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/traefik/traefik/releases/download/v3.5.3/traefik-v3.5.3.src.tar.gz": {
+    "https://github.com/traefik/traefik/releases/download/v3.5.4/traefik-v3.5.4.src.tar.gz": {
       "type": "sha256",
-      "value": "764a7a927148e71ed1a41597873c9bd0414515a4e73060ed2810b017fcf2e262"
+      "value": "27b7b9c475ca9d83385c4a135b278699e45027e02721e2b8453928d982914579"
     }
   }
 }
