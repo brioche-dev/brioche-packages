@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/F1bonacc1/process-compose.git": {
-      "v1.75.2": "d83409b3216099ee15c5825cf8413eb94c79ffd6"
+      "v1.76.1": "dc18cb4ef24729f96e3ec18b38a77d30ee075fc2"
     }
   }
 }
