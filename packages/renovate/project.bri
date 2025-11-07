@@ -16,8 +16,8 @@ const source = Brioche.gitCheckout({
 });
 
 export default function renovate(): std.Recipe<std.Directory> {
-  // Pin to Node.js v22
-  const nodejs = nodejsRecipe({ version: "22" });
+  // Pin to Node.js v24
+  const nodejs = nodejsRecipe({ version: "24" });
   const pnpm = pnpmRecipe({ nodejs });
 
   // Install dependencies using pnpm
