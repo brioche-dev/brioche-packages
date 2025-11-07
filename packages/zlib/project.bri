@@ -51,7 +51,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://zlib.net
       | lines
-      | where {|it| $it | str contains '<B> zlib ' }
+      | where ($it | str contains '<B> zlib ')
       | parse --regex '<B> zlib (?<version>[^"]+)</B>'
       | sort-by --natural --reverse version
       | get 0.version

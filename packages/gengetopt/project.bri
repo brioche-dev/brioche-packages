@@ -47,7 +47,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://ftp.gnu.org/gnu/gengetopt
       | lines
-      | where {|it| ($it | str contains "gengetopt-") and (not ($it | str contains ".sig")) }
+      | where ($it | str contains "gengetopt-") and (not ($it | str contains ".sig"))
       | parse --regex '<a href="gengetopt-(?<version>.+)\.tar\.xz">'
       | sort-by --natural --reverse version
       | get 0.version

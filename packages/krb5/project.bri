@@ -61,7 +61,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://web.mit.edu/Kerberos/
       | lines
-      | where {|it| $it | str contains 'Current release: <A HREF="krb5-' }
+      | where ($it | str contains 'Current release: <A HREF="krb5-')
       | parse --regex '<A HREF="krb5-.+/">krb5-(?<version>.+)</A>'
       | sort-by --natural --reverse version
       | get 0.version

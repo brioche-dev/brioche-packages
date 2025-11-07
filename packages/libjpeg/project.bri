@@ -59,7 +59,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://www.ijg.org/files
       | lines
-      | where {|it| ($it | str contains "jpegsrc.") }
+      | where ($it | str contains "jpegsrc.")
       | parse --regex '<A HREF="jpegsrc.v(?<version>.+)\.tar\.gz">'
       | sort-by --natural --reverse version
       | get 0.version

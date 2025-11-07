@@ -58,7 +58,7 @@ export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
     let version = http get https://www.x.org/archive/individual/lib
       | lines
-      | where {|it| ($it | str contains "libXinerama") and (not ($it | str contains ".sig")) }
+      | where ($it | str contains "libXinerama") and (not ($it | str contains ".sig"))
       | parse --regex '<a href="libXinerama-(?<version>.+)\.tar\.xz">'
       | sort-by --natural --reverse version
       | get 0.version

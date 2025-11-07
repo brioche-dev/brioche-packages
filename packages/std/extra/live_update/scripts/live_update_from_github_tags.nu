@@ -82,7 +82,7 @@ if ($project | get extra?.otherVersions?) != null {
   let otherVersions = $project.extra.otherVersions
     | items {|key, value|
       let latestVersion = $tags
-        | where { |parsedTag| $parsedTag.version | str starts-with $key }
+        | where ($it.version | str starts-with $key)
         | last
         | get version
 
