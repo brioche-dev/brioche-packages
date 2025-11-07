@@ -1,11 +1,5 @@
 function getBriocheVersion(): string {
   const { op_brioche_version } = (globalThis as any).Deno.core.ops;
-
-  // TODO: Remove this check once v0.1.0 is deprecated! Brioche v0.1.0 was
-  // the only version that did not have this op
-  if (op_brioche_version === undefined) {
-    return "0.1.0";
-  }
   return op_brioche_version();
 }
 

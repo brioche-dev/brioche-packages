@@ -5,9 +5,6 @@ import {
   createRecipe,
 } from "./recipes";
 import { source } from "./source.bri";
-import { BRIOCHE_VERSION } from "./runtime.bri";
-import { semverMatches } from "./semver.bri";
-import { assert } from "./utils.bri";
 
 /**
  * Options for retrieving a git ref commit hash.
@@ -232,11 +229,6 @@ declare global {
   });
 };
 (globalThis as any).Brioche.download ??= (url: string): Recipe<File> => {
-  assert(
-    semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
-    "Brioche.download(...) requires Brioche v0.1.2 or later",
-  );
-
   const sourceFrame = source({ depth: 1 }).at(0);
   if (sourceFrame === undefined) {
     throw new Error(`Could not find source file to download ${url}`);
@@ -260,11 +252,6 @@ declare global {
 (globalThis as any).Brioche.gitRef ??= async (
   options: GitRefOptions,
 ): Promise<GitRefResult> => {
-  assert(
-    semverMatches(BRIOCHE_VERSION, ">=0.1.2"),
-    "Brioche.gitRef(...) requires Brioche v0.1.2 or later",
-  );
-
   const sourceFrame = source({ depth: 1 }).at(0);
   if (sourceFrame === undefined) {
     throw new Error(
