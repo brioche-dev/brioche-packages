@@ -81,6 +81,8 @@ jobs:
                 echo "🔴 Failed to update $package"
                 echo "::error file=$package/project.bri::Failed to update $package"
                 failed_packages+=("$package")
+
+                echo "::endgroup::"
                 continue
               fi
 
