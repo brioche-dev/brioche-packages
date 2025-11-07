@@ -57,24 +57,24 @@ jobs:
             if grep -q 'export.*liveUpdate' "$package/project.bri"; then
               echo "::group::$label"
 
-              if git fetch --depth=1 origin "$branch_name"; then
-                git checkout -f "origin/${branch_name}"
-                git clean -ffdx
+              if git fetch --depth=1 origin "$branch_name" 2>/dev/null; then
+                git checkout -f "origin/${branch_name}" 2>/dev/null
+                git clean -ffdx 2>/dev/null
 
-                git fetch --depth=1 origin main
+                git fetch --depth=1 origin main 2>/dev/null
                 if ! git merge origin/main --no-edit 2>&1 | grep -v "^Already up to date"; then
                   echo "🔴 Failed to merge main into $branch_name"
                   echo "::error file=$package/project.bri::Failed to merge main into $branch_name"
                   failed_packages+=("$package")
-                  git merge --abort
+                  git merge --abort 2>/dev/null
 
                   echo "::endgroup::"
                   continue
                 fi
               else
                 echo "No existing branch for package $package"
-                git checkout -f "${git_head}"
-                git clean -ffdx
+                git checkout -f "${git_head}" 2>/dev/null
+                git clean -ffdx 2>/dev/null
               fi
 
               if ! brioche live-update -p "$package" --locked; then
@@ -87,9 +87,9 @@ jobs:
               fi
 
               if [ -n "$(git status --porcelain)" ]; then
-                git checkout -b "$branch_name"
-                git add "$package"
-                git commit -m "[live-update] $package"
+                git checkout -b "$branch_name" 2>/dev/null
+                git add "$package" 2>/dev/null
+                git commit -m "[live-update] $package" 2>/dev/null
                 echo "🟢 Updated $package"
               else
                 echo "⚪ No updates for $package"
