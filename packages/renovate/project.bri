@@ -6,7 +6,7 @@ import { runNushell } from "nushell";
 
 export const project = {
   name: "renovate",
-  version: "41.169.1",
+  version: "42.0.1",
   repository: "https://github.com/renovatebot/renovate.git",
 };
 
@@ -16,8 +16,8 @@ const source = Brioche.gitCheckout({
 });
 
 export default function renovate(): std.Recipe<std.Directory> {
-  // Pin to Node.js v22
-  const nodejs = nodejsRecipe({ version: "22" });
+  // Pin to Node.js v24
+  const nodejs = nodejsRecipe({ version: "24" });
   const pnpm = pnpmRecipe({ nodejs });
 
   // Install dependencies using pnpm
