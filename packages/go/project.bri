@@ -136,13 +136,13 @@ export function test(): std.Recipe<std.Directory> {
     const script = std.runBash`
       go version | tee "$BRIOCHE_OUTPUT"
     `
-      .dependencies(go)
+      .dependencies(go({ version }))
       .toFile();
 
     const result = (await script.read()).trim();
 
     // Check that the result contains the expected version
-    const expected = `go version go${project.version}`;
+    const expected = `go version go${project.extra.otherVersions[version]}`;
     std.assert(
       result.startsWith(expected),
       `expected '${expected}', got '${result}'`,
