@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/dandavison/delta": {
+      "0.18.2": "a589ff9debaefdd3992384434120f5a03a103481"
+    }
+  }
+}
