@@ -4,10 +4,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "vacuum",
-  version: "0.20.0",
+  version: "0.20.2",
   repository: "https://github.com/daveshanley/vacuum.git",
   extra: {
-    releaseDate: "2025-11-04",
+    releaseDate: "2025-11-08",
   },
 };
 
