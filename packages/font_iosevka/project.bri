@@ -3,7 +3,7 @@ import * as std from "std";
 export const project = {
   name: "font_iosevka",
   repository: "https://github.com/be5invis/Iosevka",
-  version: "33.3.3",
+  version: "33.3.4",
 };
 
 export const source = Brioche.download(
