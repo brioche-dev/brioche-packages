@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/vmware-tanzu/velero.git": {
-      "v1.17.0": "3172d9f99c3d501aad9ddfac8176d783f7692dce"
+      "v1.17.1": "94f64639cee09c5caaa65b65ab5f42175f41c101"
     }
   }
 }
