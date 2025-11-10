@@ -500,7 +500,7 @@ export function vendorCrate(
     unsafeGenerateLockfile = false,
   } = options;
 
-  // Generate the Cargo.lock file exists if not already generated
+  // Generate the Cargo.lock file if it is not already created
   const completeSource = createLockfile({
     source,
     currentDir,
