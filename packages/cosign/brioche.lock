@@ -1,8 +1,13 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/sigstore/cosign.git": {
-      "v3.0.2": "84449696f0658a5ef5f2abba87fdd3f8b17ca1be"
+  "downloads": {
+    "https://proxy.golang.org/github.com/sigstore/cosign/v3/@v/v3.0.2.info": {
+      "type": "sha256",
+      "value": "3ab8e3a98552c824931a1820a5b77ea14d5ce8ae23b3921873bde695717b1866"
+    },
+    "https://proxy.golang.org/github.com/sigstore/cosign/v3/@v/v3.0.2.zip": {
+      "type": "sha256",
+      "value": "b74ce899ba8cdc48eb6a42b98138265cc851b8c547302d4062df07d32d26db64"
     }
   }
 }
