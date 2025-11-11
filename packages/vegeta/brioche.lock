@@ -1,8 +1,13 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/tsenart/vegeta.git": {
-      "v12.13.0": "507c4f028fbad80168f3b734dab9530d3aabfefa"
+  "downloads": {
+    "https://proxy.golang.org/github.com/tsenart/vegeta/v12/@v/v12.13.0.info": {
+      "type": "sha256",
+      "value": "afa163d138c7fe3896554f94789dc512bcbcb9f53e35c4e4bb4f6d1cf9d4ea06"
+    },
+    "https://proxy.golang.org/github.com/tsenart/vegeta/v12/@v/v12.13.0.zip": {
+      "type": "sha256",
+      "value": "58593eb310432bbe29117f2a3f644f67a300633e92498680ed25137040d9c92e"
     }
   }
 }
