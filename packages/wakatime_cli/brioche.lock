@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/wakatime/wakatime-cli.git": {
-      "v1.131.0": "71f75a0bc9521a950fde6d4b10dd378d1491c7be"
+  "downloads": {
+    "https://proxy.golang.org/github.com/wakatime/wakatime-cli/@v/v1.131.0.zip": {
+      "type": "sha256",
+      "value": "d3bd15fe4c362a7feacd22cb4df3efd621d34fe64a19639aa8e6d51474f3abfa"
     }
   }
 }
