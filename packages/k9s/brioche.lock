@@ -1,8 +1,13 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/derailed/k9s.git": {
-      "v0.50.16": "3c37ca2197ca48591566d1f599b7b3a50d54a408"
+  "downloads": {
+    "https://proxy.golang.org/github.com/derailed/k9s/@v/v0.50.16.info": {
+      "type": "sha256",
+      "value": "998cd5ed78ae12a9bbd3c8efe4072dce148945f0a5031ace1d27878e70694e72"
+    },
+    "https://proxy.golang.org/github.com/derailed/k9s/@v/v0.50.16.zip": {
+      "type": "sha256",
+      "value": "3dfb5fb55511d0ad30af853bc29a906679b7cc0d347a138aff914615bad9ec6b"
     }
   }
 }
