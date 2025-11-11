@@ -4,13 +4,16 @@ import { goBuild } from "go";
 export const project = {
   name: "terraform_ls",
   version: "0.38.2",
-  repository: "https://github.com/hashicorp/terraform-ls.git",
+  extra: {
+    moduleName: "github.com/hashicorp/terraform-ls",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
 
 export default function terraformLs(): std.Recipe<std.Directory> {
   return goBuild({
@@ -39,5 +42,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }
