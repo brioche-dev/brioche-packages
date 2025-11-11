@@ -1,6 +1,6 @@
 import * as std from "std";
 import openssl from "openssl";
-import rust, { cargoBuild } from "rust";
+import rust, { cargoBuild, vendorCrate } from "rust";
 
 export const project = {
   name: "cargo_c",
@@ -42,4 +42,204 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
   return std.liveUpdateFromRustCrates({ project });
+}
+
+/**
+ * Parameters for building a C compatible library Rust crate.
+ *
+ * @param features - An array of features to enable.
+ * @param defaultFeatures - Set to `false` to opt out of the crate's
+ *   default features.
+ * @param allFeatures - Set to `true` to enable all of the crate's features.
+ * @param profile - Build the crate with the specified profile.
+ * @param bins - Set to `true` to build all bin targets in the crate, or set
+ *   to an array of bin targets to build. Defaults to `true` if no other
+ *   targets are specified.
+ * @param examples - Set to `true` to build all example targets in the crate,
+ *   or set to an array of example targets to build.
+ */
+interface CargoCBuildParameters {
+  features?: string[];
+  defaultFeatures?: boolean;
+  allFeatures?: boolean;
+  profile?: string;
+  bins?: boolean | string[];
+  examples?: boolean | string[];
+}
+
+/**
+ * Options for building and installing a C compatible library Rust crate.
+ *
+ * @param source - The library to build.
+ * @param currentDir - Optionally set a subpath to use as the starting directory
+ *   relative to `source`. This is useful when building a Cargo workspace within
+ *   a monorepo project that references resources outside the workspace root.
+ * @param path - Optionally set a subpath to the crate to build relative to
+ *   the workspace root. This is useful when building a crate in a workspace.
+ * @param disablePostBuildSteps - If set, the post build steps will not run. By
+ *   default, only `std.pkgConfigMakePathsRelative` will be executed.
+ * @param runnable - Optionally set a path to the binary to run
+ *   by default (e.g. `bin/foo`).
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param unsafe - Optional unsafe options to enable when building. For example,
+ *   passing `{ networking: true }` will allow a `build.rs` script to
+ *   download files during the build. You must take extra care to ensure
+ *   the build is hermetic when setting these options!
+ * @param cargoChefPrepare - Controls if the crate from `source` should get
+ *   pre-processed by `cargo chef prepare` before being built, which avoids
+ *   unnecessarily re-downloading dependencies when the source changes.
+ *   Defaults to `true` (should only be disabled when there's an upstream
+ *   issue with `cargo chef`).
+ * @param unsafeGenerateLockfile - Controls if the crate from `source` should
+ *   generate a `Cargo.lock` file before the build. Defaults to `false`.
+ * @param buildParams - Optional build parameters.
+ */
+interface CargoCBuildOptions {
+  source: std.RecipeLike<std.Directory>;
+  currentDir?: string;
+  path?: string;
+  disablePostBuildSteps?: boolean;
+  runnable?: string;
+  dependencies?: std.RecipeLike<std.Directory>[];
+  env?: Record<string, std.ProcessTemplateLike>;
+  unsafe?: std.ProcessUnsafeOptions;
+  cargoChefPrepare?: boolean;
+  unsafeGenerateLockfile?: boolean;
+  buildParams?: CargoCBuildParameters;
+}
+
+/**
+ * Build a C compatible library Cargo crate. Defaults to the release profile. Calls
+ * `cargo cinstall` internally.
+ *
+ * @param options - Options for building the crate.
+ *
+ * @returns The contents of the built crate
+ *
+ * @example
+ * ```typescript
+ * import { cargoCBuild } from "cargo_c";
+ *
+ * export default function (): std.Recipe<std.Directory> {
+ *   return cargoCBuild({
+ *     source: Brioche.glob("src", "Cargo.*"),
+ *     runnable: "bin/hello",
+ *   });
+ * };
+ * ```
+ */
+export function cargoCBuild(
+  options: CargoCBuildOptions,
+): std.Recipe<std.Directory> {
+  // Vendor the crate's dependencies
+  const crate = vendorCrate({
+    source: options.source,
+    currentDir: options.currentDir,
+    unsafeGenerateLockfile: options.unsafeGenerateLockfile,
+    cargoChefPrepare: options.cargoChefPrepare,
+  });
+
+  const extraArgs: string[] = [];
+  const features = options.buildParams?.features ?? [];
+  if (features.length > 0) {
+    for (const feature of features) {
+      std.assert(
+        /^[a-zA-Z0-9\-_]+$/.test(feature),
+        `Unsupported feature name: ${feature}`,
+      );
+    }
+
+    extraArgs.push("--features", features.join(","));
+  }
+
+  if (!(options.buildParams?.defaultFeatures ?? true)) {
+    extraArgs.push("--no-default-features");
+  }
+
+  if (options.buildParams?.allFeatures ?? false) {
+    extraArgs.push("--all-features");
+  }
+
+  if (options.buildParams?.profile != null) {
+    extraArgs.push("--profile", options.buildParams.profile);
+  }
+
+  const bins = options.buildParams?.bins;
+  if (bins != null) {
+    if (Array.isArray(bins)) {
+      for (const bin of bins) {
+        std.assert(
+          /^[a-zA-Z0-9\-_]+$/.test(bin),
+          `Unsupported bin name: ${bin}`,
+        );
+      }
+
+      extraArgs.push(...bins.flatMap((bin) => ["--bin", bin]));
+    } else if (typeof bins === "boolean") {
+      if (bins) {
+        extraArgs.push("--bins");
+      }
+    } else {
+      std.unreachable(bins);
+    }
+  }
+
+  const examples = options.buildParams?.examples;
+  if (examples != null) {
+    if (Array.isArray(examples)) {
+      for (const example of examples) {
+        std.assert(
+          /^[a-zA-Z0-9\-_]+$/.test(example),
+          `Unsupported example name: ${example}`,
+        );
+      }
+
+      extraArgs.push(...examples.flatMap((example) => ["--example", example]));
+    } else if (typeof examples === "boolean") {
+      if (examples) {
+        extraArgs.push("--examples");
+      }
+    } else {
+      std.unreachable(examples);
+    }
+  }
+
+  // Use `cargo cinstall` to build and install the project to `$BRIOCHE_OUTPUT`
+  return std
+    .process({
+      command: std.tpl`${cargoC}/bin/cargo-cinstall`,
+      args: [
+        "cinstall",
+
+        // Resolve paths `bindir`, `datarootdir`, `includedir`, `libdir` in the
+        // root directory
+        "--prefix",
+        "/",
+
+        // Install to `$BRIOCHE_OUTPUT`
+        "--destdir",
+        std.outputPath,
+
+        // Ensure the lockfile is up-to-date
+        "--frozen",
+
+        ...extraArgs,
+      ],
+      env: {
+        ...options.env,
+      },
+      dependencies: [rust, ...(options.dependencies ?? [])],
+      workDir: crate,
+      // Emulate `cargo install --path <path>`
+      currentDir: std.tpl`${std.workDir}/${options.path}/${options.currentDir}`,
+      unsafe: options.unsafe,
+    })
+    .toDirectory()
+    .pipe((recipe) =>
+      options.disablePostBuildSteps == null || !options.disablePostBuildSteps
+        ? std.pkgConfigMakePathsRelative(recipe)
+        : recipe,
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
