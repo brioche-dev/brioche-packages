@@ -4,19 +4,16 @@ import { goBuild } from "go";
 export const project = {
   name: "go_task",
   version: "3.45.4",
-  repository: "https://github.com/go-task/task.git",
   extra: {
-    majorVersion: "3",
+    moduleName: "github.com/go-task/task/v3",
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
-
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
 
 export default function goTask(): std.Recipe<std.Directory> {
   return goBuild({
@@ -26,7 +23,7 @@ export default function goTask(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/go-task/task/v${project.extra.majorVersion}/internal/version.version=${project.version}`,
+        `${project.extra.moduleName}/internal/version.version=${project.version}`,
       ],
     },
     path: "./cmd/task",
@@ -51,5 +48,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }
