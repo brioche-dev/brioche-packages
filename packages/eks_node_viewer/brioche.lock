@@ -1,8 +1,13 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/awslabs/eks-node-viewer.git": {
-      "v0.7.4": "798f9ba5059be4fe1083d535817918b9cdc2eca2"
+  "downloads": {
+    "https://proxy.golang.org/github.com/awslabs/eks-node-viewer/@v/v0.7.4.info": {
+      "type": "sha256",
+      "value": "48ee5995240d0df03327011f0db062c4a4316d238e98109116d883ac6c6e7c72"
+    },
+    "https://proxy.golang.org/github.com/awslabs/eks-node-viewer/@v/v0.7.4.zip": {
+      "type": "sha256",
+      "value": "14dad013280ad629850159da51fefc17450f08460173df270ee6c8abb228a032"
     }
   }
 }
