@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/tomnomnom/gron.git": {
-      "v0.7.1": "badf401da553eb41b7ffde4be6a64809ed0ed846"
+  "downloads": {
+    "https://proxy.golang.org/github.com/tomnomnom/gron/@v/v0.7.1.zip": {
+      "type": "sha256",
+      "value": "944680db5698301f02a09bca1c42b70f6cc7dda42b5c7c8d053913ea6ae264a4"
     }
   }
 }
