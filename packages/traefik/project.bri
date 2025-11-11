@@ -4,20 +4,16 @@ import { goBuild } from "go";
 export const project = {
   name: "traefik",
   version: "3.6.0",
-  repository: "https://github.com/traefik/traefik",
   extra: {
-    majorVersion: 3,
+    moduleName: "github.com/traefik/traefik/v3",
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
-
-// Download the source code from the GitHub release, since it contains some additional files
-// than are not present in the git repository (ie: 'static' folder for webui)
 const source = Brioche.download(
-  `${project.repository}/releases/download/v${project.version}/traefik-v${project.version}.src.tar.gz`,
-).unarchive("tar", "gzip");
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
 
 export default function traefik(): std.Recipe<std.Directory> {
   return goBuild({
@@ -27,7 +23,7 @@ export default function traefik(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/traefik/traefik/v${project.extra.majorVersion}/pkg/version.Version=${project.version}`,
+        `${project.extra.moduleName}/pkg/version.Version=${project.version}`,
       ],
     },
     path: "./cmd/traefik",
@@ -55,5 +51,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }
