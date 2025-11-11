@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/leetcode-cli/0.4.8/download": {
+      "type": "sha256",
+      "value": "6bf2289eddae0a52c347a6f875e2a15cbf3fcf7b03c6e9a5ff3a0a47fc58273b"
+    }
+  }
+}

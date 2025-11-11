@@ -1,0 +1,46 @@
+import * as std from "std";
+import openssl from "openssl";
+import { cargoBuild } from "rust";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "leetcode_cli",
+  version: "0.4.8",
+  extra: {
+    crateName: "leetcode-cli",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function leetcodeCli(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl, sqlite],
+    runnable: "bin/leetcode",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    leetcode --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(leetcodeCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `leetcode ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromRustCrates({ project });
+}
