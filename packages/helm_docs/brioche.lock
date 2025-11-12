@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/norwoodj/helm-docs/@v/v1.14.2.zip": {
+      "type": "sha256",
+      "value": "1a79bc10ff6163c79445ca2f327b0837eb56b21689e061e0263a264d4757ab56"
+    }
+  }
+}
