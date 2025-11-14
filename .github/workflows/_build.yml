@@ -16,11 +16,9 @@ jobs:
       matrix:
         include:
           - platform: x86_64-linux
-            runs-on: brioche-dev-builder-runner
           - platform: aarch64-linux
-            runs-on: brioche-dev-builder-runner-aarch64
 
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: brioche-dev-builder-${{ matrix.platform }}
     timeout-minutes: 1440
     steps:
       - name: Install system packages
