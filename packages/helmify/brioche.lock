@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/arttor/helmify/@v/v0.4.19.info": {
+      "type": "sha256",
+      "value": "f1a400c99141f3cee7c326dfd035855b75fd76f726feb13848434bb5a57d604a"
+    },
+    "https://proxy.golang.org/github.com/arttor/helmify/@v/v0.4.19.zip": {
+      "type": "sha256",
+      "value": "50484762ef1366d99fa2de88b3cae6841a213441351cf10342080e2cff6f1a2a"
+    }
+  }
+}
