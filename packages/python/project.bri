@@ -43,7 +43,7 @@ export function getLatestVersion(): PythonVersion {
 
 const sources: { [version: string]: std.Recipe<std.File> } = {
   "3.14": Brioche.download(
-    `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
+    `https://www.python.org/ftp/python/${project.extra.otherVersions["3.14"]}/Python-${project.extra.otherVersions["3.14"]}.tar.xz`,
   ),
   "3.13": Brioche.download(
     `https://www.python.org/ftp/python/${project.extra.otherVersions["3.13"]}/Python-${project.extra.otherVersions["3.13"]}.tar.xz`,

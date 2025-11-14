@@ -42,12 +42,12 @@ const prebuiltBinaries: Record<
 > = {
   "25": {
     "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-x64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["25"]}/node-v${project.extra.otherVersions["25"]}-linux-x64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.version}/node-v${project.version}-linux-arm64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["25"]}/node-v${project.extra.otherVersions["25"]}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
