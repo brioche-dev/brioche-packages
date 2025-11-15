@@ -270,3 +270,96 @@ export async function fixScriptShebangs(
 
   return std.merge(recipe, ...pythonWrappedShebangs, ...fixedShellShebangs);
 }
+
+/**
+ * Options for wrapping scripts' from a Python venv environment.
+ *
+ * @param venvDir - The path to the Python venv environment. If not
+ *   provided, the current directory will be used.
+ * @param scripts - The Python scripts to wrap.
+ */
+interface VenvScriptsOptions {
+  venvDir?: string;
+  scripts: string[];
+}
+
+/**
+ * Fix scripts' shebangs in a Python venv environment to use the
+ * correct path to the Python interpreter.
+ *
+ * @param recipe - The recipe to fix the scripts in.
+ * @param options - The options for fixing the scripts.
+ *
+ * @returns The recipe with the scripts fixed.
+ */
+function fixVenvScripts(
+  recipe: std.Recipe<std.Directory>,
+  options: VenvScriptsOptions,
+): std.Recipe<std.Directory> {
+  const { venvDir = ".", scripts } = options;
+
+  // Get all binaries path to fix, and update the shebang to not use an absolute path
+  // to the Python interpreter.
+  const scriptWrappedShebangs = scripts
+    .map((file) => `${venvDir}/bin/${file}`)
+    .map((file) => {
+      const fixedFile = std.runBash`
+      sed \
+        -e '1s|#!.*/bin/python|#!/bin/sh\\\n'"'"''"'"''"'"'exec'"'"' "$(dirname "$0")/python" "$0" "$@"\\\n'"'"' '"'"''"'"''"'"'|' \
+        -e 's|'"'"'exec'"'"' /.*/bin/python|'"'"'exec'"'"' "$(dirname "$0")/python"|' \
+        "$file" > "$BRIOCHE_OUTPUT"
+    `
+        .env({ file: recipe.get(file) })
+        .toFile()
+        .withPermissions({ executable: true });
+      return std.directory().insert(file, fixedFile);
+    });
+
+  return std.merge(recipe, ...scriptWrappedShebangs);
+}
+
+/**
+ * Add runnable(s) to a recipe from the Python venv environment.
+ *
+ * @param recipe - The recipe to add the runnables to.
+ * @param options - The options to use when adding the runnables.
+ *
+ * @returns The recipe with the runnables added.
+ */
+function addVenvRunnable(
+  recipe: std.Recipe<std.Directory>,
+  options: VenvScriptsOptions,
+): std.Recipe<std.Directory> {
+  const { venvDir = ".", scripts } = options;
+
+  return recipe.pipe((recipe) => {
+    for (const script of scripts) {
+      recipe = std.addRunnable(recipe, `bin/${script}`, {
+        command: { relativePath: `${venvDir}/bin/${script}` },
+      });
+    }
+
+    return recipe;
+  });
+}
+
+/**
+ * Wrap the scripts from the Python venv environment to make
+ * them callable outside of the environment.
+ *
+ * @param recipe - The recipe to wrap the scripts from.
+ * @param options - The options to use when wrapping the scripts.
+ *
+ * @returns The recipe with the scripts wrapped.
+ */
+export function wrapVenvScripts(
+  recipe: std.Recipe<std.Directory>,
+  options: VenvScriptsOptions,
+): std.Recipe<std.Directory> {
+  return recipe
+    .pipe((recipe) =>
+      // Fix the shebang of the scripts to not use absolute paths
+      fixVenvScripts(recipe, options),
+    )
+    .pipe((recipe) => addVenvRunnable(recipe, options));
+}

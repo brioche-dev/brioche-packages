@@ -1,5 +1,5 @@
 import * as std from "std";
-import python from "python";
+import python, { wrapVenvScripts } from "python";
 
 export const project = {
   name: "meson",
@@ -53,20 +53,14 @@ export default function meson(): std.Recipe<std.Directory> {
     .toDirectory();
 
   // Create the final recipe with the venv under `venv`
-  return (
-    std
-      .directory({
-        venv,
-      })
-      // Add `bin/meson` to run the main script
-      .pipe((recipe) =>
-        std.addRunnable(recipe, "bin/meson", {
-          command: { relativePath: "venv/bin/python" },
-          args: [{ relativePath: "venv/bin/meson" }],
-        }),
-      )
-      .pipe((recipe) => std.withRunnableLink(recipe, "bin/meson"))
-  );
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
+      wrapVenvScripts(recipe, { venvDir: "venv", scripts: ["meson"] }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/meson"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
