@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/imagequant-sys/4.1.0/download": {
+      "type": "sha256",
+      "value": "b5361d7aab1d0c5623172cd6d18920bf21ef56f6e21d7290f1e31e0794c4a76e"
+    }
+  }
+}
