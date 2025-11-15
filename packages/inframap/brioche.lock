@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/cycloidio/inframap.git": {
-      "v0.8.0": "d59165c805de3d8212b5a1ffbd668925b8c8e0c0"
+  "downloads": {
+    "https://proxy.golang.org/github.com/cycloidio/inframap/@v/v0.8.0.zip": {
+      "type": "sha256",
+      "value": "37be61d3abe085b7a19bd882d25f2548cee3139a55451f259e9c646768047e3c"
     }
   }
 }

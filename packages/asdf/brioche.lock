@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/asdf-vm/asdf": {
-      "v0.18.0": "80fffd86853fbfcc31e6a52aee99f8ab3d5fae9f"
+  "downloads": {
+    "https://proxy.golang.org/github.com/asdf-vm/asdf/@v/v0.18.0.zip": {
+      "type": "sha256",
+      "value": "b56c4ade0615429598b510759ca3f4223def16f3c8b07ee8409c087f0ad37258"
     }
   }
 }

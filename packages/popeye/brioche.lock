@@ -1,8 +1,13 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/derailed/popeye.git": {
-      "v0.22.1": "35b554961dcdabfa7aba6bd070673c6c24c70884"
+  "downloads": {
+    "https://proxy.golang.org/github.com/derailed/popeye/@v/v0.22.1.info": {
+      "type": "sha256",
+      "value": "5b96dc6e335057f23af53d4edfdeca64534ced5916a2cce3a884bc9eb9986476"
+    },
+    "https://proxy.golang.org/github.com/derailed/popeye/@v/v0.22.1.zip": {
+      "type": "sha256",
+      "value": "0cb77d16ef18be802e6730d928cf69bbff86e6d2817b60bacec57e65196b111f"
     }
   }
 }

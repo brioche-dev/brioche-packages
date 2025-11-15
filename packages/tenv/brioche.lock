@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/tofuutils/tenv.git": {
-      "v4.7.21": "75176f712496d3f6ddd21f87604e504354c9531d"
+  "downloads": {
+    "https://proxy.golang.org/github.com/tofuutils/tenv/v4/@v/v4.7.21.zip": {
+      "type": "sha256",
+      "value": "aa100c823d182330f94c9c95941be1d844c56822e7c92563c32183189228afe2"
     }
   }
 }

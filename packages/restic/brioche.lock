@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/restic/restic.git": {
-      "v0.18.1": "7d0aa7f2e30546fba7c8f1c0bae4d6704e3d8423"
+  "downloads": {
+    "https://proxy.golang.org/github.com/restic/restic/@v/v0.18.1.zip": {
+      "type": "sha256",
+      "value": "798e46278cc8e8da7ae633a954ca3e710b8f1bc5c0b4d3d35bd04cfaccfc8fdf"
     }
   }
 }

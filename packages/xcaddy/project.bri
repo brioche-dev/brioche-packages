@@ -4,21 +4,25 @@ import { goBuild } from "go";
 export const project = {
   name: "xcaddy",
   version: "0.4.5",
-  repository: "https://github.com/caddyserver/xcaddy.git",
+  extra: {
+    moduleName: "github.com/caddyserver/xcaddy",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-}).pipe((source) =>
-  // Patch the source to add version information injection
-  // Inspired from: https://github.com/NixOS/nixpkgs/blob/d89fc19e405cb2d55ce7cc114356846a0ee5e956/pkgs/by-name/xc/xcaddy/inject_version_info.diff
-  std.applyPatch({
-    source,
-    patch: Brioche.includeFile("inject-version-information.patch"),
-    strip: 1,
-  }),
-);
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3)
+  .pipe((source) =>
+    // Patch the source to add version information injection
+    // Inspired from: https://github.com/NixOS/nixpkgs/blob/d89fc19e405cb2d55ce7cc114356846a0ee5e956/pkgs/by-name/xc/xcaddy/inject_version_info.diff
+    std.applyPatch({
+      source,
+      patch: Brioche.includeFile("inject-version-information.patch"),
+      strip: 1,
+    }),
+  );
 
 export default function xcaddy(): std.Recipe<std.Directory> {
   return goBuild({
@@ -28,7 +32,7 @@ export default function xcaddy(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/caddyserver/xcaddy/cmd.Version=${project.version}`,
+        `${project.extra.moduleName}/cmd.Version=${project.version}`,
       ],
     },
     path: "./cmd/xcaddy",
@@ -53,5 +57,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

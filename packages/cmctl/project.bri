@@ -1,18 +1,24 @@
 import * as std from "std";
-import { gitCheckout } from "git";
-import { goBuild } from "go";
+import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "cmctl",
   version: "2.3.0",
-  repository: "https://github.com/cert-manager/cmctl.git",
+  extra: {
+    moduleName: "github.com/cert-manager/cmctl/v2",
+  },
 };
 
-const gitRef = await Brioche.gitRef({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
-const source = gitCheckout(gitRef);
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
 
 export default function cmctl(): std.Recipe<std.Directory> {
   return goBuild({
@@ -22,11 +28,11 @@ export default function cmctl(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        "github.com/cert-manager/cmctl/v2/pkg/build.name=cmctl",
+        `${project.extra.moduleName}/pkg/build.name=cmctl`,
         "-X",
         `github.com/cert-manager/cert-manager/pkg/util.AppVersion=${project.version}`,
         "-X",
-        `github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${gitRef.commit}`,
+        `github.com/cert-manager/cert-manager/pkg/util.AppGitCommit=${manifest.origin.hash}`,
       ],
     },
     runnable: "bin/cmctl",
@@ -53,5 +59,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/golang/tools.git": {
-      "gopls/v0.20.0": "2e31135b736b96cd609904370c71563ce5447826"
+  "downloads": {
+    "https://proxy.golang.org/golang.org/x/tools/gopls/@v/v0.20.0.zip": {
+      "type": "sha256",
+      "value": "ebaeab7ce9e90b2f50bd15688843f6f6392897532cdc4826b34a5454d0153357"
     }
   }
 }

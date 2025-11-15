@@ -1,8 +1,13 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/vmware-tanzu/velero.git": {
-      "v1.17.1": "94f64639cee09c5caaa65b65ab5f42175f41c101"
+  "downloads": {
+    "https://proxy.golang.org/github.com/vmware-tanzu/velero/@v/v1.17.1.info": {
+      "type": "sha256",
+      "value": "727f7eb013101e9b83ac4046ef052915ea6849b0c2bf7481a23fc63fbea2213b"
+    },
+    "https://proxy.golang.org/github.com/vmware-tanzu/velero/@v/v1.17.1.zip": {
+      "type": "sha256",
+      "value": "dabfc5cd2ddb1a41e1fe2ea78da7717e1d8ec99eb454229b31ce8db2d6216cd6"
     }
   }
 }
