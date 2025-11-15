@@ -1,6 +1,6 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
-import python, { getLatestVersion as getPythonVersion } from "python";
+import python, { getPythonVersion } from "python";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
@@ -32,7 +32,7 @@ export default function libxml2(): std.Recipe<std.Directory> {
       // Remove it once the Python binding is suppressed (see https://gitlab.gnome.org/GNOME/libxml2/-/issues/891)
       LIBXML2_PYTHON_INSTALL_DIR: std.tpl`${
         std.outputPath
-      }/lib/python${getPythonVersion()}/site-packages`,
+      }/lib/python${getPythonVersion({ full: false })}/site-packages`,
       LIBXML2_WITH_TESTS: "OFF",
     },
   }).pipe((recipe) =>
