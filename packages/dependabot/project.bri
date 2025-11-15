@@ -4,13 +4,16 @@ import { goBuild } from "go";
 export const project = {
   name: "dependabot",
   version: "1.78.1",
-  repository: "https://github.com/dependabot/cli",
+  extra: {
+    moduleName: "github.com/dependabot/cli",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
 
 export default function dependabot(): std.Recipe<std.Directory> {
   return goBuild({
@@ -21,7 +24,7 @@ export default function dependabot(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/dependabot/cli/cmd/dependabot/internal/cmd.version=${project.version}`,
+        `${project.extra.moduleName}/cmd/dependabot/internal/cmd.version=${project.version}`,
       ],
     },
     path: "./cmd/dependabot",
@@ -46,5 +49,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

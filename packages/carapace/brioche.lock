@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/carapace-sh/carapace-bin.git": {
-      "v1.5.4": "f6904721f222c8177b131a2cd23d29d606186cae"
+  "downloads": {
+    "https://proxy.golang.org/github.com/carapace-sh/carapace-bin/@v/v1.5.4.zip": {
+      "type": "sha256",
+      "value": "35a73c613af588a293740910746c21f480f8a5abd4127eec01ec122279d0570b"
     }
   }
 }
