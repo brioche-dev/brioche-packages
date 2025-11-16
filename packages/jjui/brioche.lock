@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/idursun/jjui.git": {
-      "v0.9.5": "6e95d19846d33eb0fbd07d9563a2ad02cd9f9136"
+  "downloads": {
+    "https://proxy.golang.org/github.com/idursun/jjui/@v/v0.9.5.zip": {
+      "type": "sha256",
+      "value": "99f0bd1b94542e68921b3b48eb57fac52a4daac277157e9e5eba30e17edcfc30"
     }
   }
 }

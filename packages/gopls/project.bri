@@ -4,18 +4,20 @@ import { goBuild } from "go";
 export const project = {
   name: "gopls",
   version: "0.20.0",
-  repository: "https://github.com/golang/tools.git",
+  extra: {
+    moduleName: "golang.org/x/tools/gopls",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `gopls/v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
 
 export default function gopls(): std.Recipe<std.Directory> {
   return goBuild({
     source,
-    currentDir: "./gopls",
     buildParams: {
       ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
     },
@@ -40,8 +42,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({
-    project,
-    matchTag: /^gopls\/v(?<version>\d+\.\d+\.\d+)$/,
-  });
+  return std.liveUpdateFromGoModules({ project });
 }

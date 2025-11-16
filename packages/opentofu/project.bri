@@ -4,25 +4,23 @@ import { goBuild } from "go";
 export const project = {
   name: "opentofu",
   version: "1.10.7",
-  repository: "https://github.com/opentofu/opentofu.git",
+  extra: {
+    moduleName: "github.com/opentofu/opentofu",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
 
 export default function tofu(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     path: "./cmd/tofu",
     buildParams: {
-      ldflags: [
-        "-s",
-        "-w",
-        "-X",
-        "github.com/opentofu/opentofu/version.dev=no",
-      ],
+      ldflags: ["-s", "-w", "-X", `${project.extra.moduleName}/version.dev=no`],
       mod: "readonly",
       trimpath: true,
     },
@@ -50,5 +48,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

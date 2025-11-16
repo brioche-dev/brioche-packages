@@ -4,13 +4,16 @@ import { goBuild } from "go";
 export const project = {
   name: "gitea_mcp_server",
   version: "0.5.0",
-  repository: "https://gitea.com/gitea/gitea-mcp",
+  extra: {
+    moduleName: "gitea.com/gitea/gitea-mcp",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
 
 export default function giteaMcpServer(): std.Recipe<std.Directory> {
   return goBuild({
@@ -40,5 +43,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
-  return std.liveUpdateFromGiteaReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

@@ -1,8 +1,13 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/F1bonacc1/process-compose.git": {
-      "v1.76.1": "dc18cb4ef24729f96e3ec18b38a77d30ee075fc2"
+  "downloads": {
+    "https://proxy.golang.org/github.com/f1bonacc1/process-compose/@v/v1.76.1.info": {
+      "type": "sha256",
+      "value": "4f26f8f285b5dd949cd1016b0343afa204325ad5289c78658cb1a69f9c1adf93"
+    },
+    "https://proxy.golang.org/github.com/f1bonacc1/process-compose/@v/v1.76.1.zip": {
+      "type": "sha256",
+      "value": "ac55f31af0ce1f17aff85661898d49b79f5040f94b808420352023045ac8e71f"
     }
   }
 }

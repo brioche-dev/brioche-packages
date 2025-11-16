@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/go-task/task.git": {
-      "v3.45.4": "048d92709aaa10c0cf8acc54fb59c163627ff9f4"
+  "downloads": {
+    "https://proxy.golang.org/github.com/go-task/task/v3/@v/v3.45.4.zip": {
+      "type": "sha256",
+      "value": "eb1548ce036f5d66a7cd534025674055b39d6d7375ccf681fea1a0e3e2ff2603"
     }
   }
 }

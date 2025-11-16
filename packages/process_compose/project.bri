@@ -1,21 +1,24 @@
 import * as std from "std";
-import { gitCheckout } from "git";
-import { goBuild } from "go";
+import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "process_compose",
   version: "1.76.1",
-  repository: "https://github.com/F1bonacc1/process-compose.git",
   extra: {
-    releaseDate: "2025-11-05",
+    moduleName: "github.com/f1bonacc1/process-compose",
   },
 };
 
-const gitRef = await Brioche.gitRef({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
-const source = gitCheckout(gitRef);
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
 
 export default function processCompose(): std.Recipe<std.Directory> {
   return goBuild({
@@ -25,11 +28,11 @@ export default function processCompose(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/f1bonacc1/process-compose/src/config.Version=${project.version}`,
+        `${project.extra.moduleName}/src/config.Version=${project.version}`,
         "-X",
-        `github.com/f1bonacc1/process-compose/src/config.Date=${project.extra.releaseDate}`,
+        `${project.extra.moduleName}/src/config.Date=${manifest.time}`,
         "-X",
-        `github.com/f1bonacc1/process-compose/src/config.Commit=${gitRef.commit}`,
+        `${project.extra.moduleName}/src/config.Commit=${manifest.origin.hash}`,
       ],
     },
     path: "./...",
@@ -66,5 +69,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

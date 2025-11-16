@@ -5,13 +5,16 @@ import { goBuild } from "go";
 export const project = {
   name: "rclone",
   version: "1.71.2",
-  repository: "https://github.com/rclone/rclone.git",
+  extra: {
+    moduleName: "github.com/rclone/rclone",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
 
 export default function rclone(): std.Recipe<std.Directory> {
   return goBuild({
@@ -20,7 +23,12 @@ export default function rclone(): std.Recipe<std.Directory> {
     runnable: "bin/rclone",
     buildParams: {
       // Remove `-DEV` suffix from version number
-      ldflags: ["-s", "-w", "-X", "github.com/rclone/rclone/fs.VersionSuffix="],
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/fs.VersionSuffix=`,
+      ],
     },
   });
 }
@@ -44,5 +52,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

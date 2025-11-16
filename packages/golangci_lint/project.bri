@@ -1,22 +1,24 @@
 import * as std from "std";
-import { gitCheckout } from "git";
-import { goBuild } from "go";
+import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "golangci_lint",
   version: "2.6.1",
-  repository: "https://github.com/golangci/golangci-lint.git",
   extra: {
-    releaseDate: "2025-11-04",
+    moduleName: "github.com/golangci/golangci-lint/v2",
   },
 };
 
-const gitRef = await Brioche.gitRef({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
-
-const source = gitCheckout(gitRef);
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
 
 export default function golangciLint(): std.Recipe<std.Directory> {
   return goBuild({
@@ -28,9 +30,9 @@ export default function golangciLint(): std.Recipe<std.Directory> {
         "-X",
         `main.version=${project.version}`,
         "-X",
-        `main.commit=${gitRef.commit}`,
+        `main.commit=${manifest.origin.hash}`,
         "-X",
-        `main.date=${project.extra.releaseDate}`,
+        `main.date=${manifest.time}`,
       ],
     },
     path: "./cmd/golangci-lint",
@@ -58,5 +60,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }
