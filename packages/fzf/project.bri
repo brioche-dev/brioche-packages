@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "fzf",
-  version: "0.66.1",
+  version: "0.67.0",
   extra: {
     moduleName: "github.com/junegunn/fzf",
   },
