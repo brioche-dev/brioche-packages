@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "iperf3",
-  version: "3.19.1",
+  version: "3.20",
   repository: "https://github.com/esnet/iperf.git",
 };
 
