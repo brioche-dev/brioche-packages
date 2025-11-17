@@ -6,7 +6,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "linux",
-  version: "6.17.7",
+  version: "6.17.8",
   extra: {
     majorVersion: "6",
   },
