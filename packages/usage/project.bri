@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "usage",
-  version: "2.6.0",
+  version: "2.8.0",
   repository: "https://github.com/jdx/usage.git",
 };
 
