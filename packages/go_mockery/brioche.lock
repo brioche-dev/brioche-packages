@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/vektra/mockery.git": {
-      "v3.5.5": "faf4e4a110ba4374c2c0ae05b59d6086b8ee5701"
+      "v3.6.0": "f5daeff55ebad0eb2caf849037929fb2306d4414"
     }
   }
 }
