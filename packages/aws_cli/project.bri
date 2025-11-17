@@ -3,7 +3,7 @@ import python, { fixScriptShebangs, wrapVenvScripts } from "python";
 
 export const project = {
   name: "aws_cli",
-  version: "2.31.32",
+  version: "2.31.37",
   repository: "https://github.com/aws/aws-cli",
 };
 
