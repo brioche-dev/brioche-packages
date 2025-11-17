@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "difftastic",
-  version: "0.65.0",
+  version: "0.67.0",
   repository: "https://github.com/Wilfred/difftastic.git",
 };
 
