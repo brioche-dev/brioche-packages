@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-bisect-rustc/0.6.10/download": {
+    "https://crates.io/api/v1/crates/cargo-bisect-rustc/0.6.11/download": {
       "type": "sha256",
-      "value": "ba23831df6265f127400ef3b915d2369557c9d86f5643d682bd468a682ac0e38"
+      "value": "f0fe873cf74f8a09d4eb66d20f6f017d069a02aa18fbc8fc636eadfbf1906175"
     }
   }
 }
