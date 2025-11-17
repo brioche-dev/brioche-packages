@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/wasm-tools/1.240.0/download": {
+    "https://crates.io/api/v1/crates/wasm-tools/1.241.2/download": {
       "type": "sha256",
-      "value": "43752b3816f66041a730259ff8d0346576efaea08cf05a2923124a0b6c0ec04d"
+      "value": "851435d32a3cafa29bf83e10e07402f34fa3e566772150188653a8b4bceeb0d9"
     }
   }
 }
