@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "rust_analyzer",
-  version: "2025-11-03",
+  version: "2025-11-17",
   repository: "https://github.com/rust-lang/rust-analyzer.git",
 };
 
@@ -20,6 +20,10 @@ export default function rustAnalyzer(): std.Recipe<std.Directory> {
       CFG_RELEASE: project.version,
     },
     runnable: "bin/rust-analyzer",
+
+    // cargo-chef makes the lockfile out-of-date, see this issue:
+    // https://github.com/LukeMathWalker/cargo-chef/issues/305
+    cargoChefPrepare: false,
   });
 }
 
