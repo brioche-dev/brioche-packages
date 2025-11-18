@@ -19,11 +19,6 @@ export default function scdoc(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .env({
-      // scdoc gets compiled to a static binary, so disable autopacking
-      // TODO: Remove this and make it so brioche-ld handles this properly
-      BRIOCHE_LD_AUTOPACK: "false",
-    })
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
