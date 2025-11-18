@@ -1,5 +1,5 @@
 diff --git a/requirements-dev-lock.txt b/requirements-dev-lock.txt
-index d27ac5072..ff1a70f5e 100644
+index 901355931..ddc0ef89f 100644
 --- a/requirements-dev-lock.txt
 +++ b/requirements-dev-lock.txt
 @@ -132,17 +132,10 @@ macholib==1.16.3 \
@@ -25,7 +25,7 @@ index d27ac5072..ff1a70f5e 100644
      --hash=sha256:82e6114004b3d6911c77c3953e3838654b04511b8b66e8583db70c65998017dc \
      --hash=sha256:da185cd2af68c08a6cd4481f7325ed600a88f6a813bad9dea07ab3ef73d8d8d6
 diff --git a/requirements-test-lock.txt b/requirements-test-lock.txt
-index ef2e3521d..b93890347 100644
+index e3adb416b..05b82fa34 100644
 --- a/requirements-test-lock.txt
 +++ b/requirements-test-lock.txt
 @@ -93,13 +93,10 @@ jsonschema==4.7.2 \
@@ -43,16 +43,16 @@ index ef2e3521d..b93890347 100644
 +    --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
 +    --hash=sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
 +    # (manually patched)
- pip-tools==7.5.0 \
-     --hash=sha256:30639f50961bb09f49d22f4389e8d7d990709677c094ce1114186b1f2e9b5821 \
-     --hash=sha256:69758e4e5a65f160e315d74db46246fdbb30d549f1ed0c4236d057122c9b0f18
+ pip-tools==7.5.2 \
+     --hash=sha256:2d64d72da6a044da1110257d333960563d7a4743637e8617dd2610ae7b82d60f \
+     --hash=sha256:2fe16db727bbe5bf28765aeb581e792e61be51fc275545ef6725374ad720a1ce
 diff --git a/requirements-test.txt b/requirements-test.txt
-index 28d0f1f4e..71f9926f6 100644
+index 5882cabbb..682cbf920 100644
 --- a/requirements-test.txt
 +++ b/requirements-test.txt
 @@ -9,4 +9,4 @@ coverage==7.0.1
  pytest-cov==4.1.0
  pytest-xdist==3.1.0
- pip-tools==7.5.0
+ pip-tools==7.5.2
 -packaging==24.1
 +packaging==25.0
