@@ -20,6 +20,10 @@ export default function rustAnalyzer(): std.Recipe<std.Directory> {
       CFG_RELEASE: project.version,
     },
     runnable: "bin/rust-analyzer",
+
+    // cargo-chef makes the lockfile out-of-date, see this issue:
+    // https://github.com/LukeMathWalker/cargo-chef/issues/305
+    cargoChefPrepare: false,
   });
 }
 
