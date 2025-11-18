@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "cspell",
-  version: "9.3.0",
+  version: "9.3.2",
   extra: {
     packageName: "cspell",
   },
