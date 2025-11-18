@@ -7,43 +7,74 @@ export const project = {
   repository: "https://github.com/golang/go",
   extra: {
     otherVersions: {
-      "1.25": "1.25.4",
       "1.24": "1.24.10",
     },
   },
 };
 
 std.assert(
-  Object.keys(project.extra.otherVersions).some((minorVersion) =>
-    project.version.startsWith(`${minorVersion}.`),
+  Object.keys(project.extra.otherVersions).every(
+    (minorVersion) => !project.version.startsWith(`${minorVersion}.`),
   ),
-  "Go package version not found in extra.otherVersions",
+  "Latest Go package version found in extra.otherVersions (should not be present)",
 );
 
 /**
  * The Go version.
  */
-export type GoVersion = keyof typeof project.extra.otherVersions;
+export type GoVersion = "latest" | keyof typeof project.extra.otherVersions;
 
-function getLatestVersion(): GoVersion {
-  const versions = Object.keys(project.extra.otherVersions);
-  versions.sort((a, b) => parseInt(b) - parseInt(a));
+/**
+ * The request to retrieve the Go version.
+ *
+ * @param version - Optionally, the version of Go. Defaults to `"latest"`.
+ * @param full - Optionally, whether to return the version with the patch number.
+ *   Defaults to `true`.
+ */
+interface GoVersionRequest {
+  version?: GoVersion;
+  full?: boolean;
+}
 
-  return versions[0] as GoVersion;
+/**
+ * Get the version of Go for the given `GoVersion`.
+ *
+ * @param request - The request to retrieve the Go version.
+ *
+ * @returns The version of Go.
+ */
+export function getGoVersion(request: GoVersionRequest): string {
+  const { version = "latest", full = true } = request;
+
+  if (full) {
+    if (version === "latest") {
+      return project.version;
+    }
+
+    return project.extra.otherVersions[version];
+  }
+
+  const versions = (
+    version === "latest"
+      ? project.version
+      : project.extra.otherVersions[version]
+  ).split(".");
+
+  return `${versions[0]}.${versions[1]}`;
 }
 
 const prebuiltBinaries: Record<
   string,
   Record<string, std.Recipe<std.Directory>>
 > = {
-  "1.25": {
+  latest: {
     "x86_64-linux": Brioche.download(
-      `https://go.dev/dl/go${project.extra.otherVersions["1.25"]}.linux-amd64.tar.gz`,
+      `https://go.dev/dl/go${project.version}.linux-amd64.tar.gz`,
     )
       .unarchive("tar", "gzip")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://go.dev/dl/go${project.extra.otherVersions["1.25"]}.linux-arm64.tar.gz`,
+      `https://go.dev/dl/go${project.version}.linux-arm64.tar.gz`,
     )
       .unarchive("tar", "gzip")
       .peel(),
@@ -111,7 +142,7 @@ interface GoOptions {
  * The directory `go` is intended to be used as the `$GOROOT` env var.
  */
 export default function go(options: GoOptions = {}): std.Recipe<std.Directory> {
-  const { version = getLatestVersion() } = options;
+  const { version = "latest" } = options;
 
   return std
     .directory({
@@ -130,7 +161,7 @@ export default function go(options: GoOptions = {}): std.Recipe<std.Directory> {
 }
 
 export function test(): std.Recipe<std.Directory> {
-  const goVersions = Object.keys(project.extra.otherVersions) as GoVersion[];
+  const goVersions = Object.keys(prebuiltBinaries) as GoVersion[];
 
   const tests = goVersions.map(async (version) => {
     const script = std.runBash`
@@ -142,7 +173,7 @@ export function test(): std.Recipe<std.Directory> {
     const result = (await script.read()).trim();
 
     // Check that the result contains the expected version
-    const expected = `go version go${project.extra.otherVersions[version]}`;
+    const expected = `go version go${getGoVersion({ version })}`;
     std.assert(
       result.startsWith(expected),
       `expected '${expected}', got '${result}'`,

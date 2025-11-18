@@ -10,7 +10,6 @@ export const project = {
   repository: "https://github.com/python/cpython",
   extra: {
     otherVersions: {
-      "3.14": "3.14.0",
       "3.13": "3.13.9",
       "3.12": "3.12.12",
     },
@@ -18,50 +17,83 @@ export const project = {
 };
 
 std.assert(
-  Object.keys(project.extra.otherVersions).some((minorVersion) =>
-    project.version.startsWith(`${minorVersion}.`),
+  Object.keys(project.extra.otherVersions).every(
+    (minorVersion) => !project.version.startsWith(`${minorVersion}.`),
   ),
-  "Python package version not found in extra.otherVersions",
+  "Latest Python package version found in extra.otherVersions (should not be present)",
 );
 
 /**
  * The Python version.
  */
-export type PythonVersion = keyof typeof project.extra.otherVersions;
+export type PythonVersion = "latest" | keyof typeof project.extra.otherVersions;
 
 /**
- * Get the latest version of Python.
+ * The request to retrieve the Python version.
  *
- * @returns The latest version of Python.
+ * @param version - Optionally, the version of Python. Defaults to `"latest"`.
+ * @param full - Optionally, whether to return the version with the patch number.
+ *   Defaults to `true`.
  */
-export function getLatestVersion(): PythonVersion {
-  const versions = Object.keys(project.extra.otherVersions);
-  versions.sort((a, b) => parseInt(b) - parseInt(a));
-
-  return versions[0] as PythonVersion;
+interface PythonVersionRequest {
+  version?: PythonVersion;
+  full?: boolean;
 }
 
-const sources: { [version: string]: std.Recipe<std.File> } = {
-  "3.14": Brioche.download(
-    `https://www.python.org/ftp/python/${project.extra.otherVersions["3.14"]}/Python-${project.extra.otherVersions["3.14"]}.tar.xz`,
-  ),
+/**
+ * Get the version of Python for the given `PythonVersion`.
+ *
+ * @param request - The request to retrieve the Python version.
+ *
+ * @returns The version of Python.
+ */
+export function getPythonVersion(request: PythonVersionRequest): string {
+  const { version = "latest", full = true } = request;
+
+  if (full) {
+    if (version === "latest") {
+      return project.version;
+    }
+
+    return project.extra.otherVersions[version];
+  }
+
+  const versions = (
+    version === "latest"
+      ? project.version
+      : project.extra.otherVersions[version]
+  ).split(".");
+
+  return `${versions[0]}.${versions[1]}`;
+}
+
+const sources: { [version: string]: std.Recipe<std.Directory> } = {
+  latest: Brioche.download(
+    `https://www.python.org/ftp/python/${project.version}/Python-${project.version}.tar.xz`,
+  )
+    .unarchive("tar", "xz")
+    .peel(),
   "3.13": Brioche.download(
     `https://www.python.org/ftp/python/${project.extra.otherVersions["3.13"]}/Python-${project.extra.otherVersions["3.13"]}.tar.xz`,
-  ),
+  )
+    .unarchive("tar", "xz")
+    .peel(),
   "3.12": Brioche.download(
     `https://www.python.org/ftp/python/${project.extra.otherVersions["3.12"]}/Python-${project.extra.otherVersions["3.12"]}.tar.xz`,
-  ),
-} satisfies Record<PythonVersion, std.Recipe<std.File>>;
+  )
+    .unarchive("tar", "xz")
+    .peel(),
+} satisfies Record<PythonVersion, std.Recipe<std.Directory>>;
 
 interface PythonOptions {
   version?: PythonVersion;
 }
 
 export default async function python(options: PythonOptions = {}) {
-  const { version = getLatestVersion() } = options;
+  const { version = "latest" } = options;
 
   // Get the Python source for the selected version
-  const source = sources[version]?.unarchive("tar", "xz").peel();
+  const source = sources[version];
   std.assert(
     source != null,
     `Expected Python version ${JSON.stringify(
@@ -155,10 +187,7 @@ export default async function python(options: PythonOptions = {}) {
         .insert("bin/python-config", std.symlink({ target: "python3-config" }))
         .insert("bin/pydoc", std.symlink({ target: "pydoc3" })),
     )
-    .pipe(
-      // Fix absolute paths in pkg-config files
-      std.pkgConfigMakePathsRelative,
-    )
+    .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
@@ -170,9 +199,7 @@ export default async function python(options: PythonOptions = {}) {
 }
 
 export function test(): std.Recipe<std.Directory> {
-  const pythonVersions = Object.keys(
-    project.extra.otherVersions,
-  ) as PythonVersion[];
+  const pythonVersions = Object.keys(sources) as PythonVersion[];
 
   const tests = pythonVersions.map(async (version) => {
     const script = std.runBash`
@@ -184,7 +211,7 @@ export function test(): std.Recipe<std.Directory> {
     const result = (await script.read()).trim();
 
     // Check that the result contains the expected version
-    const expected = `Python ${project.extra.otherVersions[version]}`;
+    const expected = `Python ${getPythonVersion({ version })}`;
     std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
     return std.directory().insert(version, script);
