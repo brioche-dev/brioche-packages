@@ -1,0 +1,63 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "helmfile",
+  version: "1.2.0",
+  extra: {
+    moduleName: "github.com/helmfile/helmfile",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function helmfile(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      generate: true,
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `go.szostok.io/version.version=${project.version}`,
+        "-X",
+        `go.szostok.io/version.commitDate=${manifest.origin.hash}`,
+        "-X",
+        "go.szostok.io/version.dirtyBuild=false",
+        "-X",
+        `go.szostok.io/version.buildDate=${manifest.time}`,
+      ],
+    },
+    runnable: "bin/helmfile",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    helmfile --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(helmfile)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `helmfile version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGoModules({ project });
+}
