@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { parseGiteaRepo } from "./gitea_global.bri";
+import { DEFAULT_GITEA_URL, parseGitRepo } from "./git_repository_global.bri";
 import { liveUpdateVersionRegex } from "./index.bri";
 import type {} from "nushell";
 
@@ -78,8 +78,9 @@ interface LiveUpdateFromGiteaTagsOptions {
 export function liveUpdateFromGiteaTags(
   options: LiveUpdateFromGiteaTagsOptions,
 ): std.Recipe<std.Directory> {
-  const { baseUrl, repoOwner, repoName } = parseGiteaRepo(
-    options.giteaUrl,
+  const giteaUrl = options.giteaUrl ?? DEFAULT_GITEA_URL;
+  const { baseUrl, repoOwner, repoName } = parseGitRepo(
+    giteaUrl,
     options.project.repository,
   );
   const normalizeVersion = options.normalizeVersion ?? false;

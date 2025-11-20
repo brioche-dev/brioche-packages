@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { parseGitlabRepo } from "./gitlab_global.bri";
+import { DEFAULT_GITLAB_URL, parseGitRepo } from "./git_repository_global.bri";
 import { liveUpdateVersionRegex } from "./index.bri";
 import type {} from "nushell";
 
@@ -78,8 +78,9 @@ interface LiveUpdateFromGitlabTagsOptions {
 export function liveUpdateFromGitlabTags(
   options: LiveUpdateFromGitlabTagsOptions,
 ): std.Recipe<std.Directory> {
-  const { baseUrl, repoOwner, repoName } = parseGitlabRepo(
-    options.gitlabUrl,
+  const gitlabUrl = options.gitlabUrl ?? DEFAULT_GITLAB_URL;
+  const { baseUrl, repoOwner, repoName } = parseGitRepo(
+    gitlabUrl,
     options.project.repository,
   );
   const normalizeVersion = options.normalizeVersion ?? false;

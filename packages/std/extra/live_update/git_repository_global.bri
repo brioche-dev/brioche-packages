@@ -1,24 +1,36 @@
-import { escapeUrlStringRegex } from "./index.bri";
-
 export const DEFAULT_GITEA_URL = "https://gitea.com";
+export const DEFAULT_GITHUB_URL = "https://github.com";
+export const DEFAULT_GITLAB_URL = "https://gitlab.com";
 
 /**
- * Interface representing the parsed Gitea repository information.
  *
- * @property baseUrl - The base URL of the Gitea instance.
+ * Escape a URL string to be used in a regular expression.
+ *
+ * @param url - The URL string to escape.
+ *
+ * @returns The escaped URL string.
+ */
+function escapeUrlStringRegex(url: string): string {
+  return url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Interface representing the parsed Git repository information.
+ *
+ * @property baseUrl - The base URL of the Git instance.
  * @property repoOwner - The owner of the repository.
  * @property repoName - The name of the repository.
  */
-interface GiteaRepoInfo {
+interface GitRepositoryInfo {
   readonly baseUrl: string;
   readonly repoOwner: string;
   readonly repoName: string;
 }
 
-function tryParseGiteaRepo(
-  baseUrl: string | undefined = DEFAULT_GITEA_URL,
+function tryParseGitRepo(
+  baseUrl: string,
   repo: string,
-): GiteaRepoInfo | null {
+): GitRepositoryInfo | null {
   // Remove any trailing slashes from the base URL, and escape any
   // special regex characters
   baseUrl = baseUrl.replace(/\/+$/, "");
@@ -44,20 +56,18 @@ function tryParseGiteaRepo(
 }
 
 /**
- * Parse a Gitea repository URL to extract the repository owner and name.
+ * Parse a Git repository URL to validate the base URL and extract
+ * the repository owner and name.
  *
- * @param baseUrl - The base URL of the Gitea instance.
- * @param repo - The Gitea repository URL to parse.
+ * @param baseUrl - The base URL of the Git instance.
+ * @param repo - The GitLab repository URL to parse.
  *
- * @returns An object containing the repository owner and name.
+ * @returns An object containing the repository information.
  *
  * @throws If the repository URL cannot be parsed.
  */
-export function parseGiteaRepo(
-  baseUrl: string | undefined,
-  repo: string,
-): GiteaRepoInfo {
-  const info = tryParseGiteaRepo(baseUrl, repo);
+export function parseGitRepo(baseUrl: string, repo: string): GitRepositoryInfo {
+  const info = tryParseGitRepo(baseUrl, repo);
   if (info == null) {
     throw new Error(
       `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
