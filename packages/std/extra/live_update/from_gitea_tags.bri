@@ -21,8 +21,11 @@ interface LiveUpdateFromGiteaTagsProjectExtraOptions {
 /**
  * Options for the live update from Gitea tags.
  *
+ * @param giteaUrl - Optionally set the URL of the GitLab instance. Default to
+ *   `https://gitea.com`.
  * @param project - The project export that should be updated. Must include a
- *   `repository` property containing a Gitea repository URL.
+ *   `repository` property containing a Gitea repository URL starting with the
+ *   URL provided in `giteaUrl`.
  * @param includePrerelease - Whether to include prerelease versions.
  * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
@@ -35,6 +38,7 @@ interface LiveUpdateFromGiteaTagsProjectExtraOptions {
  * @remarks `includePrerelease` and `matchTag` cannot be used together.
  */
 interface LiveUpdateFromGiteaTagsOptions {
+  giteaUrl?: string;
   project: {
     version: string;
     readonly repository: string;
@@ -74,7 +78,10 @@ interface LiveUpdateFromGiteaTagsOptions {
 export function liveUpdateFromGiteaTags(
   options: LiveUpdateFromGiteaTagsOptions,
 ): std.Recipe<std.Directory> {
-  const { repoOwner, repoName } = parseGiteaRepo(options.project.repository);
+  const { baseUrl, repoOwner, repoName } = parseGiteaRepo(
+    options.giteaUrl,
+    options.project.repository,
+  );
   const normalizeVersion = options.normalizeVersion ?? false;
 
   const matchTag = liveUpdateVersionRegex(
@@ -89,6 +96,7 @@ export function liveUpdateFromGiteaTags(
       Brioche.includeFile("./scripts/live_update_from_gitea_tags.nu"),
     ).env({
       project: JSON.stringify(options.project),
+      baseUrl,
       repoOwner,
       repoName,
       matchTag: matchTag.source,
