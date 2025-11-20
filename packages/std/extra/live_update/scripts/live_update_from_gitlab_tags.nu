@@ -1,5 +1,5 @@
 # Retrieve the most recent tags from GitLab
-let tags = http get $'https://gitlab.com/api/v4/projects/($env.repoOwner)%2F($env.repoName)/repository/tags'
+let tags = http get $'($env.baseUrl)/api/v4/projects/($env.repoOwner)%2F($env.repoName)/repository/tags'
   # Extract the tag(s)
   | get name
   | each {|name|

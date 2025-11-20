@@ -1,5 +1,5 @@
 # Retrieve the most recent releases from GitLab
-let releases = http get $'https://gitlab.com/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases'
+let releases = http get $'($env.baseUrl)/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases'
   # Extract the version(s)
   | each {|release|
     $release.tag_name

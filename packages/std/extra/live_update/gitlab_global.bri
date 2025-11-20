@@ -1,15 +1,34 @@
+import { escapeUrlStringRegex } from "./index.bri";
+
+export const DEFAULT_GITLAB_URL = "https://gitlab.com";
+
 /**
  * Interface representing the parsed GitLab repository information.
+ *
+ * @property baseUrl - The base URL of the GitLab instance.
+ * @property repoOwner - The owner of the repository.
+ * @property repoName - The name of the repository.
  */
 interface GitlabRepoInfo {
+  readonly baseUrl: string;
   readonly repoOwner: string;
   readonly repoName: string;
 }
 
-function tryParseGitlabRepo(repo: string): GitlabRepoInfo | null {
-  const match = repo.match(
-    /^(?:https?:\/\/)?(www\.)?(?:gitlab\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
-  );
+function tryParseGitlabRepo(
+  baseUrl: string | undefined = DEFAULT_GITLAB_URL,
+  repo: string,
+): GitlabRepoInfo | null {
+  // Remove any trailing slashes from the base URL, and escape any
+  // special regex characters
+  baseUrl = baseUrl.replace(/\/+$/, "");
+  const escapedBaseUrl = escapeUrlStringRegex(baseUrl);
+
+  const pattern =
+    `^${escapedBaseUrl}\\/` +
+    `(?<repoOwner>[\\w.-]+)\\/` +
+    `(?<repoName>[\\w.-]+)(?:\\.git)?\\/?$`;
+  const match = repo.match(new RegExp(pattern));
 
   const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
   if (repoOwner == null || matchedRepoName == null) {
@@ -21,20 +40,24 @@ function tryParseGitlabRepo(repo: string): GitlabRepoInfo | null {
     repoName = repoName.slice(0, -4);
   }
 
-  return { repoOwner, repoName };
+  return { baseUrl, repoOwner, repoName };
 }
 
 /**
  * Parse a GitLab repository URL to extract the repository owner and name.
  *
+ * @param baseUrl - The base URL of the GitLab instance.
  * @param repo - The GitLab repository URL to parse.
  *
  * @returns An object containing the repository owner and name.
  *
  * @throws If the repository URL cannot be parsed.
  */
-export function parseGitlabRepo(repo: string): GitlabRepoInfo {
-  const info = tryParseGitlabRepo(repo);
+export function parseGitlabRepo(
+  baseUrl: string | undefined,
+  repo: string,
+): GitlabRepoInfo {
+  const info = tryParseGitlabRepo(baseUrl, repo);
   if (info == null) {
     throw new Error(
       `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
