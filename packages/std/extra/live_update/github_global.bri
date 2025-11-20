@@ -8,7 +8,7 @@ interface GithubRepoInfo {
 
 function tryParseGithubRepo(repo: string): GithubRepoInfo | null {
   const match = repo.match(
-    /^(?:https?:\/\/)?(www\.)?(?:github\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
+    /^(?:https:\/\/github\.com\/)?(?<repoOwner>[\w\.-]+)\/(?<repoName>[\w\.-]+)\/?$/,
   );
 
   const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
