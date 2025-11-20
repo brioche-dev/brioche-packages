@@ -65,3 +65,15 @@ function validateMatchTag(matchTag: RegExp): void {
     throw new Error('matchTag must declare a named "version" group');
   }
 }
+
+/**
+ *
+ * Escape a URL string to be used in a regular expression.
+ *
+ * @param url - The URL string to escape.
+ *
+ * @returns The escaped URL string.
+ */
+export function escapeUrlStringRegex(url: string): string {
+  return url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
