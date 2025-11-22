@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.freedesktop.org/pixman/pixman": {
+      "pixman-0.46.4": "9cc163c9da0fb4da430641715313d95a6ec466d9"
+    }
+  }
+}
