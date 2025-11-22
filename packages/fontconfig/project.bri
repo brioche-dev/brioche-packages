@@ -1,0 +1,80 @@
+import * as std from "std";
+import brotli from "brotli";
+import freetype from "freetype";
+import jsonC from "json_c";
+import libpng from "libpng";
+import meson from "meson";
+import ninja from "ninja";
+import python from "python";
+
+export const project = {
+  name: "fontconfig",
+  version: "2.17.1",
+  repository: "https://gitlab.freedesktop.org/fontconfig/fontconfig",
+};
+
+const source = Brioche.download(
+  `${project.repository}/-/archive/${project.version}/fontconfig-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function fontconfig(): std.Recipe<std.Directory> {
+  return std.runBash`
+    meson setup _builddir \
+      -Dcache-build=disabled \
+      --buildtype=release \
+      --default-library=both \
+      --prefix=/
+    meson compile -C _builddir
+    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(
+      std.toolchain,
+      meson,
+      ninja,
+      python,
+      freetype,
+      jsonC,
+      brotli,
+      libpng,
+    )
+    .workDir(source)
+    .toDirectory()
+    .pipe((recipe) =>
+      // Remove the cache directory under `/var/cache/fontconfig` which is
+      // generated at install time
+      recipe.remove("var"),
+    )
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion fontconfig | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, fontconfig)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+  });
+}
