@@ -1,0 +1,61 @@
+import * as std from "std";
+import go from "go";
+
+export const project = {
+  name: "helm",
+  version: "4.0.0",
+  repository: "https://github.com/helm/helm.git",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. Since, the one from Go proxy is not up to date
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function helm(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make build
+
+    mv bin/helm "$BRIOCHE_OUTPUT/bin"
+  `
+    .workDir(source)
+    .outputScaffold(std.directory({ bin: std.directory() }))
+    .dependencies(std.toolchain, go)
+    .unsafe({ networking: true })
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/helm"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // Make sure the release's version follows the versioning scheme of the CLI
+  let helmVersion = project.version;
+  if (
+    project.version.split(".").length === 3 &&
+    project.version.endsWith(".0")
+  ) {
+    helmVersion = project.version.slice(0, -2);
+  }
+
+  const script = std.runBash`
+    helm version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(helm)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version:"v${helmVersion}+unreleased"`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
