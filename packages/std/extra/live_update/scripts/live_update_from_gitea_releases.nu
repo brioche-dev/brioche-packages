@@ -1,5 +1,5 @@
 # Retrieve the most recent releases from Gitea
-let releases = http get $'https://gitea.com/api/v1/repos/($env.repoOwner)/($env.repoName)/releases'
+let releases = http get $'($env.baseUrl)/api/v1/repos/($env.repoOwner)/($env.repoName)/releases'
   # Extract the version(s)
   | each {|release|
     $release.tag_name

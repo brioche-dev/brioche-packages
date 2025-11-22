@@ -1,5 +1,5 @@
 # Retrieve the most recent tags from Gitea
-let tags = http get $'https://gitea.com/api/v1/repos/($env.repoOwner)/($env.repoName)/tags'
+let tags = http get $'($env.baseUrl)/api/v1/repos/($env.repoOwner)/($env.repoName)/tags'
   # Extract the tag(s)
   | get name
   | each {|name|

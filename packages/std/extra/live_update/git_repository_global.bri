@@ -1,0 +1,78 @@
+export const DEFAULT_GITEA_URL = "https://gitea.com";
+export const DEFAULT_GITHUB_URL = "https://github.com";
+export const DEFAULT_GITLAB_URL = "https://gitlab.com";
+
+/**
+ *
+ * Escape a URL string to be used in a regular expression.
+ *
+ * @param url - The URL string to escape.
+ *
+ * @returns The escaped URL string.
+ */
+function escapeUrlStringRegex(url: string): string {
+  return url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Interface representing the parsed Git repository information.
+ *
+ * @property baseUrl - The base URL of the Git instance.
+ * @property repoOwner - The owner of the repository.
+ * @property repoName - The name of the repository.
+ */
+interface GitRepositoryInfo {
+  readonly baseUrl: string;
+  readonly repoOwner: string;
+  readonly repoName: string;
+}
+
+function tryParseGitRepo(
+  baseUrl: string,
+  repo: string,
+): GitRepositoryInfo | null {
+  // Remove any trailing slashes from the base URL, and escape any
+  // special regex characters
+  baseUrl = baseUrl.replace(/\/+$/, "");
+  const escapedBaseUrl = escapeUrlStringRegex(baseUrl);
+
+  const pattern =
+    `^${escapedBaseUrl}\\/` +
+    `(?<repoOwner>[\\w.-]+)\\/` +
+    `(?<repoName>[\\w.-]+)(?:\\.git)?\\/?$`;
+  const match = repo.match(new RegExp(pattern));
+
+  const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
+  if (repoOwner == null || matchedRepoName == null) {
+    return null;
+  }
+
+  let repoName = matchedRepoName;
+  if (repoName.endsWith(".git")) {
+    repoName = repoName.slice(0, -4);
+  }
+
+  return { baseUrl, repoOwner, repoName };
+}
+
+/**
+ * Parse a Git repository URL to validate the base URL and extract
+ * the repository owner and name.
+ *
+ * @param baseUrl - The base URL of the Git instance.
+ * @param repo - The GitLab repository URL to parse.
+ *
+ * @returns An object containing the repository information.
+ *
+ * @throws If the repository URL cannot be parsed.
+ */
+export function parseGitRepo(baseUrl: string, repo: string): GitRepositoryInfo {
+  const info = tryParseGitRepo(baseUrl, repo);
+  if (info == null) {
+    throw new Error(
+      `Could not parse repo name and owner from ${JSON.stringify(repo)}`,
+    );
+  }
+
+  return info;
+}

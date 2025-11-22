@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { parseGithubRepo } from "./github_global.bri";
+import { DEFAULT_GITHUB_URL, parseGitRepo } from "./git_repository_global.bri";
 import { liveUpdateVersionRegex } from "./index.bri";
 import type {} from "nushell";
 
@@ -78,7 +78,10 @@ interface LiveUpdateFromGithubReleasesOptions {
 export function liveUpdateFromGithubReleases(
   options: LiveUpdateFromGithubReleasesOptions,
 ): std.Recipe<std.Directory> {
-  const { repoOwner, repoName } = parseGithubRepo(options.project.repository);
+  const { repoOwner: repoOwner, repoName: repoName } = parseGitRepo(
+    DEFAULT_GITHUB_URL,
+    options.project.repository,
+  );
   const normalizeVersion = options.normalizeVersion ?? false;
 
   const matchTag = liveUpdateVersionRegex(

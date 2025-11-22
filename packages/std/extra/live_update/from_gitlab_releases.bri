@@ -1,5 +1,5 @@
 import * as std from "/core";
-import { parseGitlabRepo } from "./gitlab_global.bri";
+import { DEFAULT_GITLAB_URL, parseGitRepo } from "./git_repository_global.bri";
 import { liveUpdateVersionRegex } from "./index.bri";
 import type {} from "nushell";
 
@@ -21,8 +21,11 @@ interface LiveUpdateFromGitlabReleasesProjectExtraOptions {
 /**
  * Options for the live update from GitLab releases.
  *
+ * @param gitlabUrl - Optionally set the URL of the GitLab instance. Default to
+ *   `https://gitlab.com`.
  * @param project - The project export that should be updated. Must include a
- *   `repository` property containing a GitLab repository URL.
+ *   `repository` property containing a GitLab repository URL starting with the
+ *   URL provided in `gitlabUrl`.
  * @param includePrerelease - Whether to include prerelease versions.
  * @param matchTag - A regex value (`/.../`) to extract the version number from
  *   a tag name. The regex must include a group named "version". If not
@@ -35,6 +38,7 @@ interface LiveUpdateFromGitlabReleasesProjectExtraOptions {
  * @remarks `includePrerelease` and `matchTag` cannot be used together.
  */
 interface LiveUpdateFromGitlabReleasesOptions {
+  gitlabUrl?: string;
   project: {
     version: string;
     readonly repository: string;
@@ -74,7 +78,11 @@ interface LiveUpdateFromGitlabReleasesOptions {
 export function liveUpdateFromGitlabReleases(
   options: LiveUpdateFromGitlabReleasesOptions,
 ): std.Recipe<std.Directory> {
-  const { repoOwner, repoName } = parseGitlabRepo(options.project.repository);
+  const gitlabUrl = options.gitlabUrl ?? DEFAULT_GITLAB_URL;
+  const { baseUrl, repoOwner, repoName } = parseGitRepo(
+    gitlabUrl,
+    options.project.repository,
+  );
   const normalizeVersion = options.normalizeVersion ?? false;
 
   const matchTag = liveUpdateVersionRegex(
@@ -89,6 +97,7 @@ export function liveUpdateFromGitlabReleases(
       Brioche.includeFile("./scripts/live_update_from_gitlab_releases.nu"),
     ).env({
       project: JSON.stringify(options.project),
+      baseUrl,
       repoOwner,
       repoName,
       matchTag: matchTag.source,
