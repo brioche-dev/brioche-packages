@@ -1,4 +1,5 @@
 import * as std from "std";
+import fonttools from "fonttools";
 
 export const project = {
   name: "font_iosevka",
@@ -16,6 +17,28 @@ export default function fontIosevka(): std.Recipe<std.Directory> {
       fonts: std.glob(source, ["**/*.ttc"]),
     }),
   });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ttx -t name -y 0 "$font_path/Iosevka-Regular.ttc" -o - | grep -A1 'nameID="5"' | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(fonttools, fontIosevka)
+    .env({
+      font_path: std.tpl`${fontIosevka}/share/fonts`,
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
 }
 
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
