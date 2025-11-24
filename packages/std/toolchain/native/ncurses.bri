@@ -36,14 +36,18 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
-  for (const lib of ["ncurses", "form", "panel", "menu"]) {
+  for (const lib of ["form", "menu", "ncurses", "ncurses++", "panel"]) {
+    // Create symlinks for the libraries
     ncurses = ncurses.insert(`lib/lib${lib}.so`, std.file(`INPUT(-l${lib}w)`));
+
+    // Create symlinks for the pkgconfig files
     ncurses = ncurses.insert(
       `lib/pkgconfig/${lib}.pc`,
       std.symlink({ target: `${lib}w.pc` }),
     );
   }
 
+  // Create symlinks for a fallback to curses library
   ncurses = ncurses.insert("lib/libcursesw.so", std.file("INPUT(-lncursesw)"));
   ncurses = ncurses.insert(
     "lib/libcurses.so",
