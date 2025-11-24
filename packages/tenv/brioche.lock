@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/tofuutils/tenv/v4/@v/v4.7.21.zip": {
+    "https://proxy.golang.org/github.com/tofuutils/tenv/v4/@v/v4.8.3.zip": {
       "type": "sha256",
-      "value": "aa100c823d182330f94c9c95941be1d844c56822e7c92563c32183189228afe2"
+      "value": "3aae7acfaab27da188ea581ed1becb223cfefca3b9446dffe25d593b974f6bbc"
     }
   }
 }
