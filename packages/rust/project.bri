@@ -378,8 +378,7 @@ interface CreateLockFileCrateOptions {
  * Warning: if this file is missing from the upstream source, it breaks
  * reproducible builds, but we need it to vendor the dependencies.
  *
- * @param crate - The crate to ensure the lockfile will be generated for.
- * @param allowLockfileGeneration - Whether to generate the lockfile.
+ * @param options - Options for creating a lock file from a Rust crate.
  *
  * @return The source crate with the lockfile.
  */
