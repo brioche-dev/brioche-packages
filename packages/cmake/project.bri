@@ -184,7 +184,9 @@ export function cmakeBuild(
   }
 
   return std.runBash`
-    export LIB="$LIBRARY_PATH"
+    # Set CMake search hints to find dependencies
+    export CMAKE_INCLUDE_PATH="$CPATH"
+    export CMAKE_LIBRARY_PATH="$LIBRARY_PATH"
 
     cmake_args=()
     for index in $(seq 0 "$((cmake_num_set_entries-1))"); do
