@@ -36,6 +36,12 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
+  // Create symlinks for the include files
+  ncurses = ncurses.insert(
+    "include/ncurses",
+    std.symlink({ target: "ncursesw" }),
+  );
+
   for (const lib of ["form", "menu", "ncurses", "ncurses++", "panel"]) {
     // Create symlinks for the libraries
     ncurses = ncurses.insert(`lib/lib${lib}.so`, std.file(`INPUT(-l${lib}w)`));
