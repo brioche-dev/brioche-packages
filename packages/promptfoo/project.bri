@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "promptfoo",
-  version: "0.119.6",
+  version: "0.119.11",
   extra: {
     packageName: "promptfoo",
   },
