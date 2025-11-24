@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "hyperfine",
-  version: "1.19.0",
+  version: "1.20.0",
   repository: "https://github.com/sharkdp/hyperfine.git",
 };
 
