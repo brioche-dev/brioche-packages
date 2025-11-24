@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/astral-sh/uv.git": {
-      "0.9.9": "4fac4cb7ed8679debac7e495824367bf9abfeea8"
+      "0.9.11": "8d8aabb88490672c156fc688e7823140681497d0"
     }
   }
 }
