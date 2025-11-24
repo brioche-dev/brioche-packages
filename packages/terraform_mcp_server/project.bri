@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "terraform_mcp_server",
-  version: "0.3.2",
+  version: "0.3.3",
   extra: {
     moduleName: "github.com/hashicorp/terraform-mcp-server",
   },
