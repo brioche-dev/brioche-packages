@@ -32,6 +32,7 @@ export default function ncurses(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain)
     .toDirectory()
+    .pipe(createFallbackNcursesSymlink)
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
@@ -75,4 +76,55 @@ export function liveUpdate(): NushellRunnable {
       | update version $version
       | to json
   `.env({ project: JSON.stringify(project) });
+}
+
+/**
+ * Create relative symlinks for ncurses built with wide character support.
+ *
+ * It ensures that libraries relying on the non wide character version of
+ * ncurses can still find the symbols they need.
+ */
+export function createFallbackNcursesSymlink(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Create symlinks for the include files
+  recipe = recipe.insert(
+    "include/ncurses",
+    std.symlink({ target: "ncursesw" }),
+  );
+
+  for (const lib of [
+    "form",
+    "menu",
+    "ncurses",
+    "ncurses++",
+    "panel",
+    "tinfo",
+  ]) {
+    // Create symlinks for the libraries
+    recipe = recipe.insert(
+      `lib/lib${lib}.a`,
+      std.symlink({ target: `lib${lib}w.a` }),
+    );
+    recipe = recipe.insert(`lib/lib${lib}.so`, std.file(`INPUT(-l${lib}w)`));
+
+    // Create symlinks for the pkgconfig files
+    recipe = recipe.insert(
+      `lib/pkgconfig/${lib}.pc`,
+      std.symlink({ target: `${lib}w.pc` }),
+    );
+  }
+
+  // Create symlinks for a fallback to curses library
+  recipe = recipe.insert(
+    "lib/libcurses.a",
+    std.symlink({ target: "libncurses.a" }),
+  );
+  recipe = recipe.insert("lib/libcursesw.so", std.file("INPUT(-lncursesw)"));
+  recipe = recipe.insert(
+    "lib/libcurses.so",
+    std.symlink({ target: "libncurses.so" }),
+  );
+
+  return recipe;
 }
