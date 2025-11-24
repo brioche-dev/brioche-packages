@@ -3,22 +3,25 @@ import { cargoCBuild } from "cargo_c";
 
 export const project = {
   name: "libimagequant",
-  version: "4.1.0",
-  extra: {
-    crateName: "imagequant-sys",
-  },
+  version: "4.4.1",
+  repository: "https://github.com/ImageOptim/libimagequant.git",
 };
 
-const source = Brioche.download(
-  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
 
 export default function libimagequant(): std.Recipe<std.Directory> {
   return cargoCBuild({
     source,
+    currentDir: "imagequant-sys",
     dependencies: [std.toolchain],
+    unsafeGenerateLockfile: true,
+
+    // cargo-chef doesn't handled well a project with the structure of two
+    // Cargo.toml, one for the Rust crate and one for the C library.
+    cargoChefPrepare: false,
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
@@ -38,12 +41,14 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  // HACK: the C built library doesn't seem to report its version correctly.
+  // See https://github.com/ImageOptim/libimagequant/issues/126
+  const expected = project.version === "4.4.1" ? "4.1.0" : project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromRustCrates({ project });
+  return std.liveUpdateFromGithubTags({ project });
 }
