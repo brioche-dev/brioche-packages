@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_generate",
-  version: "0.23.5",
+  version: "0.23.7",
   extra: {
     crateName: "cargo-generate",
   },
