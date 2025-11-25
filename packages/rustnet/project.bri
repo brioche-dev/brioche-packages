@@ -1,0 +1,45 @@
+import * as std from "std";
+import libpcap from "libpcap";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "rustnet",
+  version: "0.8.0",
+  extra: {
+    crateName: "rustnet-monitor",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function rustnet(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [libpcap],
+    runnable: "bin/rustnet",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    rustnet --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rustnet)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `rustnet ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}
