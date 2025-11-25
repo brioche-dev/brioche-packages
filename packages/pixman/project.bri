@@ -1,0 +1,62 @@
+import * as std from "std";
+import cmake from "cmake";
+import libpng from "libpng";
+import meson from "meson";
+import ninja from "ninja";
+
+export const project = {
+  name: "pixman",
+  version: "0.46.4",
+  repository: "https://gitlab.freedesktop.org/pixman/pixman",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `pixman-${project.version}`,
+});
+
+export default function pixman(): std.Recipe<std.Directory> {
+  return std.runBash`
+    meson setup _builddir \
+      --buildtype=release \
+      --default-library=both \
+      --prefix=/
+    meson compile -C _builddir
+    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cmake, meson, ninja, libpng)
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion pixman-1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, pixman)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+    matchTag: /^pixman-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
