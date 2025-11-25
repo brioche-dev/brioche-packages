@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ImageOptim/libimagequant.git": {
+      "4.4.1": "24e2956a37cd7ad1f4b81c0e20318e3239eb71dc"
+    }
+  }
+}
