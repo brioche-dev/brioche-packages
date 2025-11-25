@@ -15,6 +15,7 @@ const source = Brioche.gitCheckout({
 export default function cargoChef(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
+
     // Disable using cargo-chef while building cargo-chef to avoid
     // infinite recursion
     cargoChefPrepare: false,
