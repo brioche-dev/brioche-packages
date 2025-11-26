@@ -1,0 +1,75 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxext from "libxext";
+import libxmu from "libxmu";
+import util_macros from "util_macros";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "xauth",
+  version: "1.1.4",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/app/xauth-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function xauth(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/ \
+      --enable-local-transport
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(
+      std.toolchain,
+      libx11,
+      libxau,
+      libxcb,
+      libxext,
+      libxmu,
+      util_macros,
+      xorgproto,
+    )
+    .workDir(source)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/xauth"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    xauth -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xauth)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/app
+      | lines
+      | where ($it | str contains "xauth") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="xauth-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
