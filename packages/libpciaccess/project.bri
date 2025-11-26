@@ -1,0 +1,69 @@
+import * as std from "std";
+import meson from "meson";
+import ninja from "ninja";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libpciaccess",
+  version: "0.18.1",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/lib/libpciaccess-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libpciaccess(): std.Recipe<std.Directory> {
+  return std.runBash`
+    meson setup _builddir \
+      --buildtype=release \
+      --default-library=both \
+      --prefix=/
+    meson compile -C _builddir
+    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, meson, ninja)
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion pciaccess | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libpciaccess)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/lib
+      | lines
+      | where ($it | str contains "libpciaccess") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="libpciaccess-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
