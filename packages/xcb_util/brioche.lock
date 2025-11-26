@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/xcb/xcb-util-0.4.1.tar.xz": {
+      "type": "sha256",
+      "value": "5abe3bbbd8e54f0fa3ec945291b7e8fa8cfd3cccc43718f8758430f94126e512"
+    }
+  }
+}
