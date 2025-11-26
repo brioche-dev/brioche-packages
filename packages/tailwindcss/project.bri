@@ -1,0 +1,43 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+import nodejs from "nodejs";
+
+export const project = {
+  name: "tailwindcss",
+  version: "4.1.17",
+  extra: {
+    packageName: "@tailwindcss/cli",
+  },
+};
+
+export default function tailwindcss(): std.Recipe<std.Directory> {
+  return npmInstallGlobal({
+    packageName: project.extra.packageName,
+    version: project.version,
+    nodejs: () => nodejs({ version: "22" }),
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/tailwindcss"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tailwindcss --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tailwindcss)
+    .env({
+      NODE_PATH: std.tpl`${tailwindcss}/lib/node_modules`,
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromNpmPackages({ project });
+}
+
