@@ -53,7 +53,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://curl.se/docs/caextract.html
       | lines
       | where ($it | str contains 'href="/ca/cacert-')
-      | parse --regex '<a href="/ca/cacert-(?<version>.+).pem"'
+      | parse --regex '<a href="/ca/cacert-(?<version>.+)\.pem"'
       | sort-by --natural --reverse version
       | get 0.version
 
