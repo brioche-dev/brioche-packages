@@ -1,0 +1,53 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "harsh",
+  version: "0.12.1",
+  repository: "https://github.com/wakatara/harsh",
+  extra: {
+    moduleName: "github.com/wakatara/harsh",
+  },
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. Since, the one from Go proxy doesn't follow the same tagging scheme.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function harsh(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/cmd.version=${project.version}`,
+      ],
+    },
+    runnable: "bin/harsh",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    harsh --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(harsh)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `harsh version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
