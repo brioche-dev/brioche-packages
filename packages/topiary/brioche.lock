@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/topiary-cli/0.7.2/download": {
+      "type": "sha256",
+      "value": "94eee854fdb76123bc1943517fbea9f40d87c2f2f1bc8a602c483a7304001ad3"
+    }
+  }
+}
