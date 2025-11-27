@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/dpilger26/NumCpp.git": {
+      "Version_2.15.0": "5f8f6b89b472421dd4f90ebd0b5be15412276ad3"
+    }
+  }
+}
