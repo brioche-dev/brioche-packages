@@ -1,0 +1,82 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "lzlib",
+  version: "1.15",
+};
+
+const source = Brioche.download(
+  `https://download.savannah.gnu.org/releases/lzip/lzlib/lzlib-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function lzlib(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/ \
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdint.h>
+      #include <stdlib.h>
+      #include <lzlib.h>
+
+      int main(void)
+      {
+          const char *version = LZ_version();
+          printf("%s", version);
+
+          return EXIT_SUCCESS;
+      }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -llz
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, lzlib)
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://download.savannah.nongnu.org/releases/lzip/lzlib
+      | lines
+      | where ($it | str contains "lzlib") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="lzlib-(?<version>[0-9]+\.[0-9]+)\.tar\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
