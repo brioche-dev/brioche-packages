@@ -1,0 +1,70 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "nexttrace",
+  version: "1.5.0",
+  extra: {
+    moduleName: "github.com/nxtrace/!n!trace-core",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function nexttrace(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/nxtrace/NTrace-core/config.Version=${project.version}`,
+        "-X",
+        `github.com/nxtrace/NTrace-core/config.CommitID=${manifest.origin.hash}`,
+        "-X",
+        `github.com/nxtrace/NTrace-core/config.BuildDate=${manifest.time}`,
+      ],
+    },
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe
+          .insert("bin/nexttrace", recipe.get("bin/NTrace-core"))
+          .remove("bin/NTrace-core"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nexttrace"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    (nexttrace version --no-color || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nexttrace)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `NextTrace ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGoModules({ project });
+}
