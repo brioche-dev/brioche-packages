@@ -77,7 +77,8 @@ interface CargoCBuildParameters {
  * @param path - Optionally set a subpath to the crate to build relative to
  *   the workspace root. This is useful when building a crate in a workspace.
  * @param disablePostBuildSteps - If set, the post build steps will not run. By
- *   default, only `std.pkgConfigMakePathsRelative` will be executed.
+ *   default, `std.libtoolSanitizeDependencies` and `std.pkgConfigMakePathsRelative`
+ *   will be executed.
  * @param runnable - Optionally set a path to the binary to run
  *   by default (e.g. `bin/foo`).
  * @param dependencies - Optionally add additional dependencies to the build.
@@ -237,9 +238,14 @@ export function cargoCBuild(
     })
     .toDirectory()
     .pipe((recipe) =>
-      options.disablePostBuildSteps == null || !options.disablePostBuildSteps
-        ? std.pkgConfigMakePathsRelative(recipe)
-        : recipe,
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : std.libtoolSanitizeDependencies(recipe),
+    )
+    .pipe((recipe) =>
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : std.pkgConfigMakePathsRelative(recipe),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
