@@ -2,10 +2,10 @@ import * as std from "std";
 import { goBuild, goModuleManifest } from "go";
 
 export const project = {
-  name: "process_compose",
-  version: "1.78.0",
+  name: "nexttrace",
+  version: "1.5.0",
   extra: {
-    moduleName: "github.com/f1bonacc1/process-compose",
+    moduleName: "github.com/nxtrace/!n!trace-core",
   },
 };
 
@@ -20,7 +20,7 @@ const manifest = await goModuleManifest(
   ),
 );
 
-export default function processCompose(): std.Recipe<std.Directory> {
+export default function nexttrace(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
@@ -28,43 +28,43 @@ export default function processCompose(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `${project.extra.moduleName}/src/config.Version=${project.version}`,
+        `github.com/nxtrace/NTrace-core/config.Version=${project.version}`,
         "-X",
-        `${project.extra.moduleName}/src/config.Date=${manifest.time}`,
+        `github.com/nxtrace/NTrace-core/config.CommitID=${manifest.origin.hash}`,
         "-X",
-        `${project.extra.moduleName}/src/config.Commit=${manifest.origin.hash}`,
+        `github.com/nxtrace/NTrace-core/config.BuildDate=${manifest.time}`,
       ],
     },
-    path: "./...",
   })
     .pipe(
       // Rename binary file
       (recipe) =>
         recipe
-          .insert("bin/process-compose", recipe.get("bin/src"))
-          .remove("bin/src"),
+          .insert("bin/nexttrace", recipe.get("bin/NTrace-core"))
+          .remove("bin/NTrace-core"),
     )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/process-compose"));
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nexttrace"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    process-compose version | tee "$BRIOCHE_OUTPUT"
+    (nexttrace version --no-color || true) | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(processCompose)
+    .dependencies(nexttrace)
     .toFile();
 
   const result = (await script.read()).trim();
 
-  const version = result.match(/^Version:\s*([\d.]+)$/m)?.at(1);
-
   // Check that the result contains the expected version
-  const expected = project.version;
-  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+  const expected = `NextTrace ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
 
-export function liveUpdate(): std.Recipe<std.Directory> {
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
   return std.liveUpdateFromGoModules({ project });
 }
