@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/uclouvain/openjpeg": {
+      "v2.5.4": "6c4a29b00211eb0430fa0e5e890f1ce5c80f409f"
+    }
+  }
+}
