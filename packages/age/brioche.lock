@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/FiloSottile/age": {
+      "v1.2.1": "482cf6fc9babd3ab06f6606762aac10447222201"
+    }
+  }
+}
