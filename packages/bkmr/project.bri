@@ -1,0 +1,45 @@
+import * as std from "std";
+import openssl from "openssl";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "bkmr",
+  version: "6.3.1",
+  extra: {
+    crateName: "bkmr",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function bkmr(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl],
+    runnable: "bin/bkmr",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    bkmr --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(bkmr)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `bkmr ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}
