@@ -84,3 +84,115 @@ export async function test(): Promise<std.Recipe<std.File>> {
 export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
   return std.liveUpdateFromGithubReleases({ project });
 }
+
+/**
+ * Options for building and installing a Meson project.
+ *
+ * @param source - The Meson project to build.
+ * @param path - Optional subpath containing the root Meson project to build,
+ *   relative to `source`. This can be useful for monorepos with multiple
+ *   Meson projects that reference each other.
+ * @param dependencies - Optionally add dependencies to the build. Most projects
+ *   will want to include `std.toolchain()` or a similar toolchain.
+ * @param config - Optionally set the build type.
+ * @param env - Optionally set environment variables for the build.
+ * @param unsafe - Optional unsafe options to enable when building. For example,
+ *   passing `{ networking: true }` will allow to download files during the build.
+ *   You must take extra care to ensure the build is hermetic when setting these
+ *   options!
+ * @param set - Optionally set Meson variables during the build, as if by passing
+ *    `-D...`.
+ * @param disablePostBuildSteps - If set, the post build steps will not run. By
+ *   default, `std.libtoolSanitizeDependencies` and `std.pkgConfigMakePathsRelative`
+ *   will be executed.
+ * @param runnable - Optionally set a path to the binary to run by default
+ *   (e.g. `bin/foo`).
+ */
+export interface MesonBuildInstallOptions {
+  source: std.RecipeLike<std.Directory>;
+  path?: string;
+  dependencies?: std.RecipeLike<std.Directory>[];
+  config?: string;
+  env?: Record<string, std.ProcessTemplateLike>;
+  unsafe?: std.ProcessUnsafeOptions;
+  set?: Record<string, std.ProcessTemplateLike>;
+  disablePostBuildSteps?: boolean;
+  runnable?: string;
+}
+
+/**
+ * Generate and build a Meson project.
+ *
+ * @description A project build system will be generated out-of-tree from the source project,
+ * and will be built using parallel jobs and installed automatically.
+ *
+ * @param options - The options for building the Meson project.
+ *
+ * @returns The built Meson project artifact
+ */
+export function mesonBuild(
+  options: MesonBuildInstallOptions,
+): std.Recipe<std.Directory> {
+  const { source, dependencies = [], config = "release", set = {} } = options;
+
+  const env: Record<string, std.ProcessTemplateLike> = {};
+
+  const setEntries = Object.entries(set);
+  setEntries.sort(([aName, _aValue], [bName, _bValue]) => {
+    if (aName > bName) {
+      return 1;
+    } else if (aName < bName) {
+      return -1;
+    } else {
+      return 0;
+    }
+  });
+  const setEntriesWithIndices = setEntries.map(
+    ([name, value], index) => [name, value, index] as const,
+  );
+
+  for (const [name, variable, index] of setEntriesWithIndices) {
+    env[`meson_name_${index}`] = name;
+    env[`meson_value_${index}`] = variable;
+  }
+
+  return std.runBash`
+    meson_args=()
+    for index in $(seq 0 "$((meson_num_set_entries-1))"); do
+      var_meson_name="meson_name_$index"
+      var_meson_value="meson_value_$index"
+      meson_args+=("-D\${!var_meson_name}=\${!var_meson_value}")
+    done
+
+    # Set the build type to the config
+    meson_args+=("--buildtype=$config")
+
+    build_dir=$(mktemp -p . -d build.XXXXXX)
+
+    meson setup "$build_dir" "$path" --prefix=/ "\${meson_args[@]}"
+    meson compile -C "$build_dir" --jobs=$(nproc)
+    meson install -C "$build_dir" --destdir "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(...dependencies, meson)
+    .workDir(source)
+    .env({
+      ...options.env,
+      path: options.path ?? ".",
+      config,
+      meson_num_set_entries: setEntriesWithIndices.length.toString(),
+      ...env,
+    })
+    .unsafe(options.unsafe)
+    .toDirectory()
+    .pipe((recipe) =>
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : std.libtoolSanitizeDependencies(recipe),
+    )
+    .pipe((recipe) =>
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : std.pkgConfigMakePathsRelative(recipe),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
+}
