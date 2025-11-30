@@ -106,7 +106,8 @@ export default function cmake(): std.Recipe<std.Directory> {
  * @param set - Optionally set CMake cache variables during the build, as if
  *   by passing `-D...`.
  * @param disablePostBuildSteps - If set, the post build steps will not run. By
- *   default, only `std.pkgConfigMakePathsRelative` will be executed.
+ *   default, `std.libtoolSanitizeDependencies` and `std.pkgConfigMakePathsRelative`
+ *   will be executed.
  * @param runnable - Optionally set a path to the binary to run by default
  *   (e.g. `bin/foo`).
  */
@@ -184,7 +185,9 @@ export function cmakeBuild(
   }
 
   return std.runBash`
-    export LIB="$LIBRARY_PATH"
+    # Set CMake search hints to find dependencies
+    export CMAKE_INCLUDE_PATH="$CPATH"
+    export CMAKE_LIBRARY_PATH="$LIBRARY_PATH"
 
     cmake_args=()
     for index in $(seq 0 "$((cmake_num_set_entries-1))"); do
@@ -227,9 +230,14 @@ export function cmakeBuild(
     .toDirectory()
     .pipe(libFolderMakeRelativeSymlink)
     .pipe((recipe) =>
-      options.disablePostBuildSteps == null || !options.disablePostBuildSteps
-        ? std.pkgConfigMakePathsRelative(recipe)
-        : recipe,
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : std.libtoolSanitizeDependencies(recipe),
+    )
+    .pipe((recipe) =>
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : std.pkgConfigMakePathsRelative(recipe),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
