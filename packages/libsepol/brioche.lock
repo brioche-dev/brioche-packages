@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/SELinuxProject/selinux/releases/download/3.9/libsepol-3.9.tar.gz": {
+      "type": "sha256",
+      "value": "ba630b59e50c5fbf9e9dd45eb3734f373cf78d689d8c10c537114c9bd769fa2e"
+    }
+  }
+}
