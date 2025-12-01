@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/SELinuxProject/selinux/releases/download/3.9/libselinux-3.9.tar.gz": {
+      "type": "sha256",
+      "value": "e7ee2c01dba64a0c35c9d7c9c0e06209d8186b325b0638a0d83f915cc3c101e8"
+    }
+  }
+}
