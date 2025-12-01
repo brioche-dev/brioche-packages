@@ -3,7 +3,7 @@ import brotli from "brotli";
 import freetype from "freetype";
 import jsonC from "json_c";
 import libpng from "libpng";
-import meson from "meson";
+import { mesonBuild } from "meson";
 import ninja from "ninja";
 import python from "python";
 
@@ -20,33 +20,27 @@ const source = Brioche.download(
   .peel();
 
 export default function fontconfig(): std.Recipe<std.Directory> {
-  return std.runBash`
-    meson setup _builddir \
-      -Dcache-build=disabled \
-      --buildtype=release \
-      --default-library=both \
-      --prefix=/
-    meson compile -C _builddir
-    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(
+  return mesonBuild({
+    source,
+    dependencies: [
       std.toolchain,
-      meson,
       ninja,
       python,
       freetype,
       jsonC,
       brotli,
       libpng,
-    )
-    .workDir(source)
-    .toDirectory()
+    ],
+    set: {
+      "cache-build": "disabled",
+      default_library: "both",
+    },
+  })
     .pipe((recipe) =>
       // Remove the cache directory under `/var/cache/fontconfig` which is
       // generated at install time
       recipe.remove("var"),
     )
-    .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },

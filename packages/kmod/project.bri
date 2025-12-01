@@ -1,5 +1,6 @@
 import * as std from "std";
-import meson from "meson";
+import cmake from "cmake";
+import { mesonBuild } from "meson";
 import ninja from "ninja";
 import openssl from "openssl";
 import scdoc from "scdoc";
@@ -17,23 +18,15 @@ const source = Brioche.download(
   .peel();
 
 export default function kmod(): std.Recipe<std.Directory> {
-  return std.runBash`
-    meson setup build \
-      -Dmanpages=false \
-      --buildtype=release \
-      --prefix=/
-    meson compile -C build
-    DESTDIR="$BRIOCHE_OUTPUT" meson install -C build
-
-    # Symlink kmod to other programs
-    for program in lsmod rmmod insmod modinfo modprobe depmod; do
-      ln -s -r "$BRIOCHE_OUTPUT/bin/kmod" "$BRIOCHE_OUTPUT/bin/$program"
-    done
-  `
-    .workDir(source)
-    .dependencies(std.toolchain, meson, ninja, scdoc, openssl)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative)
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, cmake, ninja, scdoc, openssl],
+    set: {
+      manpages: "false",
+    },
+    runnable: "bin/kmod",
+  })
+    .pipe(libFolderMakeKmodSymlinks)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
@@ -42,8 +35,7 @@ export default function kmod(): std.Recipe<std.Directory> {
           append: [{ path: "lib/pkgconfig" }, { path: "share/pkgconfig" }],
         },
       }),
-    )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/kmod"));
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -79,4 +71,24 @@ export function liveUpdate(): NushellRunnable {
       | update version $version
       | to json
   `.env({ project: JSON.stringify(project) });
+}
+
+/**
+ * Creates symlinks for other kmod packages.
+ *
+ * @param recipe - The recipe to create the symlinks for.
+ *
+ * @returns The recipe with the symlinks created.
+ */
+function libFolderMakeKmodSymlinks(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    for program in lsmod rmmod insmod modinfo modprobe depmod; do
+      ln -s -r "$BRIOCHE_OUTPUT/bin/kmod" "$BRIOCHE_OUTPUT/bin/$program"
+    done
+  `
+    .dependencies(std.toolchain)
+    .outputScaffold(recipe)
+    .toDirectory();
 }
