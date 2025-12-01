@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/axllent/mailpit.git": {
+      "v1.28.0": "d52a0d550f8cdef4faa0fc83738f1ca527680da5"
+    }
+  }
+}
