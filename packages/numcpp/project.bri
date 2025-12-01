@@ -4,7 +4,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "numcpp",
-  version: "2.15.0",
+  version: "2.16.0",
   repository: "https://github.com/dpilger26/NumCpp.git",
 };
 
