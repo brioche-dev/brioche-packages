@@ -1,7 +1,7 @@
 import * as std from "std";
 import cmake from "cmake";
 import libpng from "libpng";
-import meson from "meson";
+import { mesonBuild } from "meson";
 import ninja from "ninja";
 
 export const project = {
@@ -16,25 +16,19 @@ const source = Brioche.gitCheckout({
 });
 
 export default function pixman(): std.Recipe<std.Directory> {
-  return std.runBash`
-    meson setup _builddir \
-      --buildtype=release \
-      --default-library=both \
-      --prefix=/
-    meson compile -C _builddir
-    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(std.toolchain, cmake, meson, ninja, libpng)
-    .workDir(source)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      }),
-    );
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, cmake, ninja, libpng],
+    set: {
+      default_library: "both",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

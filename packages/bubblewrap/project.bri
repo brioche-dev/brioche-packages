@@ -1,5 +1,6 @@
 import * as std from "std";
-import meson from "meson";
+import cmake from "cmake";
+import { mesonBuild } from "meson";
 import ninja from "ninja";
 import libcap from "libcap";
 
@@ -16,17 +17,11 @@ const source = Brioche.download(
   .peel();
 
 export default function bubblewrap(): std.Recipe<std.Directory> {
-  return std.runBash`
-    meson setup _builddir \
-      --buildtype=release \
-      --prefix=/
-    meson compile -C _builddir
-    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(std.toolchain, meson, ninja, libcap)
-    .workDir(source)
-    .toDirectory()
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/bwrap"));
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, cmake, ninja, libcap],
+    runnable: "bin/bwrap",
+  });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

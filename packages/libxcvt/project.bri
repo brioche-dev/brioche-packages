@@ -1,6 +1,6 @@
 import * as std from "std";
 import { nushellRunnable, type NushellRunnable } from "nushell";
-import meson from "meson";
+import { mesonBuild } from "meson";
 import ninja from "ninja";
 
 export const project = {
@@ -15,26 +15,17 @@ const source = Brioche.download(
   .peel();
 
 export default function libxcvt(): std.Recipe<std.Directory> {
-  return std.runBash`
-    meson setup _builddir \
-      --buildtype=release \
-      --default-library=both \
-      --prefix=/
-    meson compile -C _builddir
-    meson install -C _builddir --destdir "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(std.toolchain, meson, ninja)
-    .workDir(source)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      }),
-    )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/cvt"));
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja],
+    runnable: "bin/cvt",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
