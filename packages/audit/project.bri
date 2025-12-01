@@ -1,0 +1,58 @@
+import * as std from "std";
+import krb5 from "krb5";
+
+export const project = {
+  name: "audit",
+  version: "4.1.2",
+  repository: "https://github.com/linux-audit/audit-userspace",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function audit(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure \\
+      --prefix=/ \\
+      --disable-zos-remote \\
+      --enable-gssapi-krb5
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, krb5)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion audit | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, audit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
