@@ -5,7 +5,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libxslt",
-  version: "1.1.43",
+  version: "1.1.45",
   extra: {
     majorVersion: "1",
     minorVersion: "1",
