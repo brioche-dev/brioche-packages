@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "stylelint",
-  version: "16.26.0",
+  version: "16.26.1",
   extra: {
     packageName: "stylelint",
   },
