@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/nektos/act/@v/v0.2.82.zip": {
+    "https://proxy.golang.org/github.com/nektos/act/@v/v0.2.83.zip": {
       "type": "sha256",
-      "value": "3d87682fec57690befbc0f7ef6f019a11feaf761a7628be42b7a6c6895be9d84"
+      "value": "b146f7300ab62a4e55948d0731619f2357814cd581b34df0b4e087f9ed5c8184"
     }
   }
 }
