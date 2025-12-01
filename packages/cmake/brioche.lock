@@ -8,8 +8,8 @@
   },
   "git_refs": {
     "https://github.com/brioche-dev/CMake.git": {
-      "base/brioche-patches": "2a2c2e0b2658f7c07e00fcf649882fd5578c2fc1",
-      "brioche-patches": "76d73a62c1f3d6e203af983c9cfb91264fad8c67"
+      "base/brioche-patches": "a0c7f1d29c77fd5c862b087f9d2442c84798a4b6",
+      "brioche-patches": "339d2d012473abc137391e0c1e953538f9aa6954"
     }
   }
 }
