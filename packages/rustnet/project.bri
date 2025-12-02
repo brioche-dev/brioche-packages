@@ -1,5 +1,6 @@
 import * as std from "std";
 import libpcap from "libpcap";
+import llvm from "llvm";
 import { cargoBuild } from "rust";
 
 export const project = {
@@ -19,7 +20,7 @@ const source = Brioche.download(
 export default function rustnet(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [libpcap],
+    dependencies: [libpcap, llvm],
     runnable: "bin/rustnet",
   });
 }
