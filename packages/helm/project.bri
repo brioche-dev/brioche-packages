@@ -31,10 +31,7 @@ export default function helm(): std.Recipe<std.Directory> {
 export async function test(): Promise<std.Recipe<std.File>> {
   // Make sure the release's version follows the versioning scheme of the CLI
   let helmVersion = project.version;
-  if (
-    project.version.split(".").length === 3 &&
-    project.version.endsWith(".0")
-  ) {
+  if (project.version.split(".").length === 3) {
     helmVersion = project.version.slice(0, -2);
   }
 
