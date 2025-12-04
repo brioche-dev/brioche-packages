@@ -1,0 +1,44 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "zuban",
+  version: "0.3.0",
+  repository: "https://github.com/zubanls/zuban.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+  options: {
+    submodules: true,
+  },
+});
+
+export default function zuban(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/zuban",
+    runnable: "bin/zuban",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    zuban --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(zuban)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `zuban ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
