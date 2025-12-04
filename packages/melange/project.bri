@@ -1,0 +1,65 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "melange",
+  version: "0.34.3",
+  extra: {
+    moduleName: "github.com/chainguard-dev/melange",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function melange(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitVersion=${project.version}`,
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitCommit=${manifest.origin.hash}`,
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitTreeState=clean`,
+        "-X",
+        `sigs.k8s.io/release-utils/version.buildDate=${manifest.time}`,
+      ],
+    },
+    runnable: "bin/melange",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    melange version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(melange)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `GitVersion:    ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
