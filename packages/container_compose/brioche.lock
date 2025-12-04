@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/container-compose/0.0.1-alpha.5/download": {
+      "type": "sha256",
+      "value": "ad330e32bdcbcecc9eee43d1adc3c1750c93c2cb718e6cc144d1047bbbff03bc"
+    }
+  }
+}
