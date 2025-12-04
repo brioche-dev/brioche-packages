@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/SELinuxProject/selinux/releases/download/3.9/libsemanage-3.9.tar.gz": {
+      "type": "sha256",
+      "value": "ec05850aef48bfb8e02135a7f4f3f7edba3670f63d5e67f2708d4bd80b9a4634"
+    }
+  }
+}
