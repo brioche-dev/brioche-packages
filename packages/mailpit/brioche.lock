@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/axllent/mailpit.git": {
-      "v1.28.0": "d52a0d550f8cdef4faa0fc83738f1ca527680da5"
+  "downloads": {
+    "https://proxy.golang.org/github.com/axllent/mailpit/@v/v1.28.0.zip": {
+      "type": "sha256",
+      "value": "d7ad39f3c2f7f9b17232540012c6be0cdbaa46ca8c11d9904e2bad5161967f01"
     }
   }
 }
