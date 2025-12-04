@@ -1,16 +1,27 @@
 import * as std from "std";
+import git from "git";
 import { cargoBuild } from "rust";
 
 export const project = {
   name: "amber",
-  version: "0.4.0-alpha",
+  version: "0.5.0-alpha",
   repository: "https://github.com/amber-lang/amber.git",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.version,
-});
+}).pipe((recipe) =>
+  // Create a git tag in the repo, which is used as the version number
+  std.runBash`
+    git tag "$revision"
+  `
+    .dependencies(git)
+    .env({ revision: project.version })
+    .outputScaffold(recipe)
+    .currentDir(std.outputPath)
+    .toDirectory(),
+);
 
 export default function amber(): std.Recipe<std.Directory> {
   return cargoBuild({
