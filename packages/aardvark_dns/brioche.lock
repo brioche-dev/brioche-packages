@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/aardvark-dns/1.17.0/download": {
+      "type": "sha256",
+      "value": "33b30718340595ef7a6e9b4b64b47b2bbc07c5cfec31e17b4a23bc1d4b7ceac4"
+    }
+  }
+}
