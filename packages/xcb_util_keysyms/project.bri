@@ -1,0 +1,70 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import util_macros from "util_macros";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "xcb_util_keysyms",
+  version: "0.4.1",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/xcb/xcb-util-keysyms-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function xcbUtilKeysyms(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libxau, libxcb, util_macros, xorgproto)
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xcb-keysyms | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xcbUtilKeysyms)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/xcb
+      | lines
+      | where ($it | str contains "xcb-util-keysyms") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="xcb-util-keysyms-(?<version>[0-9]+\.[0-9]+\.[0-9]+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
