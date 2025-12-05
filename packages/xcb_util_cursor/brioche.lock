@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/xcb/xcb-util-cursor-0.1.6.tar.xz": {
+      "type": "sha256",
+      "value": "fdeb8bd127873519be5cc70dcd0d3b5d33b667877200f9925a59fdcad8f7a933"
+    }
+  }
+}
