@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/LudovicRousseau/PCSC": {
+      "2.4.0": "4c8fce0c70a8c61c1a5db5566f9ffb20dacef347"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+import * as std from "std";
+import cmake from "cmake";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+
+export const project = {
+  name: "pcsc_lite",
+  version: "2.4.0",
+  repository: "https://github.com/LudovicRousseau/PCSC",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function pcscLite(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, cmake, ninja],
+    set: {
+      libsystemd: "false",
+      libudev: "false",
+      polkit: "false",
+      default_library: "both",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libpcsclite | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, pcscLite)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
