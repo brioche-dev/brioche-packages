@@ -1,0 +1,52 @@
+import * as std from "std";
+import { goBuild } from "go";
+import icu from "icu";
+
+export const project = {
+  name: "dolt",
+  version: "1.78.7",
+  repository: "https://github.com/dolthub/dolt.git",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. Since, the one from Go proxy is not up to date
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function dolt(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    currentDir: "go",
+    path: "./cmd/dolt",
+    dependencies: [std.toolchain, icu],
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/dolt",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    dolt version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(dolt)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `dolt version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

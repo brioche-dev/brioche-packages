@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/dolthub/dolt.git": {
+      "v1.78.7": "628b9dcce5d8c04e7455e9c5e8d7d8af18f9ea06"
+    }
+  }
+}
