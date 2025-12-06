@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/hangxie/parquet-tools/@v/v1.39.9.zip": {
+      "type": "sha256",
+      "value": "8feeedbeb1a63fdbdf231f510823344fe9313ab32190318825be897a3a97dba5"
+    }
+  }
+}
