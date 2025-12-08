@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/danielmiessler/fabric/@v/v1.4.337.info": {
+    "https://proxy.golang.org/github.com/danielmiessler/fabric/@v/v1.4.340.info": {
       "type": "sha256",
-      "value": "c03201e1d203f29795ea1923f7d421119fe9515ca8f87c01dff7fa53d7af5bb3"
+      "value": "5bb2c40cbb449b4af8770caf0e2781a4de2c220ebbb99935c6d04c6739f7e6b8"
     },
-    "https://proxy.golang.org/github.com/danielmiessler/fabric/@v/v1.4.337.zip": {
+    "https://proxy.golang.org/github.com/danielmiessler/fabric/@v/v1.4.340.zip": {
       "type": "sha256",
-      "value": "bf79fac515dd25fa66d03e7585caf42c4899cc1306d8da0082a32c97094dba9a"
+      "value": "7b0f5ed41f67173fe6bc8d58fd8ed11322f0bb906de2fc60ad8d2fc007bdb62e"
     }
   }
 }
