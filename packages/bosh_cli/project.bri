@@ -1,0 +1,51 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "bosh_cli",
+  version: "7.9.15",
+  extra: {
+    moduleName: "github.com/cloudfoundry/bosh-cli/v7",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
+
+export default function boshCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/cmd.VersionLabel=${project.version}`,
+      ],
+    },
+    runnable: "bin/bosh-cli",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    bosh-cli --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(boshCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
