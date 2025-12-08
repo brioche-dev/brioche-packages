@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/f1bonacc1/process-compose/@v/v1.78.0.info": {
+    "https://proxy.golang.org/github.com/f1bonacc1/process-compose/@v/v1.85.0.info": {
       "type": "sha256",
-      "value": "4e4ce3ff4cedc3ae832ed4600295c03b8cebc3eddc5493f02a3b1febfc544693"
+      "value": "41ef63072c04c711501a04d0e3d6c0fd87c239ca3f721f2c58e55df777c383d9"
     },
-    "https://proxy.golang.org/github.com/f1bonacc1/process-compose/@v/v1.78.0.zip": {
+    "https://proxy.golang.org/github.com/f1bonacc1/process-compose/@v/v1.85.0.zip": {
       "type": "sha256",
-      "value": "d35b49c1936157aaf64065cc742f2ff810fc250c17e0bc15e10c610bdcc798cb"
+      "value": "856dcf9e3e0f296ecad253d6b4cbc11dd378c685629ad411f0e36fc85dd0f53e"
     }
   }
 }
