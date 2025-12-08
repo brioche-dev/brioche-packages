@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/vtcode/0.47.6/download": {
+    "https://crates.io/api/v1/crates/vtcode/0.47.12/download": {
       "type": "sha256",
-      "value": "a35a15b8975de2e62f1d1c931f8f856cc82aac0abe2bded1ebd17a36985a73fd"
+      "value": "6d7894ac408a1cd3ecf85f4434cf54dfe434e07f67ece6d25cf29db0292812ca"
     }
   }
 }
