@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_about",
-  version: "0.8.2",
+  version: "0.8.4",
   repository: "https://github.com/EmbarkStudios/cargo-about.git",
 };
 
