@@ -1,0 +1,71 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "cliproxyapi",
+  version: "6.5.55",
+  extra: {
+    moduleName: "github.com/router-for-me/!c!l!i!proxy!a!p!i/v6",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function cliproxyapi(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `main.Version=${project.version}`,
+        "-X",
+        `main.Commit=${manifest.origin.hash}`,
+        "-X",
+        `main.BuildDat=${manifest.time}`,
+      ],
+    },
+    path: "./cmd/server",
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe
+          .insert("bin/cliproxyapi", recipe.get("bin/server"))
+          .remove("bin/server"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/cliproxyapi"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cliproxyapi -h | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(cliproxyapi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `CLIProxyAPI Version: ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
