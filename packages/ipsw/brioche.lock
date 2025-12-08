@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/blacktop/ipsw.git": {
+      "v3.1.643": "1863e93de15a0b59a13d1db1342e79cb35c2782c"
+    }
+  }
+}

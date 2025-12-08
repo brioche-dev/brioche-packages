@@ -1,0 +1,59 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "ipsw",
+  version: "3.1.643",
+  repository: "https://github.com/blacktop/ipsw.git",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. Since, the one from Go proxy is not up to date
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function ipsw(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/ipsw",
+    dependencies: [std.toolchain],
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/blacktop/ipsw/cmd/ipsw/cmd.AppVersion=${project.version}`,
+        "-X",
+        `github.com/blacktop/ipsw/cmd/ipsw/cmd.AppBuildCommit=${gitRef.commit}`,
+      ],
+    },
+    runnable: "bin/ipsw",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ipsw version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ipsw)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version: ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
