@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/skvadrik/re2c/releases/download/4.3/re2c-4.3.tar.xz": {
+    "https://github.com/skvadrik/re2c/releases/download/4.3.1/re2c-4.3.1.tar.xz": {
       "type": "sha256",
-      "value": "51e88d6d6b6ab03eb7970276aca7e0db4f8e29c958b84b561d2fdcb8351c7150"
+      "value": "5f5e8a618960f68bb46ee8728ecd4132e1275b595cfc7a48476f977afd01d0cc"
     }
   }
 }
