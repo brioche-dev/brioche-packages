@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/sharkdp/bat.git": {
-      "v0.26.0": "c734087e1d15fb730d7653389c841fd9e3016556"
+      "v0.26.1": "979ba22628bc9d8171f2cffca2bd5c90c9fc0a9e"
     }
   }
 }
