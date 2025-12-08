@@ -4,7 +4,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "ca_certificates",
-  version: "2025-11-04",
+  version: "2025-12-02",
 };
 
 const source = Brioche.download(
