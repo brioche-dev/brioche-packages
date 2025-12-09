@@ -1,0 +1,46 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo_shear",
+  version: "1.7.2",
+  extra: {
+    crateName: "cargo-shear",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cargoShear(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    env: {
+      SHEAR_VERSION: project.version,
+    },
+    runnable: "bin/cargo-shear",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo shear --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoShear)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains version information
+  const expected = `Version: ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}
