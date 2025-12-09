@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/vulsio/gost/@v/v0.7.1.info": {
+      "type": "sha256",
+      "value": "0dcb1a81db9dcd118b6a3ec7a7b9d1b721a4ead5412a6e74b280983bc21b00c8"
+    },
+    "https://proxy.golang.org/github.com/vulsio/gost/@v/v0.7.1.zip": {
+      "type": "sha256",
+      "value": "61ae5ffe616b7432053e11c2107326116eafbdc2b5573e2248bf1fb777ddf326"
+    }
+  }
+}
