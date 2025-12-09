@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/wakatara/harsh": {
-      "0.12.1": "d36573209a8c7ae4e63b85f61738e5f526f5f228"
+      "v0.12.3": "9e00bf957f1be0de0ca8a800f81b27cf18aabcdc"
     }
   }
 }
