@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/!gaurav-!gosain/tuios/@v/v0.4.1.info": {
+    "https://proxy.golang.org/github.com/!gaurav-!gosain/tuios/@v/v0.4.3.info": {
       "type": "sha256",
-      "value": "7eaf3e23f36d9bf5da46662a30f5c8733833a5b55b83672c307ca5c0aa2d550d"
+      "value": "7743b0ba86acfac17df58482b88fcc8655728848a419b049b978ffbf4abaaf02"
     },
-    "https://proxy.golang.org/github.com/!gaurav-!gosain/tuios/@v/v0.4.1.zip": {
+    "https://proxy.golang.org/github.com/!gaurav-!gosain/tuios/@v/v0.4.3.zip": {
       "type": "sha256",
-      "value": "af613e432fe5f3d15fd3c8c7ca5e05ce0b75f5e9289a481c5cbe5417dd6f171a"
+      "value": "0fad9e41326720d89d0892c420e4e97adcf0187e8801c7206fec92f70e5b1426"
     }
   }
 }
