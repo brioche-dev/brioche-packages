@@ -36,15 +36,8 @@ export default function processCompose(): std.Recipe<std.Directory> {
       ],
     },
     path: "./...",
-  })
-    .pipe(
-      // Rename binary file
-      (recipe) =>
-        recipe
-          .insert("bin/process-compose", recipe.get("bin/src"))
-          .remove("bin/src"),
-    )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/process-compose"));
+    runnable: "bin/process-compose",
+  });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
