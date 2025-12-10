@@ -2,7 +2,7 @@ import * as std from "std";
 import { goBuild, goModuleManifest } from "go";
 
 export const project = {
-  name: "gost",
+  name: "go_security_tracker",
   version: "0.7.1",
   extra: {
     moduleName: "github.com/vulsio/gost",
@@ -20,7 +20,7 @@ const manifest = await goModuleManifest(
   ),
 );
 
-export default function gost(): std.Recipe<std.Directory> {
+export default function goSecurityTracker(): std.Recipe<std.Directory> {
   return goBuild({
     source,
     buildParams: {
@@ -41,7 +41,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     gost version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(gost)
+    .dependencies(goSecurityTracker)
     .toFile();
 
   const result = (await script.read()).trim();
