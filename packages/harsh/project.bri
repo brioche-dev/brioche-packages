@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "harsh",
-  version: "0.12.1",
+  version: "0.12.3",
   repository: "https://github.com/wakatara/harsh",
   extra: {
     moduleName: "github.com/wakatara/harsh",
@@ -14,7 +14,7 @@ export const project = {
 // proxy. Since, the one from Go proxy doesn't follow the same tagging scheme.
 const source = Brioche.gitCheckout({
   repository: project.repository,
-  ref: project.version,
+  ref: `v${project.version}`,
 });
 
 export default function harsh(): std.Recipe<std.Directory> {
