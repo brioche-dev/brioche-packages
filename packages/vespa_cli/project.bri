@@ -1,0 +1,58 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "vespa_cli",
+  version: "8.618.24",
+  repository: "https://github.com/vespa-engine/vespa.git",
+  extra: {
+    moduleName: "github.com/vespa-engine/vespa/client/go",
+  },
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. Since, the one from Go proxy doesn't follow the same tagging scheme.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function vespaCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    currentDir: "client/go",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/internal/build.Version=${project.version}`,
+      ],
+    },
+    path: "./internal/cli/cmd/vespa",
+    runnable: "bin/vespa",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    vespa version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(vespaCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Vespa CLI version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
