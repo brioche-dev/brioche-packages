@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "process_compose",
-  version: "1.78.0",
+  version: "1.85.0",
   extra: {
     moduleName: "github.com/f1bonacc1/process-compose",
   },
@@ -35,16 +35,8 @@ export default function processCompose(): std.Recipe<std.Directory> {
         `${project.extra.moduleName}/src/config.Commit=${manifest.origin.hash}`,
       ],
     },
-    path: "./...",
-  })
-    .pipe(
-      // Rename binary file
-      (recipe) =>
-        recipe
-          .insert("bin/process-compose", recipe.get("bin/src"))
-          .remove("bin/src"),
-    )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/process-compose"));
+    runnable: "bin/process-compose",
+  });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
