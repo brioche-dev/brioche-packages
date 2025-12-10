@@ -35,7 +35,6 @@ export default function processCompose(): std.Recipe<std.Directory> {
         `${project.extra.moduleName}/src/config.Commit=${manifest.origin.hash}`,
       ],
     },
-    path: "./...",
     runnable: "bin/process-compose",
   });
 }
