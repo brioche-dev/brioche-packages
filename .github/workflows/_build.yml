@@ -54,6 +54,7 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
           BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
+          BRIOCHE_CACHE_CONNECT_TIMEOUT: "10s"
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_AWS_SECRET_ACCESS_KEY }}
           AWS_ENDPOINT_URL_S3: ${{ secrets.CACHE_AWS_ENDPOINT_URL_S3 }}
@@ -85,6 +86,7 @@ jobs:
         env:
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
           BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
+          BRIOCHE_CACHE_CONNECT_TIMEOUT: "10s"
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_AWS_SECRET_ACCESS_KEY }}
           AWS_ENDPOINT_URL_S3: ${{ secrets.CACHE_AWS_ENDPOINT_URL_S3 }}
