@@ -96,7 +96,7 @@ jobs:
 
       - name: Save failed processes
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: process-events-${{ github.run_id }}-${{ matrix.platform }}
           path: ~/.local/share/brioche/process-temp/*/events.bin.zst
