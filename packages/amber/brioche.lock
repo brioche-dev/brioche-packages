@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/amber-lang/amber.git": {
-      "0.5.2-nightly-2025-12-08-8439ec5": "8439ec549e65483a4f620c10158d9d0b38e01b6b"
+      "0.5.1-alpha": "eb391e296b9998b5d3e3e4e9b1fd0ba3f4409d47"
     }
   }
 }
