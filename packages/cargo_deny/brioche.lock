@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-deny/0.18.8/download": {
+    "https://crates.io/api/v1/crates/cargo-deny/0.18.9/download": {
       "type": "sha256",
-      "value": "8f67936660ed225788e110f50508bb83840b6b6a15281d5661ff498705a694ea"
+      "value": "e4391a6a139ecb6f7bd883e10852e7a72cc0928715ec2e48119871c5bc6d48d1"
     }
   }
 }

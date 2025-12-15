@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_deny",
-  version: "0.18.8",
+  version: "0.18.9",
   extra: {
     crateName: "cargo-deny",
   },
