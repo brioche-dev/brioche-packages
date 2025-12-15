@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "strace",
-  version: "6.17",
+  version: "6.18",
   repository: "https://github.com/strace/strace",
 };
 
