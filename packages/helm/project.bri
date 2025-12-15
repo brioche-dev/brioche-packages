@@ -3,7 +3,7 @@ import go from "go";
 
 export const project = {
   name: "helm",
-  version: "4.0.1",
+  version: "4.0.4",
   repository: "https://github.com/helm/helm.git",
 };
 
