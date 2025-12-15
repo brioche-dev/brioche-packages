@@ -39,5 +39,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromRustCrates({ project });
+  return std.liveUpdateFromGithubReleases({ project });
 }
