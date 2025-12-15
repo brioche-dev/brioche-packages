@@ -3,7 +3,7 @@ import cmake from "cmake";
 
 export const project = {
   name: "boost",
-  version: "1.89.0",
+  version: "1.90.0",
   repository: "https://github.com/boostorg/boost",
 };
 
