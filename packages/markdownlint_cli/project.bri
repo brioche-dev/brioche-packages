@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "markdownlint_cli",
-  version: "0.46.0",
+  version: "0.47.0",
   extra: {
     packageName: "markdownlint-cli",
   },
