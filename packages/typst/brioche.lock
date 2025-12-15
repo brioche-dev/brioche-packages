@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/typst-cli/0.14.1/download": {
+    "https://crates.io/api/v1/crates/typst-cli/0.14.2/download": {
       "type": "sha256",
-      "value": "7051ff925167abf16f29cd1dc630f7009867b8050e78a0205513abddc445610c"
+      "value": "30f99da1bb6e783d37f8a43d5c4998403592f9f62a28d3f5e5ad15fd3bb7cf9c"
     }
   }
 }
