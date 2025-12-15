@@ -1,4 +1,5 @@
 import * as std from "std";
+import llvm from "llvm";
 import { cargoBuild } from "rust";
 
 export const project = {
@@ -15,7 +16,8 @@ const source = Brioche.gitCheckout({
 export default function treeSitter(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    path: "cli",
+    path: "crates/cli",
+    dependencies: [llvm],
     runnable: "bin/tree-sitter",
   });
 }
@@ -37,5 +39,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromRustCrates({ project });
 }
