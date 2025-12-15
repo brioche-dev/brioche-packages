@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "xplr",
-  version: "1.0.1",
+  version: "1.1.0",
   repository: "https://github.com/sayanarijit/xplr.git",
 };
 
