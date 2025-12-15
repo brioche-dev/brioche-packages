@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/chainguard-dev/melange/@v/v0.35.1.info": {
+    "https://proxy.golang.org/github.com/chainguard-dev/melange/@v/v0.37.0.info": {
       "type": "sha256",
-      "value": "4990c8b0af7af7766b94876b6b55599563cc7102f764bc325dea408ffe7b6cac"
+      "value": "c5a2d00e5f3690f690ff282e59f4f93ec69c09d66fbeb3ebd150af58615363ef"
     },
-    "https://proxy.golang.org/github.com/chainguard-dev/melange/@v/v0.35.1.zip": {
+    "https://proxy.golang.org/github.com/chainguard-dev/melange/@v/v0.37.0.zip": {
       "type": "sha256",
-      "value": "828f60242a73c802f5034837e09c7a0afa873fb62f05d7416a607702d39b3022"
+      "value": "139dd3e7f657a48d5d82be176dd7df009a41f25ed7a0c6dae7d36d0594816043"
     }
   }
 }
