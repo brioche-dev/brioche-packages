@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "rulesync",
-  version: "3.30.0",
+  version: "3.33.0",
   extra: {
     packageName: "rulesync",
   },
