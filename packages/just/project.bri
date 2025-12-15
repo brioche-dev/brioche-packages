@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "just",
-  version: "1.44.0",
+  version: "1.45.0",
   repository: "https://github.com/casey/just.git",
 };
 
