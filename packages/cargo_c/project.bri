@@ -4,7 +4,7 @@ import rust, { cargoBuild, vendorCrate } from "rust";
 
 export const project = {
   name: "cargo_c",
-  version: "0.10.18+cargo-0.92.0",
+  version: "0.10.19+cargo-0.93.0",
   extra: {
     crateName: "cargo-c",
   },
