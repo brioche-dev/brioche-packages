@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "fabric_ai",
-  version: "1.4.340",
+  version: "1.4.345",
   extra: {
     moduleName: "github.com/danielmiessler/fabric",
   },
