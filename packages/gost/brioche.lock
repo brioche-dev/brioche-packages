@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/go-gost/gost.git": {
+      "v3.2.6": "340ba32ef0bebc7293908007cc423dd5f33dd88c"
+    }
+  }
+}
