@@ -1,11 +1,5 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://github.com/extrawurst/gitui/commit/950e703cab1dd37e3d02e7316ec99cc0dc70513c.patch": {
-      "type": "sha256",
-      "value": "d62931f1efa1dc5033e5c5522a475f90e712d976e88d633aa6b0f7fea49006b5"
-    }
-  },
   "git_refs": {
     "https://github.com/extrawurst/gitui": {
       "v0.28.0": "5527160424c76fba0d8d608af28301e603908db0"
