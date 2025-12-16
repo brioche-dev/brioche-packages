@@ -16,12 +16,12 @@ const source = Brioche.download(
 export default function boost(): std.Recipe<std.Directory> {
   return std.runBash`
     ./bootstrap.sh
-    ./b2 \
-      --prefix="$BRIOCHE_OUTPUT" \
-      -j8 \
-      --layout=system \
-      install \
-      variant=release \
+    ./b2 \\
+      --prefix="$BRIOCHE_OUTPUT" \\
+      -j8 \\
+      --layout=system \\
+      install \\
+      variant=release \\
       threading=multi
   `
     .dependencies(std.toolchain)

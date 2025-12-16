@@ -17,13 +17,13 @@ export default function libvpx(): std.Recipe<std.Directory> {
   // Set `prefix` to '//', otherwise we get a configure error
   // Since the script strips the first '/'
   return std.runBash`
-    ./configure \
-      --prefix=// \
-      --disable-examples \
-      --disable-unit-tests \
-      --enable-pic \
-      --enable-runtime-cpu-detect \
-      --enable-shared \
+    ./configure \\
+      --prefix=// \\
+      --disable-examples \\
+      --disable-unit-tests \\
+      --enable-pic \\
+      --enable-runtime-cpu-detect \\
+      --enable-shared \\
       --enable-vp9-highbitdepth
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

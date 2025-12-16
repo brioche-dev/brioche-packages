@@ -14,8 +14,8 @@ const source = Brioche.download(
 
 export default function fribidi(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-static
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

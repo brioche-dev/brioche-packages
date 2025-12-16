@@ -14,8 +14,8 @@ const source = Brioche.download(
 
 export default function xtrans(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-docs=no
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

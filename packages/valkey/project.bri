@@ -15,8 +15,8 @@ const source = Brioche.gitCheckout({
 
 export default function valkey(): std.Recipe<std.Directory> {
   return std.runBash`
-    make \
-      -j "$(nproc)" \
+    make \\
+      -j "$(nproc)" \\
       BUILD_TLS=yes
     make install PREFIX="$BRIOCHE_OUTPUT"
   `
