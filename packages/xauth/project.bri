@@ -21,8 +21,8 @@ const source = Brioche.download(
 
 export default function xauth(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-local-transport
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

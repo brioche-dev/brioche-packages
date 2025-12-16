@@ -304,9 +304,9 @@ function fixVenvScripts(
     .map((file) => `${venvDir}/bin/${file}`)
     .map((file) => {
       const fixedFile = std.runBash`
-      sed \
-        -e '1s|#!.*/bin/python|#!/usr/bin/env sh\\\n'"'"''"'"''"'"'exec'"'"' "$(dirname "$0")/python" "$0" "$@"\\\n'"'"' '"'"''"'"''"'"'|' \
-        -e 's|'"'"'exec'"'"' /.*/bin/python|'"'"'exec'"'"' "$(dirname "$0")/python"|' \
+      sed \\
+        -e '1s|#!.*/bin/python|#!/usr/bin/env sh\\\n'"'"''"'"''"'"'exec'"'"' "$(dirname "$0")/python" "$0" "$@"\\\n'"'"' '"'"''"'"''"'"'|' \\
+        -e 's|'"'"'exec'"'"' /.*/bin/python|'"'"'exec'"'"' "$(dirname "$0")/python"|' \\
         "$file" > "$BRIOCHE_OUTPUT"
     `
         .env({ file: recipe.get(file) })

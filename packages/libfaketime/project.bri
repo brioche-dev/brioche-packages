@@ -21,8 +21,8 @@ const source = Brioche.gitCheckout({
 export default function libfaketime(): std.Recipe<std.Directory> {
   return std.runBash`
     make -j "$(nproc)"
-    make install \
-      PREFIX=/ \
+    make install \\
+      PREFIX=/ \\
       DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
