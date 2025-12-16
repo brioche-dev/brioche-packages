@@ -1,0 +1,40 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+
+export const project = {
+  name: "vite",
+  version: "7.3.0",
+  extra: {
+    packageName: "vite",
+  },
+};
+
+export default function vite(): std.Recipe<std.Directory> {
+  return npmInstallGlobal({
+    packageName: project.extra.packageName,
+    version: project.version,
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/vite"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    vite --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(vite)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `vite/${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromNpmPackages({ project });
+}
