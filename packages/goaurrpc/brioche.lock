@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/moson-mo/goaurrpc/@v/v1.3.0.zip": {
+      "type": "sha256",
+      "value": "5b10fe7cffa489d541e91b9962c8395f2ec517fb481975e87e1012da5243c25a"
+    }
+  }
+}
