@@ -1,0 +1,56 @@
+import * as std from "std";
+
+export const project = {
+  name: "liburing",
+  version: "2.13",
+  repository: "https://github.com/axboe/liburing.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `liburing-${project.version}`,
+});
+
+export default function liburing(): std.Recipe<std.Directory> {
+  // Only build the library, skip tests
+  // Building the tests is not compatible with our current version of Linux headers
+  return std.runBash`
+    ./configure --prefix=/
+    make -C src -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion liburing | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, liburing)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^liburing-(?<version>\d+\.\d+)$/,
+  });
+}
