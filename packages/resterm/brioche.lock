@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/unkn0wn-root/resterm/@v/v0.11.5.info": {
+      "type": "sha256",
+      "value": "5e2d321dcfeb568af23d06eb48466190224d0b6642147748891f9fee52852024"
+    },
+    "https://proxy.golang.org/github.com/unkn0wn-root/resterm/@v/v0.11.5.zip": {
+      "type": "sha256",
+      "value": "05fbcaf0b52efc329ed70a55c789804f84d5bcb95cdb9fb2001b59530d573dbf"
+    }
+  }
+}

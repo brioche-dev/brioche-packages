@@ -1,0 +1,64 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "resterm",
+  version: "0.11.5",
+  extra: {
+    moduleName: "github.com/unkn0wn-root/resterm",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function resterm(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/resterm",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `main.version=${project.version}`,
+        "-X",
+        `main.commit=${manifest.origin.hash}`,
+        "-X",
+        `main.date=${manifest.time}`,
+      ],
+    },
+    runnable: "bin/resterm",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    resterm -version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(resterm)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `resterm ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
