@@ -11,10 +11,12 @@ import type {} from "nushell";
  *
  * @param versionDash - The version of the project (converted in dash format).
  * @param versionUnderscore - The version of the project (converted in underscore format).
+ * @param releaseDate - The release date of the project in the format `YYYY-MM-DD`.
  */
 interface LiveUpdateFromGiteaReleasesProjectExtraOptions {
   versionDash?: string;
   versionUnderscore?: string;
+  releaseDate?: string;
   [key: string]: unknown; // Ignore unknown properties
 }
 
