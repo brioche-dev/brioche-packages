@@ -1,0 +1,46 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "swc",
+  version: "1.15.7",
+  repository: "https://github.com/swc-project/swc",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+})
+  // Remove upstream's custom Cargo `config.toml`, which overrides the linker
+  // for various targets (for cross-compilation). This can interfere with
+  // our default working linker configuration.
+  .remove(".cargo/config.toml");
+
+export default function swc(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/swc_cli_impl",
+    runnable: "bin/swc",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    swc --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(swc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  // The package version differs from the one set in the Cargo.toml file.
+  const expected = /SWC \d+\.\d+\.\d+/;
+  std.assert(expected.test(result), `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
