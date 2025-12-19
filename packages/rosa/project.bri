@@ -1,0 +1,47 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "rosa",
+  version: "1.2.58",
+  extra: {
+    moduleName: "github.com/openshift/rosa",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function rosa(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    path: "./cmd/rosa",
+    runnable: "bin/rosa",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    rosa version --client | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rosa)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `INFO: ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
