@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/weaviate/weaviate/@v/v1.35.0.zip": {
+      "type": "sha256",
+      "value": "24a9311624859376259e70f8d9868cbc713f9878d5ca510740dcad6728b4a5d4"
+    }
+  }
+}
