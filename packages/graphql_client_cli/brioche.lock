@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/graphql_client_cli/0.15.0/download": {
+      "type": "sha256",
+      "value": "6bd4c1e3c38990ef1333fe378003ca918835833ac37ad825086ed1bde226e692"
+    }
+  }
+}
