@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/shadowsocks-rust/1.24.0/download": {
+      "type": "sha256",
+      "value": "ffb45881cb155d64015a93b36278f4ee1e06d0c444857c3591715ba2bb87b355"
+    }
+  }
+}
