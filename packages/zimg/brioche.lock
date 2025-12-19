@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/sekrit-twc/zimg": {
+      "release-3.0.6": "f819b14e8f39d1282400b0d9543e8ef73c1b2bbd"
+    }
+  }
+}
