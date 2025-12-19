@@ -1,0 +1,71 @@
+import * as std from "std";
+import python, { getLatestVersion as getPythonVersion } from "python";
+import uv from "uv";
+
+export const project = {
+  name: "poetry",
+  version: "2.2.1",
+  repository: "https://github.com/python-poetry/poetry",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function poetry(): std.Recipe<std.Directory> {
+  return std.runBash`
+    uv tool install .
+  `
+    .workDir(source)
+    .dependencies(python, uv)
+    .env({
+      UV_NO_MANAGED_PYTHON: "1",
+      UV_LINK_MODE: "copy",
+      UV_LOCKED: "1",
+      UV_TOOL_DIR: std.outputPath,
+    })
+    .unsafe({ networking: true })
+    .toDirectory()
+    .pipe((recipe) => {
+      // TODO: Clean this up! We should find a way to not hardcode the
+      // list of binaries and the Python version for `$PYTHONPATH`
+      recipe = recipe.insert("brioche-run.d/python", python);
+
+      recipe = std.addRunnable(recipe, "bin/poetry", {
+        command: { relativePath: "brioche-run.d/python/bin/python" },
+        args: [{ relativePath: "poetry/bin/poetry" }],
+        env: {
+          PYTHONPATH: {
+            prepend: {
+              relativePath: `poetry/lib/python${getPythonVersion()}/site-packages`,
+            },
+            separator: ":",
+          },
+        },
+      });
+
+      return recipe;
+    })
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/poetry"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    poetry --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(poetry)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Poetry (version ${project.version})`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
