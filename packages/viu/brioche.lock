@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/viu/1.6.1/download": {
+      "type": "sha256",
+      "value": "3b8a8c6078f4f850a46ffe7b29605567c9155fa1a2b314af85a8c65a39e6898e"
+    }
+  }
+}
