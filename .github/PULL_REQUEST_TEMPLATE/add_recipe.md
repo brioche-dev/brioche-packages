@@ -6,6 +6,7 @@ This Pull Request adds a new recipe to the registry.
 
 - **Recipe name:** `TODO: replace with name`
 - **Website / repository:** `TODO: link`
+- **Repology URL:** `TODO: https://repology.org/project/<package_name>/versions`
 - **Short description:** `TODO: one-line description`
 
 ## Related issue(s) or discussion(s)
