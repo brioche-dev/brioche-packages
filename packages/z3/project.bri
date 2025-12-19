@@ -1,0 +1,67 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import python from "python";
+
+export const project = {
+  name: "z3",
+  version: "4.15.4",
+  repository: "https://github.com/Z3Prover/z3",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `z3-${project.version}`,
+});
+
+/**
+ * Z3 is a high-performance theorem prover and SMT solver from
+ * Microsoft Research.
+ */
+export default function z3(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, python],
+    set: {
+      Z3_BUILD_EXECUTABLE: "ON",
+      Z3_BUILD_LIBZ3_SHARED: "ON",
+      Z3_BUILD_TEST_EXECUTABLES: "OFF",
+      Z3_ENABLE_EXAMPLE_TARGETS: "OFF",
+      Z3_INCLUDE_GIT_HASH: "OFF",
+      Z3_INCLUDE_GIT_DESCRIBE: "OFF",
+    },
+    runnable: "bin/z3",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    z3 --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(z3)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Z3 version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^z3-(?<version>.+)$/,
+  });
+}
