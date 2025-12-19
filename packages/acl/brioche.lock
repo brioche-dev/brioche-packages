@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.savannah.gnu.org/releases/acl/acl-2.3.2.tar.gz": {
+      "type": "sha256",
+      "value": "5f2bdbad629707aa7d85c623f994aa8a1d2dec55a73de5205bac0bf6058a2f7c"
+    }
+  }
+}
