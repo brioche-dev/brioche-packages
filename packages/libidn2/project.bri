@@ -1,4 +1,5 @@
 import * as std from "std";
+import libiconv from "libiconv";
 import libunistring from "libunistring";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
@@ -20,7 +21,7 @@ export default function libidn2(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, libunistring)
+    .dependencies(std.toolchain, libiconv, libunistring)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)

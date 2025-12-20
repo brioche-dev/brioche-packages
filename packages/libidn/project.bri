@@ -1,4 +1,5 @@
 import * as std from "std";
+import libiconv from "libiconv";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
@@ -19,7 +20,7 @@ export default function libidn(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain)
+    .dependencies(std.toolchain, libiconv)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
