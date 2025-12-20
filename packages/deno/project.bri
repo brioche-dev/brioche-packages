@@ -7,7 +7,7 @@ import llvm from "llvm";
 
 export const project = {
   name: "deno",
-  version: "2.6.0",
+  version: "2.6.3",
   repository: "https://github.com/denoland/deno",
 };
 
