@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/recp/cglm.git": {
+      "v0.9.6": "144d1e7c29b3b0c6dede7917a0476cc95248559c"
+    }
+  }
+}
