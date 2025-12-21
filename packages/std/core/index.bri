@@ -3,6 +3,7 @@ export { source } from "./source.bri";
 export { semverMatches } from "./semver.bri";
 export {
   assert,
+  equal,
   unreachable,
   indoc,
   mixin,
