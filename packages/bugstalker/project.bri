@@ -6,7 +6,7 @@ import { cargoBuild } from "rust";
 // @brioche-packages skip-platform aarch64-linux
 export const project = {
   name: "bugstalker",
-  version: "0.3.5",
+  version: "0.3.6",
   repository: "https://github.com/godzie44/BugStalker.git",
 };
 
