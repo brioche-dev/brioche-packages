@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftp.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz": {
+    "https://ftpmirror.gnu.org/gnu/libidn/libidn2-2.3.8.tar.gz": {
       "type": "sha256",
       "value": "f557911bf6171621e1f72ff35f5b1825bb35b52ed45325dcdee931e5d3c0787a"
     }

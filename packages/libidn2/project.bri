@@ -9,7 +9,7 @@ export const project = {
 };
 
 const source = Brioche.download(
-  `https://ftp.gnu.org/gnu/libidn/libidn2-${project.version}.tar.gz`,
+  `https://ftpmirror.gnu.org/gnu/libidn/libidn2-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -56,7 +56,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://ftp.gnu.org/gnu/libidn
+    let version = http get https://ftpmirror.gnu.org/gnu/libidn
       | lines
       | where ($it | str contains "libidn2-") and (not ($it | str contains ".sig"))
       | parse --regex '<a href="libidn2-(?<version>[0-9.]+)\.tar\.gz">'
