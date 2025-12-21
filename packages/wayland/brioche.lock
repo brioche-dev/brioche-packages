@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.freedesktop.org/wayland/wayland": {
+      "1.24.0": "736d12ac67c20c60dc406dc49bb06be878501f86"
+    }
+  }
+}
