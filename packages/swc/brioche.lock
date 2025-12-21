@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/swc_cli_impl/52.0.0/download": {
+      "type": "sha256",
+      "value": "3a5a3a4e7ce379178275070682f2ef92614ad03ae9298029d6c20774278db529"
+    }
+  }
+}
