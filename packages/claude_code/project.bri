@@ -3,7 +3,7 @@ import nodejs, { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "claude_code",
-  version: "2.0.69",
+  version: "2.0.75",
   extra: {
     packageName: "@anthropic-ai/claude-code",
   },
