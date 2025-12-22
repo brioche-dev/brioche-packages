@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "dasel",
-  version: "2.8.1",
+  version: "3.1.4",
   repository: "https://github.com/TomWright/dasel.git",
   extra: {
     majorVersion: "2",

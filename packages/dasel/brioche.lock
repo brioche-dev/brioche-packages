@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/TomWright/dasel.git": {
-      "v2.8.1": "5e3a3cffdd50bacb493fb041d65211f440a560a5"
+      "v3.1.4": "64ba3027d0d4ef61f5daf94a62a900f0fdd5f96e"
     }
   }
 }
