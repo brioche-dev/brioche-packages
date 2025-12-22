@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/zerofs/0.19.1/download": {
+      "type": "sha256",
+      "value": "617992c209bc4ed5be6622032858fc62ff4d2450037a3ad981b561951b952262"
+    }
+  }
+}
