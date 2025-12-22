@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "trivy",
-  version: "0.68.1",
+  version: "0.68.2",
   extra: {
     moduleName: "github.com/aquasecurity/trivy",
   },
