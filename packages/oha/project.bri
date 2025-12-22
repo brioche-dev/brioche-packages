@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "oha",
-  version: "1.12.0",
+  version: "1.12.1",
   repository: "https://github.com/hatoo/oha.git",
 };
 
