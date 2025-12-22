@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "cubejs_cli",
-  version: "1.5.13",
+  version: "1.6.1",
   extra: {
     packageName: "cubejs-cli",
   },
