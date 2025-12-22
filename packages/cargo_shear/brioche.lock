@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-shear/1.9.0/download": {
+    "https://crates.io/api/v1/crates/cargo-shear/1.9.1/download": {
       "type": "sha256",
-      "value": "a2c7f30474cae9d571b1d440cf997438ef25531dd435147f035eaccbf30074a7"
+      "value": "49ddd3e8ac4e81a927152065a4421b799e87ce427453c0ed00a84fc2d47bd7e4"
     }
   }
 }
