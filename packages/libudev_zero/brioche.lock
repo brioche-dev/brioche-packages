@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/illiliti/libudev-zero": {
+      "1.0.3": "ee32ac5f6494047b9ece26e7a5920650cdf46655"
+    }
+  }
+}
