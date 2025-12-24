@@ -4,21 +4,16 @@ import { goBuild } from "go";
 export const project = {
   name: "dasel",
   version: "3.1.4",
-  repository: "https://github.com/TomWright/dasel.git",
   extra: {
-    majorVersion: "2",
+    moduleName: "github.com/tomwright/dasel/v3",
   },
 };
 
-std.assert(
-  project.version.split(".").at(0) === project.extra.majorVersion,
-  `Dasel major version ${project.extra.majorVersion} does not match version number ${project.version}`,
-);
-
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
 
 export default function dasel(): std.Recipe<std.Directory> {
   return goBuild({
@@ -30,7 +25,7 @@ export default function dasel(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/tomwright/dasel/v${project.extra.majorVersion}/internal.Version=${project.version}`,
+        `${project.extra.moduleName}/internal.Version=${project.version}`,
       ],
     },
   });
@@ -38,7 +33,7 @@ export default function dasel(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    dasel --version | tee "$BRIOCHE_OUTPUT"
+    dasel version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(dasel)
     .toFile();
@@ -46,12 +41,12 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `dasel version ${project.version}`;
+  const expected = project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }
