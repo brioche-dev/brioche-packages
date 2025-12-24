@@ -1,5 +1,5 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
+import { pnpmInstallGlobal } from "pnpm";
 
 export const project = {
   name: "github_copilot_cli",
@@ -10,9 +10,10 @@ export const project = {
 };
 
 export default function githubCopilotCli(): std.Recipe<std.Directory> {
-  return npmInstallGlobal({
+  return pnpmInstallGlobal({
     packageName: project.extra.packageName,
     version: project.version,
+    allowBuild: ["sharp"],
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/copilot"));
 }
 
@@ -21,12 +22,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
     copilot --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(githubCopilotCli)
-    .env({
-      // TODO: remove once https://github.com/github/copilot-cli/issues/16 is done
-      // Needed because the tool dynamically opens `libresolv.so.2`,
-      // through the `sharp` module which is not directly a dependency
-      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
-    })
     .toFile();
 
   const result = (await script.read()).trim();
