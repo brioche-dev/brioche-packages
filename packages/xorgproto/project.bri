@@ -1,5 +1,7 @@
 import * as std from "std";
 import { nushellRunnable, type NushellRunnable } from "nushell";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
 
 export const project = {
   name: "xorgproto",
@@ -13,21 +15,15 @@ const source = Brioche.download(
   .peel();
 
 export default function xorgproto(): std.Recipe<std.Directory> {
-  return std.runBash`
-    ./configure --prefix=/
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
-  `
-    .dependencies(std.toolchain)
-    .workDir(source)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
-      }),
-    );
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja],
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
