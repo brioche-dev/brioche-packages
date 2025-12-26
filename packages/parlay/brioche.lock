@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/snyk/parlay/@v/v0.10.0.zip": {
+      "type": "sha256",
+      "value": "96b8e07a31d669f646b474bb1445174ee3402008c0fce0a1bc8516d2a8fb70c9"
+    }
+  }
+}

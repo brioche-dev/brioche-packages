@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/meshery/meshery.git": {
+      "v0.8.191": "810d03e1b7cc6b7f6da4b53e5d6399027b22d4d1"
+    }
+  }
+}

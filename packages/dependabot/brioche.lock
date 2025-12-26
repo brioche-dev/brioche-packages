@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/dependabot/cli/@v/v1.79.0.zip": {
+    "https://proxy.golang.org/github.com/dependabot/cli/@v/v1.80.0.zip": {
       "type": "sha256",
-      "value": "9247403e7ee65196d16998656e558b130214ca0a8c6cd5b68293bcfef5518932"
+      "value": "584a7f47ce82bcd8380a994929e0cbddc98e8f8c12666771523865e7a9976e83"
     }
   }
 }

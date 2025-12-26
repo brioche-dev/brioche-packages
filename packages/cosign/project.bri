@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "cosign",
-  version: "3.0.2",
+  version: "3.0.3",
   extra: {
     moduleName: "github.com/sigstore/cosign/v3",
   },

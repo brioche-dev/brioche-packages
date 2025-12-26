@@ -1,9 +1,10 @@
 import * as std from "std";
 import { nushellRunnable, type NushellRunnable } from "nushell";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
 import libx11 from "libx11";
 import libxau from "libxau";
 import libxcb from "libxcb";
-import util_macros from "util_macros";
 import xorgproto from "xorgproto";
 
 export const project = {
@@ -18,23 +19,16 @@ const source = Brioche.download(
   .peel();
 
 export default function libxkbfile(): std.Recipe<std.Directory> {
-  return std.runBash`
-    ./configure --prefix=/
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
-  `
-    .dependencies(std.toolchain, libx11, libxau, libxcb, util_macros, xorgproto)
-    .workDir(source)
-    .toDirectory()
-    .pipe(std.libtoolSanitizeDependencies)
-    .pipe(std.pkgConfigMakePathsRelative)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      }),
-    );
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, libx11, libxau, libxcb, xorgproto],
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

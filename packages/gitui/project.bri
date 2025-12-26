@@ -5,7 +5,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "gitui",
-  version: "0.27.0",
+  version: "0.28.0",
   repository: "https://github.com/extrawurst/gitui",
 };
 
@@ -16,17 +16,7 @@ const source = Brioche.gitCheckout({
   // Remove upstream's custom Cargo `config.toml`, which overrides the linker
   // for various targets (for cross-compilation). This can interfere with
   // our default working linker configuration.
-  .remove(".cargo/config.toml")
-  .pipe((source) =>
-    // Apply patch file to resolve build issues with Rust 1.89.0
-    std.applyPatch({
-      source,
-      patch: Brioche.download(
-        `${project.repository}/commit/950e703cab1dd37e3d02e7316ec99cc0dc70513c.patch`,
-      ),
-      strip: 1,
-    }),
-  );
+  .remove(".cargo/config.toml");
 
 export default function gitui(): std.Recipe<std.Directory> {
   return cargoBuild({

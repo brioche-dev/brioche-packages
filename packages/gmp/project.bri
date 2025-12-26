@@ -7,7 +7,7 @@ export const project = {
 };
 
 const source = Brioche.download(
-  `https://ftp.gnu.org/gnu/gmp/gmp-${project.version}.tar.xz`,
+  `https://ftpmirror.gnu.org/gnu/gmp/gmp-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
@@ -53,7 +53,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://ftp.gnu.org/gnu/gmp
+    let version = http get https://ftpmirror.gnu.org/gnu/gmp
       | lines
       | where ($it | str contains "gmp-") and ($it | str contains ".xz") and (not ($it | str contains ".sig"))
       | parse --regex '<a href="gmp-(?<version>.+)\.tar\.xz">'

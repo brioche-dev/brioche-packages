@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/axboe/liburing.git": {
+      "liburing-2.13": "e07a859d4b39583c0fe0290730a9d75bccc24b5e"
+    }
+  }
+}

@@ -3,7 +3,7 @@ import python, { wrapVenvScripts } from "python";
 
 export const project = {
   name: "meson",
-  version: "1.9.2",
+  version: "1.10.0",
   repository: "https://github.com/mesonbuild/meson.git",
 };
 

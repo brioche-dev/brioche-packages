@@ -3,7 +3,7 @@ import pcre2 from "pcre2";
 
 export const project = {
   name: "nginx",
-  version: "1.29.3",
+  version: "1.29.4",
   repository: "https://github.com/nginx/nginx",
 };
 

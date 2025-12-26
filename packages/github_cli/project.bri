@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "github_cli",
-  version: "2.83.1",
+  version: "2.83.2",
   extra: {
     moduleName: "github.com/cli/cli/v2",
   },

@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "fabric_ai",
-  version: "1.4.340",
+  version: "1.4.355",
   extra: {
     moduleName: "github.com/danielmiessler/fabric",
   },
@@ -34,7 +34,7 @@ export default function fabricAi(): std.Recipe<std.Directory> {
         "-X",
         `main.date=${manifest.time}`,
         "-X",
-        `main.tag=v${project.version}`,
+        `main.tag=${project.version}`,
       ],
     },
     path: "./cmd/fabric",

@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "github_mcp_server",
-  version: "0.24.0",
+  version: "0.26.3",
   extra: {
     moduleName: "github.com/github/github-mcp-server",
   },

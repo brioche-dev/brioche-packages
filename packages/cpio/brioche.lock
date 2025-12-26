@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftp.gnu.org/gnu/cpio/cpio-2.15.tar.gz": {
+    "https://ftpmirror.gnu.org/gnu/cpio/cpio-2.15.tar.gz": {
       "type": "sha256",
       "value": "efa50ef983137eefc0a02fdb51509d624b5e3295c980aa127ceee4183455499e"
     }

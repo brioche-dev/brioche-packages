@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/golang.org/x/tools/gopls/@v/v0.20.0.zip": {
+    "https://proxy.golang.org/golang.org/x/tools/gopls/@v/v0.21.0.zip": {
       "type": "sha256",
-      "value": "ebaeab7ce9e90b2f50bd15688843f6f6392897532cdc4826b34a5454d0153357"
+      "value": "f366328e7b5e9cc5a596201c78ed5d29007f2826e0344ffa1a043d2dbe8286c8"
     }
   }
 }

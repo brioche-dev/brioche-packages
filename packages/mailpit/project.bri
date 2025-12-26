@@ -34,7 +34,7 @@ export default function mailpit(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/axllent/mailpit/config.Version=v${project.version}`,
+        `${project.extra.moduleName}/config.Version=${project.version}`,
       ],
     },
     runnable: "bin/mailpit",
@@ -75,7 +75,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `mailpit v${project.version}`;
+  const expected = `mailpit ${project.version}`;
   std.assert(
     result.startsWith(expected),
     `expected '${expected}', got '${result}'`,

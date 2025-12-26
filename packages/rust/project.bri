@@ -5,7 +5,7 @@ import * as t from "typer";
 
 export const project = {
   name: "rust",
-  version: "1.91.1",
+  version: "1.92.0",
   repository: "https://github.com/rust-lang/rust",
 };
 

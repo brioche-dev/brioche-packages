@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/router-for-me/!c!l!i!proxy!a!p!i/v6/@v/v6.5.55.info": {
+    "https://proxy.golang.org/github.com/router-for-me/!c!l!i!proxy!a!p!i/v6/@v/v6.6.40.info": {
       "type": "sha256",
-      "value": "b3e57cca75e0123f0d67c5511805514d724ccb4279dd5aff9b8cbafd71ddb657"
+      "value": "616e265e419c154e4a4e368a146612163de2de5c8aab59ee7aa318fc1d79f463"
     },
-    "https://proxy.golang.org/github.com/router-for-me/!c!l!i!proxy!a!p!i/v6/@v/v6.5.55.zip": {
+    "https://proxy.golang.org/github.com/router-for-me/!c!l!i!proxy!a!p!i/v6/@v/v6.6.40.zip": {
       "type": "sha256",
-      "value": "643c25d02f9a26fb462c5475f887cbc33b931f9fc48f122d482f89bf02079175"
+      "value": "11e5491cd7e68198cc413fbc588a25d0f32ab00d99ebd393767badf71bcc60ab"
     }
   }
 }

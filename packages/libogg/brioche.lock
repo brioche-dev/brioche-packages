@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/xiph/ogg": {
+      "v1.3.6": "be05b13e98b048f0b5a0f5fa8ce514d56db5f822"
+    }
+  }
+}

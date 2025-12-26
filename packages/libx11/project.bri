@@ -31,7 +31,6 @@ export default function libx11(): std.Recipe<std.Directory> {
   `
     .dependencies(std.toolchain, utilMacros, xorgproto, xtrans, libxau, libxcb)
     .workDir(source)
-    .env({})
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)

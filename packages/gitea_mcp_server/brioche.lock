@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/gitea.com/gitea/gitea-mcp/@v/v0.5.0.zip": {
+    "https://proxy.golang.org/gitea.com/gitea/gitea-mcp/@v/v0.6.0.zip": {
       "type": "sha256",
-      "value": "76f4a5373a00352317944dbf725fb5ddd7ca61067d25cd3ac7bac1f2751a3586"
+      "value": "3f4e3dae2ff403910fd8059253aa64888cf7462b01197e1bb2dfefc777a873e6"
     }
   }
 }

@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "llvm",
-  version: "21.1.7",
+  version: "21.1.8",
   repository: "https://github.com/llvm/llvm-project.git",
 };
 
@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
 });
 
 export default function llvm(): std.Recipe<std.Directory> {
-  let llvm = cmakeBuild({
+  return cmakeBuild({
     source,
     path: "llvm",
     set: {
@@ -29,22 +29,28 @@ export default function llvm(): std.Recipe<std.Directory> {
         std.CURRENT_PLATFORM === "x86_64-linux" ? "16" : "8",
     },
     dependencies: [std.toolchain, python],
-  }).pipe((recipe) =>
-    std.setEnv(recipe, {
-      LIBRARY_PATH: { append: [{ path: "lib" }] },
-      CPATH: { append: [{ path: "include" }] },
-    }),
-  );
+  })
+    .pipe(removeTempFiles)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        CPATH: { append: [{ path: "include" }] },
+      }),
+    );
+}
 
-  // Remove a bunch of `*.tmp*` files left over in the build
-  // TODO: Figure out where these temp files are coming from!
-  llvm = std.runBash`
+/**
+ * Remove `*.tmp*` files left over in the build output.
+ * TODO: Figure out where these temp files are coming from
+ */
+function removeTempFiles(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
     find "$BRIOCHE_OUTPUT/lib" -name '*.tmp*' -delete
   `
-    .outputScaffold(llvm)
+    .outputScaffold(recipe)
     .toDirectory();
-
-  return llvm;
 }
 
 /**

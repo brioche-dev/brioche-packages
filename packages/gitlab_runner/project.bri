@@ -1,0 +1,70 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "gitlab_runner",
+  version: "18.7.0",
+  repository: "https://gitlab.com/gitlab-org/gitlab-runner.git",
+  extra: {
+    releaseDate: "2025-12-18",
+  },
+};
+
+// Retrieve the source directly from the GitLab repository and not from the Go
+// proxy. Since, the one from Go proxy is not up to date
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function gitlabRunner(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `gitlab.com/gitlab-org/gitlab-runner/common.VERSION=${project.version}`,
+        "-X",
+        `gitlab.com/gitlab-org/gitlab-runner/common.REVISION=${gitRef.commit}`,
+        "-X",
+        `gitlab.com/gitlab-org/gitlab-runner/common.BUILT=${project.extra.releaseDate}`,
+      ],
+    },
+    runnable: "bin/gitlab-runner",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    gitlab-runner --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gitlabRunner)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Output format: "Version:      18.7.0"
+  const versionLine = result
+    .split("\n")
+    .find((line) => line.startsWith("Version:"));
+  const versionMatch = versionLine?.match(/Version:\s+(\S+)/);
+  const version = versionMatch?.[1] ?? "";
+
+  std.assert(
+    version === project.version,
+    `expected '${project.version}', got '${version}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.com",
+    project,
+  });
+}

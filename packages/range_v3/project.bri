@@ -1,0 +1,67 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "range_v3",
+  version: "0.12.0",
+  repository: "https://github.com/ericniebler/range-v3.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function rangeV3(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      RANGE_V3_TESTS: "OFF",
+      RANGE_V3_EXAMPLES: "OFF",
+      RANGE_V3_DOCS: "OFF",
+      RANGE_V3_PERF: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <range/v3/version.hpp>
+      #include <iostream>
+
+      int main()
+      {
+        std::cout << RANGE_V3_MAJOR << "." << RANGE_V3_MINOR << "." << RANGE_V3_PATCHLEVEL << std::endl;
+
+        return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    g++ main.cpp -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, rangeV3)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

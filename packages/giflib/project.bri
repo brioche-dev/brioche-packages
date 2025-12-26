@@ -1,0 +1,77 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "giflib",
+  version: "5.2.2",
+  repository: "https://sourceforge.net/projects/giflib",
+};
+
+const source = Brioche.download(
+  `https://sourceforge.net/projects/giflib/files/giflib-${project.version}.tar.gz/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Apply patches:
+    // - Fix Makefile typo: LIBUTILMAJOR should be LIBUTILSOMAJOR
+    // - Skip HTML docs build to remove ImageMagick dependency
+    std.runBash`
+      sed -i 's/LIBUTILMAJOR/LIBUTILSOMAJOR/' "$BRIOCHE_OUTPUT/Makefile"
+      sed -i 's/^all: allhtml manpages$/all: manpages/' "$BRIOCHE_OUTPUT/doc/Makefile"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function giflib(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+    make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    gif2rgb -h 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(giflib)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version.split(".").slice(0, 2).join(".");
+  std.assert(
+    result.startsWith(`gif2rgb Version ${expected}`),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/giflib/files/
+      | lines
+      | where ($it | str contains '<a href="/projects/giflib/files/giflib-')
+      | where ($it | str contains '.tar.gz')
+      | parse --regex '<a href="/projects/giflib/files/giflib-(?<version>[0-9.]+)\\.tar\\.gz/'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
