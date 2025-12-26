@@ -18,6 +18,11 @@ export default function treeSitter(): std.Recipe<std.Directory> {
     source,
     path: "crates/cli",
     dependencies: [llvm],
+    env: {
+      // Build-time scripts dynamically load `libclang`, so ensure the standard
+      // system libraries can be dynamically loaded
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+    },
     runnable: "bin/tree-sitter",
   });
 }
