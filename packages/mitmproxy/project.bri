@@ -1,5 +1,5 @@
 import * as std from "std";
-import python from "python";
+import python, { getLatestVersion } from "python";
 import uv from "uv";
 
 export const project = {
@@ -14,17 +14,11 @@ const source = Brioche.gitCheckout({
 });
 
 export default function mitmproxy(): std.Recipe<std.Directory> {
-  // FIXME: Remove the override once the recipe uses a more recent version
-  // of `brotli` (the current version does not support the latest version of
-  // Python)
-  const pythonVersion = "3.13";
-  const managedPython = python({ version: pythonVersion });
-
   return std.runBash`
     uv tool install .
   `
     .workDir(source)
-    .dependencies(managedPython, uv)
+    .dependencies(python, uv)
     .env({
       UV_NO_MANAGED_PYTHON: "1",
       UV_LINK_MODE: "copy",
@@ -36,7 +30,7 @@ export default function mitmproxy(): std.Recipe<std.Directory> {
     .pipe((recipe) => {
       // TODO: Clean this up! We should find a way to not hardcode the
       // list of binaries and the Python version for `$PYTHONPATH`
-      recipe = recipe.insert("brioche-run.d/python", managedPython);
+      recipe = recipe.insert("brioche-run.d/python", python);
       const binaries = [
         "mitmproxy",
         "mitmdump",
@@ -50,7 +44,7 @@ export default function mitmproxy(): std.Recipe<std.Directory> {
           env: {
             PYTHONPATH: {
               prepend: {
-                relativePath: `mitmproxy/lib/python${pythonVersion}/site-packages`,
+                relativePath: `mitmproxy/lib/python${getLatestVersion()}/site-packages`,
               },
               separator: ":",
             },
