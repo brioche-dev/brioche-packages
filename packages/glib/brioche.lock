@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.gnome.org/sources/glib/2.87/glib-2.87.0.tar.xz": {
+      "type": "sha256",
+      "value": "926cf73d8eb90ea341cc2d6fc7b258901e1a086a3808b166b4476d69a98b2401"
+    }
+  }
+}
