@@ -19,12 +19,12 @@ const source = Brioche.download(
 
 export default function libxcb(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-dri3 \
-      --enable-ge \
-      --enable-xevie \
-      --enable-xprint \
+    ./configure \\
+      --prefix=/ \\
+      --enable-dri3 \\
+      --enable-ge \\
+      --enable-xevie \\
+      --enable-xprint \\
       --enable-selinux
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

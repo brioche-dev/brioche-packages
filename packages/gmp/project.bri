@@ -14,9 +14,9 @@ const source = Brioche.download(
 
 export default function gmp(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --with-pic \
+    ./configure \\
+      --prefix=/ \\
+      --with-pic \\
       --enable-cxx
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

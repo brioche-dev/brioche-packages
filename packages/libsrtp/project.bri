@@ -15,8 +15,8 @@ const source = Brioche.download(
 
 export default function libsrtp(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-openssl
     make -j "$(nproc)"
     make -j "$(nproc)" shared_library

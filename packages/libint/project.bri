@@ -24,8 +24,8 @@ const source = Brioche.gitCheckout({
 export default function libint(): std.Recipe<std.Directory> {
   return std.runBash`
     ./autogen.sh
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-shared
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

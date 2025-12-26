@@ -14,17 +14,17 @@ const source = Brioche.download(
 
 export default function ncurses(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --without-debug \
-      --with-shared \
-      --with-cxx-shared \
-      --with-versioned-syms \
-      --enable-sigwinch \
-      --enable-symlinks \
-      --enable-pc-files \
-      --enable-widec \
-      --with-termlib \
+    ./configure \\
+      --prefix=/ \\
+      --without-debug \\
+      --with-shared \\
+      --with-cxx-shared \\
+      --with-versioned-syms \\
+      --enable-sigwinch \\
+      --enable-symlinks \\
+      --enable-pc-files \\
+      --enable-widec \\
+      --with-termlib \\
       --with-pkg-config-libdir=/lib/pkgconfig
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
