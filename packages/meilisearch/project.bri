@@ -1,0 +1,41 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "meilisearch",
+  version: "1.30.1",
+  repository: "https://github.com/meilisearch/meilisearch.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function meilisearch(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/meilisearch",
+    runnable: "bin/meilisearch",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    meilisearch --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(meilisearch)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `meilisearch ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
