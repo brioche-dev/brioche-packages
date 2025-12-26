@@ -1,0 +1,54 @@
+import * as std from "std";
+import libpng from "libpng";
+
+export const project = {
+  name: "jbig2dec",
+  version: "0.20",
+  repository: "https://github.com/ArtifexSoftware/jbig2dec",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/${project.name}-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function jbig2dec(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libpng)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/jbig2dec"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    jbig2dec --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(jbig2dec)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = `jbig2dec ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
