@@ -1,0 +1,77 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import openssl from "openssl";
+
+export const project = {
+  name: "berkeley_db",
+  version: "18.1.40",
+};
+
+const source = Brioche.download(
+  `https://download.oracle.com/berkeley-db/db-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function berkeleyDb(): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd build_unix
+    ../dist/configure \\
+      --prefix=/ \\
+      --disable-debug \\
+      --enable-static \\
+      --enable-shared \\
+      --enable-cxx \\
+      --enable-compat185 \\
+      --enable-sql \\
+      --enable-sql_codegen \\
+      --enable-dbm \\
+      --enable-stl
+    make -j "$(nproc)"
+    make install_include install_lib install_utilities DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, openssl)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    db_verify -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(berkeleyDb)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Berkeley DB ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.oracle.com/database/technologies/related/berkeleydb-downloads.html
+      | lines
+      | where ($it | str contains 'Berkeley DB') and ($it | str contains '(') and (not ($it | str contains 'Java')) and (not ($it | str contains 'XML'))
+      | parse --regex 'Berkeley DB [\\d.]+ \\((?<version>[\\d.]+)\\)'
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
