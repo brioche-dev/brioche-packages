@@ -1,0 +1,56 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "cilium_cli",
+  version: "0.18.9",
+  extra: {
+    moduleName: "github.com/cilium/cilium-cli",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function ciliumCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/cilium",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/cilium/cilium/cilium-cli/defaults.CLIVersion=${project.version}`,
+      ],
+    },
+    runnable: "bin/cilium",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ls
+    cilium version --client | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ciliumCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cilium-cli: ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
