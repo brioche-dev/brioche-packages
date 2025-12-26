@@ -1,0 +1,150 @@
+import * as std from "std";
+import brotli from "brotli";
+import cairo from "cairo";
+import cmake from "cmake";
+import fontconfig from "fontconfig";
+import freetype from "freetype";
+import glib from "glib";
+import libffi from "libffi";
+import libpng from "libpng";
+import libselinux from "libselinux";
+import libsepol from "libsepol";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxext from "libxext";
+import libxrender from "libxrender";
+import lzo from "lzo";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import pcre2 from "pcre2";
+import pixman from "pixman";
+import python from "python";
+import xorgproto from "xorgproto";
+import zlib from "zlib";
+
+export const project = {
+  name: "gobject_introspection",
+  version: "1.86.0",
+  repository: "https://gitlab.gnome.org/GNOME/gobject-introspection",
+  extra: {
+    majorVersion: "1",
+    minorVersion: "86",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
+const source = Brioche.download(
+  `https://download.gnome.org/sources/gobject-introspection/${project.extra.majorVersion}.${project.extra.minorVersion}/gobject-introspection-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+// Create a Python with setuptools installed
+function pythonWithSetuptools(): std.Recipe<std.Directory> {
+  const pipDependencies = std.directory({
+    "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+      "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+    ),
+  });
+
+  const basePython = std.recipe(python);
+
+  return std.runBash`
+    pip install setuptools
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(basePython)
+    .toDirectory();
+}
+
+export default function gobjectIntrospection(): std.Recipe<std.Directory> {
+  // Custom ldd wrapper that uses LD_TRACE_LOADED_OBJECTS instead of ldd
+  const customLddWrapper = std.directory({
+    "bin/custom-ldd": std
+      .file(
+        std.indoc`
+          #!/usr/bin/env sh
+          exec env LD_TRACE_LOADED_OBJECTS=1 "$@"
+        `,
+      )
+      .withPermissions({ executable: true }),
+  });
+
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      cmake,
+      customLddWrapper,
+      ninja,
+      pythonWithSetuptools,
+      // glib dependencies
+      glib,
+      libffi,
+      libsepol,
+      libselinux,
+      pcre2,
+      // cairo dependencies
+      brotli,
+      cairo,
+      fontconfig,
+      freetype,
+      libpng,
+      libx11,
+      libxau,
+      libxcb,
+      libxext,
+      libxrender,
+      lzo,
+      pixman,
+      xorgproto,
+      zlib,
+    ],
+    set: {
+      default_library: "both",
+      doctool: "disabled",
+      gi_cross_ldd_wrapper: "custom-ldd",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      GI_TYPELIB_PATH: { append: [{ path: "lib/girepository-1.0" }] },
+      XDG_DATA_DIRS: { append: [{ path: "share" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion gobject-introspection-1.0 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, gobjectIntrospection)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.gnome.org",
+    project,
+  });
+}
