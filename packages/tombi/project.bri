@@ -1,0 +1,55 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "tombi",
+  version: "0.7.12",
+  repository: "https://github.com/tombi-toml/tombi.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Upstream uses "0.0.0-dev" as the version in Cargo.toml files.
+  // Patch them to use the actual release version so `tombi --version` reports correctly.
+  std.runBash`
+    # Fail if upstream has fixed the versioning (so we can remove this workaround)
+    grep -q '0.0.0-dev' "$BRIOCHE_OUTPUT/Cargo.toml"
+
+    sed -i 's/0.0.0-dev/${project.version}/g' "$BRIOCHE_OUTPUT/Cargo.toml"
+    sed -i 's/0.0.0-dev/${project.version}/g' "$BRIOCHE_OUTPUT"/rust/*/Cargo.toml
+    sed -i 's/0.0.0-dev/${project.version}/g' "$BRIOCHE_OUTPUT"/crates/*/Cargo.toml
+    sed -i 's/0.0.0-dev/${project.version}/g' "$BRIOCHE_OUTPUT"/extensions/*/Cargo.toml
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function tombi(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "rust/tombi-cli",
+    runnable: "bin/tombi",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tombi --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tombi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tombi ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
