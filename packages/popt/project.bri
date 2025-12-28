@@ -1,0 +1,56 @@
+import * as std from "std";
+import libiconv from "libiconv";
+
+export const project = {
+  name: "popt",
+  version: "1.19",
+  repository: "https://github.com/rpm-software-management/popt",
+};
+
+const source = Brioche.download(
+  `https://ftp.osuosl.org/pub/rpm/popt/releases/popt-1.x/popt-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function popt(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libiconv)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion popt | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, popt)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^popt-(?<version>\d+\.\d+)-release$/,
+  });
+}
