@@ -1,0 +1,62 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "spirv_tools",
+  version: "1.4.335.0",
+  repository: "https://github.com/KhronosGroup/SPIRV-Tools",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `vulkan-sdk-${project.version}`,
+});
+
+// SPIRV-Tools needs to be built with the SPIRV-Headers source
+const spirvHeadersSource = Brioche.gitCheckout({
+  repository: "https://github.com/KhronosGroup/SPIRV-Headers",
+  ref: `vulkan-sdk-${project.version}`,
+});
+
+export default function spirvTools(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      "SPIRV-Headers_SOURCE_DIR": spirvHeadersSource,
+      SPIRV_SKIP_TESTS: "ON",
+      SPIRV_WERROR: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    spirv-as --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(spirvTools)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = /SPIRV-Tools v\d+\.\d+/;
+  std.assert(expected.test(result), `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^vulkan-sdk-(?<version>\d+\.\d+\.\d+\.\d+)$/,
+  });
+}
