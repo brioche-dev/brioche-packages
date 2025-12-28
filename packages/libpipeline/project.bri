@@ -1,0 +1,52 @@
+import * as std from "std";
+
+export const project = {
+  name: "libpipeline",
+  version: "1.5.8",
+  repository: "https://gitlab.com/libpipeline/libpipeline",
+};
+
+const source = Brioche.download(
+  `https://download.savannah.nongnu.org/releases/libpipeline/libpipeline-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libpipeline(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libpipeline | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libpipeline)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({ project });
+}
