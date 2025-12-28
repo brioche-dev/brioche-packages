@@ -1,0 +1,49 @@
+import * as std from "std";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+
+export const project = {
+  name: "tllist",
+  version: "1.1.0",
+  repository: "https://codeberg.org/dnkl/tllist",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function tllist(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja],
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion tllist | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, tllist)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGiteaReleases({
+    giteaUrl: "https://codeberg.org",
+    project,
+  });
+}
