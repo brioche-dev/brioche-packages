@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ovh/ovh-ttyrec": {
+      "v1.1.7.1": "36e8dde2bc280a79e7aab0c744d5a5ba4311c344"
+    }
+  }
+}
