@@ -3,7 +3,8 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "gmp",
-  version: "6.3.0",
+  version:
+    '6.3.0.tar.xz"><img src="/icons/unknown.gif" alt="[   ]"></a></td><td><a href="gmp-6.3.0',
 };
 
 const source = Brioche.download(
