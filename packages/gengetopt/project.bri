@@ -3,7 +3,8 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "gengetopt",
-  version: "2.23",
+  version:
+    '2.23.tar.xz"><img src="/icons/unknown.gif" alt="[   ]"></a></td><td><a href="gengetopt-2.23',
 };
 
 const source = Brioche.download(
