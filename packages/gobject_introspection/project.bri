@@ -109,6 +109,11 @@ export default function gobjectIntrospection(): std.Recipe<std.Directory> {
       xorgproto,
       zlib,
     ],
+    env: {
+      // g-ir-scanner loads a Python extension (_giscanner.so) that links
+      // against glib. The dynamic linker needs these paths at runtime.
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib:${glib}/lib:${pcre2}/lib:${libselinux}/lib`,
+    },
     set: {
       default_library: "both",
       doctool: "disabled",
