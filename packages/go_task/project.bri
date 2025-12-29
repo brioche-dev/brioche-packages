@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "go_task",
-  version: "3.46.3",
+  version: "3.46.4",
   extra: {
     moduleName: "github.com/go-task/task/v3",
   },
