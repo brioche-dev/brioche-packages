@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "cliproxyapi",
-  version: "6.6.40",
+  version: "6.6.64",
   extra: {
     moduleName: "github.com/router-for-me/!c!l!i!proxy!a!p!i/v6",
   },
