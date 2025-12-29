@@ -2,24 +2,23 @@ import * as std from "std";
 import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
-  name: "spirv_headers",
-  version: "1.4.335.0",
-  repository: "https://github.com/KhronosGroup/SPIRV-Headers",
+  name: "vulkan_headers",
+  version: "1.4.337",
+  repository: "https://github.com/KhronosGroup/Vulkan-Headers",
 };
 
-export const source = Brioche.gitCheckout({
+const source = Brioche.gitCheckout({
   repository: project.repository,
-  ref: `vulkan-sdk-${project.version}`,
+  ref: `v${project.version}`,
 });
 
-export default function spirvHeaders(): std.Recipe<std.Directory> {
+export default function vulkanHeaders(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
     dependencies: [std.toolchain],
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
-      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
@@ -30,25 +29,26 @@ export async function test(): Promise<std.Recipe<std.File>> {
     cmake_minimum_required(VERSION 4.0)
     project(QueryVersion)
 
-    find_package(SPIRV-Headers REQUIRED CONFIG)
-    message(STATUS "SPIRV-Headers version: \${SPIRV-Headers_VERSION}")
+    find_package(VulkanHeaders REQUIRED CONFIG)
+    message(STATUS "VulkanHeaders version: \${VulkanHeaders_VERSION}")
   `);
 
   const script = std.runBash`
     cp "$src" CMakeLists.txt
     cmake -S . -B tmp 2>&1 | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, cmake, spirvHeaders)
+    .dependencies(std.toolchain, cmake, vulkanHeaders)
     .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  // Pay attention that it reports SPIR-V spec version, which differs from
-  // the package version
-  const expected = /SPIRV-Headers version: \d+\.\d+\.\d+/;
-  std.assert(expected.test(result), `expected '${expected}', got '${result}'`);
+  const expected = `VulkanHeaders version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
@@ -56,6 +56,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubTags({
     project,
-    matchTag: /^vulkan-sdk-(?<version>\d+\.\d+\.\d+\.\d+)$/,
+    matchTag: /^v(?<version>\d+\.\d+\.\d+)$/,
   });
 }
