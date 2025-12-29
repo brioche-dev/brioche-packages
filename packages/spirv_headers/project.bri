@@ -27,7 +27,7 @@ export default function spirvHeaders(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const src = std.file(std.indoc`
-    cmake_minimum_required(VERSION 3.16)
+    cmake_minimum_required(VERSION 4.0)
     project(QueryVersion)
 
     find_package(SPIRV-Headers REQUIRED CONFIG)
