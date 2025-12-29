@@ -1,0 +1,102 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "freeimage",
+  version: "3.18.0",
+  extra: {
+    // Version format: X.Y.Z -> XYZ
+    versionCompact: "3180",
+  },
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/freeimage/Source%20Distribution/${project.version}/FreeImage${project.extra.versionCompact}.zip`,
+)
+  .unarchive("zip")
+  .peel()
+  .pipe((source) =>
+    // Patch the source to avoid root ownership flags in install commands
+    std.runBash`
+      sed -i 's/-o root -g root//g' "$BRIOCHE_OUTPUT/Makefile.gnu" "$BRIOCHE_OUTPUT/Makefile.fip"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function freeimage(): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Build and install FreeImage library
+    make -f Makefile.gnu -j "$(nproc)"
+    make -f Makefile.gnu install INCDIR="$BRIOCHE_OUTPUT/include" INSTALLDIR="$BRIOCHE_OUTPUT/lib"
+
+    # Build and install FreeImagePlus (C++ wrapper)
+    make -f Makefile.fip -j "$(nproc)"
+    make -f Makefile.fip install INCDIR="$BRIOCHE_OUTPUT/include" INSTALLDIR="$BRIOCHE_OUTPUT/lib"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .env({
+      // Force C++98 standard to avoid ISO C++17 dynamic exception specification errors
+      CXXFLAGS: "-std=c++98",
+    })
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const testProgram = std.file(std.indoc`
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <FreeImage.h>
+
+    int main()
+    {
+      FreeImage_Initialise(0);
+
+      const char* version = FreeImage_GetVersion();
+      printf("%s", version);
+
+      FreeImage_DeInitialise();
+
+      return EXIT_SUCCESS;
+    }
+  `);
+
+  const script = std.runBash`
+    gcc -o test_freeimage test.c -lfreeimage
+    ./test_freeimage | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(std.directory({ "test.c": testProgram }))
+    .dependencies(std.toolchain, freeimage)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/freeimage/files/Source%20Distribution/
+      | lines
+      | where ($it | str contains 'href="/projects/freeimage/files/Source%20Distribution/')
+      | parse --regex '<a href="/projects/freeimage/files/Source%20Distribution/(?<version>[0-9.]+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
