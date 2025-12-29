@@ -1,0 +1,67 @@
+import * as std from "std";
+import giflib from "giflib";
+import libjpegTurbo from "libjpeg_turbo";
+import libpng from "libpng";
+import libtiff from "libtiff";
+import libwebp from "libwebp";
+import openjpeg from "openjpeg";
+
+export const project = {
+  name: "leptonica",
+  version: "1.87.0",
+  repository: "https://github.com/DanBloomberg/leptonica",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/leptonica-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function leptonica(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      giflib,
+      libjpegTurbo,
+      libpng,
+      libtiff,
+      libwebp,
+      openjpeg,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion lept | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, leptonica)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
