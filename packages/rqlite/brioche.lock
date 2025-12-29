@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/rqlite/rqlite/v9/@v/v9.3.5.info": {
+    "https://proxy.golang.org/github.com/rqlite/rqlite/v9/@v/v9.3.6.info": {
       "type": "sha256",
-      "value": "6496521bd55484f97834628b8a1b8d428751ea06fa31216159c0cb529f0eb86b"
+      "value": "77c91c87834d9c797ed9c4d560722ed4ff65cc726d40385db71796d9cf2ed6b7"
     },
-    "https://proxy.golang.org/github.com/rqlite/rqlite/v9/@v/v9.3.5.zip": {
+    "https://proxy.golang.org/github.com/rqlite/rqlite/v9/@v/v9.3.6.zip": {
       "type": "sha256",
-      "value": "ba94d0ee391c2427f96d2c719c45139cbf92d4e6b42aef7f8b6c25715eb0b5d4"
+      "value": "e637695b1bb51e190a163de7bc29eeab7c5a5a097cde8c1dd84469146c6367f4"
     }
   }
 }
