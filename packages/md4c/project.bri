@@ -1,0 +1,66 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "md4c",
+  version: "0.5.2",
+  repository: "https://github.com/mity/md4c",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `release-${project.version}`,
+});
+
+export default function md4c(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    runnable: "bin/md2html",
+  })
+    .pipe(removeTempFiles)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+/**
+ * Remove `*.tmp*` files left over in the build output.
+ * TODO: Figure out where these temp files are coming from
+ */
+function removeTempFiles(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT/lib" -name '*.tmp*' -delete
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion md4c | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, md4c)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^release-(?<version>.+)$/,
+  });
+}
