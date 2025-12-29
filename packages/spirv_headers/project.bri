@@ -7,7 +7,7 @@ export const project = {
   repository: "https://github.com/KhronosGroup/SPIRV-Headers",
 };
 
-const source = Brioche.gitCheckout({
+export const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `vulkan-sdk-${project.version}`,
 });
