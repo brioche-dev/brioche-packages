@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/USCiLab/cereal": {
+      "v1.3.2": "ebef1e929807629befafbb2918ea1a08c7194554"
+    }
+  }
+}
