@@ -1,0 +1,67 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import eigen from "eigen";
+
+export const project = {
+  name: "poselib",
+  version: "2.0.5",
+  repository: "https://github.com/PoseLib/PoseLib",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function poselib(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, eigen],
+    env: {
+      // Disable -Werror to work around upstream unused variable warning
+      CXXFLAGS: "-Wno-error=unused-variable",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    cmake_minimum_required(VERSION 4.0)
+    project(QueryVersion)
+
+    find_package(PoseLib REQUIRED CONFIG)
+    message(STATUS "PoseLib version: \${PoseLib_VERSION}")
+  `);
+
+  const script = std.runBash`
+    cp "$src" CMakeLists.txt
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cmake, poselib)
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  // Note: v2.0.5 has incorrect version in CMakeLists.txt (reports 2.0.4)
+  const expectedVersion =
+    project.version === "2.0.5" ? "2.0.4" : project.version;
+  const expected = `PoseLib version: ${expectedVersion}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
