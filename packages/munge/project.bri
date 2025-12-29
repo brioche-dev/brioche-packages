@@ -1,0 +1,67 @@
+import * as std from "std";
+import libgcrypt from "libgcrypt";
+import libgpgError from "libgpg_error";
+
+export const project = {
+  name: "munge",
+  version: "0.5.17",
+  repository: "https://github.com/dun/munge",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/munge-${project.version}/munge-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function munge(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --localstatedir=/var \\
+      --sysconfdir=/etc \\
+      --with-pkgconfigdir=/lib/pkgconfig \\
+      --with-crypto-lib=libgcrypt
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libgcrypt, libgpgError)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/munge"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    munge --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(munge)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expectedVersion = `munge-${project.version}`;
+  std.assert(
+    result.startsWith(expectedVersion),
+    `expected '${expectedVersion}' in '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^munge-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
