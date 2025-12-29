@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "wasm_language_tools",
-  version: "0.7.1",
+  version: "0.8.0",
   repository: "https://github.com/g-plane/wasm-language-tools.git",
 };
 
