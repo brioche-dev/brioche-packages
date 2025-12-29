@@ -1,5 +1,7 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
+import python from "python";
+import { source as spirvHeadersSource } from "spirv_headers";
 
 export const project = {
   name: "spirv_tools",
@@ -12,16 +14,10 @@ const source = Brioche.gitCheckout({
   ref: `vulkan-sdk-${project.version}`,
 });
 
-// SPIRV-Tools needs to be built with the SPIRV-Headers source
-const spirvHeadersSource = Brioche.gitCheckout({
-  repository: "https://github.com/KhronosGroup/SPIRV-Headers",
-  ref: `vulkan-sdk-${project.version}`,
-});
-
 export default function spirvTools(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain],
+    dependencies: [std.toolchain, python],
     set: {
       BUILD_SHARED_LIBS: "ON",
       "SPIRV-Headers_SOURCE_DIR": spirvHeadersSource,
