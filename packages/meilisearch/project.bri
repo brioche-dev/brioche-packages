@@ -16,6 +16,10 @@ export default function meilisearch(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     path: "crates/meilisearch",
+    unsafe: {
+      // Enable networking to download some dictionaries
+      networking: true,
+    },
     runnable: "bin/meilisearch",
   });
 }
