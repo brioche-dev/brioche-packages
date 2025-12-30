@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/fastfloat/fast_float": {
+      "v8.2.1": "11ce67e5ebcd0e688c7e141bd1420cf40040b59f"
+    }
+  }
+}
