@@ -1,0 +1,52 @@
+import * as std from "std";
+import pcre2 from "pcre2";
+
+export const project = {
+  name: "swig",
+  version: "4.4.1",
+  repository: "https://github.com/swig/swig",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/swig/swig/swig-${project.version}/swig-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function swig(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, pcre2)
+    .env({
+      CXXFLAGS: "-std=c++11",
+    })
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/swig"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    swig -version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(swig)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `SWIG Version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
