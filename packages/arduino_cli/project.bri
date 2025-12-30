@@ -1,0 +1,60 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "arduino_cli",
+  version: "1.4.0",
+  extra: {
+    moduleName: "github.com/arduino/arduino-cli",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function arduinoCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/internal/version.versionString=${project.version}`,
+        "-X",
+        `${project.extra.moduleName}/internal/version.commit=${manifest.origin.hash}`,
+        "-X",
+        `${project.extra.moduleName}/internal/version.date=${manifest.time}`,
+      ],
+    },
+    runnable: "bin/arduino-cli",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    arduino-cli version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(arduinoCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `arduino-cli  Version: ${project.version} Commit: ${manifest.origin.hash} Date: ${manifest.time}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
