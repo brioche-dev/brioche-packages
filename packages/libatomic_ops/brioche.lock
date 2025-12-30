@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/bdwgc/libatomic_ops/releases/download/v7.10.0/libatomic_ops-7.10.0.tar.gz": {
+      "type": "sha256",
+      "value": "0db3ebff755db170f65e74a64ec4511812e9ee3185c232eeffeacd274190dfb0"
+    }
+  }
+}
