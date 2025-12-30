@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/latex-lsp/texlab.git": {
+      "v5.25.1": "d89bf0fa65bd931ab57183d067f66189fc31e6c9"
+    }
+  }
+}
