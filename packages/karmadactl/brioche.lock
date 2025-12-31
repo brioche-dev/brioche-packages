@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/karmada-io/karmada/@v/v1.16.1.info": {
+      "type": "sha256",
+      "value": "d36cc342096ba1efdb523ed55e7b8a42526e5d625f401c27d540289654a6c742"
+    },
+    "https://proxy.golang.org/github.com/karmada-io/karmada/@v/v1.16.1.zip": {
+      "type": "sha256",
+      "value": "78c2499bfa29317f87e911c791e0d013b8961cc4eb02c4ac2f805125900e2139"
+    }
+  }
+}
