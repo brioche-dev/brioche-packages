@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/PJK/libcbor": {
+      "v0.13.0": "9826a4315116a588f7416912db9da6fcecd8da11"
+    }
+  }
+}
