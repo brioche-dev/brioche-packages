@@ -19,12 +19,12 @@ const source = Brioche.download(
 
 export default function libx11(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-unix-transport \
-      --enable-tcp-transport \
-      --enable-ipv6 \
-      --enable-loadable-i18n \
+    ./configure \\
+      --prefix=/ \\
+      --enable-unix-transport \\
+      --enable-tcp-transport \\
+      --enable-ipv6 \\
+      --enable-loadable-i18n \\
       --enable-xthreads
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

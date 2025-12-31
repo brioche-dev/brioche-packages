@@ -14,8 +14,8 @@ const source = Brioche.download(
 
 export default function lzlib(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-shared
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

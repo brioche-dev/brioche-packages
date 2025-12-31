@@ -24,7 +24,7 @@ const source = Brioche.download(
 
 export default function libxaw(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
+    ./configure \\
       --prefix=/
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
