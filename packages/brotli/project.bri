@@ -17,13 +17,32 @@ export default function brotli(): std.Recipe<std.Directory> {
     source,
     dependencies: [std.toolchain],
     runnable: "bin/brotli",
-  }).pipe((recipe) =>
-    std.setEnv(recipe, {
-      CPATH: { append: [{ path: "include" }] },
-      LIBRARY_PATH: { append: [{ path: "lib" }] },
-      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-    }),
-  );
+  })
+    .pipe(removeTempFiles)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        // This recipe doesn't embed any CMake files, but other recipes might.
+        // So we need to add the current directory to the CMAKE_PREFIX_PATH.
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+/**
+ * Remove `*.tmp*` files left over in the build output.
+ * TODO: Figure out where these temp files are coming from
+ */
+function removeTempFiles(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    find "$BRIOCHE_OUTPUT/lib" -name '*.tmp*' -delete
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
