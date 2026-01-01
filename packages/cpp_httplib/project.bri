@@ -1,0 +1,64 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import brotli from "brotli";
+import openssl from "openssl";
+import zlib from "zlib";
+
+export const project = {
+  name: "cpp_httplib",
+  version: "0.30.0",
+  repository: "https://github.com/yhirose/cpp-httplib",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cppHttplib(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl, zlib, brotli],
+    set: {
+      HTTPLIB_TEST: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    cmake_minimum_required(VERSION 4.0)
+    project(QueryVersion)
+
+    find_package(httplib REQUIRED CONFIG)
+    message(STATUS "httplib version: \${httplib_VERSION}")
+  `);
+
+  const script = std.runBash`
+    cp "$src" CMakeLists.txt
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cmake, openssl, zlib, brotli, cppHttplib)
+    .env({ src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `httplib version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
