@@ -1,6 +1,7 @@
 import * as std from "std";
 import curl from "curl";
 import hwloc from "hwloc";
+import jansson from "jansson";
 import libevent from "libevent";
 import libpciaccess from "libpciaccess";
 // TODO: Replace libudev_zero with systemd once it is packaged
@@ -33,7 +34,10 @@ const source = Brioche.download(
 
 export default function pmix(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix=/ --with-curl
+    ./configure \\
+      --prefix=/ \\
+      --with-curl \\
+      --with-jansson
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -42,6 +46,7 @@ export default function pmix(): std.Recipe<std.Directory> {
       std.toolchain,
       curl({ minimal: true }),
       hwloc,
+      jansson,
       libevent,
       libpciaccess,
       libudevZero,
