@@ -36,7 +36,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const script = std.runBash`
     cp "$src" CMakeLists.txt
-    cmake -S . -B tmp 2>&1 | tee "$BRIOCHE_OUTPUT"
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, cmake, spirvHeaders)
     .env({ src })

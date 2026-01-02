@@ -1,0 +1,57 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import python from "python";
+import spirvHeaders, { source as spirvHeadersSource } from "spirv_headers";
+import spirvTools from "spirv_tools";
+
+export const project = {
+  name: "glslang",
+  version: "16.1.0",
+  repository: "https://github.com/KhronosGroup/glslang",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function glslang(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, python, spirvHeaders, spirvTools],
+    set: {
+      BUILD_TESTING: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+      ENABLE_OPT: "ON",
+      ALLOW_EXTERNAL_SPIRV_TOOLS: "ON",
+      "SPIRV-Headers_SOURCE_DIR": spirvHeadersSource,
+    },
+    runnable: "bin/glslang",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    glslang --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(glslang)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = new RegExp(`Glslang Version: \\d+:${project.version}`);
+  std.assert(expected.test(result), `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
