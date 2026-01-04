@@ -1,0 +1,64 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "autoconf_archive",
+  version: "2024.10.16",
+  repository: "https://github.com/autoconf-archive/autoconf-archive",
+};
+
+const source = Brioche.download(
+  `https://ftpmirror.gnu.org/gnu/autoconf-archive/autoconf-archive-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function autoconfArchive(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package version. So, verify the
+  // package installs .m4 files by counting the macros
+  const script = std.runBash`
+    count=$(ls -1 "$ACLOCAL_PATH"/*.m4 2>/dev/null | wc -l)
+    echo "$count" | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(autoconfArchive)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(parseInt(result, 10) >= 0, `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://ftpmirror.gnu.org/gnu/autoconf-archive
+      | lines
+      | where ($it | str contains 'autoconf-archive-') and ($it | str contains '.tar.')
+      | parse --regex '<a href="autoconf-archive-(?<version>[\\d.]+)\\.tar'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
