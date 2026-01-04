@@ -1,0 +1,51 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "istioctl",
+  version: "1.28.2",
+  repository: "https://github.com/istio/istio.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function istioctl(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./istioctl/cmd/istioctl",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `istio.io/istio/pkg/version.buildVersion=${project.version}`,
+        "-X",
+        `istio.io/istio/pkg/version.buildTag=${project.version}`,
+      ],
+    },
+    runnable: "bin/istioctl",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    istioctl version --remote=false --short | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(istioctl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `client version: ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

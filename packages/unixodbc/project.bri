@@ -14,9 +14,9 @@ const source = Brioche.download(
 
 export default function unixodbc(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-static \
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
       --disable-gui
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

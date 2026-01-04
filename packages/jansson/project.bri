@@ -1,0 +1,62 @@
+import * as std from "std";
+
+export const project = {
+  name: "jansson",
+  version: "2.14.1",
+  repository: "https://github.com/akheron/jansson",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/jansson-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Remove unsupported --default-symver linker flag for ld.gold
+    std.runBash`
+      sed -i 's/-Wl,--default-symver//g' "$BRIOCHE_OUTPUT/configure"
+    `
+      .dependencies(std.toolchain)
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function jansson(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion jansson | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, jansson)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

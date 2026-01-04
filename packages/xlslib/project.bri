@@ -1,0 +1,84 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "xlslib",
+  version: "2.5.0",
+  repository: "https://sourceforge.net/projects/xlslib",
+};
+
+const source = std.castToDirectory(
+  Brioche.download(
+    `https://downloads.sourceforge.net/project/xlslib/xlslib-package-${project.version}.zip`,
+  )
+    .unarchive("zip")
+    .get("xlslib/xlslib"),
+);
+
+export default function xlslib(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain)
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include/xlslib" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <common/xlconfig.h>
+
+    int main()
+    {
+      const char* version = PACKAGE_VERSION;
+      printf("%s", version);
+
+      return EXIT_SUCCESS;
+    }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.cpp
+    g++ main.cpp -o main -lxls
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xlslib)
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/xlslib/files/
+      | lines
+      | where ($it | str contains "xlslib-package-")
+      | parse --regex 'xlslib-package-(?<version>[\\d.]+)\\.zip'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

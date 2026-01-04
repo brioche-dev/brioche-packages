@@ -1,0 +1,41 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "sqruff",
+  version: "0.31.0",
+  repository: "https://github.com/quarylabs/sqruff.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function sqruff(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/cli",
+    runnable: "bin/sqruff",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    sqruff --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sqruff)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `sqruff ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

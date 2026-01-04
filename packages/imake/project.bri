@@ -1,0 +1,59 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "imake",
+  version: "1.0.11",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/util/imake-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function imake(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xorgproto)
+    .workDir(source)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/imake"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // imake does not have a version flag. So the help command is used to
+  // verify the correct installation
+  const script = std.runBash`
+    (imake --help 2>&1 || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(imake())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/util
+      | lines
+      | where ($it | str contains "imake") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="imake-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

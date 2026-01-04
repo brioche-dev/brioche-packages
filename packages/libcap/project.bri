@@ -124,7 +124,7 @@ function fixSharedObjects(
   // breaks when they are used as shared libraries. This script repacks each
   // one as a shared library instead.
   return std.runBash`
-    find "$BRIOCHE_OUTPUT"/lib -name '*.so*' -type f -print0 \
+    find "$BRIOCHE_OUTPUT"/lib -name '*.so*' -type f -print0 \\
       | while IFS= read -r -d $'\\0' lib; do
         source_path="$(brioche-packer source-path "$lib")"
         if [ -z "$source_path" ]; then

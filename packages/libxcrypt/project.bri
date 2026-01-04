@@ -14,8 +14,8 @@ const source = Brioche.download(
 
 export default function libxcrypt(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --disable-failure-tokens
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

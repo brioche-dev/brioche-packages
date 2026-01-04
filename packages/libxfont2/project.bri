@@ -1,0 +1,85 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import brotli from "brotli";
+import freetype from "freetype";
+import libfontenc from "libfontenc";
+import libpng from "libpng";
+import util_macros from "util_macros";
+import xorgproto from "xorgproto";
+import xtrans from "xtrans";
+import zlib from "zlib";
+
+export const project = {
+  name: "libxfont2",
+  version: "2.0.7",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/lib/libXfont2-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libxfont2(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-devel-docs
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(
+      std.toolchain,
+      brotli,
+      freetype,
+      libfontenc,
+      libpng,
+      util_macros,
+      xorgproto,
+      xtrans,
+      zlib,
+    )
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xfont2 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libxfont2)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/lib
+      | lines
+      | where ($it | str contains "libXfont2") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="libXfont2-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

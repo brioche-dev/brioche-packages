@@ -1,0 +1,79 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxfixes from "libxfixes";
+import utilMacros from "util_macros";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "libxcomposite",
+  version: "0.4.6",
+};
+
+const source = Brioche.download(
+  `https://www.x.org/archive/individual/lib/libXcomposite-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libxcomposite(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .dependencies(
+      std.toolchain,
+      utilMacros,
+      xorgproto,
+      libx11,
+      libxau,
+      libxcb,
+      libxfixes,
+    )
+    .workDir(source)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xcomposite | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libxcomposite)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.x.org/archive/individual/lib
+      | lines
+      | where ($it | str contains "libXcomposite") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="libXcomposite-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

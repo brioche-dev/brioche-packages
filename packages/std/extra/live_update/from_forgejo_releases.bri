@@ -1,0 +1,109 @@
+import * as std from "/core";
+import { DEFAULT_FORGEJO_URL, parseGitRepo } from "./git_repository_global.bri";
+import { liveUpdateVersionRegex } from "./index.bri";
+import type {} from "nushell";
+
+// HACK: The `import type` line above is a workaround for this issue:
+// https://github.com/brioche-dev/brioche/issues/242
+
+/**
+ * Additional options for the project to update.
+ *
+ * @param versionDash - The version of the project (converted in dash format).
+ * @param versionUnderscore - The version of the project (converted in underscore format).
+ * @param releaseDate - The release date of the project in the format `YYYY-MM-DD`.
+ */
+interface LiveUpdateFromForgejoReleasesProjectExtraOptions {
+  versionDash?: string;
+  versionUnderscore?: string;
+  releaseDate?: string;
+  [key: string]: unknown; // Ignore unknown properties
+}
+
+/**
+ * Options for the live update from Forgejo releases.
+ *
+ * @param forgejoUrl - Optionally set the URL of the Forgejo instance. Default to
+ *   `https://codeberg.org`.
+ * @param project - The project export that should be updated. Must include a
+ *   `repository` property containing a Forgejo repository URL starting with the
+ *   URL provided in `forgejoUrl`.
+ * @param includePrerelease - Whether to include prerelease versions.
+ * @param matchTag - A regex value (`/.../`) to extract the version number from
+ *   a tag name. The regex must include a group named "version". If not
+ *   provided, an optional "v" prefix will be stripped and the rest of the
+ *   tag will be checked if it's a semver or semver-like version number.
+ * @param normalizeVersion - Whether to normalize the version number to
+ *   a semver-like version number. When enabled, the dashes and underscores
+ *   will be replaced with dots.
+ *
+ * @remarks `includePrerelease` and `matchTag` cannot be used together.
+ */
+interface LiveUpdateFromForgejoReleasesOptions {
+  forgejoUrl?: string;
+  project: {
+    version: string;
+    readonly repository: string;
+    extra?: LiveUpdateFromForgejoReleasesProjectExtraOptions;
+  };
+  readonly includePrerelease?: boolean;
+  readonly matchTag?: RegExp;
+  readonly normalizeVersion?: boolean;
+}
+
+/**
+ * Return a runnable recipe to live-update a project based on the latest release
+ * tag from a Forgejo repository. The project's version will be set based on a
+ * regex match against the latest tag name. The repository is inferred from the
+ * `repository` field of the project.
+ *
+ * @param options - Options for the live update from Forgejo releases.
+ *
+ * @returns A runnable recipe to live-update the project
+ *
+ * @example
+ * ```typescript
+ * export const project = {
+ *   name: "forgejo",
+ *   version: "0.1.0",
+ *   repository: "https://codeberg.org/forgejo/forgejo.git",
+ * };
+ *
+ * export function liveUpdate(): std.Recipe<std.Directory> {
+ *   return std.liveUpdateFromForgejoReleases({
+ *     project,
+ *     matchTag: /^v(?<version>\d+\.\d+\.\d+)$/, // Strip "v" prefix from tags
+ *   });
+ * }
+ * ```
+ */
+export function liveUpdateFromForgejoReleases(
+  options: LiveUpdateFromForgejoReleasesOptions,
+): std.Recipe<std.Directory> {
+  const forgejoUrl = options.forgejoUrl ?? DEFAULT_FORGEJO_URL;
+  const { baseUrl, repoOwner, repoName } = parseGitRepo(
+    forgejoUrl,
+    options.project.repository,
+  );
+  const normalizeVersion = options.normalizeVersion ?? false;
+
+  const matchTag = liveUpdateVersionRegex(
+    options.includePrerelease,
+    options.matchTag,
+  );
+
+  return std.recipe(async () => {
+    const { nushellRunnable } = await import("nushell");
+
+    return nushellRunnable(
+      Brioche.includeFile("./scripts/live_update_from_forgejo_releases.nu"),
+    ).env({
+      project: JSON.stringify(options.project),
+      baseUrl,
+      repoOwner,
+      repoName,
+      matchTag: matchTag.source,
+      normalizeVersion: normalizeVersion.toString(),
+    });
+  });
+}

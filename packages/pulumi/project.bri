@@ -1,0 +1,54 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "pulumi",
+  version: "3.214.0",
+  repository: "https://github.com/pulumi/pulumi.git",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. The repository uses a multi-module Go workspace where the `pkg` module
+// has a replace directive pointing to `../sdk`, requiring both modules to be
+// present together.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function pulumi(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    currentDir: "pkg",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/pulumi/pulumi/sdk/v3/go/common/version.Version=${project.version}`,
+      ],
+    },
+    path: "./cmd/pulumi",
+    runnable: "bin/pulumi",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pulumi version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pulumi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

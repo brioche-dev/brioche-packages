@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/open-mpi/hwloc/releases/download/hwloc-2.12.2/hwloc-2.12.2.tar.bz2": {
+      "type": "sha256",
+      "value": "563e61d70febb514138af0fac36b97621e01a4aacbca07b86e7bd95b85055ba0"
+    }
+  }
+}

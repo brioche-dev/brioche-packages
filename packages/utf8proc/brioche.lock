@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/JuliaStrings/utf8proc": {
+      "v2.11.2": "90daf9f396cfec91668758eb9cc54bd5248a6b89"
+    }
+  }
+}

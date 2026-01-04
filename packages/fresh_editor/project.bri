@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "fresh_editor",
-  version: "0.1.58",
+  version: "0.1.65",
   extra: {
     crateName: "fresh-editor",
   },

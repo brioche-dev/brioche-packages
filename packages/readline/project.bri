@@ -14,7 +14,7 @@ const source = Brioche.download(
 
 export default function readline(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix=/ \
+    ./configure --prefix=/ \\
       --with-curses
     make -j "$(nproc)"
     make install SHLIB_LIBS="-lncursesw" DESTDIR="$BRIOCHE_OUTPUT"

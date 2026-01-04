@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/argoproj/argo-cd/v3/@v/v3.2.1.info": {
+    "https://proxy.golang.org/github.com/argoproj/argo-cd/v3/@v/v3.2.3.info": {
       "type": "sha256",
-      "value": "b707bdd346e8e75d5ebefdfe77c1b8506201a3f08f33795bdc9ab068caa455c0"
+      "value": "03835d61bc35056e44d3710a1ac016aedc3a47a5bf77a4bcc7cbde3404bce155"
     },
-    "https://proxy.golang.org/github.com/argoproj/argo-cd/v3/@v/v3.2.1.zip": {
+    "https://proxy.golang.org/github.com/argoproj/argo-cd/v3/@v/v3.2.3.zip": {
       "type": "sha256",
-      "value": "f6b2f9c62bd3ccc8f7b10d860c04f1880278b7dfe78073d576f6a8c04dacbe93"
+      "value": "0e37f7704680a0af7dffe674d0fc43be0365286e0eaad204da342328019abda7"
     }
   }
 }

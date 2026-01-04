@@ -1,3 +1,4 @@
+export const DEFAULT_FORGEJO_URL = "https://codeberg.org";
 export const DEFAULT_GITEA_URL = "https://gitea.com";
 export const DEFAULT_GITHUB_URL = "https://github.com";
 export const DEFAULT_GITLAB_URL = "https://gitlab.com";

@@ -1,0 +1,71 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxext from "libxext";
+import libxrandr from "libxrandr";
+import libxrender from "libxrender";
+import vulkanHeaders from "vulkan_headers";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "vulkan_loader",
+  version: "1.4.335.0",
+  repository: "https://github.com/KhronosGroup/Vulkan-Loader",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `vulkan-sdk-${project.version}`,
+});
+
+export default function vulkanLoader(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      libx11,
+      libxau,
+      libxcb,
+      libxext,
+      libxrandr,
+      libxrender,
+      vulkanHeaders,
+      xorgproto,
+    ],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      BUILD_TESTS: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion vulkan | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, vulkanLoader)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version.replace(/\.\d+$/, "");
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^vulkan-sdk-(?<version>\d+\.\d+\.\d+\.\d+)$/,
+  });
+}
