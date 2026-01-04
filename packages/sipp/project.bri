@@ -1,0 +1,56 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import gsl from "gsl";
+import libpcap from "libpcap";
+import lksctp_tools from "lksctp_tools";
+import ncurses from "ncurses";
+import openssl from "openssl";
+
+export const project = {
+  name: "sipp",
+  version: "3.7.7",
+  repository: "https://github.com/SIPp/sipp",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/sipp-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sipp(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, gsl, libpcap, lksctp_tools, ncurses, openssl],
+    set: {
+      USE_SSL: "ON",
+      USE_PCAP: "ON",
+      USE_GSL: "ON",
+      USE_SCTP: "ON",
+    },
+    runnable: "bin/sipp",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    (sipp -v || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sipp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `SIPp v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
