@@ -37,7 +37,24 @@ function removeTempFiles(
   recipe: std.Recipe<std.Directory>,
 ): std.Recipe<std.Directory> {
   return std.runBash`
-    find "$BRIOCHE_OUTPUT/lib" -name '*.tmp*' -delete
+    # Candidate lib directories relative to $BRIOCHE_OUTPUT
+    lib_dirs=(lib lib64)
+
+    # Collect only those that are present
+    find_roots=()
+    for rel in "\${lib_dirs[@]}"; do
+      dir="$BRIOCHE_OUTPUT/$rel"
+      if [[ -d "$dir" ]]; then
+        find_roots+=("$dir")
+      fi
+    done
+
+    # No lib dir found, exit
+    if [[ \${#find_roots[@]} -eq 0 ]]; then
+      exit 0
+    fi
+
+    find -L "\${find_roots[@]}" -name '*.tmp*' -delete
   `
     .outputScaffold(recipe)
     .toDirectory();
