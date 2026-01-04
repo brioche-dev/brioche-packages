@@ -17,14 +17,18 @@ export default function libb64(): std.Recipe<std.Directory> {
     make all_src all_base64 -j "$(nproc)"
 
     # Manual installation
-    mkdir -p "$BRIOCHE_OUTPUT/bin"
     cp base64/base64 "$BRIOCHE_OUTPUT/bin/"
-    mkdir -p "$BRIOCHE_OUTPUT/lib"
     cp src/libb64.a "$BRIOCHE_OUTPUT/lib/"
-    mkdir -p "$BRIOCHE_OUTPUT/include/b64"
     cp include/b64/*.h "$BRIOCHE_OUTPUT/include/b64/"
   `
     .workDir(source)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+        lib: std.directory(),
+        "include/b64": std.directory(),
+      }),
+    )
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe((recipe) =>
