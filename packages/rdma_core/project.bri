@@ -1,6 +1,7 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
 import libnl from "libnl";
+// TODO: Replace libudev_zero with systemd once it is packaged
 import libudevZero from "libudev_zero";
 import python from "python";
 
