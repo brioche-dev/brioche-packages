@@ -2,7 +2,6 @@ import * as std from "std";
 import { cmakeBuild } from "cmake";
 import lz4 from "lz4";
 import xz from "xz";
-import zlib from "zlib";
 
 export const project = {
   name: "zstd",
@@ -19,7 +18,7 @@ export default function zstd(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
     path: "build/cmake",
-    dependencies: [std.toolchain, lz4, xz, zlib],
+    dependencies: [std.toolchain, lz4, xz],
     set: {
       ZSTD_LZ4_SUPPORT: "ON",
       ZSTD_LZMA_SUPPORT: "ON",

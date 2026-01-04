@@ -1,22 +1,43 @@
 import * as std from "std";
+import brotli from "brotli";
 import { cmakeBuild } from "cmake";
+import curl from "curl";
+import cyrusSasl from "cyrus_sasl";
+import libpsl from "libpsl";
+import libssh2 from "libssh2";
+import lz4 from "lz4";
+import openssl from "openssl";
+import zstd from "zstd";
 
 export const project = {
-  name: "md4c",
-  version: "0.5.2",
-  repository: "https://github.com/mity/md4c",
+  name: "librdkafka",
+  version: "2.12.1",
+  repository: "https://github.com/confluentinc/librdkafka",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
-  ref: `release-${project.version}`,
+  ref: `v${project.version}`,
 });
 
-export default function md4c(): std.Recipe<std.Directory> {
+export default function librdkafka(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain],
-    runnable: "bin/md2html",
+    dependencies: [
+      std.toolchain,
+      brotli,
+      curl,
+      cyrusSasl,
+      libpsl,
+      libssh2,
+      lz4,
+      openssl,
+      zstd,
+    ],
+    set: {
+      RDKAFKA_BUILD_EXAMPLES: "OFF",
+      RDKAFKA_BUILD_TESTS: "OFF",
+    },
   })
     .pipe(removeTempFiles)
     .pipe((recipe) =>
@@ -62,13 +83,14 @@ function removeTempFiles(
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    pkg-config --modversion md4c | tee "$BRIOCHE_OUTPUT"
+    pkg-config --modversion rdkafka | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, md4c)
+    .dependencies(std.toolchain, librdkafka)
     .toFile();
 
   const result = (await script.read()).trim();
 
+  // Check that the result contains the expected version
   const expected = project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
@@ -76,8 +98,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubTags({
-    project,
-    matchTag: /^release-(?<version>.+)$/,
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }
