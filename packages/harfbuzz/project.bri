@@ -1,0 +1,103 @@
+import * as std from "std";
+import brotli from "brotli";
+import cairo from "cairo";
+import cmake from "cmake";
+import fontconfig from "fontconfig";
+import freetype from "freetype";
+import glib from "glib";
+import graphite2 from "graphite2";
+import icu from "icu";
+import libffi from "libffi";
+import libpng from "libpng";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxext from "libxext";
+import libxrender from "libxrender";
+import lzo from "lzo";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import pcre2 from "pcre2";
+import pixman from "pixman";
+import python from "python";
+import xorgproto from "xorgproto";
+import zlib from "zlib";
+
+export const project = {
+  name: "harfbuzz",
+  version: "12.3.0",
+  repository: "https://github.com/harfbuzz/harfbuzz",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/harfbuzz-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function harfbuzz(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      cmake,
+      ninja,
+      python,
+      cairo,
+      freetype,
+      glib,
+      graphite2,
+      icu,
+      // Dependencies for freetype
+      brotli,
+      libpng,
+      zlib,
+      // Dependencies for glib
+      libffi,
+      pcre2,
+      // Dependencies for cairo
+      fontconfig,
+      libx11,
+      libxau,
+      libxcb,
+      libxext,
+      libxrender,
+      lzo,
+      pixman,
+      xorgproto,
+    ],
+    set: {
+      default_library: "both",
+      graphite2: "enabled",
+      tests: "disabled",
+      docs: "disabled",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion harfbuzz | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, harfbuzz)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
