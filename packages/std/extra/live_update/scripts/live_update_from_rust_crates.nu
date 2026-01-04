@@ -1,17 +1,24 @@
 # Retrieve the crate information from crates.io registry
-let crateInfo = http get $'https://crates.io/api/v1/crates/($env.crateName)'
+let versions = http get $'https://crates.io/api/v1/crates/($env.crateName)'
+  # Extract the version(s)
+  | get versions
+  | where { $in.yanked == false }
+  | each {|version|
+    $version.num
+      | parse --regex $env.matchVersion
+      | into record
+  }
+  | where (($it | get -o version) | is-not-empty)
+  | sort-by --natural version
 
-# Get the version
-let parsedVersion = $crateInfo
-  | get crate.max_version
-  | parse --regex $env.matchVersion
-  | into record
-if (($parsedVersion | get -o version) | is-empty) {
-  error make { msg: $'Latest release does not match regex ($env.matchVersion)' }
+if ($versions | is-empty) {
+  error make { msg: $'No version matches regex ($env.matchVersion)' }
 }
 
-# Get the version
-let version = $parsedVersion.version
+# Get the latest version
+let version = $versions
+  | last
+  | get version
 
 # Get project metadata, and update it
 mut project = $env.project
