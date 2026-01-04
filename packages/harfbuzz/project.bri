@@ -21,7 +21,6 @@ import pcre2 from "pcre2";
 import pixman from "pixman";
 import python from "python";
 import xorgproto from "xorgproto";
-import zlib from "zlib";
 
 export const project = {
   name: "harfbuzz",
@@ -51,7 +50,6 @@ export default function harfbuzz(): std.Recipe<std.Directory> {
       // Dependencies for freetype
       brotli,
       libpng,
-      zlib,
       // Dependencies for glib
       libffi,
       pcre2,

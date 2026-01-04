@@ -7,7 +7,6 @@ import libpng from "libpng";
 import util_macros from "util_macros";
 import xorgproto from "xorgproto";
 import xtrans from "xtrans";
-import zlib from "zlib";
 
 export const project = {
   name: "libxfont2",
@@ -37,7 +36,6 @@ export default function libxfont2(): std.Recipe<std.Directory> {
       util_macros,
       xorgproto,
       xtrans,
-      zlib,
     )
     .workDir(source)
     .toDirectory()

@@ -21,7 +21,6 @@ import pcre2 from "pcre2";
 import pixman from "pixman";
 import python from "python";
 import xorgproto from "xorgproto";
-import zlib from "zlib";
 
 export const project = {
   name: "gobject_introspection",
@@ -107,7 +106,6 @@ export default function gobjectIntrospection(): std.Recipe<std.Directory> {
       lzo,
       pixman,
       xorgproto,
-      zlib,
     ],
     env: {
       // g-ir-scanner loads a Python extension (_giscanner.so) that links

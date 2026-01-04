@@ -18,7 +18,6 @@ import pcre2 from "pcre2";
 import pixman from "pixman";
 import python from "python";
 import xorgproto from "xorgproto";
-import zlib from "zlib";
 
 export const project = {
   name: "cairo",
@@ -55,7 +54,6 @@ export default function cairo(): std.Recipe<std.Directory> {
       pixman,
       python,
       xorgproto,
-      zlib,
     ],
     set: {
       default_library: "both",

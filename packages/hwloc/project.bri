@@ -18,7 +18,6 @@ import libudevZero from "libudev_zero";
 import numactl from "numactl";
 import pixman from "pixman";
 import xorgproto from "xorgproto";
-import zlib from "zlib";
 
 export const project = {
   name: "hwloc",
@@ -62,7 +61,6 @@ export default function hwloc(): std.Recipe<std.Directory> {
       numactl,
       pixman,
       xorgproto,
-      zlib,
     )
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
