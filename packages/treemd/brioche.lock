@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/treemd/0.5.4/download": {
+    "https://crates.io/api/v1/crates/treemd/0.5.5/download": {
       "type": "sha256",
-      "value": "14722b68a1f7f50ca9b267398b68254279819d476c863c033b53a257b55c0300"
+      "value": "46483308b893f83fb72d1d34df61a09bf0e14112e3d5732e1a26f0347f13d914"
     }
   }
 }
