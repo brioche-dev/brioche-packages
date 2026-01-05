@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "swc",
-  version: "1.15.7",
+  version: "1.15.8",
   repository: "https://github.com/swc-project/swc",
 };
 
