@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/suzuki-shunsuke/pinact/v3/@v/v3.7.3.zip": {
+    "https://proxy.golang.org/github.com/suzuki-shunsuke/pinact/v3/@v/v3.8.0.zip": {
       "type": "sha256",
-      "value": "3e31a9d18a89bb8478fe7f57d1e7011c3182f6623fa629ac1832a0608f1e54f8"
+      "value": "fbaf24001d6bdb58104e671554c69be55b0d100ea9ffd7453fc4946ab6c6d0b1"
     }
   }
 }
