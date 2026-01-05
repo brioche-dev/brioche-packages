@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "rosa",
-  version: "1.2.58",
+  version: "1.2.59",
   extra: {
     moduleName: "github.com/openshift/rosa",
   },
