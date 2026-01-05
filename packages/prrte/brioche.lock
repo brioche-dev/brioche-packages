@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/openpmix/prrte/releases/download/v4.0.0/prrte-4.0.0.tar.gz": {
+      "type": "sha256",
+      "value": "ef175f11234be634894f7556eceb5a0652daf81ca6e483f306277d28c76208cf"
+    }
+  }
+}
