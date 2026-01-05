@@ -3,7 +3,7 @@ import { pnpmInstallGlobal } from "pnpm";
 
 export const project = {
   name: "github_copilot_cli",
-  version: "0.0.372",
+  version: "0.0.374",
   extra: {
     packageName: "@github/copilot",
   },
