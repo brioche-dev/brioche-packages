@@ -1,0 +1,90 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import mongoCDriver from "mongo_c_driver";
+import openssl from "openssl";
+
+export const project = {
+  name: "libmongocrypt",
+  version: "1.17.0",
+  repository: "https://github.com/mongodb/libmongocrypt",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function libmongocrypt(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, mongoCDriver, openssl],
+    set: {
+      USE_SHARED_LIBBSON: "ON",
+      MONGOCRYPT_MONGOC_DIR: "USE-SYSTEM",
+      BUILD_TESTING: "OFF",
+      ENABLE_ONLINE_TESTS: "OFF",
+      MONGOCRYPT_ENABLE_DECIMAL128: "OFF",
+      BUILD_VERSION: project.version,
+    },
+  })
+    .pipe(removeTempFiles)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+/**
+ * Remove `*.tmp*` files left over in the build output.
+ * TODO: Figure out where these temp files are coming from
+ */
+function removeTempFiles(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Candidate lib directories relative to $BRIOCHE_OUTPUT
+    lib_dirs=(lib lib64)
+
+    # Collect only those that are present
+    find_roots=()
+    for rel in "\${lib_dirs[@]}"; do
+      dir="$BRIOCHE_OUTPUT/$rel"
+      if [[ -d "$dir" ]]; then
+        find_roots+=("$dir")
+      fi
+    done
+
+    # No lib dir found, exit
+    if [[ \${#find_roots[@]} -eq 0 ]]; then
+      exit 0
+    fi
+
+    find -L "\${find_roots[@]}" -name '*.tmp*' -delete
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libmongocrypt | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libmongocrypt)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

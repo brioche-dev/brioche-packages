@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mongodb/libmongocrypt": {
+      "1.17.0": "37dcf0985fb6c34f62d625df747aabbfcc034221"
+    }
+  }
+}
