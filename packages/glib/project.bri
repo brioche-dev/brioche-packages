@@ -10,7 +10,7 @@ import python from "python";
 
 export const project = {
   name: "glib",
-  version: "2.87.0",
+  version: "2.87.1",
   repository: "https://gitlab.gnome.org/GNOME/glib",
   extra: {
     majorVersion: "2",
