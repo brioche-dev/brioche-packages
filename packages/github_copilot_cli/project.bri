@@ -1,5 +1,5 @@
 import * as std from "std";
-import { pnpmInstallGlobal } from "pnpm";
+import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "github_copilot_cli",
@@ -10,11 +10,18 @@ export const project = {
 };
 
 export default function githubCopilotCli(): std.Recipe<std.Directory> {
-  return pnpmInstallGlobal({
+  return npmInstallGlobal({
     packageName: project.extra.packageName,
     version: project.version,
-    allowBuild: ["sharp"],
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/copilot"));
+  })
+    .pipe((recipe) =>
+      // Repack the native copilot binary that's bundled in the npm package
+      std.autopack(recipe, {
+        globs: ["**/node_modules/@github/copilot-*/copilot"],
+        selfDependency: true,
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/copilot"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
