@@ -10,7 +10,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "xauth",
-  version: "1.1.4",
+  version: "1.1.5",
 };
 
 const source = Brioche.download(
