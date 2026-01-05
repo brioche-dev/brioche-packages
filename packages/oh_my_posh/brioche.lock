@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/JanDeDobbeleer/oh-my-posh.git": {
-      "v28.7.0": "bc563bdd5b83d808a9e0124e7c8530858616cecf"
+      "v28.10.0": "2c07a9561b34fe240c9bd752ed7caccb18d30ea5"
     }
   }
 }
