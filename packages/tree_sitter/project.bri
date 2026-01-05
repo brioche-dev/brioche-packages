@@ -22,6 +22,9 @@ export default function treeSitter(): std.Recipe<std.Directory> {
       // Build-time scripts dynamically load `libclang`, so ensure the standard
       // system libraries can be dynamically loaded
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      // bindgen uses clang to parse C headers; tell clang where to find
+      // the standard C library headers (stdio.h, etc.)
+      CPATH: std.tpl`${std.toolchain}/include`,
     },
     runnable: "bin/tree-sitter",
   });
