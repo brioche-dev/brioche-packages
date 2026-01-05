@@ -5,7 +5,7 @@ export const LIBTOOL_SANITIZE_DEPENDENCIES_SCRIPT = std.indoc`
   sanitize_libtool_dependencies () {
     local -r file="$1"
 
-    sed -i -e "/^dependency_libs='/,/'/ s|//lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$file"
+    sed -i -e "/^dependency_libs='/,/'/ s|[^[:space:]]*/lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$file"
   }
 
   # No lib dir found, exit
