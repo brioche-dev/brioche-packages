@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "fast_float",
-  version: "8.2.1",
+  version: "8.2.2",
   repository: "https://github.com/fastfloat/fast_float",
 };
 
