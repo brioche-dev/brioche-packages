@@ -1,9 +1,10 @@
 import * as std from "std";
+import llvm from "llvm";
 import { cargoBuild } from "rust";
 
 export const project = {
   name: "tree_sitter",
-  version: "0.25.10",
+  version: "0.26.3",
   repository: "https://github.com/tree-sitter/tree-sitter",
 };
 
@@ -15,7 +16,16 @@ const source = Brioche.gitCheckout({
 export default function treeSitter(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    path: "cli",
+    path: "crates/cli",
+    dependencies: [llvm],
+    env: {
+      // Build-time scripts dynamically load `libclang`, so ensure the standard
+      // system libraries can be dynamically loaded
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      // bindgen uses clang to parse C headers; tell clang where to find
+      // the standard C library headers (stdio.h, etc.)
+      CPATH: std.tpl`${std.toolchain}/include`,
+    },
     runnable: "bin/tree-sitter",
   });
 }
