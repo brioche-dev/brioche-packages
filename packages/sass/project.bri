@@ -1,0 +1,40 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+
+export const project = {
+  name: "sass",
+  version: "1.97.1",
+  extra: {
+    packageName: "sass",
+  },
+};
+
+export default function sass(): std.Recipe<std.Directory> {
+  return npmInstallGlobal({
+    packageName: project.extra.packageName,
+    version: project.version,
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/sass"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    sass --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sass)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected to start with '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromNpmPackages({ project });
+}

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/ngtcp2/nghttp3/releases/download/v1.14.0/nghttp3-1.14.0.tar.xz": {
+      "type": "sha256",
+      "value": "b3083dae2ff30cf00d24d5fedd432479532c7b17d993d384103527b36c1ec82d"
+    }
+  }
+}

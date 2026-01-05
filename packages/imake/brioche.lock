@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/util/imake-1.0.11.tar.xz": {
+      "type": "sha256",
+      "value": "55955527eaebe94633e4083d4fe5f2160a65fe4c6dafdee48b89fea5f1ca8a78"
+    }
+  }
+}

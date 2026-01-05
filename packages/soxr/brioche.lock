@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/chirlu/soxr.git": {
+      "0.1.3": "945b592b70470e29f917f4de89b4281fbbd540c0"
+    }
+  }
+}

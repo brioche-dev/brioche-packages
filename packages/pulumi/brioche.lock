@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/pulumi/pulumi.git": {
+      "v3.214.0": "72adf65d22a4fb6adfe9c9824188b1cf8eb19d08"
+    }
+  }
+}

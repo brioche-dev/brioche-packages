@@ -1,0 +1,88 @@
+import * as std from "std";
+import python, { wrapVenvScripts } from "python";
+
+export const project = {
+  name: "robotframework",
+  version: "7.4.1",
+  repository: "https://github.com/robotframework/robotframework.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+const pipDependencies = std.directory({
+  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl`,
+  ),
+  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  ),
+});
+
+export default function robotframework(): std.Recipe<std.Directory> {
+  // Create a venv
+  let venv = std.recipe(python);
+
+  // Install setuptools
+  venv = std.runBash`
+    pip install setuptools
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Install the application into the venv
+  venv = std.runBash`
+    pip install .
+  `
+    .workDir(source)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Create the final recipe with the venv under `venv`
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
+      wrapVenvScripts(recipe, {
+        venvDir: "venv",
+        scripts: ["robot", "rebot"],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/robot"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    (robot --version || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(robotframework)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Robot Framework ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "terraform",
-  version: "1.14.2",
+  version: "1.14.3",
   repository: "https://github.com/hashicorp/terraform.git",
 };
 

@@ -1,0 +1,68 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "ttyrec",
+  version: "1.0.8",
+};
+
+const source = Brioche.download(
+  `https://deb.debian.org/debian/pool/main/t/ttyrec/ttyrec_${project.version}.orig.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Fix "union wait" compatibility issue on modern systems
+    std.runBash`
+      sed -i 's/union wait/int/' "$BRIOCHE_OUTPUT/ttyrec.c"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function ttyrec(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+
+    # Manual installation
+    cp ttyrec ttyplay ttytime "$BRIOCHE_OUTPUT/bin/"
+  `
+    .workDir(source)
+    .outputScaffold(std.directory({ bin: std.directory() }))
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ttyrec"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    ttyrec -h 2>&1 | tee "$BRIOCHE_OUTPUT" || true
+  `
+    .dependencies(ttyrec)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://deb.debian.org/debian/pool/main/t/ttyrec/
+      | lines
+      | where ($it | str contains "ttyrec_") and ($it | str contains ".orig.tar.gz")
+      | parse --regex 'ttyrec_(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.orig\\.tar\\.gz'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

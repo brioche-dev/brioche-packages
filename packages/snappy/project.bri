@@ -1,0 +1,63 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "snappy",
+  version: "1.2.2",
+  repository: "https://github.com/google/snappy",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function snappy(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      SNAPPY_BUILD_TESTS: "OFF",
+      SNAPPY_BUILD_BENCHMARKS: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    cmake_minimum_required(VERSION 4.0)
+    project(QueryVersion)
+
+    find_package(Snappy REQUIRED CONFIG)
+    message(STATUS "Snappy version: \${Snappy_VERSION}")
+  `);
+
+  const script = std.runBash`
+    cp "$src" CMakeLists.txt
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cmake, snappy())
+    .env({ src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = `Snappy version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

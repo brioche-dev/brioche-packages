@@ -14,8 +14,8 @@ const source = Brioche.download(
 
 export default function mpfr(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-thread-safe
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

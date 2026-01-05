@@ -13,9 +13,9 @@ const source = Brioche.gitCheckout({
 
 export default function libdnet(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --sbindir="/bin" \
+    ./configure \\
+      --prefix=/ \\
+      --sbindir="/bin" \\
       --disable-check
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

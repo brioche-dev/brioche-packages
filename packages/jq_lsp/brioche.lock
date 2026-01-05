@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/wader/jq-lsp/@v/v0.1.16.zip": {
+      "type": "sha256",
+      "value": "fc889d2d9bf40537aad50f5c354c31017ef88425992d0d0cbcf38d38b08f13b3"
+    }
+  }
+}

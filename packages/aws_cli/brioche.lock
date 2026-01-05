@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/aws/aws-cli": {
-      "2.32.16": "439b186408f7224ae159bee62c24c85d9f923d8b"
+      "2.32.24": "12e3109ea85b9b5ec43c3c5344727d8b67efcc89"
     }
   }
 }

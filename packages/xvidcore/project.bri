@@ -1,0 +1,88 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import nasm from "nasm";
+
+export const project = {
+  name: "xvidcore",
+  version: "1.3.7",
+};
+
+const source = Brioche.download(
+  `https://downloads.xvid.com/downloads/xvidcore-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function xvidcore(): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd build/generic
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, nasm)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <xvid.h>
+
+    int main(void)
+    {
+        xvid_gbl_info_t info;
+        info.version = XVID_VERSION;
+        xvid_global(NULL, XVID_GBL_INFO, &info, NULL);
+
+        printf("%d.%d.%d",
+            XVID_VERSION_MAJOR(info.actual_version),
+            XVID_VERSION_MINOR(info.actual_version),
+            XVID_VERSION_PATCH(info.actual_version));
+
+        return EXIT_SUCCESS;
+    }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -lxvidcore
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xvidcore)
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://downloads.xvid.com/downloads/
+      | lines
+      | where ($it | str contains "xvidcore-") and ($it | str contains ".tar.gz") and (not ($it | str contains ".sig"))
+      | parse --regex 'xvidcore-(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.tar\\.gz'
+      | uniq-by version
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

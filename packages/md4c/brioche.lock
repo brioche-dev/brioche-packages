@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mity/md4c": {
+      "release-0.5.2": "729e6b8b320caa96328968ab27d7db2235e4fb47"
+    }
+  }
+}

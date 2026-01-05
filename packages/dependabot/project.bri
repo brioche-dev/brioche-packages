@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "dependabot",
-  version: "1.79.0",
+  version: "1.80.0",
   extra: {
     moduleName: "github.com/dependabot/cli",
   },

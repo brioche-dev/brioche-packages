@@ -1,3 +1,5 @@
+export * from "./from_forgejo_releases.bri";
+export * from "./from_forgejo_tags.bri";
 export * from "./from_gitea_releases.bri";
 export * from "./from_gitea_tags.bri";
 export * from "./from_github_releases.bri";

@@ -1,0 +1,70 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "karmadactl",
+  version: "1.16.1",
+  extra: {
+    moduleName: "github.com/karmada-io/karmada",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function karmadactl(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/karmadactl",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/pkg/version.gitVersion=${project.version}`,
+        "-X",
+        `${project.extra.moduleName}/pkg/version.gitCommit=${manifest.origin.hash}`,
+        "-X",
+        `${project.extra.moduleName}/pkg/version.gitTreeState=clean`,
+        "-X",
+        `${
+          project.extra.moduleName
+        }/pkg/version.gitShortCommit=${manifest.origin.hash.slice(0, 7)}`,
+        "-X",
+        `${project.extra.moduleName}/pkg/version.buildDate=${manifest.time}`,
+      ],
+    },
+    runnable: "bin/karmadactl",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    karmadactl version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(karmadactl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `GitVersion:"${project.version}"`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

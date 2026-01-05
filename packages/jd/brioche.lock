@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/josephburnett/jd/v2/@v/v2.3.1.zip": {
+      "type": "sha256",
+      "value": "71b11dea84408d45f262ebec063ec670d7859891b61ca3394023a25612f6d5a8"
+    }
+  }
+}

@@ -28,6 +28,9 @@ export default function libunwind(): std.Recipe<std.Directory> {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        // This recipe doesn't embed any CMake files, but other recipes might.
+        // So we need to add the current directory to the CMAKE_PREFIX_PATH.
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
       }),
     );
 }

@@ -1,0 +1,60 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "fast_float",
+  version: "8.2.1",
+  repository: "https://github.com/fastfloat/fast_float",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function fastFloat(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      FASTFLOAT_TEST: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    cmake_minimum_required(VERSION 4.0)
+    project(QueryVersion)
+
+    find_package(FastFloat REQUIRED CONFIG)
+    message(STATUS "FastFloat version: \${FastFloat_VERSION}")
+  `);
+
+  const script = std.runBash`
+    cp "$src" CMakeLists.txt
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cmake, fastFloat)
+    .env({ src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = `FastFloat version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

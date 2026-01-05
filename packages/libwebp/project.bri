@@ -1,0 +1,93 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import giflib from "giflib";
+import libjpegTurbo from "libjpeg_turbo";
+import libpng from "libpng";
+import libtiff from "libtiff";
+
+export const project = {
+  name: "libwebp",
+  version: "1.6.0",
+  repository: "https://github.com/webmproject/libwebp",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function libwebp(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, giflib, libjpegTurbo, libpng, libtiff],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      WEBP_BUILD_VWEBP: "OFF",
+      WEBP_BUILD_EXTRAS: "OFF",
+    },
+    runnable: "bin/cwebp",
+  })
+    .pipe(removeTempFiles)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+/**
+ * Remove `*.tmp*` files left over in the build output.
+ * TODO: Figure out where these temp files are coming from
+ */
+function removeTempFiles(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Candidate lib directories relative to $BRIOCHE_OUTPUT
+    lib_dirs=(lib lib64)
+
+    # Collect only those that are present
+    find_roots=()
+    for rel in "\${lib_dirs[@]}"; do
+      dir="$BRIOCHE_OUTPUT/$rel"
+      if [[ -d "$dir" ]]; then
+        find_roots+=("$dir")
+      fi
+    done
+
+    # No lib dir found, exit
+    if [[ \${#find_roots[@]} -eq 0 ]]; then
+      exit 0
+    fi
+
+    find -L "\${find_roots[@]}" -name '*.tmp*' -delete
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cwebp -version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(libwebp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

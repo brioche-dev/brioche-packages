@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "lefthook",
-  version: "2.0.11",
+  version: "2.0.13",
   extra: {
     moduleName: "github.com/evilmartians/lefthook/v2",
   },
