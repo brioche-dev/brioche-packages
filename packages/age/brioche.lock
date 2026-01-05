@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/FiloSottile/age": {
-      "v1.2.1": "482cf6fc9babd3ab06f6606762aac10447222201"
+      "v1.3.1": "b8564adb6d58329b8a3e267360ca2b0abc4efe1d"
     }
   }
 }
