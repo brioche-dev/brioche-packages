@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "brook",
-  version: "20260101",
+  version: "20250808",
   repository: "https://github.com/txthinking/brook.git",
 };
 
