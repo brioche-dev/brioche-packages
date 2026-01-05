@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/rhysd/actionlint/@v/v1.7.9.zip": {
+    "https://proxy.golang.org/github.com/rhysd/actionlint/@v/v1.7.10.zip": {
       "type": "sha256",
-      "value": "94d06c41be0f9ee42e32ace9dadd0dfaa40247af21fafc2c9f3cb675c52354b2"
+      "value": "08ce80da7c917a91dc13bb3bdbb7af085b8c888ed594daa4d6898b3ddc3086ec"
     }
   }
 }
