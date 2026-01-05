@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "process_compose",
-  version: "1.85.0",
+  version: "1.87.0",
   extra: {
     moduleName: "github.com/f1bonacc1/process-compose",
   },
