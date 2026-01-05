@@ -25,6 +25,11 @@ export default function swig(): std.Recipe<std.Directory> {
       CXXFLAGS: "-std=c++11",
     })
     .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        SWIG_LIB: { fallback: { path: `share/swig/${project.version}` } },
+      }),
+    )
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/swig"));
 }
 
