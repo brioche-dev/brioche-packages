@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "tokei",
-  version: "13.0.0",
+  version: "14.0.0",
   repository: "https://github.com/XAMPPRocky/tokei",
 };
 
