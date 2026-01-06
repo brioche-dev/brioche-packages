@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "mq",
-  version: "0.5.8",
+  version: "0.5.9",
   extra: {
     crateName: "mq-run",
   },
