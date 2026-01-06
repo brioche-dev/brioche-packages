@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "pulumi",
-  version: "3.214.0",
+  version: "3.214.1",
   repository: "https://github.com/pulumi/pulumi.git",
 };
 
