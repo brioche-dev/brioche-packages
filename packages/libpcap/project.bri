@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libpcap",
-  version: "1.10.5",
+  version: "1.10.6",
 };
 
 const source = Brioche.download(
