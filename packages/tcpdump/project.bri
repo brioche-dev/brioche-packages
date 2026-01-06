@@ -4,7 +4,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "tcpdump",
-  version: "4.99.5",
+  version: "4.99.6",
 };
 
 const source = Brioche.download(
