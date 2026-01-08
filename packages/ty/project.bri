@@ -1,0 +1,48 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "ty",
+  version: "0.0.10",
+  repository: "https://github.com/astral-sh/ty.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+  options: {
+    submodules: true,
+  },
+});
+
+export default function ty(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    currentDir: "ruff",
+    path: "crates/ty",
+    runnable: "bin/ty",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ty --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ty)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ty ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
