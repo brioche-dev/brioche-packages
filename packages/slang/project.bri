@@ -34,10 +34,10 @@ export default function slang(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure \\
       --prefix=/ \\
-      --with-png=$libpng_path \\
-      --with-onig=$oniguruma_path \\
-      --with-pcre=$pcre_path \\
-      --with-z=$zlib_path
+      --with-png="$libpng_path" \\
+      --with-onig="$oniguruma_path" \\
+      --with-pcre="$pcre_path" \\
+      --with-z="$zlib_path"
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
