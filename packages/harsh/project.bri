@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "harsh",
-  version: "0.12.4",
+  version: "0.13.0",
   repository: "https://github.com/wakatara/harsh",
   extra: {
     moduleName: "github.com/wakatara/harsh",
