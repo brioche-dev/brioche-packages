@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/dathere/qsv": {
+      "13.0.0": "1ec469638e38faa65f8394da6df97ed74ecd8831"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "qsv",
+  version: "13.0.0",
+  repository: "https://github.com/dathere/qsv",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function qsv(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    buildParams: {
+      features: [
+        "apply",
+        "feature_capable",
+        "fetch",
+        "foreach",
+        "geocode",
+        "luau",
+        "to",
+      ],
+    },
+    runnable: "bin/qsv",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    qsv --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(qsv)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `qsv ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
