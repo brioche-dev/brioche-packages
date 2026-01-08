@@ -74,7 +74,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get $"https://download.gnome.org/sources/libxml2/($sourceUrl)"
       | lines
       | where ($it | str contains '<a href="libxml2') and (not ($it | str contains '.sha256sum')) and (not ($it | str contains '.news'))
-      | parse --regex '<a href="libxml2-(?<version>[^"]+)\.tar\.xz"'
+      | parse --regex '<a href="libxml2-(?<version>[^"]+)\\.tar\\.xz"'
       | sort-by --natural --reverse version
       | get 0.version
 

@@ -58,7 +58,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.x.org/archive/individual/lib
       | lines
       | where ($it | str contains "libXext") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libXext-(?<version>.+)\.tar\.xz">'
+      | parse --regex '<a href="libXext-(?<version>.+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 

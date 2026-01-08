@@ -67,7 +67,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/gnu/ncurses
       | lines
       | where ($it | str contains "ncurses-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="ncurses-(?<version>.+)\.tar\.gz">'
+      | parse --regex '<a href="ncurses-(?<version>.+)\\.tar\\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
 

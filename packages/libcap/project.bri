@@ -67,7 +67,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://git.kernel.org/pub/scm/libs/libcap/libcap.git/refs
       | lines
       | where ($it | str contains "/pub/scm/libs/libcap/libcap.git/tag/?h=cap") and (not ($it | str contains "-rc"))
-      | parse --regex '/pub/scm/libs/libcap/libcap.git/tag/\\?h=cap/v(?<version>[1-9.]+)'
+      | parse --regex '/pub/scm/libs/libcap/libcap\\.git/tag/\\?h=cap/v(?<version>[1-9.]+)'
       | sort-by --natural --reverse version
       | get 0.version
 

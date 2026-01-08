@@ -180,7 +180,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get $"https://cdn.kernel.org/pub/linux/kernel/v($sourceUrl)"
       | lines
       | where ($it | str contains 'linux') and ($it | str contains '.tar.xz')
-      | parse --regex '<a href="linux-(?<version>[^"]+)\.tar\.xz"'
+      | parse --regex '<a href="linux-(?<version>[^"]+)\\.tar\\.xz"'
       | sort-by --natural --reverse version
       | get 0.version
 

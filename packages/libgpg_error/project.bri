@@ -58,7 +58,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://gnupg.org/ftp/gcrypt/libgpg-error/
       | lines
       | where ($it | str contains "libgpg-error-") and ($it | str contains ".tar.bz2") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libgpg-error-(?<version>[0-9]+.[0-9]+)\.tar\.bz2">'
+      | parse --regex '<a href="libgpg-error-(?<version>\\d+\\.\\d+)\\.tar\\.bz2">'
       | sort-by --natural --reverse version
       | get 0.version
 

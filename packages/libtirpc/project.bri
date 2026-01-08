@@ -62,7 +62,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get $"https://sourceforge.net/projects/libtirpc/files/libtirpc/($sourceUrl)"
       | lines
       | where ($it | str contains '<a href="https://sourceforge.net') and ($it | str contains '.tar.bz2')
-      | parse --regex ($"<a href=\\"https://sourceforge.net/projects/libtirpc/files/libtirpc/($sourceUrl)/libtirpc-" + '(?<version>[^"]+)\.tar\.bz2/')
+      | parse --regex ($"<a href=\\"https://sourceforge\\.net/projects/libtirpc/files/libtirpc/($sourceUrl)/libtirpc-" + '(?<version>[^"]+)\\.tar\\.bz2/')
       | sort-by --natural --reverse version
       | get 0.version
 

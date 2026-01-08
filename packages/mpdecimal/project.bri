@@ -53,7 +53,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.bytereef.org/mpdecimal/download.html
       | lines
       | where ($it | str contains "mpdecimal") and (not ($it | str contains "doc")) and (not ($it | str contains "testit"))
-      | parse --regex '<a class="reference external" href="../software/mpdecimal/releases/mpdecimal-(?<version>.+)\.tar\.gz">'
+      | parse --regex '<a class="reference external" href="../software/mpdecimal/releases/mpdecimal-(?<version>.+)\\.tar\\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
 

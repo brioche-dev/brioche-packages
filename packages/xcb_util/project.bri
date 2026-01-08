@@ -58,7 +58,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.x.org/archive/individual/xcb
       | lines
       | where ($it | str contains "xcb-util") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="xcb-util-(?<version>[0-9]+\.[0-9]+\.[0-9]+)\.tar\.xz">'
+      | parse --regex '<a href="xcb-util-(?<version>\\d+\\.\\d+\\.\\d+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 
