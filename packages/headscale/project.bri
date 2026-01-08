@@ -1,0 +1,59 @@
+import * as std from "std";
+import git from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "headscale",
+  version: "0.27.1",
+  repository: "https://github.com/juanfont/headscale",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((recipe) =>
+  // Create a git tag in the repo, which is used as the version number
+  std.runBash`
+    git tag "$revision"
+  `
+    .dependencies(git)
+    .env({ revision: `v${project.version}` })
+    .outputScaffold(recipe)
+    .currentDir(std.outputPath)
+    .toDirectory(),
+);
+
+export default function headscale(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    path: "./cmd/headscale",
+    runnable: "bin/headscale",
+    dependencies: [git],
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    headscale version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(headscale)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `headscale version v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
