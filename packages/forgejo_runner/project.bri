@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "forgejo_runner",
-  version: "12.3.1",
+  version: "12.4.0",
   extra: {
     moduleName: "code.forgejo.org/forgejo/runner/v12",
   },
