@@ -18,7 +18,7 @@ export default function githubCopilotCli(): std.Recipe<std.Directory> {
       // Repack the native copilot binary that's bundled in the npm package
       std.autopack(recipe, {
         globs: ["**/node_modules/@github/copilot-*/copilot"],
-        selfDependency: true,
+        linkDependencies: [std.toolchain],
       }),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/copilot"));
