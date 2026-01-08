@@ -228,6 +228,7 @@ export function cmakeBuild(
     })
     .unsafe(options.unsafe)
     .toDirectory()
+    .pipe(removeTempFiles)
     .pipe(libFolderMakeRelativeSymlink)
     .pipe((recipe) =>
       options.disablePostBuildSteps ?? false
@@ -307,6 +308,37 @@ function libFolderMakeRelativeSymlink(
     fi
   `
     .dependencies(std.toolchain)
+    .outputScaffold(recipe)
+    .toDirectory();
+}
+
+/**
+ * Remove `*.tmp*` files left over in the build output.
+ * TODO: Figure out where these temp files are coming from
+ */
+function removeTempFiles(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Candidate directories relative to $BRIOCHE_OUTPUT
+    lib_dirs=(lib lib64)
+
+    # Collect only those that are present
+    find_roots=()
+    for rel in "\${lib_dirs[@]}"; do
+      dir="$BRIOCHE_OUTPUT/$rel"
+      if [[ -d "$dir" ]]; then
+        find_roots+=("$dir")
+      fi
+    done
+
+    # If no directories found, exit early
+    if [[ \${#find_roots[@]} -eq 0 ]]; then
+      exit 0
+    fi
+
+    find -L "\${find_roots[@]}" -name '*.tmp*' -delete
+  `
     .outputScaffold(recipe)
     .toDirectory();
 }
