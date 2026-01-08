@@ -27,46 +27,13 @@ export default function rdmaCore(): std.Recipe<std.Directory> {
       NO_PYVERBS: "ON",
       NO_MAN_PAGES: "ON",
     },
-  })
-    .pipe(removeTempFiles)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      }),
-    );
-}
-
-/**
- * Remove `*.tmp*` files left over in the build output.
- * TODO: Figure out where these temp files are coming from
- */
-function removeTempFiles(
-  recipe: std.Recipe<std.Directory>,
-): std.Recipe<std.Directory> {
-  return std.runBash`
-    # Candidate lib directories relative to $BRIOCHE_OUTPUT
-    lib_dirs=(lib lib64)
-
-    # Collect only those that are present
-    find_roots=()
-    for rel in "\${lib_dirs[@]}"; do
-      dir="$BRIOCHE_OUTPUT/$rel"
-      if [[ -d "$dir" ]]; then
-        find_roots+=("$dir")
-      fi
-    done
-
-    # No lib dir found, exit
-    if [[ \${#find_roots[@]} -eq 0 ]]; then
-      exit 0
-    fi
-
-    find -L "\${find_roots[@]}" -name '*.tmp*' -delete
-  `
-    .outputScaffold(recipe)
-    .toDirectory();
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
