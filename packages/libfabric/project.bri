@@ -1,0 +1,77 @@
+import * as std from "std";
+import hwloc from "hwloc";
+import libnl from "libnl";
+import libpciaccess from "libpciaccess";
+import libxml2 from "libxml2";
+// TODO: Replace libudev_zero with systemd once it is packaged
+import libudevZero from "libudev_zero";
+import liburing from "liburing";
+import numactl from "numactl";
+import rdmaCore from "rdma_core";
+
+export const project = {
+  name: "libfabric",
+  version: "2.4.0",
+  repository: "https://github.com/ofiwg/libfabric",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/libfabric-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function libfabric(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-libnl="$libnl_path"
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      hwloc,
+      libnl,
+      libpciaccess,
+      libxml2,
+      libudevZero,
+      liburing,
+      numactl,
+      rdmaCore,
+    )
+    .env({
+      libnl_path: std.tpl`${libnl}`,
+    })
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libfabric | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libfabric)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
