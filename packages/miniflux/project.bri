@@ -1,0 +1,58 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "miniflux",
+  version: "2.2.16",
+  extra: {
+    moduleName: "miniflux.app/v2",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(2);
+
+export default function miniflux(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/internal/version.Version=${project.version}`,
+      ],
+    },
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe
+          .insert("bin/miniflux", recipe.get("bin/miniflux.app"))
+          .remove("bin/miniflux.app"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/miniflux"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    miniflux --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(miniflux())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
