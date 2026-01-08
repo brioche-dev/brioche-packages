@@ -1,0 +1,62 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libiconv from "libiconv";
+
+export const project = {
+  name: "mtools",
+  version: "4.0.49",
+  repository: "https://www.gnu.org/software/mtools/",
+};
+
+const source = Brioche.download(
+  `https://ftp.gnu.org/gnu/mtools/mtools-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function mtools(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libiconv)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/mtools"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    mtools --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(mtools)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `mtools (GNU mtools) ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://ftp.gnu.org/gnu/mtools
+      | lines
+      | where ($it | str contains "mtools-") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="mtools-(?<version>.+)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
