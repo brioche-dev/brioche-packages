@@ -16,9 +16,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --without-bash-malloc \
+          ./configure \\
+            --prefix=/ \\
+            --without-bash-malloc \\
             --with-installed-readline
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

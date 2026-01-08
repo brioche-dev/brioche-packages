@@ -16,10 +16,10 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --host=none-linux-gnu \
-            --enable-cxx \
+          ./configure \\
+            --prefix=/ \\
+            --host=none-linux-gnu \\
+            --enable-cxx \\
             --disable-static
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

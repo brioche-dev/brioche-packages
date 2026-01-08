@@ -55,11 +55,11 @@ export default std.memo((): std.Recipe<std.Directory> => {
           export M4=m4
           export MAGIC="$stage2/usr/share/misc/magic"
 
-          ../configure \
-            --prefix=/ \
-            --enable-kernel=4.14 \
-            --enable-stack-protector=strong \
-            --with-headers="$stage2/usr/include" \
+          ../configure \\
+            --prefix=/ \\
+            --enable-kernel=4.14 \\
+            --enable-stack-protector=strong \\
+            --with-headers="$stage2/usr/include" \\
             libc_cv_slibdir=/lib
 
           export BRIOCHE_LD_AUTOPACK=false

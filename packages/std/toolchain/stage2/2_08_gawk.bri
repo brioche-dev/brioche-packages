@@ -15,9 +15,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
 
       sed -i 's/extras//' Makefile.in
 
-      ./configure \
-        --prefix=/usr \
-        --host="$TARGET" \
+      ./configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
         --build="$(./build-aux/config.guess)"
 
       make

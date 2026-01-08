@@ -18,12 +18,12 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          sh Configure \
-            -des \
-            -Dprefix="$BRIOCHE_OUTPUT" \
-            -Duserelocatableinc \
-            -Dusethreads \
-            -Dlocincpth="$zlib/include $bzip2/include" \
+          sh Configure \\
+            -des \\
+            -Dprefix="$BRIOCHE_OUTPUT" \\
+            -Duserelocatableinc \\
+            -Dusethreads \\
+            -Dlocincpth="$zlib/include $bzip2/include" \\
             -Dloclibpth="$zlib/lib $bzip2/lib"
           make
           make install

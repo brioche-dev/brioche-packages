@@ -24,9 +24,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --disable-debuginfod \
+          ./configure \\
+            --prefix=/ \\
+            --disable-debuginfod \\
             --enable-libdebuginfod=dummy
           make
           make -C libelf install DESTDIR="$BRIOCHE_OUTPUT"

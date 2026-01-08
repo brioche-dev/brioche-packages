@@ -16,9 +16,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --disable-static \
+          ./configure \\
+            --prefix=/ \\
+            --disable-static \\
             --enable-libgdbm-compat
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

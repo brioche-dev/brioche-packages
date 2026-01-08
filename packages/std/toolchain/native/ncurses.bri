@@ -16,14 +16,14 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --with-shared \
-            --without-debug \
-            --without-normal \
-            --with-cxx-shared \
-            --enable-pc-files \
-            --enable-widec \
+          ./configure \\
+            --prefix=/ \\
+            --with-shared \\
+            --without-debug \\
+            --without-normal \\
+            --with-cxx-shared \\
+            --enable-pc-files \\
+            --enable-widec \\
             --with-pkg-config-libdir=/lib/pkgconfig
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

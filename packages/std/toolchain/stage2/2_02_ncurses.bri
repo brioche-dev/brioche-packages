@@ -28,18 +28,18 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         make -C progs tic
       popd
 
-      ./configure \
-        --prefix=/usr \
-        --host="$TARGET" \
-        --build="$(./config.guess)" \
-        --mandir=/usr/share/man \
-        --with-manpage-format=normal \
-        --with-shared \
-        --without-normal \
-        --with-cxx-shared \
-        --without-debug \
-        --without-ada \
-        --disable-stripping \
+      ./configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
+        --build="$(./config.guess)" \\
+        --mandir=/usr/share/man \\
+        --with-manpage-format=normal \\
+        --with-shared \\
+        --without-normal \\
+        --with-cxx-shared \\
+        --without-debug \\
+        --without-ada \\
+        --disable-stripping \\
         --enable-widec
 
       make

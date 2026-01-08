@@ -13,12 +13,12 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     script: std.indoc`
       export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
-      ./configure \
-        --prefix=/usr \
-        --host="$TARGET" \
-        --build="$(./build-aux/config.guess)" \
-        --enable-install-program=hostname \
-        --enable-no-install-program=kill,uptime \
+      ./configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
+        --build="$(./build-aux/config.guess)" \\
+        --enable-install-program=hostname \\
+        --enable-no-install-program=kill,uptime \\
         gl_cv_macro_MB_CUR_MAX_good=y
 
       make
