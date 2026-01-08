@@ -1,0 +1,47 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "moor",
+  version: "2.10.1",
+  extra: {
+    moduleName: "github.com/walles/moor/v2",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
+
+export default function moor(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/moor",
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.versionString=${project.version}`],
+    },
+    runnable: "bin/moor",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    moor --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(moor)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
