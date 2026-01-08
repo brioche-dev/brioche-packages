@@ -40,7 +40,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  // HACK: tinycbor 0.6.1 returns a version number of 0.6.0
+  // HACK: the project doesn't seem to report its version correctly.
   const expected = project.version === "0.6.1" ? "0.6.0" : project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
