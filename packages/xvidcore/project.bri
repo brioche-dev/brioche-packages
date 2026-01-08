@@ -75,7 +75,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://downloads.xvid.com/downloads/
       | lines
       | where ($it | str contains "xvidcore-") and ($it | str contains ".tar.gz") and (not ($it | str contains ".sig"))
-      | parse --regex 'xvidcore-(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.tar\\.gz'
+      | parse --regex 'xvidcore-(?<version>\\d+\\.\\d+\\.\\d+)\\.tar\\.gz'
       | uniq-by version
       | sort-by --natural --reverse version
       | get 0.version

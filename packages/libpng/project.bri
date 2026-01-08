@@ -61,7 +61,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get $"https://sourceforge.net/projects/libpng/files/libpng16/($sourceUrl)"
       | lines
       | where ($it | str contains '<a href="https://sourceforge.net') and ($it | str contains '.tar.xz')
-      | parse --regex ($"<a href=\\"https://sourceforge.net/projects/libpng/files/libpng16/($sourceUrl)/libpng-" + '(?<version>[^"]+)\.tar\.xz/')
+      | parse --regex ($"<a href=\\"https://sourceforge\\.net/projects/libpng/files/libpng16/($sourceUrl)/libpng-" + '(?<version>[^"]+)\\.tar\\.xz/')
       | sort-by --natural --reverse version
       | get 0.version
 

@@ -52,7 +52,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.tcpdump.org/release
       | lines
       | where ($it | str contains "libpcap") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libpcap-(?<version>.+)\.tar\.[^"]+">'
+      | parse --regex '<a href="libpcap-(?<version>.+)\\.tar\\.[^"]+">'
       | sort-by --natural --reverse version
       | get 0.version
 

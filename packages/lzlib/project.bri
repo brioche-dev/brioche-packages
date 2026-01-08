@@ -70,7 +70,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://download.savannah.nongnu.org/releases/lzip/lzlib
       | lines
       | where ($it | str contains "lzlib") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="lzlib-(?<version>[0-9]+\.[0-9]+)\.tar\.gz">'
+      | parse --regex '<a href="lzlib-(?<version>\\d+\\.\\d+)\\.tar\\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
 

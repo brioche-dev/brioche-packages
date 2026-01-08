@@ -53,7 +53,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://libisl.sourceforge.io
       | lines
       | where ($it | str contains "isl")
-      | parse --regex '<a href="isl-(?<version>.+)\.tar\.xz">'
+      | parse --regex '<a href="isl-(?<version>.+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 

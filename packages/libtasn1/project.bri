@@ -56,7 +56,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/libtasn1
       | lines
       | where ($it | str contains "libtasn1-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libtasn1-(?<version>[0-9.]+)\.tar\.gz">'
+      | parse --regex '<a href="libtasn1-(?<version>[0-9.]+)\\.tar\\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
 

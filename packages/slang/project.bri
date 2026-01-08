@@ -82,7 +82,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.jedsoft.org/releases/slang
       | lines
       | where ($it | str contains '<a href="slang-') and (not ($it | str contains ".asc"))
-      | parse --regex '<a href="slang-(?<version>.+)\.tar\.bz2">'
+      | parse --regex '<a href="slang-(?<version>.+)\\.tar\\.bz2">'
       | sort-by --natural --reverse version
       | get 0.version
 

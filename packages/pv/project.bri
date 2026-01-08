@@ -48,7 +48,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ivarch.com/programs/pv.shtml
       | lines
       | where ($it | str contains "/s/pv") and (not ($it | str contains "sig"))
-      | parse --regex '<a href="/s/pv-(?<version>.+)\.tar\.[^"]+">'
+      | parse --regex '<a href="/s/pv-(?<version>.+)\\.tar\\.[^"]+">'
       | sort-by --natural --reverse version
       | get 0.version
 

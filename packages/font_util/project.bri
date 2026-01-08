@@ -53,7 +53,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.x.org/archive/individual/font
       | lines
       | where ($it | str contains "font-util") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="font-util-(?<version>.+)\.tar\.xz">'
+      | parse --regex '<a href="font-util-(?<version>.+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 

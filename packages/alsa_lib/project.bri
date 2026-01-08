@@ -71,7 +71,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.alsa-project.org/files/pub/lib
       | lines
       | where ($it | str contains "alsa-lib") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="alsa-lib-(?<version>.+)\.tar\.bz2">'
+      | parse --regex '<a href="alsa-lib-(?<version>.+)\\.tar\\.bz2">'
       | sort-by --natural --reverse version
       | get 0.version
 

@@ -55,7 +55,7 @@ export function liveUpdate(): std.Recipe<std.Directory> {
     let version = http get http://www.dest-unreach.org/socat/
       | lines
       | where ($it | str contains 'href="download/socat-')
-      | parse --regex '<a href="download/socat-(?<version>(?<major>[\\d]+)\\.(?<minor>[\\d]+)(?:\\.(?<patch>[\\d]+)(?:\\.(?<extra>[\\d]+))?)?)\\.tar.gz"'
+      | parse --regex '<a href="download/socat-(?<version>(?<major>[\\d]+)\\.(?<minor>[\\d]+)(?:\\.(?<patch>[\\d]+)(?:\\.(?<extra>[\\d]+))?)?)\\.tar\\.gz"'
       | sort-by --natural --reverse version
       | get 0.version
 

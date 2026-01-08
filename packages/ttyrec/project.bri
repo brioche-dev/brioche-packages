@@ -56,7 +56,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://deb.debian.org/debian/pool/main/t/ttyrec/
       | lines
       | where ($it | str contains "ttyrec_") and ($it | str contains ".orig.tar.gz")
-      | parse --regex 'ttyrec_(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.orig\\.tar\\.gz'
+      | parse --regex 'ttyrec_(?<version>\\d+\\.\\d+\\.\\d+)\\.orig\\.tar\\.gz'
       | sort-by --natural --reverse version
       | get 0.version
 
