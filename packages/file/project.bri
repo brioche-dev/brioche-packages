@@ -1,0 +1,69 @@
+import * as std from "std";
+import xz from "xz";
+import zstd from "zstd";
+
+export const project = {
+  name: "file",
+  version: "5.46",
+  repository: "https://github.com/file/file",
+  extra: {
+    versionUnderscore: "5_46",
+  },
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `FILE${project.extra.versionUnderscore}`,
+});
+
+export default function file(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, xz, zstd)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/file"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    file --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(file)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `file-${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^FILE(?<version>\d+[._]\d+)$/,
+    normalizeVersion: true,
+  });
+}

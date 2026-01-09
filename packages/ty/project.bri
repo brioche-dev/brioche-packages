@@ -41,8 +41,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({
-    project,
-    matchTag: /^(?<version>\d+\.\d+\.\d+)$/,
-  });
+  return std.liveUpdateFromGithubReleases({ project });
 }
