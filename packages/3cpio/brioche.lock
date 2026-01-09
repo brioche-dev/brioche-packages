@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/threecpio/0.12.0/download": {
+    "https://crates.io/api/v1/crates/threecpio/0.13.0/download": {
       "type": "sha256",
-      "value": "22128f0067ea374f7858b8f39d9d617aefbb8a13bbe6c6586e699d4a9e5ade4f"
+      "value": "0dcc2042a112d8336e96c0a0587bb9501904d5696bf0d81222c14ce54bca42ff"
     }
   }
 }
