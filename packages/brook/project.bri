@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "brook",
-  version: "20250808",
+  version: "20260101.0",
   repository: "https://github.com/txthinking/brook.git",
 };
 
@@ -38,8 +38,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   // Check that the result contains the expected version
   // HACK: the package doesn't seem to report its version correctly.
   const expected =
-    project.version === "20260101"
-      ? `Brook version 20250808`
+    project.version === "20260101.0"
+      ? `Brook version 20260101`
       : `Brook version ${project.version}`;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
@@ -49,6 +49,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({
     project,
-    matchTag: /^v(?<version>\d{8})$/,
+    matchTag: /^v(?<version>\d+(?:\.\d+)?)$/,
   });
 }
