@@ -60,8 +60,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubTags({
-    project,
-    matchTag: /^v(?<version>\d+\.\d+\.\d+)$/,
-  });
+  return std.liveUpdateFromGithubTags({ project });
 }

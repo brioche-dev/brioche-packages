@@ -45,6 +45,5 @@ export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGitlabTags({
     gitlabUrl: "https://salsa.debian.org",
     project,
-    matchTag: /^v(?<version>\d+\.\d+\.\d+)$/,
   });
 }
