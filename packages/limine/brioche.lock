@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/limine-bootloader/limine/releases/download/v10.6.2/limine-10.6.2.tar.xz": {
+      "type": "sha256",
+      "value": "2ee92d8c2752fa251f3104531a5481c5aedda50ddc64074f9750bd3a1104a333"
+    }
+  }
+}
