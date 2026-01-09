@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/libjxl/libjxl": {
+      "v0.11.1": "794a5dcf0d54f9f0b20d288a12e87afb91d20dfc"
+    }
+  }
+}
