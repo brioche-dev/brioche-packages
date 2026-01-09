@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jasper-software/jasper.git": {
+      "version-4.2.8": "7c979692ede3914a481b859dbeb307dff48bf175"
+    }
+  }
+}
