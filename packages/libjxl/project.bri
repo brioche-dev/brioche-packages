@@ -1,0 +1,91 @@
+import * as std from "std";
+import brotli from "brotli";
+import giflib from "giflib";
+import highway from "highway";
+import imath from "imath";
+import lcms2 from "lcms2";
+import libdeflate from "libdeflate";
+import libjpegTurbo from "libjpeg_turbo";
+import libpng from "libpng";
+import openjph from "openjph";
+import openexr from "openexr";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "libjxl",
+  version: "0.11.1",
+  repository: "https://github.com/libjxl/libjxl",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+  options: {
+    submodules: true,
+  },
+}).pipe((source) =>
+  // Patch sjpeg's CMakeLists.txt to use a newer CMake minimum version
+  std.runBash`
+    # Fail if upstream has fixed the CMake version (so we can remove this workaround)
+    grep -q 'cmake_minimum_required(VERSION 2.8.7)' "$BRIOCHE_OUTPUT/third_party/sjpeg/CMakeLists.txt"
+
+    sed -i 's/cmake_minimum_required(VERSION 2.8.7)/cmake_minimum_required(VERSION 4.0)/' \
+      "$BRIOCHE_OUTPUT/third_party/sjpeg/CMakeLists.txt"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function libjxl(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      brotli,
+      giflib,
+      highway,
+      imath,
+      lcms2,
+      libdeflate,
+      libjpegTurbo,
+      libpng,
+      openjph,
+      openexr,
+    ],
+    set: {
+      BUILD_TESTING: "OFF",
+      JPEGXL_FORCE_SYSTEM_BROTLI: "ON",
+      JPEGXL_FORCE_SYSTEM_HWY: "ON",
+      JPEGXL_FORCE_SYSTEM_LCMS2: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cjxl --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(libjxl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cjxl v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
