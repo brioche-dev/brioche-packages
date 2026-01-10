@@ -33,7 +33,6 @@ export default function ciliumCli(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    ls
     cilium version --client | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(ciliumCli)

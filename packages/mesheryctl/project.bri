@@ -32,7 +32,6 @@ export default function mesheryctl(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    ls
     mesheryctl version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(mesheryctl)
