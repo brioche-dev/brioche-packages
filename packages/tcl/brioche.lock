@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/tcltk/tcl/releases/download/core-9-0-3/tcl9.0.3-src.tar.gz": {
+      "type": "sha256",
+      "value": "2537ba0c86112c8c953f7c09d33f134dd45c0fb3a71f2d7f7691fd301d2c33a6"
+    }
+  }
+}
