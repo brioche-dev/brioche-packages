@@ -1,0 +1,98 @@
+import * as std from "std";
+import curl from "curl";
+import brotli from "brotli";
+import libpsl from "libpsl";
+import libssh2 from "libssh2";
+import lz4 from "lz4";
+import lzo from "lzo";
+import openssl from "openssl";
+import xz from "xz";
+import zlib from "zlib";
+import zstd from "zstd";
+
+export const project = {
+  name: "wandio",
+  version: "4.2.6-1",
+  repository: "https://github.com/LibtraceTeam/wandio",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function wandio(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure \\
+      --prefix=/ \\
+      --with-http
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      brotli,
+      curl,
+      libpsl,
+      libssh2,
+      lz4,
+      lzo,
+      openssl,
+      xz,
+      zlib,
+      zstd,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/wandiocat"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.file(std.indoc`
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <wandio.h>
+
+    int main(void)
+    {
+        int type = wandio_detect_compression_type("test.gz");
+        printf("%d", type);
+
+        return EXIT_SUCCESS;
+    }
+  `);
+
+  const script = std.runBash`
+    cp "$src" main.c
+    gcc main.c -o main -lwandio -lz -lbz2 -llzo2 -llzma -lzstd -llz4 -lcurl -lpthread
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, wandio, curl, lz4, lzo, xz, zlib, zstd)
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "1";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^(?<version>\d+\.\d+\.\d+(?:-\d+)?)$/,
+  });
+}
