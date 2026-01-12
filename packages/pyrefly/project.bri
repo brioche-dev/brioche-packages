@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "pyrefly",
-  version: "0.46.0",
+  version: "0.47.0",
   repository: "https://github.com/facebook/pyrefly.git",
 };
 
