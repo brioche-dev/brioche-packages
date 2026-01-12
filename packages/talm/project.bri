@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "talm",
-  version: "0.19.5",
+  version: "0.20.0",
   extra: {
     moduleName: "github.com/cozystack/talm",
   },
