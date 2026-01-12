@@ -1,0 +1,45 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "ast_grep",
+  version: "0.40.5",
+  repository: "https://github.com/ast-grep/ast-grep.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+})
+  // Remove upstream's custom Cargo `config.toml`, which overrides the linker
+  // for various targets (for cross-compilation). This can interfere with
+  // our default working linker configuration.
+  .remove(".cargo/config.toml");
+
+export default function astGrep(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/cli",
+    runnable: "bin/ast-grep",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ast-grep --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(astGrep)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ast-grep ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
