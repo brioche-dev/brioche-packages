@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "gemini_cli",
-  version: "0.22.5",
+  version: "0.23.0",
   extra: {
     packageName: "@google/gemini-cli",
   },
