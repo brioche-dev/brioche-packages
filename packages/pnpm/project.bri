@@ -216,7 +216,8 @@ async function wrapBinstubs(
     return std.addRunnable(std.directory(), targetName, {
       command: "bash",
       args: [{ relativePath: name }],
-      dependencies: [std.bash, nodejs],
+      // Include std.tools for sed, dirname, uname needed by pnpm binstubs
+      dependencies: [std.tools, nodejs],
     });
   });
 
