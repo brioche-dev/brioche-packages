@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "topiary",
-  version: "0.7.2",
+  version: "0.7.3",
   extra: {
     crateName: "topiary-cli",
   },
