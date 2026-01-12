@@ -46,31 +46,31 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       mkdir -p build
       cd build
 
-      ../configure \
-        --prefix=/usr \
-        --target="$TARGET" \
-        --with-build-sysroot="$stage1" \
-        --with-glibc-version=2.38 \
-        --with-newlib \
-        --without-headers \
-        --enable-default-pie \
-        --enable-default-ssp \
-        --disable-nls \
-        --disable-shared \
-        --disable-multilib \
-        --disable-threads \
-        --disable-libatomic \
-        --disable-libgomp \
-        --disable-libquadmath \
-        --disable-libssp \
-        --disable-libvtv \
-        --disable-libstdcxx \
+      ../configure \\
+        --prefix=/usr \\
+        --target="$TARGET" \\
+        --with-build-sysroot="$stage1" \\
+        --with-glibc-version=2.38 \\
+        --with-newlib \\
+        --without-headers \\
+        --enable-default-pie \\
+        --enable-default-ssp \\
+        --disable-nls \\
+        --disable-shared \\
+        --disable-multilib \\
+        --disable-threads \\
+        --disable-libatomic \\
+        --disable-libgomp \\
+        --disable-libquadmath \\
+        --disable-libssp \\
+        --disable-libvtv \\
+        --disable-libstdcxx \\
         --enable-languages=c,c++
       make
       make install DESTDIR="$BRIOCHE_OUTPUT"
 
       cd ..
-      cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
+      cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \\
         "$(dirname "$("$BRIOCHE_OUTPUT/usr/bin/$TARGET-gcc" -print-libgcc-file-name)")"/include/limits.h
     `,
     env: {

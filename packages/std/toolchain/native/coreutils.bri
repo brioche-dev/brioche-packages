@@ -16,8 +16,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
+          ./configure \\
+            --prefix=/ \\
             --enable-no-install-program=kill,uptime
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

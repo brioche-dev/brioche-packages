@@ -30,7 +30,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "-c",
         std.indoc`
           cp -r "$stage2" "$BRIOCHE_OUTPUT"
-          find "$BRIOCHE_OUTPUT"/usr/bin -type f -executable -print0 \
+          find "$BRIOCHE_OUTPUT"/usr/bin -type f -executable -print0 \\
             | while IFS= read -r -d $'\\0' file; do
               if [ "$(head -c 2 "$file")" == "#!" ]; then
                 awk '

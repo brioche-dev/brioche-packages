@@ -13,11 +13,11 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     script: std.indoc`
       export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
-      ./configure \
-        --prefix=/usr \
-        --host="$TARGET" \
-        --build="$(./build-aux/config.guess)" \
-        --disable-static \
+      ./configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
+        --build="$(./build-aux/config.guess)" \\
+        --disable-static \\
         --docdir=/usr/share/doc/xz-5.4.4
 
       make

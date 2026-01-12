@@ -15,11 +15,11 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       mkdir -p build
       cd build
 
-      ../configure \
-        --prefix=/usr \
-        --target="$TARGET" \
-        --disable-nls \
-        --enable-gprofng=no \
+      ../configure \\
+        --prefix=/usr \\
+        --target="$TARGET" \\
+        --disable-nls \\
+        --enable-gprofng=no \\
         --disable-werror
       make
       make install DESTDIR="$BRIOCHE_OUTPUT"

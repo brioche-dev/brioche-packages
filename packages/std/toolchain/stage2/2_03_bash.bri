@@ -13,10 +13,10 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     script: std.indoc`
       export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
-      ./configure \
-        --prefix=/usr \
-        --host="$TARGET" \
-        --build="$(./config.guess)" \
+      ./configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
+        --build="$(./config.guess)" \\
         --without-bash-malloc
 
       make

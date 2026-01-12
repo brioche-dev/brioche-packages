@@ -55,7 +55,12 @@ export default function cmake(): std.Recipe<std.Directory> {
   return std.runBash`
     ./bootstrap \\
       --prefix=/ \\
+      --system-bzip2 \\
       --system-curl \\
+      --system-expat \\
+      --system-liblzma \\
+      --system-zlib \\
+      --system-zstd \\
       --parallel="$(nproc)"
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"

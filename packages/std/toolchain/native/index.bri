@@ -365,7 +365,7 @@ function fixShebangs(
         "pipefail",
         "-c",
         std.indoc`
-          find "$BRIOCHE_OUTPUT"/bin -type f -executable -print0 \
+          find "$BRIOCHE_OUTPUT"/bin -type f -executable -print0 \\
             | while IFS= read -r -d $'\\0' file; do
               if [ "$(head -c 2 "$file")" == "#!" ]; then
                 awk '

@@ -56,12 +56,12 @@ export default std.memo((): std.Recipe<std.Directory> => {
 
       echo "rootsbindir=/sbin" > configparms
 
-      ../configure \
-        --prefix=/usr \
-        --host="$TARGET" \
-        --build="$(../scripts/config.guess)" \
-        --enable-kernel=4.14 \
-        --with-headers="$stage1/usr/include" \
+      ../configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
+        --build="$(../scripts/config.guess)" \\
+        --enable-kernel=4.14 \\
+        --with-headers="$stage1/usr/include" \\
         libc_cv_slibdir=/lib
 
       make
@@ -80,15 +80,14 @@ export default std.memo((): std.Recipe<std.Directory> => {
     script: std.indoc`
       export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
-      mkdir -p "$BRIOCHE_OUTPUT"
       cp -r "$glibc"/* "$BRIOCHE_OUTPUT"
 
-      "$packer" \
-        autopack \
-        "$BRIOCHE_OUTPUT" \
-        --var "packed=path:$packed" \
-        --var "lib=path:$BRIOCHE_OUTPUT/lib" \
-        --var "usr_lib=path:$BRIOCHE_OUTPUT/usr/lib" \
+      "$packer" \\
+        autopack \\
+        "$BRIOCHE_OUTPUT" \\
+        --var "packed=path:$packed" \\
+        --var "lib=path:$BRIOCHE_OUTPUT/lib" \\
+        --var "usr_lib=path:$BRIOCHE_OUTPUT/usr/lib" \\
         --config '{
           "globs": [
             "usr/bin/**"

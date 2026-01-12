@@ -65,27 +65,27 @@ export default std.memo((): std.Recipe<std.Directory> => {
           mkdir build
           cd build
 
-          ../configure \
-            --prefix=/ \
-            --enable-languages=c,c++ \
-            --enable-default-pie \
-            --enable-default-ssp \
-            --disable-nls \
-            --disable-multilib \
-            --disable-bootstrap \
-            --disable-fixincludes \
-            --with-system-zlib \
-            --with-gmp="$gmp" \
-            --with-mpfr="$mpfr" \
-            --with-mpc="$mpc" \
-            --with-build-sysroot="$buildSysroot" \
-            CFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
-            CXXFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \
-            LDFLAGS_FOR_TARGET="$LDFLAGS" \
-            CFLAGS_FOR_BUILD="$CPPFLAGS" \
-            CXXFLAGS_FOR_BUILD="$CPPFLAGS" \
-            CFLAGS="$CPPFLAGS" \
-            CXXFLAGS="$CPPFLAGS" \
+          ../configure \\
+            --prefix=/ \\
+            --enable-languages=c,c++ \\
+            --enable-default-pie \\
+            --enable-default-ssp \\
+            --disable-nls \\
+            --disable-multilib \\
+            --disable-bootstrap \\
+            --disable-fixincludes \\
+            --with-system-zlib \\
+            --with-gmp="$gmp" \\
+            --with-mpfr="$mpfr" \\
+            --with-mpc="$mpc" \\
+            --with-build-sysroot="$buildSysroot" \\
+            CFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \\
+            CXXFLAGS_FOR_TARGET="-g -O2 $CPPFLAGS" \\
+            LDFLAGS_FOR_TARGET="$LDFLAGS" \\
+            CFLAGS_FOR_BUILD="$CPPFLAGS" \\
+            CXXFLAGS_FOR_BUILD="$CPPFLAGS" \\
+            CFLAGS="$CPPFLAGS" \\
+            CXXFLAGS="$CPPFLAGS" \\
             LD="ld"
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
