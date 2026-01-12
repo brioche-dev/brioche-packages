@@ -1,0 +1,70 @@
+import * as std from "std";
+
+export const project = {
+  name: "tcl",
+  version: "9.0.3",
+  repository: "https://github.com/tcltk/tcl",
+  extra: {
+    versionDash: "9-0-3",
+  },
+};
+
+std.assert(
+  project.extra.versionDash === std.projectVersionToDashFormat({ project }),
+  `expected 'project.extra.versionDash' field '${project.extra.versionDash}' to match version '${project.version}'`,
+);
+
+const source = Brioche.download(
+  `https://github.com/tcltk/tcl/releases/download/core-${project.extra.versionDash}/tcl${project.version}-src.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function tcl(): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd unix
+    ./configure \\
+      --prefix=/ \\
+      --enable-shared \\
+      --enable-threads
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .insert("bin/tclsh", std.symlink({ target: "tclsh9.0" }))
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/tclsh"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion tcl | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, tcl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^core-(?<version>\d+-\d+-\d+)$/,
+    normalizeVersion: true,
+  });
+}
