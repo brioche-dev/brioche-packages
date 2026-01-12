@@ -1,9 +1,9 @@
 import * as std from "std";
-import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libarchive",
-  version: "3.8.0",
+  version: "3.8.5",
+  repository: "https://github.com/libarchive/libarchive",
 };
 
 const source = Brioche.download(
@@ -48,18 +48,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): NushellRunnable {
-  return nushellRunnable`
-    let version = http get https://www.libarchive.de/downloads
-      | lines
-      | where ($it | str contains "libarchive")
-      | parse --regex '<a href="./libarchive-(?<version>.+)\\.tar\\.gz">'
-      | sort-by --natural --reverse version
-      | get 0.version
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `.env({ project: JSON.stringify(project) });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
 }
