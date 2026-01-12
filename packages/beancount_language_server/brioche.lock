@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/beancount-language-server/1.5.0/download": {
+    "https://crates.io/api/v1/crates/beancount-language-server/1.7.0/download": {
       "type": "sha256",
-      "value": "a1c4558bb3a857ad1d506b649107fb376a495adb1d3642f2450d42e586669dcf"
+      "value": "b75dff47616880d78523a7c07944756452c6f4231a86823a0e28185fdf39e6d7"
     }
   }
 }
