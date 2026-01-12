@@ -3,7 +3,6 @@ import { cmakeBuild } from "cmake";
 import cyrusSasl from "cyrus_sasl";
 import openssl from "openssl";
 import snappy from "snappy";
-import zstd from "zstd";
 
 export const project = {
   name: "mongo_c_driver",
@@ -19,7 +18,7 @@ const source = Brioche.gitCheckout({
 export default function mongoCDriver(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, cyrusSasl, openssl, snappy, zstd],
+    dependencies: [std.toolchain, cyrusSasl, openssl, snappy],
     set: {
       ENABLE_TESTS: "OFF",
       ENABLE_EXAMPLES: "OFF",

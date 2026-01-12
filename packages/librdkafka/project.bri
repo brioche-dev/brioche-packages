@@ -7,7 +7,6 @@ import libpsl from "libpsl";
 import libssh2 from "libssh2";
 import lz4 from "lz4";
 import openssl from "openssl";
-import zstd from "zstd";
 
 export const project = {
   name: "librdkafka",
@@ -32,7 +31,6 @@ export default function librdkafka(): std.Recipe<std.Directory> {
       libssh2,
       lz4,
       openssl,
-      zstd,
     ],
     set: {
       RDKAFKA_BUILD_EXAMPLES: "OFF",
