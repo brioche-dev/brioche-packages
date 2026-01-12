@@ -22,4 +22,4 @@ jobs:
 
       - name: Check formatting
         run: |
-          echo ./packages/* | xargs printf -- '-p %s\n' | xargs brioche fmt --check
+          brioche fmt --check ./packages/*
