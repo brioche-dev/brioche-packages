@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/clorinde/1.2.0/download": {
+    "https://crates.io/api/v1/crates/clorinde/1.3.0/download": {
       "type": "sha256",
-      "value": "301ad1eb0db14de67580fce7fa91fcca8929f6b7a7d973d240e95ad174f355c9"
+      "value": "d3c0ae2119e3fe1e513e65643ae2c8237ac2c93799ff60ccfec18526cc6066dc"
     }
   }
 }
