@@ -26,7 +26,15 @@ export default function kmod(): std.Recipe<std.Directory> {
     },
     runnable: "bin/kmod",
   })
-    .pipe(libFolderMakeKmodSymlinks)
+    .pipe((recipe) =>
+      recipe
+        .insert("bin/lsmod", std.symlink({ target: "kmod" }))
+        .insert("bin/rmmod", std.symlink({ target: "kmod" }))
+        .insert("bin/insmod", std.symlink({ target: "kmod" }))
+        .insert("bin/modinfo", std.symlink({ target: "kmod" }))
+        .insert("bin/modprobe", std.symlink({ target: "kmod" }))
+        .insert("bin/depmod", std.symlink({ target: "kmod" })),
+    )
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
@@ -71,24 +79,4 @@ export function liveUpdate(): NushellRunnable {
       | update version $version
       | to json
   `.env({ project: JSON.stringify(project) });
-}
-
-/**
- * Creates symlinks for other kmod packages.
- *
- * @param recipe - The recipe to create the symlinks for.
- *
- * @returns The recipe with the symlinks created.
- */
-function libFolderMakeKmodSymlinks(
-  recipe: std.RecipeLike<std.Directory>,
-): std.Recipe<std.Directory> {
-  return std.runBash`
-    for program in lsmod rmmod insmod modinfo modprobe depmod; do
-      ln -s -r "$BRIOCHE_OUTPUT/bin/kmod" "$BRIOCHE_OUTPUT/bin/$program"
-    done
-  `
-    .dependencies(std.toolchain)
-    .outputScaffold(recipe)
-    .toDirectory();
 }
