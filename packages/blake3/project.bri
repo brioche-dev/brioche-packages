@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "blake3",
-  version: "1.8.2",
+  version: "1.8.3",
   repository: "https://github.com/BLAKE3-team/BLAKE3.git",
 };
 
