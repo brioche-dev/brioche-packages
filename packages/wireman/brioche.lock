@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/wireman/0.3.4/download": {
+      "type": "sha256",
+      "value": "627fe94a19cb2c3e0bfef803488299118a2b91696eae0428debee61cb912410a"
+    }
+  }
+}
