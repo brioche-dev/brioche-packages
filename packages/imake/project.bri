@@ -31,7 +31,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     (imake --help 2>&1 || true) | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(imake())
+    .dependencies(imake)
     .toFile();
 
   const result = (await script.read()).trim();

@@ -41,7 +41,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
     miniflux --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(miniflux())
+    .dependencies(miniflux)
     .toFile();
 
   const result = (await script.read()).trim();
