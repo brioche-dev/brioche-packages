@@ -1,0 +1,81 @@
+import * as std from "std";
+import audit from "audit";
+import cmake from "cmake";
+import expat from "expat";
+import libapparmor from "libapparmor";
+import libcapNg from "libcap_ng";
+import libsepol from "libsepol";
+import libselinux from "libselinux";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import pcre2 from "pcre2";
+import python from "python";
+
+export const project = {
+  name: "dbus",
+  version: "1.16.2",
+  repository: "https://gitlab.freedesktop.org/dbus/dbus",
+};
+
+const source = Brioche.download(
+  `https://dbus.freedesktop.org/releases/dbus/dbus-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function dbus(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      cmake,
+      ninja,
+      expat,
+      python,
+      libapparmor,
+      libcapNg,
+      libsepol,
+      pcre2,
+      libselinux,
+      audit,
+    ],
+    set: {
+      default_library: "both",
+      xml_docs: "disabled",
+      doxygen_docs: "disabled",
+      ducktype_docs: "disabled",
+      modular_tests: "disabled",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion dbus-1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, dbus)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+    matchTag: /^dbus-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
