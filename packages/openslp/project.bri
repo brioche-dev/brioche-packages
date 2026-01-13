@@ -1,0 +1,71 @@
+import * as std from "std";
+
+export const project = {
+  name: "openslp",
+  version: "2.0.0",
+  repository: "https://github.com/openslp-org/openslp",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `openslp-${project.version}`,
+}).pipe((source) =>
+  // The install-data-hook in etc/Makefile.am creates /var/log without
+  // respecting DESTDIR, causing the build to fail when setting `prefix`.
+  // This patch fixes the problem by adding $(DESTDIR) prefix to the
+  // mkdir command.
+  std.runBash`
+    sed -i 's|mkdir -p \$(localstatedir)/log|mkdir -p \$(DESTDIR)\$(localstatedir)/log|' "$BRIOCHE_OUTPUT/openslp/etc/Makefile.am"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function openslp(): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd openslp
+    ./autogen.sh
+    ./configure \\
+      --prefix=/ \\
+      --enable-async-api
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/slptool"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    slptool --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(openslp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `slptool version = ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^openslp-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
