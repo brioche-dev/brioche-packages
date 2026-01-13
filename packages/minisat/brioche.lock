@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/stp/minisat": {
+      "releases/2.2.1": "29bb7bcf84f8987938a4f23a03dd309ebe2967e7"
+    }
+  }
+}
