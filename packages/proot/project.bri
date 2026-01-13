@@ -26,10 +26,10 @@ export default function proot(): std.Recipe<std.Directory> {
   return std.runBash`
     case "$(uname -m)" in
       x86_64)
-        BRIOCHE_LD_AUTOPACK=false make -C src loader.elf loader-m32.elf build.h
+        make -C src loader.elf loader-m32.elf build.h
         ;;
       aarch64)
-        BRIOCHE_LD_AUTOPACK=false make -C src loader.elf build.h
+        make -C src loader.elf build.h
         ;;
       *)
         echo "Unhandled architecture for PRoot package"
