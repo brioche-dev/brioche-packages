@@ -1,0 +1,92 @@
+import * as std from "std";
+import python, { wrapVenvScripts } from "python";
+
+export const project = {
+  name: "llvm_lit",
+  version: "21.1.8",
+  repository: "https://github.com/llvm/llvm-project",
+};
+
+const source = std.castToDirectory(
+  Brioche.download(
+    `https://github.com/llvm/llvm-project/releases/download/llvmorg-${project.version}/llvm-project-${project.version}.src.tar.xz`,
+  )
+    .unarchive("tar", "xz")
+    .peel()
+    .get("llvm/utils/lit"),
+);
+
+const pipDependencies = std.directory({
+  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+  ),
+  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  ),
+});
+
+export default function llvmLit(): std.Recipe<std.Directory> {
+  // Create a venv from Python
+  let venv = std.recipe(python);
+
+  // Install setuptools (needed for building from source)
+  venv = std.runBash`
+    pip install setuptools wheel
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Install the application into the venv
+  venv = std.runBash`
+    pip install .
+  `
+    .workDir(source)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Create the final recipe with the venv under `venv`
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
+      wrapVenvScripts(recipe, {
+        venvDir: "venv",
+        scripts: ["lit"],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/lit"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lit --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(llvmLit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `lit ${project.version}dev`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^llvmorg-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
