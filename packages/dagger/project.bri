@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "dagger",
-  version: "0.19.8",
+  version: "0.19.9",
   repository: "https://github.com/dagger/dagger.git",
 };
 
