@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/tomwright/dasel/v3/@v/v3.2.0.zip": {
+    "https://proxy.golang.org/github.com/tomwright/dasel/v3/@v/v3.2.1.zip": {
       "type": "sha256",
-      "value": "afbe7fbbe99c59f32f94a78ec2b4e9f0e4b4be3614f64ca350aa74fdb81b59c0"
+      "value": "bea6d954c99510af2f32a832fe33e72864d8ec26fd4f688405a3ff5343c743db"
     }
   }
 }
