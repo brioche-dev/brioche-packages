@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "gitea_mcp_server",
-  version: "0.6.0",
+  version: "0.7.0",
   extra: {
     moduleName: "gitea.com/gitea/gitea-mcp",
   },
