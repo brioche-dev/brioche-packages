@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://plocate.sesse.net/download/plocate-1.1.24.tar.gz": {
+      "type": "sha256",
+      "value": "e55a757af1d7efb15ea674993224da4f0258479f8f720bd3dae0925d27dc04a2"
+    }
+  }
+}
