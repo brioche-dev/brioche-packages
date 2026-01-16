@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/google/addlicense/@v/v1.2.0.zip": {
+      "type": "sha256",
+      "value": "d2fccbff05f5538ba14f94f591d9425d9e1da80bf612079cc348d81f72f843c3"
+    }
+  }
+}
