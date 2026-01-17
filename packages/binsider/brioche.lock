@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/binsider/0.3.0/download": {
+      "type": "sha256",
+      "value": "eea1580c34fee79a83f0190a0cbf7ab67df312c6f4913a175eaaad0e02ce2f21"
+    }
+  }
+}
