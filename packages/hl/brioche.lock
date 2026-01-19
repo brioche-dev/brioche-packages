@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/pamburus/hl.git": {
-      "v0.35.1": "fb43cdefcb2b5508cf4a04793bf3f6b62275b874"
+      "v0.35.2": "0d53e28f9b7228e3e20dc8a186e5cb0eeb1c5e43"
     }
   }
 }
