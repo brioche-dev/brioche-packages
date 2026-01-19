@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "aicommit2",
-  version: "2.4.20",
+  version: "2.4.23",
   extra: {
     packageName: "aicommit2",
   },
