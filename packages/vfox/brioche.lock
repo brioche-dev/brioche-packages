@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/version-fox/vfox/@v/v0.10.0.zip": {
+    "https://proxy.golang.org/github.com/version-fox/vfox/@v/v1.0.3.zip": {
       "type": "sha256",
-      "value": "b5a27f08cfa13d0f52d32c2d5b4aacb7d17822f67b1dd32dc3d1f1155fb45027"
+      "value": "fb3ad1be046fb365b02ea6892b411daebe3ab0ee9ac84e81df3198d412b6f0fb"
     }
   }
 }
