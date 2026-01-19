@@ -7,7 +7,7 @@ export { runNushell } from "./run_nushell.bri";
 
 export const project = {
   name: "nushell",
-  version: "0.109.1",
+  version: "0.110.0",
   repository: "https://github.com/nushell/nushell.git",
 };
 
