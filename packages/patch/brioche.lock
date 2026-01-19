@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftpmirror.gnu.org/gnu/patch/patch-2.8.tar.xz": {
+    "https://ftpmirror.gnu.org/gnu/patch/patch-2.8.tar.xz%22%20title=%22patch-2.8.tar.xz": {
       "type": "sha256",
-      "value": "f87cee69eec2b4fcbf60a396b030ad6aa3415f192aa5f7ee84cad5e11f7f5ae3"
+      "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   }
 }
