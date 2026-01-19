@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "cilium_cli",
-  version: "0.18.9",
+  version: "0.19.0",
   extra: {
     moduleName: "github.com/cilium/cilium-cli",
   },
