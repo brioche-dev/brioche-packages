@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/bacon/3.21.0/download": {
+    "https://crates.io/api/v1/crates/bacon/3.22.0/download": {
       "type": "sha256",
-      "value": "7729475273a2681b22b6235b07301fcbafaf37de9a340492d2cc9e71ea7d61c7"
+      "value": "707bb4dc0a1b15feb8011e67c23a1bd75d2b7aec27281882a9955d945c0a545c"
     }
   }
 }
