@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "mesheryctl",
-  version: "0.8.196",
+  version: "0.8.199",
   repository: "https://github.com/meshery/meshery.git",
 };
 
