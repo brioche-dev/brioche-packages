@@ -1,0 +1,40 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "fnox",
+  version: "1.9.2",
+  repository: "https://github.com/jdx/fnox.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function fnox(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/fnox",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    fnox version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(fnox)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `fnox ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
