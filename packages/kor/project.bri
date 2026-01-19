@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "kor",
-  version: "0.6.6",
+  version: "0.6.7",
   extra: {
     moduleName: "github.com/yonahd/kor",
   },
