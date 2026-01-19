@@ -3,7 +3,8 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "acl",
-  version: "2.3.2",
+  version:
+    '2.3.2.tar.gz"><img src="/icons2/package-x-generic.png" alt="[ARC]"></a></td><td class="indexcolname"><a href="acl-2.3.2',
 };
 
 const source = Brioche.download(
