@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "ncps",
-  version: "0.6.1",
+  version: "0.7.0",
   extra: {
     moduleName: "github.com/kalbasit/ncps",
   },
