@@ -4,10 +4,10 @@ import { goBuild } from "go";
 
 export const project = {
   name: "gitlab_runner",
-  version: "18.7.2",
+  version: "18.8.0",
   repository: "https://gitlab.com/gitlab-org/gitlab-runner.git",
   extra: {
-    releaseDate: "2026-01-09",
+    releaseDate: "2026-01-15",
   },
 };
 
