@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/mq-run/0.5.10/download": {
+    "https://crates.io/api/v1/crates/mq-run/0.5.11/download": {
       "type": "sha256",
-      "value": "26cc0925404a31ddaa4b400fbff62eef85b68c5d51b942015c4e441272ff0dcf"
+      "value": "2c5dd3469b650e5a6cb56689270faf730eb38d195585389dda3e4a393cc2566a"
     }
   }
 }
