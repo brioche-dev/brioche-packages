@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "mimalloc",
-  version: "3.2.6",
+  version: "3.2.7",
   repository: "https://github.com/microsoft/mimalloc",
 };
 

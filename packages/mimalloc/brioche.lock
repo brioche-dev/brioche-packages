@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/microsoft/mimalloc": {
-      "v3.2.6": "b732d834bd70d7245162d7cbd56e1717a7333088"
+      "v3.2.7": "a5969c54000f44cd45968e830f6482592373cb0e"
     }
   }
 }
