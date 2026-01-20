@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
   // Patch to add install target to the CMakeLists.txt file
   std.applyPatch({
     source,
-    patch: Brioche.includeFile("install.patch"),
+    patch: Brioche.includeFile("cmake-install-target.patch"),
     strip: 1,
   }),
 );
