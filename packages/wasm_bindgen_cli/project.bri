@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "wasm_bindgen_cli",
-  version: "0.2.106",
+  version: "0.2.108",
   extra: {
     crateName: "wasm-bindgen-cli",
   },
