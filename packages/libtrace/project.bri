@@ -1,16 +1,20 @@
 import * as std from "std";
-import curl from "curl";
 import brotli from "brotli";
+import curl from "curl";
+import libpcap from "libpcap";
 import libpsl from "libpsl";
 import libssh2 from "libssh2";
+import libwandder from "libwandder";
+import libyaml from "libyaml";
 import lz4 from "lz4";
-import lzo from "lzo";
 import openssl from "openssl";
+import uthash from "uthash";
+import wandio from "wandio";
 
 export const project = {
-  name: "wandio",
-  version: "4.2.6-1",
-  repository: "https://github.com/LibtraceTeam/wandio",
+  name: "libtrace",
+  version: "4.0.29-1",
+  repository: "https://github.com/LibtraceTeam/libtrace",
 };
 
 const source = Brioche.gitCheckout({
@@ -18,12 +22,12 @@ const source = Brioche.gitCheckout({
   ref: project.version,
 });
 
-export default function wandio(): std.Recipe<std.Directory> {
+export default function libtrace(): std.Recipe<std.Directory> {
   return std.runBash`
     autoreconf --install --force
     ./configure \\
       --prefix=/ \\
-      --with-http
+      --without-ncurses
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -32,21 +36,25 @@ export default function wandio(): std.Recipe<std.Directory> {
       std.toolchain,
       brotli,
       curl,
+      libpcap,
       libpsl,
       libssh2,
+      libwandder,
+      libyaml,
       lz4,
-      lzo,
       openssl,
+      uthash,
+      wandio,
     )
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
       }),
-    )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/wandiocat"));
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -55,12 +63,15 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const src = std.file(std.indoc`
     #include <stdio.h>
     #include <stdlib.h>
-    #include <wandio.h>
+    #include <libtrace.h>
 
     int main(void)
     {
-        int type = wandio_detect_compression_type("test.gz");
-        printf("%d", type);
+        libtrace_t *trace = trace_create("pcapfile:-");
+        if (trace) {
+            trace_destroy(trace);
+            printf("ok");
+        }
 
         return EXIT_SUCCESS;
     }
@@ -68,17 +79,17 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const script = std.runBash`
     cp "$src" main.c
-    gcc main.c -o main -lwandio -lz -lbz2 -llzo2 -llzma -lzstd -llz4 -lcurl -lpthread
+    gcc main.c -o main -ltrace -lwandio -lpcap
     ./main | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, wandio, curl, lz4, lzo)
+    .dependencies(std.toolchain, libtrace, wandio, libpcap)
     .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected output
-  const expected = "1";
+  const expected = "ok";
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
