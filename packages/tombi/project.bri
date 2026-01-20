@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "tombi",
-  version: "0.7.18",
+  version: "0.7.19",
   repository: "https://github.com/tombi-toml/tombi.git",
 };
 
