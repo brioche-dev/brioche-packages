@@ -72,7 +72,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
     ./main | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, wandio, curl, lz4, lzo)
-    .env({ src: src })
+    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();
