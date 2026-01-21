@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/asciinema/3.0.1/download": {
+    "https://crates.io/api/v1/crates/asciinema/3.1.0/download": {
       "type": "sha256",
-      "value": "32ac77f66d73d70a7b0caf85634dd692b43022c24281c837584efcc4a28dc4f0"
+      "value": "f9eb922fbd64875779273dbd43220442a54e43b4637cd27c06cf8cc219fbfaa6"
     }
   }
 }
