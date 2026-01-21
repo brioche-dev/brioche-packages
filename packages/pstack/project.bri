@@ -4,7 +4,7 @@ import { gitCheckout } from "git";
 
 export const project = {
   name: "pstack",
-  version: "2.16",
+  version: "2.16.1",
   repository: "https://github.com/peadar/pstack.git",
 };
 
