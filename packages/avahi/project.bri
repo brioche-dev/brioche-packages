@@ -1,0 +1,78 @@
+import * as std from "std";
+import dbus from "dbus";
+import glib from "glib";
+import libdaemon from "libdaemon";
+import libevent from "libevent";
+import libffi from "libffi";
+import pcre2 from "pcre2";
+import python from "python";
+
+export const project = {
+  name: "avahi",
+  version: "0.8",
+  repository: "https://github.com/avahi/avahi",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/avahi-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function avahi(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-distro=none \\
+      --disable-qt5 \\
+      --disable-gtk3 \\
+      --disable-python \\
+      --disable-mono \\
+      --disable-monodoc \\
+      --disable-manpages \\
+      --enable-compat-libdns_sd
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      dbus,
+      glib,
+      libdaemon,
+      libevent,
+      libffi,
+      pcre2,
+      python,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion avahi-core | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, avahi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
