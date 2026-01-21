@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://gnupg.org/ftp/gcrypt/libksba/libksba-1.6.7.tar.bz2": {
+      "type": "sha256",
+      "value": "cf72510b8ebb4eb6693eef765749d83677a03c79291a311040a5bfd79baab763"
+    }
+  }
+}
