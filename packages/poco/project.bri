@@ -1,0 +1,75 @@
+import * as std from "std";
+import openssl from "openssl";
+import pcre2 from "pcre2";
+import sqlite from "sqlite";
+import utf8proc from "utf8proc";
+import cmake, { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "poco",
+  version: "1.14.2",
+  repository: "https://github.com/pocoproject/poco.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `poco-${project.version}-release`,
+});
+
+export default function poco(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl, pcre2, sqlite, utf8proc],
+    set: {
+      POCO_UNBUNDLED: "ON",
+      ENABLE_MONGODB: "OFF",
+      ENABLE_REDIS: "OFF",
+      ENABLE_PROMETHEUS: "OFF",
+      ENABLE_ACTIVERECORD: "OFF",
+      ENABLE_PAGECOMPILER: "OFF",
+      ENABLE_PAGECOMPILER_FILE2PAGE: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.file(std.indoc`
+    cmake_minimum_required(VERSION 4.0)
+    project(QueryVersion)
+
+    find_package(Poco REQUIRED CONFIG COMPONENTS Foundation)
+    message(STATUS "Poco version: \${Poco_VERSION}")
+  `);
+
+  const script = std.runBash`
+    cp "$src" CMakeLists.txt
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cmake, poco)
+    .env({ src: src })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Poco version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^poco-(?<version>\d+\.\d+\.\d+)-release$/,
+  });
+}
