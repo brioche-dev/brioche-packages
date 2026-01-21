@@ -3,7 +3,7 @@ import * as std from "std";
 
 export const project = {
   name: "alsa_lib",
-  version: "1.2.15.2",
+  version: "1.2.15.3",
 };
 
 const source = Brioche.download(
