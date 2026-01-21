@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "argocd",
-  version: "3.2.3",
+  version: "3.2.5",
   extra: {
     moduleName: "github.com/argoproj/argo-cd/v3",
   },
