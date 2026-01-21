@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "datafusion_cli",
-  version: "51.0.0",
+  version: "52.0.0",
   extra: {
     crateName: "datafusion-cli",
   },
