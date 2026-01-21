@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "bkmr",
-  version: "6.4.1",
+  version: "6.4.3",
   extra: {
     crateName: "bkmr",
   },

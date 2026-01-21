@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/bkmr/6.4.1/download": {
+    "https://crates.io/api/v1/crates/bkmr/6.4.3/download": {
       "type": "sha256",
-      "value": "77ee4a2738d3986f04d36a0fb25eae768df8c8192cc895d1a5324c48dc56fee8"
+      "value": "1d58dacc1fb10c19833656a6ea5524d36ab521101474d63bda6dab9a837ab1ff"
     }
   }
 }
