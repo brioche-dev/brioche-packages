@@ -4,7 +4,7 @@ import nodejs, { npmInstall } from "nodejs";
 
 export const project = {
   name: "mailpit",
-  version: "1.28.2",
+  version: "1.28.3",
   extra: {
     moduleName: "github.com/axllent/mailpit",
   },
