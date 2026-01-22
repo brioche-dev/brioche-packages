@@ -1,25 +1,30 @@
 import * as std from "std";
-import cmake from "cmake";
-import { cmakeBuild } from "cmake";
+import cmake, { cmakeBuild } from "cmake";
+import nlohmannJson from "nlohmann_json";
 
 export const project = {
-  name: "functionalplus",
-  version: "0.2.27",
-  repository: "https://github.com/Dobiasd/FunctionalPlus.git",
+  name: "nlohmann_json_schema_validator",
+  version: "2.4.0",
+  repository: "https://github.com/pboettch/json-schema-validator",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
-  ref: `v${project.version}`,
+  ref: project.version,
 });
 
-export default function functionalplus(): std.Recipe<std.Directory> {
+export default function nlohmannJsonSchemaValidator(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain],
+    dependencies: [std.toolchain, nlohmannJson],
+    set: {
+      JSON_VALIDATOR_BUILD_TESTS: "OFF",
+      JSON_VALIDATOR_BUILD_EXAMPLES: "OFF",
+    },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
@@ -30,22 +35,27 @@ export async function test(): Promise<std.Recipe<std.File>> {
     cmake_minimum_required(VERSION 4.0)
     project(QueryVersion)
 
-    find_package(FunctionalPlus REQUIRED CONFIG)
-    message(STATUS "FunctionalPlus version: \${FunctionalPlus_VERSION}")
+    find_package(nlohmann_json_schema_validator REQUIRED CONFIG)
+    message(STATUS "nlohmann_json_schema_validator version: \${nlohmann_json_schema_validator_VERSION}")
   `);
 
   const script = std.runBash`
     cp "$src" CMakeLists.txt
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, cmake, functionalplus())
+    .dependencies(
+      std.toolchain,
+      cmake,
+      nlohmannJson,
+      nlohmannJsonSchemaValidator,
+    )
     .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `FunctionalPlus version: ${project.version}`;
+  const expected = `nlohmann_json_schema_validator version: ${project.version}`;
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,

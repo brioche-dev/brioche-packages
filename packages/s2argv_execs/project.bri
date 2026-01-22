@@ -59,7 +59,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
     echo "echo 'Hello, World!'" | ./main | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, s2argvExecs)
-    .env({ src: src })
+    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

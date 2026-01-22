@@ -43,7 +43,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, cmake, libtommath)
-    .env({ src: src })
+    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();
