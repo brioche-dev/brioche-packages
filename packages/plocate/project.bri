@@ -1,0 +1,64 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import liburing from "liburing";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import zstd from "zstd";
+
+export const project = {
+  name: "plocate",
+  version: "1.1.24",
+};
+
+const source = Brioche.download(
+  `https://plocate.sesse.net/download/plocate-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function plocate(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, zstd, liburing],
+    set: {
+      install_cron: "false",
+      install_systemd: "false",
+    },
+    runnable: "bin/plocate",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    plocate --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(plocate)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `plocate ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://plocate.sesse.net/download/
+      | lines
+      | where ($it | str contains "plocate-") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="plocate-(?<version>[\\d.]+)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

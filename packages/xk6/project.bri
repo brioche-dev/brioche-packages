@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "xk6",
-  version: "1.3.2",
+  version: "1.3.3",
   extra: {
     moduleName: "go.k6.io/xk6",
   },
