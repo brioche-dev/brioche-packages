@@ -27,7 +27,7 @@ export default function ncps(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `${project.extra.moduleName}/cmd.Version=${project.version}`,
+        `${project.extra.moduleName}/pkg/ncps.Version=${project.version}`,
       ],
     },
     runnable: "bin/ncps",
