@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/foxboron/age-plugin-tpm/@v/v1.0.1.zip": {
+      "type": "sha256",
+      "value": "2e285cb6228d12d0ac0fcfcbcb675dbd18a48a9a3d5d4e3a8e0e62c49b5085ba"
+    }
+  }
+}

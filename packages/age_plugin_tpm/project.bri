@@ -1,0 +1,47 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "age_plugin_tpm",
+  version: "1.0.1",
+  extra: {
+    moduleName: "github.com/foxboron/age-plugin-tpm",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function agePluginTpm(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/age-plugin-tpm",
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+    runnable: "bin/age-plugin-tpm",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    age-plugin-tpm --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(agePluginTpm)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `age-plugin-tpm version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
