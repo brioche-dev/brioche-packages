@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "parquet_tools",
-  version: "1.44.0",
+  version: "1.46.0",
   extra: {
     moduleName: "github.com/hangxie/parquet-tools",
   },
