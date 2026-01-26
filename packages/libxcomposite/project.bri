@@ -9,7 +9,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxcomposite",
-  version: "0.4.6",
+  version: "0.4.7",
 };
 
 const source = Brioche.download(
