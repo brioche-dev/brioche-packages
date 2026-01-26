@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "oh_my_posh",
-  version: "29.0.2",
+  version: "29.1.0",
   repository: "https://github.com/JanDeDobbeleer/oh-my-posh.git",
 };
 
