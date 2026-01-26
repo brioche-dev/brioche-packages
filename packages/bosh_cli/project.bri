@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "bosh_cli",
-  version: "7.9.15",
+  version: "7.9.16",
   extra: {
     moduleName: "github.com/cloudfoundry/bosh-cli/v7",
   },
