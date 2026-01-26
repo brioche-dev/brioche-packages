@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "coredns",
-  version: "1.14.0",
+  version: "1.14.1",
   extra: {
     moduleName: "github.com/coredns/coredns",
   },
