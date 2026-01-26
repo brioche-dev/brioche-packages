@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/budimanjojo/talhelper/v3/@v/v3.1.1.zip": {
+    "https://proxy.golang.org/github.com/budimanjojo/talhelper/v3/@v/v3.1.3.zip": {
       "type": "sha256",
-      "value": "2239d8fb4b2bbf6d6ea8bb62fed2d874a87066f50915fd7f20307281285ddb6d"
+      "value": "f72c4538415c8e06da33ce755139875c4d9c0cf94c953d9c973b1a169e5b0fea"
     }
   }
 }
