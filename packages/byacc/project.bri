@@ -1,0 +1,57 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "byacc",
+  version: "20260126",
+};
+
+const source = Brioche.download(
+  `https://invisible-island.net/archives/byacc/byacc-${project.version}.tgz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function byacc(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/yacc"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    yacc -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(byacc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `yacc - 2.0 ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://invisible-island.net/archives/byacc/
+      | lines
+      | where ($it | str contains "byacc-") and ($it | str contains ".tgz") and (not ($it | str contains ".asc"))
+      | parse --regex '<a href="byacc-(?<version>\\d+)\\.tgz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
