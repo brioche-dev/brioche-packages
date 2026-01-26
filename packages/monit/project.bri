@@ -1,0 +1,72 @@
+import * as std from "std";
+import linuxPam from "linux_pam";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import openssl from "openssl";
+
+export const project = {
+  name: "monit",
+  version: "5.35.2",
+  repository: "https://bitbucket.org/tildeslash/monit",
+};
+
+const source = Brioche.download(
+  `https://mmonit.com/monit/dist/monit-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function monit(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-ssl-incl-dir="$ssl_incl_dir" \\
+      --with-ssl-lib-dir="$ssl_lib_dir" \\
+      --with-zlib \\
+      --with-pam
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, linuxPam, openssl)
+    .env({
+      ssl_incl_dir: std.tpl`${openssl}/include`,
+      ssl_lib_dir: std.tpl`${openssl}/lib`,
+    })
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/monit"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    monit --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(monit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `This is Monit version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://mmonit.com/monit/dist/
+      | lines
+      | where ($it | str contains 'monit-') and ($it | str contains '.tar.gz') and (not ($it | str contains 'latest'))
+      | parse --regex '<a href="monit-(?<version>[\\d.]+)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
