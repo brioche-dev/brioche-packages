@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "istioctl",
-  version: "1.28.2",
+  version: "1.28.3",
   repository: "https://github.com/istio/istio.git",
 };
 
