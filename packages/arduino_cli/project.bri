@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "arduino_cli",
-  version: "1.4.0",
+  version: "1.4.1",
   extra: {
     moduleName: "github.com/arduino/arduino-cli",
   },
