@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "beancount_language_server",
-  version: "1.7.0",
+  version: "1.8.1",
   extra: {
     crateName: "beancount-language-server",
   },
