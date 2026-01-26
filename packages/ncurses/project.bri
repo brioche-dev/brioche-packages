@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "ncurses",
-  version: "6.6",
+  version: '6.6.tar.gz" title="ncurses-6.6',
 };
 
 const source = Brioche.download(

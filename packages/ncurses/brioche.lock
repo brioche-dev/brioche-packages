@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftpmirror.gnu.org/gnu/ncurses/ncurses-6.6.tar.gz": {
+    "https://ftpmirror.gnu.org/gnu/ncurses/ncurses-6.6.tar.gz%22%20title=%22ncurses-6.6.tar.gz": {
       "type": "sha256",
-      "value": "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11"
+      "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   }
 }
