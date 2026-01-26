@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.x.org/archive/individual/lib/libXpm-3.5.17.tar.xz": {
+    "https://www.x.org/archive/individual/lib/libXpm-3.5.18.tar.xz": {
       "type": "sha256",
-      "value": "64b31f81019e7d388c822b0b28af8d51c4622b83f1f0cb6fa3fc95e271226e43"
+      "value": "b4ed79bfc718000edee837d551c35286f0b84576db0ce07bbbebe60a4affa1e4"
     }
   }
 }
