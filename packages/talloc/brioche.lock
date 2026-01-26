@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz": {
+    "https://www.samba.org/ftp/talloc/talloc-2.4.4.tar.gz": {
       "type": "sha256",
-      "value": "dc46c40b9f46bb34dd97fe41f548b0e8b247b77a918576733c528e83abd854dd"
+      "value": "55e47994018c13743485544e7206780ffbb3c8495e704a99636503e6e77abf59"
     }
   }
 }
