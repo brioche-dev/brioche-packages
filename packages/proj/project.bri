@@ -1,0 +1,59 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import curl from "curl";
+import libtiff from "libtiff";
+import nlohmannJson from "nlohmann_json";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "proj",
+  version: "9.7.1",
+  repository: "https://github.com/OSGeo/PROJ",
+};
+
+const source = Brioche.download(
+  `https://download.osgeo.org/proj/proj-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function proj(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, curl, libtiff, nlohmannJson, sqlite],
+    set: {
+      BUILD_TESTING: "OFF",
+      ENABLE_CURL: "ON",
+      ENABLE_TIFF: "ON",
+    },
+    runnable: "bin/proj",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      PROJ_DATA: { fallback: { path: "share/proj" } },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion proj | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, proj())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
