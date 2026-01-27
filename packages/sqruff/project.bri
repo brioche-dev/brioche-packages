@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "sqruff",
-  version: "0.34.0",
+  version: "0.34.1",
   repository: "https://github.com/quarylabs/sqruff.git",
 };
 
