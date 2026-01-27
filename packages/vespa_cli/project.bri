@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "vespa_cli",
-  version: "8.629.20",
+  version: "8.631.39",
   repository: "https://github.com/vespa-engine/vespa.git",
   extra: {
     moduleName: "github.com/vespa-engine/vespa/client/go",
