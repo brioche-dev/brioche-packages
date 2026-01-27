@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/p11-glue/p11-kit/releases/download/0.26.0/p11-kit-0.26.0.tar.xz": {
+    "https://github.com/p11-glue/p11-kit/releases/download/0.26.1/p11-kit-0.26.1.tar.xz": {
       "type": "sha256",
-      "value": "a30a8cdfd0b0e22a6effe70d77c3d9144b74b7e267f288a2e3adcd966ff091cc"
+      "value": "4769f81483a28040cce1dac09a99599f787a8e0dc239a3089d4b0f676b7c4561"
     }
   }
 }
