@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "melange",
-  version: "0.38.1",
+  version: "0.40.0",
   extra: {
     moduleName: "github.com/chainguard-dev/melange",
   },
