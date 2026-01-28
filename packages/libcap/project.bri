@@ -5,10 +5,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "libcap",
   version: "1.2.77",
+  repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git`,
 };
 
 const source = Brioche.gitCheckout({
-  repository: `https://git.kernel.org/pub/scm/libs/libcap/libcap.git/`,
+  repository: project.repository,
   ref: `v${project.version}`,
 }).pipe((source) =>
   std.runBash`
@@ -64,10 +65,9 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://git.kernel.org/pub/scm/libs/libcap/libcap.git/refs
+    let version = ^git ls-remote --tags ${project.repository}
       | lines
-      | where ($it | str contains "/pub/scm/libs/libcap/libcap.git/tag/?h=cap") and (not ($it | str contains "-rc"))
-      | parse --regex '/pub/scm/libs/libcap/libcap\\.git/tag/\\?h=cap/v(?<version>[1-9.]+)'
+      | parse --regex 'refs/tags/v(?<version>[\\d.]+)$'
       | sort-by --natural --reverse version
       | get 0.version
 

@@ -2,22 +2,20 @@ import * as std from "std";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
-  name: "gsl",
-  version: "2.8",
+  name: "libnova",
+  version: "0.16",
+  repository: "https://git.code.sf.net/p/libnova/libnova",
 };
 
-const source = Brioche.download(
-  `https://ftpmirror.gnu.org/gnu/gsl/gsl-${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
 
-export default function gsl(): std.Recipe<std.Directory> {
+export default function libnova(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \\
-      --prefix=/ \\
-      --enable-static \\
-      --enable-shared
+    autoreconf --install --force
+    ./configure --prefix=/
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -25,28 +23,30 @@ export default function gsl(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
-    .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
       }),
-    );
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/libnovaconfig"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    pkg-config --modversion gsl | tee "$BRIOCHE_OUTPUT"
+    libnovaconfig --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, gsl)
+    .dependencies(libnova)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  // HACK: the project doesn't seem to report its version correctly.
+  const expected =
+    project.version === "0.16"
+      ? `libnova 0.15.0`
+      : `libnova ${project.version}`;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
@@ -54,10 +54,9 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://ftpmirror.gnu.org/gnu/gsl
+    let version = git ls-remote --tags ${project.repository}
       | lines
-      | where ($it | str contains "gsl-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="gsl-(?<version>\\d+\\.\\d+(\\.\\d+)?)\\.(tar\\.gz)">'
+      | parse --regex 'refs/tags/v(?<version>[\\d.]+)$'
       | sort-by --natural --reverse version
       | get 0.version
 
