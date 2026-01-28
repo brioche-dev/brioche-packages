@@ -54,10 +54,9 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://git.joeyh.name/git/moreutils.git/refs/tags
+    let version = ^git ls-remote --tags ${project.repository}
       | lines
-      | where ($it | str contains 'href="') and (not ($it | str contains 'sponge'))
-      | parse --regex '<a href="(?<version>[0-9.]+)"'
+      | parse --regex 'refs/tags/(?<version>[\\d.]+)$'
       | sort-by --natural --reverse version
       | get 0.version
 
