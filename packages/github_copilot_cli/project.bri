@@ -29,6 +29,12 @@ export async function test(): Promise<std.Recipe<std.File>> {
     copilot --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(githubCopilotCli)
+    .env({
+      // TODO: Figure out how to get rid of this! Seems to be needed because
+      // the tool dynamically opens `libutil.so.1`, but it isn't found without
+      // the toolchain lib dir in the dynamic ld library path for some reason
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+    })
     .toFile();
 
   const result = (await script.read()).trim();
