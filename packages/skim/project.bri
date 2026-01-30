@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "skim",
-  version: "0.20.5",
+  version: "1.11.2",
   extra: {
     crateName: "skim",
   },
@@ -18,6 +18,10 @@ const source = Brioche.download(
 export default function skim(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
+    env: {
+      // Requires unstable features on stable Rust
+      RUSTC_BOOTSTRAP: "1",
+    },
     runnable: "bin/sk",
   });
 }
