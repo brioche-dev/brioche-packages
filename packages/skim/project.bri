@@ -18,6 +18,10 @@ const source = Brioche.download(
 export default function skim(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
+    env: {
+      // Requires unstable features on stable Rust
+      RUSTC_BOOTSTRAP: "1",
+    },
     runnable: "bin/sk",
   });
 }
