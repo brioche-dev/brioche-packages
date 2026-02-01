@@ -10,7 +10,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxvmc",
-  version: "1.0.14",
+  version: "1.0.15",
 };
 
 const source = Brioche.download(
