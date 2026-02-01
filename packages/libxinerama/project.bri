@@ -8,7 +8,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxinerama",
-  version: "1.1.5",
+  version: "1.1.6",
 };
 
 const source = Brioche.download(
