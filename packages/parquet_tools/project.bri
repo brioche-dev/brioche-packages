@@ -9,7 +9,9 @@ export const project = {
   },
 };
 
-const source = Brioche.download(`https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`)
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
   .unarchive("zip")
   .peel(3);
 
