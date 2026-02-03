@@ -15,9 +15,9 @@ const source = Brioche.download(
 
 export default function libksba(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-static \
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
       --enable-shared
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
