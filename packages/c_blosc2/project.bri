@@ -1,0 +1,58 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import lz4 from "lz4";
+import zlibNg from "zlib_ng";
+
+export const project = {
+  name: "c_blosc2",
+  version: "2.23.0",
+  repository: "https://github.com/Blosc/c-blosc2",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function cBlosc2(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, lz4, zlibNg],
+    set: {
+      BUILD_TESTS: "OFF",
+      BUILD_FUZZERS: "OFF",
+      BUILD_BENCHMARKS: "OFF",
+      BUILD_EXAMPLES: "OFF",
+      PREFER_EXTERNAL_LZ4: "ON",
+      PREFER_EXTERNAL_ZLIB: "ON",
+      PREFER_EXTERNAL_ZSTD: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion blosc2 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cBlosc2)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
