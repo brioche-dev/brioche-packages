@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/signalwire/libks": {
+      "v2.0.10": "31153449fd33b83800eea54bfe9679844a4e0327"
+    }
+  }
+}
