@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/gabime/spdlog.git": {
+      "v1.17.0": "79524ddd08a4ec981b7fea76afd08ee05f83755d"
+    }
+  }
+}
