@@ -1,5 +1,4 @@
 import * as std from "std";
-import jq from "jq";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
@@ -43,8 +42,7 @@ export default function libcap(): std.Recipe<std.Directory> {
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       }),
-    )
-    .pipe(fixSharedObjects);
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -114,38 +112,4 @@ function briocheObjcopy(): std.Recipe<std.Directory> {
   });
 
   return briocheObjcopy;
-}
-
-function fixSharedObjects(
-  recipe: std.RecipeLike<std.Directory>,
-): std.Recipe<std.Directory> {
-  // `libcap` compiles its shared libraries with extra flags so they also work
-  // as executables. `brioche-ld` therefore treats them like executables, which
-  // breaks when they are used as shared libraries. This script repacks each
-  // one as a shared library instead.
-  return std.runBash`
-    find "$BRIOCHE_OUTPUT"/lib -name '*.so*' -type f -print0 \\
-      | while IFS= read -r -d $'\\0' lib; do
-        source_path="$(brioche-packer source-path "$lib")"
-        if [ -z "$source_path" ]; then
-          echo "Skipping $lib (not wrapped)"
-          continue
-        fi
-        if [ "$source_path" = "$lib" ]; then
-          echo "Skipping $lib (already static)"
-          continue
-        fi
-
-        new_pack="$(brioche-packer read "$lib" | jq '{type: "static", libraryDirs}')"
-        echo "Updating $lib -> $source_path"
-
-        brioche-packer pack \\
-          --packed "$source_path" \\
-          --output "$lib" \\
-          --pack "$new_pack"
-      done
-  `
-    .dependencies(jq, std.runtimeUtils)
-    .outputScaffold(recipe)
-    .toDirectory();
 }
