@@ -1,0 +1,46 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "jumppad",
+  version: "0.24.0",
+  repository: "https://github.com/jumppad-labs/jumppad.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function jumppad(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+    runnable: "bin/jumppad",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    jumppad --non-interactive version 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(jumppad)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Current Version: ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
