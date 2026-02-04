@@ -31,25 +31,26 @@ export default function nlohmannJsonSchemaValidator(): std.Recipe<std.Directory>
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    cmake_minimum_required(VERSION 4.0)
-    project(QueryVersion)
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
 
-    find_package(nlohmann_json_schema_validator REQUIRED CONFIG)
-    message(STATUS "nlohmann_json_schema_validator version: \${nlohmann_json_schema_validator_VERSION}")
-  `);
+      find_package(nlohmann_json_schema_validator REQUIRED CONFIG)
+      message(STATUS "nlohmann_json_schema_validator version: \${nlohmann_json_schema_validator_VERSION}")
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" CMakeLists.txt
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(
       std.toolchain,
       cmake,
       nlohmannJson,
       nlohmannJsonSchemaValidator,
     )
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

@@ -32,33 +32,34 @@ export default function xvidcore(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <xvid.h>
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <xvid.h>
 
-    int main(void)
-    {
-        xvid_gbl_info_t info;
-        info.version = XVID_VERSION;
-        xvid_global(NULL, XVID_GBL_INFO, &info, NULL);
+      int main(void)
+      {
+          xvid_gbl_info_t info;
+          info.version = XVID_VERSION;
+          xvid_global(NULL, XVID_GBL_INFO, &info, NULL);
 
-        printf("%d.%d.%d",
-            XVID_VERSION_MAJOR(info.actual_version),
-            XVID_VERSION_MINOR(info.actual_version),
-            XVID_VERSION_PATCH(info.actual_version));
+          printf("%d.%d.%d",
+              XVID_VERSION_MAJOR(info.actual_version),
+              XVID_VERSION_MINOR(info.actual_version),
+              XVID_VERSION_PATCH(info.actual_version));
 
-        return EXIT_SUCCESS;
-    }
-  `);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -lxvidcore
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, xvidcore)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

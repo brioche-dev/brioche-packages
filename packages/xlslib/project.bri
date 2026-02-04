@@ -35,27 +35,28 @@ export default function xlslib(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <common/xlconfig.h>
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <common/xlconfig.h>
 
-    int main()
-    {
-      const char* version = PACKAGE_VERSION;
-      printf("%s", version);
+      int main()
+      {
+        const char* version = PACKAGE_VERSION;
+        printf("%s", version);
 
-      return EXIT_SUCCESS;
-    }
-  `);
+        return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.cpp
     g++ main.cpp -o main -lxls
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, xlslib)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

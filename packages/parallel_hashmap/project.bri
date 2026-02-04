@@ -28,26 +28,27 @@ export default function parallelHashmap(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    #include <cstdio>
-    #include <cstdlib>
-    #include <parallel_hashmap/phmap_config.h>
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <cstdio>
+      #include <cstdlib>
+      #include <parallel_hashmap/phmap_config.h>
 
-    int main(void)
-    {
-        printf("%d.%d.%d", PHMAP_VERSION_MAJOR, PHMAP_VERSION_MINOR, PHMAP_VERSION_PATCH);
+      int main(void)
+      {
+          printf("%d.%d.%d", PHMAP_VERSION_MAJOR, PHMAP_VERSION_MINOR, PHMAP_VERSION_PATCH);
 
-        return EXIT_SUCCESS;
-    }
-  `);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.cpp
     g++ main.cpp -o main
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, parallelHashmap)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

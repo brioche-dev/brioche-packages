@@ -30,27 +30,28 @@ export default function libpoly(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <poly/version.h>
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <poly/version.h>
 
-    #define STRINGIFY(x) #x
-    #define TOSTRING(x) STRINGIFY(x)
+      #define STRINGIFY(x) #x
+      #define TOSTRING(x) STRINGIFY(x)
 
-    int main(void)
-    {
-        printf("%s", TOSTRING(LIBPOLY_VERSION));
-        return 0;
-    }
-  `);
+      int main(void)
+      {
+          printf("%s", TOSTRING(LIBPOLY_VERSION));
+          return 0;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     cc main.c -o main -lpoly -lgmp
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, libpoly)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();
