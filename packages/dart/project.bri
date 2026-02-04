@@ -1,0 +1,271 @@
+import * as std from "std";
+
+export const project = {
+  name: "dart",
+  version: "3.6.1",
+  repository: "https://github.com/dart-lang/sdk",
+  extra: {
+    otherVersions: {
+      "3.6": "3.6.1",
+      "3.5": "3.5.4",
+    },
+  },
+};
+
+std.assert(
+  Object.keys(project.extra.otherVersions).some((minorVersion) =>
+    project.version.startsWith(`${minorVersion}.`),
+  ),
+  "Dart package version not found in extra.otherVersions",
+);
+
+/**
+ * The Dart version.
+ */
+export type DartVersion = keyof typeof project.extra.otherVersions;
+
+function getLatestVersion(): DartVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  // Numeric sort to ensure 3.10 > 3.9
+  versions.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+
+  return versions[0] as DartVersion;
+}
+
+const prebuiltSdks: Record<
+  DartVersion,
+  Record<std.Platform, std.Recipe<std.Directory>>
+> = {
+  "3.6": {
+    "x86_64-linux": Brioche
+      .download(
+        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.6"]}/sdk/dartsdk-linux-x64-release.zip`,
+      )
+      .unarchive("zip")
+      .peel(),
+    "aarch64-linux": Brioche
+      .download(
+        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.6"]}/sdk/dartsdk-linux-arm64-release.zip`,
+      )
+      .unarchive("zip")
+      .peel(),
+  },
+  "3.5": {
+    "x86_64-linux": Brioche
+      .download(
+        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.5"]}/sdk/dartsdk-linux-x64-release.zip`,
+      )
+      .unarchive("zip")
+      .peel(),
+    "aarch64-linux": Brioche
+      .download(
+        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.5"]}/sdk/dartsdk-linux-arm64-release.zip`,
+      )
+      .unarchive("zip")
+      .peel(),
+  },
+};
+
+function prebuiltSdk(
+  version: DartVersion,
+  platform: std.Platform,
+): std.Recipe<std.Directory> {
+  const sdksForVersion = prebuiltSdks[version];
+  std.assert(
+    sdksForVersion != null,
+    `Dart version '${version}' is not supported, expected one of ${JSON.stringify(
+      Object.keys(prebuiltSdks),
+    )}`,
+  );
+
+  const sdk = sdksForVersion[platform];
+  std.assert(
+    sdk != null,
+    `Dart ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
+      Object.keys(sdksForVersion),
+    )}`,
+  );
+
+  return sdk;
+}
+
+/**
+ * Extra options for Dart.
+ */
+interface DartOptions {
+  version?: DartVersion;
+}
+
+/**
+ * The Dart SDK.
+ *
+ * @param options - The options for installing the dart package.
+ *
+ * @returns a recipe containing the standard Dart tools, including:
+ *
+ * - `dart/bin/dart`
+ * - `bin/dart` (symlink to `dart/bin/dart`)
+ *
+ * The directory `dart` is intended to be used as the `$DART_SDK` env var.
+ */
+export default function dart(
+  options: DartOptions = {},
+): std.Recipe<std.Directory> {
+  const { version = getLatestVersion() } = options;
+
+  return std
+    .directory({
+      dart: prebuiltSdk(version, std.CURRENT_PLATFORM),
+      bin: std.directory({
+        dart: std.symlink({ target: "../dart/bin/dart" }),
+        // Note: As of Dart 3, 'pub' and 'dartfmt' are merged into the main 'dart' binary.
+      }),
+    })
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        DART_SDK: { fallback: { path: "dart" } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "dart/bin/dart"));
+}
+
+export function test(): std.Recipe<std.Directory> {
+  const versions = Object.keys(project.extra.otherVersions) as DartVersion[];
+
+  const tests = versions.map((version) => {
+    const script = std.runBash`
+      dart --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(dart({ version }))
+      .toFile();
+
+    // Note: We can't await inside the map here like in the Go example because
+    // build graph construction is synchronous. Verification usually happens
+    // via 'brioche test' checking the exit code of the script above.
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^(\d+\.\d+\.\d+)$/,
+  });
+}
+
+/**
+ * Build parameters for the Dart compiler.
+ *
+ * @param defines - A map of compile-time constants (passed as `-Dkey=value`).
+ * @param verbose - Run the compiler in verbose mode.
+ */
+interface DartBuildParameters {
+  defines?: Record<string, string>;
+  verbose?: boolean;
+}
+
+/**
+ * Options for building and installing a Dart executable.
+ *
+ * @param source - The Dart project source. Should include `pubspec.yaml` and `pubspec.lock`.
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param currentDir - Optionally set the current working directory for the build.
+ * @param buildParams - Optional build parameters.
+ * @param entrypoint - The path to the Dart file to compile (e.g., `bin/main.dart`).
+ * @param output - The name of the output binary (e.g., `bin/app`).
+ * @param runnable - Optionally set a path to the binary to run by default.
+ */
+interface DartBuildOptions {
+  source: std.RecipeLike<std.Directory>;
+  dependencies?: std.RecipeLike<std.Directory>[];
+  env?: Record<string, std.ProcessTemplateLike>;
+  currentDir?: string;
+  buildParams?: DartBuildParameters;
+  entrypoint?: string;
+  output?: string;
+  runnable?: string;
+}
+
+/**
+ * Build a Dart executable.
+ *
+ * This performs two steps:
+ * 1. Downloads dependencies into a cached `PUB_CACHE` (allowing networking).
+ * 2. Compiles the executable in an offline environment using the cache.
+ *
+ * @param options - Options for building the Dart module.
+ * @returns A recipe with the built binary stored in the specified output path.
+ */
+export function dartBuild(
+  options: DartBuildOptions,
+): std.Recipe<std.Directory> {
+  // 1. Prepare the dependency cache (networking enabled)
+  const pubCache = dartPubGet(options.source, options.currentDir);
+  const entrypoint = options.entrypoint ?? "bin/main.dart";
+  const output = options.output ?? "bin/app";
+
+  // 2. Compile the executable (offline)
+  return std.runBash`
+    # Restore dependencies using the pre-downloaded cache (offline)
+    dart pub get --offline
+
+    # Construct compile flags
+    compile_args=()
+    if [ "$verbose" = "true" ]; then
+      compile_args+=("--verbose")
+    fi
+    
+    # Process defines
+    # (Note: defines are passed via env vars to script, see below)
+    
+    dart compile exe "$entrypoint" -o "$output" "\${compile_args[@]}" $DEFINES_ARGS
+  `
+    .workDir(options.source)
+    .currentDir(std.tpl`${std.workDir}/${options.currentDir}`)
+    .dependencies(dart, ...(options.dependencies ?? []))
+    .env({
+      PUB_CACHE: pubCache,
+      verbose: options.buildParams?.verbose ? "true" : "false",
+      DEFINES_ARGS: definesWrapper(options.buildParams?.defines ?? {}),
+      entrypoint,
+      output,
+      ...options.env,
+    })
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
+}
+
+/**
+ * Helper to run `dart pub get` with networking enabled.
+ * Returns the PUB_CACHE directory.
+ */
+function dartPubGet(
+  source: std.RecipeLike<std.Directory>,
+  currentDir: string | undefined,
+): std.Recipe<std.Directory> {
+  return std
+    .process({
+      command: std.tpl`${dart()}/bin/dart`,
+      args: ["pub", "get"],
+      workDir: std.glob(source, ["**/pubspec.yaml", "**/pubspec.lock"]),
+      currentDir: std.tpl`${std.workDir}/${currentDir}`,
+      env: {
+        // Direct cache to output path so we can capture it
+        PUB_CACHE: std.outputPath,
+      },
+      unsafe: { networking: true },
+    })
+    .toDirectory();
+}
+
+/**
+ * Wrapper to format defines into -D flags
+ */
+function definesWrapper(defines: Record<string, string>): string {
+  return Object.entries(defines)
+    .map(([key, value]) => `-D${key}=${value}`)
+    .join(" ");
+}
