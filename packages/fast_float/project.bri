@@ -28,20 +28,21 @@ export default function fastFloat(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    cmake_minimum_required(VERSION 4.0)
-    project(QueryVersion)
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
 
-    find_package(FastFloat REQUIRED CONFIG)
-    message(STATUS "FastFloat version: \${FastFloat_VERSION}")
-  `);
+      find_package(FastFloat REQUIRED CONFIG)
+      message(STATUS "FastFloat version: \${FastFloat_VERSION}")
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" CMakeLists.txt
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, cmake, fastFloat)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

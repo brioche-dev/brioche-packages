@@ -31,20 +31,21 @@ export default function vulkanUtilityLibraries(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   // VulkanUtilityLibraries does not export a version in its CMake config
-  const src = std.file(std.indoc`
-    cmake_minimum_required(VERSION 4.0)
-    project(QueryLibrary)
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryLibrary)
 
-    find_package(VulkanUtilityLibraries REQUIRED CONFIG)
-    message(STATUS "VulkanUtilityLibraries found: TRUE")
-  `);
+      find_package(VulkanUtilityLibraries REQUIRED CONFIG)
+      message(STATUS "VulkanUtilityLibraries found: TRUE")
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" CMakeLists.txt
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, cmake, vulkanHeaders, vulkanUtilityLibraries)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

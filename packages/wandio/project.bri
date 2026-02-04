@@ -52,27 +52,28 @@ export default function wandio(): std.Recipe<std.Directory> {
 export async function test(): Promise<std.Recipe<std.File>> {
   // There is no way to print the package's version, so we just
   // build a simple program to ensure it works
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <wandio.h>
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <wandio.h>
 
-    int main(void)
-    {
-        int type = wandio_detect_compression_type("test.gz");
-        printf("%d", type);
+      int main(void)
+      {
+          int type = wandio_detect_compression_type("test.gz");
+          printf("%d", type);
 
-        return EXIT_SUCCESS;
-    }
-  `);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -lwandio -lz -lbz2 -llzo2 -llzma -lzstd -llz4 -lcurl -lpthread
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, wandio, curl, lz4, lzo)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();
