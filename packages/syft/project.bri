@@ -1,0 +1,47 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "syft",
+  version: "1.41.2",
+  extra: {
+    moduleName: "github.com/anchore/syft",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function syft(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+    path: "./cmd/syft",
+    runnable: "bin/syft",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    syft --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(syft)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `syft ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
