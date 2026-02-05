@@ -1,0 +1,59 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+import cmake from "cmake";
+import git from "git";
+import llvm from "llvm";
+
+export const project = {
+  name: "c2rust",
+  version: "0.21.0",
+  extra: {
+    crateName: "c2rust",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function c2rust(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [cmake, git, llvm],
+    env: {
+      // Build-time scripts dynamically load `libclang`, so ensure the standard
+      // system libraries can be dynamically loaded
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      // bindgen uses clang to parse C++ headers; tell clang where to find
+      // the GCC toolchain so it can locate C++ standard library headers
+      BINDGEN_EXTRA_CLANG_ARGS: std.tpl`--sysroot=${std.toolchain}`,
+    },
+    unsafe: {
+      // The build clones tinycbor via git during compilation
+      networking: true,
+    },
+    runnable: "bin/c2rust",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    c2rust --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(c2rust)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `C2Rust ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}
