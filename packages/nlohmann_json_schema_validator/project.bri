@@ -18,6 +18,7 @@ export default function nlohmannJsonSchemaValidator(): std.Recipe<std.Directory>
     source,
     dependencies: [std.toolchain, nlohmannJson],
     set: {
+      BUILD_SHARED_LIBS: "ON",
       JSON_VALIDATOR_BUILD_TESTS: "OFF",
       JSON_VALIDATOR_BUILD_EXAMPLES: "OFF",
     },
