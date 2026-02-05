@@ -1,10 +1,10 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
-import curl from "curl";
+import llvm from "llvm";
 
 export const project = {
   name: "fresh_editor",
-  version: "0.1.77",
+  version: "0.1.99",
   extra: {
     crateName: "fresh-editor",
   },
@@ -19,12 +19,15 @@ const source = Brioche.download(
 export default function freshEditor(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [curl],
+    dependencies: [llvm],
     runnable: "bin/fresh",
-    unsafe: {
-      // Needed to download rusty_v8 through cURL in order
-      // to build the package
-      networking: true,
+    env: {
+      // Build-time scripts dynamically load `libclang`, so ensure the standard
+      // system libraries can be dynamically loaded
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      // bindgen uses clang to parse C headers; tell clang where to find
+      // the standard C library headers (stdio.h, etc.)
+      CPATH: std.tpl`${std.toolchain}/include`,
     },
   });
 }
