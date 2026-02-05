@@ -95,7 +95,7 @@ function wrapPerlShebangs(
 ): std.Recipe<std.Directory> {
   return std.recipe(async () => {
     // Add Perl in the recipe
-    recipe = recipe.insert(".local/libexec/moreutils/perl", perlEnv());
+    recipe = recipe.insert(".local/libexec/moreutils/perl", perlEnv);
 
     const perlShebangPathList = await std.runBash`
       find bin -type f -executable \\

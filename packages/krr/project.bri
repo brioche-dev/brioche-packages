@@ -1,0 +1,138 @@
+import * as std from "std";
+import python, { fixScriptShebangs } from "python";
+
+export const project = {
+  name: "krr",
+  version: "1.28.0",
+  repository: "https://github.com/robusta-dev/krr",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Patch the source:
+  // - Set __version__ to match the release version (upstream sets this
+  //   during CI, it defaults to "dev" in the source)
+  // - Relax the Python version upper bound (upstream pins <=3.12.9 but
+  //   the Brioche Python 3.12 package is a newer patch release)
+  std.runBash`
+    sed -i 's/__version__ = "dev"/__version__ = "${project.version}"/' "$BRIOCHE_OUTPUT/robusta_krr/__init__.py"
+    sed -i 's/python = ">=3.10,<=3.12.9"/python = ">=3.10,<3.13"/' "$BRIOCHE_OUTPUT/pyproject.toml"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+const pipDependencies = std.directory({
+  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+  ),
+  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  ),
+  "poetry_core-2.3.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/01/10/c9f7ca739ab0956f8dc8737e6318b9812745589ed1e3f6fdfb6a5d64f58a/poetry_core-2.3.1-py3-none-any.whl",
+  ),
+});
+
+export default function krr(): std.Recipe<std.Directory> {
+  const pythonVersion = "3.12";
+  const managedPython = python({ version: pythonVersion });
+
+  // Create a venv
+  let venv = std.recipe(managedPython);
+
+  // Install build dependencies (setuptools, wheel, poetry-core)
+  venv = std.runBash`
+    pip install setuptools wheel poetry-core
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Download runtime dependencies from PyPI
+  const dependencies = std.runBash`
+    pip download \\
+      -r requirements.txt \\
+      -d "$BRIOCHE_OUTPUT"
+  `
+    .workDir(std.glob(source, ["requirements.txt"]))
+    .dependencies(venv)
+    .unsafe({ networking: true })
+    .toDirectory();
+
+  // Install runtime dependencies into the venv
+  venv = std.runBash`
+    pip install -r requirements.txt
+  `
+    .workDir(std.glob(source, ["requirements.txt"]))
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: dependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Fix shebangs after pip install (pip may reinstall itself)
+  venv = std.recipe(fixScriptShebangs(venv));
+
+  // Install the application into the venv
+  venv = std.runBash`
+    pip install .
+  `
+    .workDir(source)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: std.merge(pipDependencies, dependencies),
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Create the final recipe with the venv under `venv`
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/krr", {
+        command: { relativePath: "venv/bin/python" },
+        args: [{ relativePath: "venv/bin/krr" }],
+        env: {
+          // Include the toolchain's lib so native Python extensions
+          // (numpy, pandas, etc.) can find libstdc++.so.6 at runtime
+          LD_LIBRARY_PATH: {
+            append: [std.toolchain, "/lib"],
+            separator: ":",
+          },
+        },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/krr"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    krr version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(krr)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
