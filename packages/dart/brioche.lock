@@ -1,6 +1,14 @@
 {
   "dependencies": {},
   "downloads": {
+    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.10.8/sdk/dartsdk-linux-arm64-release.zip": {
+      "type": "sha256",
+      "value": "584eea4c53f64feda68eba5dc4b2b024275c21003dfccd85a79e934faaac0921"
+    },
+    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.10.8/sdk/dartsdk-linux-x64-release.zip": {
+      "type": "sha256",
+      "value": "6712007d16203f8928b402800ded0e92357426b83b02417d1573db9cc88b75c4"
+    },
     "https://storage.googleapis.com/dart-archive/channels/stable/release/3.5.4/sdk/dartsdk-linux-arm64-release.zip": {
       "type": "sha256",
       "value": "a91d64dd3173349cee58c82f5ebf18bb9670f65eecc26d5684124c3def3f83ec"

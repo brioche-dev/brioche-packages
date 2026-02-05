@@ -2,10 +2,11 @@ import * as std from "std";
 
 export const project = {
   name: "dart",
-  version: "3.6.1",
+  version: "3.10.8",
   repository: "https://github.com/dart-lang/sdk",
   extra: {
     otherVersions: {
+      "3.10": "3.10.8",
       "3.6": "3.6.1",
       "3.5": "3.5.4",
     },
@@ -36,6 +37,20 @@ const prebuiltSdks: Record<
   DartVersion,
   Record<std.Platform, std.Recipe<std.Directory>>
 > = {
+  "3.10": {
+    "x86_64-linux": Brioche
+      .download(
+        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-x64-release.zip`,
+      )
+      .unarchive("zip")
+      .peel(),
+    "aarch64-linux": Brioche
+      .download(
+        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-arm64-release.zip`,
+      )
+      .unarchive("zip")
+      .peel(),
+  },
   "3.6": {
     "x86_64-linux": Brioche
       .download(
@@ -95,7 +110,7 @@ function prebuiltSdk(
 interface DartOptions {
   version?: DartVersion;
 }
-
+ 
 /**
  * The Dart SDK.
  *
@@ -104,7 +119,6 @@ interface DartOptions {
  * @returns a recipe containing the standard Dart tools, including:
  *
  * - `dart/bin/dart`
- * - `bin/dart` (symlink to `dart/bin/dart`)
  *
  * The directory `dart` is intended to be used as the `$DART_SDK` env var.
  */
@@ -115,10 +129,11 @@ export default function dart(
 
   return std
     .directory({
-      dart: prebuiltSdk(version, std.CURRENT_PLATFORM),
-      bin: std.directory({
+    dart: prebuiltSdk(version, std.CURRENT_PLATFORM).pipe((recipe) =>  
+        std.autopack(recipe, { globs: ["bin/**"] }),  
+      ),  
+    bin: std.directory({
         dart: std.symlink({ target: "../dart/bin/dart" }),
-        // Note: As of Dart 3, 'pub' and 'dartfmt' are merged into the main 'dart' binary.
       }),
     })
     .pipe((recipe) =>
@@ -128,6 +143,7 @@ export default function dart(
     )
     .pipe((recipe) => std.withRunnableLink(recipe, "dart/bin/dart"));
 }
+
 
 export function test(): std.Recipe<std.Directory> {
   const versions = Object.keys(project.extra.otherVersions) as DartVersion[];
@@ -139,9 +155,6 @@ export function test(): std.Recipe<std.Directory> {
       .dependencies(dart({ version }))
       .toFile();
 
-    // Note: We can't await inside the map here like in the Go example because
-    // build graph construction is synchronous. Verification usually happens
-    // via 'brioche test' checking the exit code of the script above.
     return std.directory().insert(version, script);
   });
 
