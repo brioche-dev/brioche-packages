@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "biome",
-  version: "2.3.11",
+  version: "2.3.12",
   repository: "https://github.com/biomejs/biome.git",
 };
 
