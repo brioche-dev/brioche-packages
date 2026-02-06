@@ -1,0 +1,72 @@
+import * as std from "std";
+import avahi from "avahi";
+import cups from "cups";
+import libjpegTurbo from "libjpeg_turbo";
+import libpng from "libpng";
+import libusb from "libusb";
+import linuxPam from "linux_pam";
+import openssl from "openssl";
+
+export const project = {
+  name: "pappl",
+  version: "1.4.10",
+  repository: "https://github.com/michaelrsweet/pappl",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/pappl-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function pappl(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-tls=openssl \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      avahi,
+      cups,
+      libjpegTurbo,
+      libpng,
+      libusb,
+      linuxPam,
+      openssl,
+    )
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion pappl | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, pappl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
