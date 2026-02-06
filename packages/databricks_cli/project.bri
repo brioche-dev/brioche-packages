@@ -1,0 +1,58 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "databricks_cli",
+  version: "0.287.0",
+  extra: {
+    moduleName: "github.com/databricks/cli",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function databricksCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/internal/build.buildVersion=${project.version}`,
+      ],
+    },
+  })
+    .pipe(
+      // Rename binary from "cli" to "databricks"
+      (recipe) =>
+        recipe
+          .insert("bin/databricks", recipe.get("bin/cli"))
+          .remove("bin/cli"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/databricks"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    databricks version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(databricksCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Databricks CLI v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
