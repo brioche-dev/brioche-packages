@@ -38,44 +38,38 @@ const prebuiltSdks: Record<
   Record<std.Platform, std.Recipe<std.Directory>>
 > = {
   "3.10": {
-    "x86_64-linux": Brioche
-      .download(
-        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-x64-release.zip`,
-      )
+    "x86_64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-x64-release.zip`,
+    )
       .unarchive("zip")
       .peel(),
-    "aarch64-linux": Brioche
-      .download(
-        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-arm64-release.zip`,
-      )
+    "aarch64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-arm64-release.zip`,
+    )
       .unarchive("zip")
       .peel(),
   },
   "3.6": {
-    "x86_64-linux": Brioche
-      .download(
-        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.6"]}/sdk/dartsdk-linux-x64-release.zip`,
-      )
+    "x86_64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.6"]}/sdk/dartsdk-linux-x64-release.zip`,
+    )
       .unarchive("zip")
       .peel(),
-    "aarch64-linux": Brioche
-      .download(
-        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.6"]}/sdk/dartsdk-linux-arm64-release.zip`,
-      )
+    "aarch64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.6"]}/sdk/dartsdk-linux-arm64-release.zip`,
+    )
       .unarchive("zip")
       .peel(),
   },
   "3.5": {
-    "x86_64-linux": Brioche
-      .download(
-        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.5"]}/sdk/dartsdk-linux-x64-release.zip`,
-      )
+    "x86_64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.5"]}/sdk/dartsdk-linux-x64-release.zip`,
+    )
       .unarchive("zip")
       .peel(),
-    "aarch64-linux": Brioche
-      .download(
-        `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.5"]}/sdk/dartsdk-linux-arm64-release.zip`,
-      )
+    "aarch64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.5"]}/sdk/dartsdk-linux-arm64-release.zip`,
+    )
       .unarchive("zip")
       .peel(),
   },
@@ -95,7 +89,7 @@ function prebuiltSdk(
 
   const sdk = sdksForVersion[platform];
   std.assert(
-    sdk != null,
+    !sdk != null,
     `Dart ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
       Object.keys(sdksForVersion),
     )}`,
@@ -110,7 +104,7 @@ function prebuiltSdk(
 interface DartOptions {
   version?: DartVersion;
 }
- 
+
 /**
  * The Dart SDK.
  *
@@ -129,10 +123,10 @@ export default function dart(
 
   return std
     .directory({
-    dart: prebuiltSdk(version, std.CURRENT_PLATFORM).pipe((recipe) =>  
-        std.autopack(recipe, { globs: ["bin/**"] }),  
-      ),  
-    bin: std.directory({
+      dart: prebuiltSdk(version, std.CURRENT_PLATFORM).pipe((recipe) =>
+        std.autopack(recipe, { globs: ["bin/**"] }),
+      ),
+      bin: std.directory({
         dart: std.symlink({ target: "../dart/bin/dart" }),
       }),
     })
@@ -143,7 +137,6 @@ export default function dart(
     )
     .pipe((recipe) => std.withRunnableLink(recipe, "dart/bin/dart"));
 }
-
 
 export function test(): std.Recipe<std.Directory> {
   const versions = Object.keys(project.extra.otherVersions) as DartVersion[];
@@ -176,7 +169,7 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  */
 interface DartBuildParameters {
   defines?: Record<string, string>;
-  verbose?: boolean;
+  verbose: boolean;
 }
 
 /**
@@ -241,7 +234,7 @@ export function dartBuild(
     .dependencies(dart, ...(options.dependencies ?? []))
     .env({
       PUB_CACHE: pubCache,
-      verbose: options.buildParams?.verbose ? "true" : "false",
+      verbose: options.buildParams?.verbose ?? false ? "true" : "false",
       DEFINES_ARGS: definesWrapper(options.buildParams?.defines ?? {}),
       entrypoint,
       output,
