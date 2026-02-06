@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/coredns/coredns/@v/v1.14.0.info": {
+    "https://proxy.golang.org/github.com/coredns/coredns/@v/v1.14.1.info": {
       "type": "sha256",
-      "value": "d6481f716b2eb9b37a20af1935eaf0bd4bc950384c3114e06140e8cbfba05042"
+      "value": "c6a13b1daaf153d59c4835c8845c7d7ec1c9628dd59e261c92543a3d6dfdec58"
     },
-    "https://proxy.golang.org/github.com/coredns/coredns/@v/v1.14.0.zip": {
+    "https://proxy.golang.org/github.com/coredns/coredns/@v/v1.14.1.zip": {
       "type": "sha256",
-      "value": "124c45bf50eb5e46ae5f71efc0851270b13bf6b8b99285a8a1b07edabf8eba6d"
+      "value": "b880aff45880ba6d9c68085fc96531f62bad4d8f6064c1ef000415dce8a26c20"
     }
   }
 }
