@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/klauspost/asmfmt/@v/v1.3.2.zip": {
+      "type": "sha256",
+      "value": "fa6a350a8677a77e0dbf3664c6baf23aab5c0b60a64b8f3c00299da5d279021f"
+    }
+  }
+}

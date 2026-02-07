@@ -298,6 +298,9 @@ function goModDownload(
       env: {
         GOMODCACHE: std.outputPath,
       },
+      // Ensure the output directory exists even when there are no dependencies,
+      // as `go mod download` would not create it
+      outputScaffold: std.directory(),
       unsafe: { networking: true },
     })
     .toDirectory();
