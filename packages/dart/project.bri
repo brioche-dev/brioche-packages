@@ -75,14 +75,11 @@ const prebuiltSdks: Record<
   },
 };
 
-
-
 function prebuiltSdk(
   version: DartVersion,
   platform: std.Platform,
 ): std.Recipe<std.Directory> {
- 
-   std.assert(
+  std.assert(
     !(version in prebuiltSdks),
     `Dart version '${version}' is not supported, expected one of ${JSON.stringify(
       Object.keys(prebuiltSdks),
@@ -90,9 +87,9 @@ function prebuiltSdk(
   );
 
   const sdksForVersion = prebuiltSdks[version];
-  
+
   std.assert(
-    !(platform in sdksForVersion), 
+    !(platform in sdksForVersion),
     `Dart ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
       Object.keys(sdksForVersion),
     )}`,
