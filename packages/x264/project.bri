@@ -1,0 +1,115 @@
+import * as std from "std";
+import nasm from "nasm";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "x264",
+  version: "0.165.3222",
+  repository: "https://code.videolan.org/videolan/x264",
+  extra: {
+    commit: "b35605ace3ddf7c1a5d67a2eb553f034aef41d55",
+  },
+};
+
+const source = Brioche.download(
+  `${project.repository}/-/archive/${project.extra.commit}/x264-${project.extra.commit}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel()
+  .pipe((source) => {
+    const rev = project.version.split(".").at(-1) ?? "0";
+    const shortCommit = project.extra.commit.slice(0, 7);
+
+    // Patch source for building without .git directory:
+    // - Inject pre-computed version defines into version.h
+    // - Replace version.sh to use the injected version.h
+    // - Fix configure shebang (Brioche sandbox has no /bin/bash)
+    return std.runBash`
+      cat > "$BRIOCHE_OUTPUT/version.h" <<VEOF
+#define X264_REV ${rev}
+#define X264_REV_DIFF 0
+#define X264_VERSION " r${rev} ${shortCommit}"
+#define X264_POINTVER "${project.version}"
+VEOF
+
+      cat > "$BRIOCHE_OUTPUT/version.sh" <<'VSHEOF'
+#!/bin/sh
+cat "$(dirname "$0")/version.h"
+VSHEOF
+
+      sed -i '1s|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT/configure"
+    `
+      .outputScaffold(source)
+      .toDirectory();
+  });
+
+export default function x264(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-shared \\
+      --enable-static \\
+      --enable-strip \\
+      --disable-lsmash \\
+      --disable-swscale \\
+      --disable-ffms
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, nasm)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/x264"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion x264 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, x264)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    # Clone bare repo to get commit count and latest commit hash
+    let tmp = mktemp -d
+    ^git clone --bare https://code.videolan.org/videolan/x264.git $'($tmp)/x264.git'
+    let commit_count = ^git -C $'($tmp)/x264.git' rev-list --count master
+      | str trim
+    let latest_commit = ^git -C $'($tmp)/x264.git' rev-parse master
+      | str trim
+    rm -rf $tmp
+
+    # Fetch x264.h from the latest commit to extract X264_BUILD
+    let build = http get $'https://code.videolan.org/api/v4/projects/videolan%2Fx264/repository/files/x264.h/raw?ref=($latest_commit)'
+      | lines
+      | parse --regex '#define X264_BUILD\\s+(?<build>\\d+)'
+      | first
+      | get build
+
+    let version = $'0.($build).($commit_count)'
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.commit $latest_commit
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
