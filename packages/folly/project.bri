@@ -1,0 +1,94 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import boost from "boost";
+import doubleConversion from "double_conversion";
+import fastFloat from "fast_float";
+import fmt from "fmt";
+import gflags from "gflags";
+import glog from "glog";
+import libevent from "libevent";
+import libsodium from "libsodium";
+import libunwind from "libunwind";
+import lz4 from "lz4";
+import openssl from "openssl";
+import snappy from "snappy";
+
+export const project = {
+  name: "folly",
+  version: "2026.02.02.00",
+  repository: "https://github.com/facebook/folly",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Patch glog discovery from MODULE to CONFIG mode for glog >= 0.7 compatibility
+    std.runBash`
+      sed -i 's/find_package(Glog MODULE)/find_package(Glog CONFIG REQUIRED)/' "$BRIOCHE_OUTPUT/CMake/folly-deps.cmake"
+      sed -i 's/set(FOLLY_HAVE_LIBGLOG \${GLOG_FOUND})/set(FOLLY_HAVE_LIBGLOG True)/' "$BRIOCHE_OUTPUT/CMake/folly-deps.cmake"
+      sed -i 's/list(APPEND FOLLY_LINK_LIBRARIES \${GLOG_LIBRARY})/list(APPEND FOLLY_LINK_LIBRARIES glog::glog)/' "$BRIOCHE_OUTPUT/CMake/folly-deps.cmake"
+      sed -i '/list(APPEND FOLLY_INCLUDE_DIRECTORIES \${GLOG_INCLUDE_DIR})/d' "$BRIOCHE_OUTPUT/CMake/folly-deps.cmake"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function folly(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      boost,
+      doubleConversion,
+      fastFloat,
+      fmt,
+      gflags,
+      glog,
+      libevent,
+      libsodium,
+      libunwind,
+      lz4,
+      openssl,
+      snappy,
+    ],
+    set: {
+      BUILD_TESTS: "OFF",
+      BUILD_BENCHMARKS: "OFF",
+      FOLLY_USE_JEMALLOC: "OFF",
+      PACKAGE_VERSION: project.version,
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libfolly | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, folly)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^v(?<version>\d{4}\.\d{2}\.\d{2}\.\d{2})$/,
+  });
+}
