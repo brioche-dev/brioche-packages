@@ -113,6 +113,8 @@ export default function cmake(): std.Recipe<std.Directory> {
  * @param disablePostBuildSteps - If set, the post build steps will not run. By
  *   default, `std.libtoolSanitizeDependencies` and `std.pkgConfigMakePathsRelative`
  *   will be executed.
+ * @param generator - Optionally set the CMake generator to use (e.g. `"Ninja"`).
+ *   When using Ninja, make sure to include `ninja` in `dependencies`.
  * @param runnable - Optionally set a path to the binary to run by default
  *   (e.g. `bin/foo`).
  */
@@ -121,6 +123,7 @@ export interface CMakeBuildInstallOptions {
   path?: string;
   dependencies?: std.RecipeLike<std.Directory>[];
   config?: string;
+  generator?: string;
   env?: Record<string, std.ProcessTemplateLike>;
   unsafe?: std.ProcessUnsafeOptions;
   set?: Record<string, CMakeVariable>;
@@ -218,7 +221,12 @@ export function cmakeBuild(
 
     build_dir=$(mktemp -p . -d build.XXXXXX)
 
-    cmake -S "$path" -B "$build_dir" --install-prefix "$BRIOCHE_OUTPUT" "\${cmake_args[@]}"
+    generator_args=()
+    if [ -n "\${generator:-}" ]; then
+      generator_args+=("-G" "$generator")
+    fi
+
+    cmake -S "$path" -B "$build_dir" "\${generator_args[@]}" --install-prefix "$BRIOCHE_OUTPUT" "\${cmake_args[@]}"
     cmake --build "$build_dir"
     cmake --install "$build_dir"
   `
@@ -228,6 +236,7 @@ export function cmakeBuild(
       ...options.env,
       path: options.path ?? ".",
       config,
+      generator: options.generator ?? "",
       cmake_num_set_entries: setEntriesWithIndices.length.toString(),
       ...env,
     })
