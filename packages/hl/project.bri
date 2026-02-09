@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "hl",
-  version: "0.35.1",
+  version: "0.35.3",
   repository: "https://github.com/pamburus/hl.git",
 };
 

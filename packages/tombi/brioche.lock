@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/tombi-toml/tombi.git": {
-      "v0.7.18": "dd56ebd362ba2ddd392305c23e294b733511f5ab"
+      "v0.7.25": "45fd7d87b0e081ac3c29b207d4ccf89dc0a7ab97"
     }
   }
 }

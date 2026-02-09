@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/podlet/0.3.1/download": {
+      "type": "sha256",
+      "value": "99cb350197f0d03d0043e4f40effe2ee0bd859882c0aed58ceb2ff7e36671efe"
+    }
+  }
+}

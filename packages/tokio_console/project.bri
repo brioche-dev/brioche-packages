@@ -1,0 +1,43 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "tokio_console",
+  version: "0.1.14",
+  extra: {
+    crateName: "tokio-console",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function tokioConsole(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/tokio-console",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tokio-console --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tokioConsole)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tokio-console ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

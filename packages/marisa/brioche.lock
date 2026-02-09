@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/s-yata/marisa-trie": {
+      "v0.3.1": "3e87d53b78e15f2f43783d5e376561a8c9722051"
+    }
+  }
+}

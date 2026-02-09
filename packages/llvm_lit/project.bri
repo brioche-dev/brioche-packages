@@ -26,10 +26,10 @@ const pipDependencies = std.directory({
 });
 
 export default function llvmLit(): std.Recipe<std.Directory> {
-  // Create a venv from Python
+  // Create a venv
   let venv = std.recipe(python);
 
-  // Install setuptools (needed for building from source)
+  // Install build dependencies (setuptools, wheel)
   venv = std.runBash`
     pip install setuptools wheel
   `

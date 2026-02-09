@@ -29,7 +29,7 @@ const source = Brioche.gitCheckout({
     # Fail if upstream has fixed the CMake version (so we can remove this workaround)
     grep -q 'cmake_minimum_required(VERSION 2.8.7)' "$BRIOCHE_OUTPUT/third_party/sjpeg/CMakeLists.txt"
 
-    sed -i 's/cmake_minimum_required(VERSION 2.8.7)/cmake_minimum_required(VERSION 4.0)/' \
+    sed -i 's/cmake_minimum_required(VERSION 2.8.7)/cmake_minimum_required(VERSION 4.0)/' \\
       "$BRIOCHE_OUTPUT/third_party/sjpeg/CMakeLists.txt"
   `
     .outputScaffold(source)

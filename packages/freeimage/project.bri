@@ -50,31 +50,32 @@ export default function freeimage(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <FreeImage.h>
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <FreeImage.h>
 
-    int main()
-    {
-      FreeImage_Initialise(0);
+      int main()
+      {
+        FreeImage_Initialise(0);
 
-      const char* version = FreeImage_GetVersion();
-      printf("%s", version);
+        const char* version = FreeImage_GetVersion();
+        printf("%s", version);
 
-      FreeImage_DeInitialise();
+        FreeImage_DeInitialise();
 
-      return EXIT_SUCCESS;
-    }
-  `);
+        return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -lfreeimage
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, freeimage)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

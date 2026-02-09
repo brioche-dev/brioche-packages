@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/tlsa/libcyaml/archive/refs/tags/v1.4.2.tar.gz": {
+      "type": "sha256",
+      "value": "3211b2a0589ebfe02c563c96adce9246c0787be2af30353becbbd362998d16dc"
+    }
+  }
+}

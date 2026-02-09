@@ -28,20 +28,21 @@ export default function microsoftGsl(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    cmake_minimum_required(VERSION 4.0)
-    project(QueryVersion)
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
 
-    find_package(Microsoft.GSL REQUIRED CONFIG)
-    message(STATUS "Microsoft.GSL version: \${Microsoft.GSL_VERSION}")
-  `);
+      find_package(Microsoft.GSL REQUIRED CONFIG)
+      message(STATUS "Microsoft.GSL version: \${Microsoft.GSL_VERSION}")
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" CMakeLists.txt
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, cmake, microsoftGsl)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

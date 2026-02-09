@@ -1,0 +1,94 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import openssl from "openssl";
+
+export const project = {
+  name: "libssh",
+  version: "0.11.3",
+  extra: {
+    majorVersion: "0",
+    minorVersion: "11",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
+const source = Brioche.download(
+  `https://www.libssh.org/files/${project.extra.majorVersion}.${project.extra.minorVersion}/libssh-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libssh(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      WITH_EXAMPLES: "OFF",
+      WITH_SERVER: "ON",
+      UNIT_TESTING: "OFF",
+      CLIENT_TESTING: "OFF",
+      SERVER_TESTING: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libssh | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libssh)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let sourceUrl = http get https://www.libssh.org/files
+      | lines
+      | where ($it | str contains 'href="')
+      | parse --regex '<a href="(?<version>[\\d.]+)/">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let version = http get $"https://www.libssh.org/files/($sourceUrl)/"
+      | lines
+      | where ($it | str contains "libssh-") and (not ($it | str contains ".asc"))
+      | parse --regex '<a href="libssh-(?<version>[\\d.]+)\\.tar\\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let majorVersion = $version
+      | split words
+      | get 0
+    let minorVersion = $version
+      | split words
+      | get 1
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.majorVersion $majorVersion
+      | update extra.minorVersion $minorVersion
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

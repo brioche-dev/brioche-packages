@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/evilmartians/lefthook/v2/@v/v2.0.13.zip": {
+    "https://proxy.golang.org/github.com/evilmartians/lefthook/v2/@v/v2.0.15.zip": {
       "type": "sha256",
-      "value": "1a02046f1086c5d39ab3b398a40c8321e4bb4fef058e791ba0159e08558fbc36"
+      "value": "b48ede3c326fbc0055b8eac33d5770c2434719903d29a24e8a3a81dd60554ba0"
     }
   }
 }

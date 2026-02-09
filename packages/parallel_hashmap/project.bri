@@ -1,0 +1,65 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "parallel_hashmap",
+  version: "2.0.0",
+  repository: "https://github.com/greg7mdp/parallel-hashmap",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function parallelHashmap(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      PHMAP_BUILD_TESTS: "OFF",
+      PHMAP_BUILD_EXAMPLES: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <cstdio>
+      #include <cstdlib>
+      #include <parallel_hashmap/phmap_config.h>
+
+      int main(void)
+      {
+          printf("%d.%d.%d", PHMAP_VERSION_MAJOR, PHMAP_VERSION_MINOR, PHMAP_VERSION_PATCH);
+
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    g++ main.cpp -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, parallelHashmap)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

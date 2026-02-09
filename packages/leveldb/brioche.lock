@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/google/leveldb": {
+      "1.23": "99b3c03b3284f5886f9ef9a4ef703d57373e61be"
+    }
+  }
+}

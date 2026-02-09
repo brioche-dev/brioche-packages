@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/c2rust/0.21.0/download": {
+      "type": "sha256",
+      "value": "ecde62db6821408b57ba1b839090b805bc8912da9d19dc659adb9232cb1edfdc"
+    }
+  }
+}

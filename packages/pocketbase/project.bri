@@ -1,0 +1,59 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "pocketbase",
+  version: "0.36.1",
+  extra: {
+    moduleName: "github.com/pocketbase/pocketbase",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function pocketbase(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./examples/base",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}.Version=${project.version}`,
+      ],
+    },
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe
+          .insert("bin/pocketbase", recipe.get("bin/base"))
+          .remove("bin/base"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/pocketbase"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pocketbase --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pocketbase)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `pocketbase version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

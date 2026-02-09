@@ -5,7 +5,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "cpp_httplib",
-  version: "0.30.0",
+  version: "0.30.1",
   repository: "https://github.com/yhirose/cpp-httplib",
 };
 
@@ -30,20 +30,21 @@ export default function cppHttplib(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    cmake_minimum_required(VERSION 4.0)
-    project(QueryVersion)
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
 
-    find_package(httplib REQUIRED CONFIG)
-    message(STATUS "httplib version: \${httplib_VERSION}")
-  `);
+      find_package(httplib REQUIRED CONFIG)
+      message(STATUS "httplib version: \${httplib_VERSION}")
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" CMakeLists.txt
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, cmake, openssl, brotli, cppHttplib)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

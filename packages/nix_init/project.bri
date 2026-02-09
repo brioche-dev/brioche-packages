@@ -1,0 +1,70 @@
+import * as std from "std";
+import rust, { cargoBuild, vendorCrate } from "rust";
+
+export const project = {
+  name: "nix_init",
+  version: "0.3.2",
+  repository: "https://github.com/nix-community/nix-init.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+const spdxLicenseData = Brioche.gitCheckout({
+  repository: "https://github.com/spdx/license-list-data.git",
+  ref: "v3.25.0",
+});
+
+export default function nixInit(): std.Recipe<std.Directory> {
+  // Build the license-store-cache binary and generate the cache file
+  // that nix-init embeds at compile time via `include_bytes!`
+  const licenseStoreCache = std.runBash`
+    cargo build -p license-store-cache --frozen --release
+
+    mkdir -p data
+    ./target/release/license-store-cache \\
+      data/license-store-cache.zstd \\
+      "$spdxLicenseData"/json/details
+  `
+    .dependencies(rust, std.toolchain)
+    .outputScaffold(vendorCrate({ source }))
+    .env({ spdxLicenseData })
+    .currentDir(std.outputPath)
+    .toDirectory()
+    .get("data/license-store-cache.zstd");
+
+  return source
+    .insert("data/license-store-cache.zstd", licenseStoreCache)
+    .insert(
+      "data/get_nix_license.rs",
+      Brioche.includeFile("get_nix_license.rs"),
+    )
+    .pipe((recipe) =>
+      cargoBuild({
+        source: recipe,
+        runnable: "bin/nix-init",
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    nix-init --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nixInit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `nix-init ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

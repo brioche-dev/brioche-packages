@@ -1,0 +1,70 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libgpgError from "libgpg_error";
+
+export const project = {
+  name: "libksba",
+  version: "1.6.7",
+};
+
+const source = Brioche.download(
+  `https://gnupg.org/ftp/gcrypt/libksba/libksba-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function libksba(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libgpgError)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion ksba | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libksba)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://gnupg.org/ftp/gcrypt/libksba/
+      | lines
+      | where ($it | str contains "libksba-") and ($it | str contains ".tar.bz2") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="libksba-(?<version>\\d+\\.\\d+\\.\\d+)\\.tar\\.bz2">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

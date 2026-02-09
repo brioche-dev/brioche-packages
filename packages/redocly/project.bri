@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "redocly",
-  version: "2.14.4",
+  version: "2.14.9",
   extra: {
     packageName: "@redocly/cli",
   },

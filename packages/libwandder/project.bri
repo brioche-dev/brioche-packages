@@ -1,0 +1,79 @@
+import * as std from "std";
+import openssl from "openssl";
+import uthash from "uthash";
+
+export const project = {
+  name: "libwandder",
+  version: "2.0.17-1",
+  repository: "https://github.com/LibtraceTeam/libwandder",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function libwandder(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, openssl, uthash)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <libwandder.h>
+
+      int main(void)
+      {
+          wandder_decoder_t *dec = init_wandder_decoder(NULL, NULL, 0, 0);
+          if (dec) {
+              free_wandder_decoder(dec);
+              printf("ok");
+          }
+
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    gcc main.c -o main -lwandder
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libwandder)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "ok";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^(?<version>\d+\.\d+\.\d+(?:-\d+)?)$/,
+  });
+}

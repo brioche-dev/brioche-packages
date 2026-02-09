@@ -6,7 +6,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "curl",
-  version: "8.17.0",
+  version: "8.18.0",
   repository: "https://github.com/curl/curl.git",
 };
 

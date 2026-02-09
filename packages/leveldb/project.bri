@@ -1,0 +1,66 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import snappy from "snappy";
+
+export const project = {
+  name: "leveldb",
+  version: "1.23",
+  repository: "https://github.com/google/leveldb",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function leveldb(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, snappy],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      LEVELDB_BUILD_TESTS: "OFF",
+      LEVELDB_BUILD_BENCHMARKS: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
+
+      find_package(leveldb REQUIRED CONFIG)
+      message(STATUS "leveldb version: \${leveldb_VERSION}")
+    `),
+  });
+
+  const script = std.runBash`
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, cmake, leveldb)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `leveldb version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

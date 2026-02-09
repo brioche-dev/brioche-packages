@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "jjui",
-  version: "0.9.9",
+  version: "0.9.10",
   extra: {
     moduleName: "github.com/idursun/jjui",
   },

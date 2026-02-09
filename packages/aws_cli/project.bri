@@ -3,7 +3,7 @@ import python, { fixScriptShebangs, wrapVenvScripts } from "python";
 
 export const project = {
   name: "aws_cli",
-  version: "2.32.32",
+  version: "2.33.2",
   repository: "https://github.com/aws/aws-cli",
 };
 
@@ -29,7 +29,7 @@ export default function awsCli(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(managedPython);
 
-  // Download dependencies from PyPI
+  // Download runtime dependencies from PyPI
   // SAFETY: the `requirements-*-lock.txt` files have hashes, and the
   // `--require-hashes` flag ensures we use hashes to verify dependencies
   const dependencies = std.runBash`
@@ -50,7 +50,7 @@ export default function awsCli(): std.Recipe<std.Directory> {
     .unsafe({ networking: true })
     .toDirectory();
 
-  // Install dependencies into the venv
+  // Install runtime dependencies into the venv
   venv = std.runBash`
     pip install --require-hashes \\
       -r requirements-base-lock.txt \\
@@ -72,9 +72,7 @@ export default function awsCli(): std.Recipe<std.Directory> {
     .outputScaffold(venv)
     .toDirectory();
 
-  // Fix shebangs in the venv. `pip install` could install a new version of
-  // pip (depending on the requirements file), which can re-introduce a
-  // shebang script that we need to re-fix
+  // Fix shebangs after pip install (pip may reinstall itself)
   venv = std.recipe(fixScriptShebangs(venv));
 
   // Install the application into the venv
