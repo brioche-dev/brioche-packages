@@ -4,7 +4,7 @@ import eigen from "eigen";
 
 export const project = {
   name: "libint",
-  version: "2.11.2",
+  version: "2.12.0",
   repository: "https://github.com/evaleev/libint",
 };
 

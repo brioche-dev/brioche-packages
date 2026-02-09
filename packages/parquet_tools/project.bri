@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "parquet_tools",
-  version: "1.42.0",
+  version: "1.46.4",
   extra: {
     moduleName: "github.com/hangxie/parquet-tools",
   },
@@ -23,7 +23,7 @@ export default function parquetTools(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `${project.extra.moduleName}/cmd.version=${project.version}`,
+        `${project.extra.moduleName}/cmd/version.version=${project.version}`,
       ],
     },
     runnable: "bin/parquet-tools",

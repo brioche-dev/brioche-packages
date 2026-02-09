@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/corrosion-rs/corrosion.git": {
-      "v0.6.0": "5239c1b64742bb03e13f10822ca8ef5e52f75f71"
+      "v0.6.1": "1499b14e4906a2890f5cee1547c8848db261753d"
     }
   }
 }

@@ -1,0 +1,60 @@
+import * as std from "std";
+import lcms2 from "lcms2";
+import libjpegTurbo from "libjpeg_turbo";
+
+export const project = {
+  name: "libraw",
+  version: "0.22.0",
+  repository: "https://github.com/LibRaw/LibRaw",
+};
+
+const source = Brioche.download(
+  `https://www.libraw.org/data/LibRaw-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libraw(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-openmp \\
+      --enable-jpeg \\
+      --enable-zlib \\
+      --enable-lcms
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, lcms2, libjpegTurbo)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libraw | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libraw)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

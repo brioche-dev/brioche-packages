@@ -5,7 +5,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "pcsc_lite",
-  version: "2.4.0",
+  version: "2.4.1",
   repository: "https://github.com/LudovicRousseau/PCSC",
 };
 

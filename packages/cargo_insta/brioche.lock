@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo-insta/1.46.3/download": {
+      "type": "sha256",
+      "value": "5238725303cc9f252800c49cc0d115a79754ebcb2beca9e8df6db44e8a941bff"
+    }
+  }
+}

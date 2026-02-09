@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/JohnnyMorganz/luau-lsp": {
+      "1.61.0": "2b3e395a4011c8225f759fff705bf44a9f5c081a"
+    }
+  }
+}

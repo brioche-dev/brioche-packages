@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.libraw.org/data/LibRaw-0.22.0.tar.gz": {
+      "type": "sha256",
+      "value": "1071e6e8011593c366ffdadc3d3513f57c90202d526e133174945ec1dd53f2a1"
+    }
+  }
+}

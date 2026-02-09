@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "git_refs": {
-    "https://git.kernel.org/pub/scm/libs/libcap/libcap.git/": {
+    "https://git.kernel.org/pub/scm/libs/libcap/libcap.git": {
       "v1.2.77": "3b2513a1ba696f01d31edfa93f35c30b379cc70e"
     }
   }

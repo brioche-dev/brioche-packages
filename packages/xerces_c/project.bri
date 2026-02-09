@@ -1,0 +1,63 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import curl from "curl";
+import icu from "icu";
+
+export const project = {
+  name: "xerces_c",
+  version: "3.3.0",
+  repository: "https://github.com/apache/xerces-c",
+};
+
+const source = Brioche.download(
+  `https://dlcdn.apache.org/xerces/c/3/sources/xerces-c-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Patch the source to use C++17 instead of C++14, required by ICU 77+
+    std.runBash`
+      sed -i 's/set(CMAKE_CXX_STANDARD 14)/set(CMAKE_CXX_STANDARD 17)/' "$BRIOCHE_OUTPUT/CMakeLists.txt"
+    `
+      .dependencies(std.toolchain)
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function xercesC(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, icu, curl],
+    set: {
+      transcoder: "icu",
+      "network-accessor": "curl",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xerces-c | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xercesC)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

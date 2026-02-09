@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://git.code.sf.net/p/libnova/libnova": {
+      "v0.16": "edbf65abe27ef1a2520eb9e839daaf58f15a6941"
+    }
+  }
+}

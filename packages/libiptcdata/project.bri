@@ -1,0 +1,65 @@
+import * as std from "std";
+
+export const project = {
+  name: "libiptcdata",
+  version: "1.0.5",
+  repository: "https://github.com/ianw/libiptcdata",
+  extra: {
+    versionUnderscore: "1_0_5",
+  },
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/release_${project.extra.versionUnderscore}/libiptcdata-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libiptcdata(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-python \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/iptc"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libiptcdata | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libiptcdata)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release_(?<version>\d+_\d+_\d+)$/,
+    normalizeVersion: true,
+  });
+}

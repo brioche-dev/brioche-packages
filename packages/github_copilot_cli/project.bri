@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "github_copilot_cli",
-  version: "0.0.369",
+  version: "0.0.394",
   extra: {
     packageName: "@github/copilot",
   },
@@ -13,7 +13,15 @@ export default function githubCopilotCli(): std.Recipe<std.Directory> {
   return npmInstallGlobal({
     packageName: project.extra.packageName,
     version: project.version,
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/copilot"));
+  })
+    .pipe((recipe) =>
+      // Repack the native copilot binary that's bundled in the npm package
+      std.autopack(recipe, {
+        globs: ["**/node_modules/@github/copilot-*/copilot"],
+        linkDependencies: [std.toolchain],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/copilot"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -22,9 +30,9 @@ export async function test(): Promise<std.Recipe<std.File>> {
   `
     .dependencies(githubCopilotCli)
     .env({
-      // TODO: remove once https://github.com/github/copilot-cli/issues/16 is done
-      // Needed because the tool dynamically opens `libresolv.so.2`,
-      // through the `sharp` module which is not directly a dependency
+      // TODO: Figure out how to get rid of this! Seems to be needed because
+      // the tool dynamically opens `libutil.so.1`, but it isn't found without
+      // the toolchain lib dir in the dynamic ld library path for some reason
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
     })
     .toFile();

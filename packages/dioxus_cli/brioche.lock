@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/dioxus-cli/0.7.3/download": {
+      "type": "sha256",
+      "value": "056a79166205fcd4189fa48bd5b4f3c332286ebb7d1b92ae45cec405ecb9e291"
+    }
+  }
+}

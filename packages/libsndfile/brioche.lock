@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/libsndfile/libsndfile": {
+      "1.2.2": "72f6af15e8f85157bd622ed45b979025828b7001"
+    }
+  }
+}

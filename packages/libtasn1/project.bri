@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libtasn1",
-  version: "4.20.0",
+  version: "4.21.0",
 };
 
 const source = Brioche.download(

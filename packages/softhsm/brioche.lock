@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/softhsm/SoftHSMv2.git": {
+      "2.7.0": "13e6e86b83748fef74046dbf0c91f664b7acc1c3"
+    }
+  }
+}
