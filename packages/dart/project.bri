@@ -80,7 +80,7 @@ function prebuiltSdk(
   platform: std.Platform,
 ): std.Recipe<std.Directory> {
   std.assert(
-    !(version in prebuiltSdks),
+    version in prebuiltSdks,
     `Dart version '${version}' is not supported, expected one of ${JSON.stringify(
       Object.keys(prebuiltSdks),
     )}`,
