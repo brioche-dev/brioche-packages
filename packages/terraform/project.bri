@@ -9,7 +9,7 @@ export const project = {
 
 // Retrieve the source directly from the GitHub repository and not from the Go
 // proxy. Since, the one from Go proxy doesn't contain additional backends
-// (such as Azure, GCP, etc)
+// (such as Azure, GCP, etc).
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
