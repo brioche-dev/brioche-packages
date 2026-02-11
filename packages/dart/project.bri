@@ -143,7 +143,7 @@ export function test(): std.Recipe<std.Directory> {
 
   const tests = versions.map((version) => {
     const script = std.runBash`
-      dart --version 2>&1 | tee "$BRIOCHE_OUTPUT"
+      dart --version | tee "$BRIOCHE_OUTPUT"
     `
       .dependencies(dart({ version }))
       .toFile();
@@ -155,10 +155,7 @@ export function test(): std.Recipe<std.Directory> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubTags({
-    project,
-    matchTag: /^(\d+\.\d+\.\d+)$/,
-  });
+  return std.liveUpdateFromGithubTags({ project });
 }
 
 /**
@@ -223,10 +220,10 @@ export function dartBuild(
     if [ "$verbose" = "true" ]; then
       compile_args+=("--verbose")
     fi
-    
+
     # Process defines
     # (Note: defines are passed via env vars to script, see below)
-    
+
     dart compile exe "$entrypoint" -o "$output" "\${compile_args[@]}" $DEFINES_ARGS
   `
     .workDir(options.source)
