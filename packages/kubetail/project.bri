@@ -1,0 +1,59 @@
+import * as std from "std";
+import go from "go";
+import pnpm from "pnpm";
+
+export const project = {
+  name: "kubetail",
+  version: "0.11.1",
+  repository: "https://github.com/kubetail-org/kubetail",
+};
+
+const source = Brioche.download(
+  `https://github.com/kubetail-org/kubetail/archive/refs/tags/cli/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function kubetail(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make build VERSION="$VERSION"
+
+    # Manual installation
+    cp bin/kubetail "$BRIOCHE_OUTPUT/bin/"
+  `
+    .workDir(source)
+    .outputScaffold(std.directory({ bin: std.directory() }))
+    .dependencies(std.toolchain, go, pnpm)
+    .env({
+      VERSION: project.version,
+    })
+    .unsafe({
+      // Required for PNPM to fetch dashboard UI dependencies and Go to
+      // download module dependencies during the build
+      networking: true,
+    })
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/kubetail"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    kubetail --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(kubetail)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = `kubetail version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^cli\/v(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
