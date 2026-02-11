@@ -9,7 +9,7 @@ export const project = {
 };
 
 // Retrieve the source directly from the GitHub repository and not from the Go
-// proxy. Since, the one from Go proxy is not up to date
+// proxy. Since, the one from Go proxy is not up to date.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,

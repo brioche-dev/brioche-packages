@@ -2,47 +2,55 @@ import * as std from "std";
 import { goBuild } from "go";
 
 export const project = {
-  name: "terraform",
-  version: "1.14.3",
-  repository: "https://github.com/hashicorp/terraform.git",
+  name: "aliyun_cli",
+  version: "3.2.9",
+  repository: "https://github.com/aliyun/aliyun-cli",
 };
 
 // Retrieve the source directly from the GitHub repository and not from the Go
-// proxy. Since, the one from Go proxy doesn't contain additional backends
-// (such as Azure, GCP, etc).
+// proxy. Since, the one from Go proxy doesn't contain the git submodule
+// required for the build.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
+  options: {
+    submodules: true,
+  },
 });
 
-export default function terraform(): std.Recipe<std.Directory> {
+export default function aliyunCli(): std.Recipe<std.Directory> {
   return goBuild({
     source,
+    path: "./main",
     buildParams: {
       ldflags: [
         "-s",
         "-w",
         "-X",
-        "github.com/hashicorp/terraform/version.dev=no",
+        `github.com/aliyun/aliyun-cli/v3/cli.Version=${project.version}`,
       ],
-      mod: "readonly",
     },
-    runnable: "bin/terraform",
-  });
+    runnable: "bin/aliyun",
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe.insert("bin/aliyun", recipe.get("bin/main")).remove("bin/main"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/aliyun"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    # Only retrieve the first line of the output, other lines are not relevant for the version check
-    terraform --version | head -n 1 | tee "$BRIOCHE_OUTPUT"
+    aliyun version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(terraform)
+    .dependencies(aliyunCli)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `Terraform v${project.version}`;
+  const expected = project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
