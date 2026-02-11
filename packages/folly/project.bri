@@ -59,6 +59,9 @@ export default function folly(): std.Recipe<std.Directory> {
       BUILD_BENCHMARKS: "OFF",
       FOLLY_USE_JEMALLOC: "OFF",
       PACKAGE_VERSION: project.version,
+      // Build with position-independent code so static libraries can be
+      // linked into shared objects.
+      CMAKE_POSITION_INDEPENDENT_CODE: "ON",
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
