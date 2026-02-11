@@ -48,7 +48,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/gnu/patch
       | lines
       | where ($it | str contains "patch-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="patch-(?<version>.+)\\.tar\\.xz">'
+      | parse --regex '<a href="(\\./)?patch-(?<version>[\\d.]+)\\.tar\\.xz"'
       | sort-by --natural --reverse version
       | get 0.version
 

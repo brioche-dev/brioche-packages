@@ -4,7 +4,6 @@ import * as std from "std";
 export const project = {
   name: "autoconf_archive",
   version: "2024.10.16",
-  repository: "https://github.com/autoconf-archive/autoconf-archive",
 };
 
 const source = Brioche.download(
@@ -52,7 +51,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/gnu/autoconf-archive
       | lines
       | where ($it | str contains 'autoconf-archive-') and ($it | str contains '.tar.')
-      | parse --regex '<a href="autoconf-archive-(?<version>[\\d.]+)\\.tar'
+      | parse --regex '<a href="(\\./)?autoconf-archive-(?<version>[\\d.]+)\\.tar'
       | sort-by --natural --reverse version
       | get 0.version
 

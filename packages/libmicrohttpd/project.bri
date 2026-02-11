@@ -2,19 +2,23 @@ import * as std from "std";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
-  name: "libtasn1",
-  version: "4.21.0",
+  name: "libmicrohttpd",
+  version: "1.0.2",
 };
 
 const source = Brioche.download(
-  `https://ftpmirror.gnu.org/libtasn1/libtasn1-${project.version}.tar.gz`,
+  `https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
 
-export default function libtasn1(): std.Recipe<std.Directory> {
+export default function libmicrohttpd(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix=/
+    ./configure \\
+      --prefix=/ \\
+      --disable-https \\
+      --disable-examples \\
+      --disable-doc
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -34,29 +38,26 @@ export default function libtasn1(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    asn1Parser --version | tee "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libmicrohttpd | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(libtasn1)
+    .dependencies(std.toolchain, libmicrohttpd)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `asn1Parser (libtasn1) ${project.version}`;
-  std.assert(
-    result.startsWith(expected),
-    `expected '${expected}', got '${result}'`,
-  );
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://ftpmirror.gnu.org/libtasn1
+    let version = http get https://ftpmirror.gnu.org/libmicrohttpd/
       | lines
-      | where ($it | str contains "libtasn1-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="(\\./)?libtasn1-(?<version>[\\d.]+)\\.tar\\.gz"'
+      | where ($it | str contains "libmicrohttpd-") and ($it | str contains ".tar.gz") and (not ($it | str contains ".sig")) and (not ($it | str contains "latest"))
+      | parse --regex '<a href="(\\./)?libmicrohttpd-(?<version>[\\d.]+)\\.tar\\.gz"'
       | sort-by --natural --reverse version
       | get 0.version
 
