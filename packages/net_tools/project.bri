@@ -1,0 +1,64 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "net_tools",
+  version: "2.10",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/net-tools/net-tools-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel()
+  .pipe((source) =>
+    // Patch the source to make configure non-interactive
+    std.applyPatch({
+      source,
+      patch: Brioche.includeFile("non-interactive-configure.patch"),
+      strip: 1,
+    }),
+  );
+
+export default function netTools(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make config
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ifconfig --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(netTools)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `net-tools ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/net-tools/files
+      | lines
+      | where {|it| $it | str contains 'href="/projects/net-tools/files' }
+      | parse --regex '<a href="/projects/net-tools/files/net-tools-(?<version>.+)\.tar\.xz'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
