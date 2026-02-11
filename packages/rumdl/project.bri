@@ -4,21 +4,17 @@ import { cargoBuild } from "rust";
 export const project = {
   name: "rumdl",
   version: "0.1.18",
-  extra: {
-    crateName: "rumdl",
-  },
+  repository: "https://github.com/rvben/rumdl.git",
 };
 
-const source = Brioche.download(
-  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
 
 export default function rumdl(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    cargoChefPrepare: false,
     runnable: "bin/rumdl",
   });
 }
@@ -40,5 +36,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromRustCrates({ project });
+  return std.liveUpdateFromGithubReleases({ project });
 }

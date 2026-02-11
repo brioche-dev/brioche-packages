@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://crates.io/api/v1/crates/rumdl/0.1.18/download": {
-      "type": "sha256",
-      "value": "f392a14ea72aff7f28f4198c8376c18c5f0f313d205d9c7c030b62afc4696a9b"
+  "git_refs": {
+    "https://github.com/rvben/rumdl.git": {
+      "v0.1.18": "94fa0f9e97532c48e5b69892bfb514de8df5a0c6"
     }
   }
 }
