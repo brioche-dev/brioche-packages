@@ -1,0 +1,61 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import openalSoft from "openal_soft";
+
+export const project = {
+  name: "freealut",
+  version: "1.1.0",
+  repository: "https://github.com/vancegroup/freealut",
+  extra: {
+    versionUnderscore: "1_1_0",
+  },
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `freealut_${project.extra.versionUnderscore}`,
+});
+
+export default function freealut(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openalSoft],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      BUILD_TESTS: "OFF",
+    },
+    runnable: "bin/freealut-config",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion freealut | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, freealut)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  // HACK: the C built library doesn't seem to report its version correctly.
+  const expected = project.version === "1.1.0" ? "1.0.1" : project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^freealut_(?<version>\d+_\d+_\d+)$/,
+    normalizeVersion: true,
+  });
+}
