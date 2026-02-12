@@ -111,8 +111,8 @@ export default function cmake(): std.Recipe<std.Directory> {
  * @param set - Optionally set CMake cache variables during the build, as if
  *   by passing `-D...`.
  * @param disablePostBuildSteps - If set, the post build steps will not run. By
- *   default, `std.libtoolSanitizeDependencies` and `std.pkgConfigMakePathsRelative`
- *   will be executed.
+ *   default, `std.libtoolSanitizeDependencies`, `std.pkgConfigMakePathsRelative`,
+ *   and `cmakeSanitizePaths` will be executed.
  * @param generator - Optionally set the CMake generator to use (e.g. `"Ninja"`).
  *   When using Ninja, make sure to include `ninja` in `dependencies`.
  * @param runnable - Optionally set a path to the binary to run by default
@@ -254,6 +254,11 @@ export function cmakeBuild(
         ? recipe
         : std.pkgConfigMakePathsRelative(recipe),
     )
+    .pipe((recipe) =>
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : cmakeSanitizePaths(recipe),
+    )
     .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
 
@@ -353,6 +358,78 @@ function removeTempFiles(
 
     find -L "\${find_roots[@]}" -name '*.tmp*' -delete
   `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
+
+const CMAKE_SANITIZE_PATHS_SCRIPT = std.indoc`
+  sanitize_cmake_paths () {
+    local -r file="$1"
+
+    # Replace absolute library paths with just the library name
+    for prop in INTERFACE_LINK_LIBRARIES IMPORTED_LINK_INTERFACE_LIBRARIES IMPORTED_LINK_DEPENDENT_LIBRARIES; do
+      sed -i -E '/'$prop'/{s#([";])/[^";]+/lib([a-zA-Z0-9_.+-]+)\\.(a|so[^";]*)#\\1\\2#g}' "$file"
+    done
+
+    # Remove absolute paths from include/link directory properties
+    for prop in INTERFACE_INCLUDE_DIRECTORIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES INTERFACE_LINK_DIRECTORIES; do
+      sed -i -E '/'$prop'/{s#;/[^";]+##g}' "$file"
+      sed -i -E '/'$prop'/{s#"/[^";]+;#"#g}' "$file"
+      sed -i -E '/'$prop'/{s#"/[^";]+"#""#g}' "$file"
+    done
+  }
+
+  # Candidate cmake directories relative to $BRIOCHE_OUTPUT
+  cmake_dirs=(lib/cmake share/cmake)
+
+  # Collect only those that are present
+  find_roots=()
+  for rel in "\${cmake_dirs[@]}"; do
+    dir="$BRIOCHE_OUTPUT/$rel"
+    if [[ -d "$dir" ]]; then
+      find_roots+=("$dir")
+    fi
+  done
+
+  # No cmake dir found, exit
+  if [[ \${#find_roots[@]} -eq 0 ]]; then
+    exit 0
+  fi
+
+  find -L "\${find_roots[@]}" -name '*.cmake' -type f -print0 \\
+    | while IFS= read -r -d $'\\0' file; do
+      sanitize_cmake_paths "$file"
+    done
+`;
+
+/**
+ * Create a recipe that replaces absolute paths in CMake config files.
+ *
+ * This performs three transformations:
+ * - Replaces absolute library paths in `INTERFACE_LINK_LIBRARIES`,
+ *   `IMPORTED_LINK_INTERFACE_LIBRARIES`, and
+ *   `IMPORTED_LINK_DEPENDENT_LIBRARIES` with library names the linker
+ *   can resolve (e.g., `/path/to/lib/libssl.so` becomes `ssl`).
+ * - Removes absolute include paths from `INTERFACE_INCLUDE_DIRECTORIES`
+ *   and `INTERFACE_SYSTEM_INCLUDE_DIRECTORIES`, keeping only
+ *   `${_IMPORT_PREFIX}/...` entries. Dependencies are found via
+ *   `CPATH`/`CMAKE_INCLUDE_PATH` instead.
+ * - Removes absolute library directory paths from
+ *   `INTERFACE_LINK_DIRECTORIES`. Dependencies are found via
+ *   `LIBRARY_PATH` instead.
+ *
+ * @param recipe - The recipe to apply the transformation to.
+ *
+ * @returns A new recipe with the sanitized CMake files.
+ *
+ * @remarks This function looks for CMake files (*.cmake) in the standard
+ *   locations `lib/cmake` and `share/cmake` relative to
+ *   the `$BRIOCHE_OUTPUT` output directory.
+ */
+export function cmakeSanitizePaths(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`${CMAKE_SANITIZE_PATHS_SCRIPT}`
     .outputScaffold(recipe)
     .toDirectory();
 }

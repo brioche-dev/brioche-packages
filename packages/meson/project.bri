@@ -1,4 +1,5 @@
 import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
 import python, { wrapVenvScripts } from "python";
 
 export const project = {
@@ -101,8 +102,8 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  * @param set - Optionally set Meson variables during the build, as if by passing
  *    `-D...`.
  * @param disablePostBuildSteps - If set, the post build steps will not run. By
- *   default, `std.libtoolSanitizeDependencies` and `std.pkgConfigMakePathsRelative`
- *   will be executed.
+ *   default, `std.libtoolSanitizeDependencies`, `std.pkgConfigMakePathsRelative`,
+ *   and `cmakeSanitizePaths` will be executed.
  * @param runnable - Optionally set a path to the binary to run by default
  *   (e.g. `bin/foo`).
  */
@@ -191,6 +192,11 @@ export function mesonBuild(
       options.disablePostBuildSteps ?? false
         ? recipe
         : std.pkgConfigMakePathsRelative(recipe),
+    )
+    .pipe((recipe) =>
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : cmakeSanitizePaths(recipe),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
