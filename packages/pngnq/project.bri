@@ -1,0 +1,79 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+import libpng from "libpng";
+
+export const project = {
+  name: "pngnq",
+  version: "1.1",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/pngnq/pngnq/${project.version}/pngnq-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    std.applyPatch({
+      source,
+      patch: Brioche.includeFile("missing-includes.patch"),
+      strip: 1,
+    }),
+  )
+  .pipe((source) =>
+    // Fix linker order: use LDADD instead of AM_LDFLAGS so that
+    // libraries are placed after object files during linking
+    std.runBash`
+      sed -i 's/^AM_LDFLAGS = /LDADD = /' "$BRIOCHE_OUTPUT/src/Makefile.in"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function pngnq(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      CFLAGS="-Wno-error=incompatible-pointer-types"
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libpng)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/pngnq"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pngnq -V 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pngnq)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `pngnq ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/pngnq/files/pngnq
+      | lines
+      | where {|it| $it | str contains 'href="/projects/pngnq/files/pngnq/' }
+      | parse --regex '<a href="/projects/pngnq/files/pngnq/(?<version>[\\d.]+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
