@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mongodb/mongo-cxx-driver": {
+      "r4.1.4": "4f5273939b5cde587b34719f7c26364e502c00f4"
+    }
+  }
+}
