@@ -1,0 +1,119 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import boost from "boost";
+import doubleConversion from "double_conversion";
+import fizz from "fizz";
+import fmt from "fmt";
+import folly from "folly";
+import gflags from "gflags";
+import glog from "glog";
+import libevent from "libevent";
+import libsodium from "libsodium";
+import libunwind from "libunwind";
+import lz4 from "lz4";
+import openssl from "openssl";
+import snappy from "snappy";
+
+export const project = {
+  name: "mvfst",
+  version: "2026.02.02.00",
+  repository: "https://github.com/facebook/mvfst",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function mvfst(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      boost,
+      doubleConversion,
+      fizz,
+      fmt,
+      folly,
+      gflags,
+      glog,
+      libevent,
+      libsodium,
+      libunwind,
+      lz4,
+      openssl,
+      snappy,
+    ],
+    set: {
+      BUILD_TESTS: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+      PACKAGE_VERSION: project.version,
+      // Prefer config-mode packages over module finders.
+      // This is needed because the FindGlog.cmake doesn't propagate
+      // glog's INTERFACE_COMPILE_DEFINITIONS (GLOG_USE_GLOG_EXPORT),
+      // causing compilation failures with glog >= 0.7.
+      CMAKE_FIND_PACKAGE_PREFER_CONFIG: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryLibrary)
+
+      find_package(mvfst REQUIRED CONFIG)
+      message(STATUS "mvfst found: TRUE")
+    `),
+  });
+
+  const script = std.runBash`
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(
+      std.toolchain,
+      cmake,
+      boost,
+      doubleConversion,
+      fizz,
+      fmt,
+      folly,
+      gflags,
+      glog,
+      libevent,
+      libsodium,
+      libunwind,
+      lz4,
+      openssl,
+      snappy,
+      mvfst,
+    )
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "mvfst found: TRUE";
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^v(?<version>\d{4}\.\d{2}\.\d{2}\.\d{2})$/,
+  });
+}
