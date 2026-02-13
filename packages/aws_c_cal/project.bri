@@ -1,10 +1,12 @@
 import * as std from "std";
 import cmake, { cmakeBuild } from "cmake";
+import awsCCommon from "aws_c_common";
+import openssl from "openssl";
 
 export const project = {
-  name: "aws_c_common",
-  version: "0.12.6",
-  repository: "https://github.com/awslabs/aws-c-common",
+  name: "aws_c_cal",
+  version: "0.9.13",
+  repository: "https://github.com/awslabs/aws-c-cal",
 };
 
 const source = Brioche.gitCheckout({
@@ -12,13 +14,14 @@ const source = Brioche.gitCheckout({
   ref: `v${project.version}`,
 });
 
-export default function awsCCommon(): std.Recipe<std.Directory> {
+export default function awsCCal(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain],
+    dependencies: [std.toolchain, awsCCommon, openssl],
     set: {
-      BUILD_SHARED_LIBS: "ON",
       BUILD_TESTING: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+      USE_OPENSSL: "ON",
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
@@ -35,8 +38,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
       cmake_minimum_required(VERSION 4.0)
       project(QueryVersion)
 
-      find_package(aws-c-common REQUIRED CONFIG)
-      message(STATUS "aws-c-common found: YES")
+      find_package(aws-c-cal REQUIRED CONFIG)
+      message(STATUS "aws-c-cal found: YES")
     `),
   });
 
@@ -44,13 +47,13 @@ export async function test(): Promise<std.Recipe<std.File>> {
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
     .workDir(src)
-    .dependencies(std.toolchain, cmake, awsCCommon)
+    .dependencies(std.toolchain, cmake, awsCCommon, openssl, awsCCal)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected output
-  const expected = "aws-c-common found: YES";
+  const expected = "aws-c-cal found: YES";
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/awslabs/aws-c-cal": {
+      "v0.9.13": "1cb9412158890201a6ffceed779f90fe1f48180c"
+    }
+  }
+}
