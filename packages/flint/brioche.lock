@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/flintlib/flint/releases/download/v3.4.0/flint-3.4.0.tar.gz": {
+      "type": "sha256",
+      "value": "9497679804dead926e3affeb8d4c58739d1c7684d60c2c12827550d28e454a33"
+    }
+  }
+}
