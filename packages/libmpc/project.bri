@@ -1,0 +1,81 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libmpc",
+  version: "1.3.1",
+  repository: "https://www.multiprecision.org/mpc/",
+};
+
+const source = Brioche.download(
+  `https://ftpmirror.gnu.org/gnu/mpc/mpc-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libmpc(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <mpc.h>
+
+      int main(void)
+      {
+          printf("%s", MPC_VERSION_STRING);
+
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    gcc main.c -o main -lmpc -lmpfr -lgmp
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libmpc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://ftpmirror.gnu.org/gnu/mpc
+      | lines
+      | where ($it | str contains "mpc-") and ($it | str contains ".tar.") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="(\\./)?mpc-(?<version>[\\d.]+)\\.tar\\.gz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
