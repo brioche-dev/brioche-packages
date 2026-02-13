@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ladislav-zezula/StormLib": {
+      "v9.31": "2aa6216c65ce68b88c46c0e4f12a38dc94c36b7a"
+    }
+  }
+}
