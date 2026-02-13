@@ -77,8 +77,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   });
 
   const script = std.runBash`
-    export CMAKE_INCLUDE_PATH="$CPATH"
-    export CMAKE_LIBRARY_PATH="$LIBRARY_PATH"
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
     .workDir(src)
@@ -103,7 +101,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  // Check that fizz was found
+  // Check that the result contains the expected output
   const expected = "fizz found: TRUE";
   std.assert(
     result.includes(expected),
