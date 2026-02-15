@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "dumbpipe",
-  version: "0.33.0",
+  version: "0.34.0",
   repository: "https://github.com/n0-computer/dumbpipe.git",
 };
 
