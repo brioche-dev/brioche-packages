@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/goharbor/harbor-cli/@v/v0.0.16.info": {
+    "https://proxy.golang.org/github.com/goharbor/harbor-cli/@v/v0.10.0.info": {
       "type": "sha256",
-      "value": "7ed3ab997710ecfc9474381408c2608ec8138f3c026308290cd43cf30d613151"
+      "value": "f198cf581de2e952caa6a5a79cca21aaf26d4fdfae989dfb51d1ef29cfbc55bb"
     },
-    "https://proxy.golang.org/github.com/goharbor/harbor-cli/@v/v0.0.16.zip": {
+    "https://proxy.golang.org/github.com/goharbor/harbor-cli/@v/v0.10.0.zip": {
       "type": "sha256",
-      "value": "666f3568d5ea2dd05d33cabd5ba9768a28ec304113ae53e76945c0c56e5379eb"
+      "value": "68d5056e34a6c2ca7c1857e8bd459c470eae8eebd95792c2e2d2f391a7b1701d"
     }
   }
 }

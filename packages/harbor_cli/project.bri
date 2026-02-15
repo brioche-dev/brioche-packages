@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "harbor_cli",
-  version: "0.0.16",
+  version: "0.10.0",
   extra: {
     moduleName: "github.com/goharbor/harbor-cli",
   },
