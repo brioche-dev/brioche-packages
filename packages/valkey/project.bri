@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "valkey",
-  version: "9.0.1",
+  version: "9.0.2",
   repository: "https://github.com/valkey-io/valkey",
 };
 
