@@ -17,21 +17,21 @@
       "type": "sha256",
       "value": "9aa8e9d2298ab68c600bd6fb86a6c13bce11a4eca1ba9b39d79fa021755d7c37"
     },
-    "https://nodejs.org/dist/v24.13.0/node-v24.13.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v24.13.1/node-v24.13.1-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "aa881151bd0f9f154a0424dd60a72e9ce10672619121658c278a24327ef46831"
+      "value": "c827d3d301e2eed1a51f36d0116b71b9e3d9e3b728f081615270ea40faac34c1"
     },
-    "https://nodejs.org/dist/v24.13.0/node-v24.13.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v24.13.1/node-v24.13.1-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "e798599612f4bb71333a3397ab0d095fd62214e115aea45aa858a145fc72d67e"
+      "value": "30215f90ea3cd04dfbc06e762c021393fa173a1d392974298bbc871a8e461089"
     },
-    "https://nodejs.org/dist/v25.4.0/node-v25.4.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v25.6.1/node-v25.6.1-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "1e8c471a0c4693cb8b592bcde86be0bf4b7bf8efb28b196e52fc6fa4b486f2e9"
+      "value": "157e76f7eee66cff1492489c94c801c48b2b0859e7f352f28b12e855ead301ff"
     },
-    "https://nodejs.org/dist/v25.4.0/node-v25.4.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v25.6.1/node-v25.6.1-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "f3bde66a96c232f34cdd9f4fea6b551f915f8f3ac0952793eef903b3e35df037"
+      "value": "97eec07e2a43c5a39e4968c1ae554461783914d872c27d856e98d2751094f5be"
     }
   }
 }
