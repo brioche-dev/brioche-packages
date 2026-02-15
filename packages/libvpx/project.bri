@@ -3,7 +3,7 @@ import nasm from "nasm";
 
 export const project = {
   name: "libvpx",
-  version: "1.15.2",
+  version: "1.16.0",
   repository: "https://github.com/webmproject/libvpx",
 };
 
