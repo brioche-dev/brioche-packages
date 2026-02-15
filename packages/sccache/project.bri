@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "sccache",
-  version: "0.13.0",
+  version: "0.14.0",
   repository: "https://github.com/mozilla/sccache.git",
 };
 
