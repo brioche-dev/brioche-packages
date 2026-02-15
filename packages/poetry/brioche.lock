@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/python-poetry/poetry": {
-      "2.3.1": "f3d239baaed2cd5c5512f827d0d80ecbfb1181fe"
+      "2.3.2": "a84cd0f1bedb5769ef6ef7389d8ee99b93b9ba4c"
     }
   }
 }
