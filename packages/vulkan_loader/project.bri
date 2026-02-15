@@ -11,7 +11,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "vulkan_loader",
-  version: "1.4.335.0",
+  version: "1.4.341.0",
   repository: "https://github.com/KhronosGroup/Vulkan-Loader",
 };
 
