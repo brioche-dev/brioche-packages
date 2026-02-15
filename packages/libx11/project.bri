@@ -8,7 +8,7 @@ import xtrans from "xtrans";
 
 export const project = {
   name: "libx11",
-  version: "1.8.12",
+  version: "1.8.13",
 };
 
 const source = Brioche.download(
