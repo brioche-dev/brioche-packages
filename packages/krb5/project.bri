@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "krb5",
-  version: "1.22.1",
+  version: "1.22.2",
   extra: {
     majorVersion: "1",
     minorVersion: "22",
