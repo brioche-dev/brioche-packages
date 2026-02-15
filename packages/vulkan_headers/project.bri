@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "vulkan_headers",
-  version: "1.4.341",
+  version: "1.4.343",
   repository: "https://github.com/KhronosGroup/Vulkan-Headers",
 };
 
