@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "parlay",
-  version: "0.10.0",
+  version: "0.11.0",
   extra: {
     moduleName: "github.com/snyk/parlay",
   },
