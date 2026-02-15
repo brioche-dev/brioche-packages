@@ -6,7 +6,7 @@ import snappy from "snappy";
 
 export const project = {
   name: "mongo_c_driver",
-  version: "2.2.1",
+  version: "2.2.2",
   repository: "https://github.com/mongodb/mongo-c-driver",
 };
 
