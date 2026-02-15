@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "lazygit",
-  version: "0.58.1",
+  version: "0.59.0",
   repository: "https://github.com/jesseduffield/lazygit",
   extra: {
     moduleName: "github.com/jesseduffield/lazygit",
