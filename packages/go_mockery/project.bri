@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "go_mockery",
-  version: "3.6.3",
+  version: "3.6.4",
   repository: "https://github.com/vektra/mockery.git",
 };
 
