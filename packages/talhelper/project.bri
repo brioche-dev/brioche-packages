@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "talhelper",
-  version: "3.1.3",
+  version: "3.1.5",
   extra: {
     moduleName: "github.com/budimanjojo/talhelper/v3",
   },
