@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/dun/munge/releases/download/munge-0.5.17/munge-0.5.17.tar.xz": {
+    "https://github.com/dun/munge/releases/download/munge-0.5.18/munge-0.5.18.tar.xz": {
       "type": "sha256",
-      "value": "bcd7b124ed0c566601dec8bad5fe14d50c843b95321e4184ccad292208554a16"
+      "value": "39c3ec6ef5604bfa206e8aa10fc05d5119040f6de4a554bc0fb98ca1aed838dc"
     }
   }
 }
