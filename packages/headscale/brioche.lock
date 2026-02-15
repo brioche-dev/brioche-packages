@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/juanfont/headscale": {
-      "v0.27.1": "f658a8eacd4d86edc65424b50635afed46ca4b2a"
+      "v0.28.0": "97fa117c48a58bee3941e5e8b4393873501afe14"
     }
   }
 }
