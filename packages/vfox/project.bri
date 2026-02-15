@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "vfox",
-  version: "1.0.4",
+  version: "1.0.6",
   extra: {
     moduleName: "github.com/version-fox/vfox",
   },
