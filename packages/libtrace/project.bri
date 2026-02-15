@@ -13,7 +13,7 @@ import wandio from "wandio";
 
 export const project = {
   name: "libtrace",
-  version: "4.0.29-1",
+  version: "4.0.30-1",
   repository: "https://github.com/LibtraceTeam/libtrace",
 };
 
