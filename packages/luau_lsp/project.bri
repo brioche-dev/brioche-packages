@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "luau_lsp",
-  version: "1.61.0",
+  version: "1.62.0",
   repository: "https://github.com/JohnnyMorganz/luau-lsp",
 };
 
