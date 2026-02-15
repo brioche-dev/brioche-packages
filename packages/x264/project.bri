@@ -4,10 +4,10 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "x264",
-  version: "0.165.3222",
+  version: "0.165.3223",
   repository: "https://code.videolan.org/videolan/x264",
   extra: {
-    commit: "b35605ace3ddf7c1a5d67a2eb553f034aef41d55",
+    commit: "0480cb05fa188d37ae87e8f4fd8f1aea3711f7ee",
   },
 };
 
