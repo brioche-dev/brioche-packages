@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/rustnet-monitor/0.18.0/download": {
+    "https://crates.io/api/v1/crates/rustnet-monitor/1.0.0/download": {
       "type": "sha256",
-      "value": "aecac9d5a1bf0bec060de5b1e9d6ebb1131f2bc712a1236c3a2e54c0e631ab6f"
+      "value": "5d7e04a36a1b02194536da5b53a02d2be85f4fdb73c2f2a979b73b83b8624b79"
     }
   }
 }
