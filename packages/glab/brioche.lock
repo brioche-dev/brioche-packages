@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://gitlab.com/gitlab-org/cli": {
-      "v1.74.0": "0c3139375a9c4f011ab19bee37418f9aee626cef"
+      "v1.85.1": "cbc454067c503122c86615e24b629dc0ee275f28"
     }
   }
 }

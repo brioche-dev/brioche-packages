@@ -4,7 +4,7 @@ import go from "go";
 
 export const project = {
   name: "glab",
-  version: "1.74.0",
+  version: "1.85.1",
   repository: "https://gitlab.com/gitlab-org/cli",
 };
 
