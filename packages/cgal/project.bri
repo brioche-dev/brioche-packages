@@ -5,7 +5,7 @@ import eigen from "eigen";
 
 export const project = {
   name: "cgal",
-  version: "6.1",
+  version: "6.1.1",
   repository: "https://github.com/CGAL/cgal",
 };
 
