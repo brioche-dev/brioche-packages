@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/microsoft/DirectX-Headers/archive/refs/tags/v1.618.2.tar.gz": {
+      "type": "sha256",
+      "value": "62004f45e2ab00cbb5c7f03c47262632c22fbce0a237383fc458d9324c44cf36"
+    }
+  }
+}
