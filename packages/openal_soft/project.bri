@@ -4,7 +4,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "openal_soft",
-  version: "1.24.3",
+  version: "1.25.1",
   repository: "https://github.com/kcat/openal-soft",
 };
 
