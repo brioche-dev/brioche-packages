@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/awslabs/aws-checksums": {
+      "v0.2.10": "1d5f2f1f3e5d013aae8810878ceb5b3f6f258c4e"
+    }
+  }
+}
