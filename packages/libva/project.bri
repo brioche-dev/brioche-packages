@@ -1,0 +1,81 @@
+import * as std from "std";
+import libdrm from "libdrm";
+import libffi from "libffi";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxdmcp from "libxdmcp";
+import libxext from "libxext";
+import libxfixes from "libxfixes";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import wayland from "wayland";
+import xcbProto from "xcb_proto";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "libva",
+  version: "2.23.0",
+  repository: "https://github.com/intel/libva",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/libva-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function libva(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      ninja,
+      libdrm,
+      libffi,
+      libx11,
+      libxau,
+      libxcb,
+      libxdmcp,
+      libxext,
+      libxfixes,
+      wayland,
+      xcbProto,
+      xorgproto,
+    ],
+    set: {
+      with_x11: "yes",
+      with_glx: "no",
+      with_wayland: "yes",
+      with_win32: "no",
+      enable_docs: "false",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libva | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libva)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const [, minor, patch] = project.version.split(".");
+  const expected = `1.${minor}.${patch}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
