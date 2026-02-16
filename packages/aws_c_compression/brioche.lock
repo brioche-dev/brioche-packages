@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/awslabs/aws-c-compression": {
+      "v0.3.2": "d8264e64f698341eb03039b96b4f44702a9b3f83"
+    }
+  }
+}
