@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.linphone.org/BC/public/bctoolbox.git": {
+      "5.4.85": "2ccf666eebfdd23eead259916f48017210ba2a70"
+    }
+  }
+}
