@@ -1,0 +1,90 @@
+import * as std from "std";
+import openssl from "openssl";
+import python from "python";
+
+export const project = {
+  name: "erlang",
+  version: "28.3.1",
+  repository: "https://github.com/erlang/otp",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/OTP-${project.version}/otp_src_${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function erlang(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, python, openssl)
+    .toDirectory()
+    .pipe(fixRootDir)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/erl"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    erl -noshell -eval 'io:fwrite("~s~n", [erlang:system_info(otp_release)]), halt().' | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(erlang)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const [majorVersion] = project.version.split(".");
+  std.assert(
+    result === majorVersion,
+    `expected '${majorVersion}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^OTP-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
+
+/**
+ * Fix hardcoded absolute paths in Erlang shell scripts so they use
+ * relative paths and work inside Brioche's sandbox.
+ *
+ * With `--prefix=/`, the `dyn_erl` lookup path and the ROOTDIR
+ * fallback in `bin/` scripts point to wrong absolute locations.
+ * This fixes both to use correct relative paths.
+ */
+function fixRootDir(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Fix scripts in bin/ — adjust dyn_erl lookup and ROOTDIR fallback
+    for f in "$BRIOCHE_OUTPUT"/bin/*; do
+      if [ -f "$f" ] && grep -q 'ROOTDIR' "$f" 2>/dev/null; then
+        sed -i 's|"\${progdir}/../erts-|"\${progdir}/../lib/erlang/erts-|' "$f"
+        sed -i 's|ROOTDIR="//lib/erlang"|ROOTDIR="$(dirname "$0")/../lib/erlang"|' "$f"
+      fi
+    done
+
+    # Fix scripts in lib/erlang/bin/ — only the ROOTDIR fallback
+    for f in "$BRIOCHE_OUTPUT"/lib/erlang/bin/*; do
+      if [ -f "$f" ] && grep -q 'ROOTDIR' "$f" 2>/dev/null; then
+        sed -i 's|ROOTDIR="//lib/erlang"|ROOTDIR="$(dirname "$0")/.."|' "$f"
+      fi
+    done
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}
