@@ -1,0 +1,76 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import awsCCal from "aws_c_cal";
+import awsCCommon from "aws_c_common";
+import openssl from "openssl";
+import s2n from "s2n";
+
+export const project = {
+  name: "aws_c_io",
+  version: "0.26.1",
+  repository: "https://github.com/awslabs/aws-c-io",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function awsCIo(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, awsCCommon, awsCCal, openssl, s2n],
+    set: {
+      BUILD_TESTING: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
+
+      find_package(aws-c-io REQUIRED CONFIG)
+      message(STATUS "aws-c-io found: YES")
+    `),
+  });
+
+  const script = std.runBash`
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(
+      std.toolchain,
+      cmake,
+      awsCCommon,
+      awsCCal,
+      openssl,
+      s2n,
+      awsCIo,
+    )
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "aws-c-io found: YES";
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
