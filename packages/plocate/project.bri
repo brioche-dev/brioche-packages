@@ -3,7 +3,6 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 import liburing from "liburing";
 import { mesonBuild } from "meson";
 import ninja from "ninja";
-import zstd from "zstd";
 
 export const project = {
   name: "plocate",
@@ -19,7 +18,7 @@ const source = Brioche.download(
 export default function plocate(): std.Recipe<std.Directory> {
   return mesonBuild({
     source,
-    dependencies: [std.toolchain, ninja, zstd, liburing],
+    dependencies: [std.toolchain, ninja, liburing],
     set: {
       install_cron: "false",
       install_systemd: "false",
