@@ -42,23 +42,74 @@ export default std.memo((): std.Recipe<std.Directory> => {
     std.symlink({ target: "ncursesw" }),
   );
 
-  for (const lib of ["form", "menu", "ncurses", "ncurses++", "panel"]) {
-    // Create symlinks for the libraries
-    ncurses = ncurses.insert(`lib/lib${lib}.so`, std.file(`INPUT(-l${lib}w)`));
+  const majorVersion = 6;
+  const fullVersion = "6.4";
 
-    // Create symlinks for the pkgconfig files
-    ncurses = ncurses.insert(
-      `lib/pkgconfig/${lib}.pc`,
-      std.symlink({ target: `${lib}w.pc` }),
+  for (const lib of ["form", "menu", "ncurses", "ncurses++", "panel"]) {
+    ncurses = addLibraryAliases(
+      ncurses,
+      lib,
+      `${lib}w`,
+      majorVersion,
+      fullVersion,
     );
   }
 
   // Create symlinks for a fallback to curses library
-  ncurses = ncurses.insert("lib/libcursesw.so", std.file("INPUT(-lncursesw)"));
-  ncurses = ncurses.insert(
-    "lib/libcurses.so",
-    std.symlink({ target: "libncurses.so" }),
+  ncurses = addLibraryAliases(
+    ncurses,
+    "curses",
+    "ncurses",
+    majorVersion,
+    fullVersion,
+  );
+  ncurses = addLibraryAliases(
+    ncurses,
+    "cursesw",
+    "ncursesw",
+    majorVersion,
+    fullVersion,
   );
 
   return ncurses;
 });
+
+/**
+ * Create library alias symlinks mapping `lib` to `target`.
+ *
+ * @param recipe - The directory recipe to insert symlinks into.
+ * @param lib - The alias library name (e.g. "ncurses", "curses").
+ * @param target - The target library name (e.g. "ncursesw", "ncurses").
+ * @param majorVersion - The soname major version (e.g. 6).
+ * @param fullVersion - The full version string (e.g. "6.4").
+ *
+ * @returns The recipe with `.so`, `.so.N`, `.so.X.Y`, and `.pc` symlinks added.
+ */
+function addLibraryAliases(
+  recipe: std.Recipe<std.Directory>,
+  lib: string,
+  target: string,
+  majorVersion: number,
+  fullVersion: string,
+): std.Recipe<std.Directory> {
+  // Symbolic links for shared library
+  recipe = recipe.insert(
+    `lib/lib${lib}.so`,
+    std.symlink({ target: `lib${target}.so` }),
+  );
+  recipe = recipe.insert(
+    `lib/lib${lib}.so.${majorVersion}`,
+    std.symlink({ target: `lib${target}.so.${majorVersion}` }),
+  );
+  recipe = recipe.insert(
+    `lib/lib${lib}.so.${fullVersion}`,
+    std.symlink({ target: `lib${target}.so.${fullVersion}` }),
+  );
+
+  // Symbolic links for pkgconfig
+  recipe = recipe.insert(
+    `lib/pkgconfig/${lib}.pc`,
+    std.symlink({ target: `${target}.pc` }),
+  );
+  return recipe;
+}
