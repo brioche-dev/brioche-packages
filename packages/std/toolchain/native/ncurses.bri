@@ -24,6 +24,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
             --with-cxx-shared \\
             --enable-pc-files \\
             --enable-widec \\
+            --enable-overwrite \\
             --with-termlib \\
             --with-pkg-config-libdir=/lib/pkgconfig
           make
