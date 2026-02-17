@@ -1,6 +1,4 @@
 import * as std from "std";
-import xz from "xz";
-import zstd from "zstd";
 
 export const project = {
   name: "file",
@@ -27,7 +25,7 @@ export default function file(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, xz, zstd)
+    .dependencies(std.toolchain)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
