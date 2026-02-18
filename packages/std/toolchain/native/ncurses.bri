@@ -47,7 +47,14 @@ export default std.memo((): std.Recipe<std.Directory> => {
   const majorVersion = 6;
   const fullVersion = "6.4";
 
-  for (const lib of ["form", "menu", "ncurses", "ncurses++", "panel", "tinfo"]) {
+  for (const lib of [
+    "form",
+    "menu",
+    "ncurses",
+    "ncurses++",
+    "panel",
+    "tinfo",
+  ]) {
     ncurses = addLibraryAliases(
       ncurses,
       lib,
@@ -74,12 +81,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
   );
 
   // Ensure -lncursesw also pulls in libtinfow at link time
-  ncurses = addLibraryLinkerScript(
-    ncurses,
-    "ncursesw",
-    majorVersion,
-    ["tinfow"],
-  );
+  ncurses = addLibraryLinkerScript(ncurses, "ncursesw", majorVersion, [
+    "tinfow",
+  ]);
 
   return ncurses;
 });
