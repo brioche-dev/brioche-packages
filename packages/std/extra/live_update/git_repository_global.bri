@@ -4,18 +4,6 @@ export const DEFAULT_GITHUB_URL = "https://github.com";
 export const DEFAULT_GITLAB_URL = "https://gitlab.com";
 
 /**
- *
- * Escape a URL string to be used in a regular expression.
- *
- * @param url - The URL string to escape.
- *
- * @returns The escaped URL string.
- */
-function escapeUrlStringRegex(url: string): string {
-  return url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
  * Interface representing the parsed Git repository information.
  *
  * @property baseUrl - The base URL of the Git instance.
@@ -32,26 +20,32 @@ function tryParseGitRepo(
   baseUrl: string,
   repo: string,
 ): GitRepositoryInfo | null {
-  // Remove any trailing slashes from the base URL, and escape any
-  // special regex characters
   baseUrl = baseUrl.replace(/\/+$/, "");
-  const escapedBaseUrl = escapeUrlStringRegex(baseUrl);
 
-  const pattern =
-    `^${escapedBaseUrl}\\/` +
-    `(?<repoOwner>[\\w.-]+)\\/` +
-    `(?<repoName>[\\w.-]+)(?:\\.git)?\\/?$`;
-  const match = repo.match(new RegExp(pattern));
-
-  const { repoOwner, repoName: matchedRepoName } = match?.groups ?? {};
-  if (repoOwner == null || matchedRepoName == null) {
+  // Check if repo starts with baseUrl
+  if (!repo.startsWith(baseUrl + "/")) {
     return null;
   }
 
-  let repoName = matchedRepoName;
-  if (repoName.endsWith(".git")) {
-    repoName = repoName.slice(0, -4);
+  // Get the path after the base URL
+  let path = repo.slice(baseUrl.length + 1);
+
+  // Remove trailing slash and .git suffix
+  path = path.replace(/\/+$/, "").replace(/\.git$/, "");
+
+  // Split into segments
+  const segments = path.split("/").filter((s) => s.length > 0);
+
+  if (segments.length < 2) {
+    return null;
   }
+
+  // Last segment is repo name, everything else is owner (possibly with subgroups)
+  const repoName = segments.at(-1);
+  if (repoName == null) {
+    return null;
+  }
+  const repoOwner = segments.slice(0, -1).join("/");
 
   return { baseUrl, repoOwner, repoName };
 }
