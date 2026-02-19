@@ -1,24 +1,25 @@
 import * as std from "std";
-import { goBuild, goModuleManifest } from "go";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
 
 export const project = {
   name: "argocd",
   version: "3.3.0",
+  repository: "https://github.com/argoproj/argo-cd",
   extra: {
     moduleName: "github.com/argoproj/argo-cd/v3",
+    releaseDate: "2026-02-02",
   },
 };
 
-const source = Brioche.download(
-  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
-)
-  .unarchive("zip")
-  .peel(4);
-const manifest = await goModuleManifest(
-  Brioche.download(
-    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
-  ),
-);
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. The source includes local replace directives which aren't included in
+// Go proxy archives.
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+const source = gitCheckout(gitRef);
 
 export default function argocd(): std.Recipe<std.Directory> {
   return goBuild({
@@ -30,9 +31,9 @@ export default function argocd(): std.Recipe<std.Directory> {
         "-X",
         `${project.extra.moduleName}/common.version=${project.version}`,
         "-X",
-        `${project.extra.moduleName}/common.buildDate=${manifest.time}`,
+        `${project.extra.moduleName}/common.buildDate=${project.extra.releaseDate}`,
         "-X",
-        `${project.extra.moduleName}/common.gitCommit=${manifest.origin.hash}`,
+        `${project.extra.moduleName}/common.gitCommit=${gitRef.commit}`,
         "-X",
         `${project.extra.moduleName}/common.gitTag=${project.version}`,
         "-X",
@@ -69,5 +70,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGoModules({ project });
+  return std.liveUpdateFromGithubReleases({ project });
 }
