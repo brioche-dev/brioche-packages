@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "databricks_cli",
-  version: "0.287.0",
+  version: "0.288.0",
   extra: {
     moduleName: "github.com/databricks/cli",
   },
