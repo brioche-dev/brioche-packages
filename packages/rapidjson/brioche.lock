@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Tencent/rapidjson.git": {
+      "v1.1.0": "f54b0e47a08782a6131cc3d60f94d038fa6e0a51"
+    }
+  }
+}
