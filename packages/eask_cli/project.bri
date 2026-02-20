@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "eask_cli",
-  version: "0.12.6",
+  version: "0.12.7",
   repository: "https://github.com/emacs-eask/cli",
   extra: {
     packageName: "@emacs-eask/cli",
