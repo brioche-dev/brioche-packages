@@ -4,6 +4,7 @@ import stage2 from "/toolchain/stage2";
 import { buildAutopackConfig, AutopackOptions } from "/extra/autopack.bri";
 import { PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT } from "/extra/pkg_config_make_paths_relative.bri";
 import { LIBTOOL_SANITIZE_DEPENDENCIES_SCRIPT } from "/extra/libtool_sanitize_dependencies.bri";
+import { LINKER_SCRIPT_MAKE_PATHS_RELATIVE_SCRIPT } from "/extra/linker_script_make_paths_relative.bri";
 import { runtimeUtils, useBriocheStrip } from "/toolchain/utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
@@ -311,6 +312,7 @@ export const toolchain = std.memo(
     });
 
     toolchain = fixShebangs(toolchain);
+    toolchain = linkerScriptMakePathsRelative(toolchain);
     toolchain = pkgConfigMakePathsRelative(toolchain);
     toolchain = libtoolSanitizeDependencies(toolchain);
 
@@ -411,6 +413,28 @@ function pkgConfigMakePathsRelative(
     .process({
       command: std.tpl`${stage2}/bin/bash`,
       args: ["-euo", "pipefail", "-c", PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT],
+      env: {
+        PATH: std.tpl`${stage2}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+function linkerScriptMakePathsRelative(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Like the public `linkerScriptMakePathsRelative` function, but uses
+  // stage2 tools
+  return std
+    .process({
+      command: std.tpl`${stage2}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        LINKER_SCRIPT_MAKE_PATHS_RELATIVE_SCRIPT,
+      ],
       env: {
         PATH: std.tpl`${stage2}/bin`,
       },

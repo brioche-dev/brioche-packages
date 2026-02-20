@@ -36,7 +36,7 @@ export default function ncurses(): std.Recipe<std.Directory> {
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
+        CPATH: { append: [{ path: "include" }, { path: "include/ncursesw" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       }),
@@ -93,6 +93,8 @@ export function createFallbackNcursesSymlink(
     std.symlink({ target: "ncursesw" }),
   );
 
+  const majorVersion = project.version.split(".")[0] ?? "";
+
   for (const lib of [
     "form",
     "menu",
@@ -101,29 +103,76 @@ export function createFallbackNcursesSymlink(
     "panel",
     "tinfo",
   ]) {
-    // Create symlinks for the libraries
-    recipe = recipe.insert(
-      `lib/lib${lib}.a`,
-      std.symlink({ target: `lib${lib}w.a` }),
-    );
-    recipe = recipe.insert(`lib/lib${lib}.so`, std.file(`INPUT(-l${lib}w)`));
-
-    // Create symlinks for the pkgconfig files
-    recipe = recipe.insert(
-      `lib/pkgconfig/${lib}.pc`,
-      std.symlink({ target: `${lib}w.pc` }),
+    recipe = addLibraryAliases(
+      recipe,
+      lib,
+      `${lib}w`,
+      majorVersion,
+      project.version,
     );
   }
 
   // Create symlinks for a fallback to curses library
-  recipe = recipe.insert(
-    "lib/libcurses.a",
-    std.symlink({ target: "libncurses.a" }),
+  recipe = addLibraryAliases(
+    recipe,
+    "curses",
+    "ncurses",
+    majorVersion,
+    project.version,
   );
-  recipe = recipe.insert("lib/libcursesw.so", std.file("INPUT(-lncursesw)"));
+  recipe = addLibraryAliases(
+    recipe,
+    "cursesw",
+    "ncursesw",
+    majorVersion,
+    project.version,
+  );
+
+  return recipe;
+}
+
+/**
+ * Create library alias symlinks mapping `lib` to `target`.
+ *
+ * @param recipe - The directory recipe to insert symlinks into.
+ * @param lib - The alias library name (e.g. "ncurses", "curses").
+ * @param target - The target library name (e.g. "ncursesw", "ncurses").
+ * @param majorVersion - The soname major version (e.g. "6").
+ * @param fullVersion - The full version string (e.g. "6.6").
+ *
+ * @returns The recipe with `.a`, `.so`, `.so.N`, `.so.X.Y`, and `.pc` symlinks added.
+ */
+function addLibraryAliases(
+  recipe: std.Recipe<std.Directory>,
+  lib: string,
+  target: string,
+  majorVersion: string,
+  fullVersion: string,
+): std.Recipe<std.Directory> {
+  // Symbolic links for static library
   recipe = recipe.insert(
-    "lib/libcurses.so",
-    std.symlink({ target: "libncurses.so" }),
+    `lib/lib${lib}.a`,
+    std.symlink({ target: `lib${target}.a` }),
+  );
+
+  // Symbolic links for shared library
+  recipe = recipe.insert(
+    `lib/lib${lib}.so`,
+    std.symlink({ target: `lib${target}.so` }),
+  );
+  recipe = recipe.insert(
+    `lib/lib${lib}.so.${majorVersion}`,
+    std.symlink({ target: `lib${target}.so.${majorVersion}` }),
+  );
+  recipe = recipe.insert(
+    `lib/lib${lib}.so.${fullVersion}`,
+    std.symlink({ target: `lib${target}.so.${fullVersion}` }),
+  );
+
+  // Symbolic links for pkgconfig
+  recipe = recipe.insert(
+    `lib/pkgconfig/${lib}.pc`,
+    std.symlink({ target: `${target}.pc` }),
   );
 
   return recipe;
