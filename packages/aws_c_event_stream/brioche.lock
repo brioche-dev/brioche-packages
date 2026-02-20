@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/awslabs/aws-c-event-stream": {
+      "v0.5.9": "f43a3d24a7c1f8b50f709ccb4fdf4c7fd2827fff"
+    }
+  }
+}
