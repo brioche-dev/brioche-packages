@@ -1,0 +1,59 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import openssl from "openssl";
+import libiconv from "libiconv";
+
+export const project = {
+  name: "minizip_ng",
+  version: "4.1.0",
+  repository: "https://github.com/zlib-ng/minizip-ng",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function minizipNg(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl, libiconv],
+    set: {
+      MZ_FETCH_LIBS: "OFF",
+      MZ_LIB_SUFFIX: "-ng",
+      MZ_LIBCOMP: "OFF",
+      MZ_LIBBSD: "OFF",
+      MZ_BUILD_TESTS: "OFF",
+      MZ_BUILD_UNIT_TESTS: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion minizip-ng | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, minizipNg)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
