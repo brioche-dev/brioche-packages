@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/facebook/folly/archive/refs/tags/v2026.02.02.00.tar.gz": {
+    "https://github.com/facebook/folly/archive/refs/tags/v2026.02.09.00.tar.gz": {
       "type": "sha256",
-      "value": "4558c9e9de4f5443efe3d961646798443545a380e5974bd2bb2486ab8d3eff66"
+      "value": "41318d9472a01cf47ace7d653a8b3f1ba8663f3e150b2952ae00e1dfe514f617"
     }
   }
 }
