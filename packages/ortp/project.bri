@@ -1,0 +1,60 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import bctoolbox from "bctoolbox";
+
+export const project = {
+  name: "ortp",
+  version: "5.4.85",
+  repository: "https://gitlab.linphone.org/BC/public/ortp.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function ortp(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, bctoolbox],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      ENABLE_DOC: "OFF",
+      ENABLE_TESTS: "OFF",
+      ENABLE_UNIT_TESTS: "OFF",
+      ENABLE_STRICT: "OFF",
+    },
+  })
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion ortp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, ortp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const majorMinorVersion = project.version.split(".").slice(0, 2).join(".");
+  const expected = `${majorMinorVersion}.0`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.linphone.org",
+    project,
+  });
+}

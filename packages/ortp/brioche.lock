@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.linphone.org/BC/public/ortp.git": {
+      "5.4.85": "298490d88d7e531631a69fde96b4856272feb378"
+    }
+  }
+}
