@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/xtensor-stack/xsimd": {
+      "14.0.0": "01bd143c82a215973a643d709121617b7fc57dae"
+    }
+  }
+}
