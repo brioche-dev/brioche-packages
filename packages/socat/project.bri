@@ -4,7 +4,7 @@ import { nushellRunnable } from "nushell";
 
 export const project = {
   name: "socat",
-  version: "1.8.1.0",
+  version: "1.8.1.1",
 };
 
 const source = Brioche.download(
