@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "syft",
-  version: "1.41.2",
+  version: "1.42.0",
   extra: {
     moduleName: "github.com/anchore/syft",
   },
