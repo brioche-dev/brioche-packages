@@ -13,7 +13,19 @@ const source = Brioche.download(
   `https://storage.googleapis.com/aom-releases/libaom-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
-  .peel();
+  .peel()
+  .pipe((source) =>
+    // Fix NASM 3.x compatibility: -hf no longer includes optimization flags,
+    // use -hO for optimization check and -hf for format check
+    std.runBash`
+      sed -i 's/COMMAND \${CMAKE_ASM_NASM_COMPILER} -hf/COMMAND \${CMAKE_ASM_NASM_COMPILER} -hO/' \\
+        "$BRIOCHE_OUTPUT/build/cmake/aom_optimization.cmake"
+      sed -i '/if("\${AOM_TARGET_CPU}" STREQUAL "x86")/i\\  execute_process(COMMAND \${CMAKE_ASM_NASM_COMPILER} -hf OUTPUT_VARIABLE nasm_helptext)' \\
+        "$BRIOCHE_OUTPUT/build/cmake/aom_optimization.cmake"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
 
 export default function aom(): std.Recipe<std.Directory> {
   return cmakeBuild({
