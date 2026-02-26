@@ -1,0 +1,49 @@
+import * as std from "/core";
+import { runBash } from "./run_bash.bri";
+
+export const LINKER_SCRIPT_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
+  fix_linker_script_paths () {
+    local -r file="$1"
+
+    sed -i 's| //lib/| |g; s| /lib/| |g' "$file"
+  }
+
+  # No lib dir found, exit
+  if [[ ! -d "$BRIOCHE_OUTPUT/lib" ]]; then
+    exit 0
+  fi
+
+  find -L "$BRIOCHE_OUTPUT/lib" -maxdepth 1 -name '*.so' -type f -print0 \\
+    | while IFS= read -r -d $'\\0' file; do
+      if grep -qE 'GROUP|INPUT' "$file" 2>/dev/null; then
+        fix_linker_script_paths "$file"
+      fi
+    done
+`;
+
+/**
+ * Create a recipe that replaces absolute paths in GNU ld linker scripts
+ * with relative filenames.
+ *
+ * Linker scripts from glibc (e.g. `libc.so`, `libm.so`) contain absolute
+ * paths like `/lib/libc.so.6` that depend on gcc's `--sysroot` to resolve
+ * correctly. Tools that parse these scripts without `--sysroot` fail to
+ * resolve the absolute paths. This function strips the absolute directory
+ * prefix so the linker resolves library names via its search paths instead.
+ *
+ * @param recipe - The recipe to apply the transformation to.
+ *
+ * @returns A new recipe with the fixed linker scripts.
+ *
+ * @remarks This function looks for `.so` files in `lib/` relative to
+ *   the `$BRIOCHE_OUTPUT` output directory that contain GNU ld script
+ *   directives (`GROUP` or `INPUT`), and strips absolute `/lib/` path
+ *   prefixes from them.
+ */
+export function linkerScriptMakePathsRelative(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return runBash(LINKER_SCRIPT_MAKE_PATHS_RELATIVE_SCRIPT)
+    .outputScaffold(recipe)
+    .toDirectory();
+}
