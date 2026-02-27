@@ -3,12 +3,12 @@ import * as typer from "typer";
 
 export const project = {
   name: "go",
-  version: "1.25.6",
+  version: "1.26.0",
   repository: "https://github.com/golang/go",
   extra: {
     otherVersions: {
-      "1.25": "1.25.6",
-      "1.24": "1.24.12",
+      "1.25": "1.25.7",
+      "1.24": "1.24.13",
     },
   },
 };
