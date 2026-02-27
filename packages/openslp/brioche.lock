@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/openslp-org/openslp": {
+      "openslp-2.0.0": "4bb754374f284905f0118540924aa2fd6b99164e"
+    }
+  }
+}
