@@ -5,7 +5,7 @@ import libsepol from "libsepol";
 
 export const project = {
   name: "libsemanage",
-  version: "3.9",
+  version: "3.10",
   repository: "https://github.com/SELinuxProject/selinux",
 };
 
