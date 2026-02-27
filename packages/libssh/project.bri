@@ -5,10 +5,10 @@ import openssl from "openssl";
 
 export const project = {
   name: "libssh",
-  version: "0.11.3",
+  version: "0.12.0",
   extra: {
     majorVersion: "0",
-    minorVersion: "11",
+    minorVersion: "12",
   },
 };
 
