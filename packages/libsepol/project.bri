@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "libsepol",
-  version: "3.9",
+  version: "3.10",
   repository: "https://github.com/SELinuxProject/selinux",
 };
 
