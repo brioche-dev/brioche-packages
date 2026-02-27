@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/ofalk/libdnet": {
-      "libdnet-1.18.0": "3dfbe889b1f65077efe579da34fc1d6819fcb7f3"
+      "libdnet-1.18.2": "024ab07d88a2f70ab161cfc0a41f460cb046133f"
     }
   }
 }
