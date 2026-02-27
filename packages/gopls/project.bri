@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "gopls",
-  version: "0.21.0",
+  version: "0.21.1",
   extra: {
     moduleName: "golang.org/x/tools/gopls",
   },
