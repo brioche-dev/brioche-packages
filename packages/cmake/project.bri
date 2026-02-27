@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "cmake",
-  version: "4.2.2",
+  version: "4.2.3",
   repository: "https://github.com/Kitware/CMake",
 };
 
