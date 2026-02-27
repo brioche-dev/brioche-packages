@@ -5,7 +5,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "libmongocrypt",
-  version: "1.17.1",
+  version: "1.17.2",
   repository: "https://github.com/mongodb/libmongocrypt",
 };
 
