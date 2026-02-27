@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/kalbasit/ncps/@v/v0.7.0.zip": {
+    "https://proxy.golang.org/github.com/kalbasit/ncps/@v/v0.8.5.zip": {
       "type": "sha256",
-      "value": "3cc5b6e47d3a954576a0f35265af80926ea2e57b520bb8c80000baa3269fbc97"
+      "value": "26e75a74f207673ed0de2e973f7a2a8a521dcaf5b2323cddc75cf64ee73f174b"
     }
   }
 }
