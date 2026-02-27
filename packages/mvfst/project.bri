@@ -2,6 +2,7 @@ import * as std from "std";
 import cmake, { cmakeBuild } from "cmake";
 import boost from "boost";
 import doubleConversion from "double_conversion";
+import fizz from "fizz";
 import fmt from "fmt";
 import folly from "folly";
 import gflags from "gflags";
@@ -14,9 +15,9 @@ import openssl from "openssl";
 import snappy from "snappy";
 
 export const project = {
-  name: "fizz",
+  name: "mvfst",
   version: "2026.02.02.00",
-  repository: "https://github.com/facebookincubator/fizz",
+  repository: "https://github.com/facebook/mvfst",
 };
 
 const source = Brioche.download(
@@ -25,14 +26,14 @@ const source = Brioche.download(
   .unarchive("tar", "gzip")
   .peel();
 
-export default function fizz(): std.Recipe<std.Directory> {
+export default function mvfst(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    path: "fizz",
     dependencies: [
       std.toolchain,
       boost,
       doubleConversion,
+      fizz,
       fmt,
       folly,
       gflags,
@@ -46,7 +47,6 @@ export default function fizz(): std.Recipe<std.Directory> {
     ],
     set: {
       BUILD_TESTS: "OFF",
-      BUILD_EXAMPLES: "OFF",
       BUILD_SHARED_LIBS: "ON",
       PACKAGE_VERSION: project.version,
       // Prefer config-mode packages over module finders.
@@ -65,14 +65,13 @@ export default function fizz(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  // The library does not export a version in its CMake config
   const src = std.directory({
     "CMakeLists.txt": std.file(std.indoc`
       cmake_minimum_required(VERSION 4.0)
       project(QueryLibrary)
 
-      find_package(fizz REQUIRED CONFIG)
-      message(STATUS "fizz found: TRUE")
+      find_package(mvfst REQUIRED CONFIG)
+      message(STATUS "mvfst found: TRUE")
     `),
   });
 
@@ -85,6 +84,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
       cmake,
       boost,
       doubleConversion,
+      fizz,
       fmt,
       folly,
       gflags,
@@ -95,14 +95,14 @@ export async function test(): Promise<std.Recipe<std.File>> {
       lz4,
       openssl,
       snappy,
-      fizz,
+      mvfst,
     )
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected output
-  const expected = "fizz found: TRUE";
+  const expected = "mvfst found: TRUE";
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,
@@ -112,7 +112,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({
+  return std.liveUpdateFromGithubTags({
     project,
     matchTag: /^v(?<version>\d{4}\.\d{2}\.\d{2}\.\d{2})$/,
   });
