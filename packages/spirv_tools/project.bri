@@ -5,7 +5,7 @@ import { source as spirvHeadersSource } from "spirv_headers";
 
 export const project = {
   name: "spirv_tools",
-  version: "1.4.335.0",
+  version: "1.4.341.0",
   repository: "https://github.com/KhronosGroup/SPIRV-Tools",
 };
 
