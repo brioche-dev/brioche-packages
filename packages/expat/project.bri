@@ -2,10 +2,10 @@ import * as std from "std";
 
 export const project = {
   name: "expat",
-  version: "2.7.3",
+  version: "2.7.4",
   repository: "https://github.com/libexpat/libexpat",
   extra: {
-    versionUnderscore: "2_7_3",
+    versionUnderscore: "2_7_4",
   },
 };
 
