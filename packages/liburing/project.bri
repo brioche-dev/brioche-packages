@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "liburing",
-  version: "2.13",
+  version: "2.14",
   repository: "https://github.com/axboe/liburing.git",
 };
 
