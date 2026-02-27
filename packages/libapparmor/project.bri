@@ -3,7 +3,7 @@ import autoconfArchive from "autoconf_archive";
 
 export const project = {
   name: "libapparmor",
-  version: "4.1.3",
+  version: "4.1.6",
   repository: "https://gitlab.com/apparmor/apparmor",
 };
 
