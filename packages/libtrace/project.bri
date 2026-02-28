@@ -25,9 +25,7 @@ const source = Brioche.gitCheckout({
 export default function libtrace(): std.Recipe<std.Directory> {
   return std.runBash`
     autoreconf --install --force
-    ./configure \\
-      --prefix=/ \\
-      --without-ncurses
+    ./configure --prefix=/
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
