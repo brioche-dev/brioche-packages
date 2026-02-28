@@ -3,7 +3,7 @@ import rust, { cargoBuild, vendorCrate } from "rust";
 
 export const project = {
   name: "nix_init",
-  version: "0.3.2",
+  version: "0.3.3",
   repository: "https://github.com/nix-community/nix-init.git",
 };
 
