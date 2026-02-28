@@ -6,7 +6,7 @@ import { runNushell } from "nushell";
 
 export const project = {
   name: "renovate",
-  version: "42.92.4",
+  version: "43.15.0",
   repository: "https://github.com/renovatebot/renovate.git",
 };
 
@@ -32,12 +32,16 @@ export default function renovate(): std.Recipe<std.Directory> {
   // provided version of pnpm instead of trying to download Renovate's
   // pinned version.
   const dist = std.runBash`
+    export LD_LIBRARY_PATH="$LIBRARY_PATH"
+
     pnpm --config.manage-package-manager-versions=false config set manage-package-manager-versions=false
     pnpm build
     mv dist "$BRIOCHE_OUTPUT"
   `
     .workDir(npmPackage)
-    .dependencies(pnpm)
+    // Rolldown (used by tsdown) dynamically loads `librt.so.1`, which
+    // needs the toolchain libraries on the dynamic linker search path.
+    .dependencies(std.toolchain, pnpm)
     .toDirectory();
 
   // Set the release version number in `package.json`.
