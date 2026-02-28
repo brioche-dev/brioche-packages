@@ -13,25 +13,19 @@ const source = Brioche.download(
   `https://www.jedsoft.org/releases/slang/slang-${project.version}.tar.bz2`,
 )
   .unarchive("tar", "bzip2")
-  .peel()
-  .pipe((source) =>
-    // Patch the source to properly build the recipe
-    // Inspired from: https://github.com/NixOS/nixpkgs/blob/d2ed99647a4b195f0bcc440f76edfa10aeb3b743/pkgs/by-name/sl/slang/package.nix#L29
-    std.runBash`
-      sed -i -e "s|/usr/lib/terminfo|$ncurses_path/lib/terminfo|" "$BRIOCHE_OUTPUT/configure"
-      sed -i -e "s|/usr/lib/terminfo|$ncurses_path/lib/terminfo|" "$BRIOCHE_OUTPUT/src/sltermin.c"
-      sed -i -e "s|/bin/ln|ln|" "$BRIOCHE_OUTPUT/src/Makefile.in"
-      sed -i -e "s|-ltermcap|-lncurses|" "$BRIOCHE_OUTPUT/configure"
-    `
-      .env({
-        ncurses_path: std.tpl`${std.toolchain}`,
-      })
-      .outputScaffold(source)
-      .toDirectory(),
-  );
+  .peel();
 
 export default function slang(): std.Recipe<std.Directory> {
+  // Patch the source to properly build the recipe
+  // Inspired from: https://github.com/NixOS/nixpkgs/blob/d2ed99647a4b195f0bcc440f76edfa10aeb3b743/pkgs/by-name/sl/slang/package.nix#L29
+  // We need to do it in the build step in order to pick up
+  // the correct terminfo paths from the toolchain
   return std.runBash`
+    sed -i -e "s|/bin/ln|ln|" "src/Makefile.in"
+    sed -i -e "s|-ltermcap|-lncurses|" "configure"
+    sed -i -e "s|/usr/lib/terminfo|$ncurses_path/share/terminfo|" configure
+    sed -i -e "s|/usr/lib/terminfo|$ncurses_path/share/terminfo|" src/sltermin.c
+
     ./configure \\
       --prefix=/ \\
       --with-png="$libpng_path" \\
@@ -44,6 +38,7 @@ export default function slang(): std.Recipe<std.Directory> {
     .workDir(source)
     .dependencies(std.toolchain, libpng, oniguruma, pcre)
     .env({
+      ncurses_path: std.tpl`${std.toolchain}`,
       libpng_path: std.tpl`${libpng}`,
       oniguruma_path: std.tpl`${oniguruma}`,
       pcre_path: std.tpl`${pcre}`,
