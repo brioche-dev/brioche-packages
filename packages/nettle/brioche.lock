@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/gnutls/nettle": {
+      "nettle_4.0_release_20260205": "bf13ee9e5024014cfa6d2fc097923afe087e63ba"
+    }
+  }
+}
