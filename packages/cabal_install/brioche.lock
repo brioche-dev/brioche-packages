@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.haskell.org/cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-aarch64-linux-deb12.tar.xz": {
+      "type": "sha256",
+      "value": "41d8fc43de1c652c00d85799d0273f8b6600bc71603126bc651ca4e3917a1b84"
+    },
+    "https://downloads.haskell.org/cabal/cabal-install-3.16.1.0/cabal-install-3.16.1.0-x86_64-linux-deb12.tar.xz": {
+      "type": "sha256",
+      "value": "209987f6abdd1119f6b2674a0d1012857a783464774708cb4f3fd9e156ea7bea"
+    }
+  }
+}
