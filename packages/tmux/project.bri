@@ -1,0 +1,95 @@
+import * as std from "std";
+import libevent from "libevent";
+import utf8proc from "utf8proc";
+
+export const project = {
+  name: "tmux",
+  version: "3.6a",
+  repository: "https://github.com/tmux/tmux",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/tmux-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function tmux(): std.Recipe<std.Directory> {
+  return (
+    std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-utf8proc
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+      .workDir(source)
+      .dependencies(std.toolchain, libevent, utf8proc)
+      .toDirectory()
+      .insert(
+        "share/terminfo",
+        std.castToDirectory(std.toolchain().get("share/terminfo")),
+      )
+      .pipe((recipe) =>
+        std.setEnv(recipe, {
+          TERMINFO_DIRS: { append: [{ path: "share/terminfo" }] },
+        }),
+      )
+      // Move the packed binary to libexec and create a wrapper at bin/tmux
+      // that sets TERMINFO_DIRS so tmux can find the terminfo database
+      .pipe((recipe) =>
+        recipe
+          .insert("libexec/tmux", recipe.get("bin/tmux"))
+          .remove("bin/tmux"),
+      )
+      .pipe((recipe) =>
+        std.addRunnable(recipe, "bin/tmux", {
+          command: { relativePath: "libexec/tmux" },
+          env: {
+            TERMINFO_DIRS: {
+              fallback: { relativePath: "share/terminfo" },
+            },
+          },
+        }),
+      )
+      .pipe((recipe) => std.withRunnableLink(recipe, "bin/tmux"))
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // Generate a C.UTF-8 locale since tmux requires UTF-8
+  const locale = std.runBash`
+    localedef -i POSIX -f UTF-8 "$BRIOCHE_OUTPUT"/C.UTF-8 || true
+  `
+    .dependencies(std.toolchain)
+    .outputScaffold(std.directory({ "C.UTF-8": std.directory() }))
+    .env({
+      I18NPATH: std.tpl`${std.toolchain}/share/i18n`,
+    })
+    .toDirectory();
+
+  const script = std.runBash`
+    tmux -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tmux)
+    .env({
+      LOCPATH: locale,
+      LANG: "C.UTF-8",
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tmux ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^(?<version>\d+\.\d+[a-z]?)$/,
+  });
+}
