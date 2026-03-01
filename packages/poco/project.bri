@@ -7,7 +7,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "poco",
-  version: "1.14.2",
+  version: "1.15.0",
   repository: "https://github.com/pocoproject/poco.git",
 };
 
