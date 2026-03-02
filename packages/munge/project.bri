@@ -4,7 +4,7 @@ import libgpgError from "libgpg_error";
 
 export const project = {
   name: "munge",
-  version: "0.5.17",
+  version: "0.5.18",
   repository: "https://github.com/dun/munge",
 };
 
