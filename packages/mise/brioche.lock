@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jdx/mise.git": {
+      "v2026.3.0": "b8eed483259b36aba93e1353f820fc726eebb67c"
+    }
+  }
+}
