@@ -22,7 +22,7 @@ export default function libint(): std.Recipe<std.Directory> {
     set: {
       BUILD_TESTING: "OFF",
       LIBINT2_BUILD_SHARED_AND_STATIC_LIBS: "ON",
-    }
+    },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
