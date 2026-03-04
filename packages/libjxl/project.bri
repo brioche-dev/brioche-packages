@@ -13,7 +13,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libjxl",
-  version: "0.11.1",
+  version: "0.11.2",
   repository: "https://github.com/libjxl/libjxl",
 };
 
@@ -23,18 +23,7 @@ const source = Brioche.gitCheckout({
   options: {
     submodules: true,
   },
-}).pipe((source) =>
-  // Patch sjpeg's CMakeLists.txt to use a newer CMake minimum version
-  std.runBash`
-    # Fail if upstream has fixed the CMake version (so we can remove this workaround)
-    grep -q 'cmake_minimum_required(VERSION 2.8.7)' "$BRIOCHE_OUTPUT/third_party/sjpeg/CMakeLists.txt"
-
-    sed -i 's/cmake_minimum_required(VERSION 2.8.7)/cmake_minimum_required(VERSION 4.0)/' \\
-      "$BRIOCHE_OUTPUT/third_party/sjpeg/CMakeLists.txt"
-  `
-    .outputScaffold(source)
-    .toDirectory(),
-);
+});
 
 export default function libjxl(): std.Recipe<std.Directory> {
   return cmakeBuild({
