@@ -1,9 +1,10 @@
 import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import libpng from "libpng";
 import openssl from "openssl";
 import pcre2 from "pcre2";
 import sqlite from "sqlite";
 import utf8proc from "utf8proc";
-import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "poco",
@@ -19,7 +20,7 @@ const source = Brioche.gitCheckout({
 export default function poco(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, openssl, pcre2, sqlite, utf8proc],
+    dependencies: [std.toolchain, libpng, openssl, pcre2, sqlite, utf8proc],
     set: {
       POCO_UNBUNDLED: "ON",
       ENABLE_MONGODB: "OFF",
