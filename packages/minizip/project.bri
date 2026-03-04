@@ -6,14 +6,27 @@ export const project = {
   repository: "https://github.com/madler/zlib",
 };
 
-const source = std.castToDirectory(
-  Brioche.download(
-    `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+const source = std
+  .castToDirectory(
+    Brioche.download(
+      `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+    )
+      .unarchive("tar", "gzip")
+      .peel()
+      .get("contrib/minizip"),
   )
-    .unarchive("tar", "gzip")
-    .peel()
-    .get("contrib/minizip"),
-);
+  .pipe((source) =>
+    // ints.h is missing from minizip_include_HEADERS
+    std.runBash`
+    # Fail if upstream has fixed the install headers (so we can remove this workaround)
+    grep -q 'crypt\\.h' "$BRIOCHE_OUTPUT/Makefile.am"
+
+    sed -i 's/\\tcrypt\\.h \\\\/&\\n\\tints.h \\\\/' "$BRIOCHE_OUTPUT/Makefile.am"
+  `
+      .outputScaffold(source)
+      .dependencies(std.toolchain)
+      .toDirectory(),
+  );
 
 export default function minizip(): std.Recipe<std.Directory> {
   return std.runBash`
