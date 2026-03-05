@@ -25,6 +25,8 @@ export default function kubetail(): std.Recipe<std.Directory> {
     .outputScaffold(std.directory({ bin: std.directory() }))
     .dependencies(std.toolchain, go, pnpm)
     .env({
+      // Help the dynamic linker to find shared libraries at runtime.
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
       VERSION: project.version,
     })
     .unsafe({
