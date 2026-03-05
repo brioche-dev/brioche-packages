@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "redis",
-  version: "8.4.0",
+  version: "8.6.0",
   repository: "https://github.com/redis/redis",
 };
 
@@ -15,8 +15,8 @@ const source = Brioche.gitCheckout({
 
 export default function redis(): std.Recipe<std.Directory> {
   return std.runBash`
-    make \
-      -j "$(nproc)" \
+    make \\
+      -j "$(nproc)" \\
       BUILD_TLS=yes
     make install PREFIX="$BRIOCHE_OUTPUT"
   `
