@@ -28,6 +28,10 @@ export default function filebrowser(): std.Recipe<std.Directory> {
   `
     .workDir(frontendWithDeps)
     .dependencies(std.toolchain, pnpm)
+    .env({
+      // Help the dynamic linker to find shared libraries at runtime.
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+    })
     .unsafe({ networking: true })
     .toDirectory();
 
