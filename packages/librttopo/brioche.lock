@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://gitea.osgeo.org/rttopo/librttopo/archive/librttopo-1.1.0.tar.gz": {
+      "type": "sha256",
+      "value": "60b49acb493c1ab545116fb0b0d223ee115166874902ad8165eb39e9fd98eaa9"
+    }
+  }
+}
