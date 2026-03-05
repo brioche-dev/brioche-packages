@@ -6,24 +6,27 @@ export const project = {
   repository: "https://github.com/openslp-org/openslp",
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `openslp-${project.version}`,
-}).pipe((source) =>
-  // The install-data-hook in etc/Makefile.am creates /var/log without
-  // respecting DESTDIR, causing the build to fail when setting `prefix`.
-  // This patch fixes the problem by adding $(DESTDIR) prefix to the
-  // mkdir command.
-  std.runBash`
-    sed -i 's|mkdir -p \$(localstatedir)/log|mkdir -p \$(DESTDIR)\$(localstatedir)/log|' "$BRIOCHE_OUTPUT/openslp/etc/Makefile.am"
-  `
-    .outputScaffold(source)
-    .toDirectory(),
+const source = std.castToDirectory(
+  Brioche.gitCheckout({
+    repository: project.repository,
+    ref: `openslp-${project.version}`,
+  })
+    .pipe((source) =>
+      // The install-data-hook in etc/Makefile.am creates /var/log without
+      // respecting DESTDIR, causing the build to fail when setting `prefix`.
+      // This patch fixes the problem by adding $(DESTDIR) prefix to the
+      // mkdir command.
+      std.runBash`
+        sed -i 's|mkdir -p \$(localstatedir)/log|mkdir -p \$(DESTDIR)\$(localstatedir)/log|' "$BRIOCHE_OUTPUT/openslp/etc/Makefile.am"
+      `
+        .outputScaffold(source)
+        .toDirectory(),
+    )
+    .get("openslp"),
 );
 
 export default function openslp(): std.Recipe<std.Directory> {
   return std.runBash`
-    cd openslp
     ./autogen.sh
     ./configure \\
       --prefix=/ \\
