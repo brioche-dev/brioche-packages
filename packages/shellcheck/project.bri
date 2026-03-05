@@ -19,10 +19,10 @@ export default function shellcheck(): std.Recipe<std.Directory> {
       export LD_LIBRARY_PATH="$LIBRARY_PATH"
 
       cabal update
-      cabal install \
-        --allow-newer=base,containers,template-haskell \
-        --install-method=copy \
-        --installdir="$BRIOCHE_OUTPUT/bin" \
+      cabal install \\
+        --allow-newer=base,containers,template-haskell \\
+        --install-method=copy \\
+        --installdir="$BRIOCHE_OUTPUT/bin" \\
         exe:shellcheck
     `
     .workDir(source)
