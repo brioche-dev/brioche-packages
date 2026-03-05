@@ -1,0 +1,126 @@
+import * as std from "std";
+import libxml2 from "libxml2";
+
+export const project = {
+  name: "docbook",
+  version: "5.2",
+  repository: "https://github.com/docbook/docbook",
+};
+
+const sourceV42 = Brioche.download(
+  "https://archive.docbook.org/xml/4.2/docbook-xml-4.2.zip",
+).unarchive("zip");
+
+const sourceV412 = Brioche.download(
+  "https://archive.docbook.org/xml/4.1.2/docbkx412.zip",
+)
+  .unarchive("zip")
+  .pipe((recipe) =>
+    std.runBash`
+      sed 's/V4\.2 \.\./V4.1.2 /g; s/4\.2/4.1.2/g' \\
+        "$SOURCE_CATALOG" > "$BRIOCHE_OUTPUT/catalog.xml"
+    `
+      .env({ SOURCE_CATALOG: std.tpl`${sourceV42}/catalog.xml` })
+      .outputScaffold(recipe)
+      .dependencies(std.toolchain)
+      .toDirectory(),
+  );
+
+const sourceV43 = Brioche.download(
+  "https://archive.docbook.org/xml/4.3/docbook-xml-4.3.zip",
+).unarchive("zip");
+
+const sourceV44 = Brioche.download(
+  "https://archive.docbook.org/xml/4.4/docbook-xml-4.4.zip",
+).unarchive("zip");
+
+const sourceV45 = Brioche.download(
+  "https://archive.docbook.org/xml/4.5/docbook-xml-4.5.zip",
+).unarchive("zip");
+
+const sourceV50 = Brioche.download(
+  "https://archive.docbook.org/xml/5.0/docbook-5.0.zip",
+)
+  .unarchive("zip")
+  .peel();
+
+const sourceV51 = Brioche.download(
+  "https://archive.docbook.org/xml/5.1/docbook-v5.1-os.zip",
+)
+  .unarchive("zip")
+  .pipe((recipe) =>
+    std.runBash`
+      sed -i 's/5\.1CR4/5.1/g' "$BRIOCHE_OUTPUT/catalog.xml"
+    `
+      .outputScaffold(std.castToDirectory(recipe.get("schemas")))
+      .dependencies(std.toolchain)
+      .toDirectory(),
+  );
+
+const sourceV52 = Brioche.download(
+  `https://github.com/docbook/docbook/releases/download/${project.version}/docbook-${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel();
+
+export default function docbook(): std.Recipe<std.Directory> {
+  const schemasDir = std.directory({
+    "4.1.2": sourceV412,
+    "4.2": sourceV42,
+    "4.3": sourceV43,
+    "4.4": sourceV44,
+    "4.5": sourceV45,
+    "5.0": sourceV50,
+    "5.1": sourceV51,
+    "5.2": sourceV52,
+  });
+
+  // Relative nextCatalog paths resolve correctly wherever the package lives in the store.
+  const catalog = std.file(std.indoc`
+    <?xml version="1.0"?>
+    <!DOCTYPE catalog PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN"
+      "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
+    <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+      <nextCatalog catalog="docbook/4.2/catalog.xml"/>
+      <nextCatalog catalog="docbook/4.1.2/catalog.xml"/>
+      <nextCatalog catalog="docbook/4.3/catalog.xml"/>
+      <nextCatalog catalog="docbook/4.4/catalog.xml"/>
+      <nextCatalog catalog="docbook/4.5/catalog.xml"/>
+      <nextCatalog catalog="docbook/5.0/catalog.xml"/>
+      <nextCatalog catalog="docbook/5.1/catalog.xml"/>
+      <nextCatalog catalog="docbook/5.2/catalog.xml"/>
+    </catalog>
+  `);
+
+  return std
+    .directory({
+      "share/xml/catalog.xml": catalog,
+      "share/xml/docbook": schemasDir,
+    })
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        XML_CATALOG_FILES: { fallback: { path: "share/xml/catalog.xml" } },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so just run to verify
+  // the correct installation
+  const script = std.runBash`
+    xmlcatalog "$XML_CATALOG_FILES" "-//OASIS//DTD DocBook XML V4.5//EN" | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libxml2, docbook)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
