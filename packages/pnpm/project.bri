@@ -89,7 +89,6 @@ export function pnpmInstall(
         }),
         ...(options.dependencies ?? []),
       ],
-      env: options.env,
       currentDir: std.outputPath,
       outputScaffold: options.source,
       unsafe: { networking: true },
@@ -227,6 +226,13 @@ async function wrapBinstubs(
       args: [{ relativePath: name }],
       // Include std.tools for sed, dirname, uname needed by pnpm binstubs
       dependencies: [std.tools, nodejs],
+      env: {
+        // Help the dynamic linker to find shared libraries at runtime.
+        LD_LIBRARY_PATH: {
+          prepend: std.toolchain().get("lib"),
+          separator: ":",
+        },
+      },
     });
   });
 

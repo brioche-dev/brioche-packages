@@ -338,6 +338,13 @@ async function wrapNodejsBins(
       command: "node",
       args: [{ relativePath: target }],
       dependencies: [nodejs],
+      env: {
+        // Help the dynamic linker to find shared libraries at runtime.
+        LD_LIBRARY_PATH: {
+          prepend: std.toolchain().get("lib"),
+          separator: ":",
+        },
+      },
     });
   });
 
