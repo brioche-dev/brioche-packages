@@ -4,7 +4,7 @@ import llvm from "llvm";
 
 export const project = {
   name: "fresh_editor",
-  version: "0.2.3",
+  version: "0.2.14",
   extra: {
     crateName: "fresh-editor",
   },
