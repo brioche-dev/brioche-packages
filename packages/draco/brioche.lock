@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/google/draco/archive/refs/tags/1.5.7.tar.gz": {
+      "type": "sha256",
+      "value": "bf6b105b79223eab2b86795363dfe5e5356050006a96521477973aba8f036fe1"
+    }
+  }
+}

@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/turbot/steampipe/v2/@v/v2.3.4.info": {
+    "https://proxy.golang.org/github.com/turbot/steampipe/v2/@v/v2.3.5.info": {
       "type": "sha256",
-      "value": "84ef3d1f4b54f0d11e7980e8395633929c4722e629f80202e134403ea3ae92a1"
+      "value": "2447ec6f3ac61a2e55388120d46a09fcf143ac726365cee864546651fb3fee29"
     },
-    "https://proxy.golang.org/github.com/turbot/steampipe/v2/@v/v2.3.4.zip": {
+    "https://proxy.golang.org/github.com/turbot/steampipe/v2/@v/v2.3.5.zip": {
       "type": "sha256",
-      "value": "57c49fd180b1414716528542423b51c0274c6dbbf88017bd9c3560931e21b31a"
+      "value": "d90e9fa06c8796473a6303844baade7ebe778888480053a489da69d4e0954a78"
     }
   }
 }

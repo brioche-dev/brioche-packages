@@ -1,0 +1,43 @@
+import * as std from "std";
+import openssl from "openssl";
+import { cargoBuild } from "rust";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "mollysocket",
+  version: "1.7.0",
+  repository: "https://github.com/mollyim/mollysocket.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function mollysocket(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl, sqlite],
+    runnable: "bin/mollysocket",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    mollysocket --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(mollysocket)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `mollysocket ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

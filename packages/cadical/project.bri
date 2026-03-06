@@ -1,0 +1,64 @@
+import * as std from "std";
+
+export const project = {
+  name: "cadical",
+  version: "3.0.0",
+  repository: "https://github.com/arminbiere/cadical.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `rel-${project.version}`,
+});
+
+export default function cadical(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure
+    make -j "$(nproc)"
+
+    # Manual installation
+    cp build/cadical build/mobical "$BRIOCHE_OUTPUT/bin/"
+    cp build/libcadical.a "$BRIOCHE_OUTPUT/lib/"
+    cp src/cadical.hpp src/ccadical.h "$BRIOCHE_OUTPUT/include/"
+  `
+    .workDir(source)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+        lib: std.directory(),
+        include: std.directory(),
+      }),
+    )
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/cadical"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cadical --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(cadical)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^rel-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

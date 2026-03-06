@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.lesbonscomptes.com/upmpdcli/downloads/libnpupnp-6.2.3.tar.gz": {
+      "type": "sha256",
+      "value": "563d2a9e4afe603717343dc4667c0b89c6a017008ac6b52262da17a1e4f6bb96"
+    }
+  }
+}

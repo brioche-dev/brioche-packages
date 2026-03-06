@@ -24,10 +24,37 @@ export default function libsodium(): std.Recipe<std.Directory> {
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
+      // Upstream libsodium doesn't ship CMake config files (only pkg-config).
+      // Provide a minimal SodiumConfig.cmake so CMake projects can use
+      // find_package(Sodium).
+      recipe.insert(
+        "lib/cmake/Sodium/SodiumConfig.cmake",
+        std.file(std.indoc`
+          get_filename_component(_sodium_prefix "\${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+
+          find_path(Sodium_INCLUDE_DIR sodium.h HINTS "\${_sodium_prefix}/include" NO_DEFAULT_PATH)
+          find_library(Sodium_LIBRARY NAMES sodium HINTS "\${_sodium_prefix}/lib" NO_DEFAULT_PATH)
+
+          include(FindPackageHandleStandardArgs)
+          find_package_handle_standard_args(Sodium REQUIRED_VARS Sodium_LIBRARY Sodium_INCLUDE_DIR)
+
+          if(Sodium_FOUND AND NOT TARGET sodium)
+            add_library(sodium UNKNOWN IMPORTED)
+            set_target_properties(sodium PROPERTIES
+              IMPORTED_LOCATION "\${Sodium_LIBRARY}"
+              INTERFACE_INCLUDE_DIRECTORIES "\${Sodium_INCLUDE_DIR}")
+          endif()
+
+          unset(_sodium_prefix)
+        `),
+      ),
+    )
+    .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
       }),
     );
 }

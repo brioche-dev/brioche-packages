@@ -1,0 +1,43 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "ttdl",
+  version: "4.22.0",
+  extra: {
+    crateName: "ttdl",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function ttdl(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/ttdl",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ttdl --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ttdl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Terminal Todo List Manager(TTDL) Version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

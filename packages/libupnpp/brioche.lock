@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.lesbonscomptes.com/upmpdcli/downloads/libupnpp-1.0.3.tar.gz": {
+      "type": "sha256",
+      "value": "d3b201619a84837279dc46eeb7ccaaa7960d4372db11b43cf2b143b5d9bd322e"
+    }
+  }
+}

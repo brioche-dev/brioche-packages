@@ -18,9 +18,9 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          perl Makefile.PL \
-            EXPATLIBPATH="$expat/lib" \
-            EXPATINCPATH="$expat/include" \
+          perl Makefile.PL \\
+            EXPATLIBPATH="$expat/lib" \\
+            EXPATINCPATH="$expat/include" \\
             PREFIX="$BRIOCHE_OUTPUT"
           make
           make test

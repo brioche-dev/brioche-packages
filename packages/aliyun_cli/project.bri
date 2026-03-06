@@ -1,0 +1,61 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "aliyun_cli",
+  version: "3.2.9",
+  repository: "https://github.com/aliyun/aliyun-cli",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. Since, the one from Go proxy doesn't contain the git submodule
+// required for the build.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+  options: {
+    submodules: true,
+  },
+});
+
+export default function aliyunCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./main",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/aliyun/aliyun-cli/v3/cli.Version=${project.version}`,
+      ],
+    },
+    runnable: "bin/aliyun",
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe.insert("bin/aliyun", recipe.get("bin/main")).remove("bin/main"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/aliyun"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    aliyun version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(aliyunCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

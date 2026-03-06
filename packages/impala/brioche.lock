@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/impala/0.7.0/download": {
+    "https://crates.io/api/v1/crates/impala/0.7.3/download": {
       "type": "sha256",
-      "value": "443651ee0bd6a67a107fe390a6e40e2d2bda1713efe98ab4eb515135cdb62705"
+      "value": "fdc10f0883ea6f30fe9da2747e9647feb81c1cd48b5b7c639bfbe4bdade82690"
     }
   }
 }

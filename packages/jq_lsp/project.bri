@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "jq_lsp",
-  version: "0.1.16",
+  version: "0.1.17",
   extra: {
     moduleName: "github.com/wader/jq-lsp",
   },

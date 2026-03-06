@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/opentofu/opentofu/@v/v1.11.2.zip": {
+    "https://proxy.golang.org/github.com/opentofu/opentofu/@v/v1.11.5.zip": {
       "type": "sha256",
-      "value": "d19b6c43b8ed5d301a28c1bd7c8c9558beeb2305321a0696a0966945656f267c"
+      "value": "a0ae40943d0d11784711509d868ca178556d17c9870336f1fa308c1fe93b9578"
     }
   }
 }

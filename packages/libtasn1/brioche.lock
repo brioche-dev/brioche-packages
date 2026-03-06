@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftpmirror.gnu.org/libtasn1/libtasn1-4.20.0.tar.gz": {
+    "https://ftpmirror.gnu.org/libtasn1/libtasn1-4.21.0.tar.gz": {
       "type": "sha256",
-      "value": "92e0e3bd4c02d4aeee76036b2ddd83f0c732ba4cda5cb71d583272b23587a76c"
+      "value": "1d8a444a223cc5464240777346e125de51d8e6abf0b8bac742ac84609167dc87"
     }
   }
 }

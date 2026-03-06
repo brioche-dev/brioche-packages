@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.osgeo.org/proj/proj-9.7.1.tar.gz": {
+      "type": "sha256",
+      "value": "6c097dc803c561929cdfcc46e4bf9945ea977611fb31493ad14e88edaeae260f"
+    }
+  }
+}

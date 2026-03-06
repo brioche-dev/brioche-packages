@@ -1,0 +1,54 @@
+import * as std from "std";
+
+export const project = {
+  name: "nvm",
+  version: "0.40.4",
+  repository: "https://github.com/nvm-sh/nvm",
+};
+
+const source = Brioche.download(
+  `https://github.com/nvm-sh/nvm/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function nvm(): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Manual installation
+    cp nvm.sh "$BRIOCHE_OUTPUT/share/nvm/nvm.sh"
+    cp nvm-exec "$BRIOCHE_OUTPUT/share/nvm/nvm-exec"
+    cp bash_completion "$BRIOCHE_OUTPUT/share/nvm/bash_completion"
+  `
+    .workDir(source)
+    .outputScaffold(
+      std.directory({
+        share: std.directory({
+          nvm: std.directory(),
+        }),
+      }),
+    )
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    . "$nvm_source/share/nvm/nvm.sh"
+    nvm --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .env({
+      nvm_source: nvm,
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

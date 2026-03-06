@@ -3,7 +3,6 @@ import { cmakeBuild } from "cmake";
 import gsl from "gsl";
 import libpcap from "libpcap";
 import lksctp_tools from "lksctp_tools";
-import ncurses from "ncurses";
 import openssl from "openssl";
 
 export const project = {
@@ -21,7 +20,7 @@ const source = Brioche.download(
 export default function sipp(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, gsl, libpcap, lksctp_tools, ncurses, openssl],
+    dependencies: [std.toolchain, gsl, libpcap, lksctp_tools, openssl],
     set: {
       USE_SSL: "ON",
       USE_PCAP: "ON",

@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libaec",
-  version: "1.1.4",
+  version: "1.1.5",
   repository: "https://github.com/MathisRosenhauer/libaec",
 };
 
@@ -29,20 +29,21 @@ export default function libaec(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    cmake_minimum_required(VERSION 4.0)
-    project(QueryVersion)
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
 
-    find_package(libaec REQUIRED CONFIG)
-    message(STATUS "libaec version: \${libaec_VERSION}")
-  `);
+      find_package(libaec REQUIRED CONFIG)
+      message(STATUS "libaec version: \${libaec_VERSION}")
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" CMakeLists.txt
     cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, cmake, libaec)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

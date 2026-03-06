@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -297,3 +297,12 @@ foreach(LIB Luau.Ast Luau.Compiler Luau.Config Luau.Analysis Luau.CodeGen Luau.V
+         endif()
+     endif()
+ endforeach()
++
++# Install CLI tools
++if(LUAU_BUILD_CLI)
++    install(TARGETS
++        Luau.Repl.CLI Luau.Analyze.CLI Luau.Ast.CLI
++        Luau.Bytecode.CLI Luau.Compile.CLI Luau.Reduce.CLI
++        RUNTIME DESTINATION bin
++    )
++endif()

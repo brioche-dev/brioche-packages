@@ -24,14 +24,14 @@ export default std.memo((): std.Recipe<std.Directory> => {
           mkdir build
           cd build
 
-          ../configure \
-            --prefix="$BRIOCHE_OUTPUT" \
-            --enable-gold \
-            --enable-ld \
-            --enable-plugins \
-            --enable-shared \
-            --disable-werror \
-            --enable-64-bit-bfd \
+          ../configure \\
+            --prefix="$BRIOCHE_OUTPUT" \\
+            --enable-gold \\
+            --enable-ld \\
+            --enable-plugins \\
+            --enable-shared \\
+            --disable-werror \\
+            --enable-64-bit-bfd \\
             --with-system-zlib
 
           make tooldir="$BRIOCHE_OUTPUT"

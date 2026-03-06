@@ -3,13 +3,13 @@ import { goBuild } from "go";
 
 export const project = {
   name: "terraform",
-  version: "1.14.3",
+  version: "1.14.5",
   repository: "https://github.com/hashicorp/terraform.git",
 };
 
 // Retrieve the source directly from the GitHub repository and not from the Go
 // proxy. Since, the one from Go proxy doesn't contain additional backends
-// (such as Azure, GCP, etc)
+// (such as Azure, GCP, etc).
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,

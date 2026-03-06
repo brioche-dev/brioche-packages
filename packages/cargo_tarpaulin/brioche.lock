@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-tarpaulin/0.35.0/download": {
+    "https://crates.io/api/v1/crates/cargo-tarpaulin/0.35.1/download": {
       "type": "sha256",
-      "value": "d10429cbaf342d2c88525f44422fa60fd17bee65333cca0509dda3ddddfac7ed"
+      "value": "b63b2adf1009219371be5090d2322aae8d036320c744633fc7a7c0e98d0a34ae"
     }
   }
 }

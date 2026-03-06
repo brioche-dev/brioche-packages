@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/idursun/jjui/@v/v0.9.8.zip": {
+    "https://proxy.golang.org/github.com/idursun/jjui/@v/v0.9.11.zip": {
       "type": "sha256",
-      "value": "95347f5634498e8c6053e0b356e3783cdd397ff0afec9a2fa4922f95cc318fff"
+      "value": "9d9cfc3a3c3f6513b19f0fd68db040774b8a1b70ce2fc898221e20b5c79e06f0"
     }
   }
 }

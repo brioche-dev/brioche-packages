@@ -19,11 +19,11 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --sysconfdir=/etc \
-            --disable-setuid \
-            --with-systemdtmpfilesdir= \
+          ./configure \\
+            --prefix=/ \\
+            --sysconfdir=/etc \\
+            --disable-setuid \\
+            --with-systemdtmpfilesdir= \\
             --with-systemdsystemunitdir=
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

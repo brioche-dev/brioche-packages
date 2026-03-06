@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "watchexec",
-  version: "2.3.2",
+  version: "2.3.3",
   extra: {
     crateName: "watchexec-cli",
   },

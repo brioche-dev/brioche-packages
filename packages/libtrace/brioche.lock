@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/LibtraceTeam/libtrace": {
+      "4.0.30-1": "bc88c151fab01f3ebf1fb07e13f498c3506fe1af"
+    }
+  }
+}

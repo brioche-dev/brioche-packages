@@ -1,0 +1,54 @@
+import * as std from "std";
+import llvm from "llvm";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "zenith",
+  version: "0.14.3",
+  repository: "https://github.com/bvaisvil/zenith.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+})
+  // Remove upstream's custom Cargo `config`, which overrides the linker
+  // for various targets (for cross-compilation). This can interfere with
+  // our default working linker configuration.
+  .remove(".cargo/config");
+
+export default function zenith(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [llvm],
+    env: {
+      // Build-time scripts dynamically load `libclang`, so ensure the standard
+      // system libraries can be dynamically loaded
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      // bindgen uses clang to parse C headers; tell clang where to find
+      // the standard C library headers (stdio.h, etc.)
+      CPATH: std.tpl`${std.toolchain}/include`,
+    },
+    runnable: "bin/zenith",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    zenith --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(zenith)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `zenith ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

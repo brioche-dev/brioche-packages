@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "graphql_client_cli",
-  version: "0.15.0",
+  version: "0.16.0",
   extra: {
     crateName: "graphql_client_cli",
   },

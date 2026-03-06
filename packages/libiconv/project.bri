@@ -55,7 +55,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/libiconv
       | lines
       | where ($it | str contains "libiconv-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libiconv-(?<version>[0-9.]+)\\.tar\\.gz">'
+      | parse --regex '<a href="(\\./)?libiconv-(?<version>[\\d.]+)\\.tar\\.gz"'
       | sort-by --natural --reverse version
       | get 0.version
 

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mollyim/mollysocket.git": {
+      "1.7.0": "1b76b8b7af9ebf7e440e3b594834c9b94edb3893"
+    }
+  }
+}

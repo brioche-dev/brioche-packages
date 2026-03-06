@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/arminbiere/cadical.git": {
+      "rel-3.0.0": "7b99c07f0bcab5824a5a3ce62c7066554017f641"
+    }
+  }
+}

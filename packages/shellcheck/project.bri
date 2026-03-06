@@ -1,0 +1,57 @@
+import * as std from "std";
+import ghc from "ghc";
+import cabalInstall from "cabal_install";
+
+export const project = {
+  name: "shellcheck",
+  version: "0.11.0",
+  repository: "https://github.com/koalaman/shellcheck",
+};
+
+const source = Brioche.download(
+  `https://hackage.haskell.org/package/ShellCheck-${project.version}/ShellCheck-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function shellcheck(): std.Recipe<std.Directory> {
+  return std.runBash`
+      export LD_LIBRARY_PATH="$LIBRARY_PATH"
+
+      cabal update
+      cabal install \
+        --allow-newer=base,containers,template-haskell \
+        --install-method=copy \
+        --installdir="$BRIOCHE_OUTPUT/bin" \
+        exe:shellcheck
+    `
+    .workDir(source)
+    .dependencies(ghc, cabalInstall, std.toolchain)
+    .outputScaffold(std.directory({ bin: std.directory() }))
+    .unsafe({ networking: true })
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/shellcheck"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+      shellcheck --version | tee "$BRIOCHE_OUTPUT"
+    `
+    .dependencies(shellcheck)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}' in output, got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/databricks/cli/@v/v0.288.0.zip": {
+      "type": "sha256",
+      "value": "ed68427a5f4cef166ed2c5dad382ac31301e7c8a76bf3843bf35bbe991e8336d"
+    }
+  }
+}

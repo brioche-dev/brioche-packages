@@ -1,0 +1,88 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import awsCCal from "aws_c_cal";
+import awsCCommon from "aws_c_common";
+import awsCIo from "aws_c_io";
+import awsChecksums from "aws_checksums";
+import openssl from "openssl";
+import s2n from "s2n";
+
+export const project = {
+  name: "aws_c_event_stream",
+  version: "0.5.9",
+  repository: "https://github.com/awslabs/aws-c-event-stream",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function awsCEventStream(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      awsCCommon,
+      awsChecksums,
+      awsCCal,
+      awsCIo,
+      openssl,
+      s2n,
+    ],
+    set: {
+      BUILD_TESTING: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
+
+      find_package(aws-c-event-stream REQUIRED CONFIG)
+      message(STATUS "aws-c-event-stream found: YES")
+    `),
+  });
+
+  const script = std.runBash`
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(
+      std.toolchain,
+      cmake,
+      awsCCommon,
+      awsChecksums,
+      awsCCal,
+      awsCIo,
+      openssl,
+      s2n,
+      awsCEventStream,
+    )
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "aws-c-event-stream found: YES";
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

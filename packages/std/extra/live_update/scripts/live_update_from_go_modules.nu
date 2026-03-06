@@ -19,7 +19,7 @@ def get-latest-module-name [
 
   let nextLatestModuleName = $'($parsedModuleName.name)/v($majorVersion + 1)'
 
-  http get --allow-errors $'https://proxy.golang.org/($nextLatestModuleName)/@latest'
+  http get --allow-errors --pool $'https://proxy.golang.org/($nextLatestModuleName)/@latest'
     # Check the response status
     | metadata access {|meta|
       match $meta.http_response.status {
@@ -38,7 +38,7 @@ def get-latest-module-name [
 let moduleName = get-latest-module-name $env.moduleName
 
 # Retrieve the most recent releases from Go proxy registry
-let releases = http get $'https://proxy.golang.org/($moduleName)/@v/list'
+let releases = http get --pool $'https://proxy.golang.org/($moduleName)/@v/list'
   | lines
   # Extract the version(s)
   | each {|release|

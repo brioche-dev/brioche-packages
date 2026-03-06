@@ -71,18 +71,18 @@ export function briocheDeserializeAny(
  * baked (or serialized).
  */
 export function recipe<T extends Artifact>(recipe: RecipeLike<T>): Recipe<T> {
-  let serialized: runtime.Recipe | undefined;
+  let serialized: Promise<runtime.Recipe> | undefined;
 
   return createRecipe<T>(
     ["file", "directory", "symlink"] as ArtifactType<T>[],
     {
       sourceDepth: 1,
-      briocheSerialize: async () => {
-        if (serialized == null) {
+      briocheSerialize: () => {
+        serialized ??= (async () => {
           const recipeValue =
             typeof recipe === "function" ? await recipe() : await recipe;
-          serialized = await recipeValue.briocheSerialize();
-        }
+          return recipeValue.briocheSerialize();
+        })();
         return serialized;
       },
     },
@@ -127,12 +127,16 @@ export function createRecipe<T extends Artifact>(
   const isDirectory = types.some((type) => type === "directory");
   const isSymlink = types.some((type) => type === "symlink");
 
+  let serialized: Promise<runtime.Recipe> | undefined;
+
   return {
-    briocheSerialize: async () => {
-      return opts.briocheSerialize(meta);
+    briocheSerialize: () => {
+      serialized ??= Promise.resolve(opts.briocheSerialize(meta));
+      return serialized;
     },
     bake: async () => {
-      const result = await runtime.bake(await opts.briocheSerialize(meta));
+      serialized ??= Promise.resolve(opts.briocheSerialize(meta));
+      const result = await runtime.bake(await serialized);
       return briocheDeserializeAny(result, source);
     },
     ...(isFile ? fileRecipeUtils : {}),

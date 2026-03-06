@@ -25,7 +25,7 @@ export default function robotframework(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(python);
 
-  // Install setuptools
+  // Install build dependencies (setuptools)
   venv = std.runBash`
     pip install setuptools
   `

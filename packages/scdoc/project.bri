@@ -4,10 +4,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "scdoc",
   version: "1.11.4",
+  repository: "https://git.sr.ht/~sircmpwn/scdoc",
 };
 
 const source = Brioche.download(
-  `https://git.sr.ht/~sircmpwn/scdoc/archive/${project.version}.tar.gz`,
+  `${project.repository}/archive/${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -59,10 +60,9 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://git.sr.ht/~sircmpwn/scdoc/refs
+    let version = ^git ls-remote --tags ${project.repository}
       | lines
-      | where ($it | str contains "~sircmpwn/scdoc/refs/")
-      | parse --regex '<a href="/~sircmpwn/scdoc/refs/(?<version>.+)">'
+      | parse --regex 'refs/tags/(?<version>[\\d.]+)$'
       | sort-by --natural --reverse version
       | get 0.version
 

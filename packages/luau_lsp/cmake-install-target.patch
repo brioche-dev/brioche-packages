@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -175,3 +175,9 @@ if (LSP_BUILD_WITH_SENTRY)
+             COMMENT "Copying crashpad_handler to output directory"
+     )
+ endif ()
++
++# Install CLI tool
++install(TARGETS
++    Luau.LanguageServer.CLI
++    RUNTIME DESTINATION bin
++)

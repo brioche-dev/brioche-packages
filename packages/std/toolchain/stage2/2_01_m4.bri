@@ -13,9 +13,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
     script: std.indoc`
       export PATH="$stage1/usr/bin:$SYSTEM_TOOLCHAIN_PATH\${PATH:+:$PATH}"
 
-      ./configure \
-        --prefix=/usr \
-        --host="$TARGET" \
+      ./configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
         --build="$(./build-aux/config.guess)"
       make
       make install DESTDIR="$BRIOCHE_OUTPUT"

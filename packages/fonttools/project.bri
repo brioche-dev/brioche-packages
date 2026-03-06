@@ -25,9 +25,7 @@ export default function fonttools(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(python);
 
-  // Install setuptools from the archive we downloaded. Setuptools is the
-  // only dependency we need installed in the venv, the rest will be installed
-  // by setuptools itself
+  // Install build dependencies (setuptools)
   venv = std.runBash`
     pip install setuptools
   `

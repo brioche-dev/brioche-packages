@@ -132,10 +132,10 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         done
 
         if [ "$include_system_headers" -eq 1 ]; then
-          set -- \
-            -isystem "$sysroot/${platformInfo.arch}-lfs-linux-gnu/include/c++/13.2.0/${platformInfo.arch}-lfs-linux-gnu" \
-            -isystem "$sysroot/${platformInfo.arch}-lfs-linux-gnu/include/c++/13.2.0" \
-            -isystem "$sysroot/usr/include" \
+          set -- \\
+            -isystem "$sysroot/${platformInfo.arch}-lfs-linux-gnu/include/c++/13.2.0/${platformInfo.arch}-lfs-linux-gnu" \\
+            -isystem "$sysroot/${platformInfo.arch}-lfs-linux-gnu/include/c++/13.2.0" \\
+            -isystem "$sysroot/usr/include" \\
             "$@"
         fi
         set -- --sysroot="$sysroot" "$@"

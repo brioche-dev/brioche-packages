@@ -4,12 +4,12 @@ import { goBuild } from "go";
 
 export const project = {
   name: "ipsw",
-  version: "3.1.648",
+  version: "3.1.651",
   repository: "https://github.com/blacktop/ipsw.git",
 };
 
 // Retrieve the source directly from the GitHub repository and not from the Go
-// proxy. Since, the one from Go proxy is not up to date
+// proxy. Since, the one from Go proxy is not up to date.
 const gitRef = await Brioche.gitRef({
   repository: project.repository,
   ref: `v${project.version}`,

@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/evaleev/libint": {
-      "v2.11.2": "5518eb9ae257b0f6c3821e4bf4b6de9060e24313"
+  "downloads": {
+    "https://github.com/evaleev/libint/releases/download/v2.13.1/libint-2.13.1.tgz": {
+      "type": "sha256",
+      "value": "029e1347774bbf740e8ef9118d736413b52c023b85a5f76b61ce6fbf1ab8e43b"
     }
   }
 }

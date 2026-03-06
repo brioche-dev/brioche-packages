@@ -16,25 +16,25 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --bindir=/bin \
-            --libdir=/lib \
-            --runstatedir=/run \
-            --sbindir=/bin \
-            --disable-chfn-chsh \
-            --disable-login \
-            --disable-nologin \
-            --disable-su \
-            --disable-setpriv \
-            --disable-runuser \
-            --disable-pylibmount \
-            --disable-static \
-            --without-python \
-            --without-systemd \
-            --without-systemdsystemunitdir \
-            --disable-makeinstall-chown \
-            --disable-makeinstall-setuid \
+          ./configure \\
+            --prefix=/ \\
+            --bindir=/bin \\
+            --libdir=/lib \\
+            --runstatedir=/run \\
+            --sbindir=/bin \\
+            --disable-chfn-chsh \\
+            --disable-login \\
+            --disable-nologin \\
+            --disable-su \\
+            --disable-setpriv \\
+            --disable-runuser \\
+            --disable-pylibmount \\
+            --disable-static \\
+            --without-python \\
+            --without-systemd \\
+            --without-systemdsystemunitdir \\
+            --disable-makeinstall-chown \\
+            --disable-makeinstall-setuid \\
             ADJTIME_PATH=/var/lib/hwclock/adjtime
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

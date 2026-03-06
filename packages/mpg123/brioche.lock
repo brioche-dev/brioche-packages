@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.sourceforge.net/project/mpg123/mpg123/1.33.4/mpg123-1.33.4.tar.bz2": {
+      "type": "sha256",
+      "value": "3ae8c9ff80a97bfc0e22e89fbcd74687eca4fc1db315b12607f27f01cb5a47d9"
+    }
+  }
+}

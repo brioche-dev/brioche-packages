@@ -1,0 +1,54 @@
+import * as std from "std";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+
+export const project = {
+  name: "libudfread",
+  version: "1.2.0",
+  repository: "https://code.videolan.org/videolan/libudfread",
+};
+
+const source = Brioche.download(
+  `https://downloads.videolan.org/pub/videolan/libudfread/libudfread-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libudfread(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja],
+    set: {
+      default_library: "both",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libudfread | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libudfread)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://code.videolan.org",
+    project,
+  });
+}

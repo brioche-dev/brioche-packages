@@ -1,0 +1,132 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import nasm from "nasm";
+import ninja from "ninja";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "x265",
+  version: "4.1",
+};
+
+const source = Brioche.download(
+  `https://download.videolan.org/pub/videolan/x265/x265_${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Patch CMakeLists.txt for CMake 4.x compatibility:
+    // - Remove deprecated OLD policy settings for CMP0025 and CMP0054
+    // - Update cmake_minimum_required to 3.5
+    std.runBash`
+      sed -i \
+        -e '/cmake_policy(SET CMP0025 OLD)/d' \
+        -e '/cmake_policy(SET CMP0054 OLD)/d' \
+        -e 's/cmake_minimum_required (VERSION 2.8.8)/cmake_minimum_required(VERSION 3.5)/' \
+        "$BRIOCHE_OUTPUT/source/CMakeLists.txt"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function x265(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source: source
+      .insert("libx265_main10.a", x265_10bit)
+      .insert("libx265_main12.a", x265_12bit),
+    path: "source",
+    dependencies: [std.toolchain, ninja, nasm],
+    generator: "Ninja",
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      GIT_ARCHETYPE: "1",
+      X265_LATEST_TAG: project.version,
+      ENABLE_HDR10_PLUS: "ON",
+      ENABLE_SHARED: "ON",
+      LINKED_10BIT: "ON",
+      LINKED_12BIT: "ON",
+      EXTRA_LIB: "x265_main10.a;x265_main12.a",
+      EXTRA_LINK_FLAGS: "-L ..",
+    },
+    runnable: "bin/x265",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+function x265_12bit(): std.Recipe<std.Artifact> {
+  return cmakeBuild({
+    source,
+    path: "source",
+    dependencies: [std.toolchain, nasm],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      GIT_ARCHETYPE: "1",
+      X265_LATEST_TAG: project.version,
+      ENABLE_HDR10_PLUS: "ON",
+      HIGH_BIT_DEPTH: "ON",
+      MAIN12: "ON",
+      EXPORT_C_API: "OFF",
+      ENABLE_SHARED: "OFF",
+      ENABLE_CLI: "OFF",
+    },
+  }).get("lib/libx265.a");
+}
+
+function x265_10bit(): std.Recipe<std.Artifact> {
+  return cmakeBuild({
+    source,
+    path: "source",
+    dependencies: [std.toolchain, nasm],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      GIT_ARCHETYPE: "1",
+      X265_LATEST_TAG: project.version,
+      ENABLE_HDR10_PLUS: "ON",
+      HIGH_BIT_DEPTH: "ON",
+      EXPORT_C_API: "OFF",
+      ENABLE_SHARED: "OFF",
+      ENABLE_CLI: "OFF",
+    },
+  }).get("lib/libx265.a");
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion x265 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, x265)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://download.videolan.org/pub/videolan/x265/
+      | lines
+      | where ($it | str contains "x265_") and ($it | str contains ".tar.gz")
+      | parse --regex 'x265_(?<version>\\d+\\.\\d+)\\.tar\\.gz'
+      | uniq-by version
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

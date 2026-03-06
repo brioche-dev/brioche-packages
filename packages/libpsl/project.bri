@@ -34,7 +34,8 @@ export default function libPsl(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>
       #include <libpsl.h>
@@ -46,15 +47,15 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
           return EXIT_SUCCESS;
       }
-  `);
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -lpsl
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, libPsl)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

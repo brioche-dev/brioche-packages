@@ -1,0 +1,75 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import openssl from "openssl";
+import nlohmannJson from "nlohmann_json";
+import nlohmannJsonSchemaValidator from "nlohmann_json_schema_validator";
+
+export const project = {
+  name: "libks",
+  version: "2.0.10",
+  repository: "https://github.com/signalwire/libks",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Patch FindLibM.cmake:
+  // - Remove NO_DEFAULT_PATH so CMake can find math.h via CPATH
+  // - Use -lm instead of an absolute path to libm.so
+  // - Use INTERFACE IMPORTED target to avoid absolute library paths
+  std.runBash`
+    sed -i \
+      -e 's/NO_DEFAULT_PATH//' \
+      -e 's/find_library(LIBM_LIBRARIES m)/set(LIBM_LIBRARIES "m")/' \
+      -e 's/UNKNOWN IMPORTED/INTERFACE IMPORTED/' \
+      -e 's/IMPORTED_LOCATION/INTERFACE_LINK_LIBRARIES/' \
+      "$BRIOCHE_OUTPUT/cmake/FindLibM.cmake"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function libks(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      openssl,
+      nlohmannJson,
+      nlohmannJsonSchemaValidator,
+    ],
+    set: {
+      WITH_KS_TEST: "OFF",
+      WITH_LIBBACKTRACE: "OFF",
+      WITH_JSON_VALIDATION: "ON",
+      WITH_PACKAGING: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libks2 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libks)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

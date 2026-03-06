@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/vulsio/gost/@v/v0.7.1.info": {
+    "https://proxy.golang.org/github.com/vulsio/gost/@v/v0.7.2.info": {
       "type": "sha256",
-      "value": "0dcb1a81db9dcd118b6a3ec7a7b9d1b721a4ead5412a6e74b280983bc21b00c8"
+      "value": "ad79f7d6b7920d817d6b4501f6eb5d0bef790a277218951e28efc25735b3d631"
     },
-    "https://proxy.golang.org/github.com/vulsio/gost/@v/v0.7.1.zip": {
+    "https://proxy.golang.org/github.com/vulsio/gost/@v/v0.7.2.zip": {
       "type": "sha256",
-      "value": "61ae5ffe616b7432053e11c2107326116eafbdc2b5573e2248bf1fb777ddf326"
+      "value": "1536449507005c738b36690f4d367c480b014197d4e6dc491ccb7aad442d76bf"
     }
   }
 }

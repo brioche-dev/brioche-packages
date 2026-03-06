@@ -3,12 +3,12 @@ import go from "go";
 
 export const project = {
   name: "helm",
-  version: "4.0.4",
+  version: "4.1.1",
   repository: "https://github.com/helm/helm.git",
 };
 
 // Retrieve the source directly from the GitHub repository and not from the Go
-// proxy. Since, the one from Go proxy is not up to date
+// proxy. Since, the one from Go proxy is not up to date.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
