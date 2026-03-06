@@ -56,8 +56,8 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  * Options for building and installing an npm package with pnpm.
  *
  * @param source - The pnpm package dependencies to install.
- * @param dependencies - Extra dependencies to include while installing, such
- *   as build dependencies used for postinstall scripts.
+ * @param dependencies - Optionally add dependencies to include while installing,
+ *   such as build dependencies used for postinstall scripts.
  * @param nodejs - The Node.js recipe to use when installing packages. This
  *   can be used to pick a different Node.js version.
  */
@@ -89,6 +89,7 @@ export function pnpmInstall(
         }),
         ...(options.dependencies ?? []),
       ],
+      env: options.env,
       currentDir: std.outputPath,
       outputScaffold: options.source,
       unsafe: { networking: true },
@@ -101,6 +102,8 @@ export function pnpmInstall(
  *
  * @param packageName - The name of the npm package to install.
  * @param version - The version of the package to install.
+ * @param dependencies - Optionally add dependencies to include while installing,
+ *   such as build dependencies used for postinstall scripts.
  * @param wrapBins - Whether to wrap the installed binaries.
  * @param allowBuild - A list of package names that are allowed to run
  *   postinstall scripts. Corresponds to the pnpm `--allow-build` option.
@@ -109,6 +112,7 @@ export function pnpmInstall(
 interface PnpmInstallGlobalOptions {
   packageName: string;
   version: string;
+  dependencies?: std.RecipeLike<std.Directory>[];
   wrapBins?: boolean;
   allowBuild?: string[];
 }
@@ -145,7 +149,7 @@ export function pnpmInstallGlobal(
   options: PnpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
   return std.recipe(async () => {
-    const { packageName, version, wrapBins = true, allowBuild = [] } = options;
+    const { wrapBins = true, allowBuild = [] } = options;
 
     const extraArgs: string[] = [];
     for (const allowBuildPackage of allowBuild) {
@@ -169,10 +173,15 @@ export function pnpmInstallGlobal(
       pnpm config set globalBinDir "$PNPM_HOME/$pnpm_install_dir"
       pnpm add --global "\${package_name}@\${version}" $extra_args
     `
-      .dependencies(std.toolchain, nodejs, pnpm)
+      .dependencies(
+        std.toolchain,
+        nodejs,
+        pnpm,
+        ...(options.dependencies ?? []),
+      )
       .env({
-        package_name: packageName,
-        version,
+        package_name: options.packageName,
+        version: options.version,
         pnpm_install_dir: pnpmInstallDir,
         PNPM_HOME: std.outputPath,
         PATH: std.tpl`${std.outputPath}/${pnpmInstallDir}`,

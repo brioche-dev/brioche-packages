@@ -236,6 +236,7 @@ export function npmInstall(
  *
  * @param packageName - The name of the npm package to install.
  * @param version - The version of the package to install.
+ * @param dependencies - Optionally add additional dependencies while installing.
  * @param wrapBins - Whether to wrap the installed binaries.
  * @param nodejs - The Node.js and npm recipe to use to install the package.
  *   Can be used to use a specific version of Node.js.
@@ -243,6 +244,7 @@ export function npmInstall(
 interface NpmInstallGlobalOptions {
   packageName: string;
   version: string;
+  dependencies?: std.RecipeLike<std.Directory>[];
   wrapBins?: boolean;
   nodejs?: std.RecipeLike<std.Directory>;
 }
@@ -280,12 +282,7 @@ export function npmInstallGlobal(
   options: NpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
   return std.recipe(async () => {
-    const {
-      packageName,
-      version,
-      wrapBins = true,
-      nodejs: nodejsDep = nodejs,
-    } = options;
+    const { wrapBins = true, nodejs: nodejsDep = nodejs } = options;
 
     return std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
@@ -295,10 +292,15 @@ export function npmInstallGlobal(
 
       npm install --global "\${package_name}@\${version}"
     `
-      .dependencies(std.toolchain, nodejsDep, python)
+      .dependencies(
+        std.toolchain,
+        nodejsDep,
+        python,
+        ...(options.dependencies ?? []),
+      )
       .env({
-        package_name: packageName,
-        version,
+        package_name: options.packageName,
+        version: options.version,
         npm_config_prefix: std.outputPath,
       })
       .unsafe({ networking: true })
