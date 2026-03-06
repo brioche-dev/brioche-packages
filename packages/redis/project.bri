@@ -14,9 +14,11 @@ const source = Brioche.gitCheckout({
 });
 
 export default function redis(): std.Recipe<std.Directory> {
+  // Override OPT to drop -flto=auto. LTO causes __cpu_model linker errors on x86_64.
   return std.runBash`
     make \\
       -j "$(nproc)" \\
+      OPT="-O3 -fno-omit-frame-pointer" \\
       BUILD_TLS=yes
     make install PREFIX="$BRIOCHE_OUTPUT"
   `
