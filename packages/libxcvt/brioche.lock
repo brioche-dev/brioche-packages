@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/lib/libxcvt-0.1.3.tar.xz": {
+      "type": "sha256",
+      "value": "a929998a8767de7dfa36d6da4751cdbeef34ed630714f2f4a767b351f2442e01"
+    }
+  }
+}

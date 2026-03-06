@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/aws/s2n-tls": {
+      "v1.7.0": "f5e5e83031be60691f22442373fb8371274fcd56"
+    }
+  }
+}

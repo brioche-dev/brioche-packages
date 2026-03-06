@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/go-delve/delve.git": {
-      "v1.25.2": "498ee9c27223fed032af8856f7a62590a63b9439"
+      "v1.26.0": "4e4f29ce753a0dda04b200452c23b90a25923465"
     }
   }
 }

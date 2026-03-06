@@ -1,0 +1,52 @@
+import * as std from "std";
+
+export const project = {
+  name: "fping",
+  version: "5.5",
+  repository: "https://github.com/schweikert/fping",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/fping-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function fping(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        PATH: { append: [{ path: "sbin" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "sbin/fping"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // 'fping --version' requires /etc/protocols to exist for getprotobyname("icmp"),
+  // which is not available here. So, the help command is used to verify the
+  // correct installation
+  const script = std.runBash`
+    fping --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(fping)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

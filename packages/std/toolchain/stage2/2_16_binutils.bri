@@ -24,14 +24,14 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       mkdir build
       cd build
 
-      ../configure \
-        --prefix=/usr \
-        --build="$(../config.guess)" \
-        --host="$TARGET" \
-        --disable-nls \
-        --enable-shared \
-        --enable-gprofng=no \
-        --disable-werror \
+      ../configure \\
+        --prefix=/usr \\
+        --build="$(../config.guess)" \\
+        --host="$TARGET" \\
+        --disable-nls \\
+        --enable-shared \\
+        --enable-gprofng=no \\
+        --disable-werror \\
         --enable-64-bit-bfd
 
       make

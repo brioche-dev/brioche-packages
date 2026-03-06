@@ -53,7 +53,7 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       sed -e '/m64=/s/lib64/lib/' -i gcc/config/i386/t-linux64
       sed -e '/mabi.lp64=/s/lib64/lib/' -i gcc/config/aarch64/t-aarch64-linux
 
-      sed '/thread_header =/s/@.*@/gthr-posix.h/' \
+      sed '/thread_header =/s/@.*@/gthr-posix.h/' \\
         -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
     `,
     outputScaffold: source,
@@ -109,29 +109,29 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       export CFLAGS="-isystem $stage2/usr/include"
       export CXXFLAGS="-isystem $stage2/usr/include"
 
-      ../configure \
-        --build="$(../config.guess)" \
-        --host="$TARGET" \
-        --target="$TARGET" \
-        LDFLAGS_FOR_TARGET="-L$PWD/$TARGET/libgcc" \
-        CFLAGS_FOR_TARGET="-g -O2 -isystem $stage2/usr/include" \
-        CXXFLAGS_FOR_TARGET="-g -O2 -isystem $stage2/usr/include" \
-        CFLAGS_FOR_BUILD="-isystem $stage2/usr/include" \
-        CXXFLAGS_FOR_BUILD="-isystem $stage2/usr/include" \
-        CFLAGS="-isystem $stage2/usr/include" \
-        CXXFLAGS="-isystem $stage2/usr/include" \
-        --with-build-sysroot="$stage2" \
-        --prefix=/usr \
-        --enable-default-pie \
-        --enable-default-ssp \
-        --disable-nls \
-        --disable-multilib \
-        --disable-libatomic \
-        --disable-libgomp \
-        --disable-libquadmath \
-        --disable-libsanitizer \
-        --disable-libssp \
-        --disable-libvtv \
+      ../configure \\
+        --build="$(../config.guess)" \\
+        --host="$TARGET" \\
+        --target="$TARGET" \\
+        LDFLAGS_FOR_TARGET="-L$PWD/$TARGET/libgcc" \\
+        CFLAGS_FOR_TARGET="-g -O2 -isystem $stage2/usr/include" \\
+        CXXFLAGS_FOR_TARGET="-g -O2 -isystem $stage2/usr/include" \\
+        CFLAGS_FOR_BUILD="-isystem $stage2/usr/include" \\
+        CXXFLAGS_FOR_BUILD="-isystem $stage2/usr/include" \\
+        CFLAGS="-isystem $stage2/usr/include" \\
+        CXXFLAGS="-isystem $stage2/usr/include" \\
+        --with-build-sysroot="$stage2" \\
+        --prefix=/usr \\
+        --enable-default-pie \\
+        --enable-default-ssp \\
+        --disable-nls \\
+        --disable-multilib \\
+        --disable-libatomic \\
+        --disable-libgomp \\
+        --disable-libquadmath \\
+        --disable-libsanitizer \\
+        --disable-libssp \\
+        --disable-libvtv \\
         --enable-languages=c,c++
 
       make

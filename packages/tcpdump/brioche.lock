@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.tcpdump.org/release/tcpdump-4.99.5.tar.xz": {
+    "https://www.tcpdump.org/release/tcpdump-4.99.6.tar.xz": {
       "type": "sha256",
-      "value": "d76395ab82d659d526291b013eee200201380930793531515abfc6e77b4f2ee5"
+      "value": "40a8cefd45f0d2a06827e6658efb830d484868c449ad80f7efb33516af44f3da"
     }
   }
 }

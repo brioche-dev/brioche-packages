@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/ofiwg/libfabric/releases/download/v2.4.0/libfabric-2.4.0.tar.bz2": {
+      "type": "sha256",
+      "value": "13f508e1d770c44f872c4117d9bcbfc102dc9d7532d3292455e0e0e5ef7b3bba"
+    }
+  }
+}

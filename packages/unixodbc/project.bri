@@ -14,9 +14,9 @@ const source = Brioche.download(
 
 export default function unixodbc(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-static \
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
       --disable-gui
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -57,7 +57,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.unixodbc.org/download.html
       | lines
       | where ($it | str contains "unixODBC")
-      | parse --regex '<a  HREF="unixODBC-(?<version>.+)\.tar\.gz">'
+      | parse --regex '<a  HREF="unixODBC-(?<version>.+)\\.tar\\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
 

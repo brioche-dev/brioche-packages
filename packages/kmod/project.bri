@@ -1,5 +1,6 @@
 import * as std from "std";
-import meson from "meson";
+import cmake from "cmake";
+import { mesonBuild } from "meson";
 import ninja from "ninja";
 import openssl from "openssl";
 import scdoc from "scdoc";
@@ -17,23 +18,23 @@ const source = Brioche.download(
   .peel();
 
 export default function kmod(): std.Recipe<std.Directory> {
-  return std.runBash`
-    meson setup build \
-      -Dmanpages=false \
-      --buildtype=release \
-      --prefix=/
-    meson compile -C build
-    DESTDIR="$BRIOCHE_OUTPUT" meson install -C build
-
-    # Symlink kmod to other programs
-    for program in lsmod rmmod insmod modinfo modprobe depmod; do
-      ln -s -r "$BRIOCHE_OUTPUT/bin/kmod" "$BRIOCHE_OUTPUT/bin/$program"
-    done
-  `
-    .workDir(source)
-    .dependencies(std.toolchain, meson, ninja, scdoc, openssl)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative)
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, cmake, ninja, scdoc, openssl],
+    set: {
+      manpages: "false",
+    },
+    runnable: "bin/kmod",
+  })
+    .pipe((recipe) =>
+      recipe
+        .insert("bin/lsmod", std.symlink({ target: "kmod" }))
+        .insert("bin/rmmod", std.symlink({ target: "kmod" }))
+        .insert("bin/insmod", std.symlink({ target: "kmod" }))
+        .insert("bin/modinfo", std.symlink({ target: "kmod" }))
+        .insert("bin/modprobe", std.symlink({ target: "kmod" }))
+        .insert("bin/depmod", std.symlink({ target: "kmod" })),
+    )
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
@@ -42,8 +43,7 @@ export default function kmod(): std.Recipe<std.Directory> {
           append: [{ path: "lib/pkgconfig" }, { path: "share/pkgconfig" }],
         },
       }),
-    )
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/kmod"));
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -70,7 +70,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.kernel.org/pub/linux/utils/kernel/kmod
       | lines
       | where ($it | str contains 'href="kmod-') and ($it | str contains '.tar.gz')
-      | parse --regex '<a href="kmod-(?<version>.+).tar.gz"'
+      | parse --regex '<a href="kmod-(?<version>.+)\\.tar\\.gz"'
       | sort-by --natural --reverse version
       | get 0.version
 

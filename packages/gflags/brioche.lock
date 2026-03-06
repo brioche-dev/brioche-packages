@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/gflags/gflags.git": {
+      "v2.3.0": "33bb3461e10864b5406353d3a1fb7ff34c2314b8"
+    }
+  }
+}

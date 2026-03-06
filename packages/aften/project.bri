@@ -1,0 +1,75 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "aften",
+  version: "0.0.8",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/aften/aften/${project.version}/aften-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel()
+  .pipe((source) =>
+    // Patch to add fallback function for apply_simd_restrictions() on non-x86/ppc
+    std.applyPatch({
+      source,
+      patch: Brioche.includeFile("cpu-caps-fallback.patch"),
+      strip: 1,
+    }),
+  );
+
+export default function aften(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      SHARED: "ON",
+    },
+    runnable: "bin/aften",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    aften -h | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(aften)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/aften/files/aften/
+      | lines
+      | where ($it | str contains 'href="/projects/aften/files/aften/')
+      | parse --regex '<a href="/projects/aften/files/aften/(?<version>\\d+\\.\\d+\\.\\d+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

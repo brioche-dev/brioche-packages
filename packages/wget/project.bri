@@ -1,0 +1,64 @@
+import * as std from "std";
+import libidn2 from "libidn2";
+import openssl from "openssl";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "wget",
+  version: "1.25.0",
+};
+
+const source = Brioche.download(
+  `https://ftpmirror.gnu.org/gnu/wget/wget-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function wget(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-ssl=openssl
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, openssl, libidn2)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/wget"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    wget --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(wget)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `GNU Wget ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://ftpmirror.gnu.org/gnu/wget
+      | lines
+      | where ($it | str contains "wget-") and ($it | str contains ".tar.gz") and (not ($it | str contains ".sig")) and (not ($it | str contains "wget2-")) and (not ($it | str contains "wget-latest"))
+      | parse --regex 'href="(\\.\\./|\\./)?wget-(?<version>[0-9.]+)\\.tar\\.gz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

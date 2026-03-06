@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/lib/libXfont2-2.0.7.tar.xz": {
+      "type": "sha256",
+      "value": "8b7b82fdeba48769b69433e8e3fbb984a5f6bf368b0d5f47abeec49de3e58efb"
+    }
+  }
+}

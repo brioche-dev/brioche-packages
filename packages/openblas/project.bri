@@ -1,0 +1,58 @@
+import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
+
+export const project = {
+  name: "openblas",
+  version: "0.3.31",
+  repository: "https://github.com/OpenMathLib/OpenBLAS",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/OpenBLAS-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function openblas(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make \\
+      NO_FORTRAN=1 C_LAPACK=1 NO_LAPACKE=0 USE_OPENMP=0 \\
+      DYNAMIC_ARCH=1 DYNAMIC_OLDER=1 \\
+      PREFIX=/ \\
+      -j "$(nproc)"
+    make PREFIX=/ install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion openblas | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, openblas)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

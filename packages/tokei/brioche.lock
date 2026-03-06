@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/XAMPPRocky/tokei": {
-      "v12.1.2": "7e0b30ff4c1fe78fe2cc615d1f0f52c7ce6cb761"
+      "v14.0.0": "8cdd6fa3a54f8cd69442d2f00effb29aa3110353"
     }
   }
 }

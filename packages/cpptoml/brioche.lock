@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/skystrife/cpptoml": {
+      "v0.1.1": "fededad7169e538ca47e11a9ee9251bc361a9a65"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import python from "python";
+
+export const project = {
+  name: "doxygen",
+  version: "1.16.1",
+  repository: "https://github.com/doxygen/doxygen.git",
+  extra: {
+    versionUnderscore: "1_16_1",
+  },
+};
+
+std.assert(
+  project.extra.versionUnderscore ===
+    std.projectVersionToUnderscoreFormat({ project }),
+  `expected 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
+);
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `Release_${project.extra.versionUnderscore}`,
+}).pipe((source) =>
+  // Disable LTO: ar lacks the GCC LTO plugin, so static archives with LTO objects
+  // produce undefined references
+  std.runBash`
+    sed -i 's/set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)/set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)/' \
+      "$BRIOCHE_OUTPUT/CMakeLists.txt"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function doxygen(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, python],
+    runnable: "bin/doxygen",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    doxygen --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(doxygen)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^Release_(?<version>.+)$/,
+    normalizeVersion: true,
+  });
+}

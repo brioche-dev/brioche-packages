@@ -1,0 +1,45 @@
+import * as std from "std";
+import pcscLite from "pcsc_lite";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "age_plugin_yubikey",
+  version: "0.5.0",
+  extra: {
+    crateName: "age-plugin-yubikey",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function agePluginYubikey(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [pcscLite],
+    runnable: "bin/age-plugin-yubikey",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    age-plugin-yubikey --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(agePluginYubikey)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `age-plugin-yubikey ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

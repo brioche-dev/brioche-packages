@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "kor",
-  version: "0.6.6",
+  version: "0.6.7",
   extra: {
     moduleName: "github.com/yonahd/kor",
   },
@@ -46,6 +46,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGoModules({ project });
 }

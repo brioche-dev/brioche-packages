@@ -14,8 +14,8 @@ const source = Brioche.download(
 
 export default function hunspell(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --with-readline
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

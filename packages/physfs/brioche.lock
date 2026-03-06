@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/icculus/physfs": {
+      "release-3.2.0": "eb3383b532c5f74bfeb42ec306ba2cf80eed988c"
+    }
+  }
+}

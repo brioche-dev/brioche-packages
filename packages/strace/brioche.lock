@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/strace/strace/releases/download/v6.17/strace-6.17.tar.xz": {
+    "https://github.com/strace/strace/releases/download/v6.19/strace-6.19.tar.xz": {
       "type": "sha256",
-      "value": "0a7c7bedc7efc076f3242a0310af2ae63c292a36dd4236f079e88a93e98cb9c0"
+      "value": "e076c851eec0972486ec842164fdc54547f9d17abd3d1449de8b120f5d299143"
     }
   }
 }

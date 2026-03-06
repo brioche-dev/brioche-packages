@@ -17,9 +17,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         "pipefail",
         "-c",
         std.indoc`
-          sh Configure \
-            -des \
-            -Dprefix="/usr" \
+          sh Configure \\
+            -des \\
+            -Dprefix="/usr" \\
             -Duserelocatableinc
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

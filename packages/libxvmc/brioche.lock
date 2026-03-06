@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/lib/libXvMC-1.0.15.tar.xz": {
+      "type": "sha256",
+      "value": "4f518afde3d7fd435346af7b368d2f73517f3d5f82647c962caf3f7bb8ff7078"
+    }
+  }
+}

@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/rust-lang/mdBook.git": {
-      "v0.4.52": "f6dd0a4a13dfbf02a31ad8494e671fcddf832e48"
+  "downloads": {
+    "https://crates.io/api/v1/crates/mdbook/0.5.2/download": {
+      "type": "sha256",
+      "value": "380f0dd1c54930692986cfe33221a2d34dbfb39c9e9325923c0f6bf7aee119a5"
     }
   }
 }

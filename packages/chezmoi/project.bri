@@ -3,12 +3,12 @@ import { goBuild } from "go";
 
 export const project = {
   name: "chezmoi",
-  version: "2.67.0",
+  version: "2.69.4",
   repository: "https://github.com/twpayne/chezmoi.git",
 };
 
 // Retrieve the source directly from the GitHub repository and not from the Go
-// proxy. Since, the one from Go proxy is not up to date
+// proxy. Since, the one from Go proxy is not up to date.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
@@ -43,6 +43,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
 }

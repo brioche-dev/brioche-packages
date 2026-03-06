@@ -1,0 +1,59 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import cyrusSasl from "cyrus_sasl";
+import mongoCDriver from "mongo_c_driver";
+import openssl from "openssl";
+
+export const project = {
+  name: "mongo_cxx_driver",
+  version: "4.1.4",
+  repository: "https://github.com/mongodb/mongo-cxx-driver",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `r${project.version}`,
+});
+
+export default function mongoCxxDriver(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, mongoCDriver, openssl, cyrusSasl],
+    set: {
+      BUILD_VERSION: project.version,
+      BUILD_TESTING: "OFF",
+      ENABLE_TESTS: "OFF",
+      ENABLE_EXAMPLES: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libmongocxx | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, mongoCxxDriver)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^r(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "tenv",
-  version: "4.8.3",
+  version: "4.9.3",
   extra: {
     moduleName: "github.com/tofuutils/tenv/v4",
   },
@@ -42,6 +42,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGoModules({ project });
 }

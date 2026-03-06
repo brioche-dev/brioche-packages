@@ -51,13 +51,13 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
       export CXXFLAGS="$CFLAGS"
       export LDFLAGS="--sysroot=$stage1"
 
-      ../libstdc++-v3/configure \
-        --prefix=/usr \
-        --host="$TARGET" \
-        --build="$(../config.guess)" \
-        --disable-multilib \
-        --disable-nls \
-        --disable-libstdcxx-pch \
+      ../libstdc++-v3/configure \\
+        --prefix=/usr \\
+        --host="$TARGET" \\
+        --build="$(../config.guess)" \\
+        --disable-multilib \\
+        --disable-nls \\
+        --disable-libstdcxx-pch \\
         --with-gxx-include-dir="/$TARGET/include/c++/13.2.0"
 
       make

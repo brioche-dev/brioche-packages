@@ -1,0 +1,55 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libtiff from "libtiff";
+
+export const project = {
+  name: "openjph",
+  version: "0.26.0",
+  repository: "https://github.com/aous72/OpenJPH",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function openjph(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, libtiff],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      OJPH_ENABLE_TIFF_SUPPORT: "ON",
+      OJPH_BUILD_TESTS: "OFF",
+      OJPH_BUILD_EXECUTABLES: "ON",
+    },
+    runnable: "bin/ojph_compress",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion openjph | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, openjph)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

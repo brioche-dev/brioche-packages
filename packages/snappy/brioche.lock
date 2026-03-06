@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/google/snappy": {
+      "1.2.2": "6af9287fbdb913f0794d0148c6aa43b58e63c8e3"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Kampfkarren/selene.git": {
+      "0.30.0": "33a77154d008506b3443be363d4d8c265e01b104"
+    }
+  }
+}

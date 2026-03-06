@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "wasm_server_runner",
-  version: "1.0.0",
+  version: "1.0.1",
   extra: {
     crateName: "wasm-server-runner",
   },

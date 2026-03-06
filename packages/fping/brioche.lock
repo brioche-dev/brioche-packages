@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/schweikert/fping/releases/download/v5.5/fping-5.5.tar.gz": {
+      "type": "sha256",
+      "value": "15c4e32b6c55ff105bafe03e8c91c7ca1b2eda31bf9a7127326bb87887ee18fe"
+    }
+  }
+}

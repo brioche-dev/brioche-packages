@@ -1,0 +1,70 @@
+import * as std from "std";
+import brotli from "brotli";
+import curl from "curl";
+import expat from "expat";
+import libmicrohttpd from "libmicrohttpd";
+import libpsl from "libpsl";
+import libssh2 from "libssh2";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import openssl from "openssl";
+
+export const project = {
+  name: "libnpupnp",
+  version: "6.2.3",
+  repository: "https://framagit.org/medoc92/npupnp",
+};
+
+const source = Brioche.download(
+  `https://www.lesbonscomptes.com/upmpdcli/downloads/libnpupnp-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .remove("subprojects");
+
+export default function libnpupnp(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      ninja,
+      curl,
+      brotli,
+      openssl,
+      libpsl,
+      libssh2,
+      expat,
+      libmicrohttpd,
+    ],
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libnpupnp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libnpupnp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://framagit.org",
+    project,
+    matchTag: /^libnpupnp-v(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_smart_release",
-  version: "0.21.9",
+  version: "0.21.10",
   extra: {
     crateName: "cargo-smart-release",
   },
@@ -41,6 +41,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromRustCrates({ project });
 }

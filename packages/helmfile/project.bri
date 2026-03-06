@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "helmfile",
-  version: "1.2.1",
+  version: "1.2.3",
   extra: {
     moduleName: "github.com/helmfile/helmfile",
   },
@@ -58,6 +58,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGoModules({ project });
 }

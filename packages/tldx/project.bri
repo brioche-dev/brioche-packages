@@ -1,0 +1,51 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "tldx",
+  version: "1.3.4",
+  extra: {
+    moduleName: "github.com/brandonyoungdev/tldx",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function tldx(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/cmd.Version=${project.version}`,
+      ],
+    },
+    runnable: "bin/tldx",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tldx --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tldx)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tldx version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

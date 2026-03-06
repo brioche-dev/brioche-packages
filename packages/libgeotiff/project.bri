@@ -1,0 +1,57 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libjpeg from "libjpeg";
+import libtiff from "libtiff";
+import proj from "proj";
+
+export const project = {
+  name: "libgeotiff",
+  version: "1.7.4",
+  repository: "https://github.com/OSGeo/libgeotiff",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/libgeotiff-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libgeotiff(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, libjpeg, libtiff, proj],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      WITH_UTILITIES: "ON",
+      WITH_JPEG: "ON",
+      WITH_ZLIB: "ON",
+    },
+    runnable: "bin/listgeo",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libgeotiff | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libgeotiff)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

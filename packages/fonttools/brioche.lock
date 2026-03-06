@@ -12,7 +12,7 @@
   },
   "git_refs": {
     "https://github.com/fonttools/fonttools.git": {
-      "4.60.1": "af032c141b452f47f35e93f1c5ca2004f133cdcf"
+      "4.61.1": "0a6517921cb779fef919a5e2cbc1a01e77375ced"
     }
   }
 }

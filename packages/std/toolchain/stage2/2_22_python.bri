@@ -15,9 +15,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         "sh",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/usr \
-            --enable-shared \
+          ./configure \\
+            --prefix=/usr \\
+            --enable-shared \\
             --without-ensurepip
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

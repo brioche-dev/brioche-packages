@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/quarylabs/sqruff.git": {
+      "v0.34.1": "a2b6abfe09d2b9aee3f5324d0e09dae6a4aabe8c"
+    }
+  }
+}

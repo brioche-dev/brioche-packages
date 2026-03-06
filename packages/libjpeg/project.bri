@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libjpeg",
-  version: "9f",
+  version: "10",
 };
 
 const source = Brioche.download(
@@ -42,11 +42,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  const versionMatch = result.match(/(\d+)\.(\d+)\.(\d+)/);
-  const [, majorVersion = null, minorVersion = null] = versionMatch ?? [];
-  const version = `${majorVersion}${String.fromCharCode(
-    96 + Number(minorVersion),
-  )}`;
+  const [, major, minor] = result.match(/(\d+)\.(\d+)\.(\d+)/) ?? [];
+  const version =
+    Number(minor) > 0
+      ? `${major}${String.fromCharCode(96 + Number(minor))}`
+      : major;
 
   // Check that the result contains the expected version
   const expected = project.version;
@@ -60,7 +60,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.ijg.org/files
       | lines
       | where ($it | str contains "jpegsrc.")
-      | parse --regex '<A HREF="jpegsrc.v(?<version>.+)\.tar\.gz">'
+      | parse --regex '<A HREF="jpegsrc\\.v(?<version>.+)\\.tar\\.gz">'
       | sort-by --natural --reverse version
       | get 0.version
 

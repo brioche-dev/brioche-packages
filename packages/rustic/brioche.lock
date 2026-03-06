@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/rustic-rs/0.11.0/download": {
+      "type": "sha256",
+      "value": "692d568a7bc63b94da1e783da6dbe5a4f8887a9a519fd6d5abdc9b9220861fcc"
+    }
+  }
+}

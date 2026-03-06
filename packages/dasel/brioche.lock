@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/TomWright/dasel.git": {
-      "v2.8.1": "5e3a3cffdd50bacb493fb041d65211f440a560a5"
+  "downloads": {
+    "https://proxy.golang.org/github.com/tomwright/dasel/v3/@v/v3.2.2.zip": {
+      "type": "sha256",
+      "value": "e6f67d4858a91f8366c40d2035cbcad02c37ada1f3d096f0537e752f11cb6fb7"
     }
   }
 }

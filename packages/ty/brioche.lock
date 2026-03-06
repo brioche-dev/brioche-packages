@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/astral-sh/ty.git": {
+      "0.0.17": "8cec857182f4bc28bd8e103940341643162777f8"
+    }
+  }
+}

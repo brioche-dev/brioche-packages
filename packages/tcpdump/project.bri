@@ -4,7 +4,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "tcpdump",
-  version: "4.99.5",
+  version: "4.99.6",
 };
 
 const source = Brioche.download(
@@ -49,7 +49,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.tcpdump.org/release
       | lines
       | where ($it | str contains "tcpdump") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="tcpdump-(?<version>.+)\.tar\.[^"]+">'
+      | parse --regex '<a href="tcpdump-(?<version>.+)\\.tar\\.[^"]+">'
       | sort-by --natural --reverse version
       | get 0.version
 

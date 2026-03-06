@@ -14,8 +14,8 @@ const source = Brioche.download(
 
 export default function xtrans(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
+    ./configure \\
+      --prefix=/ \\
       --enable-docs=no
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -54,7 +54,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.x.org/archive/individual/lib
       | lines
       | where ($it | str contains "xtrans") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="xtrans-(?<version>.+)\.tar\.xz">'
+      | parse --regex '<a href="xtrans-(?<version>.+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 

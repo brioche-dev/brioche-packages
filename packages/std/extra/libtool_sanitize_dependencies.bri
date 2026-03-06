@@ -5,10 +5,15 @@ export const LIBTOOL_SANITIZE_DEPENDENCIES_SCRIPT = std.indoc`
   sanitize_libtool_dependencies () {
     local -r file="$1"
 
-    sed -i -e "/^dependency_libs='/,/'/ s|//lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$file"
+    sed -i -e "/^dependency_libs='/,/'/ s|[^[:space:]]*/lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$file"
   }
 
-  find -L "$BRIOCHE_OUTPUT/lib" -name '*.la' -type f -print0 \
+  # No lib dir found, exit
+  if [[ ! -d "$BRIOCHE_OUTPUT/lib" ]]; then
+    exit 0
+  fi
+
+  find -L "$BRIOCHE_OUTPUT/lib" -name '*.la' -type f -print0 \\
     | while IFS= read -r -d $'\\0' file; do
       sanitize_libtool_dependencies "$file"
     done

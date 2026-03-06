@@ -42,8 +42,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
+          ./configure \\
+            --prefix=/ \\
             --with-curses
           make SHLIB_LIBS="-lncursesw"
           make install SHLIB_LIBS="-lncursesw" DESTDIR="$BRIOCHE_OUTPUT"

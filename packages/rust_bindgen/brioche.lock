@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/bindgen-cli/0.72.1/download": {
+      "type": "sha256",
+      "value": "8a408c0fcb20bf7bd4ceaf4bf990e223e3543a04b84d2394f3edeee29a0e87e2"
+    }
+  }
+}

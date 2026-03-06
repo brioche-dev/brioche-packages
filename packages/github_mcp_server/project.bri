@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "github_mcp_server",
-  version: "0.21.0",
+  version: "0.29.0",
   extra: {
     moduleName: "github.com/github/github-mcp-server",
   },
@@ -59,6 +59,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGoModules({ project });
 }

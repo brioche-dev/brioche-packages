@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/nghttp2/nghttp2/releases/download/v1.68.0/nghttp2-1.68.0.tar.xz": {
+      "type": "sha256",
+      "value": "5511d3128850e01b5b26ec92bf39df15381c767a63441438b25ad6235def902c"
+    }
+  }
+}

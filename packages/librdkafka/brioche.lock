@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/confluentinc/librdkafka": {
+      "v2.12.1": "e1db7eaa517f0a6438bc846a9c49ede73b9ea211"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "texlab",
+  version: "5.25.1",
+  repository: "https://github.com/latex-lsp/texlab.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function texlab(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    path: "crates/texlab",
+    runnable: "bin/texlab",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    texlab --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(texlab)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `texlab ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

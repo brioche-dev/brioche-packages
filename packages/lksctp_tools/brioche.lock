@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/sctp/lksctp-tools": {
+      "v1.0.21": "37d5f1225573b91d706a5e547d081f79963a9deb"
+    }
+  }
+}

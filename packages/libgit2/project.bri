@@ -5,7 +5,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libgit2",
-  version: "1.9.1",
+  version: "1.9.2",
   repository: "https://github.com/libgit2/libgit2.git",
 };
 

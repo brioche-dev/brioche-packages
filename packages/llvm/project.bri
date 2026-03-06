@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "llvm",
-  version: "21.1.6",
+  version: "21.1.8",
   repository: "https://github.com/llvm/llvm-project.git",
 };
 
@@ -14,7 +14,7 @@ const source = Brioche.gitCheckout({
 });
 
 export default function llvm(): std.Recipe<std.Directory> {
-  let llvm = cmakeBuild({
+  return cmakeBuild({
     source,
     path: "llvm",
     set: {
@@ -35,16 +35,6 @@ export default function llvm(): std.Recipe<std.Directory> {
       CPATH: { append: [{ path: "include" }] },
     }),
   );
-
-  // Remove a bunch of `*.tmp*` files left over in the build
-  // TODO: Figure out where these temp files are coming from!
-  llvm = std.runBash`
-    find "$BRIOCHE_OUTPUT/lib" -name '*.tmp*' -delete
-  `
-    .outputScaffold(llvm)
-    .toDirectory();
-
-  return llvm;
 }
 
 /**

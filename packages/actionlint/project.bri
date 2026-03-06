@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "actionlint",
-  version: "1.7.8",
+  version: "1.7.11",
   extra: {
     moduleName: "github.com/rhysd/actionlint",
   },
@@ -50,6 +50,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGoModules({ project });
 }

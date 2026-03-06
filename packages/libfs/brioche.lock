@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.x.org/archive/individual/lib/libFS-1.0.10.tar.xz": {
+      "type": "sha256",
+      "value": "9babbd3c86069c98563da044045fdc0ece4ec0c93dcdd2c68aa74eb34b4f3b77"
+    }
+  }
+}

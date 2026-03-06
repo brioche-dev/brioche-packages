@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jdx/fnox.git": {
+      "v1.10.0": "774d984ded401dcdf8796877612182f20c7429e5"
+    }
+  }
+}

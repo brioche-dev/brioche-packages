@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/CGAL/cgal": {
+      "v6.1.1": "08b27d3db14039d926c3a89d12955aa28fd55171"
+    }
+  }
+}

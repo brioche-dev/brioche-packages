@@ -1,0 +1,73 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "tzdata",
+  version: "2025c",
+};
+
+const tzcodeSource = Brioche.download(
+  `https://data.iana.org/time-zones/releases/tzcode${project.version}.tar.gz`,
+).unarchive("tar", "gzip");
+const tzdataSource = Brioche.download(
+  `https://data.iana.org/time-zones/releases/tzdata${project.version}.tar.gz`,
+).unarchive("tar", "gzip");
+
+const source = std.merge(tzcodeSource, tzdataSource);
+
+export default function tzdata(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)" CC=gcc
+    make \\
+      install \\
+      TOPDIR="$BRIOCHE_OUTPUT/" \\
+      TZDIR="$BRIOCHE_OUTPUT/share/zoneinfo" \\
+      BINDIR="$BRIOCHE_OUTPUT/bin" \\
+      ZICDIR="$BRIOCHE_OUTPUT/bin" \\
+      LIBDIR="$BRIOCHE_OUTPUT/lib" \\
+      MANDIR="$BRIOCHE_OUTPUT/share/man"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => recipe.remove("etc")) // Remove generated localtime
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        TZDIR: { append: [{ path: "share/zoneinfo" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/tzselect"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    zdump --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tzdata)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `zdump (tzcode) ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://data.iana.org/time-zones/releases/
+      | lines
+      | where ($it | str contains 'href="tzdb-') and (not ($it | str contains '.sig"'))
+      | parse --regex '<a href="tzdb-(?<version>[^"]+)\\.tar\\.lz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

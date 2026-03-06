@@ -1,0 +1,78 @@
+import * as std from "std";
+import expat from "expat";
+import openssl from "openssl";
+import libevent from "libevent";
+import nghttp2 from "nghttp2";
+
+export const project = {
+  name: "unbound",
+  version: "1.24.2",
+  repository: "https://github.com/NLnetLabs/unbound",
+};
+
+const source = Brioche.download(
+  `https://nlnetlabs.nl/downloads/unbound/unbound-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function unbound(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-ssl="$ssl_dir" \\
+      --with-libevent="$libevent_dir" \\
+      --with-libnghttp2="$nghttp2_dir" \\
+      --with-libexpat="$expat_dir" \\
+      --with-pthreads \\
+      --disable-rpath
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, expat, openssl, libevent, nghttp2)
+    .env({
+      ssl_dir: std.tpl`${openssl}`,
+      libevent_dir: std.tpl`${libevent}`,
+      nghttp2_dir: std.tpl`${nghttp2}`,
+      expat_dir: std.tpl`${expat}`,
+    })
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        PATH: { append: [{ path: "sbin" }] },
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "sbin/unbound"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    unbound -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, unbound)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

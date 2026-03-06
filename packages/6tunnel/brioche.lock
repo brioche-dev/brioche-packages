@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/wojtekka/6tunnel/releases/download/0.14/6tunnel-0.14.tar.gz": {
+      "type": "sha256",
+      "value": "6945312793079408f1ab40071cee68e70158a23560145f1d424a3eb16227f235"
+    }
+  }
+}

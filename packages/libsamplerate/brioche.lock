@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/libsndfile/libsamplerate": {
+      "0.2.2": "c96f5e3de9c4488f4e6c97f59f5245f22fda22f7"
+    }
+  }
+}

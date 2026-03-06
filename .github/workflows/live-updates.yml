@@ -3,7 +3,7 @@ name: Live updates
 on:
   workflow_dispatch:
   schedule:
-    - cron: "37 5 * * MON" # Every Monday at 5:37am UTC
+    - cron: "37 5 15 * *" # On the 15th of the month at 5:37am UTC
 
 jobs:
   live-update-packages:

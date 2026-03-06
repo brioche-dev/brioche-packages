@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/libtom/libtommath": {
+      "v1.3.0": "95d80fd8229d05dd6cb4ec88bc8d4f5377ff00ef"
+    }
+  }
+}

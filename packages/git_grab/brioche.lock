@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/git-grab/4.0.1/download": {
+      "type": "sha256",
+      "value": "5182ee527d93f15e811d346fb86f3e4c2c24fbc479d4deb57efda6bec065a1c0"
+    }
+  }
+}

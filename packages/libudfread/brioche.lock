@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.videolan.org/pub/videolan/libudfread/libudfread-1.2.0.tar.xz": {
+      "type": "sha256",
+      "value": "bb477cbd4cfbfc7787d9d05b71ee5e70430f5cfebf1297497f7e83547958050f"
+    }
+  }
+}

@@ -1,0 +1,85 @@
+import * as std from "std";
+import hwloc from "hwloc";
+import libevent from "libevent";
+import libpciaccess from "libpciaccess";
+// TODO: Replace libudev_zero with systemd once it is packaged
+import libudevZero from "libudev_zero";
+import libxml2 from "libxml2";
+import munge from "munge";
+import pmix from "pmix";
+
+export const project = {
+  name: "prrte",
+  version: "4.0.0",
+  repository: "https://github.com/openpmix/prrte",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/prrte-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Patch the configure script to bypass the false positive pthread PID check
+    // It has no effect on the build process, it only affects the configuration checks
+    std.runBash`
+      sed -i 's/tpids_MSG=yes PRTE_THREADS_HAVE_DIFFERENT_PIDS=1/tpids_MSG=no PRTE_THREADS_HAVE_DIFFERENT_PIDS=0/' "$BRIOCHE_OUTPUT/configure"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function prrte(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-pmix \\
+      --with-hwloc \\
+      --with-libevent
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      hwloc,
+      libevent,
+      libpciaccess,
+      libudevZero,
+      libxml2,
+      munge,
+      pmix,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/prte"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    prte --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(prrte)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `prte (PRRTE) ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

@@ -1,0 +1,70 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "ragel",
+  version: "6.10",
+};
+
+const source = Brioche.download(
+  `https://www.colm.net/files/ragel/ragel-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function ragel(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ragel"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ragel --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ragel)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Ragel State Machine Compiler version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  // Parse the official colm.net page to find the latest "Stable" version,
+  // instead of checking GitHub tags which don't make the distinction between
+  // stable and development versions.
+  return nushellRunnable`
+    let page = http get https://www.colm.net/open-source/ragel/
+
+    # Extract the stable section (between "<h3>Stable</h3>" and "<h3>Development</h3>")
+    let stable_section = $page
+      | split row "<h3>Stable</h3>"
+      | get 1
+      | split row "<h3>Development</h3>"
+      | get 0
+
+    # Parse the version from the stable section
+    let version = $stable_section
+      | parse --regex 'ragel-(?<version>[\\d.]+)\\.tar\\.gz'
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

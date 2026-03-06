@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/nginx/nginx/releases/download/release-1.29.3/nginx-1.29.3.tar.gz": {
+    "https://github.com/nginx/nginx/releases/download/release-1.29.5/nginx-1.29.5.tar.gz": {
       "type": "sha256",
-      "value": "9befcced12ee09c2f4e1385d7e8e21c91f1a5a63b196f78f897c2d044b8c9312"
+      "value": "6744768a4114880f37b13a0443244e731bcb3130c0a065d7e37d8fd589ade374"
     }
   }
 }

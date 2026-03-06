@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/flamegraph/0.6.10/download": {
+    "https://crates.io/api/v1/crates/flamegraph/0.6.11/download": {
       "type": "sha256",
-      "value": "9cd16b516465c8fc1483cfd4955ac392a867728972bcdc6c5bd5ce3774f6aff4"
+      "value": "08b6da442f70c790348380cd6d45f0bae93b76dfdd005d9bea8cabd49ebbc609"
     }
   }
 }

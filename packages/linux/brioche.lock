@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.17.8.tar.xz": {
+    "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.7.tar.xz": {
       "type": "sha256",
-      "value": "5a8de64a75fca706c01c6c0a77cf75a74618439db195e25f1f0268af6b2fb1da"
+      "value": "b726a4d15cf9ae06219b56d87820776e34d89fbc137e55fb54a9b9c3015b8f1e"
     }
   }
 }

@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "starship",
-  version: "1.24.1",
+  version: "1.24.2",
   repository: "https://github.com/starship/starship.git",
 };
 

@@ -53,7 +53,10 @@ jobs:
         env:
           PLATFORM: ${{ matrix.platform }}
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
-          BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
+          BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_READ_URL }}
+          BRIOCHE_CACHE_WRITE_URL: ${{ vars.BRIOCHE_CACHE_WRITE_URL }}
+          BRIOCHE_CACHE_USE_DEFAULT_CACHE: ${{ vars.BRIOCHE_CACHE_USE_DEFAULT_CACHE }}
+          BRIOCHE_CACHE_CONNECT_TIMEOUT: "10s"
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_AWS_SECRET_ACCESS_KEY }}
           AWS_ENDPOINT_URL_S3: ${{ secrets.CACHE_AWS_ENDPOINT_URL_S3 }}
@@ -84,7 +87,10 @@ jobs:
           done
         env:
           BRIOCHE_REGISTRY_PASSWORD: ${{ secrets.BRIOCHE_REGISTRY_PASSWORD }}
-          BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_URL }}
+          BRIOCHE_CACHE_URL: ${{ vars.BRIOCHE_CACHE_READ_URL }}
+          BRIOCHE_CACHE_WRITE_URL: ${{ vars.BRIOCHE_CACHE_WRITE_URL }}
+          BRIOCHE_CACHE_USE_DEFAULT_CACHE: ${{ vars.BRIOCHE_CACHE_USE_DEFAULT_CACHE }}
+          BRIOCHE_CACHE_CONNECT_TIMEOUT: "10s"
           AWS_ACCESS_KEY_ID: ${{ secrets.CACHE_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CACHE_AWS_SECRET_ACCESS_KEY }}
           AWS_ENDPOINT_URL_S3: ${{ secrets.CACHE_AWS_ENDPOINT_URL_S3 }}
@@ -94,7 +100,7 @@ jobs:
 
       - name: Save failed processes
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: process-events-${{ github.run_id }}-${{ matrix.platform }}
           path: ~/.local/share/brioche/process-temp/*/events.bin.zst

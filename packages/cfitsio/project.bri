@@ -1,0 +1,56 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import curl from "curl";
+
+export const project = {
+  name: "cfitsio",
+  version: "4.6.3",
+  repository: "https://github.com/HEASARC/cfitsio",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `cfitsio-${project.version}`,
+});
+
+export default function cfitsio(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, curl],
+    set: {
+      USE_PTHREADS: "ON",
+      TESTS: "OFF",
+      UTILS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion cfitsio | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cfitsio)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^cfitsio-(?<version>.+)$/,
+  });
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/vancegroup/freealut": {
+      "freealut_1_1_0": "570dea5b77493cc9ce0b84f6a0a2ee31ed0b2c73"
+    }
+  }
+}

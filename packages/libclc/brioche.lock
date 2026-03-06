@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/libclc-21.1.8.src.tar.xz": {
+      "type": "sha256",
+      "value": "6c2677362a53531c35edf482bdc9171ea0471ca0a1e9138ac9b5a1782925616f"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://deb.debian.org/debian/pool/main/t/ttyrec/ttyrec_1.0.8.orig.tar.gz": {
+      "type": "sha256",
+      "value": "ef5e9bf276b65bb831f9c2554cd8784bd5b4ee65353808f82b7e2aef851587ec"
+    }
+  }
+}

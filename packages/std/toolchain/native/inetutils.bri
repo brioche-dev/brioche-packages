@@ -16,16 +16,16 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/ \
-            --bindir=/bin \
-            --localstatedir=/var \
-            --disable-logger \
-            --disable-whois \
-            --disable-rcp \
-            --disable-rexec \
-            --disable-rlogin \
-            --disable-rsh \
+          ./configure \\
+            --prefix=/ \\
+            --bindir=/bin \\
+            --localstatedir=/var \\
+            --disable-logger \\
+            --disable-whois \\
+            --disable-rcp \\
+            --disable-rexec \\
+            --disable-rlogin \\
+            --disable-rsh \\
             --disable-servers
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

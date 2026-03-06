@@ -1,0 +1,48 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "weaviate",
+  version: "1.35.0",
+  extra: {
+    moduleName: "github.com/weaviate/weaviate",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function weaviate(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/weaviate-server",
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/weaviate-server",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    weaviate-server --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(weaviate)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/mm2/Little-CMS/releases/download/lcms2.17/lcms2-2.17.tar.gz": {
+    "https://github.com/mm2/Little-CMS/releases/download/lcms2.18/lcms2-2.18.tar.gz": {
       "type": "sha256",
-      "value": "d11af569e42a1baa1650d20ad61d12e41af4fead4aa7964a01f93b08b53ab074"
+      "value": "ee67be3566f459362c1ee094fde2c159d33fa0390aa4ed5f5af676f9e5004347"
     }
   }
 }

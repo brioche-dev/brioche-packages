@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cntr/2.0.0/download": {
+      "type": "sha256",
+      "value": "f5dd86322937199c5ae5d55117bc64f21ca09a65d1ae85df4a0943a7a8f37e96"
+    }
+  }
+}

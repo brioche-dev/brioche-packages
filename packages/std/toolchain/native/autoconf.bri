@@ -16,8 +16,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          sed -e 's/SECONDS|/&SHLVL|/' \
-            -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \
+          sed -e 's/SECONDS|/&SHLVL|/' \\
+            -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \\
             -i.orig tests/local.at
         `,
       ],
@@ -37,8 +37,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
         "pipefail",
         "-c",
         std.indoc`
-          sed -e 's/SECONDS|/&SHLVL|/' \
-            -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \
+          sed -e 's/SECONDS|/&SHLVL|/' \\
+            -e '/BASH_ARGV=/a\\        /^SHLVL=/ d' \\
             -i.orig tests/local.at
 
           ./configure --prefix=/

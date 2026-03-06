@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/pboettch/json-schema-validator": {
+      "2.4.0": "c780404a84dd9ba978ba26bc58d17cb43fa7bc80"
+    }
+  }
+}

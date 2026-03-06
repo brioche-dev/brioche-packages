@@ -24,7 +24,7 @@ const source = Brioche.download(
 
 export default function libxaw(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
+    ./configure \\
       --prefix=/
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -76,7 +76,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.x.org/archive/individual/lib
       | lines
       | where ($it | str contains "libXaw") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libXaw-(?<version>.+)\.tar\.xz">'
+      | parse --regex '<a href="libXaw-(?<version>.+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 

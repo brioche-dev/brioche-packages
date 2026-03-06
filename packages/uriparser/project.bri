@@ -1,0 +1,56 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "uriparser",
+  version: "1.0.0",
+  repository: "https://github.com/uriparser/uriparser",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/uriparser-${project.version}/uriparser-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function uriparser(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      URIPARSER_BUILD_TESTS: "OFF",
+      URIPARSER_BUILD_DOCS: "OFF",
+    },
+    runnable: "bin/uriparse",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion liburiparser | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, uriparser)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^uriparser-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

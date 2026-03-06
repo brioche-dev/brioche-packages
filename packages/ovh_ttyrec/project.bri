@@ -1,0 +1,58 @@
+import * as std from "std";
+
+export const project = {
+  name: "ovh_ttyrec",
+  version: "1.1.7.1",
+  repository: "https://github.com/ovh/ovh-ttyrec",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Patch the source to properly build the recipe by not using
+  // /dev/null to test the compiler
+  std.runBash`
+    sed -i 's|-o /dev/null|-o /tmp/conftest|g' "$BRIOCHE_OUTPUT/configure"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function ovhTtyrec(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ttyrec"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ttyrec --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ovhTtyrec)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ttyrec v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^v(?<version>\d+\.\d+\.\d+\.\d+)$/,
+  });
+}

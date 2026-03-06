@@ -1,0 +1,67 @@
+import * as std from "std";
+import python from "python";
+import swig from "swig";
+
+export const project = {
+  name: "libcap_ng",
+  version: "0.8.5",
+  repository: "https://github.com/stevegrubb/libcap-ng",
+};
+
+const source = Brioche.download(
+  `https://people.redhat.com/sgrubb/libcap-ng/libcap-ng-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libcapNg(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-python3
+
+    # Patch the Python bindings Makefile to use std.toolchain's capability.h
+    # instead of hardcoded /usr/include/linux/capability.h. It has to be done
+    # after the configure step
+    sed -i "s|CAPABILITY_HEADER = /usr/include/linux/capability.h|CAPABILITY_HEADER = $capability_header|g" bindings/python3/Makefile
+
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, swig, python)
+    .env({
+      // Find the path to linux/capability.h in std.toolchain
+      capability_header: std.tpl`${std.toolchain}/include/linux/capability.h`,
+    })
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libcap-ng | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libcapNg)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

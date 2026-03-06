@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/gfold/2025.12.0/download": {
+      "type": "sha256",
+      "value": "80f4d7818cbf6226c80d0e611e990aae3ae75a302b4bc42c774e65d43ffd6cc5"
+    }
+  }
+}

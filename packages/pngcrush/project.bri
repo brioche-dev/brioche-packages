@@ -1,0 +1,62 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "pngcrush",
+  version: "1.8.13",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/pmt/pngcrush/${project.version}/pngcrush-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function pngcrush(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+
+    # Manual installation
+    cp pngcrush "$BRIOCHE_OUTPUT/bin/"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .outputScaffold(std.directory({ bin: std.directory() }))
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/pngcrush"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pngcrush -version 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pngcrush)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `pngcrush ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/pmt/files/pngcrush
+      | lines
+      | where ($it | str contains 'href="/projects/pmt/files/pngcrush/') and (not ($it | str contains 'old-versions'))
+      | parse --regex '<a href="/projects/pmt/files/pngcrush/(?<version>[\\d.]+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

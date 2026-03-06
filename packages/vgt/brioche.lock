@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/roblaszczak/vgt/@v/v1.0.1.zip": {
+      "type": "sha256",
+      "value": "ed96ee5683a14b6629b9d4210900a77d16ee4b0c5bb0b82993d10749ab0082d1"
+    }
+  }
+}

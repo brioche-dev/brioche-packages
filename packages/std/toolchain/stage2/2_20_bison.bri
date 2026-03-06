@@ -17,9 +17,9 @@ export default std.memo(async (): Promise<std.Recipe<std.Directory>> => {
         "pipefail",
         "-c",
         std.indoc`
-          ./configure \
-            --prefix=/usr \
-            --docdir=/usr/share/doc/bison-3.8.2 \
+          ./configure \\
+            --prefix=/usr \\
+            --docdir=/usr/share/doc/bison-3.8.2 \\
             --enable-relocatable
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"

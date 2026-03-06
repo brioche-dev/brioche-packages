@@ -1,5 +1,5 @@
 import * as runtime from "../runtime.bri";
-import { assert } from "../utils.bri";
+import { assert, ImplementsEquatable } from "../utils.bri";
 
 /**
  * Represents an expected SHA-256 hash. Should be a hex-encoded
@@ -18,6 +18,13 @@ export class Sha256Hash {
   constructor(value: runtime.HexString) {
     assert(runtime.isHex(value));
     this.hex = value;
+  }
+
+  equals(other: ImplementsEquatable): boolean {
+    if (other instanceof Sha256Hash) {
+      return this.hex === other.hex;
+    }
+    return false;
   }
 
   briocheSerialize(): runtime.Hash {

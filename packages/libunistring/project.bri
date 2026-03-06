@@ -7,7 +7,7 @@ export const project = {
 };
 
 const source = Brioche.download(
-  `https://ftp.gnu.org/gnu/libunistring/libunistring-${project.version}.tar.xz`,
+  `https://ftpmirror.gnu.org/gnu/libunistring/libunistring-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();
@@ -31,7 +31,8 @@ export default function libunistring(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>
       #include <unistring/version.h>
@@ -44,15 +45,15 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
           return EXIT_SUCCESS;
       }
-  `);
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -lunistring
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, libunistring)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();
@@ -66,10 +67,10 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): NushellRunnable {
   return nushellRunnable`
-    let version = http get https://ftp.gnu.org/gnu/libunistring
+    let version = http get https://ftpmirror.gnu.org/gnu/libunistring
       | lines
       | where ($it | str contains "libunistring-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libunistring-(?<version>[0-9.]+)\.tar\.xz">'
+      | parse --regex '<a href="(\\./)?libunistring-(?<version>[\\d.]+)\\.tar\\.xz"'
       | sort-by --natural --reverse version
       | get 0.version
 

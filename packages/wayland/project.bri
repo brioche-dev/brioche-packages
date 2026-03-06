@@ -1,0 +1,58 @@
+import * as std from "std";
+import libffi from "libffi";
+import libxml2 from "libxml2";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+
+export const project = {
+  name: "wayland",
+  version: "1.24.0",
+  repository: "https://gitlab.freedesktop.org/wayland/wayland",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function wayland(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, libffi, libxml2],
+    set: {
+      default_library: "both",
+      documentation: "false",
+      tests: "false",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion wayland-server | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, wayland)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+  });
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/google/double-conversion": {
+      "v3.4.0": "9dd6227ee3e29807183e56877f0282aeb40b8b1e"
+    }
+  }
+}

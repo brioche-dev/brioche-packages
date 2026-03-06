@@ -57,7 +57,12 @@ export type Equatable =
   | Primitive
   | Equatable[]
   | { [key: string]: Equatable }
+  | ImplementsEquatable
   | SerializeEquatable;
+
+export interface ImplementsEquatable {
+  equals: (other: ImplementsEquatable) => boolean;
+}
 
 export interface SerializeEquatable {
   briocheSerialize: () => Equatable;
@@ -104,6 +109,14 @@ export function equal<T extends Equatable>(a: T, b: T): boolean {
       return false;
     }
 
+    if (isImplementsEquatable(a) || isImplementsEquatable(b)) {
+      if (!isImplementsEquatable(a) || !isImplementsEquatable(b)) {
+        return false;
+      }
+
+      return a.equals(b);
+    }
+
     if (isSerializeEquatable(a) || isSerializeEquatable(b)) {
       if (!isSerializeEquatable(a) || !isSerializeEquatable(b)) {
         return false;
@@ -130,6 +143,15 @@ export function equal<T extends Equatable>(a: T, b: T): boolean {
   return false;
 }
 
+function isImplementsEquatable(value: unknown): value is ImplementsEquatable {
+  return (
+    typeof value === "object" &&
+    value != null &&
+    "equals" in value &&
+    typeof value.equals === "function"
+  );
+}
+
 function isSerializeEquatable(value: unknown): value is SerializeEquatable {
   return (
     typeof value === "object" &&
@@ -153,6 +175,10 @@ export function isEquatable(value: unknown): value is Equatable {
 
       if (Array.isArray(value)) {
         return value.every(isEquatable);
+      }
+
+      if (isImplementsEquatable(value)) {
+        return true;
       }
 
       if (isSerializeEquatable(value)) {

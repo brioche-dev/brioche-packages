@@ -5,7 +5,7 @@ import icu from "icu";
 
 export const project = {
   name: "nuspell",
-  version: "5.1.6",
+  version: "5.1.7",
   repository: "https://github.com/nuspell/nuspell",
 };
 

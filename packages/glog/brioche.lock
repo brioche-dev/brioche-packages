@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/google/glog.git": {
+      "v0.7.1": "7b134a5c82c0c0b5698bb6bf7a835b230c5638e4"
+    }
+  }
+}

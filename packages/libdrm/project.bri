@@ -1,0 +1,60 @@
+import * as std from "std";
+import libatomicOps from "libatomic_ops";
+import libpciaccess from "libpciaccess";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+
+export const project = {
+  name: "libdrm",
+  version: "2.4.131",
+  repository: "https://gitlab.freedesktop.org/mesa/drm",
+};
+
+const source = Brioche.download(
+  `https://dri.freedesktop.org/libdrm/libdrm-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libdrm(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, libatomicOps, libpciaccess],
+    set: {
+      "install-test-programs": "false",
+      "cairo-tests": "disabled",
+      tests: "false",
+      "man-pages": "disabled",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libdrm | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libdrm)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+    matchTag: /^libdrm-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

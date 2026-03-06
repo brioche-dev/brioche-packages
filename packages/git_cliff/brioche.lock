@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/git-cliff/2.12.0/download": {
+      "type": "sha256",
+      "value": "cd739481aba21660a094b30c5111ced62c627bbb69e092162dd2441f7ac4e1ef"
+    }
+  }
+}

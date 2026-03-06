@@ -1,0 +1,55 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import llvm from "llvm";
+import python from "python";
+
+export const project = {
+  name: "libclc",
+  version: "21.1.8",
+  repository: "https://github.com/llvm/llvm-project.git",
+};
+
+const source = Brioche.download(
+  `https://github.com/llvm/llvm-project/releases/download/llvmorg-${project.version}/libclc-${project.version}.src.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libclc(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, llvm, python],
+    set: {
+      LIBCLC_TARGETS_TO_BUILD: "all",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libclc | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libclc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  // The version printed is the one of the library, whereas the package's
+  // version is the one of the LLVM project
+  const expected = /\d+\.\d+\.\d+/;
+  std.assert(expected.test(result), `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^llvmorg-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

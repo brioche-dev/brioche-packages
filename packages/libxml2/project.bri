@@ -24,7 +24,7 @@ const source = Brioche.download(
   .peel();
 
 export default function libxml2(): std.Recipe<std.Directory> {
-  let libxml2 = cmakeBuild({
+  return cmakeBuild({
     source,
     dependencies: [std.toolchain, python],
     set: {
@@ -44,16 +44,6 @@ export default function libxml2(): std.Recipe<std.Directory> {
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
-
-  // Remove a bunch of `*.tmp*` files left over in the build
-  // TODO: Figure out where these temp files are coming from!
-  libxml2 = std.runBash`
-    find "$BRIOCHE_OUTPUT/lib" -name '*.tmp*' -delete
-  `
-    .outputScaffold(libxml2)
-    .toDirectory();
-
-  return libxml2;
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -84,7 +74,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get $"https://download.gnome.org/sources/libxml2/($sourceUrl)"
       | lines
       | where ($it | str contains '<a href="libxml2') and (not ($it | str contains '.sha256sum')) and (not ($it | str contains '.news'))
-      | parse --regex '<a href="libxml2-(?<version>[^"]+)\.tar\.xz"'
+      | parse --regex '<a href="libxml2-(?<version>[^"]+)\\.tar\\.xz"'
       | sort-by --natural --reverse version
       | get 0.version
 

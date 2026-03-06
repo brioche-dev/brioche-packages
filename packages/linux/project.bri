@@ -6,7 +6,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "linux",
-  version: "6.17.8",
+  version: "6.18.7",
   extra: {
     majorVersion: "6",
   },
@@ -180,7 +180,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get $"https://cdn.kernel.org/pub/linux/kernel/v($sourceUrl)"
       | lines
       | where ($it | str contains 'linux') and ($it | str contains '.tar.xz')
-      | parse --regex '<a href="linux-(?<version>[^"]+)\.tar\.xz"'
+      | parse --regex '<a href="linux-(?<version>[^"]+)\\.tar\\.xz"'
       | sort-by --natural --reverse version
       | get 0.version
 
@@ -293,28 +293,14 @@ function distClean(
 
 function ldWrapper(): std.Recipe<std.Directory> {
   // Create a custom wrapper to use `ld.bfd` instead of gold when linking.
-  // HACK: We also explicitly disable autopacking based on the output filename,
-  // but `brioche-ld` should handle these edge cases better.
   return std.directory({
     "bin/ld": std
-      .file(std.indoc`
+      .file(
+        std.indoc`
         #!/usr/bin/env sh
-
-        for (( i=1; i <= "$#"; i++ )); do
-            if [[ "\${!i}" == "-o" ]]; then
-                i=$((i + 1))
-                case "\${!i}" in
-                    *.o | *.ko | *.elf | *vmlinux* )
-                        export BRIOCHE_LD_AUTOPACK=false
-                        ;;
-                    *)
-                        ;;
-                esac
-            fi
-        done
-
         exec ld.bfd "$@"
-      `)
+      `,
+      )
       .withPermissions({ executable: true }),
   });
 }

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/systemfd/0.4.6/download": {
+      "type": "sha256",
+      "value": "8e81a83f23d38fe19fcf18fadf176c5c1c771cf509b54ad1309c908bace26369"
+    }
+  }
+}

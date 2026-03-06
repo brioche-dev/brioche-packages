@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/tokio-console/0.1.14/download": {
+      "type": "sha256",
+      "value": "6b67cfbdda24190c5ba3af613e7d11fc9d796634ba0987bda1ef205c4cf95915"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/rnr/0.5.1/download": {
+      "type": "sha256",
+      "value": "98bd126f8e2519933472a27f35806df214d4a689cb55bba876177f8f25d89134"
+    }
+  }
+}

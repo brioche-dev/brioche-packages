@@ -8,7 +8,7 @@ import xtrans from "xtrans";
 
 export const project = {
   name: "libx11",
-  version: "1.8.12",
+  version: "1.8.13",
 };
 
 const source = Brioche.download(
@@ -19,19 +19,18 @@ const source = Brioche.download(
 
 export default function libx11(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-unix-transport \
-      --enable-tcp-transport \
-      --enable-ipv6 \
-      --enable-loadable-i18n \
+    ./configure \\
+      --prefix=/ \\
+      --enable-unix-transport \\
+      --enable-tcp-transport \\
+      --enable-ipv6 \\
+      --enable-loadable-i18n \\
       --enable-xthreads
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, utilMacros, xorgproto, xtrans, libxau, libxcb)
     .workDir(source)
-    .env({})
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
@@ -65,7 +64,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.x.org/archive/individual/lib
       | lines
       | where ($it | str contains "libX11") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="libX11-(?<version>.+)\.tar\.xz">'
+      | parse --regex '<a href="libX11-(?<version>.+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 

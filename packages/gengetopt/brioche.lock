@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftp.gnu.org/gnu/gengetopt/gengetopt-2.23.tar.xz": {
+    "https://ftpmirror.gnu.org/gnu/gengetopt/gengetopt-2.23.tar.xz": {
       "type": "sha256",
       "value": "b941aec9011864978dd7fdeb052b1943535824169d2aa2b0e7eae9ab807584ac"
     }

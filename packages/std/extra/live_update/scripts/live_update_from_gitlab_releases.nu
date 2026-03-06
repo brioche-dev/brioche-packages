@@ -1,10 +1,14 @@
 # Retrieve the most recent releases from GitLab
-let releases = http get $'($env.baseUrl)/api/v4/projects/($env.repoOwner)%2F($env.repoName)/releases'
+let projectId = [$env.repoOwner, $env.repoName]
+  | str join "/"
+  | url encode --all
+let releases = http get $'($env.baseUrl)/api/v4/projects/($projectId)/releases'
   # Extract the version(s)
   | each {|release|
     $release.tag_name
       | parse --regex $env.matchTag
       | into record
+      | insert created_at $release.created_at
   }
   | where (($it | get -o version) | is-not-empty)
   | sort-by --natural version
@@ -46,6 +50,17 @@ if ($project | get extra?.versionUnderscore?) != null {
 
   $project = $project
     | update extra.versionUnderscore $versionUnderscore
+}
+
+# Extract the release date (if needed by the project)
+if ($project | get extra?.releaseDate?) != null {
+  let $createdDate = $latestReleaseInfo
+    | get created_at
+    | into datetime
+    | format date "%Y-%m-%d"
+
+  $project = $project
+    | update extra.releaseDate $createdDate
 }
 
 # Return back the project metadata encoded as JSON

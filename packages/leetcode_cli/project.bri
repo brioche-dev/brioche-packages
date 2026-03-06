@@ -5,7 +5,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "leetcode_cli",
-  version: "0.4.8",
+  version: "0.5.0",
   extra: {
     crateName: "leetcode-cli",
   },
@@ -41,6 +41,6 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromRustCrates({ project });
 }

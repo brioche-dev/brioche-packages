@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/xiph/flac": {
+      "1.5.0": "1507800de4b70e21be71f38caa0d9079d0bc6e45"
+    }
+  }
+}

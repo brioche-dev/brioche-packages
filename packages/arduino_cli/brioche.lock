@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/arduino/arduino-cli/@v/v1.4.1.info": {
+      "type": "sha256",
+      "value": "f30223741e3a94b56826107fb4eb9abe531f639bda5fe99a05a4c49fe2265d86"
+    },
+    "https://proxy.golang.org/github.com/arduino/arduino-cli/@v/v1.4.1.zip": {
+      "type": "sha256",
+      "value": "80ebeddc4f0483ec1100c361257698e9a4a47c0a0ec19547a35390e9d6bc9e7d"
+    }
+  }
+}

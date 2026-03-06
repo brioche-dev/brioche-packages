@@ -1,0 +1,63 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import openssl from "openssl";
+
+export const project = {
+  name: "bctoolbox",
+  version: "5.4.85",
+  repository: "https://gitlab.linphone.org/BC/public/bctoolbox.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function bctoolbox(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      ENABLE_MBEDTLS: "OFF",
+      ENABLE_OPENSSL: "ON",
+      ENABLE_DECAF: "OFF",
+      ENABLE_TESTS_COMPONENT: "OFF",
+      ENABLE_UNIT_TESTS: "OFF",
+      ENABLE_STRICT: "OFF",
+    },
+  })
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion bctoolbox | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, bctoolbox)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const majorMinorVersion = project.version.split(".").slice(0, 2).join(".");
+  const expected = `${majorMinorVersion}.0`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.linphone.org",
+    project,
+  });
+}

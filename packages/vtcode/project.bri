@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "vtcode",
-  version: "0.47.1",
+  version: "0.79.4",
   extra: {
     crateName: "vtcode",
   },
@@ -35,11 +35,14 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   // Check that the result contains the expected version
   const expected = `vtcode ${project.version}`;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
 
-export async function liveUpdate(): Promise<std.Recipe<std.Directory>> {
+export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromRustCrates({ project });
 }

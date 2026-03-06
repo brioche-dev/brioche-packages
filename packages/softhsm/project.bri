@@ -1,0 +1,56 @@
+import * as std from "std";
+import openssl from "openssl";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "softhsm",
+  version: "2.7.0",
+  repository: "https://github.com/softhsm/SoftHSMv2.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function softhsm(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure \\
+      --prefix=/ \\
+      --with-objectstore-backend-db \\
+      --disable-gost
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, openssl, sqlite)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib/softhsm" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/softhsm2-util"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    softhsm2-util --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(softhsm)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/neovim/unibilium": {
+      "v2.1.2": "bfcb0350129dd76893bc90399cf37c45812268a2"
+    }
+  }
+}

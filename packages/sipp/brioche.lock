@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/SIPp/sipp/releases/download/v3.7.7/sipp-3.7.7.tar.gz": {
+      "type": "sha256",
+      "value": "e55b15f567760e9febeef366a1ab51a5239d197a132ce931b78c826d22d31e69"
+    }
+  }
+}

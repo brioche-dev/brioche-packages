@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.14.tar.bz2": {
+    "https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.15.3.tar.bz2": {
       "type": "sha256",
-      "value": "be9c88a0b3604367dd74167a2b754a35e142f670292ae47a2fdef27a2ee97a32"
+      "value": "7b079d614d582cade7ab8db2364e65271d0877a37df8757ac4ac0c8970be861e"
     }
   }
 }

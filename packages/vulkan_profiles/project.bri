@@ -1,0 +1,82 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import jsoncpp from "jsoncpp";
+import python from "python";
+import valijson from "valijson";
+import vulkanHeaders from "vulkan_headers";
+import vulkanUtilityLibraries from "vulkan_utility_libraries";
+
+export const project = {
+  name: "vulkan_profiles",
+  version: "1.4.344",
+  repository: "https://github.com/KhronosGroup/Vulkan-Profiles",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function vulkanProfiles(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      jsoncpp,
+      python,
+      valijson,
+      vulkanHeaders,
+      vulkanUtilityLibraries,
+    ],
+    set: {
+      BUILD_TESTS: "OFF",
+      VALIJSON_INSTALL_DIR: std.tpl`${valijson}`,
+      VULKAN_HEADERS_INSTALL_DIR: std.tpl`${vulkanHeaders}`,
+      VULKAN_UTILITY_LIBRARIES_INSTALL_DIR: std.tpl`${vulkanUtilityLibraries}`,
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <vulkan/vulkan_profiles.hpp>
+      #include <iostream>
+
+      int main()
+      {
+        std::cout << VK_API_VERSION_PATCH(VP_HEADER_VERSION_COMPLETE) << std::endl;
+
+        return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    g++ main.cpp -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, vulkanHeaders, vulkanProfiles)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = /([\d.]+)$/m;
+  std.assert(
+    result.match(expected) != null,
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/PoseLib/PoseLib": {
+      "v2.0.5": "7e9f5f53372e43f89655040d4dfc4a00e5ace11c"
+    }
+  }
+}

@@ -51,7 +51,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://www.x.org/archive/individual/util
       | lines
       | where ($it | str contains "util-macros") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="util-macros-(?<version>.+)\.tar\.xz">'
+      | parse --regex '<a href="util-macros-(?<version>.+)\\.tar\\.xz">'
       | sort-by --natural --reverse version
       | get 0.version
 

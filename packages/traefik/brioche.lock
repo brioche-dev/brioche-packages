@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/traefik/traefik/v3/@v/v3.6.2.zip": {
+    "https://proxy.golang.org/github.com/traefik/traefik/v3/@v/v3.6.8.zip": {
       "type": "sha256",
-      "value": "3d8c7285864fb54298fda232d6fc4a4eee5ecf3e140e440a7250999a3a2c81e6"
+      "value": "1331e3c2d8b137b9dc7d0053dd6f138a4a402672b868a894e151c3ab2a72da38"
     }
   }
 }
