@@ -1,10 +1,11 @@
 import * as std from "std";
+import libcap from "libcap";
 import openssl from "openssl";
 import { cargoBuild } from "rust";
 
 export const project = {
   name: "codex",
-  version: "0.91.0",
+  version: "0.110.0",
   repository: "https://github.com/openai/codex.git",
 };
 
@@ -18,7 +19,7 @@ export default function codex(): std.Recipe<std.Directory> {
     source,
     currentDir: "codex-rs",
     path: "cli",
-    dependencies: [openssl],
+    dependencies: [libcap, openssl],
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
 }
 
