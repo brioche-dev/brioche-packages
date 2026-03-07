@@ -23,6 +23,7 @@ export default function hdf5(): std.Recipe<std.Directory> {
       HDF5_BUILD_FORTRAN: "OFF",
       HDF5_BUILD_JAVA: "OFF",
       HDF5_BUILD_EXAMPLES: "OFF",
+      HDF5_ENABLE_ZLIB_SUPPORT: "ON",
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
