@@ -15,7 +15,6 @@ import awsCrtCpp from "aws_crt_cpp";
 import curl from "curl";
 import openssl from "openssl";
 import s2n from "s2n";
-import zlib from "zlib";
 
 export const project = {
   name: "aws_sdk_cpp",
@@ -45,7 +44,6 @@ const dependencies = [
   curl,
   openssl,
   s2n,
-  zlib,
 ];
 
 /**

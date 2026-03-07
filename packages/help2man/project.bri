@@ -50,12 +50,12 @@ export async function test(): Promise<std.Recipe<std.File>> {
 function wrapPerlShebangs(
   recipe: std.Recipe<std.Directory>,
 ): std.Recipe<std.Directory> {
-  recipe = recipe.insert(".local/libexec/help2man/perl", perl);
+  recipe = recipe.insert("libexec/help2man/perl", perl);
 
   return std.merge(
     recipe,
     std.addRunnable(std.directory(), "bin/help2man", {
-      command: { relativePath: ".local/libexec/help2man/perl/bin/perl" },
+      command: { relativePath: "libexec/help2man/perl/bin/perl" },
       args: [[std.glob(recipe, ["bin/help2man"]), "/bin/help2man"]],
     }),
   );
