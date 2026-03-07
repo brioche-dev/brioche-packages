@@ -1,0 +1,86 @@
+import * as std from "std";
+import libxml2 from "libxml2";
+
+export const project = {
+  name: "docbook_xsl",
+  version: "1.79.2",
+  repository: "https://github.com/docbook/xslt10-stylesheets",
+};
+
+const source = Brioche.download(
+  `https://github.com/docbook/xslt10-stylesheets/releases/download/release/${project.version}/docbook-xsl-nons-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function docbookXsl(): std.Recipe<std.Directory> {
+  const stylesheetDir = `xsl-stylesheets-nons-${project.version}`;
+
+  // Catalog maps standard DocBook XSL URIs to the local install path.
+  const catalog = std.file(std.indoc`
+    <?xml version="1.0"?>
+    <!DOCTYPE catalog PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN"
+      "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
+    <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+      <rewriteSystem systemIdStartString="http://cdn.docbook.org/release/xsl-nons/${project.version}/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteSystem systemIdStartString="https://cdn.docbook.org/release/xsl-nons/${project.version}/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteSystem systemIdStartString="http://cdn.docbook.org/release/xsl-nons/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteSystem systemIdStartString="https://cdn.docbook.org/release/xsl-nons/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteSystem systemIdStartString="http://docbook.sourceforge.net/release/xsl/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteSystem systemIdStartString="https://docbook.sourceforge.net/release/xsl/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteURI uriStartString="http://cdn.docbook.org/release/xsl-nons/${project.version}/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteURI uriStartString="https://cdn.docbook.org/release/xsl-nons/${project.version}/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteURI uriStartString="http://cdn.docbook.org/release/xsl-nons/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteURI uriStartString="https://cdn.docbook.org/release/xsl-nons/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteURI uriStartString="http://docbook.sourceforge.net/release/xsl/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+      <rewriteURI uriStartString="https://docbook.sourceforge.net/release/xsl/current/"
+        rewritePrefix="docbook/${stylesheetDir}/"/>
+    </catalog>
+  `);
+
+  return std
+    .directory({
+      [`share/xml/docbook/${stylesheetDir}`]: source,
+      "share/xml/catalog.xml": catalog,
+    })
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        XML_CATALOG_FILES: { fallback: { path: "share/xml/catalog.xml" } },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so just run to verify
+  // the correct installation
+  const script = std.runBash`
+    xmlcatalog "$XML_CATALOG_FILES" "https://cdn.docbook.org/release/xsl-nons/current/" | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libxml2, docbookXsl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release\/(?<version>.+)$/,
+  });
+}
