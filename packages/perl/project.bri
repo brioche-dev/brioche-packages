@@ -3,10 +3,17 @@ import * as std from "std";
 export const project = {
   name: "perl",
   version: "5.40.1",
+  repository: "https://github.com/Perl/perl5",
+  extra: {
+    majorVersion: "5",
+  },
 };
 
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+
 const source = Brioche.download(
-  `https://www.cpan.org/src/5.0/perl-${project.version}.tar.gz`,
+  `https://www.cpan.org/src/${project.extra.majorVersion}.0/perl-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -59,4 +66,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
   );
 
   return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^v(?<version>\d+\.\d*[02468]\.\d+)$/,
+  });
 }
