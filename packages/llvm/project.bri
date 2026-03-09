@@ -19,6 +19,11 @@ export default function llvm(): std.Recipe<std.Directory> {
     path: "llvm",
     set: {
       LLVM_ENABLE_PROJECTS: "clang;clang-tools-extra;lld;lldb",
+      LLVM_ENABLE_RUNTIMES: "compiler-rt",
+      LLVM_ENABLE_RTTI: "ON",
+      LLVM_LINK_LLVM_DYLIB: "ON",
+      LLVM_INCLUDE_DOCS: "OFF",
+      LLVM_INCLUDE_TESTS: "OFF",
       CMAKE_BUILD_TYPE: "Release",
     },
     env: {
