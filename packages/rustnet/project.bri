@@ -5,7 +5,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "rustnet",
-  version: "0.18.0",
+  version: "1.0.0",
   extra: {
     crateName: "rustnet-monitor",
   },

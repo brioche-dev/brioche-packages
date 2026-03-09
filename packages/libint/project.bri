@@ -1,61 +1,63 @@
 import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
 import boost from "boost";
 import eigen from "eigen";
 
 export const project = {
   name: "libint",
-  version: "2.12.0",
+  version: "2.13.1",
   repository: "https://github.com/evaleev/libint",
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-}).pipe((source) =>
-  std.runBash`
-    sed -i -e "s|/bin/rm|rm|" "$BRIOCHE_OUTPUT/configure.ac"
-    sed -i -e "s|/bin/rm|rm|" "$BRIOCHE_OUTPUT/src/bin/libint/Makefile"
-    sed -i -e "s|/bin/rm|rm|" "$BRIOCHE_OUTPUT/src/lib/libint/Makefile.library"
-  `
-    .outputScaffold(source)
-    .toDirectory(),
-);
+const source = Brioche.download(
+  `https://github.com/evaleev/libint/releases/download/v${project.version}/libint-${project.version}.tgz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function libint(): std.Recipe<std.Directory> {
-  return std.runBash`
-    ./autogen.sh
-    ./configure \\
-      --prefix=/ \\
-      --enable-shared
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
-  `
-    .workDir(source)
-    .dependencies(std.toolchain, boost, eigen)
-    .toDirectory()
-    .pipe(std.libtoolSanitizeDependencies)
-    .pipe(std.pkgConfigMakePathsRelative)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      }),
-    );
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, boost, eigen],
+    set: {
+      BUILD_TESTING: "OFF",
+      LIBINT2_BUILD_SHARED_AND_STATIC_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
+
+      find_package(libint2 REQUIRED CONFIG)
+      message(STATUS "libint2 version: \${libint2_VERSION}")
+    `),
+  });
+
   const script = std.runBash`
-    pkg-config --modversion libint2 | tee "$BRIOCHE_OUTPUT"
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, libint)
+    .workDir(src)
+    .dependencies(std.toolchain, cmake, boost, eigen, libint)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  const expected = `libint2 version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }

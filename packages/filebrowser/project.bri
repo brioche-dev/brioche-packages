@@ -1,0 +1,74 @@
+import * as std from "std";
+import { goBuild } from "go";
+import pnpm, { pnpmInstall } from "pnpm";
+
+export const project = {
+  name: "filebrowser",
+  version: "2.61.0",
+  extra: {
+    moduleName: "github.com/filebrowser/filebrowser/v2",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
+
+export default function filebrowser(): std.Recipe<std.Directory> {
+  // Install frontend dependencies and build the frontend
+  const frontendWithDeps = pnpmInstall({
+    source: std.castToDirectory(source.get("frontend")),
+  });
+
+  const frontendDist = std.runBash`
+    pnpm run build
+    mv dist "$BRIOCHE_OUTPUT"
+  `
+    .workDir(frontendWithDeps)
+    .dependencies(std.toolchain, pnpm)
+    .env({
+      // Help the dynamic linker to find shared libraries at runtime.
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+    })
+    .unsafe({ networking: true })
+    .toDirectory();
+
+  // Build the Go binary with embedded frontend
+  return goBuild({
+    source: source.insert("frontend/dist", frontendDist),
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/version.Version=${project.version}`,
+      ],
+    },
+    runnable: "bin/filebrowser",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    filebrowser version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(filebrowser)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `File Browser v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

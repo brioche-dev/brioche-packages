@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "dbmate",
-  version: "2.29.3",
+  version: "2.30.0",
   extra: {
     moduleName: "github.com/amacneil/dbmate/v2",
   },

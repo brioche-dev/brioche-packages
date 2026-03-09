@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "carapace",
-  version: "1.6.0",
+  version: "1.6.2",
   extra: {
     moduleName: "github.com/carapace-sh/carapace-bin",
   },

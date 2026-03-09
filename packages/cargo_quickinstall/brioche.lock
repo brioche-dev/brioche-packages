@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-quickinstall/0.3.45/download": {
+    "https://crates.io/api/v1/crates/cargo-quickinstall/0.3.47/download": {
       "type": "sha256",
-      "value": "9399341a0aef6de1094c4325f92f0bf0387265ba6ca0b11cf0c883dea579c30b"
+      "value": "988ca85c0a53df071606513a1a8fa70b002a6d8c3b688d634715a2b0158476bc"
     }
   }
 }

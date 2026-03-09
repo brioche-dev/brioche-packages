@@ -1,0 +1,63 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libassuan from "libassuan";
+import libgpgError from "libgpg_error";
+
+export const project = {
+  name: "pinentry",
+  version: "1.3.2",
+  repository: "https://www.gnupg.org/software/pinentry/index.html",
+};
+
+const source = Brioche.download(
+  `https://gnupg.org/ftp/gcrypt/pinentry/pinentry-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function pinentry(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libgpgError, libassuan)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/pinentry"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pinentry --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pinentry())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `pinentry-curses (pinentry) ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://gnupg.org/ftp/gcrypt/pinentry/
+      | lines
+      | where ($it | str contains "pinentry-") and ($it | str contains ".tar.bz2") and (not ($it | str contains ".sig")) and (not ($it | str contains "pinentry-qt"))
+      | parse --regex 'pinentry-(?<version>\\d+\\.\\d+\\.\\d+)\\.tar\\.bz2'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

@@ -4,7 +4,7 @@ import vulkanHeaders from "vulkan_headers";
 
 export const project = {
   name: "vulkan_utility_libraries",
-  version: "1.4.339",
+  version: "1.4.343",
   repository: "https://github.com/KhronosGroup/Vulkan-Utility-Libraries",
 };
 

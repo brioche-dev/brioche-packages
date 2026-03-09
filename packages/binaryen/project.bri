@@ -4,7 +4,7 @@ import git from "git";
 
 export const project = {
   name: "binaryen",
-  version: "125",
+  version: "126",
   repository: "https://github.com/WebAssembly/binaryen.git",
 };
 

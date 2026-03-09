@@ -1,0 +1,139 @@
+import * as std from "std";
+import nspr from "nspr";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "nss",
+  version: "3.120.1",
+  repository: "https://github.com/nss-dev/nss",
+  extra: {
+    versionUnderscore: "3_120_1",
+  },
+};
+
+std.assert(
+  project.extra.versionUnderscore ===
+    std.projectVersionToUnderscoreFormat({ project }),
+  `expected 'project.extra.versionUnderscore' field '${project.extra.versionUnderscore}' to match version '${project.version}'`,
+);
+
+const source = Brioche.download(
+  `https://ftp.mozilla.org/pub/security/nss/releases/NSS_${project.extra.versionUnderscore}_RTM/src/nss-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function nss(): std.Recipe<std.Directory> {
+  return (
+    std.runBash`
+    # Set LD_LIBRARY_PATH so shlibsign can load shared libraries
+    # export LD_LIBRARY_PATH="$nspr_lib"
+
+    cd nss
+
+    make all \\
+      BUILD_OPT=1 \\
+      NSS_DISABLE_GTESTS=1 \\
+      USE_64=1 \\
+      NSPR_INCLUDE_DIR="$nspr_include" \\
+      NSPR_LIB_DIR="$nspr_lib"
+
+    cd ../dist
+
+    # Find the build output directory
+    build_dir=$(ls -d Linux* | head -1)
+
+    # Manual installation
+    cp "$build_dir"/bin/* "$BRIOCHE_OUTPUT/bin/"
+    cp -RL public/nss/* "$BRIOCHE_OUTPUT/include/nss/"
+    cp -RL public/dbm/* "$BRIOCHE_OUTPUT/include/nss/"
+    cp "$build_dir"/lib/*.so "$BRIOCHE_OUTPUT/lib/"
+    cp "$build_dir"/lib/*.chk "$BRIOCHE_OUTPUT/lib/" 2>/dev/null || true
+    cp "$build_dir"/lib/libcrmf.a "$BRIOCHE_OUTPUT/lib/"
+
+    # Generate nss-config from upstream template
+    IFS='.' read -r major minor patch <<< "$nss_version"
+    sed \\
+      -e "s|@prefix@|/|" \\
+      -e "s|@MOD_MAJOR_VERSION@|$major|" \\
+      -e "s|@MOD_MINOR_VERSION@|$minor|" \\
+      -e "s|@MOD_PATCH_VERSION@|$patch|" \\
+      ../nss/pkg/pkg-config/nss-config.in > "$BRIOCHE_OUTPUT/bin/nss-config"
+    chmod +x "$BRIOCHE_OUTPUT/bin/nss-config"
+
+    # Generate nss.pc from upstream template
+    sed \\
+      -e 's|%prefix%|/|' \\
+      -e 's|%exec_prefix%|\${prefix}|' \\
+      -e 's|%libdir%|\${exec_prefix}/lib|' \\
+      -e 's|%includedir%|\${prefix}/include/nss|' \\
+      -e "s|%NSS_VERSION%|$nss_version|" \\
+      -e 's|%NSPR_VERSION%|4.12|' \\
+      ../nss/pkg/pkg-config/nss.pc.in > "$BRIOCHE_OUTPUT/lib/pkgconfig/nss.pc"
+  `
+      .workDir(source)
+      .dependencies(std.toolchain, nspr)
+      .outputScaffold(
+        std.directory({
+          bin: std.directory(),
+          lib: std.directory({
+            pkgconfig: std.directory(),
+          }),
+          include: std.directory({
+            nss: std.directory(),
+          }),
+        }),
+      )
+      .env({
+        nspr_include: std.tpl`${nspr}/include/nspr`,
+        nspr_lib: std.tpl`${nspr}/lib`,
+        nss_version: project.version,
+      })
+      .toDirectory()
+      // Remove libssl.a to avoid conflict with OpenSSL
+      .remove("lib/libssl.a")
+      .pipe(std.pkgConfigMakePathsRelative)
+      .pipe((recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+      )
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion nss | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, nss())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://ftp.mozilla.org/pub/security/nss/releases/
+      | lines
+      | where ($it | str contains '_RTM/')
+      | parse --regex 'NSS_(?<version>[\\d_]+)_RTM'
+      | uniq-by version
+      | sort-by --natural --reverse version
+      | get 0.version
+      | str replace --all '_' '.'
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.versionUnderscore ($version | str replace --all '.' '_')
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

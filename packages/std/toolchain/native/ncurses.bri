@@ -24,6 +24,8 @@ export default std.memo((): std.Recipe<std.Directory> => {
             --with-cxx-shared \\
             --enable-pc-files \\
             --enable-widec \\
+            --enable-overwrite \\
+            --with-termlib \\
             --with-pkg-config-libdir=/lib/pkgconfig
           make
           make install DESTDIR="$BRIOCHE_OUTPUT"
@@ -42,23 +44,112 @@ export default std.memo((): std.Recipe<std.Directory> => {
     std.symlink({ target: "ncursesw" }),
   );
 
-  for (const lib of ["form", "menu", "ncurses", "ncurses++", "panel"]) {
-    // Create symlinks for the libraries
-    ncurses = ncurses.insert(`lib/lib${lib}.so`, std.file(`INPUT(-l${lib}w)`));
+  const majorVersion = 6;
+  const fullVersion = "6.4";
 
-    // Create symlinks for the pkgconfig files
-    ncurses = ncurses.insert(
-      `lib/pkgconfig/${lib}.pc`,
-      std.symlink({ target: `${lib}w.pc` }),
+  for (const lib of [
+    "form",
+    "menu",
+    "ncurses",
+    "ncurses++",
+    "panel",
+    "tinfo",
+  ]) {
+    ncurses = addLibraryAliases(
+      ncurses,
+      lib,
+      `${lib}w`,
+      majorVersion,
+      fullVersion,
     );
   }
 
   // Create symlinks for a fallback to curses library
-  ncurses = ncurses.insert("lib/libcursesw.so", std.file("INPUT(-lncursesw)"));
-  ncurses = ncurses.insert(
-    "lib/libcurses.so",
-    std.symlink({ target: "libncurses.so" }),
+  ncurses = addLibraryAliases(
+    ncurses,
+    "curses",
+    "ncurses",
+    majorVersion,
+    fullVersion,
   );
+  ncurses = addLibraryAliases(
+    ncurses,
+    "cursesw",
+    "ncursesw",
+    majorVersion,
+    fullVersion,
+  );
+
+  // Ensure -lncursesw also pulls in libtinfow at link time
+  ncurses = addLibraryLinkerScript(ncurses, "ncursesw", majorVersion, [
+    "tinfow",
+  ]);
 
   return ncurses;
 });
+
+/**
+ * Create library alias symlinks mapping `lib` to `target`.
+ *
+ * @param recipe - The directory recipe to insert symlinks into.
+ * @param lib - The alias library name (e.g. "ncurses", "curses").
+ * @param target - The target library name (e.g. "ncursesw", "ncurses").
+ * @param majorVersion - The soname major version (e.g. 6).
+ * @param fullVersion - The full version string (e.g. "6.4").
+ *
+ * @returns The recipe with `.so`, `.so.N`, `.so.X.Y`, and `.pc` symlinks added.
+ */
+function addLibraryAliases(
+  recipe: std.Recipe<std.Directory>,
+  lib: string,
+  target: string,
+  majorVersion: number,
+  fullVersion: string,
+): std.Recipe<std.Directory> {
+  // Symbolic links for shared library
+  recipe = recipe.insert(
+    `lib/lib${lib}.so`,
+    std.symlink({ target: `lib${target}.so` }),
+  );
+  recipe = recipe.insert(
+    `lib/lib${lib}.so.${majorVersion}`,
+    std.symlink({ target: `lib${target}.so.${majorVersion}` }),
+  );
+  recipe = recipe.insert(
+    `lib/lib${lib}.so.${fullVersion}`,
+    std.symlink({ target: `lib${target}.so.${fullVersion}` }),
+  );
+
+  // Symbolic links for pkgconfig
+  recipe = recipe.insert(
+    `lib/pkgconfig/${lib}.pc`,
+    std.symlink({ target: `${target}.pc` }),
+  );
+  return recipe;
+}
+
+/**
+ * Replace a library's `.so` dev link with a linker script that pulls in
+ * extra dependencies. This works around the gold linker not following
+ * transitive DT_NEEDED entries.
+ *
+ * @param recipe - The directory recipe to insert the linker script into.
+ * @param lib - The library name (e.g. "ncursesw").
+ * @param majorVersion - The soname major version (e.g. 6).
+ * @param deps - Extra libraries to pull in (e.g. ["tinfow"]).
+ *
+ * @returns The recipe with the `.so` dev link replaced by a linker script.
+ */
+function addLibraryLinkerScript(
+  recipe: std.Recipe<std.Directory>,
+  lib: string,
+  majorVersion: number,
+  deps: string[],
+): std.Recipe<std.Directory> {
+  const depsFlags = deps.map((d) => `-l${d}`).join(" ");
+  recipe = recipe.insert(
+    `lib/lib${lib}.so`,
+    std.file(`INPUT(lib${lib}.so.${majorVersion} ${depsFlags})`),
+  );
+  return recipe;
+}

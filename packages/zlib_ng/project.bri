@@ -1,8 +1,9 @@
 import * as std from "std";
+import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "zlib_ng",
-  version: "2.3.2",
+  version: "2.3.3",
   repository: "https://github.com/zlib-ng/zlib-ng.git",
 };
 
@@ -11,23 +12,37 @@ const source = Brioche.gitCheckout({
   ref: project.version,
 });
 
-export default function zlibNg(): std.Recipe<std.Directory> {
-  return std.runBash`
-    ./configure --prefix=/
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
-  `
-    .workDir(source)
-    .dependencies(std.toolchain)
-    .toDirectory()
-    .pipe(std.pkgConfigMakePathsRelative)
-    .pipe((recipe) =>
-      std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
-        LIBRARY_PATH: { append: [{ path: "lib" }] },
-        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      }),
-    );
+/**
+ * Options for building zlib-ng.
+ *
+ * @param zlibCompat - Build in zlib-compatible mode, installing headers and
+ *   libraries under the standard zlib names so it can act as a drop-in
+ *   replacement for zlib.
+ */
+interface ZlibNgOptions {
+  zlibCompat?: boolean;
+}
+
+export default function zlibNg(
+  options: ZlibNgOptions = {},
+): std.Recipe<std.Directory> {
+  const { zlibCompat = false } = options;
+
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      BUILD_SHARED_LIBS: "ON",
+      ZLIB_COMPAT: zlibCompat ? "ON" : "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

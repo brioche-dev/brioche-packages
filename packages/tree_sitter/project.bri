@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "tree_sitter",
-  version: "0.26.3",
+  version: "0.26.5",
   repository: "https://github.com/tree-sitter/tree-sitter",
 };
 

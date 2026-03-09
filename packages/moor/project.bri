@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "moor",
-  version: "2.10.2",
+  version: "2.10.4",
   extra: {
     moduleName: "github.com/walles/moor/v2",
   },

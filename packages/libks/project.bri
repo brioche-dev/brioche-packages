@@ -19,11 +19,11 @@ const source = Brioche.gitCheckout({
   // - Use -lm instead of an absolute path to libm.so
   // - Use INTERFACE IMPORTED target to avoid absolute library paths
   std.runBash`
-    sed -i \
-      -e 's/NO_DEFAULT_PATH//' \
-      -e 's/find_library(LIBM_LIBRARIES m)/set(LIBM_LIBRARIES "m")/' \
-      -e 's/UNKNOWN IMPORTED/INTERFACE IMPORTED/' \
-      -e 's/IMPORTED_LOCATION/INTERFACE_LINK_LIBRARIES/' \
+    sed -i \\
+      -e 's/NO_DEFAULT_PATH//' \\
+      -e 's/find_library(LIBM_LIBRARIES m)/set(LIBM_LIBRARIES "m")/' \\
+      -e 's/UNKNOWN IMPORTED/INTERFACE IMPORTED/' \\
+      -e 's/IMPORTED_LOCATION/INTERFACE_LINK_LIBRARIES/' \\
       "$BRIOCHE_OUTPUT/cmake/FindLibM.cmake"
   `
     .outputScaffold(source)

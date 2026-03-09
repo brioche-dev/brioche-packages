@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "esbuild",
-  version: "0.27.2",
+  version: "0.27.3",
   extra: {
     moduleName: "github.com/evanw/esbuild",
   },

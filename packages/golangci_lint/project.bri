@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "golangci_lint",
-  version: "2.8.0",
+  version: "2.9.0",
   extra: {
     moduleName: "github.com/golangci/golangci-lint/v2",
   },

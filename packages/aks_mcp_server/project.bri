@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "aks_mcp_server",
-  version: "0.0.12",
+  version: "0.0.15",
   extra: {
     moduleName: "github.com/!azure/aks-mcp",
   },

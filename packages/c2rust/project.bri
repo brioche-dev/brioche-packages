@@ -6,7 +6,7 @@ import llvm from "llvm";
 
 export const project = {
   name: "c2rust",
-  version: "0.21.0",
+  version: "0.22.1",
   extra: {
     crateName: "c2rust",
   },

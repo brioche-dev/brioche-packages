@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "z3",
-  version: "4.15.4",
+  version: "4.15.8",
   repository: "https://github.com/Z3Prover/z3",
 };
 

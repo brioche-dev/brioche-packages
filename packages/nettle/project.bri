@@ -1,0 +1,77 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "nettle",
+  version: "4.0",
+  repository: "https://github.com/gnutls/nettle",
+  extra: {
+    gitRef: "nettle_4.0_release_20260205",
+  },
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.extra.gitRef,
+});
+
+export default function nettle(): std.Recipe<std.Directory> {
+  // Skip testsuite/tools/examples
+  return std.runBash`
+    autoreconf --install --force
+    ./configure \\
+      --prefix=/ \\
+      --disable-documentation
+    make -j "$(nproc)" SUBDIRS=""
+    make install DESTDIR="$BRIOCHE_OUTPUT" SUBDIRS=""
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion nettle | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, nettle)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    # Parse the latest release tag
+    let latest = http get https://api.github.com/repos/gnutls/nettle/tags
+      | where ($it.name | str starts-with "nettle_") and ($it.name | str contains "_release_")
+      | first
+
+    let parsed = $latest.name
+      | parse --regex 'nettle_(?<version>[\\d.]+)_release_(?<date>\\d+)'
+      | first
+
+    let version = $parsed.version
+    let gitRef = $latest.name
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.gitRef $gitRef
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

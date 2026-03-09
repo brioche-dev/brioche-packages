@@ -21,7 +21,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "hwloc",
-  version: "2.12.2",
+  version: "2.13.0",
   repository: "https://github.com/open-mpi/hwloc",
 };
 

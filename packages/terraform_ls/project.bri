@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "terraform_ls",
-  version: "0.38.3",
+  version: "0.38.4",
   extra: {
     moduleName: "github.com/hashicorp/terraform-ls",
   },
