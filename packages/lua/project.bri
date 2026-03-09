@@ -1,0 +1,56 @@
+import * as std from "std";
+
+export const project = {
+  name: "lua",
+  version: "5.5.0",
+  repository: "https://github.com/lua/lua",
+};
+
+const source = Brioche.download(
+  `https://www.lua.org/ftp/lua-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function lua(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make linux \\
+      -j "$(nproc)" \\
+      MYCFLAGS="-DLUA_USE_READLINE" \\
+      MYLIBS="-lreadline"
+    make install INSTALL_TOP="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/lua"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lua -v | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(lua)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Lua ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
