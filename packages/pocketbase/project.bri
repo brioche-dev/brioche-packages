@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "pocketbase",
-  version: "0.36.1",
+  version: "0.36.3",
   extra: {
     moduleName: "github.com/pocketbase/pocketbase",
   },

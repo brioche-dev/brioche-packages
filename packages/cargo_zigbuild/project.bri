@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_zigbuild",
-  version: "0.21.6",
+  version: "0.22.0",
   extra: {
     crateName: "cargo-zigbuild",
   },

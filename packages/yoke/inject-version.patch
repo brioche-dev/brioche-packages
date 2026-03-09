@@ -1,0 +1,13 @@
+--- a/internal/debug.go
++++ b/internal/debug.go
+@@ -33,5 +33,10 @@
++var buildVersion string
++
+ var Info, _ = debug.ReadBuildInfo()
+ 
+ func GetYokeVersion() string {
++	if buildVersion != "" {
++		return buildVersion
++	}
+ 	const path = "github.com/yokecd/yoke"
+ 	if Info.Main.Path == path {

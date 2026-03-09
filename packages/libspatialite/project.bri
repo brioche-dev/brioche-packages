@@ -1,0 +1,74 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import freexl from "freexl";
+import geos from "geos";
+import librttopo from "librttopo";
+import minizip from "minizip";
+import proj from "proj";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "libspatialite",
+  version: "5.1.0",
+};
+
+const source = Brioche.download(
+  `https://www.gaia-gis.it/gaia-sins/libspatialite-sources/libspatialite-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libspatialite(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --force --install
+    ./configure \
+      --prefix=/ \
+      --enable-rttopo \
+      --disable-libxml2
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, freexl, geos, librttopo, minizip, proj, sqlite)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion spatialite | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libspatialite)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.gaia-gis.it/gaia-sins/libspatialite-sources/
+      | lines
+      | where ($it | str contains 'href="libspatialite-') and ($it | str contains '.tar.gz"')
+      | parse --regex '<a href="libspatialite-(?<version>[\\d.]+)\\.tar\\.gz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

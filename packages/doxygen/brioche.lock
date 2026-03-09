@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/doxygen/doxygen.git": {
+      "Release_1_16_1": "669aeeefca743c148e2d935b3d3c69535c7491e6"
+    }
+  }
+}

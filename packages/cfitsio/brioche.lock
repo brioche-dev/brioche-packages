@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/HEASARC/cfitsio": {
+      "cfitsio-4.6.3": "386e719ccc5e30ca497ec2df57c4ef1de5adbc3f"
+    }
+  }
+}

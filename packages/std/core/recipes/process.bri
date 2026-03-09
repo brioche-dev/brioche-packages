@@ -426,15 +426,15 @@ export type ProcessTemplateLike =
 export class ProcessTemplate {
   componentType: "processTemplate" = "processTemplate";
   components: ProcessTemplateLike[];
-  #serialized: runtime.ProcessTemplate | undefined;
+  #serialized: Promise<runtime.ProcessTemplate> | undefined;
 
   constructor(...components: ProcessTemplateLike[]) {
     /* eslint-disable-next-line */
     this.components = components;
   }
 
-  async briocheSerialize(): Promise<runtime.ProcessTemplate> {
-    if (this.#serialized == null) {
+  briocheSerialize(): Promise<runtime.ProcessTemplate> {
+    this.#serialized ??= (async () => {
       const components = await Promise.all(
         this.components.map((component) =>
           typeof component === "function" ? component() : component,
@@ -478,10 +478,10 @@ export class ProcessTemplate {
         ),
       );
 
-      this.#serialized = {
+      return {
         components: runtimeComponents.flat(1),
       };
-    }
+    })();
     return this.#serialized;
   }
 }

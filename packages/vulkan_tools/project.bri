@@ -1,0 +1,81 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libffi from "libffi";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxext from "libxext";
+import libxrandr from "libxrandr";
+import libxrender from "libxrender";
+import vulkanHeaders from "vulkan_headers";
+import vulkanLoader from "vulkan_loader";
+import wayland from "wayland";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "vulkan_tools",
+  version: "1.4.344",
+  repository: "https://github.com/KhronosGroup/Vulkan-Tools",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function vulkanTools(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      libffi,
+      libx11,
+      libxau,
+      libxcb,
+      libxext,
+      libxrandr,
+      libxrender,
+      vulkanHeaders,
+      vulkanLoader,
+      wayland,
+      xorgproto,
+    ],
+    set: {
+      BUILD_CUBE: "OFF",
+      INSTALL_ICD: "ON",
+    },
+    runnable: "bin/vulkaninfo",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    export LD_LIBRARY_PATH="$LIBRARY_PATH"
+
+    vulkaninfo --summary | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, vulkanTools, vulkanLoader)
+    .env({
+      VK_ICD_FILENAMES: std.tpl`${vulkanTools}/share/vulkan/icd.d/VkICD_mock_icd.json`,
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `= ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

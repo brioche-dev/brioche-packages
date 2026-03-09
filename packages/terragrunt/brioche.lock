@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/gruntwork-io/terragrunt/@v/v0.98.0.zip": {
+    "https://proxy.golang.org/github.com/gruntwork-io/terragrunt/@v/v0.99.2.zip": {
       "type": "sha256",
-      "value": "6f2fad658636af25bcb97e0923a89ed02e9cd13869535db6be77cdc22ba2e799"
+      "value": "d899c41cb17169c38a542018a711a28819e1fa69fa111630f5a513e144af0f93"
     }
   }
 }

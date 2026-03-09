@@ -8,6 +8,7 @@ export * from "./with_runnable_link.bri";
 export * from "./apply_patch.bri";
 export * from "./live_update";
 export { libtoolSanitizeDependencies } from "./libtool_sanitize_dependencies.bri";
+export { linkerScriptMakePathsRelative } from "./linker_script_make_paths_relative.bri";
 export { pkgConfigMakePathsRelative } from "./pkg_config_make_paths_relative.bri";
 export * from "./project_version";
 

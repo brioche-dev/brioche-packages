@@ -1,0 +1,76 @@
+import * as std from "std";
+import blosc2 from "c_blosc2";
+import fmt from "fmt";
+import lz4 from "lz4";
+import nlohmannJson from "nlohmann_json";
+import openssl from "openssl";
+import spdlog from "spdlog";
+import zlibNg from "zlib_ng";
+import zstd from "zstd";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "tiledb",
+  version: "2.30.1",
+  repository: "https://github.com/TileDB-Inc/TileDB",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function tiledb(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      blosc2,
+      fmt,
+      lz4,
+      nlohmannJson,
+      openssl,
+      spdlog,
+      zlibNg,
+      zstd, // unlike std.toolchain's libzstd, this one ships cmake config files
+    ],
+    set: {
+      TILEDB_TESTS: "OFF",
+      TILEDB_WERROR: "OFF",
+      TILEDB_SERIALIZATION: "OFF",
+      TILEDB_S3: "OFF",
+      TILEDB_AZURE: "OFF",
+      TILEDB_GCS: "OFF",
+      TILEDB_WEBP: "OFF",
+      TILEDB_DISABLE_AUTO_VCPKG: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion tiledb | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, tiledb)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  // HACK: the 2.30.1 tag did not bump the patch in the version header, still reports 2.30.0
+  const expected = project.version === "2.30.1" ? "2.30.0" : project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

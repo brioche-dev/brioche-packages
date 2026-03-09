@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/anchore/syft/@v/v1.41.2.zip": {
+    "https://proxy.golang.org/github.com/anchore/syft/@v/v1.42.0.zip": {
       "type": "sha256",
-      "value": "994c14117070169fc778cabce92f908d9826372615cd4e3f6570314c48cdb1df"
+      "value": "98ab421644815cf66eaea9b17bcb95b6afcb521a858a3e5e09cbc2fcc8c1789a"
     }
   }
 }

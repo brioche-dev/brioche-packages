@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "seaweedfs",
-  version: "3.99",
+  version: "4.12",
   repository: "https://github.com/seaweedfs/seaweedfs.git",
 };
 

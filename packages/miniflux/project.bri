@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "miniflux",
-  version: "2.2.16",
+  version: "2.2.17",
   extra: {
     moduleName: "miniflux.app/v2",
   },

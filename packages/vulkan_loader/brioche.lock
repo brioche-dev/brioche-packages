@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/KhronosGroup/Vulkan-Loader": {
-      "vulkan-sdk-1.4.335.0": "057ca1e5f2b61bbb3942e3a7464d488d5bde4a3c"
+      "vulkan-sdk-1.4.341.0": "32fcb949e253cbeb40cda7ea76122b492db579ae"
     }
   }
 }

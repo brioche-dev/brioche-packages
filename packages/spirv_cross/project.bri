@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "spirv_cross",
-  version: "1.4.335.0",
+  version: "1.4.341.0",
   repository: "https://github.com/KhronosGroup/SPIRV-Cross",
 };
 

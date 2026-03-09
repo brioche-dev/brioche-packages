@@ -1,0 +1,89 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import glslang from "glslang";
+import libffi from "libffi";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxrandr from "libxrandr";
+import libxrender from "libxrender";
+import spirvHeaders from "spirv_headers";
+import spirvTools from "spirv_tools";
+import vulkanHeaders from "vulkan_headers";
+import vulkanLoader from "vulkan_loader";
+import vulkanTools from "vulkan_tools";
+import vulkanUtilityLibraries from "vulkan_utility_libraries";
+import wayland from "wayland";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "vulkan_extensionlayer",
+  version: "1.4.341.0",
+  repository: "https://github.com/KhronosGroup/Vulkan-ExtensionLayer",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `vulkan-sdk-${project.version}`,
+});
+
+export default function vulkanExtensionlayer(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      glslang,
+      libffi,
+      libx11,
+      libxau,
+      libxcb,
+      libxrandr,
+      libxrender,
+      spirvHeaders,
+      spirvTools,
+      vulkanHeaders,
+      vulkanUtilityLibraries,
+      wayland,
+      xorgproto,
+    ],
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      VK_LAYER_PATH: { append: [{ path: "share/vulkan/explicit_layer.d" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    export LD_LIBRARY_PATH="$LIBRARY_PATH"
+
+    vulkaninfo --text | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(
+      std.toolchain,
+      vulkanExtensionlayer,
+      vulkanTools,
+      vulkanLoader,
+    )
+    .env({
+      VK_ICD_FILENAMES: std.tpl`${vulkanTools}/share/vulkan/icd.d/VkICD_mock_icd.json`,
+    })
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^vulkan-sdk-(?<version>\d+\.\d+\.\d+\.\d+)$/,
+  });
+}

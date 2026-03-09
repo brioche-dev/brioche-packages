@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/sourcefrog/cargo-mutants.git": {
-      "v26.0.0": "f40f9615b866dff9a012c3b5351a410bd3527f06"
+      "v26.2.0": "1b2b2ea8118711b8479427657b8fd0d26b34c6b4"
     }
   }
 }

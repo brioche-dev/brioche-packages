@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "terragrunt",
-  version: "0.98.0",
+  version: "0.99.2",
   extra: {
     moduleName: "github.com/gruntwork-io/terragrunt",
   },

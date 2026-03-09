@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/qhull/qhull": {
+      "2020.2": "613debeaea72ee66626dace9ba1a2eff11b5d37d"
+    }
+  }
+}

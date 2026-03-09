@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/LibtraceTeam/libtrace": {
-      "4.0.29-1": "0225ebde61f80955d6c09f229756f23260af3cb8"
+      "4.0.30-1": "bc88c151fab01f3ebf1fb07e13f498c3506fe1af"
     }
   }
 }

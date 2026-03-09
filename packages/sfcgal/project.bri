@@ -1,0 +1,68 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import boost from "boost";
+import cgal from "cgal";
+
+export const project = {
+  name: "sfcgal",
+  version: "2.2.0",
+  repository: "https://gitlab.com/sfcgal/SFCGAL",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Remove boost_system from required components, it's header-only since Boost 1.74+
+  std.runBash`
+    sed -i 's/set( SFCGAL_Boost_COMPONENTS thread system serialization )/set( SFCGAL_Boost_COMPONENTS thread serialization )/' \\
+      "$BRIOCHE_OUTPUT/CMakeLists.txt"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function sfcgal(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, boost, cgal],
+    set: {
+      BUILD_TESTING: "OFF",
+      SFCGAL_BUILD_TESTS: "OFF",
+      SFCGAL_BUILD_EXAMPLES: "OFF",
+      CMAKE_CXX_FLAGS: "-Wno-maybe-uninitialized",
+    },
+    env: {
+      // HACK: Building the recipe can use a lot of memory, especially when building
+      // in parallel. So limit parallelism to avoid OOM.
+      CMAKE_BUILD_PARALLEL_LEVEL: "4",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion sfcgal | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sfcgal)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({ project });
+}

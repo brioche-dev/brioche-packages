@@ -1,5 +1,6 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
+import doxygen from "doxygen";
 import python, { getLatestVersion as getPythonVersion } from "python";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
@@ -26,14 +27,16 @@ const source = Brioche.download(
 export default function libxml2(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, python],
+    dependencies: [std.toolchain, python, doxygen],
     set: {
+      LIBXML2_WITH_PYTHON: "ON",
       // TODO: `LIBXML2_PYTHON_INSTALL_DIR` is set to resolved an upstream issue (see https://gitlab.gnome.org/GNOME/libxml2/-/issues/977)
-      // Remove it once the Python binding is suppressed (see https://gitlab.gnome.org/GNOME/libxml2/-/issues/891)
       LIBXML2_PYTHON_INSTALL_DIR: std.tpl`${
         std.outputPath
       }/lib/python${getPythonVersion()}/site-packages`,
       LIBXML2_WITH_TESTS: "OFF",
+      // libxml2mod.so (in lib/python*/site-packages/) needs to find libxml2.so (in lib/) at runtime
+      CMAKE_INSTALL_RPATH: "$ORIGIN/../..",
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {

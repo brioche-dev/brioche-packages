@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "steampipe",
-  version: "2.3.4",
+  version: "2.3.5",
   extra: {
     moduleName: "github.com/turbot/steampipe/v2",
   },
