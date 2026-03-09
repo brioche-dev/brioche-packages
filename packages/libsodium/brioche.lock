@@ -1,9 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://download.libsodium.org/libsodium/releases/libsodium-1.0.20.tar.gz": {
+    "https://github.com/jedisct1/libsodium/commit/f2f8575329c677de767ff2ce3385938d8bcb3322.patch": {
       "type": "sha256",
-      "value": "ebb65ef6ca439333c2bb41a0c1990587288da07f6c7fd07cb3a18cc18d30ce19"
+      "value": "84d672f7258da74ba49c6588e5a668d3fefb1ceb5fe65059d7e6efbbfb35626f"
+    },
+    "https://github.com/jedisct1/libsodium/releases/download/1.0.21-RELEASE/libsodium-1.0.21.tar.gz": {
+      "type": "sha256",
+      "value": "9e4285c7a419e82dedb0be63a72eea357d6943bc3e28e6735bf600dd4883feaf"
     }
   }
 }
