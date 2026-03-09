@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://chromium.googlesource.com/libyuv/libyuv/+archive/500f45652c459cfccd20f83f297eb66cb7b015cb.tar.gz": {
+      "type": "sha256",
+      "value": "92fdf0037552db1e6f6d35e9ff52eb03f35992d730dc021bb77daca3ff88a0ec"
+    }
+  }
+}
