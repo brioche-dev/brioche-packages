@@ -1,0 +1,103 @@
+import * as std from "std";
+import hwloc from "hwloc";
+import libevent from "libevent";
+import libpciaccess from "libpciaccess";
+// TODO: Replace libudev_zero with systemd once it is packaged
+import libudevZero from "libudev_zero";
+import libxml2 from "libxml2";
+import munge from "munge";
+import pmix from "pmix";
+import prrte from "prrte";
+
+export const project = {
+  name: "openmpi",
+  version: "5.0.10",
+  repository: "https://github.com/open-mpi/ompi",
+  extra: {
+    majorVersion: "5",
+    minorVersion: "0",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
+const source = Brioche.download(
+  `https://download.open-mpi.org/release/open-mpi/v${project.extra.majorVersion}.${project.extra.minorVersion}/openmpi-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function openmpi(): std.Recipe<std.Directory> {
+  return (
+    std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
+      --enable-shared \\
+      --with-hwloc=external \\
+      --with-libevent=external \\
+      --with-pmix=external \\
+      --with-prrte=external \\
+      --with-zlib \\
+      --disable-mpi-fortran
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+      .workDir(source)
+      .dependencies(
+        std.toolchain,
+        hwloc,
+        libevent,
+        libpciaccess,
+        libudevZero,
+        libxml2,
+        munge,
+        pmix,
+        prrte,
+      )
+      .toDirectory()
+      .pipe(std.libtoolSanitizeDependencies)
+      .pipe(std.pkgConfigMakePathsRelative)
+      // mpirun needs prterun from the prrte package at runtime
+      .insert("libexec/prterun", prrte().get("bin/prte"))
+      .pipe((recipe) =>
+        std.setEnv(recipe, {
+          OPAL_PREFIX: { fallback: { path: "." } },
+          OMPI_PRTERUN: { fallback: { path: "libexec/prterun" } },
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+      )
+      .pipe((recipe) => std.withRunnableLink(recipe, "bin/mpirun"))
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    mpirun --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(openmpi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `mpirun (Open MPI) ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^v(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
