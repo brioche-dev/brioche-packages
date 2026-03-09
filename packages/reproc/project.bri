@@ -1,0 +1,54 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "reproc",
+  version: "14.2.5",
+  repository: "https://github.com/DaanDeMeyer/reproc",
+};
+
+const source = Brioche.gitCheckout({
+  repository: `${project.repository}.git`,
+  ref: `v${project.version}`,
+});
+
+export default function reproc(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      "REPROC++": "ON",
+      REPROC_TEST: "OFF",
+      REPROC_EXAMPLES: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion reproc | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, reproc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  // HACK: the CMakeLists.txt version differs from the release tag version.
+  const expected = project.version === "14.2.5" ? "14.2.4" : project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
