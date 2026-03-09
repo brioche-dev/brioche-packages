@@ -7,6 +7,7 @@ export const project = {
   repository: "https://github.com/golang/go",
   extra: {
     otherVersions: {
+      "1.26": "1.26.0",
       "1.25": "1.25.7",
       "1.24": "1.24.13",
     },
@@ -36,6 +37,18 @@ const prebuiltBinaries: Record<
   string,
   Record<string, std.Recipe<std.Directory>>
 > = {
+  "1.26": {
+    "x86_64-linux": Brioche.download(
+      `https://go.dev/dl/go${project.extra.otherVersions["1.26"]}.linux-amd64.tar.gz`,
+    )
+      .unarchive("tar", "gzip")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://go.dev/dl/go${project.extra.otherVersions["1.26"]}.linux-arm64.tar.gz`,
+    )
+      .unarchive("tar", "gzip")
+      .peel(),
+  },
   "1.25": {
     "x86_64-linux": Brioche.download(
       `https://go.dev/dl/go${project.extra.otherVersions["1.25"]}.linux-amd64.tar.gz`,
