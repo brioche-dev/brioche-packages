@@ -13,8 +13,7 @@ export default function tailwindcss(): std.Recipe<std.Directory> {
   return npmInstallGlobal({
     packageName: project.extra.packageName,
     version: project.version,
-  })
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/tailwindcss"));
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/tailwindcss"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
