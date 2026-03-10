@@ -1,0 +1,85 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import aom from "aom";
+import dav1d from "dav1d";
+import libde265 from "libde265";
+import libjpegTurbo from "libjpeg_turbo";
+import libpng from "libpng";
+import libtiff from "libtiff";
+import libwebp from "libwebp";
+import openjpeg from "openjpeg";
+import x265 from "x265";
+import zlib from "zlib";
+
+export const project = {
+  name: "libheif",
+  version: "1.21.2",
+  repository: "https://github.com/strukturag/libheif",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/${project.name}-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libheif(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      aom,
+      dav1d,
+      libde265,
+      libjpegTurbo,
+      libpng,
+      libtiff,
+      libwebp,
+      openjpeg,
+      x265,
+      zlib,
+    ],
+    set: {
+      BUILD_TESTING: "OFF",
+      WITH_EXAMPLES: "OFF",
+      ENABLE_PLUGIN_LOADING: "OFF",
+      WITH_LIBDE265: "ON",
+      WITH_X265: "ON",
+      WITH_AOM_DECODER: "ON",
+      WITH_AOM_ENCODER: "ON",
+      WITH_DAV1D: "ON",
+      WITH_JPEG_DECODER: "ON",
+      WITH_JPEG_ENCODER: "ON",
+      WITH_OpenJPEG_DECODER: "ON",
+      WITH_OpenJPEG_ENCODER: "ON",
+      BUILD_SHARED_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libheif | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libheif)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
