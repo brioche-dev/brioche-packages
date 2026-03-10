@@ -1,0 +1,58 @@
+import * as std from "std";
+import glib from "glib";
+import libxml2 from "libxml2";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import pcre2 from "pcre2";
+
+export const project = {
+  name: "shared_mime_info",
+  version: "2.4",
+  repository: "https://gitlab.freedesktop.org/xdg/shared-mime-info",
+};
+
+const source = Brioche.download(
+  `${project.repository}/-/archive/${project.version}/shared-mime-info-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sharedMimeInfo(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, glib, libxml2, pcre2],
+    set: {
+      "build-tools": "true",
+      "build-tests": "false",
+      "update-mimedb": "false",
+    },
+    runnable: "bin/update-mime-database",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion shared-mime-info | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sharedMimeInfo)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+  });
+}
