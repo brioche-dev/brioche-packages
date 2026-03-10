@@ -20,6 +20,10 @@ export default function llvm(): std.Recipe<std.Directory> {
     set: {
       LLVM_ENABLE_PROJECTS: "clang;clang-tools-extra;lld;lldb",
       LLVM_ENABLE_RUNTIMES: "compiler-rt",
+      // compiler-rt is built using the just-built Clang, which has no
+      // configured sysroot, point it at the GCC toolchain so it can
+      // locate standard headers
+      BUILTINS_CMAKE_ARGS: std.tpl`-DCMAKE_C_FLAGS=--sysroot=${std.toolchain}`,
       LLVM_ENABLE_RTTI: "ON",
       LLVM_LINK_LLVM_DYLIB: "ON",
       LLVM_INCLUDE_DOCS: "OFF",
