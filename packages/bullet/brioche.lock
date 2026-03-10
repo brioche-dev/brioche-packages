@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/bulletphysics/bullet3.git": {
+      "3.25": "2c204c49e56ed15ec5fcfa71d199ab6d6570b3f5"
+    }
+  }
+}
