@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/obgm/libcoap.git": {
+      "v4.3.5": "7cf7465b784baded4de183290c547d582becfd28"
+    }
+  }
+}
