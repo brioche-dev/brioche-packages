@@ -1,4 +1,5 @@
 import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "expat",
@@ -32,6 +33,7 @@ export default function expat(): std.Recipe<std.Directory> {
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
