@@ -1,0 +1,96 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { gitCheckout } from "git";
+import libjpegTurbo from "libjpeg_turbo";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libyuv",
+  version: "1922",
+  repository: "https://chromium.googlesource.com/libyuv/libyuv.git",
+  extra: {
+    gitRef: "500f45652c459cfccd20f83f297eb66cb7b015cb",
+  },
+};
+
+const source = gitCheckout({
+  repository: project.repository,
+  commit: project.extra.gitRef,
+});
+
+export default function libyuv(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, libjpegTurbo],
+    set: {
+      UNIT_TEST: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <libyuv/version.h>
+
+      int main(void)
+      {
+          printf("%d", LIBYUV_VERSION);
+          return 0;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -lyuv -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libyuv)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let gitRef = ^git ls-remote ${project.repository} refs/heads/main
+      | lines
+      | parse --regex '(?<hash>[0-9a-f]+)\\s+'
+      | get 0.hash
+
+    let version = http get --raw $"https://chromium.googlesource.com/libyuv/libyuv/+/($gitRef)/include/libyuv/version.h?format=TEXT"
+      | decode base64
+      | decode
+      | lines
+      | where ($it | str contains "LIBYUV_VERSION ")
+      | first
+      | parse --regex '#define LIBYUV_VERSION (?<version>[0-9]+)'
+      | get 0.version
+
+    let project = $env.project
+      | from json
+
+    if $version == ($project | get version) {
+      $project
+        | to json
+    } else {
+      $project
+        | update version $version
+        | update extra.gitRef $gitRef
+        | to json
+    }
+  `.env({ project: JSON.stringify(project) });
+}
