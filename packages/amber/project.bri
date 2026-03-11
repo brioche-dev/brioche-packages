@@ -1,5 +1,4 @@
 import * as std from "std";
-import git from "git";
 import { cargoBuild } from "rust";
 
 export const project = {
@@ -11,17 +10,10 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.version,
-}).pipe((recipe) =>
-  // Create a git tag in the repo, which is used as the version number
-  std.runBash`
-    git tag "$revision"
-  `
-    .dependencies(git)
-    .env({ revision: project.version })
-    .outputScaffold(recipe)
-    .currentDir(std.outputPath)
-    .toDirectory(),
-);
+  options: {
+    tag: true,
+  },
+});
 
 export default function amber(): std.Recipe<std.Directory> {
   return cargoBuild({
