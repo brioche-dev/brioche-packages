@@ -1,5 +1,6 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
+import { gitCheckout } from "git";
 import libjpegTurbo from "libjpeg_turbo";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
@@ -12,9 +13,10 @@ export const project = {
   },
 };
 
-const source = Brioche.download(
-  `https://chromium.googlesource.com/libyuv/libyuv/+archive/${project.extra.gitRef}.tar.gz`,
-).unarchive("tar", "gzip");
+const source = gitCheckout({
+  repository: project.repository,
+  commit: project.extra.gitRef,
+});
 
 export default function libyuv(): std.Recipe<std.Directory> {
   return cmakeBuild({
