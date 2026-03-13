@@ -1,0 +1,76 @@
+import * as std from "std";
+import cmake from "cmake";
+import glib from "glib";
+import gobjectIntrospection from "gobject_introspection";
+import libffi from "libffi";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import pcre2 from "pcre2";
+import python from "python";
+
+export const project = {
+  name: "gsettings_desktop_schemas",
+  version: "49.1",
+  repository: "https://gitlab.gnome.org/GNOME/gsettings-desktop-schemas",
+  extra: {
+    majorVersion: "49",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+
+const source = Brioche.download(
+  `https://download.gnome.org/sources/gsettings-desktop-schemas/${project.extra.majorVersion}/gsettings-desktop-schemas-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function gsettingsDesktopSchemas(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      cmake,
+      ninja,
+      python,
+      glib,
+      gobjectIntrospection,
+      libffi,
+      pcre2,
+    ],
+    set: {
+      introspection: "true",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+      GSETTINGS_SCHEMA_DIR: { append: [{ path: "share/glib-2.0/schemas" }] },
+      GI_TYPELIB_PATH: { append: [{ path: "lib/girepository-1.0" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion gsettings-desktop-schemas | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, gsettingsDesktopSchemas)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.gnome.org",
+    project,
+  });
+}
