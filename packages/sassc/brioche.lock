@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/sass/sassc": {
+      "3.6.2": "66f0ef37e7f0ad3a65d2f481eff09d09408f42d0"
+    }
+  }
+}
