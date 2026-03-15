@@ -4,11 +4,11 @@ import { goBuild } from "go";
 
 export const project = {
   name: "argocd",
-  version: "3.3.0",
+  version: "3.3.3",
   repository: "https://github.com/argoproj/argo-cd",
   extra: {
     moduleName: "github.com/argoproj/argo-cd/v3",
-    releaseDate: "2026-02-02",
+    releaseDate: "2026-03-09",
   },
 };
 
