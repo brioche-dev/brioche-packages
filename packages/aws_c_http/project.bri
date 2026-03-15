@@ -9,7 +9,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_c_http",
-  version: "0.10.10",
+  version: "0.10.11",
   repository: "https://github.com/awslabs/aws-c-http",
 };
 
