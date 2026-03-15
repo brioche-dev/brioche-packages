@@ -8,7 +8,7 @@ import vulkanUtilityLibraries from "vulkan_utility_libraries";
 
 export const project = {
   name: "vulkan_profiles",
-  version: "1.4.344",
+  version: "1.4.346",
   repository: "https://github.com/KhronosGroup/Vulkan-Profiles",
 };
 
