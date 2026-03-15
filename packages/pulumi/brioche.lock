@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/pulumi/pulumi.git": {
-      "v3.220.0": "e8ecd95a5ecb4baa93f35866ec34e94fa785b1c5"
+      "v3.226.0": "94ee966f0f3e4d1207c1a1bbe5b0b5ffd123c5d8"
     }
   }
 }
