@@ -4,10 +4,10 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "nss",
-  version: "3.120.1",
+  version: "3.121",
   repository: "https://github.com/nss-dev/nss",
   extra: {
-    versionUnderscore: "3_120_1",
+    versionUnderscore: "3_121",
   },
 };
 
