@@ -11,7 +11,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_c_auth",
-  version: "0.9.6",
+  version: "0.10.1",
   repository: "https://github.com/awslabs/aws-c-auth",
 };
 
