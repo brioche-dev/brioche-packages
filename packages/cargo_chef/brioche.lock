@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/LukeMathWalker/cargo-chef.git": {
-      "v0.1.73": "0e6d0f6777dc5770c6097c3ed67700eea313ac85"
+      "v0.1.77": "52669eb4df1d660e0cfe8339bb7f81c68c60c19a"
     }
   }
 }
