@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "github_copilot_cli",
-  version: "1.0.2",
+  version: "1.0.5",
   extra: {
     packageName: "@github/copilot",
   },
