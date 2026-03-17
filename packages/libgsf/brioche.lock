@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.gnome.org/sources/libgsf/1.14/libgsf-1.14.56.tar.xz": {
+      "type": "sha256",
+      "value": "9d21d30df1d12feaf03e181afd6067f65e3048ab69cb6ad174a3c5b72b92d297"
+    }
+  }
+}
