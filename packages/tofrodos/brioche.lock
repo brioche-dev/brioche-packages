@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ChristopherHeng/tofrodos": {
+      "2.0.0": "61093edfe5fc689594cd982f4db4b1c30f1730bd"
+    }
+  }
+}

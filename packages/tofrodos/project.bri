@@ -1,0 +1,54 @@
+import * as std from "std";
+
+export const project = {
+  name: "tofrodos",
+  version: "2.0.0",
+  repository: "https://github.com/ChristopherHeng/tofrodos",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function tofrodos(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -f makefile.gcc -j "$(nproc)" all
+
+    # Manual installation
+    cp fromdos "$BRIOCHE_OUTPUT/bin/"
+    ln -sf fromdos "$BRIOCHE_OUTPUT/bin/todos"
+  `
+    .workDir(source)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/fromdos"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    fromdos -V 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tofrodos)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `tofrodos Ver ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
