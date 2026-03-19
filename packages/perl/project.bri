@@ -25,7 +25,11 @@ export default function perl(): std.Recipe<std.Directory> {
     localedef -i POSIX -f UTF-8 "$BRIOCHE_OUTPUT"/C.UTF-8 || true
   `
     .dependencies(std.toolchain)
-    .outputScaffold(std.directory({ "C.UTF-8": std.directory() }))
+    .outputScaffold(
+      std.directory({
+        "C.UTF-8": std.directory(),
+      }),
+    )
     .env({
       I18NPATH: std.tpl`${std.toolchain}/share/i18n`,
     })

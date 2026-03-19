@@ -35,12 +35,13 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const src = std.directory({
     "main.c": std.file(std.indoc`
       #include <stdio.h>
+      #include <stdlib.h>
       #include <omp.h>
 
-      int main()
+      int main(void)
       {
         printf("%d", _OPENMP);
-        return 0;
+        return EXIT_SUCCESS;
       }
     `),
   });

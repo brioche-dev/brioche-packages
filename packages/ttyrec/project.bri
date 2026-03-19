@@ -28,7 +28,11 @@ export default function ttyrec(): std.Recipe<std.Directory> {
     cp ttyrec ttyplay ttytime "$BRIOCHE_OUTPUT/bin/"
   `
     .workDir(source)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/ttyrec"));

@@ -37,12 +37,13 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const src = std.directory({
     "main.c": std.file(std.indoc`
       #include <stdio.h>
+      #include <stdlib.h>
       #include <libyuv/version.h>
 
       int main(void)
       {
           printf("%d", LIBYUV_VERSION);
-          return 0;
+          return EXIT_SUCCESS;
       }
     `),
   });
