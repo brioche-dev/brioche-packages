@@ -21,7 +21,11 @@ export default function cabalInstall(): std.Recipe<std.Directory> {
     cp cabal "$BRIOCHE_OUTPUT/bin/"
   `
     .workDir(source)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .toDirectory()
     .pipe((recipe) =>
       std.autopack(recipe, {

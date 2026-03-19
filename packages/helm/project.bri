@@ -21,7 +21,11 @@ export default function helm(): std.Recipe<std.Directory> {
     mv bin/helm "$BRIOCHE_OUTPUT/bin"
   `
     .workDir(source)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .dependencies(std.toolchain, go)
     .unsafe({ networking: true })
     .toDirectory()

@@ -22,7 +22,11 @@ export default function kubetail(): std.Recipe<std.Directory> {
     cp bin/kubetail "$BRIOCHE_OUTPUT/bin/"
   `
     .workDir(source)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .dependencies(std.toolchain, go, pnpm)
     .env({
       // Help the dynamic linker to find shared libraries at runtime.
