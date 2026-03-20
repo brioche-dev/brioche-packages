@@ -68,7 +68,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = vulkanHeadersProject.version.split(".").at(-1)!;
+  const expected = vulkanHeadersProject.version.split(".").at(-1);
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
