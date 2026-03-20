@@ -45,9 +45,11 @@ interface OciContainerImageOptions {
  *
  * @returns An OCI container image as a tar file.
  *
- * @remarks The returned image matches the [OCI Image Layout Specification][oci-spec].
+ * @remarks The returned image matches the [OCI Image Layout Specification][oci-spec],
+ *   and additionally has a manifest file following the [Docker Image Specification][docker-spec].
  *
  * [oci-spec]: https://github.com/opencontainers/image-spec/blob/dd33f727e2faea07432ef6f06d6f9afe73f3f519/image-layout.md
+ * [docker-spec]: https://github.com/moby/docker-image-spec/blob/main/spec.md
  */
 export function ociContainerImage(
   options: OciContainerImageOptions,
@@ -68,6 +70,7 @@ export function ociContainerImage(
     );
 
     const diffIds: string[] = [];
+    const layerPaths: string[] = [];
     const layerDescriptors: {
       mediaType: string;
       digest: string;
@@ -81,11 +84,11 @@ export function ociContainerImage(
       const layerTarGzip = gzip(layerTar);
       let layerDigest = "";
       let layerSize = 0;
-      [imageDir, { digest: layerDigest, size: layerSize }] = await addBlob(
-        imageDir,
-        layerTarGzip,
-      );
+      let layerPath = "";
+      [imageDir, { digest: layerDigest, size: layerSize, path: layerPath }] =
+        await addBlob(imageDir, layerTarGzip);
 
+      layerPaths.push(layerPath);
       layerDescriptors.push({
         mediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
         digest: layerDigest,
@@ -110,20 +113,22 @@ export function ociContainerImage(
 
     let configDigest: string = "";
     let configSize: number = 0;
-    [imageDir, { digest: configDigest, size: configSize }] = await addBlob(
-      imageDir,
-      std.file(
-        JSON.stringify({
-          architecture: platform.architecture,
-          os: platform.os,
-          config: imageConfig,
-          rootfs: {
-            type: "layers",
-            diff_ids: diffIds,
-          },
-        }),
-      ),
-    );
+    let configPath: string = "";
+    [imageDir, { digest: configDigest, size: configSize, path: configPath }] =
+      await addBlob(
+        imageDir,
+        std.file(
+          JSON.stringify({
+            architecture: platform.architecture,
+            os: platform.os,
+            config: imageConfig,
+            rootfs: {
+              type: "layers",
+              diff_ids: diffIds,
+            },
+          }),
+        ),
+      );
 
     let manifestDigest = "";
     let manifestSize = 0;
@@ -168,6 +173,19 @@ export function ociContainerImage(
       ),
     );
 
+    imageDir = imageDir.insert(
+      "manifest.json",
+      std.file(
+        JSON.stringify([
+          {
+            Config: configPath,
+            RepoTags: options.ref != null ? [options.ref] : [],
+            Layers: layerPaths,
+          },
+        ]),
+      ),
+    );
+
     return tar(imageDir);
   });
 }
@@ -175,6 +193,7 @@ export function ociContainerImage(
 interface AddBlobResult {
   digest: string;
   size: number;
+  path: string;
 }
 
 async function addBlob(
@@ -184,7 +203,7 @@ async function addBlob(
   const { sha256Digest, size } = await describeBlob(blob);
   const path = `blobs/sha256/${sha256Digest}`;
   imageDir = imageDir.insert(path, blob);
-  return [imageDir, { digest: `sha256:${sha256Digest}`, size }];
+  return [imageDir, { digest: `sha256:${sha256Digest}`, size, path }];
 }
 
 interface DescribeBlobResult {
