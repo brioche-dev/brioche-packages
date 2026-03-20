@@ -10,6 +10,6 @@ export default function server(): std.Recipe<std.Directory> {
 
 export function container(): std.Recipe<std.File> {
   return std.ociContainerImage({
-    recipe: server(),
+    layers: [server()],
   });
 }
