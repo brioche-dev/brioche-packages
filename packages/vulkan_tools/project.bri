@@ -7,7 +7,7 @@ import libxcb from "libxcb";
 import libxext from "libxext";
 import libxrandr from "libxrandr";
 import libxrender from "libxrender";
-import vulkanHeaders from "vulkan_headers";
+import vulkanHeaders, { project as vulkanHeadersProject } from "vulkan_headers";
 import vulkanLoader from "vulkan_loader";
 import wayland from "wayland";
 import xorgproto from "xorgproto";
@@ -54,12 +54,12 @@ export default function vulkanTools(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    export LD_LIBRARY_PATH="$LIBRARY_PATH"
-
     vulkaninfo --summary | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, vulkanTools, vulkanLoader)
+    .dependencies(vulkanTools)
     .env({
+      // Help the dynamic linker to find shared libraries at runtime
+      LD_LIBRARY_PATH: std.tpl`${vulkanTools}/lib:${vulkanLoader}/lib`,
       VK_ICD_FILENAMES: std.tpl`${vulkanTools}/share/vulkan/icd.d/VkICD_mock_icd.json`,
     })
     .toFile();
@@ -67,7 +67,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `= ${project.version}`;
+  const expected = `= ${vulkanHeadersProject.version}`;
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,
