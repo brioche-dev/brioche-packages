@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/openpmix/openpmix/releases/download/v6.0.0/pmix-6.0.0.tar.gz": {
+    "https://github.com/openpmix/openpmix/releases/download/v6.1.0/pmix-6.1.0.tar.gz": {
       "type": "sha256",
-      "value": "7576b6e53b4941725c8dac938c47b4369393c4fddbe94f17af99858e3309880a"
+      "value": "706f06bdafdbb99fc62300b1a9eb1731075057faccc3461fa022aff6a8a5be55"
     }
   }
 }
