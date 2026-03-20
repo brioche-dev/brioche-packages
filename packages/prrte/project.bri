@@ -10,7 +10,7 @@ import pmix from "pmix";
 
 export const project = {
   name: "prrte",
-  version: "4.0.0",
+  version: "4.1.0",
   repository: "https://github.com/openpmix/prrte",
 };
 
