@@ -24,7 +24,7 @@ import mpc from "./mpc.bri";
 import attr from "./attr.bri";
 import acl from "./acl.bri";
 import libxcrypt from "./libxcrypt.bri";
-import gcc from "./gcc.bri";
+import gcc, { toolchainTriple } from "./gcc.bri";
 import pkgconf from "./pkgconf.bri";
 import ncurses from "./ncurses.bri";
 import sed from "./sed.bri";
@@ -210,6 +210,14 @@ export const toolchain = std.memo(
     toolchain = toolchain.insert(
       "share/libtool/m4",
       std.symlink({ target: "../aclocal" }),
+    );
+
+    // Enable LTO support in binutils by linking to the GCC LTO plugin
+    toolchain = toolchain.insert(
+      "lib/bfd-plugins/liblto_plugin.so",
+      std.symlink({
+        target: `../../libexec/gcc/${toolchainTriple()}/13.2.0/liblto_plugin.so`,
+      }),
     );
 
     // Set env vars when used as a dependency. These are also used
