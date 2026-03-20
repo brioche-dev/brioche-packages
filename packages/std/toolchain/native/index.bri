@@ -320,6 +320,8 @@ export const toolchain = std.memo(
     });
 
     toolchain = fixShebangs(toolchain);
+    toolchain = fixLdd(toolchain);
+    toolchain = fixLibtool(toolchain);
     toolchain = linkerScriptMakePathsRelative(toolchain);
     toolchain = pkgConfigMakePathsRelative(toolchain);
     toolchain = libtoolSanitizeDependencies(toolchain);
@@ -402,6 +404,86 @@ function fixShebangs(
                 mv temp "$file"
               fi
             done
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+function fixLdd(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Patch ldd to resolve the dynamic linker relative to its own
+  // location instead of the absolute /lib path glibc hardcodes
+  // during make install.
+  return std
+    .process({
+      command: std.tpl`${stage2}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          if [ -f "$BRIOCHE_OUTPUT/bin/ldd" ]; then
+            # Quoted form (multiple dynamic linker entries)
+            sed -i 's|^RTLDLIST="|_brioche_ldd_prefix="$(cd "$(dirname "$0")/.." \\&\\& pwd -P)"\\nRTLDLIST="$_brioche_ldd_prefix|' "$BRIOCHE_OUTPUT/bin/ldd"
+
+            # Unquoted form (single dynamic linker entry)
+            sed -i 's|^RTLDLIST=\\(/[^ ]*\\)$|_brioche_ldd_prefix="$(cd "$(dirname "$0")/.." \\&\\& pwd -P)"\\nRTLDLIST="$_brioche_ldd_prefix\\1"|' "$BRIOCHE_OUTPUT/bin/ldd"
+
+            sed -i '/^RTLDLIST=/s| /| $_brioche_ldd_prefix/|g' "$BRIOCHE_OUTPUT/bin/ldd"
+          fi
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+function fixLibtool(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replace build-time absolute paths baked into bin/libtool.
+  // Tool variables get simple command names (resolved via PATH),
+  // absolute sed paths in global_symbol_* get stripped, and stale
+  // library/object search paths are cleared.
+  return std
+    .process({
+      command: std.tpl`${stage2}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          if [ -f "$BRIOCHE_OUTPUT/bin/libtool" ]; then
+            sed -i -E '
+              /^SED=/s|=.*|="sed"|
+              /^GREP=/s|=.*|="grep"|
+              /^EGREP=/s|=.*|="grep -E"|
+              /^FGREP=/s|=.*|="grep -F"|
+              /^NM=/s|=.*|="nm -B"|
+              /^LD=/s|=.*|="ld"|
+              /^lt_truncate_bin=/s|=.*|="dd bs=4096 count=1"|
+            ' "$BRIOCHE_OUTPUT/bin/libtool"
+
+            # Strip absolute paths to sed in global_symbol_* variables
+            sed -i 's@/[^ ]*bin/sed @sed @g' "$BRIOCHE_OUTPUT/bin/libtool"
+
+            sed -i -E '
+              /^sys_lib_search_path_spec=/s|=.*|=""|
+              /^compiler_lib_search_dirs=/s|=.*|=""|
+              /^compiler_lib_search_path=/s|=.*|=""|
+              /^predep_objects=/s|=.*|=""|
+              /^postdep_objects=/s|=.*|=""|
+            ' "$BRIOCHE_OUTPUT/bin/libtool"
+          fi
         `,
       ],
       env: {
