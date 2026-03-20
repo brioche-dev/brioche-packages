@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 import jsoncpp from "jsoncpp";
 import python from "python";
 import valijson from "valijson";
-import vulkanHeaders from "vulkan_headers";
+import vulkanHeaders, { project as vulkanHeadersProject } from "vulkan_headers";
 import vulkanUtilityLibraries from "vulkan_utility_libraries";
 
 export const project = {
@@ -68,11 +68,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = /([\d.]+)$/m;
-  std.assert(
-    result.match(expected) != null,
-    `expected '${expected}', got '${result}'`,
-  );
+  const expected = vulkanHeadersProject.version.split(".").at(-1)!;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
