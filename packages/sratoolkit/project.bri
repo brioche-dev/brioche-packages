@@ -1,0 +1,55 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import hdf5 from "hdf5";
+import libxml2 from "libxml2";
+import ncbiVdb from "ncbi_vdb";
+
+export const project = {
+  name: "sratoolkit",
+  version: "3.4.0",
+  repository: "https://github.com/ncbi/sra-tools",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sratoolkit(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, hdf5, libxml2, ncbiVdb],
+    set: {
+      CMAKE_C_FLAGS: "-DH5_USE_110_API",
+      CMAKE_CXX_FLAGS: "-DH5_USE_110_API",
+      VDB_INCDIR: std.tpl`${ncbiVdb}/include`,
+      VDB_LIBDIR: std.tpl`${ncbiVdb}/lib`,
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    fastq-dump --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sratoolkit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `fastq-dump : ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
