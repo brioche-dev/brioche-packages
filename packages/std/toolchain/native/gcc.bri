@@ -120,7 +120,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
   return gcc;
 });
 
-function toolchainTriple(): string {
+export function toolchainTriple(): string {
   switch (std.CURRENT_PLATFORM) {
     case "x86_64-linux":
       return "x86_64-pc-linux-gnu";
