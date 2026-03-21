@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/DevinR528/cargo-sort.git": {
-      "v2.0.2": "ac6e328faf467a39e38ab48dc60dcf4f6a46d7a5"
+      "v2.1.1": "985b67a262eaa60dd6f37cdd2fa7d68d580707e7"
     }
   }
 }
