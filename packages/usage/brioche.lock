@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/jdx/usage.git": {
-      "v2.16.2": "35e26fa6b647469aeebfbf8fa1ef2961fc53d121"
+      "v3.0.0": "743efec46babbc1b93d9db029d723253125bc7e6"
     }
   }
 }
