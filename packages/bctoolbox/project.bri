@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "bctoolbox",
-  version: "5.4.85",
+  version: "5.4.97",
   repository: "https://gitlab.linphone.org/BC/public/bctoolbox.git",
 };
 
