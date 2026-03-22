@@ -3,12 +3,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "sqlite",
-  version: "3.48.0",
+  version: "3.52.0",
   repository: "https://github.com/sqlite/sqlite",
   extra: {
-    releaseYear: "2025",
-    // The version number as encoded in SQLite build product names
-    filenameEncodedVersion: "3480000",
+    releaseYear: "2026",
+    filenameEncodedVersion: "3520000",
   },
 };
 
