@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "keep_sorted",
-  version: "0.7.1",
+  version: "0.8.0",
   repository: "https://github.com/google/keep-sorted.git",
 };
 
