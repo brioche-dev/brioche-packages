@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "tinycbor",
-  version: "0.6.1",
+  version: "7.0",
   repository: "https://github.com/intel/tinycbor.git",
 };
 
