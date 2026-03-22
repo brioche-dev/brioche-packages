@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "ipget",
-  version: "0.12.2",
+  version: "0.13.0",
   extra: {
     moduleName: "github.com/ipfs/ipget",
   },
