@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/esri/lerc": {
-      "v4.0.0": "fbeb481120b79d05163f8544c645e9975920526f"
+      "v4.1.0": "fa0ae1b00903cc55e321d5c0165746310092adf8"
     }
   }
 }
