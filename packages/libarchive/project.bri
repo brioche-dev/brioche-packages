@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "libarchive",
-  version: "3.8.5",
+  version: "3.8.6",
   repository: "https://github.com/libarchive/libarchive",
 };
 
