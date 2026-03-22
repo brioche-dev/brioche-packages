@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "jd",
-  version: "2.4.0",
+  version: "2.5.0",
   extra: {
     moduleName: "github.com/josephburnett/jd/v2",
   },
