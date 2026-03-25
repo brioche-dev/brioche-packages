@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mufeedvh/pdfrip.git": {
+      "v3.0.0": "db977cfb910d0b3fb6ebcfcf99cad9e6e5f2ba41"
+    }
+  }
+}
