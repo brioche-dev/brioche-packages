@@ -24,7 +24,7 @@ interface is available.
 
 ## Usage
 
-- Build the cluster artifacts with `brioche build -p ./examples/redis_cluster -o ./examples/redis_cluster/output`. This produces OCI image tarballs and a `docker-compose.yml`.
+- Build the cluster artifacts with `brioche build ./examples/redis_cluster -o ./examples/redis_cluster/output`. This produces OCI image tarballs and a `docker-compose.yml`.
 - Run the cluster with Docker Compose:
     1. Load the images with `docker load < ./examples/redis_cluster/output/redis-master.tar && docker load < ./examples/redis_cluster/output/redis-replica.tar && docker load < ./examples/redis_cluster/output/redis-sentinel.tar`
     2. Start the cluster with `docker compose -f ./examples/redis_cluster/output/docker-compose.yml up`
