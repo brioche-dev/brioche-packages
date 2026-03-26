@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_spellcheck",
-  version: "0.15.5",
+  version: "0.15.7",
   extra: {
     crateName: "cargo-spellcheck",
   },
