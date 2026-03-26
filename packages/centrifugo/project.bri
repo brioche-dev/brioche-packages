@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "centrifugo",
-  version: "6.6.0",
+  version: "6.7.0",
   extra: {
     moduleName: "github.com/centrifugal/centrifugo/v6",
   },
