@@ -36,7 +36,7 @@ jobs:
 
       - name: Build packages
         run: |
-          packages=(packages/*)
+          packages=(./packages/*)
 
           n=1
           for package in "${packages[@]}"; do
@@ -46,7 +46,7 @@ jobs:
               echo "$label: skipping (does not support $PLATFORM)"
             else
               echo "::group::$label"
-              brioche build -p "$package" --sync --locked --display plain-reduced --experimental-lazy
+              brioche build "$package" --sync --locked --display plain-reduced --experimental-lazy
               echo "::endgroup::"
             fi
           done
@@ -66,7 +66,7 @@ jobs:
 
       - name: Run package tests
         run: |
-          packages=(packages/*)
+          packages=(./packages/*)
 
           n=1
           for package in "${packages[@]}"; do
@@ -78,7 +78,7 @@ jobs:
                 echo "$label: skipping (does not support $PLATFORM)"
               else
                 echo "::group::$label"
-                brioche build -p "$package" -e test --sync --locked --display plain-reduced --experimental-lazy
+                brioche build "$package"^test --sync --locked --display plain-reduced --experimental-lazy
                 echo "::endgroup::"
               fi
             else

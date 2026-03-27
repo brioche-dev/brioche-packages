@@ -33,14 +33,14 @@ jobs:
 
       - name: Publish packages
         run: |
-          packages=(packages/*)
+          packages=(./packages/*)
 
           n=1
           for package in "${packages[@]}"; do
             label="$package ($n / ${#packages[@]})"
             ((n++))
             echo "::group::$label"
-            brioche publish --no-verify -p "$package"
+            brioche publish --no-verify "$package"
             echo "::endgroup::"
           done
         env:
