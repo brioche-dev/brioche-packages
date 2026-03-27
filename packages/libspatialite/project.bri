@@ -21,9 +21,9 @@ const source = Brioche.download(
 export default function libspatialite(): std.Recipe<std.Directory> {
   return std.runBash`
     autoreconf --force --install
-    ./configure \
-      --prefix=/ \
-      --enable-rttopo \
+    ./configure \\
+      --prefix=/ \\
+      --enable-rttopo \\
       --disable-libxml2
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

@@ -75,15 +75,15 @@ function fixHardcodedPaths(
   recipe: std.Recipe<std.Directory>,
 ): std.Recipe<std.Directory> {
   return std.runBash`
-    sed -i \
-      -e '1s|^#!.*|#!/usr/bin/env bash|' \
-      -e 's|^BASH=.*|BASH=bash|' \
-      -e 's|^TAIL=.*|TAIL=tail|' \
-      -e 's|^GREP=.*|GREP=grep|' \
-      -e 's|^SED=.*|SED=sed|' \
-      -e 's|^LOCALE_PATH=.*|LOCALE_PATH=locale|' \
-      -e 's|^XMLLINT_PATH=.*|XMLLINT_PATH=xmllint|' \
-      -e 's|^XSLTPROC_PATH=.*|XSLTPROC_PATH=xsltproc|' \
+    sed -i \\
+      -e '1s|^#!.*|#!/usr/bin/env bash|' \\
+      -e 's|^BASH=.*|BASH=bash|' \\
+      -e 's|^TAIL=.*|TAIL=tail|' \\
+      -e 's|^GREP=.*|GREP=grep|' \\
+      -e 's|^SED=.*|SED=sed|' \\
+      -e 's|^LOCALE_PATH=.*|LOCALE_PATH=locale|' \\
+      -e 's|^XMLLINT_PATH=.*|XMLLINT_PATH=xmllint|' \\
+      -e 's|^XSLTPROC_PATH=.*|XSLTPROC_PATH=xsltproc|' \\
       "$BRIOCHE_OUTPUT/bin/xmlto"
   `
     .outputScaffold(recipe)

@@ -15,11 +15,11 @@ const source = Brioche.download(
 
 export default function fftw(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-shared \
-      --enable-static \
-      --enable-threads \
+    ./configure \\
+      --prefix=/ \\
+      --enable-shared \\
+      --enable-static \\
+      --enable-threads \\
       --enable-openmp
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
