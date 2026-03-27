@@ -1,0 +1,94 @@
+import * as std from "std";
+import aom from "aom";
+import brotli from "brotli";
+import dav1d from "dav1d";
+import fontconfig from "fontconfig";
+import freetype from "freetype";
+import lerc from "lerc";
+import libavif from "libavif";
+import libdeflate from "libdeflate";
+import libjpeg from "libjpeg";
+import libpng from "libpng";
+import libtiff from "libtiff";
+import libwebp from "libwebp";
+import rav1e from "rav1e";
+import zstd from "zstd";
+
+export const project = {
+  name: "gd",
+  version: "2.3.3",
+  repository: "https://github.com/libgd/libgd",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/gd-${project.version}/libgd-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function gd(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-png \\
+      --with-jpeg \\
+      --with-freetype \\
+      --with-fontconfig \\
+      --with-webp \\
+      --with-tiff \\
+      --with-avif
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      aom,
+      brotli,
+      dav1d,
+      fontconfig,
+      freetype,
+      lerc,
+      libavif,
+      libdeflate,
+      libjpeg,
+      libpng,
+      libtiff,
+      libwebp,
+      rav1e,
+      zstd,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion gdlib | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, gd)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^gd-(?<version>.+)$/,
+  });
+}
