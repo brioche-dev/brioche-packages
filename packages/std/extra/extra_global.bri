@@ -6,11 +6,13 @@ import type { GitCheckoutOptions } from "git";
 /**
  * Options for the `Brioche.gitCheckout` function.
  *
+ * @param keepGitDir - Set to true to keep the `.git` directory. Defaults to false.
  * @param submodules - Set to true to recursively checkout git submodules too.
  * @param tag - Create an annotated git tag on the checkout commit. Pass a
  *   string to use as the tag name, or `true` to use the `ref` value.
  */
 interface BriocheGitCheckoutOptions {
+  keepGitDir?: boolean;
   submodules?: boolean;
   tag?: boolean | string;
 }
