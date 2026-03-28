@@ -25,6 +25,9 @@ export default function deno(): std.Recipe<std.Directory> {
       // system libraries can be dynamically loaded
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
 
+      // Tell bindgen where to find standard C headers
+      BINDGEN_EXTRA_CLANG_ARGS: std.tpl`--sysroot=${std.toolchain}`,
+
       // Deno currently uses the linker flag `--export-dynamic-symbol-list`, so
       // ensure we use ld.bfd since ld.gold doesn't support this flag (at
       // the time of writing)
