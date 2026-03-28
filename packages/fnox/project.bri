@@ -17,8 +17,8 @@ const source = Brioche.gitCheckout({
 export default function fnox(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    runnable: "bin/fnox",
     dependencies: [libudevZero],
+    runnable: "bin/fnox",
   });
 }
 
