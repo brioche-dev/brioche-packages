@@ -10,7 +10,10 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.version,
-  options: { tag: project.version },
+  options: {
+    keepGitDir: true,
+    tag: project.version,
+  },
 });
 
 export default function jemalloc(): std.Recipe<std.Directory> {

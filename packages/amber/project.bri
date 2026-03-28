@@ -11,6 +11,7 @@ const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.version,
   options: {
+    keepGitDir: true,
     tag: true,
   },
 });
