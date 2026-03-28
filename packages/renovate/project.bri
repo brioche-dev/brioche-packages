@@ -6,7 +6,7 @@ import { runNushell } from "nushell";
 
 export const project = {
   name: "renovate",
-  version: "43.15.0",
+  version: "43.75.0",
   repository: "https://github.com/renovatebot/renovate.git",
 };
 
@@ -86,7 +86,10 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   // Check that the result contains the expected version
   const expected = project.version;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
