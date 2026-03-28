@@ -35,7 +35,6 @@ export default function sqlite(): std.Recipe<std.Directory> {
       --readline \\
       --with-readline-cflags="$(pkg-config --cflags readline)" \\
       --fts3 \\
-      --enable-session \\
       --session \\
       CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA"
     make -j "$(nproc)"
