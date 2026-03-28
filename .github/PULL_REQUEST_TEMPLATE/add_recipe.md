@@ -25,7 +25,7 @@ This Pull Request adds a new recipe to the registry.
 1. Run the **test** scenario:
 
 ```bash
-brioche build -e test -p RECIPE_PATH
+brioche build RECIPE_PATH^test
 ```
 
 <details><summary>Test output (click to expand)</summary>
@@ -41,7 +41,7 @@ TODO: paste the relevant output here
 2. Run the **live-update** scenario:
 
 ```bash
-brioche run -e liveUpdate -p RECIPE_PATH
+brioche run RECIPE_PATH^liveUpdate
 ```
 
 <details><summary>Live-update output (click to expand)</summary>

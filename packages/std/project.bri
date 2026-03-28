@@ -34,7 +34,7 @@ export const project = {
   name: "std",
 };
 
-// NOTE: This default export is a workaround so that `brioche build -p ./std`
+// NOTE: This default export is a workaround so that `brioche build ./std`
 // will build the toolchain. This will be removed once we support building
 // other exports more easily. The `never` type is used to discourage external
 // use.
