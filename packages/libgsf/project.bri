@@ -1,0 +1,110 @@
+import * as std from "std";
+import glib from "glib";
+import libffi from "libffi";
+import libselinux from "libselinux";
+import libsepol from "libsepol";
+import libxml2 from "libxml2";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import pcre2 from "pcre2";
+
+export const project = {
+  name: "libgsf",
+  version: "1.14.56",
+  repository: "https://gitlab.gnome.org/GNOME/libgsf",
+  extra: {
+    majorVersion: "1",
+    minorVersion: "14",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
+const source = Brioche.download(
+  `https://download.gnome.org/sources/libgsf/${project.extra.majorVersion}.${project.extra.minorVersion}/libgsf-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libgsf(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-gtk-doc \\
+      --without-gdk-pixbuf \\
+      --disable-introspection
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      glib,
+      libxml2,
+      libffi,
+      libselinux,
+      libsepol,
+      pcre2,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/gsf"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libgsf-1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libgsf)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let sourceUrl = http get https://download.gnome.org/sources/libgsf
+      | lines
+      | where ($it | str contains 'href="')
+      | parse --regex '<a href="(?<version>.+)/"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let version = http get $"https://download.gnome.org/sources/libgsf/($sourceUrl)"
+      | lines
+      | where ($it | str contains '<a href="libgsf') and (not ($it | str contains '.sha256sum')) and (not ($it | str contains '.news')) and (not ($it | str contains '.changes'))
+      | parse --regex '<a href="libgsf-(?<version>[^"]+)\\.tar\\.xz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let majorVersion = $version
+      | split words
+      | get 0
+    let minorVersion = $version
+      | split words
+      | get 1
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.majorVersion $majorVersion
+      | update extra.minorVersion $minorVersion
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

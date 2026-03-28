@@ -9,7 +9,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_c_event_stream",
-  version: "0.5.9",
+  version: "0.6.0",
   repository: "https://github.com/awslabs/aws-c-event-stream",
 };
 

@@ -3,7 +3,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "libsrtp",
-  version: "2.7.0",
+  version: "2.8.0",
   repository: "https://github.com/cisco/libsrtp",
 };
 

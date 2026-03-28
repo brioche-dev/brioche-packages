@@ -1,0 +1,52 @@
+import * as std from "std";
+import boehmGc from "boehm_gc";
+import libatomicOps from "libatomic_ops";
+import libffi from "libffi";
+
+export const project = {
+  name: "ecl",
+  version: "24.5.10",
+  repository: "https://gitlab.com/embeddable-common-lisp/ecl",
+};
+
+const source = Brioche.download(
+  `https://ecl.common-lisp.dev/static/files/release/ecl-${project.version}.tgz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function ecl(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-threads=yes \\
+      --enable-boehm=system \\
+      --enable-gmp=system
+    make
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, boehmGc, libatomicOps, libffi)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ecl"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ecl --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ecl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ECL ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({ project });
+}

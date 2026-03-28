@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "oxlint",
-  version: "1.51.0",
+  version: "1.55.0",
   repository: "https://github.com/web-infra-dev/oxc.git",
 };
 

@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/jasper-software/jasper.git": {
-      "version-4.2.8": "7c979692ede3914a481b859dbeb307dff48bf175"
+      "version-4.2.9": "63e106c80eb72af9fd4fa28772499ab0138b9994"
     }
   }
 }

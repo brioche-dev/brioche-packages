@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "tzdata",
-  version: "2025c",
+  version: "2026a",
 };
 
 const tzcodeSource = Brioche.download(

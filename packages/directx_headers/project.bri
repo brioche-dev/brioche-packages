@@ -4,7 +4,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "directx_headers",
-  version: "1.618.2",
+  version: "1.619.1",
   repository: "https://github.com/microsoft/DirectX-Headers",
 };
 

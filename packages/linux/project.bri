@@ -107,7 +107,11 @@ export default function linux(
     make modules_install
   `
     .workDir(source)
-    .outputScaffold(std.directory({ boot: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        boot: std.directory(),
+      }),
+    )
     .dependencies(
       ...dependencies,
       kmod,

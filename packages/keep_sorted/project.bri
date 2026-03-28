@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "keep_sorted",
-  version: "0.7.1",
+  version: "0.8.0",
   repository: "https://github.com/google/keep-sorted.git",
 };
 
@@ -13,17 +13,9 @@ const gitRef = await Brioche.gitRef({
   ref: `v${project.version}`,
 });
 
-const source = gitCheckout(gitRef).pipe((recipe) =>
-  // Create a git tag in the repo, which is used as the version number
-  std.runBash`
-    git tag "$revision"
-  `
-    .dependencies(git)
-    .env({ revision: `v${project.version}` })
-    .outputScaffold(recipe)
-    .currentDir(std.outputPath)
-    .toDirectory(),
-);
+const source = gitCheckout(gitRef, {
+  tag: `v${project.version}`,
+});
 
 export default function keepSorted(): std.Recipe<std.Directory> {
   return goBuild({

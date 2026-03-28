@@ -13,9 +13,9 @@
       "type": "sha256",
       "value": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529"
     },
-    "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.4.2.tar.gz": {
+    "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.4.3.tar.gz": {
       "type": "sha256",
-      "value": "659a6107e31a83c4e33f763942275fd278b21d095094044eb35569e86a21ddae"
+      "value": "483a201202b73495f00dbc83796c6ae63137a9bdade074f7648b3e32613412dd"
     }
   }
 }

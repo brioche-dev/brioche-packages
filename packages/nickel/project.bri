@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "nickel",
-  version: "1.15.1",
+  version: "1.16.0",
   repository: "https://github.com/tweag/nickel.git",
   extra: {
     crateName: "nickel-lang-cli",

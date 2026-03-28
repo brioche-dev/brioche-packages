@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Create GitHub app token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ vars.LIVE_UPDATE_APP_ID }}
@@ -108,7 +108,7 @@ jobs:
       # the previous token expired already (at the time of writing, tokens
       # are valid for 1 hour)
       - name: Create GitHub app token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token-2
         with:
           app-id: ${{ vars.LIVE_UPDATE_APP_ID }}

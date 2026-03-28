@@ -4,24 +4,17 @@ import go from "go";
 
 export const project = {
   name: "glab",
-  version: "1.85.1",
+  version: "1.89.0",
   repository: "https://gitlab.com/gitlab-org/cli",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-}).pipe((recipe) =>
-  // Create a git tag in the repo, which is used as the version number
-  std.runBash`
-    git tag "$revision"
-  `
-    .dependencies(git)
-    .env({ revision: project.version })
-    .outputScaffold(recipe)
-    .currentDir(std.outputPath)
-    .toDirectory(),
-);
+  options: {
+    tag: project.version,
+  },
+});
 
 export default function glab(): std.Recipe<std.Directory> {
   return std.runBash`

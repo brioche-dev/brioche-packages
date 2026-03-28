@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/ipfs/ipget/@v/v0.12.2.zip": {
+    "https://proxy.golang.org/github.com/ipfs/ipget/@v/v0.13.0.zip": {
       "type": "sha256",
-      "value": "5d74b5bc888044bfd4b7af741388b71cd29455f41a166e34fc0b37a7bbbc0111"
+      "value": "2ebcfd0c46aa73e236f3dd88df33d8d54ca0586d69911e240341876a5b534370"
     }
   }
 }
