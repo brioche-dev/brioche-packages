@@ -1,5 +1,6 @@
 import * as std from "std";
 import { nushellRunnable, type NushellRunnable } from "nushell";
+import readline from "readline";
 
 export const project = {
   name: "sqlite",
@@ -31,14 +32,15 @@ export default function sqlite(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure \\
       --prefix=/ \\
-      --enable-readline \\
-      --enable-fts3 \\
-      --enable-session
+      --readline \\
+      --with-readline-cflags="$(pkg-config --cflags readline)" \\
+      --fts3 \\
+      --session
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain)
+    .dependencies(std.toolchain, readline)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
