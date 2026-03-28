@@ -1,9 +1,11 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
+// TODO: Replace libudev_zero with systemd once it is packaged
+import libudevZero from "libudev_zero";
 
 export const project = {
   name: "fnox",
-  version: "1.12.1",
+  version: "1.18.0",
   repository: "https://github.com/jdx/fnox.git",
 };
 
@@ -15,6 +17,7 @@ const source = Brioche.gitCheckout({
 export default function fnox(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
+    dependencies: [libudevZero],
     runnable: "bin/fnox",
   });
 }
