@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://gitlab.linphone.org/BC/public/bctoolbox.git": {
-      "5.4.85": "2ccf666eebfdd23eead259916f48017210ba2a70"
+      "5.4.97": "7a73e1abfb3442998b4499fea83c5203bda9e00e"
     }
   }
 }

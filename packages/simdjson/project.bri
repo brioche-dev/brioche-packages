@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "simdjson",
-  version: "4.2.4",
+  version: "4.4.0",
   repository: "https://github.com/simdjson/simdjson.git",
 };
 

@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "skim",
-  version: "3.5.0",
+  version: "4.0.0",
   extra: {
     crateName: "skim",
   },

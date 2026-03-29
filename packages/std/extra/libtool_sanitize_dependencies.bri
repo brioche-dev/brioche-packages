@@ -5,34 +5,53 @@ export const LIBTOOL_SANITIZE_DEPENDENCIES_SCRIPT = std.indoc`
   sanitize_libtool_dependencies () {
     local -r file="$1"
 
-    sed -i -e "/^dependency_libs='/,/'/ s|[^[:space:]]*/lib/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$file"
+    # Replace quoted-path .la references with -l flags
+    sed -i -e "/^dependency_libs='/,/'/ s|'[^']*'/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$file"
+
+    # Replace unquoted .la references with -l flags
+    sed -i -e "/^dependency_libs='/,/'/ s|[^[:space:]]*/lib[^[:space:]]*/lib\\([^[:space:]]*\\)\\.la|-l\\1|g" "$file"
+
+    # Remove -L flags with absolute paths
+    sed -i -e "/^dependency_libs='/,/'/ s|-L/[^ ']*||g" "$file"
+
+    # Collapse repeated spaces
+    sed -i -e "/^dependency_libs='/,/'/ s|  *| |g" "$file"
   }
 
-  # No lib dir found, exit
-  if [[ ! -d "$BRIOCHE_OUTPUT/lib" ]]; then
+  # Candidate directories relative to $BRIOCHE_OUTPUT
+  la_dirs=(lib lib64)
+
+  # Collect only those that are present
+  find_roots=()
+  for rel in "\${la_dirs[@]}"; do
+    dir="$BRIOCHE_OUTPUT/$rel"
+    if [[ -d "$dir" ]]; then
+      find_roots+=("$dir")
+    fi
+  done
+
+  # No directory found, exit
+  if [[ \${#find_roots[@]} -eq 0 ]]; then
     exit 0
   fi
 
-  find -L "$BRIOCHE_OUTPUT/lib" -name '*.la' -type f -print0 \\
+  find -L "\${find_roots[@]}" -name '*.la' -type f -print0 \\
     | while IFS= read -r -d $'\\0' file; do
       sanitize_libtool_dependencies "$file"
     done
 `;
 
 /**
- * Create a recipe that replaces dependencies absolute paths in libtool files
- * with the corresponding linker flag.
- *
- * This is useful for ensuring that libtool files can be used in different
- * environments without needing to modify them manually.
+ * Create a recipe that sanitizes libtool `.la` files by replacing
+ * `.la` references in `dependency_libs` with `-l` flags and removing
+ * stale absolute `-L` paths.
  *
  * @param recipe - The recipe to apply the transformation to.
  *
- * @returns A new recipe with the transformed libtool files.
+ * @returns A new recipe with the sanitized libtool files.
  *
- * @remarks This function looks for libtool files in the standard locations
- *   `lib` relative to the `$BRIOCHE_OUTPUT` output directory, and updates
- *   the variable `dependency_libs`.
+ * @remarks This function looks for `.la` files in the standard locations
+ *   `lib` and `lib64` relative to the `$BRIOCHE_OUTPUT` output directory.
  */
 export function libtoolSanitizeDependencies(
   recipe: std.RecipeLike<std.Directory>,

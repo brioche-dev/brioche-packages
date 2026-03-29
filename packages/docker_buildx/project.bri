@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "docker_buildx",
-  version: "0.31.1",
+  version: "0.32.1",
   extra: {
     moduleName: "github.com/docker/buildx",
   },

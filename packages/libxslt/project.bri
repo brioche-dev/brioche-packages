@@ -1,4 +1,5 @@
 import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
 import python from "python";
 import libxml2 from "libxml2";
 import { nushellRunnable, type NushellRunnable } from "nushell";
@@ -34,6 +35,7 @@ export default function libxslt(): std.Recipe<std.Directory> {
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },

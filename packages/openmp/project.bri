@@ -1,0 +1,71 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import python from "python";
+
+export const project = {
+  name: "openmp",
+  version: "22.1.1",
+  repository: "https://github.com/llvm/llvm-project",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/llvmorg-${project.version}/llvm-project-${project.version}.src.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function openmp(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    path: "openmp",
+    dependencies: [std.toolchain, python],
+    set: {
+      LIBOMP_INSTALL_ALIASES: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <omp.h>
+
+      int main(void)
+      {
+        printf("%d", _OPENMP);
+        return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc -fopenmp main.c -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, openmp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = /^\d+$/;
+  std.assert(expected.test(result), `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^llvmorg-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

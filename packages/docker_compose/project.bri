@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "docker_compose",
-  version: "5.0.2",
+  version: "5.1.0",
   extra: {
     moduleName: "github.com/docker/compose/v5",
   },

@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "rust_analyzer",
-  version: "2026-02-09",
+  version: "2026-03-09",
   repository: "https://github.com/rust-lang/rust-analyzer.git",
 };
 

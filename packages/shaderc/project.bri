@@ -1,0 +1,71 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import python from "python";
+import { source as glslangSource } from "glslang";
+import { source as spirvToolsSource } from "spirv_tools";
+import { source as spirvHeadersSource } from "spirv_headers";
+
+export const project = {
+  name: "shaderc",
+  version: "2026.1",
+  repository: "https://github.com/google/shaderc",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function shaderc(): std.Recipe<std.Directory> {
+  const sourceWithDeps = source
+    .insert("third_party/glslang", glslangSource)
+    .insert("third_party/spirv-tools", spirvToolsSource)
+    .insert("third_party/spirv-headers", spirvHeadersSource);
+
+  return cmakeBuild({
+    source: sourceWithDeps,
+    dependencies: [std.toolchain, python],
+    set: {
+      SHADERC_SKIP_TESTS: "ON",
+      SHADERC_SKIP_EXAMPLES: "ON",
+      SHADERC_SKIP_COPYRIGHT_CHECK: "ON",
+      SKIP_GLSLANG_INSTALL: "ON",
+      SKIP_SPIRV_TOOLS_INSTALL: "ON",
+      SKIP_GOOGLETEST_INSTALL: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    glslc --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(shaderc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `shaderc v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^v(?<version>\d+\.\d+)$/,
+  });
+}

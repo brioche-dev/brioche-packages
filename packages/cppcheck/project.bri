@@ -6,7 +6,7 @@ import pcre from "pcre";
 
 export const project = {
   name: "cppcheck",
-  version: "2.19.0",
+  version: "2.20.0",
   repository: "https://github.com/danmar/cppcheck.git",
 };
 

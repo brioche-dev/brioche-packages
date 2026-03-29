@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/go-task/task/v3/@v/v3.48.0.zip": {
+    "https://proxy.golang.org/github.com/go-task/task/v3/@v/v3.49.1.zip": {
       "type": "sha256",
-      "value": "6274756450ff79bce2d603131859072115be8f3f28b9496d4a73624ca7336ce2"
+      "value": "c56ebfa4a564355c08430775b4a6ab6aa4d90d4454c4e4690a34513bdca53c14"
     }
   }
 }

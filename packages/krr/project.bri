@@ -106,7 +106,7 @@ export default function krr(): std.Recipe<std.Directory> {
         args: [{ relativePath: "venv/bin/krr" }],
         env: {
           // Include the toolchain's lib so native Python extensions
-          // (numpy, pandas, etc.) can find libstdc++.so.6 at runtime
+          // can find libstdc++.so.6 at runtime
           LD_LIBRARY_PATH: {
             append: [std.toolchain, "/lib"],
             separator: ":",

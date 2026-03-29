@@ -7,7 +7,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "proj",
-  version: "9.7.1",
+  version: "9.8.0",
   repository: "https://github.com/OSGeo/PROJ",
 };
 

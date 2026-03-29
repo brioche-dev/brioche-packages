@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/redis/redis": {
+      "8.6.0": "006e6a6a602ac5265a676b3aebe9f8ba65459190"
+    }
+  }
+}

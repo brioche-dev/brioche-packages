@@ -19,10 +19,10 @@ const source = Brioche.download(
     // - Remove deprecated OLD policy settings for CMP0025 and CMP0054
     // - Update cmake_minimum_required to 3.5
     std.runBash`
-      sed -i \
-        -e '/cmake_policy(SET CMP0025 OLD)/d' \
-        -e '/cmake_policy(SET CMP0054 OLD)/d' \
-        -e 's/cmake_minimum_required (VERSION 2.8.8)/cmake_minimum_required(VERSION 3.5)/' \
+      sed -i \\
+        -e '/cmake_policy(SET CMP0025 OLD)/d' \\
+        -e '/cmake_policy(SET CMP0054 OLD)/d' \\
+        -e 's/cmake_minimum_required (VERSION 2.8.8)/cmake_minimum_required(VERSION 3.5)/' \\
         "$BRIOCHE_OUTPUT/source/CMakeLists.txt"
     `
       .outputScaffold(source)

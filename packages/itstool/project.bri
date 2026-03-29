@@ -1,0 +1,79 @@
+import * as std from "std";
+import libxml2 from "libxml2";
+import python, { getLatestVersion as getPythonVersion } from "python";
+
+export const project = {
+  name: "itstool",
+  version: "2.0.7",
+  repository: "https://github.com/itstool/itstool",
+};
+
+const source = Brioche.download(
+  `https://files.itstool.org/itstool/itstool-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function itstool(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --bindir=/libexec/itstool/bin \\
+      --datarootdir=/share
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, python, libxml2)
+    .toDirectory()
+    .pipe(wrapPythonShebang)
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/itstool"));
+}
+
+/**
+ * Embed Python and libxml2 as runtime dependencies and add a runnable entry point.
+ *
+ * @param recipe - The recipe to add the runnable to.
+ *
+ * @returns The recipe with the runnable added.
+ */
+function wrapPythonShebang(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  recipe = recipe
+    .insert("brioche-run.d/python", python)
+    .insert("brioche-run.d/libxml2", libxml2);
+
+  return std.addRunnable(recipe, "bin/itstool", {
+    command: { relativePath: "brioche-run.d/python/bin/python" },
+    args: [{ relativePath: "libexec/itstool/bin/itstool" }],
+    env: {
+      PYTHONPATH: {
+        prepend: {
+          relativePath: `brioche-run.d/libxml2/lib/python${getPythonVersion()}/site-packages`,
+        },
+        separator: ":",
+      },
+    },
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    itstool --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(itstool)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `itstool ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

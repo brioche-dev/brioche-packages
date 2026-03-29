@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "git",
-  version: "2.52.0",
+  version: "2.53.0",
   repository: "https://github.com/git/git",
 };
 
@@ -74,9 +74,11 @@ interface GitCheckoutInit {
  * Specific git checkout options.
  *
  * @param submodules - Set to true to recursively checkout git submodules too.
+ * @param tag - Create an annotated git tag on the checkout commit.
  */
 export interface GitCheckoutOptions {
   submodules?: boolean;
+  tag?: string;
 }
 
 /**
@@ -142,6 +144,29 @@ export function gitCheckout(
         unsafe: { networking: true },
       })
       .toDirectory();
+
+    if (options.tag != null) {
+      repo = std
+        .process({
+          command: "git",
+          args: [
+            "-C",
+            std.outputPath,
+            "-c",
+            "user.name=Brioche",
+            "-c",
+            "user.email=github@brioche.dev",
+            "tag",
+            "-a",
+            options.tag,
+            "-m",
+            "",
+          ],
+          dependencies: [git],
+          outputScaffold: repo,
+        })
+        .toDirectory();
+    }
 
     if (options.submodules === true) {
       repo = std

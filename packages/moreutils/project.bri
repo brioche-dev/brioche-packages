@@ -2,6 +2,8 @@ import * as std from "std";
 import perl from "perl";
 import libxml2 from "libxml2";
 import libxslt from "libxslt";
+import docbook from "docbook";
+import docbookXsl from "docbook_xsl";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
@@ -17,20 +19,16 @@ const source = Brioche.gitCheckout({
 
 export default function moreutils(): std.Recipe<std.Directory> {
   return std.runBash`
+    export DOCBOOKXSL="$(echo "$DOCBOOKXSL_DIR"/xsl-stylesheets-nons-*)"
+
     make -j "$(nproc)"
     make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, libxml2, libxslt)
+    .dependencies(std.toolchain, libxml2, libxslt, docbook, docbookXsl)
     .workDir(source)
     .env({
-      // XML catalog for DocBook. The moreutils build validates some XML
-      // files against the DocBook schema, which will attempt to download
-      // the schema if not found in a system catalog. Providing a catalog
-      // ensures the build works offline
-      XML_CATALOG_FILES: std.tpl`${xmlCatalogs}/catalog.xml`,
-      // XSL files for DocBook. The build will look for these in a global
-      // path, and will fail if not found
-      DOCBOOKXSL: docbookXsl,
+      XML_CATALOG_FILES: std.tpl`${docbook}/share/xml/catalog.xml ${docbookXsl}/share/xml/catalog.xml`,
+      DOCBOOKXSL_DIR: std.tpl`${docbookXsl}/share/xml/docbook`,
     })
     .toDirectory()
     .pipe(wrapPerlShebangs);
@@ -67,27 +65,6 @@ export function liveUpdate(): NushellRunnable {
   `.env({ project: JSON.stringify(project) });
 }
 
-const xmlCatalogs = std.directory({
-  "catalog.xml": std.file(std.indoc`
-    <?xml version="1.0"?>
-    <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
-      <rewriteSystem
-        systemIdStartString="http://www.oasis-open.org/"
-        rewritePrefix="www.oasis-open.org/"
-      />
-    </catalog>
-  `),
-  "www.oasis-open.org/docbook/xml/4.4": Brioche.download(
-    "https://www.oasis-open.org/docbook/xml/4.4/docbook-xml-4.4.zip",
-  ).unarchive("zip"),
-});
-
-const docbookXsl = Brioche.download(
-  `https://github.com/docbook/xslt10-stylesheets/releases/download/release%2F1.79.2/docbook-xsl-nons-1.79.2.tar.bz2`,
-)
-  .unarchive("tar", "bzip2")
-  .peel();
-
 // Wrap Perl shebang scripts using `std.addRunnable`
 // TODO: Figure out where to move this, this is copied from `python`
 function wrapPerlShebangs(
@@ -95,7 +72,7 @@ function wrapPerlShebangs(
 ): std.Recipe<std.Directory> {
   return std.recipe(async () => {
     // Add Perl in the recipe
-    recipe = recipe.insert(".local/libexec/moreutils/perl", perlEnv);
+    recipe = recipe.insert("libexec/moreutils/perl", perlEnv);
 
     const perlShebangPathList = await std.runBash`
       find bin -type f -executable \\
@@ -115,7 +92,7 @@ function wrapPerlShebangs(
     // Wrap each script using `std.addRunnable()`
     const wrappedShebangs = perlShebangPaths.map((path) => {
       return std.addRunnable(std.directory(), path, {
-        command: { relativePath: ".local/libexec/moreutils/perl/bin/perl" },
+        command: { relativePath: "libexec/moreutils/perl/bin/perl" },
         args: [[std.glob(recipe, [path]), `/${path}`]],
       });
     });

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/apache/thrift/archive/refs/tags/v0.22.0.tar.gz": {
+      "type": "sha256",
+      "value": "c4649c5879dd56c88f1e7a1c03e0fbfcc3b2a2872fb81616bffba5aa8a225a37"
+    }
+  }
+}

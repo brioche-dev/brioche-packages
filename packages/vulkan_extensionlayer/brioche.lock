@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/KhronosGroup/Vulkan-ExtensionLayer": {
+      "vulkan-sdk-1.4.341.0": "38092a9e23a086d4eba8657dc49f2ab71320e91f"
+    }
+  }
+}

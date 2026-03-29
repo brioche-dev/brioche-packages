@@ -1,4 +1,5 @@
 import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
 import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
@@ -23,6 +24,7 @@ export default function libsodium(): std.Recipe<std.Directory> {
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
     .pipe((recipe) =>
       // Upstream libsodium doesn't ship CMake config files (only pkg-config).
       // Provide a minimal SodiumConfig.cmake so CMake projects can use

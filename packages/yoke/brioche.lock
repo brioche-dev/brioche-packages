@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/yokecd/yoke/@v/v0.20.5.zip": {
+    "https://proxy.golang.org/github.com/yokecd/yoke/@v/v0.20.6.zip": {
       "type": "sha256",
-      "value": "19319e63f1e47ffc350c88a18805418e5c22484f392460360d53bf438448eb59"
+      "value": "4cbfb74f5344c30070dfcdc05960b36124e188fa4175b9682fffa544e714ae3b"
     }
   }
 }

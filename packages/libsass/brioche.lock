@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/sass/libsass": {
+      "3.6.6": "7037f03fabeb2b18b5efa84403f5a6d7a990f460"
+    }
+  }
+}
