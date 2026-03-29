@@ -32,10 +32,9 @@ export default function sqlite(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure \\
       --prefix=/ \\
-      --readline \\
+      --all \\
+      --soname=legacy \\
       --with-readline-cflags="$(pkg-config --cflags readline)" \\
-      --fts3 \\
-      --session \\
       CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA"
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
