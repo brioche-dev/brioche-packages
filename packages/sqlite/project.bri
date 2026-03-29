@@ -1,14 +1,14 @@
 import * as std from "std";
 import { nushellRunnable, type NushellRunnable } from "nushell";
+import readline from "readline";
 
 export const project = {
   name: "sqlite",
-  version: "3.48.0",
+  version: "3.52.0",
   repository: "https://github.com/sqlite/sqlite",
   extra: {
-    releaseYear: "2025",
-    // The version number as encoded in SQLite build product names
-    filenameEncodedVersion: "3480000",
+    releaseYear: "2026",
+    filenameEncodedVersion: "3520000",
   },
 };
 
@@ -32,15 +32,15 @@ export default function sqlite(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure \\
       --prefix=/ \\
-      --enable-readline \\
-      --enable-fts3 \\
-      --enable-session \\
+      --all \\
+      --soname=legacy \\
+      --with-readline-cflags="$(pkg-config --cflags readline)" \\
       CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA"
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain)
+    .dependencies(std.toolchain, readline)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
