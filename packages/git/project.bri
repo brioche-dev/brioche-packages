@@ -73,10 +73,12 @@ interface GitCheckoutInit {
 /**
  * Specific git checkout options.
  *
+ * @param keepGitDir - Set to true to keep the `.git` directory. Defaults to false.
  * @param submodules - Set to true to recursively checkout git submodules too.
  * @param tag - Create an annotated git tag on the checkout commit.
  */
 export interface GitCheckoutOptions {
+  keepGitDir?: boolean;
   submodules?: boolean;
   tag?: string;
 }
@@ -121,6 +123,11 @@ export function gitCheckout(
     std.assert(
       /^[0-9a-f]{40}$/.test(commit),
       `Invalid git commit hash: ${commit}`,
+    );
+
+    std.assert(
+      options.keepGitDir === true || options.tag == null,
+      "Cannot use 'tag' without 'keepGitDir' enabled",
     );
 
     // Clone and fetch only the specified commit. See this article:
@@ -184,6 +191,26 @@ export function gitCheckout(
           dependencies: [std.toolchain, git],
           outputScaffold: repo,
           unsafe: { networking: true },
+        })
+        .toDirectory();
+    }
+
+    if (options.keepGitDir !== true) {
+      repo = std
+        .process({
+          command: "find",
+          args: [
+            std.outputPath,
+            "-name",
+            ".git",
+            "-exec",
+            "rm",
+            "-rf",
+            "{}",
+            "+",
+          ],
+          dependencies: [std.toolchain],
+          outputScaffold: repo,
         })
         .toDirectory();
     }
