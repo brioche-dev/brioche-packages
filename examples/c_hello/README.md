@@ -6,4 +6,4 @@ See [`project.bri`](./project.bri) for the Brioche build definition.
 
 ## Usage
 
-`brioche run -p ./examples/c_hello`
+`brioche run ./examples/c_hello`
