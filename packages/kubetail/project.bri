@@ -22,7 +22,11 @@ export default function kubetail(): std.Recipe<std.Directory> {
     cp bin/kubetail "$BRIOCHE_OUTPUT/bin/"
   `
     .workDir(source)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .dependencies(std.toolchain, go, pnpm)
     .env({
       // Help the dynamic linker to find shared libraries at runtime.
@@ -47,6 +51,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
+  // Check that the result contains the expected version
   const expected = `kubetail version ${project.version}`;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 

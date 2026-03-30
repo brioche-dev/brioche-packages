@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/cpuguy83/go-md2man/v2/@v/v2.0.7.zip": {
+      "type": "sha256",
+      "value": "9ad5f2cbc644c0bb648a9b182d6b70f92e7ac4dfab5cf0ef746bbeef944fda59"
+    }
+  }
+}

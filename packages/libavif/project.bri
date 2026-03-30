@@ -1,0 +1,75 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import aom from "aom";
+import dav1d from "dav1d";
+import libpng from "libpng";
+import libjpegTurbo from "libjpeg_turbo";
+import libwebp from "libwebp";
+import libyuv from "libyuv";
+import rav1e from "rav1e";
+
+export const project = {
+  name: "libavif",
+  version: "1.4.0",
+  repository: "https://github.com/AOMediaCodec/libavif",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libavif(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      aom,
+      dav1d,
+      libpng,
+      libjpegTurbo,
+      libwebp,
+      libyuv,
+      rav1e,
+    ],
+    set: {
+      AVIF_CODEC_AOM: "SYSTEM",
+      AVIF_CODEC_DAV1D: "SYSTEM",
+      AVIF_CODEC_RAV1E: "SYSTEM",
+      AVIF_BUILD_APPS: "OFF",
+      AVIF_BUILD_TESTS: "OFF",
+      AVIF_BUILD_EXAMPLES: "OFF",
+      AVIF_LIBYUV: "SYSTEM",
+      AVIF_LIBSHARPYUV: "SYSTEM",
+      BUILD_SHARED_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libavif | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libavif)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

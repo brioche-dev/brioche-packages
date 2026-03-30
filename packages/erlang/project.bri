@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "erlang",
-  version: "28.3.1",
+  version: "28.4.1",
   repository: "https://github.com/erlang/otp",
 };
 
@@ -65,6 +65,10 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  * With `--prefix=/`, the `dyn_erl` lookup path and the ROOTDIR
  * fallback in `bin/` scripts point to wrong absolute locations.
  * This fixes both to use correct relative paths.
+ *
+ * @param recipe - The recipe to fix.
+ *
+ * @returns The recipe with the paths fixed.
  */
 function fixRootDir(
   recipe: std.Recipe<std.Directory>,

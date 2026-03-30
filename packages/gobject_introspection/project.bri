@@ -117,16 +117,54 @@ export default function gobjectIntrospection(): std.Recipe<std.Directory> {
       doctool: "disabled",
       gi_cross_ldd_wrapper: "custom-ldd",
     },
-  }).pipe((recipe) =>
-    std.setEnv(recipe, {
-      CPATH: { append: [{ path: "include" }] },
-      LIBRARY_PATH: { append: [{ path: "lib" }] },
-      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
-      ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
-      GI_TYPELIB_PATH: { append: [{ path: "lib/girepository-1.0" }] },
-      XDG_DATA_DIRS: { append: [{ path: "share" }] },
-    }),
-  );
+  })
+    .pipe((recipe) => {
+      // Embed Python and runtime libs for the wrapped scripts below
+      recipe = recipe.insert("libexec/gi/python", pythonWithSetuptools);
+      recipe = recipe.insert(
+        "libexec/gi/runtime-deps",
+        std.merge(
+          std.recipe(std.toolchain),
+          std.recipe(glib),
+          std.recipe(pcre2),
+          std.recipe(libffi),
+          std.recipe(libselinux),
+          std.recipe(libsepol),
+        ),
+      );
+
+      // Include sibling directories so __file__ relative paths resolve
+      const scriptContext = std.glob(recipe, [
+        "bin/g-ir-scanner",
+        "bin/g-ir-annotation-tool",
+        "share/gir-1.0/**",
+        "lib/gobject-introspection/**",
+      ]);
+      const wrappedScripts = ["g-ir-scanner", "g-ir-annotation-tool"].map(
+        (script) => {
+          return std.addRunnable(std.directory(), `bin/${script}`, {
+            command: { relativePath: "libexec/gi/python/bin/python3" },
+            args: [[scriptContext, `/bin/${script}`]],
+            env: {
+              LD_LIBRARY_PATH: {
+                fallback: { relativePath: "libexec/gi/runtime-deps/lib" },
+              },
+            },
+          });
+        },
+      );
+
+      return std.merge(recipe, ...wrappedScripts);
+    })
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+        GI_TYPELIB_PATH: { append: [{ path: "lib/girepository-1.0" }] },
+      }),
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

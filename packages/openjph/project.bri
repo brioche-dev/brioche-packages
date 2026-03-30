@@ -4,7 +4,7 @@ import libtiff from "libtiff";
 
 export const project = {
   name: "openjph",
-  version: "0.26.0",
+  version: "0.26.3",
   repository: "https://github.com/aous72/OpenJPH",
 };
 

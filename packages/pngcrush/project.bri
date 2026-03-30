@@ -21,7 +21,11 @@ export default function pngcrush(): std.Recipe<std.Directory> {
   `
     .workDir(source)
     .dependencies(std.toolchain)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/pngcrush"));
 }

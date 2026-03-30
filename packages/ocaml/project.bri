@@ -25,7 +25,11 @@ export default function ocaml(): std.Recipe<std.Directory> {
     mv "$BRIOCHE_OUTPUT/lib/ocaml/caml" "$BRIOCHE_OUTPUT/include"
   `
     .workDir(source)
-    .outputScaffold(std.directory({ include: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        include: std.directory(),
+      }),
+    )
     .dependencies(std.toolchain, python, openssl)
     .toDirectory()
     .pipe((recipe) => std.recipe(fixShebangs(recipe)))

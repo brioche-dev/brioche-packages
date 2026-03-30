@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/foxglove/mcap.git": {
-      "releases/mcap-cli/v0.0.61": "fa382a06f852bd4b90046ab74b30c11b0a089d9b"
+      "releases/mcap-cli/v0.0.62": "f2a70d619b945d68e4e0ee32c7a3d9042834b219"
     }
   }
 }

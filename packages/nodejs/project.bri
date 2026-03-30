@@ -5,14 +5,14 @@ import nushell from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "25.6.1",
+  version: "25.8.1",
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
-      "25": "25.6.1",
-      "24": "24.13.1",
-      "22": "22.22.0",
-      "20": "20.20.0",
+      "25": "25.8.1",
+      "24": "24.14.0",
+      "22": "22.22.1",
+      "20": "20.20.1",
     },
   },
 } as const;

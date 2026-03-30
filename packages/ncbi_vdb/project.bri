@@ -1,0 +1,71 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import hdf5 from "hdf5";
+import libxml2 from "libxml2";
+
+export const project = {
+  name: "ncbi_vdb",
+  version: "3.4.0",
+  repository: "https://github.com/ncbi/ncbi-vdb",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function ncbiVdb(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, hdf5, libxml2],
+    set: {
+      CMAKE_C_FLAGS: "-DH5_USE_110_API",
+      CMAKE_CXX_FLAGS: "-DH5_USE_110_API",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <klib/rc.h>
+      #include <stdio.h>
+      #include <stdlib.h>
+
+      int main(void)
+      {
+          printf("ncbi-vdb ok");
+
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -lncbi-vdb -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, ncbiVdb)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "ncbi-vdb ok";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

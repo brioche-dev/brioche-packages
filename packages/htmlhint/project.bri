@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "htmlhint",
-  version: "1.9.1",
+  version: "1.9.2",
   extra: {
     packageName: "htmlhint",
   },

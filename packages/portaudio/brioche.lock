@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/PortAudio/portaudio/archive/refs/tags/v19.7.0.tar.gz": {
+      "type": "sha256",
+      "value": "5af29ba58bbdbb7bbcefaaecc77ec8fc413f0db6f4c4e286c40c3e1b83174fa0"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/mummer4/mummer/releases/download/v4.0.1/mummer-4.0.1.tar.gz": {
+      "type": "sha256",
+      "value": "bc20ae2701a0b2e323e4e515b7cfa18a0f0cb34a4ff5844b289b2de0154e3d3e"
+    }
+  }
+}

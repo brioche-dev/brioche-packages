@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ivmai/bdwgc.git": {
+      "v8.2.12": "4fab5386df64466b2b61fc7209bef033cad1e6cc"
+    }
+  }
+}

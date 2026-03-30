@@ -27,7 +27,11 @@ export default function shellcheck(): std.Recipe<std.Directory> {
     `
     .workDir(source)
     .dependencies(ghc, cabalInstall, std.toolchain)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .unsafe({ networking: true })
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/shellcheck"));

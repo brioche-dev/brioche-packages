@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/fastfloat/fast_float": {
-      "v8.2.3": "01ce95dfe46abccf3264fbccf9f5139ea9016cd2"
+      "v8.2.4": "eb9ab42c0aa86d3cc41871ba7306527d95077b3b"
     }
   }
 }

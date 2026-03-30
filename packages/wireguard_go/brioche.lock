@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/WireGuard/wireguard-go.git": {
+      "0.0.20250522": "f333402bd9cbe0f3eeb02507bd14e23d7d639280"
+    }
+  }
+}

@@ -46,7 +46,6 @@ export default function libtrace(): std.Recipe<std.Directory> {
     )
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
-    .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },

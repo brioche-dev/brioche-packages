@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/TartanLlama/expected.git": {
+      "v1.3.1": "1770e3559f2f6ea4a5fb4f577ad22aeb30fbd8e4"
+    }
+  }
+}

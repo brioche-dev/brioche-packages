@@ -5,7 +5,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libpciaccess",
-  version: "0.18.1",
+  version: "0.19",
 };
 
 const source = Brioche.download(
