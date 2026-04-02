@@ -1,0 +1,69 @@
+import * as std from "std";
+import { gitCheckout } from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "hysteria",
+  version: "2.8.0",
+  repository: "https://github.com/apernet/hysteria.git",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. The app module has a local replace directive pointing to ../core,
+// which isn't included in Go proxy archives.
+const gitRef = await Brioche.gitRef({
+  repository: project.repository,
+  ref: `app/v${project.version}`,
+});
+const source = gitCheckout(gitRef);
+
+export default function hysteria(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./app",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/apernet/hysteria/app/v2/cmd.appVersion=v${project.version}`,
+        "-X",
+        `github.com/apernet/hysteria/app/v2/cmd.appType=release`,
+        "-X",
+        `github.com/apernet/hysteria/app/v2/cmd.appCommit=${gitRef.commit}`,
+      ],
+    },
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe.insert("bin/hysteria", recipe.get("bin/app")).remove("bin/app"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/hysteria"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    hysteria version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(hysteria)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `v${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^app\/v(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
