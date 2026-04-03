@@ -40,8 +40,7 @@ export default function libxml2(): std.Recipe<std.Directory> {
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
-      // Software that depends on this library looks for the `libxml` include folder, which is located in `include/libxml2`
-      CPATH: { append: [{ path: "include/libxml2" }] },
+      CPATH: { append: [{ path: "include" }, { path: "include/libxml2" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/zhlynn/zsign/archive/refs/tags/v1.0.0.tar.gz": {
+      "type": "sha256",
+      "value": "5268e946c654bdc3ece16905ea93f2b961c1235adc07127553a8b335d17ee393"
+    }
+  }
+}
