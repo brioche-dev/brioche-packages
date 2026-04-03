@@ -42,7 +42,7 @@ export default function minizip(): std.Recipe<std.Directory> {
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include" }] },
+        CPATH: { append: [{ path: "include" }, { path: "include/minizip" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
         PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       }),
