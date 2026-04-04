@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 export const project = {
   name: "helix",
   version: "25.07.1",
-  repository: "https://github.com/helix-editor/helix.git",
+  repository: "https://github.com/helix-editor/helix",
 };
 
 const source = Brioche.gitCheckout({
@@ -12,12 +12,29 @@ const source = Brioche.gitCheckout({
   ref: project.version,
 });
 
+// Pre-built release for compiled grammar .so files.
+const prebuilt = (
+  std.CURRENT_PLATFORM === "x86_64-linux"
+    ? Brioche.download(
+        `${project.repository}/releases/download/${project.version}/helix-${project.version}-x86_64-linux.tar.xz`,
+      )
+    : Brioche.download(
+        `${project.repository}/releases/download/${project.version}/helix-${project.version}-aarch64-linux.tar.xz`,
+      )
+)
+  .unarchive("tar", "xz")
+  .peel();
+
 export default function helix(): std.Recipe<std.Directory> {
-  // TODO: https://docs.helix-editor.com/building-from-source.html#note-to-packagers
-  // - set HELIX_DEFAULT_RUNTIME to $BRIOCHE_OUTPUT/lib/helix/runtime
-  // TODO: https://docs.helix-editor.com/building-from-source.html#configure-the-desktop-shortcut
-  // - setup desktop shortcut and icon
-  // TODO: parse languages.toml with `nu`, `std.download()` grammar sources
+  // Helix resolves runtime as exe_parent/runtime (see helix-loader prioritize_runtime_dirs).
+  // Since the binary is at bin/hx, we place runtime/ inside bin/ so it's found automatically.
+  const runtime = std.merge(
+    source.get("runtime").pipe(std.castToDirectory),
+    std.directory({
+      grammars: prebuilt.get("runtime/grammars").pipe(std.castToDirectory),
+    }),
+  );
+
   return std.merge(
     cargoBuild({
       env: {
@@ -28,14 +45,7 @@ export default function helix(): std.Recipe<std.Directory> {
       source,
     }),
     std.directory({
-      lib: std.directory({
-        helix: std.directory({
-          runtime: std.directory({
-            queries: source.get("runtime/queries"),
-            themes: source.get("runtime/themes"),
-          }),
-        }),
-      }),
+      bin: std.directory({ runtime }),
     }),
   );
 }
