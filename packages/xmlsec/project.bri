@@ -1,0 +1,65 @@
+import * as std from "std";
+import libxml2 from "libxml2";
+import libxslt from "libxslt";
+import openssl from "openssl";
+
+export const project = {
+  name: "xmlsec",
+  version: "1.3.10",
+  repository: "https://github.com/lsh123/xmlsec",
+};
+
+const source = Brioche.download(
+  `https://www.aleksey.com/xmlsec/download/xmlsec1-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function xmlsec(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/ \
+      --with-openssl \
+      --with-default-crypto=openssl \
+      --disable-docs
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libxml2, libxslt, openssl)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/xmlsec1"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    xmlsec1 --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(xmlsec)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `xmlsec1 ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
