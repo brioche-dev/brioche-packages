@@ -1,7 +1,20 @@
 {
-  "dependencies": {},
+  "dependencies": {
+    "rust": "0e6b107bd20a2ecf3984cbc19be98d9141f416d7482df1ea99fd7b293d629ec9",
+    "std": "68ba6ea17363ef173c20fe75f1f93bfd89eea7a43180f4eb848a7882ef73a671"
+  },
+  "downloads": {
+    "https://github.com/helix-editor/helix/releases/download/25.07.1/helix-25.07.1-aarch64-linux.tar.xz": {
+      "type": "sha256",
+      "value": "ce23fa8d395e633e3e54c052012f11965d91d8d5c2bfa659685f50430b4f8175"
+    },
+    "https://github.com/helix-editor/helix/releases/download/25.07.1/helix-25.07.1-x86_64-linux.tar.xz": {
+      "type": "sha256",
+      "value": "3f08e63ecd388fff657ad39722f88bb03dcf326f1f2da2700d99e1dc40ab2e8b"
+    }
+  },
   "git_refs": {
-    "https://github.com/helix-editor/helix.git": {
+    "https://github.com/helix-editor/helix": {
       "25.07.1": "a05c151bb6e8e9c65ec390b0ae2afe7a5efd619b"
     }
   }
