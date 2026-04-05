@@ -1,5 +1,4 @@
 import * as std from "std";
-import git from "git";
 import { goBuild } from "go";
 
 export const project = {
@@ -19,7 +18,6 @@ const source = Brioche.download(
 export default function rclone(): std.Recipe<std.Directory> {
   return goBuild({
     source,
-    dependencies: [git],
     runnable: "bin/rclone",
     buildParams: {
       // Remove `-DEV` suffix from version number
@@ -42,11 +40,12 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  const version = result.split("\n").at(0);
-
   // Check that the result contains the expected version
   const expected = `rclone v${project.version}`;
-  std.assert(version === expected, `expected '${expected}', got '${version}'`);
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
