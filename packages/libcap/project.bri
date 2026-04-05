@@ -11,8 +11,12 @@ const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
 }).pipe((source) =>
+  // Fix shebang for portability, and patch the objcopy rule that extracts
+  // the dynamic linker path so it operates on the underlying binary rather
+  // than the packed wrapper.
   std.runBash`
     sed -i 's|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT/progs/mkcapshdoc.sh"
+    sed -i 's#$(OBJCOPY) --dump-section .interp=$@ $< /dev/null#$(OBJCOPY) --dump-section .interp=$@ $$(brioche-packer source-path $< 2>/dev/null || echo $<) /dev/null#' "$BRIOCHE_OUTPUT/libcap/Makefile"
   `
     .outputScaffold(source)
     .toDirectory(),
@@ -24,8 +28,7 @@ export default function libcap(): std.Recipe<std.Directory> {
       -j "$(nproc)" \\
       prefix=/ \\
       lib=lib \\
-      sbin=bin \\
-      OBJCOPY=brioche-objcopy
+      sbin=bin
     make install \\
       prefix=/ \\
       lib=lib \\
@@ -33,7 +36,7 @@ export default function libcap(): std.Recipe<std.Directory> {
       DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, std.runtimeUtils, briocheObjcopy)
+    .dependencies(std.toolchain, std.runtimeUtils)
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
@@ -74,42 +77,4 @@ export function liveUpdate(): NushellRunnable {
       | update version $version
       | to json
   `.env({ project: JSON.stringify(project) });
-}
-
-function briocheObjcopy(): std.Recipe<std.Directory> {
-  // A custom wrapper script around `objcopy`, which automatically resolves
-  // packed executable paths into unpacked executable paths.
-  //
-  // The libcap build uses `objcopy` to get the interpreter path of an
-  // executable, which fails with packed executables. This script fixes it by
-  // redirecting the `objcopy` call to the underlying executable path.
-  const briocheObjcopyScript = std
-    .file(std.indoc`
-      #!/usr/bin/env bash
-      set -euo pipefail
-
-      args=()
-      for arg in "$@"; do
-        if [[ $arg == -* ]]; then
-          args+=( "$arg" )
-        else
-          args+=( "$(brioche-packer source-path "$arg" 2>/dev/null || echo "$arg")" )
-        fi
-      done
-
-      printf '%s\\n' objcopy "\${args[@]}"
-      exec objcopy "\${args[@]}"
-    `)
-    .withPermissions({ executable: true });
-
-  let briocheObjcopy = std.directory({
-    "bin/brioche-objcopy": briocheObjcopyScript,
-  });
-  briocheObjcopy = std.autopack(briocheObjcopy, {
-    paths: ["bin/brioche-objcopy"],
-    scriptConfig: { enabled: true },
-    linkDependencies: [std.bash],
-  });
-
-  return briocheObjcopy;
 }
