@@ -30,7 +30,6 @@ export default function aliyunCli(): std.Recipe<std.Directory> {
         `github.com/aliyun/aliyun-cli/v3/cli.Version=${project.version}`,
       ],
     },
-    runnable: "bin/aliyun",
   })
     .pipe(
       // Rename binary file
