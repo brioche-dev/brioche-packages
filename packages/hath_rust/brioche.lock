@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/james58899/hath-rust.git": {
+      "v1.16.1": "0ed8597b5a25903eaa41ba0ff5925c9bae967b18"
+    }
+  }
+}
