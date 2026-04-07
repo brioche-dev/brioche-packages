@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/mvdan.cc/sh/v3/@v/v3.13.1.zip": {
+      "type": "sha256",
+      "value": "f7fdbe40f3d485df9d3ccbebae6754936dfbd59642e04c93926f1313f4e4c046"
+    }
+  }
+}
