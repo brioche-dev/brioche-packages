@@ -1,0 +1,75 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import fmt from "fmt";
+import lcms2 from "lcms2";
+import libjpegTurbo from "libjpeg_turbo";
+import libpng from "libpng";
+import libtiff from "libtiff";
+import xz from "xz";
+import zstd from "zstd";
+
+export const project = {
+  name: "grokj2k",
+  version: "20.2.7",
+  repository: "https://github.com/GrokImageCompression/grok",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/source-full.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function grokj2k(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      fmt,
+      lcms2,
+      libjpegTurbo,
+      libpng,
+      libtiff,
+      xz,
+      zstd,
+    ],
+    set: {
+      BUILD_TESTING: "OFF",
+      GRK_BUILD_CODEC: "ON",
+      GRK_BUILD_CORE_SWIG_BINDINGS: "OFF",
+      GRK_BUILD_DOC: "OFF",
+      GRK_BUILD_JPEG: "OFF",
+      GRK_BUILD_LCMS2: "OFF",
+      GRK_BUILD_LIBPNG: "OFF",
+      GRK_BUILD_LIBTIFF: "OFF",
+      SPDLOG_FMT_EXTERNAL: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libgrokj2k | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, grokj2k)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
