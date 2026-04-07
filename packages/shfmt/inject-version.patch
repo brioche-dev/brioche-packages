@@ -1,0 +1,22 @@
+--- a/cmd/shfmt/main.go
++++ b/cmd/shfmt/main.go
+@@ -27,6 +27,8 @@
+ 	"mvdan.cc/sh/v3/syntax/typedjson"
+ )
+
++var buildVersion string
++
+ type boolStringValue string
+
+ func (b *boolStringValue) Set(val string) error {
+@@ -153,6 +155,10 @@
+ 	flag.Parse()
+
+ 	if versionFlag.val {
++		if buildVersion != "" {
++			fmt.Println(buildVersion)
++			return
++		}
+ 		version := "(unknown)"
+ 		if info, ok := debug.ReadBuildInfo(); ok {
+ 			mod := &info.Main
