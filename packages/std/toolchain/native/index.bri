@@ -294,11 +294,11 @@ export const toolchain = std.memo(
       },
     });
 
-    // Repack `ld` and friends to include `libm`. `liblto_plugin.so` links
-    // against `libm`, which gets dynamically loaded. But since e.g. `ld.bfd`
-    // doesn't depend on `libm`, we need to manually include it
+    // Repack `ld` and friends to include `libm`. These tools
+    // don't depend on `libm` directly, so we need to manually
+    // include it in their packs.
     toolchain = autopack(toolchain, {
-      globs: ["bin/.brioche-ld-orig-*"],
+      globs: ["bin/.brioche-ld-orig-*", "bin/ar", "bin/ranlib", "bin/nm"],
       selfDependency: true,
       dynamicBinaryConfig: {
         enabled: true,
