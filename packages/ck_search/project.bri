@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "ck_search",
-  version: "0.7.0",
+  version: "0.7.2",
   extra: {
     crateName: "ck-search",
   },
