@@ -14,19 +14,11 @@ const source = Brioche.download(
   .peel();
 
 export default function fftw(): std.Recipe<std.Directory> {
-  return std.runBash`
-    ./configure \\
-      --prefix=/ \\
-      --enable-shared \\
-      --enable-static \\
-      --enable-threads \\
-      --enable-openmp
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
-  `
-    .workDir(source)
-    .dependencies(std.toolchain)
-    .toDirectory()
+  const doublePrecision = buildWithFlags("");
+  const singlePrecision = buildWithFlags("--enable-float");
+
+  return std
+    .merge(doublePrecision, singlePrecision)
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe(cmakeSanitizePaths)
@@ -38,6 +30,30 @@ export default function fftw(): std.Recipe<std.Directory> {
         CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
       }),
     );
+}
+
+/**
+ * Build FFTW with the given extra configure flags.
+ *
+ * @param extraFlags - Extra configure flags to append.
+ *
+ * @returns A recipe containing the built FFTW libraries.
+ */
+function buildWithFlags(extraFlags: string): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \
+      --prefix=/ \
+      --enable-shared \
+      --enable-static \
+      --enable-threads \
+      --enable-openmp \
+      ${extraFlags}
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory();
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
