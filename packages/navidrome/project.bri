@@ -1,0 +1,83 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+import nodejs, { npmInstall } from "nodejs";
+import taglib from "taglib";
+
+export const project = {
+  name: "navidrome",
+  version: "0.61.1",
+  extra: {
+    moduleName: "github.com/navidrome/navidrome",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function navidrome(): std.Recipe<std.Directory> {
+  return goBuild({
+    source: source.insert("ui/build", ui),
+    dependencies: [std.toolchain, taglib],
+    env: {
+      GOFLAGS: "-tags=netgo,sqlite_fts5",
+      CGO_ENABLED: "1",
+    },
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/consts.gitTag=v${project.version}`,
+        "-X",
+        `${project.extra.moduleName}/consts.gitSha=${manifest.origin.hash}`,
+      ],
+    },
+    runnable: "bin/navidrome",
+  });
+}
+
+function ui(): std.Recipe<std.Directory> {
+  const uiSource = std.castToDirectory(source.get("ui")).insert(
+    "bin/update-workbox.sh",
+    std.castToFile(source.get("ui/bin/update-workbox.sh")).withPermissions({
+      executable: true,
+    }),
+  );
+  const uiWithDeps = npmInstall({ source: uiSource });
+
+  return std.runBash`
+    npm run build
+    mv build "$BRIOCHE_OUTPUT"
+  `
+    .workDir(uiWithDeps)
+    .dependencies(nodejs)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    navidrome --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(navidrome)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version} (${manifest.origin.hash})`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
