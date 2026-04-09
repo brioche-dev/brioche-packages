@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/openai/codex.git": {
-      "rust-v0.91.0": "3684bc646e0f1123e76a90f03cfb1111358f1aa1"
+      "rust-v0.114.0": "b9904c0ae4ecb773549efd6ea3fb05229402fdb9"
     }
   }
 }
