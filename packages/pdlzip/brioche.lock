@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.savannah.nongnu.org/releases/lzip/pdlzip/pdlzip-1.15.tar.gz": {
+      "type": "sha256",
+      "value": "cee1ea8540a19b4d1383db9029dd04a1fdb6ea20962cbfc7dc45d02acc04ed40"
+    }
+  }
+}
