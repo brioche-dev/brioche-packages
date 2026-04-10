@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.sourceforge.net/project/avf/avfs/1.3.0/avfs-1.3.0.tar.bz2": {
+      "type": "sha256",
+      "value": "07cd69d4c0c7ed080e80ff040d980286405ad38a443fdc52dc395efef11c44b1"
+    }
+  }
+}
