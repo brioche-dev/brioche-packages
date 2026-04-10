@@ -24,7 +24,7 @@ export default function sdl12Compat(): std.Recipe<std.Directory> {
     runnable: "bin/sdl-config",
   }).pipe((recipe) =>
     std.setEnv(recipe, {
-      CPATH: { append: [{ path: "include" }] },
+      CPATH: { append: [{ path: "include" }, { path: "include/SDL" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
