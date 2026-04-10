@@ -1,0 +1,38 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+
+export const project = {
+  name: "webpack_cli",
+  version: "7.0.2",
+  extra: {
+    packageName: "webpack-cli",
+  },
+};
+
+export default function webpackCli(): std.Recipe<std.Directory> {
+  return npmInstallGlobal({
+    packageName: project.extra.packageName,
+    version: project.version,
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/webpack-cli"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    webpack-cli --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(webpackCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromNpmPackages({ project });
+}
