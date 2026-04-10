@@ -1,0 +1,60 @@
+import * as std from "std";
+import liburing from "liburing";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import numactl from "numactl";
+
+export const project = {
+  name: "libfuse",
+  version: "3.18.2",
+  repository: "https://github.com/libfuse/libfuse",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/fuse-${project.version}/fuse-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libfuse(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, liburing, numactl],
+    set: {
+      default_library: "both",
+      tests: "false",
+      examples: "false",
+      utils: "false",
+      useroot: "false",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion fuse3 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libfuse)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^fuse-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
