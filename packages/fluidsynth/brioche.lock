@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/FluidSynth/fluidsynth": {
+      "v2.5.3": "6b8fabbd60f0df3b6e2f5b5df8478a1b43315acd"
+    }
+  }
+}
