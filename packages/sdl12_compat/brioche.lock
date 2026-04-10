@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/libsdl-org/sdl12-compat/releases/download/release-1.2.76/sdl12-compat-1.2.76.tar.gz": {
+      "type": "sha256",
+      "value": "a68477009c24bc6e876326b1e8dd0bedec2b0c37acbddbddf90acba48fba4b38"
+    }
+  }
+}
