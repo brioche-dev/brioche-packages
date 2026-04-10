@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/symfony-cli/symfony-cli.git": {
+      "v5.17.1": "1e2a63ccefd4b18e20b7387f001bdba879499022"
+    }
+  }
+}
