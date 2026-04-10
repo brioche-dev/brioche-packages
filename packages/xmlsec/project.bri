@@ -17,10 +17,10 @@ const source = Brioche.download(
 
 export default function xmlsec(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --with-openssl \
-      --with-default-crypto=openssl \
+    ./configure \\
+      --prefix=/ \\
+      --with-openssl \\
+      --with-default-crypto=openssl \\
       --disable-docs
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

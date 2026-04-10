@@ -22,13 +22,13 @@ const source = Brioche.download(
 
 export default function lasso(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --with-pkg-config="$PKG_CONFIG_PATH" \
-      --disable-perl \
-      --disable-php5 \
-      --disable-php7 \
-      --disable-python \
+    ./configure \\
+      --prefix=/ \\
+      --with-pkg-config="$PKG_CONFIG_PATH" \\
+      --disable-perl \\
+      --disable-php5 \\
+      --disable-php7 \\
+      --disable-python \\
       --disable-java
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
