@@ -1,0 +1,62 @@
+import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
+import sdl2 from "sdl2";
+
+export const project = {
+  name: "sdl2_net",
+  version: "2.2.0",
+  repository: "https://github.com/libsdl-org/SDL_net",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/release-${project.version}/SDL2_net-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sdl2Net(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-sdltest
+    make -j "$(nproc)" noinst_PROGRAMS=
+    make install DESTDIR="$BRIOCHE_OUTPUT" noinst_PROGRAMS=
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, sdl2)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }, { path: "include/SDL2" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion SDL2_net | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl2Net)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>2\.\d+\.\d+)$/,
+  });
+}
