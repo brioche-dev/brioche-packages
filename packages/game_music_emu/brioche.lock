@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/libgme/game-music-emu": {
+      "0.6.4": "f0d9517c5c3e0b712f553baa62e213336587d52e"
+    }
+  }
+}
