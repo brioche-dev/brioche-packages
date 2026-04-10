@@ -1,0 +1,61 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "wayback",
+  version: "0.20.1",
+  extra: {
+    moduleName: "github.com/wabarc/wayback",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function wayback(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/version.Version=${project.version}`,
+        "-X",
+        `${project.extra.moduleName}/version.Commit=${manifest.origin.hash}`,
+        "-X",
+        `${project.extra.moduleName}/version.BuildDate=${manifest.time}`,
+      ],
+    },
+    path: "./cmd/wayback",
+    runnable: "bin/wayback",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    wayback --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(wayback)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `wayback version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}
