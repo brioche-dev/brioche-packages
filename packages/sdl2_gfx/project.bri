@@ -1,0 +1,81 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+import sdl2 from "sdl2";
+
+export const project = {
+  name: "sdl2_gfx",
+  version: "1.0.4",
+  repository: "https://github.com/ferzkopp/SDL2_gfx",
+};
+
+const source = Brioche.download(
+  `https://www.ferzkopp.net/Software/SDL2_gfx/SDL2_gfx-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Bundled config.guess does not recognize aarch64
+    std.runBash`
+      cp "$(automake --print-libdir)/config.guess" "$BRIOCHE_OUTPUT/config.guess"
+      cp "$(automake --print-libdir)/config.sub" "$BRIOCHE_OUTPUT/config.sub"
+    `
+      .dependencies(std.toolchain)
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function sdl2Gfx(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-sdltest \\
+      --disable-mmx
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, sdl2)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }, { path: "include/SDL2" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion SDL2_gfx | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl2Gfx)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  // HACK: upstream configure.in was not bumped past 1.0.2 in the 1.0.4 tarball.
+  const expected = project.version === "1.0.4" ? "1.0.2" : project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/sdl2gfx/files/
+      | lines
+      | where {|it| ($it | str contains 'SDL2_gfx-') and ($it | str contains '.tar.gz') and (not ($it | str contains '.asc')) }
+      | parse --regex 'SDL2_gfx-(?<version>[\\d.]+)\\.tar\\.gz'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
