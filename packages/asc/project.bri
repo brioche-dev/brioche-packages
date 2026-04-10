@@ -1,0 +1,50 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "asc",
+  version: "1.2.0",
+  repository: "https://github.com/rudrankriyam/App-Store-Connect-CLI.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function asc(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe
+          .insert("bin/asc", recipe.get("bin/App-Store-Connect-CLI"))
+          .remove("bin/App-Store-Connect-CLI"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/asc"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    asc --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(asc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `${project.version} (commit: unknown, date: unknown)`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
