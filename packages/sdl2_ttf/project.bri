@@ -1,0 +1,65 @@
+import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
+import freetype from "freetype";
+import harfbuzz from "harfbuzz";
+import sdl2 from "sdl2";
+
+export const project = {
+  name: "sdl2_ttf",
+  version: "2.24.0",
+  repository: "https://github.com/libsdl-org/SDL_ttf",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/release-${project.version}/SDL2_ttf-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sdl2Ttf(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, freetype, harfbuzz, sdl2)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }, { path: "include/SDL2" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion SDL2_ttf | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl2Ttf)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>2\.\d+\.\d+)$/,
+  });
+}
