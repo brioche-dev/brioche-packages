@@ -1,0 +1,76 @@
+import * as std from "std";
+import fluidsynth from "fluidsynth";
+import gameMusicEmu from "game_music_emu";
+import libogg from "libogg";
+import libxmp from "libxmp";
+import opus from "opus";
+import opusfile from "opusfile";
+import sdl2 from "sdl2";
+import wavpack from "wavpack";
+
+export const project = {
+  name: "sdl2_mixer",
+  version: "2.8.1",
+  repository: "https://github.com/libsdl-org/SDL_mixer",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/release-${project.version}/SDL2_mixer-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sdl2Mixer(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      fluidsynth,
+      gameMusicEmu,
+      libogg,
+      libxmp,
+      opus,
+      opusfile,
+      sdl2,
+      wavpack,
+    )
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion SDL2_mixer | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl2Mixer)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>2\.\d+\.\d+)$/,
+  });
+}
