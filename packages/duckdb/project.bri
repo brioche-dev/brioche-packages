@@ -2,30 +2,32 @@ import * as std from "std";
 import { cmakeBuild } from "cmake";
 
 export const project = {
-  name: "highway",
-  version: "1.3.0",
-  repository: "https://github.com/google/highway",
+  name: "duckdb",
+  version: "1.5.1",
+  repository: "https://github.com/duckdb/duckdb.git",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
-  ref: project.version,
+  ref: `v${project.version}`,
 });
 
-export default function highway(): std.Recipe<std.Directory> {
+export default function duckdb(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
     dependencies: [std.toolchain],
     set: {
-      BUILD_SHARED_LIBS: "ON",
-      HWY_ENABLE_TESTS: "OFF",
-      HWY_ENABLE_EXAMPLES: "OFF",
+      BUILD_UNITTESTS: "OFF",
+      BUILD_SHELL: "ON",
+      // GIT_DESCRIBE need to match, either fully specified 'vX.Y.Z-N-gGITHASH123'
+      // or version only 'vX.Y.Z' or rc like 'vX.Y.Z-rcW'
+      OVERRIDE_GIT_DESCRIBE: `v${project.version}`,
     },
+    runnable: "bin/duckdb",
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
-      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
@@ -33,16 +35,19 @@ export default function highway(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    pkg-config --modversion libhwy | tee "$BRIOCHE_OUTPUT"
+    duckdb --version | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, highway)
+    .dependencies(duckdb)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  const expected = `v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
