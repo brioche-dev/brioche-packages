@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/dprint/0.54.0/download": {
+      "type": "sha256",
+      "value": "276832f406faf1b31c819972f0221eec7a6ff9d896866f5c007bc6ab88000697"
+    }
+  }
+}
