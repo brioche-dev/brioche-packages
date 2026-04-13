@@ -1,0 +1,76 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libavif from "libavif";
+import libjpegTurbo from "libjpeg_turbo";
+import libjxl from "libjxl";
+import libpng from "libpng";
+import libtiff from "libtiff";
+import libwebp from "libwebp";
+import sdl3 from "sdl3";
+
+export const project = {
+  name: "sdl3_image",
+  version: "3.4.2",
+  repository: "https://github.com/libsdl-org/SDL_image",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/release-${project.version}/SDL3_image-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sdl3Image(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      sdl3,
+      libavif,
+      libjpegTurbo,
+      libjxl,
+      libpng,
+      libtiff,
+      libwebp,
+    ],
+    set: {
+      SDLIMAGE_VENDORED: "OFF",
+      SDLIMAGE_DEPS_SHARED: "OFF",
+      SDLIMAGE_SAMPLES: "OFF",
+      SDLIMAGE_TESTS: "OFF",
+      SDLIMAGE_JXL: "ON",
+      SDLIMAGE_JPG_SAVE: "ON",
+      SDLIMAGE_PNG_SAVE: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }, { path: "include/SDL3_image" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion sdl3-image | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl3Image)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>3\.\d+\.\d+)$/,
+  });
+}
