@@ -1,3 +1,24 @@
+def archive-url [repo: string, rev: string]: nothing -> string {
+  let parts = $repo
+    | url parse
+  let path = $parts.path
+    | str trim --left --char '/'
+    | str trim --right --char '/'
+    | str replace '.git' ''
+  let host = $parts.host
+
+  match $host {
+    "gitlab.com" => {
+        let repo_name = $path
+          | split row '/'
+          | get 1
+
+        $"https://($host)/($path)/-/archive/($rev)/($repo_name)-($rev).tar.gz"
+    },
+    _ => $"https://($host)/($path)/archive/($rev).tar.gz",
+  }
+}
+
 open $env.languages_toml
   | get grammar
   | where source? != null
@@ -7,19 +28,24 @@ open $env.languages_toml
     let rev = $grammar.source.rev
     let subpath = ($grammar.source.subpath? | default "")
 
-    print $"Building grammar: ($name)"
+    let src_dir = mktemp -d
+    let url = archive-url $repo $rev
 
-    let clone_dir = mktemp -d
+    print $"Building grammar '($name)' \(($url)\)"
+
+    let archive = $"($src_dir)/archive.tar.gz"
 
     try {
-      ^git -c advice.detachedHead=false clone --depth 1 --revision $rev $repo $clone_dir
+      ^curl -sfL -o $archive $url
     } catch {
-      print $"Skipping ($name): clone failed"
-      rm -rf $clone_dir
+      print $"Skipping '($name)': download failed"
+      rm -rf $src_dir
       return
     }
 
-    mut srcdir = $clone_dir
+    ^tar xzf $archive -C $src_dir --strip-components=1
+
+    mut srcdir = $src_dir
     if $subpath != "" {
       $srcdir = $"($srcdir)/($subpath)"
     }
@@ -27,7 +53,7 @@ open $env.languages_toml
     let out = $"($env.BRIOCHE_OUTPUT)/($name).so"
 
     if ($"($srcdir)/src/scanner.cc" | path exists) {
-      let obj = $"($clone_dir)/scanner.o"
+      let obj = $"($src_dir)/scanner.o"
       ^g++ -fPIC -fno-exceptions -I $"($srcdir)/src" -o $obj -std=c++14 -c $"($srcdir)/src/scanner.cc"
       ^gcc -fPIC -fno-exceptions -I $"($srcdir)/src" -shared -o $out $obj -xc -std=c11 $"($srcdir)/src/parser.c"
     } else if ($"($srcdir)/src/scanner.c" | path exists) {
@@ -36,5 +62,6 @@ open $env.languages_toml
       ^gcc -fPIC -fno-exceptions -I $"($srcdir)/src" -shared -o $out -xc -std=c11 $"($srcdir)/src/parser.c"
     }
 
-    rm -rf $clone_dir
+    rm -rf $src_dir
   }
+  | ignore

@@ -1,6 +1,6 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
-import git from "git";
+import curl from "curl";
 import nushell from "nushell";
 
 export const project = {
@@ -23,8 +23,10 @@ function buildGrammars(): std.Recipe<std.Directory> {
         languages_toml: std.tpl`${source}/languages.toml`,
       },
       outputScaffold: std.directory(),
-      dependencies: [std.toolchain, git],
-      unsafe: { networking: true },
+      dependencies: [std.toolchain, curl],
+      unsafe: {
+        networking: true,
+      },
     })
     .toDirectory();
 }
