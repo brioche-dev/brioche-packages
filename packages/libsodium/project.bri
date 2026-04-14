@@ -3,12 +3,12 @@ import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "libsodium",
-  version: "1.0.21",
+  version: "1.0.22",
   repository: `https://github.com/jedisct1/libsodium`,
 };
 
 const source = Brioche.download(
-  `https://github.com/jedisct1/libsodium/releases/download/${project.version}-RELEASE/libsodium-${project.version}.tar.gz`,
+  `${project.repository}/releases/download/${project.version}-RELEASE/libsodium-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
