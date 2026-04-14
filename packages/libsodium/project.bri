@@ -1,14 +1,14 @@
 import * as std from "std";
 import { cmakeSanitizePaths } from "cmake";
-import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libsodium",
-  version: "1.0.20",
+  version: "1.0.22",
+  repository: `https://github.com/jedisct1/libsodium`,
 };
 
 const source = Brioche.download(
-  `https://download.libsodium.org/libsodium/releases/libsodium-${project.version}.tar.gz`,
+  `${project.repository}/releases/download/${project.version}-RELEASE/libsodium-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -77,18 +77,9 @@ export async function test(): Promise<std.Recipe<std.File>> {
   return script;
 }
 
-export function liveUpdate(): NushellRunnable {
-  return nushellRunnable`
-    let version = http get https://download.libsodium.org/libsodium/releases
-      | lines
-      | where ($it | str contains "libsodium") and (not ($it | str contains ".sig")) and (not ($it | str contains ".minisig"))
-      | parse --regex '<a href="libsodium-(?<version>[^-]+)\\.tar\\.[^"]+">'
-      | sort-by --natural --reverse version
-      | get 0.version
-
-    $env.project
-      | from json
-      | update version $version
-      | to json
-  `.env({ project: JSON.stringify(project) });
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^(?<version>\d+\.\d+\.\d+)-RELEASE$/,
+  });
 }
