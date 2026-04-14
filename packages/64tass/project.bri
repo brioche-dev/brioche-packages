@@ -1,0 +1,59 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "64tass",
+  version: "1.60.3243",
+};
+
+const source = Brioche.download(
+  `https://downloads.sourceforge.net/project/tass64/source/64tass-${project.version}-src.zip`,
+)
+  .unarchive("zip")
+  .peel();
+
+export default function _64tass(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+    make install-strip prefix=/ DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/64tass"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    64tass --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(_64tass)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceforge.net/projects/tass64/files/source/
+      | lines
+      | where ($it | str contains '64tass-')
+      | parse --regex '64tass-(?<version>[\\d.]+)-src\\.zip'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
