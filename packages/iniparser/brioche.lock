@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "git_refs": {
-    "https://github.com/ndevilla/iniparser.git": {
+    "https://github.com/ndevilla/iniparser": {
       "v4.2.6": "4bef811283e0ec1658c60e09950bd5a1ddc92e4b"
     }
   }
