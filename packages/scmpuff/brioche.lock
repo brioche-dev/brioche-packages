@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/mroth/scmpuff/@v/v0.6.3.info": {
+      "type": "sha256",
+      "value": "3d9b38631de0acc64b652b84c747fc12078445a1591dbc740ad42b95e4a95927"
+    },
+    "https://proxy.golang.org/github.com/mroth/scmpuff/@v/v0.6.3.zip": {
+      "type": "sha256",
+      "value": "7176cfb33f35312efe4bbe96388929223d70357200adef9eab77220b4d05a51b"
+    }
+  }
+}
