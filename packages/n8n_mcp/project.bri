@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "n8n_mcp",
-  version: "2.35.5",
+  version: "2.37.1",
   extra: {
     packageName: "n8n-mcp",
   },

@@ -1,41 +1,30 @@
 import * as std from "std";
-import git from "git";
-import go from "go";
+import { goBuild } from "go";
 
 export const project = {
   name: "glab",
-  version: "1.74.0",
-  repository: "https://gitlab.com/gitlab-org/cli",
+  version: "1.89.0",
+  extra: {
+    moduleName: "gitlab.com/gitlab-org/cli",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-}).pipe((recipe) =>
-  // Create a git tag in the repo, which is used as the version number
-  std.runBash`
-    git tag "$revision"
-  `
-    .dependencies(git)
-    .env({ revision: project.version })
-    .outputScaffold(recipe)
-    .currentDir(std.outputPath)
-    .toDirectory(),
-);
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
 
 export default function glab(): std.Recipe<std.Directory> {
-  return std.runBash`
-    make
-    make install
-  `
-    .workDir(source)
-    .dependencies(std.toolchain, git, go)
-    .env({
-      GOPATH: std.outputPath,
-    })
-    .unsafe({ networking: true })
-    .toDirectory()
-    .pipe((recipe) => std.withRunnableLink(recipe, "bin/glab"));
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+      trimpath: true,
+    },
+    path: "./cmd/glab",
+    runnable: "bin/glab",
+  });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -58,5 +47,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGitlabReleases({ project });
+  return std.liveUpdateFromGoModules({ project });
 }

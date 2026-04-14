@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.x.org/archive/individual/lib/libpciaccess-0.18.1.tar.xz": {
+    "https://www.x.org/archive/individual/lib/libpciaccess-0.19.tar.xz": {
       "type": "sha256",
-      "value": "4af43444b38adb5545d0ed1c2ce46d9608cc47b31c2387fc5181656765a6fa76"
+      "value": "3c55aa86c82e54a4e3109786f0463530d53b36b6d1cfd14616454f985dd2aa43"
     }
   }
 }

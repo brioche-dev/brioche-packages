@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/axboe/fio/archive/refs/tags/fio-3.42.tar.gz": {
+      "type": "sha256",
+      "value": "56b03497a918d07692257890fd759bf73168ad79df5be78a2bcbbdc8ce67895b"
+    }
+  }
+}

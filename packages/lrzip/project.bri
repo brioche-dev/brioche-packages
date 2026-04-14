@@ -1,0 +1,50 @@
+import * as std from "std";
+import lz4 from "lz4";
+import lzo from "lzo";
+
+export const project = {
+  name: "lrzip",
+  version: "0.651",
+  repository: "https://github.com/ckolivas/lrzip",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function lrzip(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure \\
+      --prefix=/ \\
+      --disable-asm
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, lz4, lzo)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/lrzip"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lrzip -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(lrzip)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `lrzip version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

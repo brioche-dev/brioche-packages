@@ -1,10 +1,9 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
-import git from "git";
 
 export const project = {
   name: "binaryen",
-  version: "126",
+  version: "128",
   repository: "https://github.com/WebAssembly/binaryen.git",
 };
 
@@ -16,7 +15,7 @@ const source = Brioche.gitCheckout({
 export default function binaryen(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, git],
+    dependencies: [std.toolchain],
     set: {
       BUILD_TESTS: "OFF",
     },

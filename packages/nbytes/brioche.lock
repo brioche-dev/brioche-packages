@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/nodejs/nbytes.git": {
+      "v0.1.4": "3e858fde1f941bf38dd0a6512e54fb13d88f344f"
+    }
+  }
+}

@@ -6,7 +6,7 @@ import openjph from "openjph";
 
 export const project = {
   name: "openexr",
-  version: "3.4.4",
+  version: "3.4.6",
   repository: "https://github.com/AcademySoftwareFoundation/openexr",
 };
 

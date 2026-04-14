@@ -1,0 +1,21 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://files.pythonhosted.org/packages/16/7f/d1b0c65b267a1463d752b324f11d3470e30889daefc4b9ec83029bfa30b5/meson_python-0.19.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "67b5906c37404396d23c195e12c8825506074460d4a2e7083266b845d14f0298"
+    },
+    "https://files.pythonhosted.org/packages/1d/0b/da4851b1e2d9c40c9bd74c0abd94510a7d797da9ccde0a90e8953751ed4a/pyproject_metadata-0.11.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "85bbecca8694e2c00f63b492c96921d6c228454057c88e7c352b2077fcaa4096"
+    },
+    "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529"
+    },
+    "https://files.pythonhosted.org/packages/source/n/numpy/numpy-2.4.3.tar.gz": {
+      "type": "sha256",
+      "value": "483a201202b73495f00dbc83796c6ae63137a9bdade074f7648b3e32613412dd"
+    }
+  }
+}

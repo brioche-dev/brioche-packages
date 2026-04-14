@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/kholtman/afio/archive/refs/tags/v2.5.2.tar.gz": {
+      "type": "sha256",
+      "value": "c64ca14109df547e25702c9f3a9ca877881cd4bf38dcbe90fbd09c8d294f42b9"
+    }
+  }
+}

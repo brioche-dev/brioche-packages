@@ -1,0 +1,77 @@
+import * as std from "std";
+import rust, { vendorCrate } from "rust";
+import openssl from "openssl";
+
+export const project = {
+  name: "rpm_sequoia",
+  version: "1.10.1",
+  extra: {
+    crateName: "rpm-sequoia",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function rpmSequoia(): std.Recipe<std.Directory> {
+  const vendored = vendorCrate({
+    source,
+  });
+
+  return std.runBash`
+    cargo build \\
+      --release \\
+      --frozen \\
+      --no-default-features \\
+      --features crypto-openssl
+
+    # Manual installation
+    cp target/release/librpm_sequoia.so "$BRIOCHE_OUTPUT/lib/"
+    cp target/release/librpm_sequoia.so "$BRIOCHE_OUTPUT/lib/librpm_sequoia.so.1"
+    cp target/release/rpm-sequoia.pc "$BRIOCHE_OUTPUT/lib/pkgconfig/"
+  `
+    .dependencies(std.toolchain, rust, openssl)
+    .workDir(vendored)
+    .outputScaffold(
+      std.directory({
+        lib: std.directory({
+          pkgconfig: std.directory(),
+        }),
+      }),
+    )
+    .env({
+      PREFIX: "/",
+      LIBDIR: "/lib",
+    })
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion rpm-sequoia | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, rpmSequoia)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

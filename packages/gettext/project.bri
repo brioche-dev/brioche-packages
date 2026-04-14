@@ -1,0 +1,75 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libiconv from "libiconv";
+import libunistring from "libunistring";
+import libxml2 from "libxml2";
+
+export const project = {
+  name: "gettext",
+  version: "1.0",
+};
+
+const source = Brioche.download(
+  `https://ftpmirror.gnu.org/gnu/gettext/gettext-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function gettext(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-java \\
+      --disable-csharp \\
+      --without-emacs
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libiconv, libunistring, libxml2)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/gettext"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    gettext --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gettext)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `gettext (GNU gettext-runtime) ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://ftpmirror.gnu.org/gnu/gettext
+      | lines
+      | where ($it | str contains "gettext-") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="(\\./)?gettext-(?<version>[\\d.]+)\\.tar\\.xz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "selene",
-  version: "0.30.0",
+  version: "0.30.1",
   repository: "https://github.com/Kampfkarren/selene.git",
 };
 

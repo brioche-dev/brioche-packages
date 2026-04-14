@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/nuspell/nuspell": {
-      "v5.1.7": "6d84c501354751af3960fd89fa6bff6c27c8266e"
+  "downloads": {
+    "https://github.com/nuspell/nuspell/archive/refs/tags/v5.1.7.tar.gz": {
+      "type": "sha256",
+      "value": "9aee944e86924ce44434741cb950fee8f9a6ff9c4f002803ab5f04698c8e4c68"
     }
   }
 }

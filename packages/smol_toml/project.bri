@@ -11,7 +11,7 @@ export const project = {
   version: "1.2.0",
 };
 
-// HACK: This default export is a workaround so that `brioche build -p ./smol_toml`
+// HACK: This default export is a workaround so that `brioche build ./smol_toml`
 // will not error out, which is used in CI/CD. This will be removed
 // eventually.
 export default function (): never {

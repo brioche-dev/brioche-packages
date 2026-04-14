@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/ckolivas/lrzip/archive/refs/tags/v0.651.tar.gz": {
+      "type": "sha256",
+      "value": "f4c84de778a059123040681fd47c17565fcc4fec0ccc68fcf32d97fad16cd892"
+    }
+  }
+}

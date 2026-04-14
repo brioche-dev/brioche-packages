@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/OpenVisualCloud/SVT-VP9": {
+      "v0.3.1": "290fb8c3662ed76a8887b587a9b8201878ba71ed"
+    }
+  }
+}

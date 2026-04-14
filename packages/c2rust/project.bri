@@ -26,8 +26,7 @@ export default function c2rust(): std.Recipe<std.Directory> {
       // Build-time scripts dynamically load `libclang`, so ensure the standard
       // system libraries can be dynamically loaded
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
-      // bindgen uses clang to parse C++ headers; tell clang where to find
-      // the GCC toolchain so it can locate C++ standard library headers
+      // Tell bindgen where to find standard C headers
       BINDGEN_EXTRA_CLANG_ARGS: std.tpl`--sysroot=${std.toolchain}`,
     },
     unsafe: {

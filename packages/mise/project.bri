@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "mise",
-  version: "2026.3.0",
+  version: "2026.3.9",
   repository: "https://github.com/jdx/mise.git",
 };
 

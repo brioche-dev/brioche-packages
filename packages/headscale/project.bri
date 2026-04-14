@@ -11,17 +11,11 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-}).pipe((recipe) =>
-  // Create a git tag in the repo, which is used as the version number
-  std.runBash`
-    git tag "$revision"
-  `
-    .dependencies(git)
-    .env({ revision: `v${project.version}` })
-    .outputScaffold(recipe)
-    .currentDir(std.outputPath)
-    .toDirectory(),
-);
+  options: {
+    keepGitDir: true,
+    tag: true,
+  },
+});
 
 export default function headscale(): std.Recipe<std.Directory> {
   return goBuild({

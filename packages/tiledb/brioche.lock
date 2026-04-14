@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/TileDB-Inc/TileDB": {
+      "2.30.1": "6ea48ca43f292c46a33925e1dd9659a1bd657c9a"
+    }
+  }
+}

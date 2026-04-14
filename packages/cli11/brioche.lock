@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/CLIUtils/CLI11.git": {
+      "v2.6.2": "37bb6edc5317e99af72ef48405e65d9ca5218861"
+    }
+  }
+}

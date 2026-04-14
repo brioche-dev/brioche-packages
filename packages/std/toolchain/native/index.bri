@@ -24,7 +24,7 @@ import mpc from "./mpc.bri";
 import attr from "./attr.bri";
 import acl from "./acl.bri";
 import libxcrypt from "./libxcrypt.bri";
-import gcc from "./gcc.bri";
+import gcc, { toolchainTriple } from "./gcc.bri";
 import pkgconf from "./pkgconf.bri";
 import ncurses from "./ncurses.bri";
 import sed from "./sed.bri";
@@ -212,6 +212,14 @@ export const toolchain = std.memo(
       std.symlink({ target: "../aclocal" }),
     );
 
+    // Enable LTO support in binutils by linking to the GCC LTO plugin
+    toolchain = toolchain.insert(
+      "lib/bfd-plugins/liblto_plugin.so",
+      std.symlink({
+        target: `../../libexec/gcc/${toolchainTriple()}/13.2.0/liblto_plugin.so`,
+      }),
+    );
+
     // Set env vars when used as a dependency. These are also used
     // when autopacking
     toolchain = setEnv(toolchain, {
@@ -286,11 +294,11 @@ export const toolchain = std.memo(
       },
     });
 
-    // Repack `ld` and friends to include `libm`. `liblto_plugin.so` links
-    // against `libm`, which gets dynamically loaded. But since e.g. `ld.bfd`
-    // doesn't depend on `libm`, we need to manually include it
+    // Repack `ld` and friends to include `libm`. These tools
+    // don't depend on `libm` directly, so we need to manually
+    // include it in their packs.
     toolchain = autopack(toolchain, {
-      globs: ["bin/.brioche-ld-orig-*"],
+      globs: ["bin/.brioche-ld-orig-*", "bin/ar", "bin/ranlib", "bin/nm"],
       selfDependency: true,
       dynamicBinaryConfig: {
         enabled: true,
@@ -312,6 +320,8 @@ export const toolchain = std.memo(
     });
 
     toolchain = fixShebangs(toolchain);
+    toolchain = fixLdd(toolchain);
+    toolchain = fixLibtool(toolchain);
     toolchain = linkerScriptMakePathsRelative(toolchain);
     toolchain = pkgConfigMakePathsRelative(toolchain);
     toolchain = libtoolSanitizeDependencies(toolchain);
@@ -394,6 +404,86 @@ function fixShebangs(
                 mv temp "$file"
               fi
             done
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+function fixLdd(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Patch ldd to resolve the dynamic linker relative to its own
+  // location instead of the absolute /lib path glibc hardcodes
+  // during make install.
+  return std
+    .process({
+      command: std.tpl`${stage2}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          if [ -f "$BRIOCHE_OUTPUT/bin/ldd" ]; then
+            # Quoted form (multiple dynamic linker entries)
+            sed -i 's|^RTLDLIST="|_brioche_ldd_prefix="$(cd "$(dirname "$0")/.." \\&\\& pwd -P)"\\nRTLDLIST="$_brioche_ldd_prefix|' "$BRIOCHE_OUTPUT/bin/ldd"
+
+            # Unquoted form (single dynamic linker entry)
+            sed -i 's|^RTLDLIST=\\(/[^ ]*\\)$|_brioche_ldd_prefix="$(cd "$(dirname "$0")/.." \\&\\& pwd -P)"\\nRTLDLIST="$_brioche_ldd_prefix\\1"|' "$BRIOCHE_OUTPUT/bin/ldd"
+
+            sed -i '/^RTLDLIST=/s| /| $_brioche_ldd_prefix/|g' "$BRIOCHE_OUTPUT/bin/ldd"
+          fi
+        `,
+      ],
+      env: {
+        PATH: std.tpl`${stage2}/bin`,
+      },
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+function fixLibtool(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  // Replace build-time absolute paths baked into bin/libtool.
+  // Tool variables get simple command names (resolved via PATH),
+  // absolute sed paths in global_symbol_* get stripped, and stale
+  // library/object search paths are cleared.
+  return std
+    .process({
+      command: std.tpl`${stage2}/bin/bash`,
+      args: [
+        "-euo",
+        "pipefail",
+        "-c",
+        std.indoc`
+          if [ -f "$BRIOCHE_OUTPUT/bin/libtool" ]; then
+            sed -i -E '
+              /^SED=/s|=.*|="sed"|
+              /^GREP=/s|=.*|="grep"|
+              /^EGREP=/s|=.*|="grep -E"|
+              /^FGREP=/s|=.*|="grep -F"|
+              /^NM=/s|=.*|="nm -B"|
+              /^LD=/s|=.*|="ld"|
+              /^lt_truncate_bin=/s|=.*|="dd bs=4096 count=1"|
+            ' "$BRIOCHE_OUTPUT/bin/libtool"
+
+            # Strip absolute paths to sed in global_symbol_* variables
+            sed -i 's@/[^ ]*bin/sed @sed @g' "$BRIOCHE_OUTPUT/bin/libtool"
+
+            sed -i -E '
+              /^sys_lib_search_path_spec=/s|=.*|=""|
+              /^compiler_lib_search_dirs=/s|=.*|=""|
+              /^compiler_lib_search_path=/s|=.*|=""|
+              /^predep_objects=/s|=.*|=""|
+              /^postdep_objects=/s|=.*|=""|
+            ' "$BRIOCHE_OUTPUT/bin/libtool"
+          fi
         `,
       ],
       env: {

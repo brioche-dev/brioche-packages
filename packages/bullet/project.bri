@@ -1,0 +1,59 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "bullet",
+  version: "3.25",
+  repository: "https://github.com/bulletphysics/bullet3.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function bullet(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      BUILD_SHARED_LIBS: "ON",
+      BUILD_CPU_DEMOS: "OFF",
+      BUILD_BULLET2_DEMOS: "OFF",
+      BUILD_OPENGL3_DEMOS: "OFF",
+      BUILD_UNIT_TESTS: "OFF",
+      INSTALL_EXTRA_LIBS: "ON",
+      INSTALL_LIBS: "ON",
+      BUILD_BULLET_ROBOTICS_GUI_EXTRA: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion bullet | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, bullet)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

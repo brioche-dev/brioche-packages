@@ -1,0 +1,57 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "duckdb",
+  version: "1.5.1",
+  repository: "https://github.com/duckdb/duckdb.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function duckdb(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      BUILD_UNITTESTS: "OFF",
+      BUILD_SHELL: "ON",
+      // GIT_DESCRIBE need to match, either fully specified 'vX.Y.Z-N-gGITHASH123'
+      // or version only 'vX.Y.Z' or rc like 'vX.Y.Z-rcW'
+      OVERRIDE_GIT_DESCRIBE: `v${project.version}`,
+    },
+    runnable: "bin/duckdb",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    duckdb --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(duckdb)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

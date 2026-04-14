@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/duckdb/duckdb.git": {
+      "v1.5.1": "7dbb2e646fea939a89f10a55aa98c474cbb0c098"
+    }
+  }
+}

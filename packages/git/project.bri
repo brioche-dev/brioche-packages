@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "git",
-  version: "2.52.0",
+  version: "2.53.0",
   repository: "https://github.com/git/git",
 };
 
@@ -73,10 +73,14 @@ interface GitCheckoutInit {
 /**
  * Specific git checkout options.
  *
+ * @param keepGitDir - Set to true to keep the `.git` directory. Defaults to false.
  * @param submodules - Set to true to recursively checkout git submodules too.
+ * @param tag - Create an annotated git tag on the checkout commit.
  */
 export interface GitCheckoutOptions {
+  keepGitDir?: boolean;
   submodules?: boolean;
+  tag?: string;
 }
 
 /**
@@ -121,6 +125,11 @@ export function gitCheckout(
       `Invalid git commit hash: ${commit}`,
     );
 
+    std.assert(
+      options.keepGitDir === true || options.tag == null,
+      "Cannot use 'tag' without 'keepGitDir' enabled",
+    );
+
     // Clone and fetch only the specified commit. See this article:
     // https://about.gitlab.com/blog/whats-new-in-git-2-49-0/#thin-clone-using---revision
     let repo = std
@@ -143,6 +152,29 @@ export function gitCheckout(
       })
       .toDirectory();
 
+    if (options.tag != null) {
+      repo = std
+        .process({
+          command: "git",
+          args: [
+            "-C",
+            std.outputPath,
+            "-c",
+            "user.name=Brioche",
+            "-c",
+            "user.email=github@brioche.dev",
+            "tag",
+            "-a",
+            options.tag,
+            "-m",
+            "",
+          ],
+          dependencies: [git],
+          outputScaffold: repo,
+        })
+        .toDirectory();
+    }
+
     if (options.submodules === true) {
       repo = std
         .process({
@@ -159,6 +191,26 @@ export function gitCheckout(
           dependencies: [std.toolchain, git],
           outputScaffold: repo,
           unsafe: { networking: true },
+        })
+        .toDirectory();
+    }
+
+    if (options.keepGitDir !== true) {
+      repo = std
+        .process({
+          command: "find",
+          args: [
+            std.outputPath,
+            "-name",
+            ".git",
+            "-exec",
+            "rm",
+            "-rf",
+            "{}",
+            "+",
+          ],
+          dependencies: [std.toolchain],
+          outputScaffold: repo,
         })
         .toDirectory();
     }

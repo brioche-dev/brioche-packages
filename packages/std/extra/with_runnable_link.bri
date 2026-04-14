@@ -24,7 +24,11 @@ import * as std from "/core";
  *     gcc -o "$BRIOCHE_OUTPUT/bin/hello" src/hello.c
  *   `
  *     .workDir(Brioche.glob("src"))
- *     .outputScaffold(std.directory({ bin: std.directory() }))
+ *     .outputScaffold(
+ *       std.directory({
+ *         bin: std.directory(),
+ *       }),
+ *     )
  *     .dependencies(std.toolchain);
  *
  *   // Add a symlink so that `brioche run` will run `bin/hello`

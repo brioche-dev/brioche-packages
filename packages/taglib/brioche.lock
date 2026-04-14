@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/taglib/taglib/releases/download/v2.2.1/taglib-2.2.1.tar.gz": {
+      "type": "sha256",
+      "value": "7e76b5299dcef427c486bffe455098470c8da91cf3ccb9ea804893df57389b5e"
+    }
+  }
+}

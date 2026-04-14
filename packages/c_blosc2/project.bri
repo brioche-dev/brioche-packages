@@ -5,7 +5,7 @@ import zlibNg from "zlib_ng";
 
 export const project = {
   name: "c_blosc2",
-  version: "2.23.0",
+  version: "2.23.1",
   repository: "https://github.com/Blosc/c-blosc2",
 };
 

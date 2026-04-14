@@ -3,7 +3,7 @@ import python, { wrapVenvScripts } from "python";
 
 export const project = {
   name: "robotframework",
-  version: "7.4.1",
+  version: "7.4.2",
   repository: "https://github.com/robotframework/robotframework.git",
 };
 

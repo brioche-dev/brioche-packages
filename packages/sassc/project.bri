@@ -1,0 +1,49 @@
+import * as std from "std";
+import libsass from "libsass";
+
+export const project = {
+  name: "sassc",
+  version: "3.6.2",
+  repository: "https://github.com/sass/sassc",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function sassc(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libsass)
+    .env({
+      SASSC_VERSION: project.version,
+    })
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/sassc"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    sassc --version 2>&1 | head -1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(sassc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `sassc: ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

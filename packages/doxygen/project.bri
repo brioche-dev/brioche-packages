@@ -20,16 +20,7 @@ std.assert(
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `Release_${project.extra.versionUnderscore}`,
-}).pipe((source) =>
-  // Disable LTO: ar lacks the GCC LTO plugin, so static archives with LTO objects
-  // produce undefined references
-  std.runBash`
-    sed -i 's/set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)/set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)/' \
-      "$BRIOCHE_OUTPUT/CMakeLists.txt"
-  `
-    .outputScaffold(source)
-    .toDirectory(),
-);
+});
 
 export default function doxygen(): std.Recipe<std.Directory> {
   return cmakeBuild({

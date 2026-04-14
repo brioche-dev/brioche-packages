@@ -1,0 +1,65 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "apko",
+  version: "1.2.2",
+  extra: {
+    moduleName: "chainguard.dev/apko",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(2);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function apko(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitVersion=${project.version}`,
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitCommit=${manifest.origin.hash}`,
+        "-X",
+        `sigs.k8s.io/release-utils/version.gitTreeState=clean`,
+        "-X",
+        `sigs.k8s.io/release-utils/version.buildDate=${manifest.time}`,
+      ],
+    },
+    runnable: "bin/apko",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    apko version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(apko)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `GitVersion:    ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

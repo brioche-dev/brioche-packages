@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/Z3Prover/z3": {
-      "z3-4.15.8": "f80414f4bbd6e367f759655469fb384751fa2d20"
+      "z3-4.16.0": "ddb49568d3520e99799e364fb22f35fc67d887b1"
     }
   }
 }

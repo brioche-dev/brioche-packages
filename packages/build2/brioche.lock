@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.build2.org/0.17.0/build2-toolchain-0.17.0.tar.xz": {
+      "type": "sha256",
+      "value": "3722a89ea86df742539d0f91bb4429fd46bbf668553a350780a63411b648bf5d"
+    }
+  }
+}

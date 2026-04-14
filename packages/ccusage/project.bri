@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "ccusage",
-  version: "18.0.5",
+  version: "18.0.10",
   extra: {
     packageName: "ccusage",
   },

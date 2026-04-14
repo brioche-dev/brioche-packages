@@ -1,0 +1,177 @@
+import * as std from "std";
+import cbindgen from "cbindgen";
+import cmake from "cmake";
+import elfutils from "elfutils";
+import expat from "expat";
+import glslang from "glslang";
+import libclc from "libclc";
+import libdrm from "libdrm";
+import libffi from "libffi";
+import libpng from "libpng";
+import libx11 from "libx11";
+import libxau from "libxau";
+import libxcb from "libxcb";
+import libxdmcp from "libxdmcp";
+import libxext from "libxext";
+import libxfixes from "libxfixes";
+import libxrandr from "libxrandr";
+import libxrender from "libxrender";
+import libxshmfence from "libxshmfence";
+import libxxf86vm from "libxxf86vm";
+import libyaml from "libyaml";
+import llvm from "llvm";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import python from "python";
+import rust from "rust";
+import spirvLlvmTranslator from "spirv_llvm_translator";
+import spirvTools from "spirv_tools";
+import wayland from "wayland";
+import waylandProtocols from "wayland_protocols";
+import xcbUtilKeysyms from "xcb_util_keysyms";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "mesa",
+  version: "26.0.2",
+  repository: "https://gitlab.freedesktop.org/mesa/mesa",
+};
+
+const source = Brioche.download(
+  `${project.repository}/-/archive/mesa-${project.version}/mesa-mesa-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+const pipDependencies = (() => {
+  const pyYamlWheelName =
+    std.CURRENT_PLATFORM === "x86_64-linux"
+      ? "pyyaml-6.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+      : "pyyaml-6.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl";
+
+  const pyYamlWheel =
+    std.CURRENT_PLATFORM === "x86_64-linux"
+      ? Brioche.download(
+          "https://files.pythonhosted.org/packages/88/f9/16491d7ed2a919954993e48aa941b200f38040928474c9e85ea9e64222c3/pyyaml-6.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        )
+      : Brioche.download(
+          "https://files.pythonhosted.org/packages/92/b5/47e807c2623074914e29dabd16cbbdd4bf5e9b2db9f8090fa64411fc5382/pyyaml-6.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+        );
+
+  const markupSafeWheelName =
+    std.CURRENT_PLATFORM === "x86_64-linux"
+      ? "markupsafe-3.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+      : "markupsafe-3.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl";
+
+  const markupSafeWheel =
+    std.CURRENT_PLATFORM === "x86_64-linux"
+      ? Brioche.download(
+          "https://files.pythonhosted.org/packages/41/3c/a36c2450754618e62008bf7435ccb0f88053e07592e6028a34776213d877/markupsafe-3.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+        )
+      : Brioche.download(
+          "https://files.pythonhosted.org/packages/da/ef/e648bfd021127bef5fa12e1720ffed0c6cbb8310c8d9bea7266337ff06de/markupsafe-3.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl",
+        );
+
+  return std.directory({
+    "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+      "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+    ),
+    "mako-1.3.10-py3-none-any.whl": Brioche.download(
+      "https://files.pythonhosted.org/packages/87/fb/99f81ac72ae23375f22b7afdb7642aba97c00a713c217124420147681a2f/mako-1.3.10-py3-none-any.whl",
+    ),
+    [pyYamlWheelName]: pyYamlWheel,
+    [markupSafeWheelName]: markupSafeWheel,
+  });
+})();
+
+function pythonWithBuildDeps(): std.Recipe<std.Directory> {
+  let venv = std.recipe(python);
+
+  // Install build dependencies (setuptools, markupsafe, mako, pyyaml)
+  venv = std.runBash`
+    pip install setuptools markupsafe mako pyyaml
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  return venv;
+}
+
+export default function mesa(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      cbindgen,
+      cmake,
+      elfutils,
+      expat,
+      glslang,
+      libclc,
+      libdrm,
+      libffi,
+      libpng,
+      libx11,
+      libxau,
+      libxcb,
+      libxdmcp,
+      libxext,
+      libxfixes,
+      libxrandr,
+      libxrender,
+      libxshmfence,
+      libxxf86vm,
+      libyaml,
+      llvm,
+      ninja,
+      pythonWithBuildDeps,
+      rust,
+      spirvLlvmTranslator,
+      spirvTools,
+      wayland,
+      waylandProtocols,
+      xcbUtilKeysyms,
+      xorgproto,
+    ],
+    set: {
+      "gallium-drivers": "llvmpipe,softpipe,virgl",
+      "vulkan-drivers": "swrast",
+      platforms: "x11,wayland",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion gl | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, mesa)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+    matchTag: /^mesa-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

@@ -2,10 +2,10 @@ import * as std from "std";
 
 export const project = {
   name: "file",
-  version: "5.46",
+  version: "5.47",
   repository: "https://github.com/file/file",
   extra: {
-    versionUnderscore: "5_46",
+    versionUnderscore: "5_47",
   },
 };
 

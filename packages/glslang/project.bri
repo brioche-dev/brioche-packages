@@ -10,7 +10,7 @@ export const project = {
   repository: "https://github.com/KhronosGroup/glslang",
 };
 
-const source = Brioche.gitCheckout({
+export const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.version,
 });

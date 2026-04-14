@@ -2,14 +2,14 @@ import * as std from "std";
 
 export const project = {
   name: "dart",
-  version: "3.11.0",
+  version: "3.11.2",
   repository: "https://github.com/dart-lang/sdk",
   extra: {
     otherVersions: {
-      "3.11": "3.11.0",
-      "3.10": "3.10.9",
       "3.6": "3.6.2",
       "3.5": "3.5.4",
+      "3.11": "3.11.2",
+      "3.10": "3.10.9",
     },
   },
 };

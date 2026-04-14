@@ -1,0 +1,64 @@
+import * as std from "std";
+
+export const project = {
+  name: "umka_lang",
+  version: "1.5.6",
+  repository: "https://github.com/vtereshkov/umka-lang",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) => {
+    if (std.CURRENT_PLATFORM === "aarch64-linux") {
+      // Remove -malign-double, an x86-only GCC flag
+      return std.runBash`
+        sed -i 's/-malign-double//' "$BRIOCHE_OUTPUT/Makefile"
+      `
+        .outputScaffold(source)
+        .toDirectory();
+    }
+    return source;
+  });
+
+export default function umkaLang(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+    make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/umka"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    (umka || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(umkaLang)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Umka ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

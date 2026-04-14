@@ -1,0 +1,91 @@
+import * as std from "std";
+import libxml2 from "libxml2";
+import libxslt from "libxslt";
+import docbook from "docbook";
+import docbookXsl from "docbook_xsl";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "xmlto",
+  version: "0.0.29",
+  repository: "https://pagure.io/xmlto",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/${project.version}/xmlto-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function xmlto(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libxml2, libxslt, docbook, docbookXsl)
+    .env({
+      XML_CATALOG_FILES: std.tpl`${docbook}/share/xml/catalog.xml ${docbookXsl}/share/xml/catalog.xml`,
+    })
+    .toDirectory()
+    .pipe(fixHardcodedPaths)
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/xmlto"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    xmlto --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xmlto)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `xmlto version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://pagure.io/api/0/xmlto/git/tags
+      | get tags
+      | sort --natural --reverse
+      | get 0
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
+
+/**
+ * Fix hardcoded paths in the shell script.
+ *
+ * @param recipe - The recipe to fix.
+ *
+ * @returns The recipe with the paths fixed.
+ */
+function fixHardcodedPaths(
+  recipe: std.Recipe<std.Directory>,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    sed -i \\
+      -e '1s|^#!.*|#!/usr/bin/env bash|' \\
+      -e 's|^BASH=.*|BASH=bash|' \\
+      -e 's|^TAIL=.*|TAIL=tail|' \\
+      -e 's|^GREP=.*|GREP=grep|' \\
+      -e 's|^SED=.*|SED=sed|' \\
+      -e 's|^LOCALE_PATH=.*|LOCALE_PATH=locale|' \\
+      -e 's|^XMLLINT_PATH=.*|XMLLINT_PATH=xmllint|' \\
+      -e 's|^XSLTPROC_PATH=.*|XSLTPROC_PATH=xsltproc|' \\
+      "$BRIOCHE_OUTPUT/bin/xmlto"
+  `
+    .outputScaffold(recipe)
+    .toDirectory();
+}

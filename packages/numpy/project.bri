@@ -1,0 +1,131 @@
+import * as std from "std";
+import python, { getLatestVersion as getPythonVersion } from "python";
+import meson from "meson";
+import ninja from "ninja";
+import openblas from "openblas";
+import cython from "cython";
+
+export const project = {
+  name: "numpy",
+  version: "2.4.3",
+  extra: {
+    packageName: "numpy",
+  },
+};
+
+const source = Brioche.download(
+  `https://files.pythonhosted.org/packages/source/n/numpy/numpy-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+const pipDependencies = std.directory({
+  "meson_python-0.19.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/16/7f/d1b0c65b267a1463d752b324f11d3470e30889daefc4b9ec83029bfa30b5/meson_python-0.19.0-py3-none-any.whl",
+  ),
+  "packaging-26.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/b7/b9/c538f279a4e237a006a2c98387d081e9eb060d203d8ed34467cc0f0b9b53/packaging-26.0-py3-none-any.whl",
+  ),
+  "pyproject_metadata-0.11.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/1d/0b/da4851b1e2d9c40c9bd74c0abd94510a7d797da9ccde0a90e8953751ed4a/pyproject_metadata-0.11.0-py3-none-any.whl",
+  ),
+});
+
+export default function numpy(): std.Recipe<std.Directory> {
+  const managedPython = python();
+
+  // Create a venv
+  let venv = std.recipe(managedPython);
+
+  // Install build dependencies (meson-python, packaging, pyproject-metadata)
+  venv = std.runBash`
+    pip install --no-deps meson-python packaging pyproject-metadata
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Install the application into the venv
+  venv = std.runBash`
+    pip install --no-build-isolation .
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, meson, ninja, openblas, cython)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Create the final recipe with the venv under `venv`
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) => {
+      for (const script of ["f2py", "numpy-config"]) {
+        recipe = std.addRunnable(recipe, `bin/${script}`, {
+          command: { relativePath: "venv/bin/python" },
+          args: [{ relativePath: `venv/bin/${script}` }],
+          env: {
+            // Native extensions need libstdc++.so.6 and libopenblas at runtime
+            LD_LIBRARY_PATH: {
+              append: [std.toolchain().get("lib"), ":", openblas().get("lib")],
+              separator: ":",
+            },
+          },
+        });
+      }
+      return recipe;
+    })
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: {
+          append: [
+            {
+              path: `venv/lib/python${getPythonVersion()}/site-packages/numpy/_core/include`,
+            },
+          ],
+        },
+        LIBRARY_PATH: {
+          append: [
+            {
+              path: `venv/lib/python${getPythonVersion()}/site-packages/numpy/_core/lib`,
+            },
+          ],
+        },
+        PKG_CONFIG_PATH: {
+          append: [
+            {
+              path: `venv/lib/python${getPythonVersion()}/site-packages/numpy/_core/lib/pkgconfig`,
+            },
+          ],
+        },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    numpy-config --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(numpy)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromPythonPackages({ project });
+}

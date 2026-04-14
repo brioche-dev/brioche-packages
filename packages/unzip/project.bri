@@ -1,12 +1,22 @@
 import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "unzip",
   version: "6.0",
+  extra: {
+    majorVersion: "6",
+    minorVersion: "0",
+  },
 };
 
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
 const source = Brioche.download(
-  `https://sourceforge.net/projects/infozip/files/UnZip%206.x%20%28latest%29/UnZip%20${project.version}/unzip60.tar.gz/download`,
+  `https://sourceforge.net/projects/infozip/files/UnZip%20${project.extra.majorVersion}.x%20%28latest%29/UnZip%20${project.version}/unzip${project.extra.majorVersion}${project.extra.minorVersion}.tar.gz/download`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -46,4 +56,35 @@ export async function test(): Promise<std.Recipe<std.File>> {
   );
 
   return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let latestFolder = http get 'https://sourceforge.net/projects/infozip/files/'
+      | lines
+      | where ($it | str contains 'latest')
+      | parse --regex 'href="/projects/infozip/files/(?<folder>UnZip[^"]+)/"'
+      | get 0.folder
+
+    let version = http get $'https://sourceforge.net/projects/infozip/files/($latestFolder)/'
+      | lines
+      | parse --regex 'UnZip (?<version>\\d+\\.\\d+)'
+      | uniq-by version
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let majorVersion = $version
+      | split words
+      | get 0
+    let minorVersion = $version
+      | split words
+      | get 1
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.majorVersion $majorVersion
+      | update extra.minorVersion $minorVersion
+      | to json
+  `.env({ project: JSON.stringify(project) });
 }

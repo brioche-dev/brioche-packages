@@ -1,0 +1,81 @@
+import * as std from "std";
+import glib from "glib";
+import libffi from "libffi";
+import libxml2 from "libxml2";
+import libxslt from "libxslt";
+import openssl from "openssl";
+import pcre2 from "pcre2";
+import python from "python";
+import xmlsec from "xmlsec";
+
+export const project = {
+  name: "lasso",
+  version: "2.9.0",
+  repository: "https://git.entrouvert.org/entrouvert/lasso",
+};
+
+const source = Brioche.download(
+  `https://dev.entrouvert.org/releases/lasso/lasso-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function lasso(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-pkg-config="$PKG_CONFIG_PATH" \\
+      --disable-perl \\
+      --disable-php5 \\
+      --disable-php7 \\
+      --disable-python \\
+      --disable-java
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      glib,
+      libffi,
+      libxml2,
+      libxslt,
+      openssl,
+      pcre2,
+      python,
+      xmlsec,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion lasso | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, lasso)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGiteaTags({
+    giteaUrl: "https://git.entrouvert.org",
+    project,
+  });
+}

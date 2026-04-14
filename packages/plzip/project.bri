@@ -1,0 +1,61 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import lzlib from "lzlib";
+
+export const project = {
+  name: "plzip",
+  version: "1.13",
+};
+
+const source = Brioche.download(
+  `https://download.savannah.nongnu.org/releases/lzip/plzip/plzip-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function plzip(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, lzlib)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/plzip"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    plzip --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(plzip)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `plzip ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://download.savannah.nongnu.org/releases/lzip/plzip
+      | lines
+      | where ($it | str contains "plzip-") and ($it | str contains ".tar.gz") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="plzip-(?<version>\\d+\\.\\d+)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
