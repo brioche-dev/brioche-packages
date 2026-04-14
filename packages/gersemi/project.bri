@@ -1,0 +1,98 @@
+import * as std from "std";
+import python, { fixScriptShebangs, wrapVenvScripts } from "python";
+import rust from "rust";
+
+export const project = {
+  name: "gersemi",
+  version: "0.27.0",
+  repository: "https://github.com/BlankSpruce/gersemi",
+  extra: {
+    packageName: "gersemi",
+  },
+};
+
+const pipDependencies = std.directory({
+  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+  ),
+  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  ),
+  "setuptools_rust-1.12.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/b7/29/c12876926be20e100527f541c792731ea09b995139aee9676eaacd1b751e/setuptools_rust-1.12.1-py3-none-any.whl",
+  ),
+  "semantic_version-2.10.0-py2.py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl",
+  ),
+});
+
+export default function gersemi(): std.Recipe<std.Directory> {
+  // Create a venv
+  let venv = std.recipe(python);
+
+  // Install build dependencies (setuptools, wheel, setuptools-rust)
+  venv = std.runBash`
+    pip install setuptools wheel setuptools-rust semantic-version
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Install the application into the venv (needs networking because
+  // cargo downloads crates to build the Rust backend)
+  venv = std.runBash`
+    pip install "gersemi==${project.version}"
+  `
+    .dependencies(rust, std.toolchain)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      CARGO_VERSION: project.version,
+    })
+    .outputScaffold(venv)
+    .unsafe({ networking: true })
+    .toDirectory();
+
+  // Fix shebangs after pip install (pip may reinstall itself)
+  venv = std.recipe(fixScriptShebangs(venv));
+
+  // Create the final recipe with the venv under `venv`
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
+      wrapVenvScripts(recipe, {
+        venvDir: "venv",
+        scripts: ["gersemi"],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/gersemi"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    gersemi --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gersemi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `gersemi ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromPythonPackages({ project });
+}
