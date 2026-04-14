@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/folkertvanheusden/HTTPing": {
+      "v4.4.0": "6854bb0298eb6cc948c30179a37781a008b4f046"
+    }
+  }
+}
