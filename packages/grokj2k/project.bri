@@ -10,7 +10,7 @@ import zstd from "zstd";
 
 export const project = {
   name: "grokj2k",
-  version: "20.2.7",
+  version: "20.3.0",
   repository: "https://github.com/GrokImageCompression/grok",
 };
 
