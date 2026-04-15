@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "age_plugin_yubikey",
-  version: "0.5.0",
+  version: "0.5.1",
   extra: {
     crateName: "age-plugin-yubikey",
   },
