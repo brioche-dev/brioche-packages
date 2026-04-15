@@ -44,7 +44,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const expected = `HiGHS version ${project.version}`;
   std.assert(
     result.includes(expected),
-    `expected '${expected}' in '${result}'`,
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;
