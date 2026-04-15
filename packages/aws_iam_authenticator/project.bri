@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "aws_iam_authenticator",
-  version: "0.7.11",
+  version: "0.7.12",
   extra: {
     moduleName: "sigs.k8s.io/aws-iam-authenticator",
   },
