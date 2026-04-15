@@ -6,7 +6,7 @@ import { source as spirvHeadersSource } from "spirv_headers";
 
 export const project = {
   name: "spirv_llvm_translator",
-  version: "22.1.0",
+  version: "22.1.1",
   repository: "https://github.com/KhronosGroup/SPIRV-LLVM-Translator",
 };
 
