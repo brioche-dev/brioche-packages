@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/aous72/OpenJPH": {
-      "0.26.3": "cb6592af91fc1332d5381288c1b885372926c447"
+      "0.27.0": "c3a6d8eb28b04393260c8778fc88bac653e449a0"
     }
   }
 }
