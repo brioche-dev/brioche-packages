@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/fresh-editor/0.2.14/download": {
+    "https://crates.io/api/v1/crates/fresh-editor/0.2.23/download": {
       "type": "sha256",
-      "value": "45cb071642d40e5a90cc9189fdd0c59b185a578f9fa2e4a3780c50ec3f6cfc61"
+      "value": "6c19875f53f07648fd09ab22bcccd4e34a8e933ff4083819dff619c8684ce117"
     }
   }
 }
