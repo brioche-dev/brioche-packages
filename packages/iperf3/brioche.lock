@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/esnet/iperf.git": {
-      "3.20": "0711330bacfaf1c2a804be66e7ecc26f481ede5d"
+      "3.21": "d39cf41526626b4e5a130f115d931cd6cbdffc19"
     }
   }
 }
