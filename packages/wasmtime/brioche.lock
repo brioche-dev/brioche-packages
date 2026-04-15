@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/bytecodealliance/wasmtime.git": {
-      "v42.0.1": "6844a83b530f86ad13a65175282fe2dbcd33cad1"
+      "v43.0.1": "cd4b6ed9b2a59cd3f317bff812126dd6a0e92dd2"
     }
   }
 }
