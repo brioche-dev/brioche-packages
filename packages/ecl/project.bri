@@ -5,7 +5,7 @@ import libffi from "libffi";
 
 export const project = {
   name: "ecl",
-  version: "24.5.10",
+  version: "26.3.27",
   repository: "https://gitlab.com/embeddable-common-lisp/ecl",
 };
 
