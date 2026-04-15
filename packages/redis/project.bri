@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "redis",
-  version: "8.6.0",
+  version: "8.6.2",
   repository: "https://github.com/redis/redis",
 };
 
