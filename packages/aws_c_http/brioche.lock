@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-http": {
-      "v0.10.11": "0d8e1a933f46b8af984dfc8168ebcdf32748c184"
+      "v0.10.14": "da535b1bf9c9334730eb78a26a1bbb3c069b38c9"
     }
   }
 }
