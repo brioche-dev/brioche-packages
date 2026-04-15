@@ -6,7 +6,7 @@ import libcap from "libcap";
 
 export const project = {
   name: "bubblewrap",
-  version: "0.11.0",
+  version: "0.11.1",
   repository: "https://github.com/containers/bubblewrap",
 };
 
