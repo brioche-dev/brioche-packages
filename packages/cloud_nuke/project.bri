@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "cloud_nuke",
-  version: "0.46.0",
+  version: "0.49.0",
   extra: {
     moduleName: "github.com/gruntwork-io/cloud-nuke",
   },
