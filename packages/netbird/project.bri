@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "netbird",
-  version: "0.68.1",
+  version: "0.68.3",
   extra: {
     moduleName: "github.com/netbirdio/netbird",
   },
