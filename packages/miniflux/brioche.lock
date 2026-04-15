@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/miniflux.app/v2/@v/v2.2.18.zip": {
+    "https://proxy.golang.org/miniflux.app/v2/@v/v2.2.19.zip": {
       "type": "sha256",
-      "value": "035f7f028e4fb50f60c0028300dde2c89b5ef35d600e77ae573338f9fd57b2dd"
+      "value": "17c057f1795e25a199f79260e6c0f65f2f6f16499e57243409511f3df3459ebe"
     }
   }
 }
