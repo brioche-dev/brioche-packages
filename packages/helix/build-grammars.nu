@@ -22,7 +22,8 @@ def archive-url [repo: string, rev: string]: nothing -> string {
 open $env.languages_toml
   | get grammar
   | where source? != null
-  | par-each --threads 16 {|grammar|
+  # Number of threads is deliberately set to 2 to avoid rate limiting
+  | par-each --threads 2 {|grammar|
     let name = $grammar.name
     let repo = $grammar.source.git
     let rev = $grammar.source.rev
@@ -31,7 +32,7 @@ open $env.languages_toml
     let src_dir = mktemp -d
     let url = archive-url $repo $rev
 
-    print $"Building grammar '($name)' \(($url)\)"
+    print $"Downloading grammar '($name)' \(($url)\)"
 
     let archive = $"($src_dir)/archive.tar.gz"
 
@@ -45,10 +46,18 @@ open $env.languages_toml
 
     ^tar xzf $archive -C $src_dir --strip-components=1
 
+    { name: $name, src_dir: $src_dir, subpath: $subpath }
+  }
+  | par-each --threads 16 {|source|
+    let name = $source.name
+    let src_dir = $source.src_dir
+
     mut srcdir = $src_dir
-    if $subpath != "" {
-      $srcdir = $"($srcdir)/($subpath)"
+    if $source.subpath != "" {
+      $srcdir = $"($srcdir)/($source.subpath)"
     }
+
+    print $"Building grammar '($name)'"
 
     let out = $"($env.BRIOCHE_OUTPUT)/($name).so"
 
