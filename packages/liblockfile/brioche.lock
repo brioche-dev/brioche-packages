@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/miquels/liblockfile": {
+      "v1.17": "9389848f70d5b1f242ffffe1ebf7865011f9026f"
+    }
+  }
+}
