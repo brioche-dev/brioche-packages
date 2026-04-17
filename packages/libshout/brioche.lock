@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.xiph.org/releases/libshout/libshout-2.4.6.tar.gz": {
+      "type": "sha256",
+      "value": "39cbd4f0efdfddc9755d88217e47f8f2d7108fa767f9d58a2ba26a16d8f7c910"
+    }
+  }
+}
