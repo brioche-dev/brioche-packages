@@ -1,0 +1,54 @@
+import * as std from "std";
+import nasm from "nasm";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "svt_av1",
+  version: "4.1.0",
+  repository: "https://gitlab.com/AOMediaCodec/SVT-AV1",
+};
+
+const source = Brioche.download(
+  `${project.repository}/-/archive/v${project.version}/SVT-AV1-v${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function svtAv1(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, nasm],
+    set: {
+      BUILD_TESTING: "OFF",
+      BUILD_APPS: "ON",
+    },
+    runnable: "bin/SvtAv1EncApp",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion SvtAv1Enc | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, svtAv1)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({ project });
+}
