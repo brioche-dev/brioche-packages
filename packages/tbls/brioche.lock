@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/k1!lo!w/tbls/@v/v1.93.0.zip": {
+    "https://proxy.golang.org/github.com/k1!lo!w/tbls/@v/v1.94.4.zip": {
       "type": "sha256",
-      "value": "aa7e2c6b89dbe587fce2ff884a02b986cb6cf7f4518a66fcc532b100fcbfa5ea"
+      "value": "5cf7a950d2bdccd947a518e374f22d40634155865557bbe9cc8435961cba4c9b"
     }
   }
 }
