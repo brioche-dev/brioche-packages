@@ -43,18 +43,16 @@ export function createProxy<T extends Artifact>(
   let serialized: Promise<runtime.ProxyRecipe> | undefined;
 
   const serializeProxy = async (): Promise<runtime.ProxyRecipe> => {
-    if (serialized === undefined) {
-      serialized = (async () => {
-        const recipeValue =
-          typeof recipe === "function" ? await recipe() : await recipe;
-        const serializedRecipe = await recipeValue.briocheSerialize();
-        const proxy = await runtime.createProxy(serializedRecipe);
-        return {
-          ...proxy,
-          meta: serializedRecipe.meta,
-        };
-      })();
-    }
+    serialized ??= (async () => {
+      const recipeValue =
+        typeof recipe === "function" ? await recipe() : await recipe;
+      const serializedRecipe = await recipeValue.briocheSerialize();
+      const proxy = await runtime.createProxy(serializedRecipe);
+      return {
+        ...proxy,
+        meta: serializedRecipe.meta,
+      };
+    })();
 
     return await serialized;
   };
