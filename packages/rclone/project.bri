@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "rclone",
-  version: "1.73.2",
+  version: "1.73.4",
   extra: {
     moduleName: "github.com/rclone/rclone",
   },
