@@ -245,6 +245,9 @@ export const toolchain = std.memo(
       ZLIB_ROOT: { fallback: { path: "." } },
       LIBLZMA_ROOT: { fallback: { path: "." } },
 
+      // glibc gconv modules for charset conversion (used by msgfmt, iconv, etc.)
+      GCONV_PATH: { fallback: { path: "lib/gconv" } },
+
       // Bison data dir
       BISON_PKGDATADIR: { fallback: { path: "share/bison" } },
 
