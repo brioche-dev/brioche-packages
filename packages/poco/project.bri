@@ -8,7 +8,7 @@ import utf8proc from "utf8proc";
 
 export const project = {
   name: "poco",
-  version: "1.15.0",
+  version: "1.15.1",
   repository: "https://github.com/pocoproject/poco.git",
 };
 
