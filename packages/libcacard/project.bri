@@ -1,0 +1,74 @@
+import * as std from "std";
+import glib from "glib";
+import libffi from "libffi";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import nspr from "nspr";
+import nss from "nss";
+import pcre2 from "pcre2";
+import pcscLite from "pcsc_lite";
+
+export const project = {
+  name: "libcacard",
+  version: "2.8.2",
+  repository: "https://gitlab.freedesktop.org/spice/libcacard",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+})
+  // The upstream meson.build derives the version from git via
+  // `build-aux/git-version-gen`, which falls back to a `.tarball-version`
+  // file when there is no git history. Ship one so the configure step
+  // works against the plain archive checkout.
+  .insert(".tarball-version", std.file(`${project.version}\n`));
+
+export default function libcacard(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      ninja,
+      glib,
+      libffi,
+      nspr,
+      nss,
+      pcre2,
+      pcscLite,
+    ],
+    set: {
+      default_library: "both",
+      disable_tests: "true",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libcacard | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libcacard)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+  });
+}
