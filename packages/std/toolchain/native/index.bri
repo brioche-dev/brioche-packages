@@ -342,7 +342,13 @@ function autopack(
 
   const variableArgs: std.ProcessTemplateLike[] = Object.entries(
     variables,
-  ).flatMap(([name, value]) => ["--var", std.tpl`${name}=path:${value.value}`]);
+  ).flatMap(([name, value]) => {
+    switch (value.type) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      case "path":
+        return ["--var", std.tpl`${name}=path:${value.value}`];
+    }
+  });
 
   return std
     .process({
