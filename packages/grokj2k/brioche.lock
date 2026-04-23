@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/GrokImageCompression/grok/releases/download/v20.2.7/source-full.tar.gz": {
+    "https://github.com/GrokImageCompression/grok/releases/download/v20.3.0/source-full.tar.gz": {
       "type": "sha256",
-      "value": "a0995c4cf5433d66e25d1e818185ef8bbc3c16f5f1c646b09632ffd4049f8b0c"
+      "value": "291965752e932684cf9c9b197efa15639b290a93099115a0111f37ed6c2308c6"
     }
   }
 }
