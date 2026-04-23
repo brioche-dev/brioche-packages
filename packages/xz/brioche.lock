@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/tukaani-project/xz/releases/download/v5.8.2/xz-5.8.2.tar.gz": {
+    "https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz": {
       "type": "sha256",
-      "value": "ce09c50a5962786b83e5da389c90dd2c15ecd0980a258dd01f70f9e7ce58a8f1"
+      "value": "3d3a1b973af218114f4f889bbaa2f4c037deaae0c8e815eec381c3d546b974a0"
     }
   }
 }

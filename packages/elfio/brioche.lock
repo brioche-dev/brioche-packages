@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/serge1/ELFIO": {
+      "Release_3.12": "8ae6cec5d60495822ecd57d736f66149da9b1830"
+    }
+  }
+}

@@ -4,7 +4,6 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "xlslib",
   version: "2.5.0",
-  repository: "https://sourceforge.net/projects/xlslib",
 };
 
 const source = std.castToDirectory(
@@ -28,7 +27,7 @@ export default function xlslib(): std.Recipe<std.Directory> {
     .pipe(std.libtoolSanitizeDependencies)
     .pipe((recipe) =>
       std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include/xlslib" }] },
+        CPATH: { append: [{ path: "include" }, { path: "include/xlslib" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
       }),
     );

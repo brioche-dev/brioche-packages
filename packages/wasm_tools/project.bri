@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "wasm_tools",
-  version: "1.245.1",
+  version: "1.246.2",
   extra: {
     crateName: "wasm-tools",
   },

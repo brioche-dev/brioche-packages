@@ -1,0 +1,55 @@
+import * as std from "std";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import python from "python";
+
+export const project = {
+  name: "xkeyboard_config",
+  version: "2.47",
+  repository:
+    "https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config",
+};
+
+const source = Brioche.download(
+  `https://xorg.freedesktop.org/archive/individual/data/xkeyboard-config/xkeyboard-config-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function xkeyboardConfig(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, python],
+    set: {
+      nls: "false",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion xkeyboard-config | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, xkeyboardConfig)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+    matchTag: /^xkeyboard-config-(?<version>\d+\.\d+)$/,
+  });
+}

@@ -1,6 +1,6 @@
 import * as std from "std";
 import cmake from "cmake";
-import git from "git";
+import { gitCheckout } from "git";
 import { cargoBuild } from "rust";
 
 export const project = {
@@ -9,10 +9,11 @@ export const project = {
   repository: "https://github.com/extrawurst/gitui",
 };
 
-const source = Brioche.gitCheckout({
+const gitRef = await Brioche.gitRef({
   repository: project.repository,
   ref: `v${project.version}`,
-})
+});
+const source = gitCheckout(gitRef)
   // Remove upstream's custom Cargo `config.toml`, which overrides the linker
   // for various targets (for cross-compilation). This can interfere with
   // our default working linker configuration.
@@ -21,9 +22,10 @@ const source = Brioche.gitCheckout({
 export default function gitui(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [cmake, git],
+    dependencies: [cmake],
     env: {
       GITUI_RELEASE: "1",
+      BUILD_GIT_COMMIT_ID: gitRef.commit,
     },
     runnable: "bin/gitui",
   });

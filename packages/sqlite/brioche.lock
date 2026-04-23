@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.sqlite.org/2025/sqlite-autoconf-3480000.tar.gz": {
+    "https://www.sqlite.org/2026/sqlite-autoconf-3520000.tar.gz": {
       "type": "sha256",
-      "value": "ac992f7fca3989de7ed1fe99c16363f848794c8c32a158dafd4eb927a2e02fd5"
+      "value": "f6b50b0c103392af32a8be15b2b9d25959de9a00a70c3979128aafeaa5338b3f"
     }
   }
 }

@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "tbls",
-  version: "1.93.0",
+  version: "1.94.4",
   extra: {
     moduleName: "github.com/k1!lo!w/tbls",
   },

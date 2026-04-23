@@ -1,5 +1,5 @@
 import * as std from "std";
-import git, { gitCheckout } from "git";
+import { gitCheckout } from "git";
 import talloc from "talloc";
 import libarchive from "libarchive";
 import uthash from "uthash";
@@ -26,10 +26,10 @@ export default function proot(): std.Recipe<std.Directory> {
   return std.runBash`
     case "$(uname -m)" in
       x86_64)
-        make -C src loader.elf loader-m32.elf build.h
+        make -C src VERSION="$version" loader.elf loader-m32.elf build.h
         ;;
       aarch64)
-        make -C src loader.elf build.h
+        make -C src VERSION="$version" loader.elf build.h
         ;;
       *)
         echo "Unhandled architecture for PRoot package"
@@ -41,7 +41,10 @@ export default function proot(): std.Recipe<std.Directory> {
     make -C src install PREFIX="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, git, talloc, uthash, libarchive)
+    .dependencies(std.toolchain, talloc, uthash, libarchive)
+    .env({
+      version: `${project.version}-${gitRef.commit.slice(0, 8)}`,
+    })
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/proot"));
 }
@@ -57,7 +60,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected output
-  const expected = `-${gitRef.commit.slice(0, 8)}`;
+  const expected = `${project.version}-${gitRef.commit.slice(0, 8)}`;
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,

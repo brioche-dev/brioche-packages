@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.savannah.nongnu.org/releases/lzip/lziprecover/lziprecover-1.26.tar.gz": {
+      "type": "sha256",
+      "value": "e234005a756d5649f41686116d3e548736d4a77e5a5ec37b943ca6650787801d"
+    }
+  }
+}

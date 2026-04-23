@@ -1,0 +1,60 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "lziprecover",
+  version: "1.26",
+};
+
+const source = Brioche.download(
+  `https://download.savannah.nongnu.org/releases/lzip/lziprecover/lziprecover-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function lziprecover(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/lziprecover"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lziprecover --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(lziprecover)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `lziprecover ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://download.savannah.nongnu.org/releases/lzip/lziprecover
+      | lines
+      | where ($it | str contains "lziprecover-") and ($it | str contains ".tar.gz") and (not ($it | str contains ".sig")) and (not ($it | str contains "-rc"))
+      | parse --regex '<a href="lziprecover-(?<version>\\d+\\.\\d+)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

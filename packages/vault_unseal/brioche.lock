@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/lrstanley/vault-unseal/@v/v1.0.0.info": {
+      "type": "sha256",
+      "value": "8a656c58f28c307974bca498ac97b736f580a225baf8eb11002ca9c9486fa460"
+    },
+    "https://proxy.golang.org/github.com/lrstanley/vault-unseal/@v/v1.0.0.zip": {
+      "type": "sha256",
+      "value": "eaf063f5067fb4c75a713de1ef4416eff108840a383e59cc58c6c145ec14e021"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "codebook",
+  version: "0.3.37",
+  repository: "https://github.com/blopker/codebook.git",
+  extra: {
+    crateName: "codebook-lsp",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function codebook(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/codebook-lsp",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    codebook-lsp --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(codebook)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `codebook-lsp ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

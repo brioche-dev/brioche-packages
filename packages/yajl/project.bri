@@ -8,7 +8,7 @@ export const project = {
 };
 
 const source = Brioche.gitCheckout({
-  repository: `${project.repository}.git`,
+  repository: project.repository,
   ref: project.version,
 }).pipe((source) =>
   // Patch deprecated GET_TARGET_PROPERTY(... LOCATION) and the

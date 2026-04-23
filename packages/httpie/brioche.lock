@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/httpie/cli.git": {
+      "3.2.4": "2105caa49bae87c5809c274e407619a0de2639d1"
+    }
+  }
+}

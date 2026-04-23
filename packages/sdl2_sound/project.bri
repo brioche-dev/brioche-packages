@@ -1,0 +1,57 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import sdl2 from "sdl2";
+
+export const project = {
+  name: "sdl2_sound",
+  version: "2.0.4",
+  repository: "https://github.com/icculus/SDL_sound",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/SDL2_sound-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sdl2Sound(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, sdl2],
+    set: {
+      SDLSOUND_BUILD_TEST: "OFF",
+      SDLSOUND_BUILD_SHARED: "ON",
+      SDLSOUND_BUILD_STATIC: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion SDL2_sound | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl2Sound)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^v(?<version>2\.\d+\.\d+)$/,
+  });
+}

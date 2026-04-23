@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/rustic-rs/0.11.1/download": {
+    "https://crates.io/api/v1/crates/rustic-rs/0.11.2/download": {
       "type": "sha256",
-      "value": "d4760a4b77479707b992e605e4d72a7ca0e9b414e0d30740c104931e30f818b9"
+      "value": "f946d326747b939bcbd710699a5ed42f72e375952a507e095e284b61f1ff3ced"
     }
   }
 }

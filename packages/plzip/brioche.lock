@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.savannah.nongnu.org/releases/lzip/plzip/plzip-1.13.tar.gz": {
+      "type": "sha256",
+      "value": "64d49dde20daa5fdff2b3ff28e3348082de10dd54eb10df6da7d1bc6c7a6db64"
+    }
+  }
+}

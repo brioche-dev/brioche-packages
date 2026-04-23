@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.sourceforge.net/project/tass64/source/64tass-1.60.3243-src.zip": {
+      "type": "sha256",
+      "value": "9d83be3d23a2c55e085b7c7a7856c2f96080447ea120a6a8c21a217ed76427f0"
+    }
+  }
+}
