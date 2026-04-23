@@ -1,21 +1,42 @@
 import * as std from "std";
-import nodejs, { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "claude_code",
-  version: "2.1.109",
+  version: "2.1.118",
   extra: {
     packageName: "@anthropic-ai/claude-code",
   },
 };
 
+function source(): std.Recipe<std.File> {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return Brioche.download(
+        `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${project.version}/linux-x64/claude`,
+      ).withPermissions({ executable: true });
+    case "aarch64-linux":
+      return Brioche.download(
+        `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/${project.version}/linux-arm64/claude`,
+      ).withPermissions({ executable: true });
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the claude_code package`,
+      );
+  }
+}
+
 export default function claudeCode(): std.Recipe<std.Directory> {
-  return npmInstallGlobal({
-    packageName: project.extra.packageName,
-    version: project.version,
-    // TODO: use latest Node.js when upstream issue is resolved: https://github.com/anthropics/claude-code/issues/9795
-    nodejs: nodejs({ version: "24" }),
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/claude"));
+  return std
+    .directory({
+      "bin/claude": source(),
+    })
+    .pipe((recipe) =>
+      std.autopack(recipe, {
+        globs: ["bin/**"],
+        linkDependencies: [std.toolchain],
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/claude"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
