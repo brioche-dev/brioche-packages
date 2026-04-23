@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "glab",
-  version: "1.89.0",
+  version: "1.92.1",
   extra: {
     moduleName: "gitlab.com/gitlab-org/cli",
   },
