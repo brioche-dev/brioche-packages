@@ -430,6 +430,9 @@ export class ProcessTemplate {
   #serialized: Promise<runtime.ProcessTemplate> | undefined;
 
   constructor(...components: ProcessTemplateLike[]) {
+    // NOTE: Needed to silence warnings for ESLint in Brioche v0.1.7
+    // and earlier.
+    // eslint-disable-next-line
     this.components = components;
   }
 
