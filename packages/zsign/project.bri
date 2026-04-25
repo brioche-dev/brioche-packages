@@ -17,13 +17,14 @@ const source = Brioche.download(
 export default function zsign(): std.Recipe<std.Directory> {
   return std.runBash`
     cd build/linux
-    make -j "$(nproc)"
+    make -j "$(nproc)" VERSION="$version"
 
     # Manual installation
     cp ../../bin/zsign "$BRIOCHE_OUTPUT/bin/"
   `
     .workDir(source)
     .dependencies(std.toolchain, openssl, minizip)
+    .env({ version: project.version })
     .outputScaffold(
       std.directory({
         bin: std.directory(),
