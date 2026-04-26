@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/nushell/nufmt.git": {
+      "4a9e384cb13a3bf5e7a0094d7e4e21868b4f9c1d": "4a9e384cb13a3bf5e7a0094d7e4e21868b4f9c1d"
+    }
+  }
+}
