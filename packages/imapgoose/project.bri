@@ -4,7 +4,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "imapgoose",
-  version: "0.5.1",
+  version: "0.5.2",
   repository: "https://git.sr.ht/~whynothugo/ImapGoose",
   extra: {
     moduleName: "git.sr.ht/~whynothugo/!imap!goose",
