@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/github/github-mcp-server/@v/v0.33.0.info": {
+    "https://proxy.golang.org/github.com/github/github-mcp-server/@v/v0.33.1.info": {
       "type": "sha256",
-      "value": "be51bd02aaef353a0360791e797c03e8fc4571f0bde3ebf8c1bc717fe129cf21"
+      "value": "45cc66bd40593ebbd85c7a4eb984052780c25cb7d4a2da38a9ee6764e5c91566"
     },
-    "https://proxy.golang.org/github.com/github/github-mcp-server/@v/v0.33.0.zip": {
+    "https://proxy.golang.org/github.com/github/github-mcp-server/@v/v0.33.1.zip": {
       "type": "sha256",
-      "value": "f27ec90186b6578f8934590f40ddd455f2c0dec24f24e1b19cb47e483f785dae"
+      "value": "77607e5aaf63e52904350dabe5a60ad3051a37d3ddc3fc455f4e7eb904ef2424"
     }
   }
 }
