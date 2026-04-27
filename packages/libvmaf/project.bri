@@ -42,7 +42,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  // HACK: the 3.1.0 tag did not bump the version in the build files, still reports 3.0.0
+  const expected = project.version === "3.1.0" ? "3.0.0" : project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
