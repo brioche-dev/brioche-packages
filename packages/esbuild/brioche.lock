@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/evanw/esbuild/@v/v0.27.2.zip": {
+    "https://proxy.golang.org/github.com/evanw/esbuild/@v/v0.27.4.zip": {
       "type": "sha256",
-      "value": "3cddef561de275f085717cb9668a7fcfe9460ae6decd135893115745c8d1a608"
+      "value": "98b51d6380e2b85c5bdde222566f23666c64d4d0fc15f3811a0c3b482c28a384"
     }
   }
 }

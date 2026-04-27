@@ -14,10 +14,11 @@ const source = Brioche.download(
 
 export default function readline(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure --prefix=/ \\
+    ./configure \\
+      --prefix=/ \\
       --with-curses
     make -j "$(nproc)"
-    make install SHLIB_LIBS="-lncursesw" DESTDIR="$BRIOCHE_OUTPUT"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
@@ -53,7 +54,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/gnu/readline
       | lines
       | where ($it | str contains "readline-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="readline-(?<version>\\d+\\.\\d+(\\.\\d+)?)\\.tar\\.gz">'
+      | parse --regex '<a href="(\\./)?readline-(?<version>[\\d.]+)\\.tar\\.gz"'
       | sort-by --natural --reverse version
       | get 0.version
 

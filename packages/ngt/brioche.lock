@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/yahoojapan/NGT": {
+      "v2.7.2": "284f81a9eccdfd19e3d7b6b1c2dcd733cfdfb1ec"
+    }
+  }
+}

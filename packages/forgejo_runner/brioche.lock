@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/code.forgejo.org/forgejo/runner/v12/@v/v12.5.3.zip": {
+    "https://proxy.golang.org/code.forgejo.org/forgejo/runner/v12/@v/v12.7.2.zip": {
       "type": "sha256",
-      "value": "4ce1070690ebf899b23ede309add8096336e9b0cf4d0c0f4d761a0e2f267fd0d"
+      "value": "d305d37f1a50b4bf811779c557d714a406785ca6a2fc813882f99c042904f376"
     }
   }
 }

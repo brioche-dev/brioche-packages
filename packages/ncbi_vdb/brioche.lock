@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/ncbi/ncbi-vdb/archive/refs/tags/3.4.1.tar.gz": {
+      "type": "sha256",
+      "value": "2fa0919b2842641ead93eeeb45047e87ca480a543b6e4eda15f94d5187e91c85"
+    }
+  }
+}

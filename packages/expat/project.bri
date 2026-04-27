@@ -1,11 +1,12 @@
 import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "expat",
-  version: "2.7.3",
+  version: "2.7.4",
   repository: "https://github.com/libexpat/libexpat",
   extra: {
-    versionUnderscore: "2_7_3",
+    versionUnderscore: "2_7_4",
   },
 };
 
@@ -32,6 +33,7 @@ export default function expat(): std.Recipe<std.Directory> {
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },

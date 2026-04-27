@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.cpan.org/src/5.0/perl-5.40.1.tar.gz": {
+    "https://www.cpan.org/src/5.0/perl-5.42.2.tar.gz": {
       "type": "sha256",
-      "value": "02f8c45bb379ed0c3de7514fad48c714fd46be8f0b536bfd5320050165a1ee26"
+      "value": "9384e8deb75b7b1695e5637971b752281aaecd025a3d5d4734d33c1d0adfee47"
     }
   }
 }

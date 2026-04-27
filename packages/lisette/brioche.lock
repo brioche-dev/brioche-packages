@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/lisette/0.1.11/download": {
+      "type": "sha256",
+      "value": "286e7d68a0ad58600709d00819ef56fc438386999e204a1e1d35eb7ebaa8f3c3"
+    }
+  }
+}

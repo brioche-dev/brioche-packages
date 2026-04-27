@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/lintspec/0.16.0/download": {
+      "type": "sha256",
+      "value": "0dcd5e0fa53b663e1e59c2ad33164aaf1b931d244fea233e18d6d5689c3868e1"
+    }
+  }
+}

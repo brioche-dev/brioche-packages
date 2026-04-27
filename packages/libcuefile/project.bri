@@ -1,0 +1,87 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libcuefile",
+  version: "r475",
+};
+
+const source = Brioche.download(
+  `https://files.musepack.net/source/libcuefile_${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Add missing header installation
+    std.runBash`
+      sed -i '/install(TARGETS/a\\install(DIRECTORY \${libcuefile_SOURCE_DIR}/include/cuetools DESTINATION include)' "$BRIOCHE_OUTPUT/src/CMakeLists.txt"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function libcuefile(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <cuetools/cuefile.h>
+
+      int main(void)
+      {
+          printf("ok");
+          return 0;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -lcuefile -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libcuefile)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "ok";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.musepack.net/index.php?pg=src
+      | lines
+      | where ($it | str contains 'libcuefile')
+      | parse --regex 'libcuefile[._-](?<version>r\\d+)\\.t'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

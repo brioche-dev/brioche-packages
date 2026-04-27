@@ -1,0 +1,52 @@
+import * as std from "std";
+import openssl from "openssl";
+import fftw from "fftw";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "httping",
+  version: "4.4.0",
+  repository: "https://github.com/folkertvanheusden/HTTPing",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function httping(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl, fftw],
+    set: {
+      USE_SSL: "ON",
+      USE_TUI: "ON",
+      USE_FFTW3: "ON",
+      USE_GETTEXT: "ON",
+    },
+    runnable: "bin/httping",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    httping -V 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(httping)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `HTTPing v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

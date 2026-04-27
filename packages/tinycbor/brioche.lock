@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/intel/tinycbor.git": {
-      "v0.6.1": "c0aad2fb2137a31b9845fbaae3653540c410f215"
+      "v7.0": "6442e749ca811e24afad1551338a45c75e09808f"
     }
   }
 }

@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/aerleon/aerleon.git": {
-      "1.13.0": "82f5514bf4f49de43b937384e5d32040a598d836"
+      "1.16.0": "748a28e2a1b986f33ee31baf30ac3187f4dc1a10"
     }
   }
 }

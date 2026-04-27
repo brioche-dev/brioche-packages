@@ -1,0 +1,78 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libaio",
+  version: "0.3.113",
+  repository: "https://pagure.io/libaio",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/libaio-${project.version}/libaio-libaio-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libaio(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+    make prefix=/ install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <libaio.h>
+
+      int main(void)
+      {
+          io_context_t ctx = 0;
+          printf("ok");
+
+          return 0;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -laio -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libaio)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "ok";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = ^git ls-remote --tags ${project.repository}
+      | lines
+      | parse --regex 'refs/tags/libaio-(?<version>[\\d.]+)$'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

@@ -1,6 +1,5 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
-import git from "git";
 import icu from "icu";
 
 export const project = {
@@ -9,20 +8,19 @@ export const project = {
   repository: "https://github.com/nuspell/nuspell",
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function nuspell(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, git, icu],
+    dependencies: [std.toolchain, icu],
     set: {
       BUILD_DOCS: "OFF",
-    },
-    unsafe: {
-      networking: true,
+      BUILD_TESTING: "OFF",
     },
     runnable: "bin/nuspell",
   }).pipe((recipe) =>

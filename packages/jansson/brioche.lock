@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/akheron/jansson/releases/download/v2.14.1/jansson-2.14.1.tar.gz": {
+    "https://github.com/akheron/jansson/releases/download/v2.15.0/jansson-2.15.0.tar.gz": {
       "type": "sha256",
-      "value": "2521cd51a9641d7a4e457f7215a4cd5bb176f690bc11715ddeec483e85d9e2b3"
+      "value": "070a629590723228dc3b744ae90e965a569efb9c535b3309b52e80e75d8eb3be"
     }
   }
 }

@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/television/0.14.5/download": {
+    "https://crates.io/api/v1/crates/television/0.15.6/download": {
       "type": "sha256",
-      "value": "54df8fc4129365299a9244e56e093c12db55dcf87b661dfafd46e9852cceb00d"
+      "value": "dd35b8b0806efee35bc139a0097ddf3eb799dbcdc599afc499e1122ac249fbcd"
     }
   }
 }

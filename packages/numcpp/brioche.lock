@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/dpilger26/NumCpp.git": {
-      "Version_2.16.0": "212d94d46eb7678640a0d5783890cc68829e900e"
+      "Version_2.16.1": "bceeebfeed19f950e6b456bf50719be02e4a6d04"
     }
   }
 }

@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/wabarc/wayback/@v/v0.20.1.info": {
+      "type": "sha256",
+      "value": "e8bf6564b7f2dd3e9102d323344e63141477abd9a35a981dd9630e3f890865c4"
+    },
+    "https://proxy.golang.org/github.com/wabarc/wayback/@v/v0.20.1.zip": {
+      "type": "sha256",
+      "value": "c01edbce39a621a7069154368eebc1a24b34984d84387122a5655d45e732fa0b"
+    }
+  }
+}

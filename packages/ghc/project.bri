@@ -1,0 +1,85 @@
+import * as std from "std";
+
+export const project = {
+  name: "ghc",
+  version: "9.14.1",
+  repository: "https://gitlab.haskell.org/ghc/ghc",
+};
+
+const source =
+  std.CURRENT_PLATFORM === "x86_64-linux"
+    ? Brioche.download(
+        `https://downloads.haskell.org/~ghc/${project.version}/ghc-${project.version}-x86_64-deb12-linux.tar.xz`,
+      )
+        .unarchive("tar", "xz")
+        .peel()
+    : Brioche.download(
+        `https://downloads.haskell.org/~ghc/${project.version}/ghc-${project.version}-aarch64-deb12-linux.tar.xz`,
+      )
+        .unarchive("tar", "xz")
+        .peel();
+
+export default async function ghc(): Promise<std.Recipe<std.Directory>> {
+  // Dynamically discover the GHC lib directory name
+  const ghcLibDirName = (
+    await std.runBash`
+        for dir in *-linux-ghc-*; do
+          printf '%s' "$dir" > "$BRIOCHE_OUTPUT"
+          break
+        done
+      `
+      .workDir(std.castToDirectory(source.get("lib")))
+      .toFile()
+      .read()
+  ).trim();
+
+  const ghcLibDir = `lib/${ghcLibDirName}`;
+  const ghcLibPath = std.directory({
+    lib: std.castToDirectory(source.get(ghcLibDir)),
+  });
+
+  return source
+    .pipe((recipe) =>
+      std.autopack(recipe, {
+        globs: ["bin/**", "lib/**"],
+        linkDependencies: [std.toolchain],
+        dynamicBinaryConfig: {
+          libraryPaths: [ghcLibPath],
+          extraRuntimeLibraryPaths: [ghcLibDir],
+          skipUnknownLibraries: true,
+        },
+        sharedLibraryConfig: {
+          libraryPaths: [ghcLibPath],
+          skipUnknownLibraries: true,
+        },
+        scriptConfig: {
+          enabled: false,
+        },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ghc"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ghc --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ghc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `The Glorious Glasgow Haskell Compilation System, version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.haskell.org",
+    project,
+    matchTag: /^ghc-(?<version>\d+\.\d+\.\d+)-release$/,
+  });
+}

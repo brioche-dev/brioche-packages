@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/action-validator/0.9.0/download": {
+      "type": "sha256",
+      "value": "e379b5be9a8a4659aaec855a3321e40d98c5216d6191bc362a24d5b605a2cbcb"
+    }
+  }
+}

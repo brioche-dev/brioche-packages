@@ -1,11 +1,14 @@
 import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import readline from "readline";
 
 export const project = {
   name: "sqlite",
-  version: "3.48.0",
+  version: "3.52.0",
+  repository: "https://github.com/sqlite/sqlite",
   extra: {
-    // The version number as encoded in SQLite build product names
-    filenameEncodedVersion: "3480000",
+    releaseYear: "2026",
+    filenameEncodedVersion: "3520000",
   },
 };
 
@@ -20,7 +23,7 @@ std.assert(
 );
 
 const source = Brioche.download(
-  `https://www.sqlite.org/2025/sqlite-autoconf-${project.extra.filenameEncodedVersion}.tar.gz`,
+  `https://www.sqlite.org/${project.extra.releaseYear}/sqlite-autoconf-${project.extra.filenameEncodedVersion}.tar.gz`,
 )
   .unarchive("tar", "gzip")
   .peel();
@@ -29,14 +32,15 @@ export default function sqlite(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure \\
       --prefix=/ \\
-      --enable-readline \\
-      --enable-fts3 \\
-      --enable-session
+      --all \\
+      --soname=legacy \\
+      --with-readline-cflags="$(pkg-config --cflags readline)" \\
+      CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA"
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain)
+    .dependencies(std.toolchain, readline)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
@@ -64,6 +68,54 @@ export async function test(): Promise<std.Recipe<std.File>> {
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let tags = http get 'https://api.github.com/repos/sqlite/sqlite/git/matching-refs/tags'
+      | get ref
+      | each {|ref|
+        $ref | str substring 10..-1
+          | parse --regex '^version-(?<version>\\d+\\.\\d+\\.\\d+)$'
+          | into record
+      }
+      | where (($it | get -o version) | is-not-empty)
+      | sort-by --natural version
+
+    let latestTag = $tags
+      | last
+    let version = $latestTag
+      | get version
+
+    # Extract the release year
+    let tagRef = http get $'https://api.github.com/repos/sqlite/sqlite/git/ref/tags/version-($version)'
+      | get object.url
+    let tagDate = http get $tagRef
+      | get committer.date
+      | into datetime
+    let releaseYear = $tagDate
+      | format date "%Y"
+
+    # Compute filenameEncodedVersion
+    let parts = $version
+      | split row "."
+    let major = $parts
+      | get 0
+    let xx = $parts
+      | get 1
+      | fill -a right -c '0' -w 2
+    let yy = $parts
+      | get 2
+      | fill -a right -c '0' -w 2
+    let filenameEncodedVersion = $'($major)($xx)($yy)00'
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.releaseYear $releaseYear
+      | update extra.filenameEncodedVersion $filenameEncodedVersion
+      | to json
+  `.env({ project: JSON.stringify(project) });
 }
 
 /**

@@ -1,0 +1,67 @@
+import * as std from "std";
+import git from "git";
+
+export const project = {
+  name: "jemalloc",
+  version: "5.3.0",
+  repository: "https://github.com/facebook/jemalloc",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+  options: {
+    keepGitDir: true,
+    tag: project.version,
+  },
+});
+
+export default function jemalloc(): std.Recipe<std.Directory> {
+  // Set the default page size used internally by jemalloc to 64kB.
+  // This is a good and safe defaults, since it can handle page
+  // size <= 64kb.
+  // See https://github.com/facebook/jemalloc/blob/f5f0f063c10a7599c05da266fc202824d8fdf904/INSTALL.md?plain=1#L225-L232
+  return std.runBash`
+    ./autogen.sh
+    ./configure \\
+      --prefix=/ \\
+      --with-lg-page=16
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, git)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/jemalloc.sh"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion jemalloc | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, jemalloc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

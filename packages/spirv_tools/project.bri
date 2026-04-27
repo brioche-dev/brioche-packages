@@ -5,11 +5,11 @@ import { source as spirvHeadersSource } from "spirv_headers";
 
 export const project = {
   name: "spirv_tools",
-  version: "1.4.335.0",
+  version: "1.4.341.0",
   repository: "https://github.com/KhronosGroup/SPIRV-Tools",
 };
 
-const source = Brioche.gitCheckout({
+export const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `vulkan-sdk-${project.version}`,
 });

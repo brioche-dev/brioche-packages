@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/kha7iq/pingme/@v/v0.2.7.zip": {
+      "type": "sha256",
+      "value": "f086520fe8fcbec17ac5f04aa2f3587f8e4a6c4b878b6b4b0c4cef00ec858e77"
+    }
+  }
+}

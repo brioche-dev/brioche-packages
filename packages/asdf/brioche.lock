@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/asdf-vm/asdf/@v/v0.18.0.zip": {
+    "https://proxy.golang.org/github.com/asdf-vm/asdf/@v/v0.18.1.zip": {
       "type": "sha256",
-      "value": "b56c4ade0615429598b510759ca3f4223def16f3c8b07ee8409c087f0ad37258"
+      "value": "da008b0a030dfe263f608994bf1300a3becc17e7826b0845c02904beab6cbe18"
     }
   }
 }

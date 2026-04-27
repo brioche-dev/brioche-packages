@@ -1,0 +1,21 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248"
+    },
+    "https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl": {
+      "type": "sha256",
+      "value": "de78a3b8e0feda74cabc54aab2da702113e33ac9d9eb9d2389bcf1f58b7d9177"
+    },
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"
+    },
+    "https://files.pythonhosted.org/packages/b7/29/c12876926be20e100527f541c792731ea09b995139aee9676eaacd1b751e/setuptools_rust-1.12.1-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "b7ebd6a182e7aefa97a072e880530c9b0ec8fcca8617e0bb8ff299c1a064f693"
+    }
+  }
+}

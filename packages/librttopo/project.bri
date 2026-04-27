@@ -1,0 +1,61 @@
+import * as std from "std";
+import geos from "geos";
+
+export const project = {
+  name: "librttopo",
+  version: "1.1.0",
+  repository: "https://gitea.osgeo.org/rttopo/librttopo",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/librttopo-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function librttopo(): std.Recipe<std.Directory> {
+  return std.runBash`
+    autoreconf --install --force
+    ./configure \\
+      --prefix=/ \\
+      --with-geosconfig="$(command -v geos-config)"
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, geos)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion rttopo | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, librttopo)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGiteaTags({
+    giteaUrl: "https://gitea.osgeo.org",
+    project,
+    matchTag: /^librttopo-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

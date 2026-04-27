@@ -1,0 +1,75 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import dbus from "dbus";
+import libdrm from "libdrm";
+import libffi from "libffi";
+import libusb from "libusb";
+import libudevZero from "libudev_zero";
+import libxkbcommon from "libxkbcommon";
+import mesa from "mesa";
+import pipewire from "pipewire";
+import wayland from "wayland";
+
+export const project = {
+  name: "sdl3",
+  version: "3.4.4",
+  repository: "https://github.com/libsdl-org/SDL",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/release-${project.version}/SDL3-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sdl3(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      dbus,
+      libdrm,
+      libffi,
+      libusb,
+      libudevZero,
+      libxkbcommon,
+      mesa,
+      pipewire,
+      wayland,
+    ],
+    set: {
+      SDL_TEST_LIBRARY: "OFF",
+      SDL_TESTS: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }, { path: "include/SDL3" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion sdl3 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl3)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>3\.\d+\.\d+)$/,
+  });
+}

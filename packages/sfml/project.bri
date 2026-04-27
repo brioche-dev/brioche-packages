@@ -1,0 +1,85 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import flac from "flac";
+import freetype from "freetype";
+import libogg from "libogg";
+import libvorbis from "libvorbis";
+import libx11 from "libx11";
+import libxcursor from "libxcursor";
+import libxext from "libxext";
+import libxfixes from "libxfixes";
+import libxi from "libxi";
+import libxrandr from "libxrandr";
+import libxrender from "libxrender";
+import libudevZero from "libudev_zero";
+import mesa from "mesa";
+import openalSoft from "openal_soft";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "sfml",
+  version: "3.0.2",
+  repository: "https://github.com/SFML/SFML",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function sfml(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      flac,
+      freetype,
+      libogg,
+      libvorbis,
+      libx11,
+      libxcursor,
+      libxext,
+      libxfixes,
+      libxi,
+      libxrandr,
+      libxrender,
+      libudevZero,
+      mesa,
+      openalSoft,
+      xorgproto,
+    ],
+    set: {
+      SFML_BUILD_EXAMPLES: "OFF",
+      SFML_BUILD_TEST_SUITE: "OFF",
+      SFML_BUILD_DOC: "OFF",
+      BUILD_SHARED_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion sfml-system | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sfml)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

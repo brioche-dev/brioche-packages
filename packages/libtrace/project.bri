@@ -13,7 +13,7 @@ import wandio from "wandio";
 
 export const project = {
   name: "libtrace",
-  version: "4.0.29-1",
+  version: "4.0.30-1",
   repository: "https://github.com/LibtraceTeam/libtrace",
 };
 
@@ -25,9 +25,7 @@ const source = Brioche.gitCheckout({
 export default function libtrace(): std.Recipe<std.Directory> {
   return std.runBash`
     autoreconf --install --force
-    ./configure \\
-      --prefix=/ \\
-      --without-ncurses
+    ./configure --prefix=/
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
@@ -48,7 +46,6 @@ export default function libtrace(): std.Recipe<std.Directory> {
     )
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
-    .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
@@ -60,30 +57,31 @@ export default function libtrace(): std.Recipe<std.Directory> {
 export async function test(): Promise<std.Recipe<std.File>> {
   // There is no way to print the package's version, so we just
   // build a simple program to ensure it works
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <libtrace.h>
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <libtrace.h>
 
-    int main(void)
-    {
-        libtrace_t *trace = trace_create("pcapfile:-");
-        if (trace) {
-            trace_destroy(trace);
-            printf("ok");
-        }
+      int main(void)
+      {
+          libtrace_t *trace = trace_create("pcapfile:-");
+          if (trace) {
+              trace_destroy(trace);
+              printf("ok");
+          }
 
-        return EXIT_SUCCESS;
-    }
-  `);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -ltrace -lwandio -lpcap
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, libtrace, wandio, libpcap)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

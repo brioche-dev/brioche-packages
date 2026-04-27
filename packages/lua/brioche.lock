@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.lua.org/ftp/lua-5.5.0.tar.gz": {
+      "type": "sha256",
+      "value": "57ccc32bbbd005cab75bcc52444052535af691789dba2b9016d5c50640d68b3d"
+    }
+  }
+}

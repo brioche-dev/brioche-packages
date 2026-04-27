@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/SRI-CSL/libpoly.git": {
+      "v0.2.1": "3d5e6fbd98639cb0941b029e23ca17c0e3c4a80a"
+    }
+  }
+}

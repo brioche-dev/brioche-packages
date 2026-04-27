@@ -1,0 +1,76 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "build2",
+  version: "0.17.0",
+  repository: "https://github.com/build2/build2",
+};
+
+const source = Brioche.download(
+  `https://download.build2.org/${project.version}/build2-toolchain-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function build2(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./build.sh \\
+      --trust yes \\
+      --local \\
+      --system libsqlite3 \\
+      --install-dir "$BRIOCHE_OUTPUT" \\
+      g++
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, sqlite)
+    .env({
+      BUILD2_DEF_OPT: "0",
+    })
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/b"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    b --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(build2)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `build2 ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://download.build2.org/toolchain.sha256
+      | lines
+      | where ($it | str starts-with '# ')
+      | parse --regex '^# (?<version>[\\d.]+)'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

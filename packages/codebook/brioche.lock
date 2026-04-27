@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/codebook-lsp/0.3.37/download": {
+      "type": "sha256",
+      "value": "1db8a9f43dd53eef77aba7aa678b1d13d4c25084f23fd0cc5c27bfd828c2a984"
+    }
+  }
+}

@@ -1,0 +1,131 @@
+import * as std from "std";
+import cmake, { cmakeBuild, type CMakeVariable } from "cmake";
+import awsCAuth from "aws_c_auth";
+import awsCCal from "aws_c_cal";
+import awsCCommon from "aws_c_common";
+import awsCCompression from "aws_c_compression";
+import awsCEventStream from "aws_c_event_stream";
+import awsCHttp from "aws_c_http";
+import awsCIo from "aws_c_io";
+import awsCMqtt from "aws_c_mqtt";
+import awsCS3 from "aws_c_s3";
+import awsCSdkutils from "aws_c_sdkutils";
+import awsChecksums from "aws_checksums";
+import awsCrtCpp from "aws_crt_cpp";
+import curl from "curl";
+import openssl from "openssl";
+import s2n from "s2n";
+
+export const project = {
+  name: "aws_sdk_cpp",
+  version: "1.11.769",
+  repository: "https://github.com/aws/aws-sdk-cpp",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+const dependencies = [
+  std.toolchain,
+  awsCAuth,
+  awsCCal,
+  awsCCommon,
+  awsCCompression,
+  awsCEventStream,
+  awsCHttp,
+  awsCIo,
+  awsCMqtt,
+  awsCS3,
+  awsCSdkutils,
+  awsChecksums,
+  awsCrtCpp,
+  curl,
+  openssl,
+  s2n,
+];
+
+/**
+ * Options for building the AWS SDK for C++.
+ *
+ * @param services - Which service libraries to build. Pass `"all"` to build
+ *   all service libraries, a string array for specific services, or omit to
+ *   build only the `core` library (the default minimal build).
+ */
+interface AwsSdkCppOptions {
+  services?: "all" | string[];
+}
+
+export default function awsSdkCpp(
+  options: AwsSdkCppOptions = {},
+): std.Recipe<std.Directory> {
+  const { services } = options;
+
+  const cmakeSet: Record<string, CMakeVariable> = {
+    BUILD_DEPS: "OFF",
+    ENABLE_TESTING: "OFF",
+    BUILD_SHARED_LIBS: "ON",
+    CUSTOM_MEMORY_MANAGEMENT: "OFF",
+  };
+
+  if (services !== "all") {
+    if (services == null || services.length === 0) {
+      cmakeSet.BUILD_ONLY = "core";
+    } else {
+      for (const svc of services) {
+        std.assert(
+          /^[a-zA-Z0-9\-_]+$/.test(svc),
+          `invalid service name: ${svc}`,
+        );
+      }
+      cmakeSet.BUILD_ONLY = services.join(";");
+    }
+  }
+
+  return cmakeBuild({
+    source,
+    dependencies,
+    set: cmakeSet,
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
+
+      find_package(AWSSDK REQUIRED CONFIG COMPONENTS core)
+      message(STATUS "AWSSDK found: YES")
+    `),
+  });
+
+  const script = std.runBash`
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, cmake, ...dependencies, awsSdkCpp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "AWSSDK found: YES";
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

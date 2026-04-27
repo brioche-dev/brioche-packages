@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://code.videolan.org/videolan/x264/-/archive/0480cb05fa188d37ae87e8f4fd8f1aea3711f7ee/x264-0480cb05fa188d37ae87e8f4fd8f1aea3711f7ee.tar.bz2": {
+      "type": "sha256",
+      "value": "f05c59f2e83d494c36307025dca2d3afc6b4d185f3a3453d06cc4fecd7094057"
+    }
+  }
+}

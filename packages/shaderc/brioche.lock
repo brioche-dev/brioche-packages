@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/google/shaderc/archive/refs/tags/v2026.1.tar.gz": {
+      "type": "sha256",
+      "value": "245002feccbe7f8361b223545a5654cea69780745886872d7efff50a38d96c66"
+    }
+  }
+}

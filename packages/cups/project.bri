@@ -1,0 +1,70 @@
+import * as std from "std";
+import avahi from "avahi";
+import dbus from "dbus";
+import libusb from "libusb";
+import linuxPam from "linux_pam";
+import openssl from "openssl";
+
+export const project = {
+  name: "cups",
+  version: "2.4.16",
+  repository: "https://github.com/OpenPrinting/cups",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/cups-${project.version}-source.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cups(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-tls=openssl \\
+      --enable-static \\
+      --enable-shared \\
+      --without-rcdir
+
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT" \\
+      CUPS_USER="$(id -un)" \\
+      CUPS_GROUP="$(id -gn)" \\
+      CUPS_PRIMARY_SYSTEM_GROUP="$(id -gn)"
+
+    # Manual installation
+    cp -a "$BRIOCHE_OUTPUT"/usr/* "$BRIOCHE_OUTPUT"/
+    rm -rf "$BRIOCHE_OUTPUT"/usr
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, avahi, dbus, libusb, linuxPam, openssl)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion cups | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, cups)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

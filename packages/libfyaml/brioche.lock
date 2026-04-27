@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/pantoniou/libfyaml/releases/download/v0.9.6/libfyaml-0.9.6.tar.gz": {
+      "type": "sha256",
+      "value": "a59cc3331e2eb903ec36933ad52a45888041cac31e44f553a00511131242c483"
+    }
+  }
+}

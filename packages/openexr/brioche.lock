@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/AcademySoftwareFoundation/openexr": {
-      "v3.4.4": "741ecb82ccdb291ce5b04713fc6c03208753575e"
+      "v3.4.9": "b5fa98ac6b5fc660c0295123c1d02bbf687dbec3"
     }
   }
 }

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.com/sfcgal/SFCGAL": {
+      "v2.2.0": "d1ba2619e8fa8ce2f6ff6bab7fe0d51fbc9413a0"
+    }
+  }
+}

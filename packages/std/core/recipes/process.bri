@@ -193,6 +193,7 @@ export function process(options: ProcessOptions): Process {
             await v.briocheSerialize(),
           ]),
         ),
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         Promise.all(dependencies.map((dep) => dep.briocheSerialize())),
       ]);
 
@@ -426,16 +427,19 @@ export type ProcessTemplateLike =
 export class ProcessTemplate {
   componentType: "processTemplate" = "processTemplate";
   components: ProcessTemplateLike[];
-  #serialized: runtime.ProcessTemplate | undefined;
+  #serialized: Promise<runtime.ProcessTemplate> | undefined;
 
   constructor(...components: ProcessTemplateLike[]) {
-    /* eslint-disable-next-line */
+    // NOTE: Needed to silence warnings for ESLint in Brioche v0.1.7
+    // and earlier.
+    // eslint-disable-next-line
     this.components = components;
   }
 
-  async briocheSerialize(): Promise<runtime.ProcessTemplate> {
-    if (this.#serialized == null) {
+  briocheSerialize(): Promise<runtime.ProcessTemplate> {
+    this.#serialized ??= (async () => {
       const components = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         this.components.map((component) =>
           typeof component === "function" ? component() : component,
         ),
@@ -478,10 +482,10 @@ export class ProcessTemplate {
         ),
       );
 
-      this.#serialized = {
+      return {
         components: runtimeComponents.flat(1),
       };
-    }
+    })();
     return this.#serialized;
   }
 }

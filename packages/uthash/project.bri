@@ -19,7 +19,8 @@ export default function uthash(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   // This example has been adapted from the main documentation
-  const src = std.file(std.indoc`
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>
       #include <uthash.h>
@@ -42,15 +43,15 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
           return EXIT_SUCCESS;
       }
-  `);
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, uthash)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

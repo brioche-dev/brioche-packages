@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/ncbi/sra-tools/archive/refs/tags/3.4.1.tar.gz": {
+      "type": "sha256",
+      "value": "874dcbb28b7ebffb5554839254e777b1137b0f0430815bab175068decfe96e98"
+    }
+  }
+}

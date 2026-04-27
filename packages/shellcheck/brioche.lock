@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://hackage.haskell.org/package/ShellCheck-0.11.0/ShellCheck-0.11.0.tar.gz": {
+      "type": "sha256",
+      "value": "81a72e9c195788301f38e4b2e250ab916cf3778993d428786bfb2fac2a847400"
+    }
+  }
+}

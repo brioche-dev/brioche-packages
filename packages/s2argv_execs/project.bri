@@ -26,7 +26,8 @@ export default function s2argvExecs(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   // Create a simple C program that uses s2argv_execs to execute a command passed via stdin
-  const src = std.file(std.indoc`
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>
       #include <execs.h>
@@ -49,17 +50,17 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
           return EXIT_SUCCESS;
       }
-  `);
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -lexecs
 
     # Output 'Hello, World!' through s2argv_execs
     echo "echo 'Hello, World!'" | ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, s2argvExecs)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

@@ -4,12 +4,12 @@ import icu from "icu";
 
 export const project = {
   name: "dolt",
-  version: "1.80.2",
+  version: "1.83.6",
   repository: "https://github.com/dolthub/dolt.git",
 };
 
 // Retrieve the source directly from the GitHub repository and not from the Go
-// proxy. Since, the one from Go proxy is not up to date
+// proxy. Since, the one from Go proxy is not up to date.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,

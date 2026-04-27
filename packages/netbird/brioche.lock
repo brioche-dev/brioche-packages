@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/netbirdio/netbird/@v/v0.68.3.zip": {
+      "type": "sha256",
+      "value": "be5bde7f4efc182a01ddbeb68f6afcef56700fb7e33fee6cdb87dd2bf1e5f15f"
+    }
+  }
+}

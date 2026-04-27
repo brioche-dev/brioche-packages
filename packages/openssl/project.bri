@@ -1,8 +1,9 @@
 import * as std from "std";
+import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "openssl",
-  version: "3.6.0",
+  version: "3.6.1",
   repository: "https://github.com/openssl/openssl",
 };
 
@@ -25,6 +26,7 @@ export default function openssl(): std.Recipe<std.Directory> {
     .workDir(source)
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative)
+    .pipe(cmakeSanitizePaths)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },

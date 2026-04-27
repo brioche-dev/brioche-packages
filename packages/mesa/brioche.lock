@@ -1,0 +1,33 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://files.pythonhosted.org/packages/41/3c/a36c2450754618e62008bf7435ccb0f88053e07592e6028a34776213d877/markupsafe-3.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": {
+      "type": "sha256",
+      "value": "457a69a9577064c05a97c41f4e65148652db078a3a509039e64d3467b9e7ef97"
+    },
+    "https://files.pythonhosted.org/packages/87/fb/99f81ac72ae23375f22b7afdb7642aba97c00a713c217124420147681a2f/mako-1.3.10-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "baef24a52fc4fc514a0887ac600f9f1cff3d82c61d4d700a1fa84d597b88db59"
+    },
+    "https://files.pythonhosted.org/packages/88/f9/16491d7ed2a919954993e48aa941b200f38040928474c9e85ea9e64222c3/pyyaml-6.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl": {
+      "type": "sha256",
+      "value": "c458b6d084f9b935061bc36216e8a69a7e293a2f1e68bf956dcd9e6cbcd143f5"
+    },
+    "https://files.pythonhosted.org/packages/92/b5/47e807c2623074914e29dabd16cbbdd4bf5e9b2db9f8090fa64411fc5382/pyyaml-6.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl": {
+      "type": "sha256",
+      "value": "501a031947e3a9025ed4405a168e6ef5ae3126c59f90ce0cd6f2bfc477be31b7"
+    },
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"
+    },
+    "https://files.pythonhosted.org/packages/da/ef/e648bfd021127bef5fa12e1720ffed0c6cbb8310c8d9bea7266337ff06de/markupsafe-3.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl": {
+      "type": "sha256",
+      "value": "f34c41761022dd093b4b6896d4810782ffbabe30f2d443ff5f083e0cbbb8c737"
+    },
+    "https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.0.4/mesa-mesa-26.0.4.tar.bz2": {
+      "type": "sha256",
+      "value": "dd4283517e412cb038683b724377da8ffb51c17ce8812e6bbcfe05c6a3eea84f"
+    }
+  }
+}

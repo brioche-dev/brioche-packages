@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.14.0.tar.gz": {
+      "type": "sha256",
+      "value": "67fb27e967a4a6968c0905691c89c908e7250dddc581b887c19ef981c737e473"
+    }
+  }
+}

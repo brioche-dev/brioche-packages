@@ -1,0 +1,46 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "symfony_cli",
+  version: "5.17.1",
+  repository: "https://github.com/symfony-cli/symfony-cli.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function symfonyCli(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+    runnable: "bin/symfony-cli",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    symfony-cli version --no-ansi | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(symfonyCli)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Symfony CLI version ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

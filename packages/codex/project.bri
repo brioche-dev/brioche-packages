@@ -1,25 +1,42 @@
 import * as std from "std";
-import openssl from "openssl";
-import { cargoBuild } from "rust";
 
 export const project = {
   name: "codex",
-  version: "0.80.0",
-  repository: "https://github.com/openai/codex.git",
+  version: "0.124.0",
+  repository: "https://github.com/openai/codex",
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `rust-v${project.version}`,
-});
+function source(): std.Recipe<std.File> {
+  switch (std.CURRENT_PLATFORM) {
+    case "x86_64-linux":
+      return std.castToFile(
+        Brioche.download(
+          `https://github.com/openai/codex/releases/download/rust-v${project.version}/codex-x86_64-unknown-linux-musl.tar.gz`,
+        )
+          .unarchive("tar", "gzip")
+          .get("codex-x86_64-unknown-linux-musl"),
+      );
+    case "aarch64-linux":
+      return std.castToFile(
+        Brioche.download(
+          `https://github.com/openai/codex/releases/download/rust-v${project.version}/codex-aarch64-unknown-linux-musl.tar.gz`,
+        )
+          .unarchive("tar", "gzip")
+          .get("codex-aarch64-unknown-linux-musl"),
+      );
+    default:
+      throw new Error(
+        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the codex package`,
+      );
+  }
+}
 
 export default function codex(): std.Recipe<std.Directory> {
-  return cargoBuild({
-    source,
-    currentDir: "codex-rs",
-    path: "cli",
-    dependencies: [openssl],
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
+  return std
+    .directory({
+      "bin/codex": source(),
+    })
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/codex"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

@@ -4,7 +4,6 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "gsl",
   version: "2.8",
-  repository: "https://git.savannah.gnu.org/git/gsl.git",
 };
 
 const source = Brioche.download(
@@ -58,7 +57,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/gnu/gsl
       | lines
       | where ($it | str contains "gsl-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="gsl-(?<version>\\d+\\.\\d+(\\.\\d+)?)\\.(tar\\.gz)">'
+      | parse --regex '<a href="(\\./)?gsl-(?<version>[\\d.]+)\\.tar\\.gz"'
       | sort-by --natural --reverse version
       | get 0.version
 

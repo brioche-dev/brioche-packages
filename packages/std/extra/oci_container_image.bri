@@ -2,27 +2,51 @@ import * as std from "/core";
 import { runBash } from "./run_bash.bri";
 
 /**
+ * OCI platform descriptor matching the OCI Image Specification.
+ */
+interface OciPlatform {
+  architecture: string;
+  os: string;
+}
+
+const PLATFORM_MAP: Record<std.Platform, OciPlatform> = {
+  "x86_64-linux": { architecture: "amd64", os: "linux" },
+  "aarch64-linux": { architecture: "arm64", os: "linux" },
+};
+
+/**
  * Options for creating an OCI container image.
  *
- * @param recipe - The recipe to use as the image layer.
- * @param entrypoint - The entrypoint to use for the image.
+ * @param layers - The recipes to use as image layers, applied in order.
+ * @param entrypoint - The entrypoint for the image.
  *   Defaults to `["/brioche-run"]`.
+ * @param cmd - Default arguments appended to the entrypoint.
+ * @param env - Environment variables baked into the image config.
+ * @param labels - Labels baked into the image config.
+ * @param ref - Image reference used to name the image in the OCI layout
+ *   index.
+ * @param platform - Override the target platform. Defaults to the current
+ *   Brioche build platform.
  */
 interface OciContainerImageOptions {
-  recipe: std.RecipeLike<std.Directory>;
+  layers: std.RecipeLike<std.Directory>[];
   entrypoint?: string[];
+  cmd?: string[];
+  env?: Record<string, string>;
+  labels?: Record<string, string>;
+  ref?: string;
+  platform?: OciPlatform;
 }
 
 /**
- * Create an OCI container image from a recipe. The recipe
- * will be included as a layer in the image.
+ * Create an OCI container image from one or more recipe layers.
  *
  * @param options - Options for the OCI container image.
  *
- * @returns An OCI container image with the recipe as a layer
+ * @returns An OCI container image as a tar file.
  *
  * @remarks The returned image matches the [OCI Image Layout Specification][oci-spec],
- * and additionally has a manifest file following the [Docker Image Specification][docker-spec].
+ *   and additionally has a manifest file following the [Docker Image Specification][docker-spec].
  *
  * [oci-spec]: https://github.com/opencontainers/image-spec/blob/dd33f727e2faea07432ef6f06d6f9afe73f3f519/image-layout.md
  * [docker-spec]: https://github.com/moby/docker-image-spec/blob/main/spec.md
@@ -32,6 +56,7 @@ export function ociContainerImage(
 ): std.Recipe<std.File> {
   return std.recipe(async (): Promise<std.Recipe<std.File>> => {
     const entrypoint = options.entrypoint ?? ["/brioche-run"];
+    const platform = options.platform ?? PLATFORM_MAP[std.CURRENT_PLATFORM];
 
     let imageDir = std.directory();
 
@@ -44,16 +69,47 @@ export function ociContainerImage(
       ),
     );
 
-    const layerTar = tar(std.collectReferences(options.recipe));
-    const { sha256Digest: layerSha256Digest } = await describeBlob(layerTar);
-    const diffId = `sha256:${layerSha256Digest}`;
+    const diffIds: string[] = [];
+    const layerPaths: string[] = [];
+    const layerDescriptors: {
+      mediaType: string;
+      digest: string;
+      size: number;
+    }[] = [];
+    for (const layer of options.layers) {
+      const layerTar = tar(std.collectReferences(layer));
+      const { sha256Digest: layerSha256Digest } = await describeBlob(layerTar);
+      diffIds.push(`sha256:${layerSha256Digest}`);
 
-    const layerTarGzip = gzip(layerTar);
-    let layerDigest = "";
-    let layerSize = 0;
-    let layerPath = "";
-    [imageDir, { digest: layerDigest, size: layerSize, path: layerPath }] =
-      await addBlob(imageDir, layerTarGzip);
+      const layerTarGzip = gzip(layerTar);
+      let layerDigest = "";
+      let layerSize = 0;
+      let layerPath = "";
+      [imageDir, { digest: layerDigest, size: layerSize, path: layerPath }] =
+        await addBlob(imageDir, layerTarGzip);
+
+      layerPaths.push(layerPath);
+      layerDescriptors.push({
+        mediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
+        digest: layerDigest,
+        size: layerSize,
+      });
+    }
+
+    const imageConfig: Record<string, unknown> = {
+      Entrypoint: entrypoint,
+    };
+    if (options.cmd != null) {
+      imageConfig["Cmd"] = options.cmd;
+    }
+    if (options.env != null) {
+      imageConfig["Env"] = Object.entries(options.env).map(
+        ([k, v]) => `${k}=${v}`,
+      );
+    }
+    if (options.labels != null) {
+      imageConfig["Labels"] = options.labels;
+    }
 
     let configDigest: string = "";
     let configSize: number = 0;
@@ -63,14 +119,12 @@ export function ociContainerImage(
         imageDir,
         std.file(
           JSON.stringify({
-            architecture: "amd64",
-            os: "linux",
-            config: {
-              Entrypoint: entrypoint,
-            },
+            architecture: platform.architecture,
+            os: platform.os,
+            config: imageConfig,
             rootfs: {
               type: "layers",
-              diff_ids: [diffId],
+              diff_ids: diffIds,
             },
           }),
         ),
@@ -89,13 +143,7 @@ export function ociContainerImage(
             digest: configDigest,
             size: configSize,
           },
-          layers: [
-            {
-              mediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
-              digest: layerDigest,
-              size: layerSize,
-            },
-          ],
+          layers: layerDescriptors,
         }),
       ),
     );
@@ -111,10 +159,14 @@ export function ociContainerImage(
               mediaType: "application/vnd.oci.image.manifest.v1+json",
               size: manifestSize,
               digest: manifestDigest,
-              platform: {
-                architecture: "amd64",
-                os: "linux",
-              },
+              platform,
+              ...(options.ref != null
+                ? {
+                    annotations: {
+                      "org.opencontainers.image.ref.name": options.ref,
+                    },
+                  }
+                : {}),
             },
           ],
         }),
@@ -127,8 +179,8 @@ export function ociContainerImage(
         JSON.stringify([
           {
             Config: configPath,
-            RepoTags: [],
-            Layers: [layerPath],
+            RepoTags: options.ref != null ? [options.ref] : [],
+            Layers: layerPaths,
           },
         ]),
       ),

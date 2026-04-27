@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/AOMediaCodec/libavif/archive/refs/tags/v1.4.1.tar.gz": {
+      "type": "sha256",
+      "value": "d4aea31a4becb3273ba7968221be2e48148ba05eb8a68d14e671963e17785648"
+    }
+  }
+}

@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.ijg.org/files/jpegsrc.v9f.tar.gz": {
+    "https://www.ijg.org/files/jpegsrc.v10.tar.gz": {
       "type": "sha256",
-      "value": "04705c110cb2469caa79fb71fba3d7bf834914706e9641a4589485c1f832565b"
+      "value": "8b9eaa13242690ebd03e1728ab1edf97a81a78ed6e83624d493655f31ac95ab5"
     }
   }
 }

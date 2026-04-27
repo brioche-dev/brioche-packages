@@ -55,7 +55,7 @@ export function liveUpdate(): NushellRunnable {
     let version = http get https://ftpmirror.gnu.org/gnu/mpfr
       | lines
       | where ($it | str contains "mpfr-") and (not ($it | str contains ".sig"))
-      | parse --regex '<a href="mpfr-(?<version>.+)\\.tar\\.xz">'
+      | parse --regex '<a href="(\\./)?mpfr-(?<version>[\\d.]+)\\.tar\\.xz"'
       | sort-by --natural --reverse version
       | get 0.version
 

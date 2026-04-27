@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/KhronosGroup/Vulkan-Tools": {
+      "v1.4.349": "7c46da2b39036a80ce088576d5794bf39e667f56"
+    }
+  }
+}

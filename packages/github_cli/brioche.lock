@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/cli/cli/v2/@v/v2.85.0.info": {
+    "https://proxy.golang.org/github.com/cli/cli/v2/@v/v2.88.1.info": {
       "type": "sha256",
-      "value": "e1f9fde9bd24b59e37d183316275266a04488c9ff45a9e65dea8a8a2aa287d93"
+      "value": "5dc61af470cae39445f80d468663a96c1a3101c3d9370181f3ec0a50204ec899"
     },
-    "https://proxy.golang.org/github.com/cli/cli/v2/@v/v2.85.0.zip": {
+    "https://proxy.golang.org/github.com/cli/cli/v2/@v/v2.88.1.zip": {
       "type": "sha256",
-      "value": "815cadd22072f40e033ed8b9ec0da418ebf87a1ce52b5ac4387bd2f228858656"
+      "value": "bf5d135db19c483b19d3b5e1b22d48ea5fef228d595677c233b41d2f8643bf14"
     }
   }
 }

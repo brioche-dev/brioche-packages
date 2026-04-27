@@ -9,7 +9,11 @@ export default function (): std.Recipe<std.Directory> {
     gcc src/main.c -o "$BRIOCHE_OUTPUT/bin/hello-world"
   `
     .workDir(Brioche.glob("src"))
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/hello-world"));

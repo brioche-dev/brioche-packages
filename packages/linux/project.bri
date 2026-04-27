@@ -6,9 +6,9 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "linux",
-  version: "6.18.6",
+  version: "7.0",
   extra: {
-    majorVersion: "6",
+    majorVersion: "7",
   },
 };
 
@@ -107,7 +107,11 @@ export default function linux(
     make modules_install
   `
     .workDir(source)
-    .outputScaffold(std.directory({ boot: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        boot: std.directory(),
+      }),
+    )
     .dependencies(
       ...dependencies,
       kmod,

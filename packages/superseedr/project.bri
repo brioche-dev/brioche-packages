@@ -1,0 +1,45 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+import openssl from "openssl";
+
+export const project = {
+  name: "superseedr",
+  version: "1.0.4",
+  extra: {
+    crateName: "superseedr",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function superseedr(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl],
+    runnable: "bin/superseedr",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    superseedr --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(superseedr)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `superseedr ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

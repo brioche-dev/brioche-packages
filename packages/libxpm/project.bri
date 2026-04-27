@@ -7,7 +7,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxpm",
-  version: "3.5.17",
+  version: "3.5.18",
 };
 
 const source = Brioche.download(

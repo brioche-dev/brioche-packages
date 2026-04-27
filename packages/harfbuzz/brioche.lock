@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/harfbuzz/harfbuzz/releases/download/12.3.0/harfbuzz-12.3.0.tar.xz": {
+    "https://github.com/harfbuzz/harfbuzz/releases/download/13.1.1/harfbuzz-13.1.1.tar.xz": {
       "type": "sha256",
-      "value": "8660ebd3c27d9407fc8433b5d172bafba5f0317cb0bb4339f28e5370c93d42b7"
+      "value": "e7f3b8bac3fdcc529985be8e84fbd65c675ac47ee58512b15a5dd620c79ffe2a"
     }
   }
 }

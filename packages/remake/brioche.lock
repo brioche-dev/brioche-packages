@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/Trepan-Debuggers/remake/releases/download/remake-4.3+dbg-1.6/remake-4.3+dbg-1.6.tar.gz": {
+      "type": "sha256",
+      "value": "f6a0c6179cd92524ad5dd04787477c0cd45afb5822d977be93d083b810647b87"
+    }
+  }
+}

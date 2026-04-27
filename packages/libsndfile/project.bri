@@ -1,0 +1,74 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import flac from "flac";
+import lame from "lame";
+import libogg from "libogg";
+import libvorbis from "libvorbis";
+import mpg123 from "mpg123";
+import opus from "opus";
+import python from "python";
+
+export const project = {
+  name: "libsndfile",
+  version: "1.2.2",
+  repository: "https://github.com/libsndfile/libsndfile",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function libsndfile(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      flac,
+      lame,
+      libogg,
+      libvorbis,
+      mpg123,
+      opus,
+      python,
+    ],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      BUILD_SHARED_LIBS: "ON",
+      BUILD_PROGRAMS: "ON",
+      BUILD_EXAMPLES: "OFF",
+      BUILD_TESTING: "OFF",
+      BUILD_REGTEST: "OFF",
+      ENABLE_EXTERNAL_LIBS: "ON",
+      ENABLE_MPEG: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion sndfile | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libsndfile)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

@@ -5,14 +5,14 @@ import nushell from "nushell";
 
 export const project = {
   name: "nodejs",
-  version: "25.3.0",
+  version: "25.9.0",
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
-      "25": "25.3.0",
-      "24": "24.13.0",
-      "22": "22.22.0",
-      "20": "20.20.0",
+      "25": "25.9.0",
+      "24": "24.14.1",
+      "22": "22.22.2",
+      "20": "20.20.2",
     },
   },
 } as const;
@@ -236,6 +236,7 @@ export function npmInstall(
  *
  * @param packageName - The name of the npm package to install.
  * @param version - The version of the package to install.
+ * @param dependencies - Optionally add additional dependencies while installing.
  * @param wrapBins - Whether to wrap the installed binaries.
  * @param nodejs - The Node.js and npm recipe to use to install the package.
  *   Can be used to use a specific version of Node.js.
@@ -243,6 +244,7 @@ export function npmInstall(
 interface NpmInstallGlobalOptions {
   packageName: string;
   version: string;
+  dependencies?: std.RecipeLike<std.Directory>[];
   wrapBins?: boolean;
   nodejs?: std.RecipeLike<std.Directory>;
 }
@@ -280,12 +282,7 @@ export function npmInstallGlobal(
   options: NpmInstallGlobalOptions,
 ): std.Recipe<std.Directory> {
   return std.recipe(async () => {
-    const {
-      packageName,
-      version,
-      wrapBins = true,
-      nodejs: nodejsDep = nodejs,
-    } = options;
+    const { wrapBins = true, nodejs: nodejsDep = nodejs } = options;
 
     return std.runBash`
       if [ "$(npm view "\${package_name}@\${version}" version)" != "$version" ]; then
@@ -295,10 +292,15 @@ export function npmInstallGlobal(
 
       npm install --global "\${package_name}@\${version}"
     `
-      .dependencies(std.toolchain, nodejsDep, python)
+      .dependencies(
+        std.toolchain,
+        nodejsDep,
+        python,
+        ...(options.dependencies ?? []),
+      )
       .env({
-        package_name: packageName,
-        version,
+        package_name: options.packageName,
+        version: options.version,
         npm_config_prefix: std.outputPath,
       })
       .unsafe({ networking: true })
@@ -336,6 +338,13 @@ async function wrapNodejsBins(
       command: "node",
       args: [{ relativePath: target }],
       dependencies: [nodejs],
+      env: {
+        // Help the dynamic linker to find shared libraries at runtime.
+        LD_LIBRARY_PATH: {
+          prepend: std.toolchain().get("lib"),
+          separator: ":",
+        },
+      },
     });
   });
 

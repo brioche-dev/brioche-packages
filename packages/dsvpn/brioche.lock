@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jedisct1/dsvpn.git": {
+      "0.1.5": "0ad849a8591f070ea8ee2f7343dc7a5c1f9f722c"
+    }
+  }
+}

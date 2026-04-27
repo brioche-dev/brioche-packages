@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/rvben/rumdl.git": {
+      "v0.1.72": "fd16b0551e217696a32a922542e1e8848bf10fb6"
+    }
+  }
+}

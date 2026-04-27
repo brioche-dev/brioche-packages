@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jiixyj/libebur128.git": {
+      "v1.2.6": "67b33abe1558160ed76ada1322329b0e9e058b02"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+import * as std from "std";
+
+export const project = {
+  name: "remake",
+  version: "4.3+dbg-1.6",
+  repository: "https://github.com/Trepan-Debuggers/remake",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/remake-${project.version}/remake-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function remake(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/remake"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    remake --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(remake)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `GNU Make ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^remake-(?<version>.+)$/,
+  });
+}

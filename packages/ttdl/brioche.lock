@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/ttdl/6.0.0/download": {
+      "type": "sha256",
+      "value": "7f23f2c3eb6729ba4d46e72f64196806fff8b665335aef3ab76e4d01f2f39851"
+    }
+  }
+}

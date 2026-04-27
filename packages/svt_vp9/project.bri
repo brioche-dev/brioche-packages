@@ -1,0 +1,55 @@
+import * as std from "std";
+import nasm from "nasm";
+import { cmakeBuild } from "cmake";
+
+// SVT-VP9 only supports x86-64 (uses x86 SIMD intrinsics with no ARM fallback)
+// @brioche-packages skip-platform aarch64-linux
+export const project = {
+  name: "svt_vp9",
+  version: "0.3.1",
+  repository: "https://github.com/OpenVisualCloud/SVT-VP9",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function svtVp9(): std.Recipe<std.Directory> {
+  std.assert(
+    std.CURRENT_PLATFORM === "x86_64-linux",
+    `SVT-VP9 does not currently support the platform '${std.CURRENT_PLATFORM}'`,
+  );
+
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, nasm],
+    runnable: "bin/SvtVp9EncApp",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }, { path: "include/svt-vp9" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion SvtVp9Enc | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, svtVp9)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

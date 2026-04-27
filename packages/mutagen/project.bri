@@ -22,7 +22,11 @@ export default function mutagen(): std.Recipe<std.Directory> {
   `
     .dependencies(go)
     .workDir(source)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .unsafe({ networking: true })
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/mutagen"));

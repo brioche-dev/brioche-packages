@@ -1,0 +1,82 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import flac from "flac";
+import fluidsynth from "fluidsynth";
+import gameMusicEmu from "game_music_emu";
+import libogg from "libogg";
+import libvorbis from "libvorbis";
+import libxmp from "libxmp";
+import mpg123 from "mpg123";
+import opus from "opus";
+import opusfile from "opusfile";
+import sdl3 from "sdl3";
+import wavpack from "wavpack";
+
+export const project = {
+  name: "sdl3_mixer",
+  version: "3.2.0",
+  repository: "https://github.com/libsdl-org/SDL_mixer",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/release-${project.version}/SDL3_mixer-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sdl3Mixer(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      flac,
+      fluidsynth,
+      gameMusicEmu,
+      libogg,
+      libvorbis,
+      libxmp,
+      mpg123,
+      opus,
+      opusfile,
+      sdl3,
+      wavpack,
+    ],
+    set: {
+      SDLMIXER_VENDORED: "OFF",
+      SDLMIXER_TESTS: "OFF",
+      SDLMIXER_EXAMPLES: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: {
+        append: [{ path: "include" }, { path: "include/SDL3_mixer" }],
+      },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion sdl3-mixer | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, sdl3Mixer)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^release-(?<version>3\.\d+\.\d+)$/,
+  });
+}

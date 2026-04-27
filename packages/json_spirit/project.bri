@@ -35,28 +35,29 @@ export default function jsonSpirit(): std.Recipe<std.Directory> {
 export async function test(): Promise<std.Recipe<std.File>> {
   // There is no way to print the package's version, so we just
   // build a simple program to ensure it works
-  const src = std.file(std.indoc`
-    #include <json_spirit/json_spirit.h>
-    #include <iostream>
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <json_spirit/json_spirit.h>
+      #include <iostream>
 
-    int main()
-    {
-      json_spirit::Value value;
-      value = "test";
+      int main()
+      {
+        json_spirit::Value value;
+        value = "test";
 
-      std::cout << "hello world" << std::endl;
+        std::cout << "hello world" << std::endl;
 
-      return EXIT_SUCCESS;
-    }
-  `);
+        return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.cpp
     g++ main.cpp -o main -ljson_spirit
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, boost, jsonSpirit)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

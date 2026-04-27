@@ -1,0 +1,46 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "tbls",
+  version: "1.94.4",
+  extra: {
+    moduleName: "github.com/k1!lo!w/tbls",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function tbls(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/tbls",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    tbls version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(tbls)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

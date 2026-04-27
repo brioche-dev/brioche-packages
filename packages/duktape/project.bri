@@ -21,7 +21,11 @@ export default function duktape(): std.Recipe<std.Directory> {
     make INSTALL_PREFIX="$BRIOCHE_OUTPUT" -f Makefile.sharedlibrary install
   `
     .workDir(source)
-    .outputScaffold(std.directory({ bin: std.directory() }))
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
     .dependencies(std.toolchain)
     .toDirectory()
     .pipe(std.pkgConfigMakePathsRelative)

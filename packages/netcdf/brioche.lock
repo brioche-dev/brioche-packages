@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Unidata/netcdf-c": {
+      "v4.10.0": "80c6d3fbe3ee5b80014b0078c17b737b7e14d80c"
+    }
+  }
+}

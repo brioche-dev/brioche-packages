@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/attempt-cli/1.1.1/download": {
+      "type": "sha256",
+      "value": "a6d6e618a0ae2c18e3a6f63e25ef2df169212e2a3e2207d4ac227c724daf19c3"
+    }
+  }
+}

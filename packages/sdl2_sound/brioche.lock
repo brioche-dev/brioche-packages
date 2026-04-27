@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/icculus/SDL_sound/releases/download/v2.0.4/SDL2_sound-2.0.4.tar.gz": {
+      "type": "sha256",
+      "value": "f73f6720dba2e677c0bf70d0c76ca3c96d865d04025e49a8b161711685961931"
+    }
+  }
+}

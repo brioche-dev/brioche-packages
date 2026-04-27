@@ -1,0 +1,393 @@
+import * as std from "std";
+import openssl from "openssl";
+import redis from "redis";
+
+export const project = {
+  name: "redis_cluster",
+};
+
+/**
+ * Network stack used by the cluster containers.
+ */
+type NetworkMode = "ipv4" | "ipv6" | "dual";
+
+/**
+ * Cluster configuration. Edit these values to customize the topology.
+ */
+const config = {
+  /** Number of replica instances. */
+  replicas: 2,
+  /** Deploy Sentinel for automatic failover. */
+  sentinel: true,
+  /** Number of Sentinel instances. */
+  sentinelCount: 3,
+  /** Enable TLS on all Redis and Sentinel ports. */
+  tls: true,
+  /** Shared password for requirepass and masterauth. */
+  password: "changeme",
+  /** Enable AOF persistence to /data. */
+  persistence: true,
+  /** Network stack for the cluster containers. */
+  network: "ipv6" as NetworkMode,
+};
+
+/** Sentinel quorum derived from the configured sentinel count. */
+const quorum = Math.ceil(config.sentinelCount / 2);
+
+/** Redis bind directive matching the chosen network mode. */
+const bindDirective: Record<NetworkMode, string> = {
+  ipv4: "bind 0.0.0.0",
+  ipv6: "bind ::*",
+  dual: "bind * -::*",
+};
+
+/** Compose service sysctls to force IPv4-only DNS resolution. */
+const composeSysctls =
+  config.network === "ipv4"
+    ? { sysctls: { "net.ipv6.conf.all.disable_ipv6": "1" } }
+    : {};
+
+/** Compose network declaration matching the chosen network mode. */
+const composeNetwork = config.network !== "ipv4" ? { enable_ipv6: true } : {};
+
+/**
+ * Common redis.conf directives shared by master and replica roles.
+ */
+function serverBaseConfig(extra: string[] = []): string {
+  const persistenceLines = config.persistence
+    ? [
+        "appendonly yes",
+        'appendfilename "appendonly.aof"',
+        'appenddirname "appendonlydir"',
+        "dir /data",
+      ]
+    : [];
+
+  const portLines = config.tls
+    ? ["port 0", ...tlsConfig(6379, { authClients: true })]
+    : ["port 6379"];
+
+  return [
+    bindDirective[config.network],
+    ...portLines,
+    "protected-mode no",
+    `requirepass ${config.password}`,
+    `masterauth ${config.password}`,
+    ...extra,
+    ...persistenceLines,
+  ].join("\n");
+}
+
+/**
+ * Generate redis.conf content for a master node.
+ */
+function masterConfig(): string {
+  return serverBaseConfig();
+}
+
+/**
+ * Generate redis.conf content for a replica node.
+ */
+function replicaConfig(): string {
+  return serverBaseConfig(["replicaof redis-master 6379"]);
+}
+
+/**
+ * Generate sentinel.conf content.
+ */
+function sentinelConfig(): string {
+  const portLines = config.tls
+    ? ["port 0", ...tlsConfig(26379)]
+    : ["port 26379"];
+
+  return [
+    ...portLines,
+    "protected-mode no",
+    "sentinel resolve-hostnames yes",
+    `sentinel monitor mymaster redis-master 6379 ${quorum}`,
+    `sentinel auth-pass mymaster ${config.password}`,
+    "sentinel down-after-milliseconds mymaster 5000",
+    "sentinel failover-timeout mymaster 60000",
+    "sentinel parallel-syncs mymaster 1",
+  ].join("\n");
+}
+
+/**
+ * TLS directives reused across server and sentinel configs.
+ */
+function tlsConfig(port: number, flags?: { authClients?: boolean }): string[] {
+  const authLine =
+    flags?.authClients === true ? ["tls-auth-clients optional"] : [];
+
+  return [
+    `tls-port ${port}`,
+    "tls-cert-file /tls/redis.crt",
+    "tls-key-file /tls/redis.key",
+    "tls-ca-cert-file /tls/ca.crt",
+    "tls-replication yes",
+    'tls-protocols "TLSv1.2 TLSv1.3"',
+    ...authLine,
+  ];
+}
+
+/**
+ * Build the redis-cli healthcheck command.
+ */
+function healthcheckCmd(): string[] {
+  const hostArgs = config.network === "ipv6" ? ["-h", "::1"] : [];
+  const tlsArgs = config.tls ? ["--tls", "--cacert", "/tls/ca.crt"] : [];
+  return [
+    "CMD",
+    "redis-cli",
+    ...hostArgs,
+    ...tlsArgs,
+    "-a",
+    config.password,
+    "ping",
+  ];
+}
+
+/**
+ * Generate a self-signed CA for the cluster.
+ * Returns a directory with ca/cert.pem and ca/key.pem.
+ */
+function generateCa(): std.Recipe<std.Directory> {
+  return std.runBash`
+    openssl ecparam -name prime256v1 -genkey -out "$BRIOCHE_OUTPUT/ca/key.pem"
+    openssl req -new -x509 -key "$BRIOCHE_OUTPUT/ca/key.pem" \\
+      -config "$opensslDir/etc/ssl/openssl.cnf" \\
+      -out "$BRIOCHE_OUTPUT/ca/cert.pem" \\
+      -subj "/CN=Redis Cluster CA" -days 365 -batch 2>/dev/null
+  `
+    .dependencies(openssl)
+    .env({ opensslDir: openssl })
+    .outputScaffold(
+      std.directory({
+        ca: std.directory(),
+      }),
+    )
+    .toDirectory();
+}
+
+/**
+ * Generate a node certificate signed by the cluster CA.
+ * Returns a directory with tls/ca.crt, tls/redis.crt, and tls/redis.key.
+ */
+function generateNodeCert(
+  ca: std.Recipe<std.Directory>,
+  cn: string,
+): std.Recipe<std.Directory> {
+  return std.runBash`
+    openssl ecparam -name prime256v1 -genkey -out node.key
+    openssl req -new -key node.key -out node.csr \\
+      -config "$opensslDir/etc/ssl/openssl.cnf" \\
+      -subj "/CN=$cn" -batch 2>/dev/null
+    openssl x509 -req -in node.csr \\
+      -CA "$ca/ca/cert.pem" -CAkey "$ca/ca/key.pem" \\
+      -CAserial ca.srl -CAcreateserial \\
+      -out node.crt -days 365 2>/dev/null
+
+    cp "$ca/ca/cert.pem" "$BRIOCHE_OUTPUT/tls/ca.crt"
+    cp node.crt "$BRIOCHE_OUTPUT/tls/redis.crt"
+    cp node.key "$BRIOCHE_OUTPUT/tls/redis.key"
+  `
+    .dependencies(openssl)
+    .env({ ca, cn, opensslDir: openssl })
+    .outputScaffold(
+      std.directory({
+        tls: std.directory(),
+      }),
+    )
+    .toDirectory();
+}
+
+/**
+ * Options for building a Redis OCI container image.
+ */
+interface RedisImageOptions {
+  base: std.Recipe<std.Directory>;
+  role: "master" | "replica" | "sentinel";
+  redisConf: string;
+  ca?: std.Recipe<std.Directory>;
+  nodeName?: string;
+}
+
+/**
+ * Build an OCI container image for a given Redis role. The base layer is
+ * shared across roles for layer deduplication.
+ */
+function redisImage(options: RedisImageOptions): std.Recipe<std.File> {
+  const isSentinel = options.role === "sentinel";
+  const configPath = isSentinel
+    ? "etc/redis/sentinel.conf"
+    : "etc/redis/redis.conf";
+  const entrypoint = isSentinel
+    ? ["/bin/redis-sentinel"]
+    : ["/bin/redis-server"];
+  const cmd = [`/${configPath}`];
+
+  const configDir = config.persistence
+    ? std.directory({ data: std.directory() })
+    : std.directory();
+  const configLayer = configDir.insert(configPath, std.file(options.redisConf));
+
+  const { ca, nodeName } = options;
+  const tlsLayer =
+    config.tls && ca != null && nodeName != null
+      ? [generateNodeCert(ca, nodeName)]
+      : [];
+
+  return std.ociContainerImage({
+    layers: [options.base, configLayer, ...tlsLayer],
+    entrypoint,
+    cmd,
+    ref: `docker.io/library/redis-${options.role}:latest`,
+  });
+}
+
+/**
+ * Generate a docker-compose.yml for the full cluster topology.
+ */
+function composeFile(): std.Recipe<std.File> {
+  const dependsOnMaster = {
+    "redis-master": { condition: "service_healthy" as const },
+  };
+
+  const replicaIndices = rangeFrom(1, config.replicas);
+  const sentinelIndices = config.sentinel
+    ? rangeFrom(1, config.sentinelCount)
+    : [];
+
+  const replicaServices = Object.fromEntries(
+    replicaIndices.map((i) => {
+      const name = `redis-replica-${i}`;
+      return [
+        name,
+        {
+          image: "redis-replica:latest",
+          pull_policy: "never",
+          container_name: name,
+          ...(config.persistence ? { volumes: [`${name}-data:/data`] } : {}),
+          depends_on: dependsOnMaster,
+          networks: ["redis-net"],
+          ...composeSysctls,
+          restart: "unless-stopped",
+        },
+      ];
+    }),
+  );
+
+  const sentinelServices = Object.fromEntries(
+    sentinelIndices.map((i) => {
+      const name = `redis-sentinel-${i}`;
+      return [
+        name,
+        {
+          image: "redis-sentinel:latest",
+          pull_policy: "never",
+          container_name: name,
+          ...(i === 1 ? { ports: ["26379:26379"] } : {}),
+          depends_on: dependsOnMaster,
+          networks: ["redis-net"],
+          ...composeSysctls,
+          restart: "unless-stopped",
+        },
+      ];
+    }),
+  );
+
+  const masterService = {
+    image: "redis-master:latest",
+    pull_policy: "never",
+    container_name: "redis-master",
+    ports: ["6379:6379"],
+    ...(config.persistence ? { volumes: ["redis-master-data:/data"] } : {}),
+    networks: ["redis-net"],
+    ...composeSysctls,
+    restart: "unless-stopped",
+    healthcheck: {
+      test: healthcheckCmd(),
+      interval: "2s",
+      timeout: "5s",
+      retries: 3,
+    },
+  };
+
+  const allVolumes = config.persistence
+    ? {
+        "redis-master-data": {},
+        ...Object.fromEntries(
+          replicaIndices.map((i) => [`redis-replica-${i}-data`, {}]),
+        ),
+      }
+    : undefined;
+
+  const compose = {
+    name: "redis-cluster",
+    services: {
+      "redis-master": masterService,
+      ...replicaServices,
+      ...sentinelServices,
+    },
+    ...(allVolumes != null ? { volumes: allVolumes } : {}),
+    networks: {
+      "redis-net": composeNetwork,
+    },
+  };
+
+  return std.file(JSON.stringify(compose, null, 2));
+}
+
+function rangeFrom(start: number, count: number): number[] {
+  return Array.from({ length: count }, (_, i) => start + i);
+}
+
+/**
+ * Build all cluster artifacts: per-role OCI images and docker-compose.yml.
+ */
+export default function (): std.Recipe<std.Directory> {
+  const base = redis();
+  const ca = config.tls ? generateCa() : undefined;
+
+  const images: [string, RedisImageOptions][] = [
+    [
+      "redis-master.tar",
+      {
+        base,
+        role: "master",
+        redisConf: masterConfig(),
+        ca,
+        nodeName: "redis-master",
+      },
+    ],
+    [
+      "redis-replica.tar",
+      {
+        base,
+        role: "replica",
+        redisConf: replicaConfig(),
+        ca,
+        nodeName: "redis-replica",
+      },
+    ],
+    ...(config.sentinel
+      ? [
+          [
+            "redis-sentinel.tar",
+            {
+              base,
+              role: "sentinel",
+              redisConf: sentinelConfig(),
+              ca,
+              nodeName: "redis-sentinel",
+            },
+          ] satisfies [string, RedisImageOptions],
+        ]
+      : []),
+  ];
+
+  return images.reduce(
+    (dir, [filename, opts]) => dir.insert(filename, redisImage(opts)),
+    std.directory().insert("docker-compose.yml", composeFile()),
+  );
+}

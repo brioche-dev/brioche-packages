@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/DaanDeMeyer/reproc": {
+      "v14.2.5": "3179928ae7b085e41dfb846d987519fa7c12ffb3"
+    }
+  }
+}

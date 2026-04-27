@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/KhronosGroup/Vulkan-Utility-Libraries": {
-      "v1.4.337": "9a3f4105c16bde4e2717eeab0fcc5a49236f7294"
+      "v1.4.349": "5f62a4c3c686d3d3d1b3973a4397dd4d4768f3ad"
     }
   }
 }

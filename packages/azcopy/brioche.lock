@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/!azure/azure-storage-azcopy/v10/@v/v10.32.3.zip": {
+      "type": "sha256",
+      "value": "faa3f2277a9c911929a6ed66693a31a223946c885e63bb3c3d3e712e45501317"
+    }
+  }
+}

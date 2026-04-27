@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://files.pythonhosted.org/packages/f2/65/b6ba90634c984a4fcc02c7e3afe523fef500c4980fec67cc27536ee50acf/flit_core-3.12.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "e7a0304069ea895172e3c7bb703292e992c5d1555dd1233ab7b5621b5b69e62c"
+    },
+    "https://files.pythonhosted.org/packages/source/d/docutils/docutils-0.22.4.tar.gz": {
+      "type": "sha256",
+      "value": "4db53b1fde9abecbb74d91230d32ab626d94f6badfc575d6db9194a49df29968"
+    }
+  }
+}

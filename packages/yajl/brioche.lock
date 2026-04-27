@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/lloyd/yajl": {
+      "2.1.0": "66cb08ca2ad8581080b626a75dfca266a890afb2"
+    }
+  }
+}

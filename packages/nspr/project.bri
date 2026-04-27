@@ -1,0 +1,72 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "nspr",
+  version: "4.38.2",
+};
+
+const source = Brioche.download(
+  `https://archive.mozilla.org/pub/nspr/releases/v${project.version}/src/nspr-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function nspr(): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd nspr
+    ./configure \\
+      --prefix=/ \\
+      --with-mozilla \\
+      --with-pthreads \\
+      --enable-64bit
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nspr-config"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion nspr | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, nspr)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://archive.mozilla.org/pub/nspr/releases/
+      | lines
+      | where ($it | str contains '/pub/nspr/releases/v')
+      | parse --regex '/pub/nspr/releases/v(?<version>[\\d.]+)/'
+      | uniq-by version
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/uutils/coreutils.git": {
+      "0.8.0": "c4093734e2ebe2efb7d65e216cd1444664bcf26a"
+    }
+  }
+}

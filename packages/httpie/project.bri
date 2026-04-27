@@ -1,0 +1,70 @@
+import * as std from "std";
+import python, { getLatestVersion as getPythonVersion } from "python";
+import uv from "uv";
+
+export const project = {
+  name: "httpie",
+  version: "3.2.4",
+  repository: "https://github.com/httpie/cli.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function httpie(): std.Recipe<std.Directory> {
+  return std.runBash`
+    uv tool install .
+  `
+    .workDir(source)
+    .dependencies(python, uv)
+    .env({
+      UV_NO_MANAGED_PYTHON: "1",
+      UV_LINK_MODE: "copy",
+      UV_TOOL_DIR: std.outputPath,
+    })
+    .unsafe({ networking: true })
+    .toDirectory()
+    .pipe((recipe) => {
+      recipe = recipe.insert("brioche-run.d/python", python);
+      const binaries = ["http", "https", "httpie"];
+      for (const binary of binaries) {
+        recipe = std.addRunnable(recipe, `bin/${binary}`, {
+          command: { relativePath: "brioche-run.d/python/bin/python" },
+          args: [{ relativePath: `httpie/bin/${binary}` }],
+          env: {
+            PYTHONPATH: {
+              prepend: {
+                relativePath: `httpie/lib/python${getPythonVersion()}/site-packages`,
+              },
+              separator: ":",
+            },
+          },
+        });
+      }
+
+      return recipe;
+    })
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/http"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    http --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(httpie)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

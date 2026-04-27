@@ -4,7 +4,6 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "xlslib",
   version: "2.5.0",
-  repository: "https://sourceforge.net/projects/xlslib",
 };
 
 const source = std.castToDirectory(
@@ -28,34 +27,35 @@ export default function xlslib(): std.Recipe<std.Directory> {
     .pipe(std.libtoolSanitizeDependencies)
     .pipe((recipe) =>
       std.setEnv(recipe, {
-        CPATH: { append: [{ path: "include/xlslib" }] },
+        CPATH: { append: [{ path: "include" }, { path: "include/xlslib" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
       }),
     );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <common/xlconfig.h>
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <common/xlconfig.h>
 
-    int main()
-    {
-      const char* version = PACKAGE_VERSION;
-      printf("%s", version);
+      int main()
+      {
+        const char* version = PACKAGE_VERSION;
+        printf("%s", version);
 
-      return EXIT_SUCCESS;
-    }
-  `);
+        return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.cpp
     g++ main.cpp -o main -lxls
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, xlslib)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

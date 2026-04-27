@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/uriparser/uriparser/releases/download/uriparser-1.0.0/uriparser-1.0.0.tar.xz": {
+      "type": "sha256",
+      "value": "154a3f649d80a78d5095fc461ec032ffb45f5ed3619edec923ac68cff29a088d"
+    }
+  }
+}

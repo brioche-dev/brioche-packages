@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/zeux/pugixml": {
+      "v1.15": "ee86beb30e4973f5feffe3ce63bfa4fbadf72f38"
+    }
+  }
+}

@@ -33,26 +33,27 @@ export default function graphite2(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const src = std.file(std.indoc`
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <graphite2/Font.h>
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <graphite2/Font.h>
 
-    int main(void)
-    {
-        printf("%d.%d.%d", GR2_VERSION_MAJOR, GR2_VERSION_MINOR, GR2_VERSION_BUGFIX);
+      int main(void)
+      {
+          printf("%d.%d.%d", GR2_VERSION_MAJOR, GR2_VERSION_MINOR, GR2_VERSION_BUGFIX);
 
-        return EXIT_SUCCESS;
-    }
-  `);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main -lgraphite2
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, graphite2)
-    .env({ src })
     .toFile();
 
   const result = (await script.read()).trim();

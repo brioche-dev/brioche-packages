@@ -1,0 +1,51 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "glab",
+  version: "1.89.0",
+  extra: {
+    moduleName: "gitlab.com/gitlab-org/cli",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function glab(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+      trimpath: true,
+    },
+    path: "./cmd/glab",
+    runnable: "bin/glab",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    glab version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(glab)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `glab ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

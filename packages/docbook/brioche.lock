@@ -1,0 +1,37 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://archive.docbook.org/xml/4.1.2/docbkx412.zip": {
+      "type": "sha256",
+      "value": "30f0644064e0ea71751438251940b1431f46acada814a062870f486c772e7772"
+    },
+    "https://archive.docbook.org/xml/4.2/docbook-xml-4.2.zip": {
+      "type": "sha256",
+      "value": "acc4601e4f97a196076b7e64b368d9248b07c7abf26b34a02cca40eeebe60fa2"
+    },
+    "https://archive.docbook.org/xml/4.3/docbook-xml-4.3.zip": {
+      "type": "sha256",
+      "value": "23068a94ea6fd484b004c5a73ec36a66aa47ea8f0d6b62cc1695931f5c143464"
+    },
+    "https://archive.docbook.org/xml/4.4/docbook-xml-4.4.zip": {
+      "type": "sha256",
+      "value": "02f159eb88c4254d95e831c51c144b1863b216d909b5ff45743a1ce6f5273090"
+    },
+    "https://archive.docbook.org/xml/4.5/docbook-xml-4.5.zip": {
+      "type": "sha256",
+      "value": "4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4"
+    },
+    "https://archive.docbook.org/xml/5.0/docbook-5.0.zip": {
+      "type": "sha256",
+      "value": "3dcd65e1f5d9c0c891b3be204fa2bb418ce485d32310e1ca052e81d36623208e"
+    },
+    "https://archive.docbook.org/xml/5.1/docbook-v5.1-os.zip": {
+      "type": "sha256",
+      "value": "b3f3413654003c1e773360d7fc60ebb8abd0e8c9af8e7d6c4b55f124f34d1e7f"
+    },
+    "https://github.com/docbook/docbook/releases/download/5.2/docbook-5.2.zip": {
+      "type": "sha256",
+      "value": "11992554a884786f1b78c6b478d6cec90352caf00bef54731c8d54f26751f2c5"
+    }
+  }
+}

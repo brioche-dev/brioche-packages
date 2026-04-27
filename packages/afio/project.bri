@@ -1,0 +1,54 @@
+import * as std from "std";
+
+export const project = {
+  name: "afio",
+  version: "2.5.2",
+  repository: "https://github.com/kholtman/afio",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function afio(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make CC="cc" -j "$(nproc)"
+
+    # Manual installation
+    cp afio "$BRIOCHE_OUTPUT/bin/"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/afio"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    afio -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(afio)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `afio: Version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

@@ -1,0 +1,102 @@
+import * as std from "std";
+import { runNushell } from "nushell";
+import openssl from "openssl";
+import python from "python";
+
+export const project = {
+  name: "ocaml",
+  version: "5.4.1",
+  repository: "https://github.com/ocaml/ocaml",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/ocaml-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function ocaml(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)" world.opt
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+
+    # Manual installation
+    mv "$BRIOCHE_OUTPUT/lib/ocaml/caml" "$BRIOCHE_OUTPUT/include"
+  `
+    .workDir(source)
+    .outputScaffold(
+      std.directory({
+        include: std.directory(),
+      }),
+    )
+    .dependencies(std.toolchain, python, openssl)
+    .toDirectory()
+    .pipe((recipe) => std.recipe(fixShebangs(recipe)))
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ocaml"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ocaml --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ocaml)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `The OCaml toplevel, version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
+
+/**
+ * Fix shebang in OCaml scripts to use the correct path to the
+ * interpreter.
+ *
+ * @remarks The scripts are assumed to be found under `bin` folder.
+ *
+ * @returns The recipe with the shebang fixed.
+ */
+async function fixShebangs(
+  recipe: std.Recipe<std.Directory>,
+): Promise<std.Recipe<std.Directory>> {
+  // Get all shebang scripts under `bin/` which reference `#!//bin/ocamlrun`
+  const shebangPathList = await runNushell`
+    cd $env.recipe
+    ls --long bin
+      | where type == "file" and mode =~ "x"
+      | each {|it| { path: $it.name, firstLine: (open --raw $it.name | decode utf-8 | lines | first) }}
+      | where {|it| (($it.firstLine | str substring ..7) == "#!//bin/") and ($it.firstLine | str contains "ocamlrun")}
+      | get path
+      | save $env.BRIOCHE_OUTPUT
+  `
+    .env({ recipe })
+    .toFile()
+    .read();
+  const shebangPaths = shebangPathList
+    .split("\n")
+    .filter((line) => line !== "");
+
+  // Wrap each script using `std.addRunnable()`
+  const wrappedShebangs = shebangPaths.map((path) => {
+    return std.addRunnable(std.directory(), path, {
+      command: { relativePath: "bin/ocamlrun" },
+      args: [[std.glob(recipe, [path]), `/${path}`]],
+    });
+  });
+
+  return std.merge(recipe, ...wrappedShebangs);
+}

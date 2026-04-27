@@ -30,7 +30,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
   // This package contains multiple header files for X11 protocol and its extensions.
   // The version can be obtained per extension, but not for the entire package.
   // Here, we just check that we can build a simple program using the header files.
-  const src = std.file(std.indoc`
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
       #include <stdio.h>
       #include <stdlib.h>
       #include <X11/X.h>
@@ -41,15 +42,15 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
           return EXIT_SUCCESS;
       }
-  `);
+    `),
+  });
 
   const script = std.runBash`
-    cp "$src" main.c
     gcc main.c -o main $(pkg-config --cflags xproto)
     ./main | tee "$BRIOCHE_OUTPUT"
   `
+    .workDir(src)
     .dependencies(std.toolchain, xorgproto)
-    .env({ src: src })
     .toFile();
 
   const result = (await script.read()).trim();

@@ -1,0 +1,61 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "yajl",
+  version: "2.1.0",
+  repository: "https://github.com/lloyd/yajl",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+}).pipe((source) =>
+  // Patch deprecated GET_TARGET_PROPERTY(... LOCATION) and the
+  // ADD_CUSTOM_COMMAND that uses it, both incompatible with modern CMake.
+  std.runBash`
+    for f in "$BRIOCHE_OUTPUT"/reformatter/CMakeLists.txt "$BRIOCHE_OUTPUT"/verify/CMakeLists.txt; do
+      sed -i '/GET_TARGET_PROPERTY/d; /ADD_CUSTOM_COMMAND.*POST_BUILD/,/)/d' "$f"
+    done
+  `
+    .dependencies(std.toolchain)
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function yajl(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion yajl | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, yajl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
