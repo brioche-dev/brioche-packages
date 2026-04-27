@@ -4,26 +4,35 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "ck_search",
-  version: "0.7.2",
-  extra: {
-    crateName: "ck-search",
-  },
+  version: "0.7.4",
+  repository: "https://github.com/BeaconBay/ck.git",
 };
 
-const source = Brioche.download(
-  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+// HACK: Disable the embedding features on aarch64-linux so that ort is not pulled
+// in, mirroring upstream's handling for platforms where ort cannot link
+// (https://github.com/BeaconBay/ck/commit/ed43e058). Semantic search is
+// unavailable there, but regex/lexical search still works.
+const embeddingFeaturesSupported = std.CURRENT_PLATFORM === "x86_64-linux";
 
 export default function ckSearch(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
+    path: "ck-cli",
     dependencies: [openssl],
-    unsafe: {
-      // Needed to run custom build command for 'ort-sys'
-      networking: true,
-    },
+    unsafe: embeddingFeaturesSupported
+      ? {
+          // Needed to run custom build command for 'ort-sys'
+          networking: true,
+        }
+      : undefined,
+    buildParams: embeddingFeaturesSupported
+      ? undefined
+      : { defaultFeatures: false },
     runnable: "bin/ck",
   });
 }
@@ -45,5 +54,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromRustCrates({ project });
+  return std.liveUpdateFromGithubReleases({ project });
 }

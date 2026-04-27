@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://crates.io/api/v1/crates/ck-search/0.7.2/download": {
-      "type": "sha256",
-      "value": "003a82e26e0798827818696de96d98a7e166d32e153ba945f9513f20c6ba773e"
+  "git_refs": {
+    "https://github.com/BeaconBay/ck.git": {
+      "0.7.4": "ed43e058f0353e8798462cc44f3f522c2e87603e"
     }
   }
 }
