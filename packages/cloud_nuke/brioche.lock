@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/gruntwork-io/cloud-nuke/@v/v0.46.0.zip": {
+    "https://proxy.golang.org/github.com/gruntwork-io/cloud-nuke/@v/v0.49.0.zip": {
       "type": "sha256",
-      "value": "8d6427131a6791b7da5e51fe2e6baffd955728d65f26f8a93ab4a61d9661ccd4"
+      "value": "43340c95cbe73c723ea230272ba748b3b03de388bafe9ac08e73082d34307e48"
     }
   }
 }
