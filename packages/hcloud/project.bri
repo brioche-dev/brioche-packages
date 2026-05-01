@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "hcloud",
-  version: "1.61.0",
+  version: "1.62.2",
   extra: {
     moduleName: "github.com/hetznercloud/cli",
   },

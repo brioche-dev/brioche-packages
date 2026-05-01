@@ -1,0 +1,70 @@
+import * as std from "std";
+import premake from "premake";
+
+export const project = {
+  name: "otfcc",
+  version: "0.10.4",
+  repository: "https://github.com/caryll/otfcc",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // StaticRuntime was removed in modern premake5, and the toolchain gcc
+    // is built with --disable-multilib so -m64/-m32 flags are unavailable
+    std.runBash`
+      sed -i \\
+        -e 's/flags { "StaticRuntime" }/-- flags { "StaticRuntime" }/' \\
+        -e 's/platforms { "x64", "x86" }/-- platforms { "x64", "x86" }/' \\
+        -e '/filter "platforms:x86"/,/filter {}/d' \\
+        -e '/filter "platforms:x64"/,/filter {}/d' \\
+        "$BRIOCHE_OUTPUT/premake5.lua"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function otfcc(): std.Recipe<std.Directory> {
+  return std.runBash`
+    premake5 gmake
+    cd build/gmake
+    make config=release -j "$(nproc)"
+    cd ../..
+
+    # Manual installation
+    cp bin/release-/otfccdump "$BRIOCHE_OUTPUT/bin/"
+    cp bin/release-/otfccbuild "$BRIOCHE_OUTPUT/bin/"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, premake)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/otfccdump"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    otfccdump --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(otfcc)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `This is otfccdump, version ${project.version}.`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
