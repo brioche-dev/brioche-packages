@@ -12,7 +12,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "libupnpp",
-  version: "1.0.3",
+  version: "1.0.4",
   repository: "https://framagit.org/medoc92/libupnpp",
 };
 

@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "newrelic_cli",
-  version: "0.110.0",
+  version: "0.111.6",
   extra: {
     moduleName: "github.com/newrelic/newrelic-cli",
   },

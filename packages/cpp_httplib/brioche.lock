@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/yhirose/cpp-httplib": {
-      "v0.38.0": "6f2717e6230713484c4ee819fdd431723d29ea08"
+      "v0.42.0": "ff04679538c66d1b90e95e5a5530e2dd2f1b3c53"
     }
   }
 }

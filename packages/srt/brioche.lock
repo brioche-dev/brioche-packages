@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Haivision/srt.git": {
+      "v1.5.4": "a8c6b65520f814c5bd8f801be48c33ceece7c4a6"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/benhoyt/inih/archive/refs/tags/r62.tar.gz": {
+      "type": "sha256",
+      "value": "9c15fa751bb8093d042dae1b9f125eb45198c32c6704cd5481ccde460d4f8151"
+    }
+  }
+}

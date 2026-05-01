@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/cloudflare/cf-terraforming/@v/v0.24.0.zip": {
+    "https://proxy.golang.org/github.com/cloudflare/cf-terraforming/@v/v0.25.0.zip": {
       "type": "sha256",
-      "value": "dffcf674877551db701cec30a4dcd5c161dd20a01453ec3a879e2879af3e87ba"
+      "value": "c67a5fce49d7dea731771aac93c2ef208329ee6714c21a0873072357c6cdae84"
     }
   }
 }
