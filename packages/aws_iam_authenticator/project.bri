@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "aws_iam_authenticator",
-  version: "0.7.11",
+  version: "0.7.12",
   extra: {
     moduleName: "sigs.k8s.io/aws-iam-authenticator",
   },
@@ -13,7 +13,10 @@ const source = Brioche.download(
   `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
 )
   .unarchive("zip")
-  .peel(2);
+  .peel(2)
+  // HACK: Workspace references test modules not shipped in the proxy zip,
+  // so we remove it to avoid build errors.
+  .remove("go.work");
 const manifest = await goModuleManifest(
   Brioche.download(
     `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
