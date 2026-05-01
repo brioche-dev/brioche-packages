@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "go_size_analyzer",
-  version: "1.12.0",
+  version: "1.12.4",
   extra: {
     moduleName: "github.com/!zxilly/go-size-analyzer",
   },
@@ -32,6 +32,10 @@ export default function gsa(): std.Recipe<std.Directory> {
         "-X",
         `github.com/Zxilly/go-size-analyzer.buildDate=${manifest.time}`,
       ],
+    },
+    env: {
+      // Uses the new experimental JSON encoding feature available in Go 1.25
+      GOEXPERIMENT: "jsonv2",
     },
     path: "./cmd/gsa",
     runnable: "bin/gsa",
