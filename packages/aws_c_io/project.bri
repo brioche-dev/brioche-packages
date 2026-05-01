@@ -7,7 +7,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_c_io",
-  version: "0.26.1",
+  version: "0.26.3",
   repository: "https://github.com/awslabs/aws-c-io",
 };
 
