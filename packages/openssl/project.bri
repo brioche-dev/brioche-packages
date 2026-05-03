@@ -18,7 +18,9 @@ export default function openssl(): std.Recipe<std.Directory> {
     ./config \\
       --prefix=/ \\
       --openssldir=/etc/ssl \\
-      --libdir=lib
+      --libdir=lib \\
+      no-tests \\
+      no-docs
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
