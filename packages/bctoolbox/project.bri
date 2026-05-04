@@ -4,8 +4,10 @@ import openssl from "openssl";
 
 export const project = {
   name: "bctoolbox",
-  version: "5.4.106",
-  repository: "https://gitlab.linphone.org/BC/public/bctoolbox.git",
+  version: "5.4.110",
+  // Use the GitHub mirror instead of the official GitLab repository,
+  // the later seems to have network issues.
+  repository: "https://github.com/BelledonneCommunications/bctoolbox.git",
 };
 
 const source = Brioche.gitCheckout({
@@ -56,8 +58,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGitlabTags({
-    gitlabUrl: "https://gitlab.linphone.org",
-    project,
-  });
+  return std.liveUpdateFromGithubTags({ project });
 }
