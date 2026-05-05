@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/Kitware/CMake/releases/download/v4.2.3/cmake-4.2.3.tar.gz": {
+    "https://github.com/Kitware/CMake/releases/download/v4.3.1/cmake-4.3.1.tar.gz": {
       "type": "sha256",
-      "value": "7efaccde8c5a6b2968bad6ce0fe60e19b6e10701a12fce948c2bf79bac8a11e9"
+      "value": "0798f4be7a1a406a419ac32db90c2956936fecbf50db3057d7af47d69a2d7edb"
     }
   },
   "git_refs": {
