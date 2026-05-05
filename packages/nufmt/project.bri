@@ -1,0 +1,63 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "nufmt",
+  version: "0.1.0",
+  repository: "https://github.com/nushell/nufmt.git",
+  extra: {
+    // No tags or releases published yet, pin to the latest commit.
+    gitRef: "4a9e384cb13a3bf5e7a0094d7e4e21868b4f9c1d",
+  },
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.extra.gitRef,
+});
+
+export default function nufmt(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/nufmt",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    nufmt --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nufmt)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `nufmt ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let gitRef = ^git ls-remote ${project.repository} refs/heads/main
+      | lines
+      | parse --regex '(?<hash>[0-9a-f]+)\\s+'
+      | get 0.hash
+
+    let version = http get --raw $"https://raw.githubusercontent.com/nushell/nufmt/($gitRef)/Cargo.toml"
+      | lines
+      | where ($it | str starts-with 'version = ')
+      | first
+      | parse --regex 'version = "(?<version>[^"]+)"'
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.gitRef $gitRef
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
