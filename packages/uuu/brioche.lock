@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/nxp-imx/mfgtools": {
+      "uuu_1.5.243": "bb04dcf48c7be428bd6d9b6d50b15c021bdd6495"
+    }
+  }
+}
