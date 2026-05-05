@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "nghttp2",
-  version: "1.68.0",
+  version: "1.68.1",
   repository: "https://github.com/nghttp2/nghttp2",
 };
 

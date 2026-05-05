@@ -1,0 +1,82 @@
+import imlib2 from "imlib2";
+import libx11 from "libx11";
+import * as std from "std";
+import xorgproto from "xorgproto";
+
+export const project = {
+  name: "libcaca",
+  version: "0.99.beta20",
+  repository: "https://github.com/cacalabs/libcaca",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/libcaca-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Redefine `_caca_alloc2d` locally in `common-image.c` so `img2txt` and
+    // `cacaview` build without pulling the internal symbol from libcaca.
+    // https://github.com/cacalabs/libcaca/issues/59#issuecomment-3453490297
+    std.applyPatch({
+      source,
+      patch: Brioche.download(
+        `${project.repository}/commit/00d5a26a131b2b91cead7588881fb4b41b6d9392.patch`,
+      ),
+      strip: 1,
+    }),
+  );
+
+export default function libcaca(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-static \\
+      --disable-java \\
+      --disable-cxx \\
+      --disable-csharp \\
+      --disable-python \\
+      --disable-ruby \\
+      --disable-doc \\
+      --disable-slang \\
+      --disable-x11 \\
+      --disable-gl
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, imlib2, libx11, xorgproto)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion caca | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libcaca)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^v(?<version>\d+\.\d+\.\w+\d+)$/,
+  });
+}

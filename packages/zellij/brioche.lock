@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/zellij/0.43.1/download": {
+    "https://crates.io/api/v1/crates/zellij/0.44.1/download": {
       "type": "sha256",
-      "value": "c19109fa86ccbfc7d8ad7a87a7ef38cce2bc56936b7f5d1fc98b8aebe5182058"
+      "value": "e36b0d9072c8484525642a5c920a884ab7609019d9b5d044d2bda181ff1c998d"
     }
   }
 }

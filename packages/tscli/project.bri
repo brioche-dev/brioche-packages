@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "tscli",
-  version: "0.3.0",
+  version: "0.6.1",
   extra: {
     moduleName: "github.com/jaxxstorm/tscli",
   },

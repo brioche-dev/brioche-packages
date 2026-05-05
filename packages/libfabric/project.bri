@@ -11,7 +11,7 @@ import rdmaCore from "rdma_core";
 
 export const project = {
   name: "libfabric",
-  version: "2.4.0",
+  version: "2.5.1",
   repository: "https://github.com/ofiwg/libfabric",
 };
 

@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libmicrohttpd",
-  version: "1.0.2",
+  version: "1.0.4",
 };
 
 const source = Brioche.download(

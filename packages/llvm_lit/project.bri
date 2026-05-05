@@ -3,7 +3,7 @@ import python, { wrapVenvScripts } from "python";
 
 export const project = {
   name: "llvm_lit",
-  version: "22.1.1",
+  version: "22.1.3",
   repository: "https://github.com/llvm/llvm-project",
 };
 

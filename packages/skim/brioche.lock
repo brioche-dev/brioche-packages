@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/skim/4.0.0/download": {
+    "https://crates.io/api/v1/crates/skim/4.6.0/download": {
       "type": "sha256",
-      "value": "8ff70fb8b48f4e2dcd5bf00cbdb44edfe5013e7d193f4974b41df5f4a9723aa8"
+      "value": "2c2d96f5e862d8d10a55695c6ce96fcfbc3ca09df5b6c87db6f6f154c5307944"
     }
   }
 }

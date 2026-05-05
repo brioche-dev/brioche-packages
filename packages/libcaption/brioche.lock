@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/szatmary/libcaption.git": {
+      "v0.8": "e8b6261090eb3f2012427cc6b151c923f82453db"
+    }
+  }
+}

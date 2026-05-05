@@ -1,5 +1,4 @@
 diff --git a/requirements-dev-lock.txt b/requirements-dev-lock.txt
-index b917ba447..1329f8afb 100644
 --- a/requirements-dev-lock.txt
 +++ b/requirements-dev-lock.txt
 @@ -132,18 +132,10 @@
@@ -18,15 +17,14 @@ index b917ba447..1329f8afb 100644
 -    #   pytest
 -    #   tox
 -    #   wheel
-+packaging==25.0 \
-+    --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
-+    --hash=sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
++packaging==26.0 \
++    --hash=sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4 \
++    --hash=sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529
 +    # (manually patched)
  pefile==2023.2.7 \
      --hash=sha256:82e6114004b3d6911c77c3953e3838654b04511b8b66e8583db70c65998017dc \
      --hash=sha256:da185cd2af68c08a6cd4481f7325ed600a88f6a813bad9dea07ab3ef73d8d8d6
 diff --git a/requirements-test-lock.txt b/requirements-test-lock.txt
-index d9ebfcae7..6f6088dc2 100644
 --- a/requirements-test-lock.txt
 +++ b/requirements-test-lock.txt
 @@ -93,14 +93,10 @@
@@ -41,15 +39,14 @@ index d9ebfcae7..6f6088dc2 100644
 -    #   build
 -    #   pytest
 -    #   wheel
-+packaging==25.0 \
-+    --hash=sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484 \
-+    --hash=sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
++packaging==26.0 \
++    --hash=sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4 \
++    --hash=sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529
 +    # (manually patched)
  pip-tools==7.5.3 \
      --hash=sha256:3aac0c473240ae90db7213c033401f345b05197293ccbdd2704e52e7a783785e \
      --hash=sha256:8fa364779ebc010cbfe17cb9de404457ac733e100840423f28f6955de7742d41
 diff --git a/requirements-test.txt b/requirements-test.txt
-index 420381404..b6493480b 100644
 --- a/requirements-test.txt
 +++ b/requirements-test.txt
 @@ -9,4 +9,4 @@
@@ -57,4 +54,4 @@ index 420381404..b6493480b 100644
  pytest-xdist==3.1.0
  pip-tools==7.5.3
 -packaging==24.1
-+packaging==25.0
++packaging==26.0

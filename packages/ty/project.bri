@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "ty",
-  version: "0.0.23",
+  version: "0.0.30",
   repository: "https://github.com/astral-sh/ty.git",
 };
 

@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/railwayapp/4.31.0/download": {
+    "https://crates.io/api/v1/crates/railwayapp/4.37.3/download": {
       "type": "sha256",
-      "value": "6a2f0e629673c59386de4a7cc5f4b04e5040408f87ab075cf9971de58ebc2462"
+      "value": "996c2420f0b410f58e7d6365428797ba1d75dcc768463531b15fc8c2d162fad0"
     }
   }
 }

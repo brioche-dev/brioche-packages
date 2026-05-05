@@ -5,7 +5,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "mollysocket",
-  version: "1.7.0",
+  version: "1.7.1",
   repository: "https://github.com/mollyim/mollysocket.git",
 };
 

@@ -6,7 +6,7 @@ import nasm from "nasm";
 
 export const project = {
   name: "aom",
-  version: "3.13.1",
+  version: "3.13.3",
 };
 
 const source = Brioche.download(

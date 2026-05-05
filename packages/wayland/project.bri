@@ -6,7 +6,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "wayland",
-  version: "1.24.91",
+  version: "1.25.0",
   repository: "https://gitlab.freedesktop.org/wayland/wayland",
 };
 

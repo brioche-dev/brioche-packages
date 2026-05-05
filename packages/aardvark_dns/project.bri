@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "aardvark_dns",
-  version: "1.17.0",
+  version: "1.17.1",
   extra: {
     crateName: "aardvark-dns",
   },

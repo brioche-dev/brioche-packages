@@ -1,0 +1,49 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "noti",
+  version: "3.8.0",
+  repository: "https://github.com/variadico/noti.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function noti(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./cmd/noti",
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/variadico/noti/internal/command.Version=${project.version}`,
+      ],
+    },
+    runnable: "bin/noti",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    noti --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(noti)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `noti version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

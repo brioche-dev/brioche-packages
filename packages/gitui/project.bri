@@ -5,7 +5,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "gitui",
-  version: "0.28.0",
+  version: "0.28.1",
   repository: "https://github.com/extrawurst/gitui",
 };
 

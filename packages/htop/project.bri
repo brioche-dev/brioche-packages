@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "htop",
-  version: "3.4.1",
+  version: "3.5.0",
   repository: "https://github.com/htop-dev/htop",
 };
 

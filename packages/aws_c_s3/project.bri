@@ -13,7 +13,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_c_s3",
-  version: "0.11.5",
+  version: "0.12.2",
   repository: "https://github.com/awslabs/aws-c-s3",
 };
 

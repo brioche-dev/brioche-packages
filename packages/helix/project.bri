@@ -1,5 +1,7 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
+import curl from "curl";
+import nushell from "nushell";
 
 export const project = {
   name: "helix",
@@ -12,31 +14,61 @@ const source = Brioche.gitCheckout({
   ref: project.version,
 });
 
-export default function helix(): std.Recipe<std.Directory> {
-  // TODO: https://docs.helix-editor.com/building-from-source.html#note-to-packagers
-  // - set HELIX_DEFAULT_RUNTIME to $BRIOCHE_OUTPUT/lib/helix/runtime
-  // TODO: https://docs.helix-editor.com/building-from-source.html#configure-the-desktop-shortcut
-  // - setup desktop shortcut and icon
-  // TODO: parse languages.toml with `nu`, `std.download()` grammar sources
-  return std.merge(
-    cargoBuild({
+function buildGrammars(): std.Recipe<std.Directory> {
+  return std
+    .process({
+      command: std.tpl`${nushell}/bin/nu`,
+      args: [Brioche.includeFile("build-grammars.nu")],
       env: {
-        HELIX_DISABLE_AUTO_GRAMMAR_BUILD: "1",
+        languages_toml: std.tpl`${source}/languages.toml`,
       },
-      path: "helix-term",
-      runnable: "bin/hx",
-      source,
-    }),
-    std.directory({
-      lib: std.directory({
-        helix: std.directory({
-          runtime: std.directory({
-            queries: source.get("runtime/queries"),
-            themes: source.get("runtime/themes"),
+      outputScaffold: std.directory(),
+      dependencies: [std.toolchain, curl],
+      unsafe: {
+        networking: true,
+      },
+    })
+    .toDirectory();
+}
+
+export default function helix(): std.Recipe<std.Directory> {
+  const recipe = cargoBuild({
+    source,
+    path: "helix-term",
+    env: {
+      HELIX_DISABLE_AUTO_GRAMMAR_BUILD: "1",
+    },
+  });
+
+  const runtime = std.directory({
+    grammars: buildGrammars(),
+    queries: std.castToDirectory(source.get("runtime/queries")),
+    themes: std.castToDirectory(source.get("runtime/themes")),
+  });
+
+  return (
+    std
+      .merge(
+        recipe,
+        std.directory({
+          lib: std.directory({
+            helix: std.directory({ runtime }),
           }),
         }),
-      }),
-    }),
+      )
+      // Wrap the binary so HELIX_RUNTIME is set when run directly
+      .pipe((recipe) =>
+        recipe.insert("libexec/hx", recipe.get("bin/hx")).remove("bin/hx"),
+      )
+      .pipe((recipe) =>
+        std.addRunnable(recipe, "bin/hx", {
+          command: { relativePath: "libexec/hx" },
+          env: {
+            HELIX_RUNTIME: { fallback: { relativePath: "lib/helix/runtime" } },
+          },
+        }),
+      )
+      .pipe((recipe) => std.withRunnableLink(recipe, "bin/hx"))
   );
 }
 

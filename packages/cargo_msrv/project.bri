@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_msrv",
-  version: "0.19.2",
+  version: "0.19.3",
   repository: "https://github.com/foresterre/cargo-msrv.git",
 };
 

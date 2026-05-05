@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.freedesktop.org/spice/libcacard": {
+      "v2.8.2": "df2d3c05a250741632184c2cc66df247039a70d7"
+    }
+  }
+}

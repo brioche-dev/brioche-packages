@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "ipsw",
-  version: "3.1.664",
+  version: "3.1.671",
   repository: "https://github.com/blacktop/ipsw.git",
 };
 

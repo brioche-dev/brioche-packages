@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://files.musepack.net/source/libreplaygain_r475.tar.gz": {
+      "type": "sha256",
+      "value": "8258bf785547ac2cda43bb195e07522f0a3682f55abe97753c974609ec232482"
+    }
+  }
+}

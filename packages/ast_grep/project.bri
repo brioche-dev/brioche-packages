@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "ast_grep",
-  version: "0.41.1",
+  version: "0.42.1",
   repository: "https://github.com/ast-grep/ast-grep.git",
 };
 

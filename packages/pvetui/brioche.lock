@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/devnullvoid/pvetui/@v/v1.3.1.info": {
+      "type": "sha256",
+      "value": "2543e6b24d7a35bd5ec6fd12c9b3d94a3d689a721ebffb7299f5a056884192b4"
+    },
+    "https://proxy.golang.org/github.com/devnullvoid/pvetui/@v/v1.3.1.zip": {
+      "type": "sha256",
+      "value": "32ab1ec9bbff73e63fe178bb902b57e8b32cd7a8c65bd7b0cf815e37eace2616"
+    }
+  }
+}

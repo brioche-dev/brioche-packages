@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "tailwindcss",
-  version: "4.2.1",
+  version: "4.2.2",
   extra: {
     packageName: "@tailwindcss/cli",
   },

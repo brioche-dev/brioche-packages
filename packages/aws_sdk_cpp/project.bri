@@ -18,7 +18,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_sdk_cpp",
-  version: "1.11.769",
+  version: "1.11.790",
   repository: "https://github.com/aws/aws-sdk-cpp",
 };
 

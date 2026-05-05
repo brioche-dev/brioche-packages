@@ -1,0 +1,96 @@
+import * as std from "std";
+import alsaLib from "alsa_lib";
+import cmake from "cmake";
+import dbus from "dbus";
+import flac from "flac";
+import glib from "glib";
+import lame from "lame";
+import libcap from "libcap";
+import libogg from "libogg";
+import libsndfile from "libsndfile";
+import libvorbis from "libvorbis";
+import { mesonBuild } from "meson";
+import mpg123 from "mpg123";
+import ninja from "ninja";
+import openssl from "openssl";
+import opus from "opus";
+import orc from "orc";
+import pcre2 from "pcre2";
+import soxr from "soxr";
+import speexdsp from "speexdsp";
+
+export const project = {
+  name: "pulseaudio",
+  version: "17.0",
+  repository: "https://gitlab.freedesktop.org/pulseaudio/pulseaudio",
+};
+
+const source = Brioche.download(
+  `https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function pulseaudio(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      cmake,
+      ninja,
+      alsaLib,
+      dbus,
+      flac,
+      glib,
+      lame,
+      libcap,
+      libogg,
+      libsndfile,
+      libvorbis,
+      mpg123,
+      openssl,
+      opus,
+      orc,
+      pcre2,
+      soxr,
+      speexdsp,
+    ],
+    set: {
+      database: "simple",
+      doxygen: "false",
+      man: "false",
+      tests: "false",
+    },
+    runnable: "bin/pulseaudio",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libpulse | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, pulseaudio)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+  });
+}

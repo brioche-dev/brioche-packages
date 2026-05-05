@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "vet",
-  version: "1.14.0",
+  version: "1.16.2",
   extra: {
     moduleName: "github.com/safedep/vet",
   },

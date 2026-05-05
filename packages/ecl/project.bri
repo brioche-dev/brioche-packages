@@ -5,7 +5,7 @@ import libffi from "libffi";
 
 export const project = {
   name: "ecl",
-  version: "24.5.10",
+  version: "26.3.27",
   repository: "https://gitlab.com/embeddable-common-lisp/ecl",
 };
 
@@ -19,9 +19,11 @@ export default function ecl(): std.Recipe<std.Directory> {
   return std.runBash`
     ./configure \\
       --prefix=/ \\
-      --enable-threads=yes \\
       --enable-boehm=system \\
-      --enable-gmp=system
+      --enable-gmp=system \\
+      --enable-libatomic=system \\
+      --enable-threads=yes \\
+      --with-dffi=system
     make
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `

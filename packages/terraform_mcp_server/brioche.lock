@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/hashicorp/terraform-mcp-server/@v/v0.4.0.info": {
+    "https://proxy.golang.org/github.com/hashicorp/terraform-mcp-server/@v/v0.5.1.info": {
       "type": "sha256",
-      "value": "a9f77ba1bf3cb007e6dba9c3a5d59bc9067a2626d3d78951891503f5fcc0c338"
+      "value": "32f16868df53bf9eb2e28018a05a208e383540ae678c499a548b45c265cca9b7"
     },
-    "https://proxy.golang.org/github.com/hashicorp/terraform-mcp-server/@v/v0.4.0.zip": {
+    "https://proxy.golang.org/github.com/hashicorp/terraform-mcp-server/@v/v0.5.1.zip": {
       "type": "sha256",
-      "value": "ab08fa77ada358e000e55f3f25c4dabc5964d1e85c57e76a31fec998dbaa58e7"
+      "value": "6a65fa3308dbfb45d2d0f3b06eb98135b67437b49642c935b8df899535db50de"
     }
   }
 }

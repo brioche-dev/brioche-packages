@@ -6,7 +6,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "mongo_cxx_driver",
-  version: "4.1.4",
+  version: "4.2.0",
   repository: "https://github.com/mongodb/mongo-cxx-driver",
 };
 

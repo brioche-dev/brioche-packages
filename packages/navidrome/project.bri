@@ -5,7 +5,7 @@ import taglib from "taglib";
 
 export const project = {
   name: "navidrome",
-  version: "0.61.1",
+  version: "0.61.2",
   extra: {
     moduleName: "github.com/navidrome/navidrome",
   },

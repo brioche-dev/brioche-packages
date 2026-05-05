@@ -4,7 +4,7 @@ import libjpegTurbo from "libjpeg_turbo";
 
 export const project = {
   name: "libraw",
-  version: "0.22.0",
+  version: "0.22.1",
   repository: "https://github.com/LibRaw/LibRaw",
 };
 

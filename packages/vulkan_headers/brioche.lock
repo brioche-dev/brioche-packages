@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/KhronosGroup/Vulkan-Headers": {
-      "v1.4.346": "29184b98984f6169a5e83e97557a77cff1e5b0ca"
+      "v1.4.349": "f6a6f7ab165cedbfa2a7d0c93fe27a2d01ce09c8"
     }
   }
 }

@@ -1,0 +1,54 @@
+import * as std from "std";
+import openssl from "openssl";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "srt",
+  version: "1.5.4",
+  repository: "https://github.com/Haivision/srt",
+};
+
+const source = Brioche.gitCheckout({
+  repository: `${project.repository}.git`,
+  ref: `v${project.version}`,
+});
+
+export default function srt(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, openssl],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      ENABLE_APPS: "ON",
+      ENABLE_TESTING: "OFF",
+      ENABLE_UNITTESTS: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion srt | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, srt)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

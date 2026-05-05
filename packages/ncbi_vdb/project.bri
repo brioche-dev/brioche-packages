@@ -5,7 +5,7 @@ import libxml2 from "libxml2";
 
 export const project = {
   name: "ncbi_vdb",
-  version: "3.4.0",
+  version: "3.4.1",
   repository: "https://github.com/ncbi/ncbi-vdb",
 };
 

@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/libjpeg-turbo/libjpeg-turbo.git": {
-      "3.1.3": "af9c1c268520a29adf98cad5138dafe612b3d318"
+      "3.1.90": "e1dbfa7be7b7e54922020051dc77781e92739700"
     }
   }
 }

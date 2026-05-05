@@ -1,0 +1,54 @@
+import * as std from "std";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+
+export const project = {
+  name: "faac",
+  version: "1.50",
+  repository: "https://github.com/knik0/faac",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `faac-${project.version}`,
+});
+
+export default function faac(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja],
+    runnable: "bin/faac",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion faac | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, faac)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^faac-(?<version>\d+\.\d+(?:\.\d+)?)$/,
+  });
+}

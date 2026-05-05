@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/WebAssembly/binaryen.git": {
-      "version_128": "06cc1d9b452df3e7f4d80bb9314a863c69d4aad6"
+      "version_129": "d0e2be9edd0052e487dde1d8d85d10f1338af584"
     }
   }
 }

@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "highs",
-  version: "1.13.1",
+  version: "1.14.0",
   repository: "https://github.com/ERGO-Code/HiGHS.git",
 };
 
@@ -44,7 +44,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const expected = `HiGHS version ${project.version}`;
   std.assert(
     result.includes(expected),
-    `expected '${expected}' in '${result}'`,
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;

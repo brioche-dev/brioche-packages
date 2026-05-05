@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "glaze",
-  version: "7.2.3",
+  version: "7.3.3",
   repository: "https://github.com/stephenberry/glaze.git",
 };
 

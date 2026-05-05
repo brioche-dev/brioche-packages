@@ -7,7 +7,7 @@ import cython from "cython";
 
 export const project = {
   name: "numpy",
-  version: "2.4.3",
+  version: "2.4.4",
   extra: {
     packageName: "numpy",
   },

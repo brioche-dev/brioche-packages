@@ -1,0 +1,78 @@
+import * as std from "std";
+
+export const project = {
+  name: "liblockfile",
+  version: "1.17",
+  repository: "https://github.com/miquels/liblockfile",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Drop -g root flags and guard empty @LDCONFIG@ substitution
+  std.runBash`
+    sed -i 's/-g root//g; s/-g $(MAILGROUP) -m 2755/-m 755/g' "$BRIOCHE_OUTPUT/Makefile.in"
+    sed -i 's/@LDCONFIG@/true/' "$BRIOCHE_OUTPUT/Makefile.in"
+  `
+    .dependencies(std.toolchain)
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function liblockfile(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install_shared install_common DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <lockfile.h>
+
+      int main(void)
+      {
+          printf("ok");
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -llockfile -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, liblockfile)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "ok";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

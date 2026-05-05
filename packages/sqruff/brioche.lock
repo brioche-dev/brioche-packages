@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/quarylabs/sqruff.git": {
-      "v0.35.4": "31a265994c6b581f19ac62a7803b468fc9f34eeb"
+      "v0.38.0": "cd01b8d6fe9c12d41d2e27db04c0bbbaacdedddc"
     }
   }
 }

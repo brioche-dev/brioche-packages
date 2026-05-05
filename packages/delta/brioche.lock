@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/dandavison/delta": {
-      "0.18.2": "a589ff9debaefdd3992384434120f5a03a103481"
+      "0.19.2": "1502986e81c8e3fa27bfb5b84bac6b281a6b1edd"
     }
   }
 }

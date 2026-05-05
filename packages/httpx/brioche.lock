@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/projectdiscovery/httpx/@v/v1.9.0.zip": {
+      "type": "sha256",
+      "value": "05ab4b7acb6ea26f6afb2a4d46bfc1915982e2e8c5dae62d815e11533828bada"
+    }
+  }
+}

@@ -5,13 +5,13 @@
       "type": "sha256",
       "value": "c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684"
     },
-    "https://www.python.org/ftp/python/3.13.12/Python-3.13.12.tar.xz": {
+    "https://www.python.org/ftp/python/3.13.13/Python-3.13.13.tar.xz": {
       "type": "sha256",
-      "value": "2a84cd31dd8d8ea8aaff75de66fc1b4b0127dd5799aa50a64ae9a313885b4593"
+      "value": "2ab91ff401783ccca64f75d10c882e957bdfd60e2bf5a72f8421793729b78a71"
     },
-    "https://www.python.org/ftp/python/3.14.3/Python-3.14.3.tar.xz": {
+    "https://www.python.org/ftp/python/3.14.4/Python-3.14.4.tar.xz": {
       "type": "sha256",
-      "value": "a97d5549e9ad81fe17159ed02c68774ad5d266c72f8d9a0b5a9c371fe85d902b"
+      "value": "d923c51303e38e249136fc1bdf3568d56ecb03214efdef48516176d3d7faaef8"
     }
   }
 }

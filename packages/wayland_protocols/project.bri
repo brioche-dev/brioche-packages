@@ -5,7 +5,7 @@ import wayland from "wayland";
 
 export const project = {
   name: "wayland_protocols",
-  version: "1.47",
+  version: "1.48",
   repository: "https://gitlab.freedesktop.org/wayland/wayland-protocols",
 };
 

@@ -10,7 +10,7 @@ import rav1e from "rav1e";
 
 export const project = {
   name: "libavif",
-  version: "1.4.0",
+  version: "1.4.1",
   repository: "https://github.com/AOMediaCodec/libavif",
 };
 

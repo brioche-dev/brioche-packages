@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/HowardHinnant/date.git": {
+      "v3.0.4": "f94b8f36c6180be0021876c4a397a054fe50c6f2"
+    }
+  }
+}

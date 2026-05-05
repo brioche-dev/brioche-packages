@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/sendme/0.31.0/download": {
+    "https://crates.io/api/v1/crates/sendme/0.32.0/download": {
       "type": "sha256",
-      "value": "d8d6b34e639ca1a8626b02b28a8e9b4915c60c4abc0b6d30602efe78d2f185e7"
+      "value": "410a53d7383885add280a78f4f813cc6d56e3cb7b13207eddf016c545652caee"
     }
   }
 }

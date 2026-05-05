@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-s3": {
-      "v0.11.5": "e9d1bde139f88b08aaa3bf0507f443f31ccede93"
+      "v0.12.2": "ab764f57ec3cab7866c0f8b7d9e9772b7cc1b9ee"
     }
   }
 }

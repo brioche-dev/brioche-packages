@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "ngt",
-  version: "2.7.1",
+  version: "2.7.2",
   repository: "https://github.com/yahoojapan/NGT",
 };
 

@@ -1,0 +1,64 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libogg from "libogg";
+import libvorbis from "libvorbis";
+
+export const project = {
+  name: "libcanberra",
+  version: "0.30",
+};
+
+const source = Brioche.download(
+  `http://0pointer.de/lennart/projects/libcanberra/libcanberra-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libcanberra(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libogg, libvorbis)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libcanberra | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libcanberra)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get http://0pointer.de/lennart/projects/libcanberra/
+      | lines
+      | where ($it | str contains 'libcanberra-') and ($it | str contains '.tar.')
+      | parse --regex 'libcanberra-(?<version>[\\d.]+)\\.tar'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

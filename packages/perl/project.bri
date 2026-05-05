@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "perl",
-  version: "5.42.1",
+  version: "5.42.2",
   repository: "https://github.com/Perl/perl5",
   extra: {
     majorVersion: "5",

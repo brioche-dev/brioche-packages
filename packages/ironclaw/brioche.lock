@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/ironclaw/0.18.0/download": {
+    "https://crates.io/api/v1/crates/ironclaw/0.24.0/download": {
       "type": "sha256",
-      "value": "5e13f67e112ee8a294b76baa6214f795bb7754f1366db1c310436eb4e51f5126"
+      "value": "84614a872a80ab59ba75a48d7b398e247454c6b12e3e4a2128c87f6e2f3b0389"
     }
   }
 }

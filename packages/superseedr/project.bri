@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "superseedr",
-  version: "1.0.3",
+  version: "1.0.4",
   extra: {
     crateName: "superseedr",
   },

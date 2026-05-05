@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "cf_terraforming",
-  version: "0.24.0",
+  version: "0.25.0",
   extra: {
     moduleName: "github.com/cloudflare/cf-terraforming",
   },

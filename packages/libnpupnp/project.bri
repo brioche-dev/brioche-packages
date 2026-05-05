@@ -11,7 +11,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "libnpupnp",
-  version: "6.2.3",
+  version: "6.3.0",
   repository: "https://framagit.org/medoc92/npupnp",
 };
 

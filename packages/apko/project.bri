@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "apko",
-  version: "1.2.2",
+  version: "1.2.3",
   extra: {
     moduleName: "chainguard.dev/apko",
   },
