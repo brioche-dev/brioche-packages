@@ -1,0 +1,81 @@
+import * as std from "std";
+import libiconv from "libiconv";
+import libidn2 from "libidn2";
+import libtasn1 from "libtasn1";
+import libunistring from "libunistring";
+import nettle from "nettle";
+import p11Kit from "p11_kit";
+
+export const project = {
+  name: "gnutls",
+  version: "3.8.13",
+  repository: "https://gitlab.com/gnutls/gnutls",
+  extra: {
+    majorVersion: "3",
+    minorVersion: "8",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
+const source = Brioche.download(
+  `https://www.gnupg.org/ftp/gcrypt/gnutls/v${project.extra.majorVersion}.${project.extra.minorVersion}/gnutls-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function gnutls(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --without-tpm \\
+      --without-tpm2 \\
+      --disable-doc \\
+      --disable-tests
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      nettle,
+      libtasn1,
+      libidn2,
+      libiconv,
+      libunistring,
+      p11Kit,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion gnutls | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, gnutls)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({ project });
+}
