@@ -1,0 +1,158 @@
+import * as std from "std";
+import aom from "aom";
+import brotli from "brotli";
+import dav1d from "dav1d";
+import fontconfig from "fontconfig";
+import freetype from "freetype";
+import glib from "glib";
+import lcms2 from "lcms2";
+import libde265 from "libde265";
+import libdeflate from "libdeflate";
+import libheif from "libheif";
+import libjpegTurbo from "libjpeg_turbo";
+import liblqr from "liblqr";
+import libpng from "libpng";
+import libtiff from "libtiff";
+import libvmaf from "libvmaf";
+import libwebp from "libwebp";
+import libxml2 from "libxml2";
+import lerc from "lerc";
+import openjpeg from "openjpeg";
+import pcre2 from "pcre2";
+import x265 from "x265";
+
+export const project = {
+  name: "imagemagick",
+  version: "7.1.2-21",
+  repository: "https://github.com/ImageMagick/ImageMagick",
+};
+
+const source = Brioche.download(
+  `https://imagemagick.org/archive/releases/ImageMagick-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function imagemagick(): std.Recipe<std.Directory> {
+  return (
+    std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --without-x \\
+      --disable-docs
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+      .workDir(source)
+      .dependencies(
+        std.toolchain,
+        aom,
+        brotli,
+        dav1d,
+        fontconfig,
+        freetype,
+        glib,
+        lcms2,
+        libde265,
+        libdeflate,
+        libheif,
+        libjpegTurbo,
+        liblqr,
+        libpng,
+        libtiff,
+        libvmaf,
+        libwebp,
+        libxml2,
+        lerc,
+        openjpeg,
+        pcre2,
+        x265,
+      )
+      .toDirectory()
+      .pipe(std.libtoolSanitizeDependencies)
+      .pipe(std.pkgConfigMakePathsRelative)
+      .pipe((recipe) =>
+        std.setEnv(recipe, {
+          CPATH: { append: [{ path: "include" }] },
+          LIBRARY_PATH: { append: [{ path: "lib" }] },
+          PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        }),
+      )
+      // Relocate the binary to libexec to free bin/magick for the wrapper added next
+      .pipe((recipe) =>
+        recipe
+          .insert("libexec/magick", recipe.get("bin/magick"))
+          .remove("bin/magick"),
+      )
+      .pipe((recipe) => {
+        // The binary can't locate its config directory at runtime,
+        // so the wrapper exports MAGICK_CONFIGURE_PATH for it
+        let result = std.addRunnable(recipe, "bin/magick", {
+          command: { relativePath: "libexec/magick" },
+          env: {
+            MAGICK_CONFIGURE_PATH: {
+              fallback: { relativePath: "etc/ImageMagick-7" },
+            },
+          },
+        });
+
+        // ImageMagick 7 dispatches legacy commands via argv[0], which the
+        // wrapper can't carry through a symlink; replace each symlink with
+        // its own wrapper that invokes magick with the legacy name prepended
+        const legacyCommands = [
+          "animate",
+          "compare",
+          "composite",
+          "conjure",
+          "convert",
+          "display",
+          "identify",
+          "import",
+          "magick-script",
+          "mogrify",
+          "montage",
+          "stream",
+        ];
+        for (const name of legacyCommands) {
+          result = result.remove(`bin/${name}`);
+          result = std.addRunnable(result, `bin/${name}`, {
+            command: { relativePath: "libexec/magick" },
+            args: [name],
+            env: {
+              MAGICK_CONFIGURE_PATH: {
+                fallback: { relativePath: "etc/ImageMagick-7" },
+              },
+            },
+          });
+        }
+        return result;
+      })
+      .pipe((recipe) => std.withRunnableLink(recipe, "bin/magick"))
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    magick --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(imagemagick)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ImageMagick ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^(?<version>\d+\.\d+\.\d+-\d+)$/,
+  });
+}

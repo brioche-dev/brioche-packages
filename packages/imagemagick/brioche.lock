@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://imagemagick.org/archive/releases/ImageMagick-7.1.2-21.tar.xz": {
+      "type": "sha256",
+      "value": "56450bf5d65b63abb09568abb2c40b493ab913418f92df135ed661471da0eb0d"
+    }
+  }
+}
