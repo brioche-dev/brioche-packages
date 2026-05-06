@@ -29,7 +29,7 @@ interface NushellPlugin {
   dependencies?: std.RecipeLike<std.Directory>[];
 }
 
-function buildNushellPlugins(): std.Recipe<std.Directory> {
+function buildNushellPlugins(): std.Recipe<std.Directory>[] {
   const nushellPlugins: NushellPlugin[] = [
     {
       name: "nu_plugin_formats",
