@@ -35,7 +35,7 @@ const nushellPlugins: NushellPlugin[] = [
   },
   {
     name: "nu_plugin_gstat",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   },
   {
     name: "nu_plugin_inc",
@@ -45,7 +45,7 @@ const nushellPlugins: NushellPlugin[] = [
   },
   {
     name: "nu_plugin_query",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   },
 ];
 
