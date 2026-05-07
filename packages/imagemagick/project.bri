@@ -25,7 +25,13 @@ export const project = {
   name: "imagemagick",
   version: "7.1.2-21",
   repository: "https://github.com/ImageMagick/ImageMagick",
+  extra: {
+    majorVersion: "7",
+  },
 };
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
 
 const source = Brioche.download(
   `https://imagemagick.org/archive/releases/ImageMagick-${project.version}.tar.xz`,
@@ -91,12 +97,14 @@ export default function imagemagick(): std.Recipe<std.Directory> {
           command: { relativePath: "libexec/magick" },
           env: {
             MAGICK_CONFIGURE_PATH: {
-              fallback: { relativePath: "etc/ImageMagick-7" },
+              fallback: {
+                relativePath: `etc/ImageMagick-${project.extra.majorVersion}`,
+              },
             },
           },
         });
 
-        // ImageMagick 7 dispatches legacy commands via argv[0], which the
+        // ImageMagick dispatches legacy commands via argv[0], which the
         // wrapper can't carry through a symlink; replace each symlink with
         // its own wrapper that invokes magick with the legacy name prepended
         const legacyCommands = [
@@ -120,7 +128,9 @@ export default function imagemagick(): std.Recipe<std.Directory> {
             args: [name],
             env: {
               MAGICK_CONFIGURE_PATH: {
-                fallback: { relativePath: "etc/ImageMagick-7" },
+                fallback: {
+                  relativePath: `etc/ImageMagick-${project.extra.majorVersion}`,
+                },
               },
             },
           });
