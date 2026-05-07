@@ -1,0 +1,40 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "volta",
+  version: "2.0.2",
+  repository: "https://github.com/volta-cli/volta.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function volta(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/volta",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    volta --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(volta)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
