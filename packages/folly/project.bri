@@ -51,7 +51,7 @@ export default function folly(): std.Recipe<std.Directory> {
       libsodium,
       libunwind,
       lz4,
-      openssl,
+      openssl({ version: "3" }),
       snappy,
     ],
     set: {
