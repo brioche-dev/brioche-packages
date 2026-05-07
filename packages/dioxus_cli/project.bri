@@ -20,7 +20,7 @@ export default function dioxusCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/dx",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 

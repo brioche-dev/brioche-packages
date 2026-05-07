@@ -17,7 +17,7 @@ const source = Brioche.gitCheckout({
 export default function mollysocket(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl, sqlite],
+    dependencies: [openssl({ version: "3" }), sqlite],
     runnable: "bin/mollysocket",
   });
 }

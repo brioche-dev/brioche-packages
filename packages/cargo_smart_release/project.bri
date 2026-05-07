@@ -19,7 +19,7 @@ const source = Brioche.download(
 export default function cargoSmartRelease(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
     runnable: "bin/cargo-smart-release",
   });
 }

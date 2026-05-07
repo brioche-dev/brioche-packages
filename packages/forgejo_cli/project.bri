@@ -17,7 +17,7 @@ export default function forgejoCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/fj",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 

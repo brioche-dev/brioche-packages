@@ -19,7 +19,7 @@ const source = Brioche.download(
 export default function cargoOutdated(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
     runnable: "bin/cargo-outdated",
   });
 }
