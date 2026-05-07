@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/sahlberg/libnfs.git": {
+      "libnfs-6.0.2": "18c5c73ee88bb7dc8da0d55dc95164bb77e49dc6"
+    }
+  }
+}
