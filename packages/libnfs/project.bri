@@ -1,0 +1,58 @@
+import * as std from "std";
+import gnutls from "gnutls";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "libnfs",
+  version: "6.0.2",
+  repository: "https://github.com/sahlberg/libnfs.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `libnfs-${project.version}`,
+});
+
+export default function libnfs(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, gnutls],
+    set: {
+      ENABLE_TESTS: "OFF",
+      ENABLE_EXAMPLES: "OFF",
+      ENABLE_UTILS: "OFF",
+      ENABLE_DOCUMENTATION: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the pkg-config
+  // modversion is used to verify the correct installation
+  const script = std.runBash`
+    pkg-config --modversion libnfs | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libnfs)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^libnfs-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}
