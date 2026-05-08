@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/golang.org/x/review/@v/v1.20.0.zip": {
+      "type": "sha256",
+      "value": "215f7bccf9dd2ab0d829b0a95f72d70be765304ba265121c29d635bd5442ce98"
+    }
+  }
+}
