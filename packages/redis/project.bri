@@ -23,7 +23,7 @@ export default function redis(): std.Recipe<std.Directory> {
     make install PREFIX="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, python)
+    .dependencies(std.toolchain, openssl({ version: "3" }), python)
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/redis-server"));
 }
