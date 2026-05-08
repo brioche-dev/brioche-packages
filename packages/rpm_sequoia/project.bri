@@ -33,7 +33,7 @@ export default function rpmSequoia(): std.Recipe<std.Directory> {
     cp target/release/librpm_sequoia.so "$BRIOCHE_OUTPUT/lib/librpm_sequoia.so.1"
     cp target/release/rpm-sequoia.pc "$BRIOCHE_OUTPUT/lib/pkgconfig/"
   `
-    .dependencies(std.toolchain, rust, openssl)
+    .dependencies(std.toolchain, rust, openssl({ version: "3" }))
     .workDir(vendored)
     .outputScaffold(
       std.directory({
