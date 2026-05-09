@@ -30,7 +30,13 @@ export default function unbound(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, expat, openssl, libevent, nghttp2)
+    .dependencies(
+      std.toolchain,
+      expat,
+      openssl({ version: "3" }),
+      libevent,
+      nghttp2,
+    )
     .env({
       ssl_dir: std.tpl`${openssl}`,
       libevent_dir: std.tpl`${libevent}`,
