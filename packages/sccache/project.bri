@@ -17,7 +17,7 @@ export default function sccache(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/sccache",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 

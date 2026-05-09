@@ -23,7 +23,7 @@ export default function ckSearch(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     path: "ck-cli",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
     unsafe: embeddingFeaturesSupported
       ? {
           // Needed to run custom build command for 'ort-sys'

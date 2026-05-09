@@ -17,7 +17,7 @@ export default function cargoUdeps(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/cargo-udeps",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 

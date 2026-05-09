@@ -26,7 +26,7 @@ export default function xmlsec(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, libxml2, libxslt, openssl)
+    .dependencies(std.toolchain, libxml2, libxslt, openssl({ version: "3" }))
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)

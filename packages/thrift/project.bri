@@ -19,7 +19,7 @@ const source = Brioche.download(
 export default function thrift(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, boost, libevent, openssl],
+    dependencies: [std.toolchain, boost, libevent, openssl({ version: "3" })],
     set: {
       BUILD_SHARED_LIBS: "ON",
       BUILD_TESTING: "OFF",

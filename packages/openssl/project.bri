@@ -3,17 +3,76 @@ import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "openssl",
-  version: "3.6.1",
+  version: "4.0.0",
   repository: "https://github.com/openssl/openssl",
-};
+  extra: {
+    otherVersions: {
+      "4": "4.0.0",
+      "3": "3.6.2",
+    },
+  },
+} as const;
 
-const source = Brioche.download(
-  `${project.repository}/releases/download/openssl-${project.version}/openssl-${project.version}.tar.gz`,
-)
-  .unarchive("tar", "gzip")
-  .peel();
+std.assert(
+  Object.keys(project.extra.otherVersions).some((version) =>
+    project.version.startsWith(`${version}.`),
+  ),
+  "OpenSSL package version not found in extra.otherVersions",
+);
 
-export default function openssl(): std.Recipe<std.Directory> {
+/**
+ * The OpenSSL major version.
+ */
+export type OpenSSLVersion = keyof typeof project.extra.otherVersions;
+
+/**
+ * Get the latest major version of OpenSSL.
+ *
+ * @returns The latest major version of OpenSSL.
+ */
+export function getLatestVersion(): OpenSSLVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  versions.sort((a, b) => parseInt(b) - parseInt(a));
+
+  return versions[0] as OpenSSLVersion;
+}
+
+const sources: { [version: string]: std.Recipe<std.Directory> } = {
+  "4": Brioche.download(
+    `${project.repository}/releases/download/openssl-${project.extra.otherVersions["4"]}/openssl-${project.extra.otherVersions["4"]}.tar.gz`,
+  )
+    .unarchive("tar", "gzip")
+    .peel(),
+  "3": Brioche.download(
+    `${project.repository}/releases/download/openssl-${project.extra.otherVersions["3"]}/openssl-${project.extra.otherVersions["3"]}.tar.gz`,
+  )
+    .unarchive("tar", "gzip")
+    .peel(),
+} satisfies Record<OpenSSLVersion, std.Recipe<std.Directory>>;
+
+/**
+ * Extra options for OpenSSL.
+ *
+ * @param version - The major version of OpenSSL to use. Defaults to the
+ *   latest stable major release.
+ */
+interface OpenSSLOptions {
+  version?: OpenSSLVersion;
+}
+
+export default function openssl(
+  options: OpenSSLOptions = {},
+): std.Recipe<std.Directory> {
+  const { version = getLatestVersion() } = options;
+
+  const source = sources[version];
+  std.assert(
+    source != null,
+    `Expected OpenSSL version ${JSON.stringify(
+      version,
+    )} to be one of ${JSON.stringify(Object.keys(sources))}`,
+  );
+
   return std.runBash`
     ./config \\
       --prefix=/ \\
@@ -41,23 +100,31 @@ export default function openssl(): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/openssl"));
 }
 
-export async function test(): Promise<std.Recipe<std.File>> {
-  const script = std.runBash`
-    openssl version | tee "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(openssl)
-    .toFile();
+export function test(): std.Recipe<std.Directory> {
+  const opensslVersions = Object.keys(
+    project.extra.otherVersions,
+  ) as OpenSSLVersion[];
 
-  const result = (await script.read()).trim();
+  const tests = opensslVersions.map(async (version) => {
+    const script = std.runBash`
+      openssl version | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(openssl({ version }))
+      .toFile();
 
-  // Check that the result contains the expected version
-  const expected = `OpenSSL ${project.version}`;
-  std.assert(
-    result.startsWith(expected),
-    `expected '${expected}', got '${result}'`,
-  );
+    const result = (await script.read()).trim();
 
-  return script;
+    // Check that the result contains the expected version
+    const expected = `OpenSSL ${project.extra.otherVersions[version]}`;
+    std.assert(
+      result.startsWith(expected),
+      `expected '${expected}', got '${result}'`,
+    );
+
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {

@@ -26,7 +26,11 @@ export default function git(): std.Recipe<std.Directory> {
       DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, curl({ minimal: true }))
+    .dependencies(
+      std.toolchain,
+      openssl({ version: "3" }),
+      curl({ minimal: true }),
+    )
     .toDirectory()
     .pipe((recipe) =>
       std.setEnv(recipe, {

@@ -16,7 +16,7 @@ const source = Brioche.gitCheckout({
 export default function sqlxCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
     path: "sqlx-cli",
     runnable: "bin/sqlx",
   });

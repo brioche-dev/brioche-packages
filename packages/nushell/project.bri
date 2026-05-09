@@ -29,25 +29,35 @@ interface NushellPlugin {
   dependencies?: std.RecipeLike<std.Directory>[];
 }
 
-const nushellPlugins: NushellPlugin[] = [
-  {
-    name: "nu_plugin_formats",
-  },
-  {
-    name: "nu_plugin_gstat",
-    dependencies: [openssl],
-  },
-  {
-    name: "nu_plugin_inc",
-  },
-  {
-    name: "nu_plugin_polars",
-  },
-  {
-    name: "nu_plugin_query",
-    dependencies: [openssl],
-  },
-];
+function buildNushellPlugins(): std.Recipe<std.Directory>[] {
+  const nushellPlugins: NushellPlugin[] = [
+    {
+      name: "nu_plugin_formats",
+    },
+    {
+      name: "nu_plugin_gstat",
+      dependencies: [openssl({ version: "3" })],
+    },
+    {
+      name: "nu_plugin_inc",
+    },
+    {
+      name: "nu_plugin_polars",
+    },
+    {
+      name: "nu_plugin_query",
+      dependencies: [openssl({ version: "3" })],
+    },
+  ];
+
+  return nushellPlugins.map((plugin: NushellPlugin) =>
+    cargoBuild({
+      source,
+      path: `crates/${plugin.name}`,
+      dependencies: plugin.dependencies ?? [],
+    }),
+  );
+}
 
 export default function nushell(): std.Recipe<std.Directory> {
   const nushell = cargoBuild({
@@ -55,16 +65,9 @@ export default function nushell(): std.Recipe<std.Directory> {
     runnable: "bin/nu",
   });
 
-  // Build the Nushell plugins
-  const plugins = nushellPlugins.map((plugin: NushellPlugin) =>
-    cargoBuild({
-      source,
-      path: `crates/${plugin.name}`,
-      dependencies: plugin.dependencies ?? [],
-    }),
-  );
+  const nushellPlugins = buildNushellPlugins();
 
-  return std.merge(nushell, ...plugins);
+  return std.merge(nushell, ...nushellPlugins);
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
