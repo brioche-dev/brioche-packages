@@ -24,7 +24,7 @@ export default function softhsm(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, sqlite)
+    .dependencies(std.toolchain, openssl({ version: "3" }), sqlite)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe((recipe) =>
