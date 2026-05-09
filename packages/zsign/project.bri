@@ -23,7 +23,7 @@ export default function zsign(): std.Recipe<std.Directory> {
     cp ../../bin/zsign "$BRIOCHE_OUTPUT/bin/"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, minizip)
+    .dependencies(std.toolchain, openssl({ version: "3" }), minizip)
     .env({ version: project.version })
     .outputScaffold(
       std.directory({
