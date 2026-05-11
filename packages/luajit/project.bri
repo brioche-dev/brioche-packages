@@ -1,0 +1,74 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "luajit",
+  version: "2.1.1774896198",
+  repository: "https://github.com/LuaJIT/LuaJIT",
+  extra: {
+    // No recent tags or releases published, pin to the latest commit on the v2.1 branch.
+    gitRef: "18b087cd2cd4ddc4a79782bf155383a689d5093d",
+  },
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.extra.gitRef,
+})
+  // Bake the commit timestamp into `.relver`
+  .insert(".relver", std.file(project.version.replace(/^\d+\.\d+\./, "")));
+
+export default function luajit(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+    make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/luajit"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    luajit -v | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(luajit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `LuaJIT ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let response = http get https://api.github.com/repos/LuaJIT/LuaJIT/commits/v2.1
+    let gitRef = $response.sha
+    let timestamp = $response.commit.committer.date
+      | into datetime
+      | format date "%s"
+    let version = $"2.1.($timestamp)"
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.gitRef $gitRef
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
