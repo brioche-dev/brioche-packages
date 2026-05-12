@@ -31,7 +31,7 @@ export default function yoke(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `${project.extra.moduleName}/internal.buildVersion=v${project.version}`,
+        `${project.extra.moduleName}/internal.buildVersion=${project.version}`,
       ],
     },
     path: "./cmd/yoke",
