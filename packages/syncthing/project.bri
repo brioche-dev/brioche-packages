@@ -1,0 +1,72 @@
+import * as std from "std";
+import { goBuild, goModuleManifest } from "go";
+
+export const project = {
+  name: "syncthing",
+  version: "1.30.0",
+  extra: {
+    moduleName: "github.com/syncthing/syncthing",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+const manifest = await goModuleManifest(
+  Brioche.download(
+    `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.info`,
+  ),
+);
+
+export default function syncthing(): std.Recipe<std.Directory> {
+  // The build system expects a Unix timestamp for the Stamp variable
+  const stamp = Math.floor(Date.parse(manifest.time) / 1000).toString();
+
+  return goBuild({
+    source,
+    env: {
+      GOFLAGS: "-tags=noassets",
+    },
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `github.com/syncthing/syncthing/lib/build.Version=v${project.version}`,
+        "-X",
+        `github.com/syncthing/syncthing/lib/build.Stamp=${stamp}`,
+        "-X",
+        `github.com/syncthing/syncthing/lib/build.User=brioche`,
+        "-X",
+        `github.com/syncthing/syncthing/lib/build.Host=brioche`,
+      ],
+    },
+    path: "./cmd/syncthing",
+    runnable: "bin/syncthing",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    syncthing --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(syncthing)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `syncthing v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

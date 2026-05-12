@@ -24,7 +24,7 @@ export default function fastly(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/fastly/cli/pkg/revision.AppVersion=v${project.version}`,
+        `github.com/fastly/cli/pkg/revision.AppVersion=${project.version}`,
         "-X",
         "github.com/fastly/cli/pkg/revision.Environment=release",
       ],
@@ -43,7 +43,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  const expected = `Fastly CLI version v${project.version}`;
+  const expected = `Fastly CLI version ${project.version}`;
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,
