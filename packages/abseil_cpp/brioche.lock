@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/abseil/abseil-cpp.git": {
+      "20260107.1": "255c84dadd029fd8ad25c5efb5933e47beaa00c7"
+    }
+  }
+}
