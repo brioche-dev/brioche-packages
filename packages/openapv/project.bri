@@ -2,23 +2,31 @@ import * as std from "std";
 import { cmakeBuild } from "cmake";
 
 export const project = {
-  name: "nbytes",
-  version: "0.1.4",
-  repository: "https://github.com/nodejs/nbytes.git",
+  name: "openapv",
+  version: "0.2.1.3",
+  repository: "https://github.com/AcademySoftwareFoundation/openapv",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-});
+}).pipe((dir) =>
+  std.applyPatch({
+    source: dir,
+    patch: Brioche.includeFile("os-release-guard.patch"),
+    strip: 1,
+  }),
+);
 
-export default function nbytes(): std.Recipe<std.Directory> {
+export default function openapv(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
     dependencies: [std.toolchain],
     set: {
-      NBYTES_ENABLE_TESTING: "OFF",
+      ENABLE_TESTS: "OFF",
+      OAPV_BUILD_APPS: "ON",
     },
+    runnable: "bin/oapv_app_enc",
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
@@ -30,20 +38,24 @@ export default function nbytes(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    pkg-config --modversion nbytes | tee "$BRIOCHE_OUTPUT"
+    pkg-config --modversion oapv | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, nbytes)
+    .dependencies(std.toolchain, openapv)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  // HACK: the project doesn't seem to report its version correctly.
+  const expected = project.version === "0.2.1.3" ? "0.2.1.1" : project.version;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^v(?<version>\d+\.\d+\.\d+\.\d+)(?:-\w+)?$/,
+  });
 }

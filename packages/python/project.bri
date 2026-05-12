@@ -57,7 +57,9 @@ interface PythonOptions {
   version?: PythonVersion;
 }
 
-export default async function python(options: PythonOptions = {}) {
+export default async function python(
+  options: PythonOptions = {},
+): Promise<std.Recipe<std.Directory>> {
   const { version = getLatestVersion() } = options;
 
   // Get the Python source for the selected version
