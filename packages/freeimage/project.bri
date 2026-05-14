@@ -5,7 +5,6 @@ export const project = {
   name: "freeimage",
   version: "3.18.0",
   extra: {
-    // Version format: X.Y.Z -> XYZ
     versionCompact: "3180",
   },
 };
@@ -96,9 +95,13 @@ export function liveUpdate(): NushellRunnable {
       | sort-by --natural --reverse version
       | get 0.version
 
+    let version_compact = $version
+      | str replace --all '.' ''
+
     $env.project
       | from json
       | update version $version
+      | update extra.versionCompact $version_compact
       | to json
   `.env({ project: JSON.stringify(project) });
 }

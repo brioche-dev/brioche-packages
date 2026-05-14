@@ -1,0 +1,64 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "monkeys_audio",
+  version: "12.93",
+  extra: {
+    versionCompact: "1293",
+  },
+};
+
+const source = Brioche.download(
+  `https://monkeysaudio.com/files/MAC_${project.extra.versionCompact}_SDK.zip`,
+).unarchive("zip");
+
+export default function monkeysAudio(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    runnable: "bin/mac",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    (mac 2>&1 || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(monkeysAudio)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.monkeysaudio.com/versionhistory.html --raw
+      | parse --regex '<div class="release">Version (?<version>[\\d.]+) '
+      | get 0.version
+
+    let version_compact = $version
+      | str replace --all '.' ''
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.versionCompact $version_compact
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
