@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/newrelic/newrelic-cli/@v/v0.111.6.zip": {
+    "https://proxy.golang.org/github.com/newrelic/newrelic-cli/@v/v0.112.6.zip": {
       "type": "sha256",
-      "value": "32776f99225e3867da397dc106509593fe7154f937cd8a96f17099254f06d041"
+      "value": "a9d8ac13875b04662cbcc8f967438e04193768d2fb2b5dca3badc8be683f3ed1"
     }
   }
 }
