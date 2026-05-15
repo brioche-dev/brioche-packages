@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/yonahd/kor/@v/v0.6.7.zip": {
+    "https://proxy.golang.org/github.com/yonahd/kor/@v/v0.6.8.zip": {
       "type": "sha256",
-      "value": "bb87e283edd2b89bbcf0adf0afd7ace09ed566c2c9ff925b2f8f4160952df0c9"
+      "value": "c83832423e878b297f017874062382d038ded6cbf5951e4301bc55b246e3147b"
     }
   }
 }
