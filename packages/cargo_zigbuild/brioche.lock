@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-zigbuild/0.22.1/download": {
+    "https://crates.io/api/v1/crates/cargo-zigbuild/0.22.3/download": {
       "type": "sha256",
-      "value": "6a72970dc4f54505e68b934ae90af6040a3edea6af820f535421e00d510b7984"
+      "value": "418b19ee36a550c7c34a0bfd04e0b31d0dfb2c92f54aa36189ea3f2f85764845"
     }
   }
 }
