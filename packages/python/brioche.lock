@@ -9,9 +9,9 @@
       "type": "sha256",
       "value": "2ab91ff401783ccca64f75d10c882e957bdfd60e2bf5a72f8421793729b78a71"
     },
-    "https://www.python.org/ftp/python/3.14.4/Python-3.14.4.tar.xz": {
+    "https://www.python.org/ftp/python/3.14.5/Python-3.14.5.tar.xz": {
       "type": "sha256",
-      "value": "d923c51303e38e249136fc1bdf3568d56ecb03214efdef48516176d3d7faaef8"
+      "value": "7e32597b99e5d9a39abed35de4693fa169df3e5850d4c334337ffd6a19a36db6"
     }
   }
 }
