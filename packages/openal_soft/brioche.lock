@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/kcat/openal-soft": {
-      "1.25.1": "c41d64c6a35f6174bf4a27010aeac52a8d3bb2c6"
+      "1.25.2": "b2c48f7718ef3fcf67921a8b6534c4914e328970"
     }
   }
 }
