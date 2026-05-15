@@ -4,7 +4,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "srt",
-  version: "1.5.4",
+  version: "1.5.5",
   repository: "https://github.com/Haivision/srt",
 };
 
