@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/mitmproxy/mitmproxy.git": {
-      "v12.2.2": "437fb75d196bdfdda738bd58bcf793c8dd600079"
+      "v12.2.3": "6c09d56e4c29a92f5ad01b03199977584b8ea14f"
     }
   }
 }
