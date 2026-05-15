@@ -18,7 +18,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "sfml",
-  version: "3.0.2",
+  version: "3.1.0",
   repository: "https://github.com/SFML/SFML",
 };
 
