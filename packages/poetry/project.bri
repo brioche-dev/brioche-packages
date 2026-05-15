@@ -4,7 +4,7 @@ import uv from "uv";
 
 export const project = {
   name: "poetry",
-  version: "2.3.4",
+  version: "2.4.1",
   repository: "https://github.com/python-poetry/poetry",
 };
 
