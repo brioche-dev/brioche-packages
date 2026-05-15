@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://codeberg.org/forgejo-contrib/forgejo-cli": {
-      "v0.4.1": "e146673681de6b9462f6221ebce23b987a3e0572"
+      "v0.5.0": "04c50ce1e5b0cea8614629f9768cac874911be4a"
     }
   }
 }
