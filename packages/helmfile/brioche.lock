@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/helmfile/helmfile/@v/v1.4.4.info": {
+    "https://proxy.golang.org/github.com/helmfile/helmfile/@v/v1.5.1.info": {
       "type": "sha256",
-      "value": "e7b366c4467655a8f9dd8304abd5ada1179be78a45fbab5f785ef22ae90ee77d"
+      "value": "b6860e23b1a999ac7c2eea8de10b6e58a7a69945a039d6565bfce7194797e35f"
     },
-    "https://proxy.golang.org/github.com/helmfile/helmfile/@v/v1.4.4.zip": {
+    "https://proxy.golang.org/github.com/helmfile/helmfile/@v/v1.5.1.zip": {
       "type": "sha256",
-      "value": "cf9467a6ea355b99edcf64ee4264698604d6d14e1b7df0196010636636ca9ed8"
+      "value": "4d62a0d9c4b41652b90583b16992e55cd994e6e37b0ae3c2b5e53d2720c07ff1"
     }
   }
 }
