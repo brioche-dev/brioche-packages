@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/noborus/ov/@v/v0.51.1.info": {
+    "https://proxy.golang.org/github.com/noborus/ov/@v/v0.52.0.info": {
       "type": "sha256",
-      "value": "8c9210b671fa0c9ca40c8464421691a1967e97ccf091659dc2261ae6a53b2d25"
+      "value": "f138b5264974a88ae41ba6921a8ac138f4096661c24e08affc8e92f17e02ebfa"
     },
-    "https://proxy.golang.org/github.com/noborus/ov/@v/v0.51.1.zip": {
+    "https://proxy.golang.org/github.com/noborus/ov/@v/v0.52.0.zip": {
       "type": "sha256",
-      "value": "3d1962076b032de2d64a283a6399bfab91c8bb60e804a0711657b5f076b6d581"
+      "value": "59a856b78284559510ed8c881da341af7acf8d15786c71c7df1f8ecf64d27ca7"
     }
   }
 }
