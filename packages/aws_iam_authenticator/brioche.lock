@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/sigs.k8s.io/aws-iam-authenticator/@v/v0.7.12.info": {
+    "https://proxy.golang.org/sigs.k8s.io/aws-iam-authenticator/@v/v0.7.15.info": {
       "type": "sha256",
-      "value": "6872629194488f11f1dcb92dbeb18938d0b8197ea562de74bf47e1b03420a997"
+      "value": "a08c0e20e0196df1233605a698fd3427eb0112f51c5657d17b53eaa262a7cace"
     },
-    "https://proxy.golang.org/sigs.k8s.io/aws-iam-authenticator/@v/v0.7.12.zip": {
+    "https://proxy.golang.org/sigs.k8s.io/aws-iam-authenticator/@v/v0.7.15.zip": {
       "type": "sha256",
-      "value": "d9eaba993b91bf41bc2e8ee71bc63ffdaee53ba8ecc89a7a4d135bffdb7728ee"
+      "value": "a60801391e2439cef8be788546baf8c32c86fb125b7b1a730c72960624c5f495"
     }
   }
 }
