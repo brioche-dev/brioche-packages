@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "hunspell",
-  version: "1.7.2",
+  version: "1.7.3",
   repository: "https://github.com/hunspell/hunspell",
 };
 
