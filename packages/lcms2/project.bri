@@ -6,7 +6,7 @@ import libtiff from "libtiff";
 
 export const project = {
   name: "lcms2",
-  version: "2.18",
+  version: "2.19.1",
   repository: "https://github.com/mm2/Little-CMS",
 };
 
