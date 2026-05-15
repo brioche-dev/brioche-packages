@@ -1,0 +1,54 @@
+import * as std from "std";
+
+export const project = {
+  name: "pacparser",
+  version: "1.5.1",
+  repository: "https://github.com/manugarg/pacparser",
+};
+
+const source = Brioche.download(
+  `https://github.com/manugarg/pacparser/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function pacparser(): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd src
+    make install \\
+      PREFIX="$BRIOCHE_OUTPUT" \\
+      NO_INTERNET=1 \\
+      VERSION="${project.version}" \\
+      SHELL="$(command -v bash)"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/pactester"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pactester -v | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(pacparser)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
