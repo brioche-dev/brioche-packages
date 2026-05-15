@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/cert-manager/cmctl/v2/@v/v2.4.1.info": {
+    "https://proxy.golang.org/github.com/cert-manager/cmctl/v2/@v/v2.5.0.info": {
       "type": "sha256",
-      "value": "e8c977ca4fbddf7fa9c0af343eebb5201c6420e76f34111dd520891c1b526fc3"
+      "value": "d75e9bb698204abd2b65c9c4a45b091881177ac4466837ff2300b6f986128c6a"
     },
-    "https://proxy.golang.org/github.com/cert-manager/cmctl/v2/@v/v2.4.1.zip": {
+    "https://proxy.golang.org/github.com/cert-manager/cmctl/v2/@v/v2.5.0.zip": {
       "type": "sha256",
-      "value": "943db285ee0dd3e8145ee473d7d2eb974c6abb0079ead4f0f1bcfe4a1e2a7311"
+      "value": "48b603483fd668880365970887dfd31ece87bc84e17b4d8ffb6a0761e40b5d6b"
     }
   }
 }
