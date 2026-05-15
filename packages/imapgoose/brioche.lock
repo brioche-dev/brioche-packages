@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/git.sr.ht/~whynothugo/!imap!goose/@v/v0.5.2.zip": {
+    "https://proxy.golang.org/git.sr.ht/~whynothugo/!imap!goose/@v/v0.5.3.zip": {
       "type": "sha256",
-      "value": "3aeddb21832e7a4f473631a07b56969c90cc13c0e53a1c48dd0ca9c373a61dba"
+      "value": "7a1fea2154c89fa87d1cf239c1d430f92a574d5c517cd135f12703dec6b3d3e7"
     }
   }
 }
