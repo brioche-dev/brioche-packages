@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/starship/starship.git": {
-      "v1.24.2": "33f7077fbe9d7f30476c96645e482be323d42566"
+      "v1.25.1": "8758daa7767d4e73874330b1e262fca66a7ffd30"
     }
   }
 }
