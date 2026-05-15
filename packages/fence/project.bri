@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "fence",
-  version: "0.1.47",
+  version: "0.1.58",
   extra: {
     moduleName: "github.com/!use-!tusk/fence",
   },
