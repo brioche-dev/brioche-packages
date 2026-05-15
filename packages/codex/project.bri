@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "codex",
-  version: "0.124.0",
+  version: "0.130.0",
   repository: "https://github.com/openai/codex",
 };
 
