@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/mergiraf/0.16.3/download": {
+    "https://crates.io/api/v1/crates/mergiraf/0.17.0/download": {
       "type": "sha256",
-      "value": "93d2e91293ffea06d971ecfdf56256a11821f9bb5c6e9ccf6013191d7ed3b92c"
+      "value": "8b830e48fbb7ec0c8c5b31eaea9d06690bc5a4c6c918e68eeee1c2a957649915"
     }
   }
 }
