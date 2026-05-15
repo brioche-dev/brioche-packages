@@ -4,7 +4,7 @@ import { gitCheckout } from "git";
 
 export const project = {
   name: "yazi",
-  version: "26.1.22",
+  version: "26.5.6",
   repository: "https://github.com/sxyazi/yazi.git",
 };
 
