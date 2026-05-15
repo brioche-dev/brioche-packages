@@ -10,7 +10,7 @@ import wavpack from "wavpack";
 
 export const project = {
   name: "sdl2_mixer",
-  version: "2.8.1",
+  version: "2.8.2",
   repository: "https://github.com/libsdl-org/SDL_mixer",
 };
 
