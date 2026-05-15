@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/meilisearch/meilisearch.git": {
-      "v1.42.1": "36db1d7e380ca52240dd6f61497fdee94bebb2f2"
+      "v1.43.1": "ba97d76a294ac0e4f006547c3bb38d3fe2a98c07"
     }
   }
 }
