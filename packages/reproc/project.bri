@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "reproc",
-  version: "14.2.5",
+  version: "14.2.7",
   repository: "https://github.com/DaanDeMeyer/reproc",
 };
 
