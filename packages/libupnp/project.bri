@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libupnp",
-  version: "1.18.4",
+  version: "1.18.5",
   repository: "https://github.com/pupnp/pupnp",
 };
 
