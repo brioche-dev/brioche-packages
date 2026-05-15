@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/koki-develop/clive/@v/v0.12.16.zip": {
+    "https://proxy.golang.org/github.com/koki-develop/clive/@v/v0.12.17.zip": {
       "type": "sha256",
-      "value": "ea6292859a4fde45b0d6f76ed55e11c9d8330a957092140ba53a3e1299ec0f33"
+      "value": "3251c03ca731169f38b79365e4ab0da2c62f0f3206433ac1cd7f04f48f1a00f9"
     }
   }
 }
