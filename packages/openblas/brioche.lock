@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.32/OpenBLAS-0.3.32.tar.gz": {
+    "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.33/OpenBLAS-0.3.33.tar.gz": {
       "type": "sha256",
-      "value": "f8a1138e01fddca9e4c29f9684fd570ba39dedc9ca76055e1425d5d4b1a4a766"
+      "value": "6761af1d9f5d353ab4f0b7497be2643313b36c8f31caec0144bfef198e71e6ab"
     }
   }
 }
