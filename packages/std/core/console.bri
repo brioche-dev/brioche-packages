@@ -38,10 +38,12 @@ export function displayAll(...values: unknown[]): string[] {
     return [];
   }
 
-  const displayed = [];
+  const displayed: string[] = [];
   const remaining = [...values];
-  if (typeof remaining[0] === "string") {
-    displayed.push(remaining.shift() as string);
+  const first = remaining[0];
+  if (typeof first === "string") {
+    displayed.push(first);
+    remaining.shift();
   }
 
   for (const value of remaining) {

@@ -82,11 +82,12 @@ export function ociContainerImage(
       diffIds.push(`sha256:${layerSha256Digest}`);
 
       const layerTarGzip = gzip(layerTar);
-      let layerDigest = "";
-      let layerSize = 0;
-      let layerPath = "";
-      [imageDir, { digest: layerDigest, size: layerSize, path: layerPath }] =
-        await addBlob(imageDir, layerTarGzip);
+      const {
+        digest: layerDigest,
+        size: layerSize,
+        path: layerPath,
+      } = await blobInfo(layerTarGzip);
+      imageDir = imageDir.insert(layerPath, layerTarGzip);
 
       layerPaths.push(layerPath);
       layerDescriptors.push({
@@ -111,42 +112,42 @@ export function ociContainerImage(
       imageConfig["Labels"] = options.labels;
     }
 
-    let configDigest: string = "";
-    let configSize: number = 0;
-    let configPath: string = "";
-    [imageDir, { digest: configDigest, size: configSize, path: configPath }] =
-      await addBlob(
-        imageDir,
-        std.file(
-          JSON.stringify({
-            architecture: platform.architecture,
-            os: platform.os,
-            config: imageConfig,
-            rootfs: {
-              type: "layers",
-              diff_ids: diffIds,
-            },
-          }),
-        ),
-      );
-
-    let manifestDigest = "";
-    let manifestSize = 0;
-    [imageDir, { digest: manifestDigest, size: manifestSize }] = await addBlob(
-      imageDir,
-      std.file(
-        JSON.stringify({
-          schemaVersion: 2,
-          mediaType: "application/vnd.oci.image.manifest.v1+json",
-          config: {
-            mediaType: "application/vnd.oci.image.config.v1+json",
-            digest: configDigest,
-            size: configSize,
-          },
-          layers: layerDescriptors,
-        }),
-      ),
+    const configFile = std.file(
+      JSON.stringify({
+        architecture: platform.architecture,
+        os: platform.os,
+        config: imageConfig,
+        rootfs: {
+          type: "layers",
+          diff_ids: diffIds,
+        },
+      }),
     );
+    const {
+      digest: configDigest,
+      size: configSize,
+      path: configPath,
+    } = await blobInfo(configFile);
+    imageDir = imageDir.insert(configPath, configFile);
+
+    const manifestFile = std.file(
+      JSON.stringify({
+        schemaVersion: 2,
+        mediaType: "application/vnd.oci.image.manifest.v1+json",
+        config: {
+          mediaType: "application/vnd.oci.image.config.v1+json",
+          digest: configDigest,
+          size: configSize,
+        },
+        layers: layerDescriptors,
+      }),
+    );
+    const {
+      digest: manifestDigest,
+      size: manifestSize,
+      path: manifestPath,
+    } = await blobInfo(manifestFile);
+    imageDir = imageDir.insert(manifestPath, manifestFile);
 
     imageDir = imageDir.insert(
       "index.json",
@@ -190,20 +191,19 @@ export function ociContainerImage(
   });
 }
 
-interface AddBlobResult {
+interface BlobInfo {
   digest: string;
   size: number;
   path: string;
 }
 
-async function addBlob(
-  imageDir: std.Recipe<std.Directory>,
-  blob: std.Recipe<std.File>,
-): Promise<[std.Recipe<std.Directory>, AddBlobResult]> {
+async function blobInfo(blob: std.Recipe<std.File>): Promise<BlobInfo> {
   const { sha256Digest, size } = await describeBlob(blob);
-  const path = `blobs/sha256/${sha256Digest}`;
-  imageDir = imageDir.insert(path, blob);
-  return [imageDir, { digest: `sha256:${sha256Digest}`, size, path }];
+  return {
+    digest: `sha256:${sha256Digest}`,
+    size,
+    path: `blobs/sha256/${sha256Digest}`,
+  };
 }
 
 interface DescribeBlobResult {
