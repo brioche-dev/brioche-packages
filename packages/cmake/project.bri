@@ -380,15 +380,17 @@ const CMAKE_SANITIZE_PATHS_SCRIPT = std.indoc`
   }
 
   # Candidate cmake directories relative to $BRIOCHE_OUTPUT
-  cmake_dirs=(lib/cmake share/cmake)
+  cmake_dirs=(lib/cmake "lib/*/cmake" share/cmake "share/*/cmake")
 
   # Collect only those that are present
+  shopt -s nullglob
   find_roots=()
   for rel in "\${cmake_dirs[@]}"; do
-    dir="$BRIOCHE_OUTPUT/$rel"
-    if [[ -d "$dir" ]]; then
-      find_roots+=("$dir")
-    fi
+    for dir in "$BRIOCHE_OUTPUT"/$rel; do
+      if [[ -d "$dir" ]]; then
+        find_roots+=("$dir")
+      fi
+    done
   done
 
   # No cmake dir found, exit
@@ -422,9 +424,9 @@ const CMAKE_SANITIZE_PATHS_SCRIPT = std.indoc`
  *
  * @returns A new recipe with the sanitized CMake files.
  *
- * @remarks This function looks for CMake files (*.cmake) in the standard
- *   locations `lib/cmake` and `share/cmake` relative to
- *   the `$BRIOCHE_OUTPUT` output directory.
+ * @remarks This function looks for CMake files (*.cmake) in `lib/cmake`,
+ *   `lib/<package>/cmake`, `share/cmake`, and `share/<package>/cmake`
+ *   relative to the `$BRIOCHE_OUTPUT` output directory.
  */
 export function cmakeSanitizePaths(
   recipe: std.RecipeLike<std.Directory>,
