@@ -9,7 +9,7 @@ import pcre2 from "pcre2";
 
 export const project = {
   name: "libgsf",
-  version: "1.14.56",
+  version: "1.14.58",
   repository: "https://gitlab.gnome.org/GNOME/libgsf",
   extra: {
     majorVersion: "1",
