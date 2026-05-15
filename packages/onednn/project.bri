@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "onednn",
-  version: "3.11.2",
+  version: "3.12",
   repository: "https://github.com/uxlfoundation/oneDNN.git",
 };
 
