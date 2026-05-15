@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/kubetail-org/kubetail/archive/refs/tags/cli/v0.13.0.tar.gz": {
+    "https://github.com/kubetail-org/kubetail/archive/refs/tags/cli/v0.17.0.tar.gz": {
       "type": "sha256",
-      "value": "bddd4ed7e29ff8218c23ae2f8e0834b762c60955f53ebc10d07329689c3a9878"
+      "value": "e47bf87a29cede1f190624dfb63f3fe289eff4b63ef2c3caffc972be2659d74a"
     }
   }
 }
