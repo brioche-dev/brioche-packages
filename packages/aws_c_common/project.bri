@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "aws_c_common",
-  version: "0.12.6",
+  version: "0.13.0",
   repository: "https://github.com/awslabs/aws-c-common",
 };
 
