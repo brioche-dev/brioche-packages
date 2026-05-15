@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/libexpat/libexpat/releases/download/R_2_7_5/expat-2.7.5.tar.xz": {
+    "https://github.com/libexpat/libexpat/releases/download/R_2_8_1/expat-2.8.1.tar.xz": {
       "type": "sha256",
-      "value": "1032dfef4ff17f70464827daa28369b20f6584d108bc36f17ab1676e1edd2f91"
+      "value": "10b195ee78160a908388180a8fe3603d4e9a12f4755fbf5f3816b23a9d750da0"
     }
   }
 }
