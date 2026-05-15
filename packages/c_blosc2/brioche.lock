@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/Blosc/c-blosc2": {
-      "v2.23.1": "1386ef42f58b61c876edf714a2af84bd7b59dc5d"
+      "v3.0.3": "ca746eef3808b7169dd063d70a6eff6c2fee78b2"
     }
   }
 }
