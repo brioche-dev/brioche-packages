@@ -5,7 +5,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "xmlsec",
-  version: "1.3.10",
+  version: "1.3.11",
   repository: "https://github.com/lsh123/xmlsec",
 };
 
@@ -26,7 +26,7 @@ export default function xmlsec(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, libxml2, libxslt, openssl({ version: "3" }))
+    .dependencies(std.toolchain, libxml2, libxslt, openssl)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe(std.pkgConfigMakePathsRelative)
