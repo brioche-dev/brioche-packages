@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/go.k6.io/xk6/@v/v1.3.7.zip": {
+    "https://proxy.golang.org/go.k6.io/xk6/@v/v1.4.3.zip": {
       "type": "sha256",
-      "value": "b6bafbbe609c41eb040cedcafb0d74ff1b9406d0dc3aee9225075a99e5a38f1d"
+      "value": "b25f24f9bed8b9998787fd19d2f1e7b54e6c0d8de85ca8220f83976dd7e93dca"
     }
   }
 }
