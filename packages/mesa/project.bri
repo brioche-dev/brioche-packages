@@ -33,7 +33,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "mesa",
-  version: "26.0.4",
+  version: "26.1.0",
   repository: "https://gitlab.freedesktop.org/mesa/mesa",
 };
 
