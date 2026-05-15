@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/zlib-ng/minizip-ng/archive/refs/tags/4.1.0.tar.gz": {
+    "https://github.com/zlib-ng/minizip-ng/archive/refs/tags/4.2.1.tar.gz": {
       "type": "sha256",
-      "value": "85417229bb0cd56403e811c316150eea1a3643346d9cec7512ddb7ea291b06f2"
+      "value": "3cc35c2cb925dbe67cc801e3234b31b0f30197812a99377352fa1b551ab3d011"
     }
   }
 }
