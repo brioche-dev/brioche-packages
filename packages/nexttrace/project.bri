@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "nexttrace",
-  version: "1.6.2",
+  version: "1.6.5",
   extra: {
     moduleName: "github.com/nxtrace/!n!trace-core",
   },
