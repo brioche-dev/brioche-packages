@@ -4,7 +4,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "functionalplus",
-  version: "0.2.27",
+  version: "0.2.28",
   repository: "https://github.com/Dobiasd/FunctionalPlus.git",
 };
 
