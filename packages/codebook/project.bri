@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "codebook",
-  version: "0.3.37",
+  version: "0.3.39",
   repository: "https://github.com/blopker/codebook.git",
   extra: {
     crateName: "codebook-lsp",
