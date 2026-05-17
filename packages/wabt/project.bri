@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "wabt",
-  version: "1.0.40",
+  version: "1.0.41",
   repository: "https://github.com/webassembly/wabt.git",
 };
 
