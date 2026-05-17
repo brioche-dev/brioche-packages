@@ -74,11 +74,11 @@ export class TomlDate extends Date {
     }
   }
 
-  isDateTime() {
+  isDateTime(): boolean {
     return this.#hasDate && this.#hasTime;
   }
 
-  isLocal() {
+  isLocal(): boolean {
     return (
       !this.#hasDate ||
       !this.#hasTime ||
@@ -87,19 +87,19 @@ export class TomlDate extends Date {
     );
   }
 
-  isDate() {
+  isDate(): boolean {
     return this.#hasDate && !this.#hasTime;
   }
 
-  isTime() {
+  isTime(): boolean {
     return this.#hasTime && !this.#hasDate;
   }
 
-  isValid() {
+  isValid(): boolean {
     return this.#hasDate || this.#hasTime;
   }
 
-  override toISOString() {
+  override toISOString(): string {
     const iso = super.toISOString();
 
     // Local Date
@@ -124,26 +124,26 @@ export class TomlDate extends Date {
     return offsetDate.toISOString().slice(0, -1) + this.#offset;
   }
 
-  static wrapAsOffsetDateTime(jsDate: Date, offset = "Z") {
+  static wrapAsOffsetDateTime(jsDate: Date, offset = "Z"): TomlDate {
     const date = new TomlDate(jsDate);
     date.#offset = offset;
     return date;
   }
 
-  static wrapAsLocalDateTime(jsDate: Date) {
+  static wrapAsLocalDateTime(jsDate: Date): TomlDate {
     const date = new TomlDate(jsDate);
     date.#offset = null;
     return date;
   }
 
-  static wrapAsLocalDate(jsDate: Date) {
+  static wrapAsLocalDate(jsDate: Date): TomlDate {
     const date = new TomlDate(jsDate);
     date.#hasTime = false;
     date.#offset = null;
     return date;
   }
 
-  static wrapAsLocalTime(jsDate: Date) {
+  static wrapAsLocalTime(jsDate: Date): TomlDate {
     const date = new TomlDate(jsDate);
     date.#hasDate = false;
     date.#offset = null;

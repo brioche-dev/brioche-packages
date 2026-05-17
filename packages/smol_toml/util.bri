@@ -37,13 +37,17 @@ export type TomlPrimitive =
   | { [key: string]: TomlPrimitive }
   | TomlPrimitive[];
 
-export function indexOfNewline(str: string, start = 0, end = str.length) {
+export function indexOfNewline(
+  str: string,
+  start = 0,
+  end = str.length,
+): number {
   let idx = str.indexOf("\n", start);
   if (str[idx - 1] === "\r") idx--;
   return idx <= end ? idx : -1;
 }
 
-export function skipComment(str: string, ptr: number) {
+export function skipComment(str: string, ptr: number): number {
   for (let i = ptr; i < str.length; i++) {
     const c = str[i] as string;
     if (c === "\n") return i;
@@ -88,7 +92,7 @@ export function skipUntil(
   sep: string,
   end?: string,
   banNewLines: boolean = false,
-) {
+): number {
   if (end == null || end === "") {
     ptr = indexOfNewline(str, ptr);
     return ptr < 0 ? str.length : ptr;
@@ -116,7 +120,7 @@ export function skipUntil(
   });
 }
 
-export function getStringEnd(str: string, seek: number) {
+export function getStringEnd(str: string, seek: number): number {
   const first = str[seek] as string;
   const target =
     first === str[seek + 1] && str[seek + 1] === str[seek + 2]
