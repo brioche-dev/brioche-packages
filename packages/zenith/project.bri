@@ -15,7 +15,7 @@ const source = Brioche.gitCheckout({
   // Remove upstream's custom Cargo `config`, which overrides the linker
   // for various targets (for cross-compilation). This can interfere with
   // our default working linker configuration.
-  .remove(".cargo/config");
+  .remove(".cargo/config.toml");
 
 export default function zenith(): std.Recipe<std.Directory> {
   return cargoBuild({
