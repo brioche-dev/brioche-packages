@@ -1,9 +1,8 @@
 {
   "dependencies": {},
-  "downloads": {
-    "https://proxy.golang.org/github.com/caddyserver/xcaddy/@v/v0.4.6.zip": {
-      "type": "sha256",
-      "value": "cf701f7f72e66b89bcfa4b1256f9503583f0f3ef80031049bff53a4c389cd428"
+  "git_refs": {
+    "https://github.com/caddyserver/xcaddy": {
+      "v0.4.6": "f0b95317e7c814612e6f8cf28f06b3f816eadbbe"
     }
   }
 }
