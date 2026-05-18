@@ -128,7 +128,7 @@ export function getStringEnd(str: string, seek: number): number {
       : first;
 
   seek += target.length - 1;
-  do seek = str.indexOf(target, ++seek);
+  do seek = str.indexOf(target, seek + 1);
   while (
     seek > -1 &&
     first !== "'" &&
