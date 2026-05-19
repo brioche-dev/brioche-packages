@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/KhronosGroup/SPIRV-Cross": {
-      "vulkan-sdk-1.4.341.0": "a0fba56c34a6700f1724bf9b751da5b488a3775c"
+      "vulkan-sdk-1.4.350.0": "1a6169566c73d3da552748fc372fe2bbb856e46e"
     }
   }
 }
