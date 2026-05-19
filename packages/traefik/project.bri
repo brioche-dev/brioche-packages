@@ -4,16 +4,15 @@ import { goBuild } from "go";
 export const project = {
   name: "traefik",
   version: "3.7.1",
-  extra: {
-    moduleName: "github.com/traefik/traefik/v3",
-  },
+  repository: "https://github.com/traefik/traefik.git",
 };
 
-const source = Brioche.download(
-  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
-)
-  .unarchive("zip")
-  .peel(4);
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. The Go proxy excludes any subdirectory that has its own go.mod.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
 
 export default function traefik(): std.Recipe<std.Directory> {
   return goBuild({
@@ -23,7 +22,7 @@ export default function traefik(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `${project.extra.moduleName}/pkg/version.Version=${project.version}`,
+        `github.com/traefik/traefik/v3/pkg/version.Version=${project.version}`,
       ],
     },
     path: "./cmd/traefik",
@@ -51,5 +50,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGoModules({ project });
+  return std.liveUpdateFromGithubReleases({ project });
 }
