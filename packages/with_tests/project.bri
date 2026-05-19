@@ -1,0 +1,68 @@
+import * as std from "std";
+import data1 from "./1.json" with { type: "json" };
+import data2 from "./2.txt" with { type: "text" };
+import data3 from "./3.bin" with { type: "bytes" };
+
+export const project = {
+  name: "with_tests",
+};
+
+export default function with_tests(): std.Recipe<std.Directory> {
+  return std.directory({
+    "1.json": std.file(JSON.stringify(data1)),
+    "2.txt": std.file(data2),
+    "3.bin": std.file(data3),
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // JSON: check recipe output, then check imported value.
+  const jsonFromRecipe = JSON.parse(
+    await std.castToFile(with_tests().get("1.json")).read(),
+  );
+  std.assert(
+    jsonFromRecipe.key === true,
+    `expected '1.json' recipe content to parse with key=true, got '${JSON.stringify(
+      jsonFromRecipe,
+    )}'`,
+  );
+  std.assert(
+    data1.key,
+    `expected imported 'data1.key' to be true, got '${JSON.stringify(data1)}'`,
+  );
+
+  // Text: check recipe output, then check imported value.
+  const expectedText = "hello world";
+  const textFromRecipe = await std.castToFile(with_tests().get("2.txt")).read();
+  std.assert(
+    textFromRecipe === expectedText,
+    `expected '2.txt' recipe content '${expectedText}', got '${textFromRecipe}'`,
+  );
+  std.assert(
+    data2 === expectedText,
+    `expected imported 'data2' to be '${expectedText}', got '${data2}'`,
+  );
+
+  // Bytes: check recipe output, then check imported value.
+  const expectedBytes = [0x01, 0x02, 0x03, 0x04];
+  const bytesFromRecipe = await std
+    .castToFile(with_tests().get("3.bin"))
+    .readBytes();
+  std.assert(
+    bytesFromRecipe.length === expectedBytes.length &&
+      expectedBytes.every((b, i) => bytesFromRecipe[i] === b),
+    `expected '3.bin' recipe content [${expectedBytes.join(", ")}], got [${[
+      ...bytesFromRecipe,
+    ].join(", ")}]`,
+  );
+  std.assert(
+    data3 instanceof Uint8Array &&
+      data3.length === expectedBytes.length &&
+      expectedBytes.every((b, i) => data3[i] === b),
+    `expected imported 'data3' to be Uint8Array [${expectedBytes.join(
+      ", ",
+    )}], got [${[...data3].join(", ")}]`,
+  );
+
+  return std.file("ok");
+}
