@@ -5,15 +5,27 @@ export const LINKER_SCRIPT_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
   fix_linker_script_paths () {
     local -r file="$1"
 
-    sed -i 's| //lib/| |g; s| /lib/| |g' "$file"
+    sed -i -E 's|([( \\t])/+lib(64)?/|\\1|g' "$file"
   }
 
-  # No lib dir found, exit
-  if [[ ! -d "$BRIOCHE_OUTPUT/lib" ]]; then
+  # Candidate directories relative to $BRIOCHE_OUTPUT
+  lib_dirs=(lib lib64)
+
+  # Collect only those that are present
+  find_roots=()
+  for rel in "\${lib_dirs[@]}"; do
+    dir="$BRIOCHE_OUTPUT/$rel"
+    if [[ -d "$dir" ]]; then
+      find_roots+=("$dir")
+    fi
+  done
+
+  # No directory found, exit
+  if [[ \${#find_roots[@]} -eq 0 ]]; then
     exit 0
   fi
 
-  find -L "$BRIOCHE_OUTPUT/lib" -maxdepth 1 -name '*.so' -type f -print0 \\
+  find -L "\${find_roots[@]}" -maxdepth 1 -name '*.so' -type f -print0 \\
     | while IFS= read -r -d $'\\0' file; do
       if grep -qE 'GROUP|INPUT' "$file" 2>/dev/null; then
         fix_linker_script_paths "$file"
@@ -22,23 +34,16 @@ export const LINKER_SCRIPT_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
 `;
 
 /**
- * Create a recipe that replaces absolute paths in GNU ld linker scripts
- * with relative filenames.
- *
- * Linker scripts from glibc (e.g. `libc.so`, `libm.so`) contain absolute
- * paths like `/lib/libc.so.6` that depend on gcc's `--sysroot` to resolve
- * correctly. Tools that parse these scripts without `--sysroot` fail to
- * resolve the absolute paths. This function strips the absolute directory
- * prefix so the linker resolves library names via its search paths instead.
+ * Create a recipe that sanitizes GNU ld linker scripts by stripping
+ * absolute directory prefixes from library references so the linker
+ * resolves them via its search paths instead.
  *
  * @param recipe - The recipe to apply the transformation to.
  *
- * @returns A new recipe with the fixed linker scripts.
+ * @returns A new recipe with the sanitized linker scripts.
  *
- * @remarks This function looks for `.so` files in `lib/` relative to
- *   the `$BRIOCHE_OUTPUT` output directory that contain GNU ld script
- *   directives (`GROUP` or `INPUT`), and strips absolute `/lib/` path
- *   prefixes from them.
+ * @remarks This function looks for `.so` files in the standard locations
+ *   `lib` and `lib64` relative to the `$BRIOCHE_OUTPUT` output directory.
  */
 export function linkerScriptMakePathsRelative(
   recipe: std.RecipeLike<std.Directory>,
