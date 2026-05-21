@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://gitlab.com/gitlab-org/gitlab-pages.git": {
+      "v19.0.0": "3b081a50561c5a5a6e45bb7cd9fc7db18b79bb5b"
+    }
+  }
+}
