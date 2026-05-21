@@ -102,8 +102,8 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  * @param set - Optionally set Meson variables during the build, as if by passing
  *    `-D...`.
  * @param disablePostBuildSteps - If set, the post build steps will not run. By
- *   default, `std.libtoolSanitizeDependencies`, `std.pkgConfigMakePathsRelative`,
- *   and `cmakeSanitizePaths` will be executed.
+ *   default, `std.libtoolSanitizeDependencies`, `std.linkerScriptMakePathsRelative`,
+ *   `std.pkgConfigMakePathsRelative`, and `cmakeSanitizePaths` will be executed.
  * @param runnable - Optionally set a path to the binary to run by default
  *   (e.g. `bin/foo`).
  */
@@ -187,6 +187,11 @@ export function mesonBuild(
       options.disablePostBuildSteps ?? false
         ? recipe
         : std.libtoolSanitizeDependencies(recipe),
+    )
+    .pipe((recipe) =>
+      options.disablePostBuildSteps ?? false
+        ? recipe
+        : std.linkerScriptMakePathsRelative(recipe),
     )
     .pipe((recipe) =>
       options.disablePostBuildSteps ?? false
