@@ -1,0 +1,63 @@
+import * as std from "std";
+import { goBuild, project as goProject } from "go";
+
+export const project = {
+  name: "mmctl",
+  version: "11.7.1",
+  repository: "https://github.com/mattermost/mattermost.git",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. Since, the one from Go proxy doesn't follow the same tagging scheme.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+})
+  // Ship a go.work file so the server module resolves its companion
+  // module from the local tree instead of the registry.
+  .insert(
+    "server/go.work",
+    std.file(std.indoc`
+      go ${goProject.version}
+
+      use (
+          .
+          ./public
+      )
+    `),
+  );
+
+export default function mmctl(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    currentDir: "server",
+    path: "./cmd/mmctl",
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/mmctl",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    mmctl version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(mmctl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version:\t${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
