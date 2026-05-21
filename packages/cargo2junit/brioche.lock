@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/cargo2junit/0.1.15/download": {
+      "type": "sha256",
+      "value": "4d44b708e703a832b449333fc66a96b9c5f50e89d275e7746fb5e964a979b2a8"
+    }
+  }
+}
