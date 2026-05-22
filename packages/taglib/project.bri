@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "taglib",
-  version: "2.2.1",
+  version: "2.3",
   repository: "https://github.com/taglib/taglib",
 };
 

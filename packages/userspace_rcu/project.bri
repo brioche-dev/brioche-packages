@@ -1,0 +1,56 @@
+import * as std from "std";
+
+export const project = {
+  name: "userspace_rcu",
+  version: "0.15.6",
+  repository: "https://github.com/urcu/userspace-rcu",
+};
+
+const source = Brioche.download(
+  `https://www.lttng.org/files/urcu/userspace-rcu-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function userspaceRcu(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-shared \\
+      --enable-static
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion liburcu | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, userspaceRcu)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

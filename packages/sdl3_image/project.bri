@@ -10,7 +10,7 @@ import sdl3 from "sdl3";
 
 export const project = {
   name: "sdl3_image",
-  version: "3.4.2",
+  version: "3.4.4",
   repository: "https://github.com/libsdl-org/SDL_image",
 };
 

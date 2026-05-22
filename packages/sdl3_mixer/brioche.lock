@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/libsdl-org/SDL_mixer/releases/download/release-3.2.0/SDL3_mixer-3.2.0.tar.gz": {
+    "https://github.com/libsdl-org/SDL_mixer/releases/download/release-3.2.2/SDL3_mixer-3.2.2.tar.gz": {
       "type": "sha256",
-      "value": "1f86fae7226d58f2ad210ca4d9e06488db722230032803423d83bad6d35fc395"
+      "value": "cdb6d2a9f01bb3c1b98c957ee12109dd6ec1a1157682c9bc8523b0fe8ab2da1e"
     }
   }
 }

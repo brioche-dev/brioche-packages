@@ -212,17 +212,17 @@ export function buildAutopackConfig(
   const variables: Record<string, AutopackConfigVariable> = {};
 
   let variableIndex = 0;
-  const addVar = (variable: {
+  function addVar(variable: {
     name?: string;
     value: std.RecipeLike;
-  }): TemplateVariable => {
+  }): TemplateVariable {
     const name = variable.name ?? `var${variableIndex++}`;
     std.assert(!(name in variables), `duplicate variable name ${name}`);
     variables[name] = { type: "path", value: variable.value };
     return { variable: name };
-  };
+  }
 
-  const buildEnvValue = (value: EnvValue): EnvValueTemplateValue => {
+  function buildEnvValue(value: EnvValue): EnvValueTemplateValue {
     if (typeof value === "object" && "relativePath" in value) {
       return {
         components: [
@@ -265,7 +265,7 @@ export function buildAutopackConfig(
         ),
       };
     }
-  };
+  }
 
   const dynamicBinaryPackedExecutable = addVar({
     name: "dynamicBinaryPackedExecutable",

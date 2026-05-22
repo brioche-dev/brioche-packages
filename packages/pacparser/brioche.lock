@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/manugarg/pacparser/archive/refs/tags/v1.5.1.tar.gz": {
+      "type": "sha256",
+      "value": "88dda1833b5c467ea61d0217fa58fbc7980f7c5a856ca2af325e6a110b1c081d"
+    }
+  }
+}
