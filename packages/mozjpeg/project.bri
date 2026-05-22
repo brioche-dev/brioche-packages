@@ -1,0 +1,55 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libpng from "libpng";
+import nasm from "nasm";
+
+export const project = {
+  name: "mozjpeg",
+  version: "4.1.5",
+  repository: "https://github.com/mozilla/mozjpeg.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function mozjpeg(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, libpng, nasm],
+    set: {
+      WITH_JPEG8: "1",
+      ENABLE_STATIC: "OFF",
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libjpeg | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, mozjpeg)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
