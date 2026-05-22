@@ -1,0 +1,95 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import gnutls from "gnutls";
+import libassuan from "libassuan";
+import libgcrypt from "libgcrypt";
+import libgpgError from "libgpg_error";
+import libidn2 from "libidn2";
+import libksba from "libksba";
+import libtasn1 from "libtasn1";
+import libunistring from "libunistring";
+import libusb from "libusb";
+import nettle from "nettle";
+import npth from "npth";
+import p11Kit from "p11_kit";
+import sqlite from "sqlite";
+import tpm2Tss from "tpm2_tss";
+
+export const project = {
+  name: "gnupg",
+  version: "2.5.20",
+  repository: "https://www.gnupg.org/",
+};
+
+const source = Brioche.download(
+  `https://gnupg.org/ftp/gcrypt/gnupg/gnupg-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function gnupg(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-doc \\
+      --disable-tests \\
+      --enable-ccid-driver
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      libgpgError,
+      libgcrypt,
+      libassuan,
+      libksba,
+      npth,
+      gnutls,
+      nettle,
+      libtasn1,
+      libidn2,
+      libunistring,
+      p11Kit,
+      sqlite,
+      libusb,
+      tpm2Tss,
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/gpg"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    gpg --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gnupg())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `gpg (GnuPG) ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://gnupg.org/ftp/gcrypt/gnupg/
+      | lines
+      | where ($it | str contains "gnupg-") and ($it | str contains ".tar.bz2") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="gnupg-(?<version>\\d+\\.\\d+\\.\\d+)\\.tar\\.bz2">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
