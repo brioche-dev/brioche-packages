@@ -1,6 +1,10 @@
 {
   "dependencies": {},
   "downloads": {
+    "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.6/mbedtls-3.6.6.tar.bz2": {
+      "type": "sha256",
+      "value": "8fb65fae8dcae5840f793c0a334860a411f884cc537ea290ce1c52bb64ca007a"
+    },
     "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-4.1.0/mbedtls-4.1.0.tar.bz2": {
       "type": "sha256",
       "value": "377a09cf8eb81b5fb2707045e5522d5489d3309fed5006c9874e60558fc81d10"
