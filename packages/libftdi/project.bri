@@ -1,0 +1,59 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import libconfuse from "libconfuse";
+import libusb from "libusb";
+
+export const project = {
+  name: "libftdi",
+  version: "1.5",
+  repository: "https://github.com/mcuee/libftdi",
+};
+
+const source = Brioche.download(
+  `https://www.intra2net.com/en/developer/libftdi/download/libftdi1-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function libftdi(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, libconfuse, libusb],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+      BUILD_TESTS: "OFF",
+      EXAMPLES: "OFF",
+      FTDIPP: "OFF",
+      DOCUMENTATION: "OFF",
+      PYTHON_BINDINGS: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libftdi1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libftdi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
