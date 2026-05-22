@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Tehreer/SheenBidi.git": {
+      "v3.0.0": "cfe430e7375a7845b679adae9d51dac6deaa8858"
+    }
+  }
+}
