@@ -1,25 +1,104 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
+import python from "python";
 
 export const project = {
   name: "mbedtls",
   version: "4.1.0",
   repository: "https://github.com/Mbed-TLS/mbedtls",
-};
+  extra: {
+    otherVersions: {
+      "4": "4.1.0",
+      "3": "3.6.6",
+    },
+  },
+} as const;
 
-const source = Brioche.download(
-  `${project.repository}/releases/download/mbedtls-${project.version}/mbedtls-${project.version}.tar.bz2`,
-)
-  .unarchive("tar", "bzip2")
-  .peel();
+std.assert(
+  Object.keys(project.extra.otherVersions).some((version) =>
+    project.version.startsWith(`${version}.`),
+  ),
+  "MbedTLS package version not found in extra.otherVersions",
+);
 
-export default function mbedtls(): std.Recipe<std.Directory> {
+/**
+ * The MbedTLS major version.
+ */
+export type MbedTLSVersion = keyof typeof project.extra.otherVersions;
+
+/**
+ * Get the latest major version of MbedTLS.
+ *
+ * @returns The latest major version of MbedTLS.
+ */
+export function getLatestVersion(): MbedTLSVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  versions.sort((a, b) => parseInt(b) - parseInt(a));
+
+  return versions[0] as MbedTLSVersion;
+}
+
+const sources: { [version: string]: std.Recipe<std.Directory> } = {
+  "4": Brioche.download(
+    `${project.repository}/releases/download/mbedtls-${project.extra.otherVersions["4"]}/mbedtls-${project.extra.otherVersions["4"]}.tar.bz2`,
+  )
+    .unarchive("tar", "bzip2")
+    .peel(),
+  "3": Brioche.download(
+    `${project.repository}/releases/download/mbedtls-${project.extra.otherVersions["3"]}/mbedtls-${project.extra.otherVersions["3"]}.tar.bz2`,
+  )
+    .unarchive("tar", "bzip2")
+    .peel(),
+} satisfies Record<MbedTLSVersion, std.Recipe<std.Directory>>;
+
+const DEFAULT_DEFINES = ["MBEDTLS_THREADING_C", "MBEDTLS_THREADING_PTHREAD"];
+
+/**
+ * Extra options for MbedTLS.
+ *
+ * @param version - The major version of MbedTLS to use. Defaults to the
+ *   latest stable major release.
+ * @param defines - Additional configuration macros to enable, on top of
+ *   the threading defaults.
+ */
+interface MbedTLSOptions {
+  version?: MbedTLSVersion;
+  defines?: string[];
+}
+
+export default function mbedtls(
+  options: MbedTLSOptions = {},
+): std.Recipe<std.Directory> {
+  const { version = getLatestVersion(), defines = [] } = options;
+
+  const baseSource = sources[version];
+  std.assert(
+    baseSource != null,
+    `Expected MbedTLS version ${JSON.stringify(
+      version,
+    )} to be one of ${JSON.stringify(Object.keys(sources))}`,
+  );
+
+  const allDefines = [...DEFAULT_DEFINES, ...defines];
+
+  const source = std.runBash`
+      for define in $defines; do
+        python3 scripts/config.py set "$define"
+      done
+    `
+    .outputScaffold(baseSource)
+    .currentDir(std.outputPath)
+    .env({ defines: allDefines.join(" ") })
+    .dependencies(std.toolchain, python)
+    .toDirectory();
+
   return cmakeBuild({
     source,
     dependencies: [std.toolchain],
     set: {
       USE_SHARED_MBEDTLS_LIBRARY: "ON",
       USE_STATIC_MBEDTLS_LIBRARY: "ON",
+      LINK_WITH_PTHREAD: "ON",
       ENABLE_TESTING: "OFF",
       ENABLE_PROGRAMS: "OFF",
       GEN_FILES: "OFF",
@@ -35,20 +114,28 @@ export default function mbedtls(): std.Recipe<std.Directory> {
   );
 }
 
-export async function test(): Promise<std.Recipe<std.File>> {
-  const script = std.runBash`
-    pkg-config --modversion mbedtls | tee "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(std.toolchain, mbedtls)
-    .toFile();
+export function test(): std.Recipe<std.Directory> {
+  const mbedtlsVersions = Object.keys(
+    project.extra.otherVersions,
+  ) as MbedTLSVersion[];
 
-  const result = (await script.read()).trim();
+  const tests = mbedtlsVersions.map(async (version) => {
+    const script = std.runBash`
+      pkg-config --modversion mbedtls | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(std.toolchain, mbedtls({ version }))
+      .toFile();
 
-  // Check that the result contains the expected version
-  const expected = project.version;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+    const result = (await script.read()).trim();
 
-  return script;
+    // Check that the result contains the expected version
+    const expected = project.extra.otherVersions[version];
+    std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
