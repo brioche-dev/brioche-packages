@@ -23,6 +23,7 @@ export default function libbsd(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain, libmd)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.linkerScriptMakePathsRelative)
     .pipe(std.pkgConfigMakePathsRelative)
     .pipe((recipe) =>
       std.setEnv(recipe, {
