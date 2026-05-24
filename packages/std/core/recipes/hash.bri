@@ -1,5 +1,5 @@
 import * as runtime from "../runtime.bri";
-import { assert, ImplementsEquatable } from "../utils.bri";
+import { assert, type ImplementsEquatable } from "../utils.bri";
 
 /**
  * Represents an expected SHA-256 hash. Should be a hex-encoded

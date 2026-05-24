@@ -164,10 +164,10 @@ export function parseInlineTable(
       let hasOwn = false;
 
       const [key, keyEndPtr] = parseKey(str, ptr - 1);
-      for (let i = 0; i < key.length; i++) {
+      for (const [i, currentKey] of key.entries()) {
         if (i !== 0) t = hasOwn ? t[k as string] : (t[k as string] = {});
 
-        k = key[i] as string;
+        k = currentKey;
         if (
           (hasOwn = Object.hasOwn(t, k)) &&
           (typeof t[k] !== "object" || seen.has(t[k]))

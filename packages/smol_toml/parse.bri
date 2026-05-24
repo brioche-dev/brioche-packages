@@ -54,7 +54,7 @@ function peekTable(
   let hasOwn = false;
   let state: MetaState;
 
-  for (let i = 0; i < key.length; i++) {
+  for (const [i, currentKey] of key.entries()) {
     if (i !== 0) {
       t = hasOwn ? t[k as string] : (t[k as string] = {});
       m = (state = m[k as string] as MetaState).c;
@@ -73,7 +73,7 @@ function peekTable(
       }
     }
 
-    k = key[i] as string;
+    k = currentKey;
     if (
       (hasOwn = Object.hasOwn(t, k)) &&
       m[k]?.t === Type.DOTTED &&
