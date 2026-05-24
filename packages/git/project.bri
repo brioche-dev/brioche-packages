@@ -8,7 +8,7 @@ export const project = {
   repository: "https://github.com/git/git",
 };
 
-const source = Brioche.download(
+export const source = Brioche.download(
   `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
