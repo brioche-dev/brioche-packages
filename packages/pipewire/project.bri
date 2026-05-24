@@ -22,7 +22,7 @@ import python from "python";
 
 export const project = {
   name: "pipewire",
-  version: "1.6.3",
+  version: "1.6.5",
   repository: "https://gitlab.freedesktop.org/pipewire/pipewire",
 };
 
