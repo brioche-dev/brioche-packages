@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/malb/m4rie/releases/download/20250128/m4rie-20250128.tar.gz": {
+      "type": "sha256",
+      "value": "96f1adafd50e6a0b51dc3aa1cb56cb6c1361ae7c10d97dc35c3fa70822a55bd7"
+    }
+  }
+}
