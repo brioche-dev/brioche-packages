@@ -1,0 +1,101 @@
+import * as std from "std";
+import python, { injectVenvPackages } from "python";
+import libffi from "libffi";
+import pycparser, { project as pycparserProject } from "pycparser";
+
+export const project = {
+  name: "cffi",
+  version: "2.0.0",
+  extra: {
+    packageName: "cffi",
+  },
+};
+
+const source = Brioche.download(
+  `https://files.pythonhosted.org/packages/source/c/cffi/cffi-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+const pipDependencies = std.directory({
+  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+  ),
+  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  ),
+});
+
+export default function cffi(): std.Recipe<std.Directory> {
+  // Create a venv
+  let venv = std.recipe(python);
+
+  // Install build dependencies (setuptools, wheel)
+  venv = std.runBash`
+    pip install setuptools wheel
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Inject pycparser into the venv
+  venv = injectVenvPackages(venv, [
+    {
+      recipe: pycparser(),
+      name: pycparserProject.name,
+      version: pycparserProject.version,
+    },
+  ]);
+
+  // Install the application into the venv
+  venv = std.runBash`
+    pip install .
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libffi)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Create the final recipe with the venv under `venv`
+  return std
+    .directory({
+      venv,
+    })
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/python3", {
+        command: { relativePath: "venv/bin/python3" },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    python3 -c "import cffi; print(cffi.__version__)" | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(cffi)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromPythonPackages({ project });
+}
