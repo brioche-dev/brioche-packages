@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://ftp.indexdata.com/pub/metaproxy/metaproxy-1.22.4.tar.gz": {
+      "type": "sha256",
+      "value": "79bffb2786bfd7612dab9603bd69ab1505c6d04053db192e0cc9ef6a842450dc"
+    }
+  }
+}
