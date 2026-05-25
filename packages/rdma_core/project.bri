@@ -14,7 +14,16 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-});
+}).pipe((source) =>
+  // Patch the sysusers.d install path to be relative to CMAKE_INSTALL_PREFIX.
+  std.runBash`
+    grep -q '"/usr/lib/sysusers.d"' "$BRIOCHE_OUTPUT/CMakeLists.txt"
+
+    sed -i 's|"/usr/lib/sysusers.d"|"lib/sysusers.d"|' "$BRIOCHE_OUTPUT/CMakeLists.txt"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
 
 export default function rdmaCore(): std.Recipe<std.Directory> {
   return cmakeBuild({
