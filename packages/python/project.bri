@@ -371,3 +371,62 @@ export function wrapVenvScripts(
     )
     .pipe((recipe) => addVenvRunnable(recipe, options));
 }
+
+/**
+ * A Python package to inject into a venv.
+ *
+ * @param recipe - A pre-built Python package recipe.
+ * @param name - The distribution name under `site-packages`.
+ * @param version - The distribution version.
+ */
+export interface VenvPackageSource {
+  recipe: std.Recipe<std.Directory>;
+  name: string;
+  version: string;
+}
+
+/**
+ * Options for {@link injectVenvPackages}.
+ *
+ * @param pythonVersion - The Python minor version shared by the source
+ *   and target venvs.
+ */
+interface InjectVenvPackagesOptions {
+  pythonVersion?: PythonVersion;
+}
+
+/**
+ * Inject the installed contents of pre-built Python packages into a
+ * venv, so `pip install` treats them as already satisfied.
+ *
+ * @remarks The target recipe must be the venv root.
+ *
+ * @param recipe - The target venv recipe.
+ * @param packages - The source packages to inject.
+ * @param options - Additional options.
+ *
+ * @returns The venv recipe with the source packages merged in.
+ */
+export function injectVenvPackages(
+  recipe: std.Recipe<std.Directory>,
+  packages: VenvPackageSource[],
+  options: InjectVenvPackagesOptions = {},
+): std.Recipe<std.Directory> {
+  const { pythonVersion = getLatestVersion() } = options;
+  const sitePackages = `lib/python${pythonVersion}/site-packages`;
+
+  return packages.reduce((target, pkg) => {
+    const module = std.castToDirectory(
+      pkg.recipe.get(`venv/${sitePackages}/${pkg.name}`),
+    );
+    const distInfo = std.castToDirectory(
+      pkg.recipe.get(
+        `venv/${sitePackages}/${pkg.name}-${pkg.version}.dist-info`,
+      ),
+    );
+
+    return target
+      .insert(`${sitePackages}/${pkg.name}`, module)
+      .insert(`${sitePackages}/${pkg.name}-${pkg.version}.dist-info`, distInfo);
+  }, recipe);
+}
