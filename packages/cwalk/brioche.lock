@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/likle/cwalk": {
+      "v1.2.9": "f45a23a13abf39d94b347d7c83810eca26a5a8d0"
+    }
+  }
+}
