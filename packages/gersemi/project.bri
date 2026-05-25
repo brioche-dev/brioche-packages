@@ -12,11 +12,8 @@ export const project = {
 };
 
 const pipDependencies = std.directory({
-  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
-    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
-  ),
-  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
-    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  "setuptools-82.0.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl",
   ),
   "setuptools_rust-1.12.1-py3-none-any.whl": Brioche.download(
     "https://files.pythonhosted.org/packages/b7/29/c12876926be20e100527f541c792731ea09b995139aee9676eaacd1b751e/setuptools_rust-1.12.1-py3-none-any.whl",
@@ -30,9 +27,9 @@ export default function gersemi(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(python);
 
-  // Install build dependencies (setuptools, wheel, setuptools-rust)
+  // Install build dependencies (setuptools, setuptools-rust)
   venv = std.runBash`
-    pip install setuptools wheel setuptools-rust semantic-version
+    pip install setuptools setuptools-rust semantic-version
   `
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
@@ -45,12 +42,11 @@ export default function gersemi(): std.Recipe<std.Directory> {
   // Install the application into the venv (needs networking because
   // cargo downloads crates to build the Rust backend)
   venv = std.runBash`
-    pip install "gersemi==${project.version}"
+    pip install --no-build-isolation "gersemi==${project.version}"
   `
     .dependencies(rust, std.toolchain)
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
-      PIP_FIND_LINKS: pipDependencies,
       CARGO_VERSION: project.version,
     })
     .outputScaffold(venv)
