@@ -14,11 +14,8 @@ const source = Brioche.gitCheckout({
 });
 
 const pipDependencies = std.directory({
-  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
-    `https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl`,
-  ),
-  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
-    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  "setuptools-82.0.1-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl`,
   ),
 });
 
@@ -40,13 +37,11 @@ export default function meson(): std.Recipe<std.Directory> {
 
   // Install the application into the venv
   venv = std.runBash`
-    pip install .
+    pip install --no-build-isolation .
   `
     .workDir(source)
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
-      PIP_FIND_LINKS: pipDependencies,
-      PIP_NO_INDEX: "1",
     })
     .outputScaffold(venv)
     .toDirectory();
