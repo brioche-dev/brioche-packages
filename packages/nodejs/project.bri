@@ -9,10 +9,9 @@ export const project = {
   repository: "https://github.com/nodejs/node",
   extra: {
     otherVersions: {
-      "25": "25.9.0",
+      "26": "26.1.0",
       "24": "24.15.0",
       "22": "22.22.3",
-      "20": "20.20.2",
     },
   },
 } as const;
@@ -40,14 +39,14 @@ const prebuiltBinaries: Record<
   string,
   Record<string, std.Recipe<std.Directory>>
 > = {
-  "25": {
+  "26": {
     "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.otherVersions["25"]}/node-v${project.extra.otherVersions["25"]}-linux-x64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["26"]}/node-v${project.extra.otherVersions["26"]}-linux-x64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
     "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.otherVersions["25"]}/node-v${project.extra.otherVersions["25"]}-linux-arm64.tar.xz`,
+      `https://nodejs.org/dist/v${project.extra.otherVersions["26"]}/node-v${project.extra.otherVersions["26"]}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
@@ -72,18 +71,6 @@ const prebuiltBinaries: Record<
       .peel(),
     "aarch64-linux": Brioche.download(
       `https://nodejs.org/dist/v${project.extra.otherVersions["22"]}/node-v${project.extra.otherVersions["22"]}-linux-arm64.tar.xz`,
-    )
-      .unarchive("tar", "xz")
-      .peel(),
-  },
-  "20": {
-    "x86_64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.otherVersions["20"]}/node-v${project.extra.otherVersions["20"]}-linux-x64.tar.xz`,
-    )
-      .unarchive("tar", "xz")
-      .peel(),
-    "aarch64-linux": Brioche.download(
-      `https://nodejs.org/dist/v${project.extra.otherVersions["20"]}/node-v${project.extra.otherVersions["20"]}-linux-arm64.tar.xz`,
     )
       .unarchive("tar", "xz")
       .peel(),
