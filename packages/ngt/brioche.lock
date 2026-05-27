@@ -1,5 +1,11 @@
 {
   "dependencies": {},
+  "downloads": {
+    "https://github.com/yahoojapan/NGT/commit/ddb97ff021bab08b3bae6144d5971a1616e1477c.patch": {
+      "type": "sha256",
+      "value": "51684d2812fd1d61664d53889980fb9202fe5e9dab261ba42f10da5b77eaf3b3"
+    }
+  },
   "git_refs": {
     "https://github.com/yahoojapan/NGT": {
       "v2.7.4": "e1ef561717767df8305a39735c6132e7dcb17260"
