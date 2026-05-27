@@ -33,7 +33,7 @@ let tags = http get --allow-errors --headers $gh_headers $'https://api.github.co
       | parse --regex $env.matchTag
       | into record
   }
-  | where (($it | get -o version) | is-not-empty)
+  | where ($it.version? | is-not-empty)
   | sort-by --natural version
 
 if ($tags | is-empty) {
@@ -41,12 +41,11 @@ if ($tags | is-empty) {
 }
 
 # Get the latest tag
-mut latestTag = $tags
+let latestTag = $tags
   | last
 
 # Get the version
-mut version = $latestTag
-  | get version
+mut version = $latestTag.version
 
 if $env.normalizeVersion == "true" {
   $version = $version
@@ -60,7 +59,7 @@ mut project = $env.project
 $project = $project
   | update version $version
 
-if ($project | get extra?.versionDash?) != null {
+if $project.extra?.versionDash? != null {
   let $versionDash = $version
     | str replace --all "." "-"
 
@@ -68,7 +67,7 @@ if ($project | get extra?.versionDash?) != null {
     | update extra.versionDash $versionDash
 }
 
-if ($project | get extra?.versionUnderscore?) != null {
+if $project.extra?.versionUnderscore? != null {
   let $versionUnderscore = $version
     | str replace --all "." "_"
 
@@ -76,7 +75,7 @@ if ($project | get extra?.versionUnderscore?) != null {
     | update extra.versionUnderscore $versionUnderscore
 }
 
-if ($project | get extra?.otherVersions?) != null {
+if $project.extra?.otherVersions? != null {
   # Ensure the newest version is in the list of other versions, then
   # update the metadata of each other version
   let otherVersions = $project.extra.otherVersions
