@@ -1,5 +1,6 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
+import git from "git";
 import openssl from "openssl";
 import libiconv from "libiconv";
 
@@ -18,7 +19,10 @@ const source = Brioche.download(
 export default function minizipNg(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, openssl, libiconv],
+    dependencies: [std.toolchain, git, openssl, libiconv],
+    // PPMD support fetches sources from the 7zip repo via FetchContent at
+    // configure time, which needs git and network access.
+    unsafe: { networking: true },
     set: {
       MZ_FETCH_LIBS: "OFF",
       MZ_LIB_SUFFIX: "-ng",
