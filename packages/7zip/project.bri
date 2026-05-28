@@ -1,0 +1,77 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "7zip",
+  version: "26.01",
+  repository: "https://github.com/ip7z/7zip",
+  extra: {
+    majorVersion: "26",
+    minorVersion: "01",
+  },
+};
+
+// Ensure the major version number matches the version
+std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+// Ensure the minor version number matches the version
+std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+
+export const source = Brioche.download(
+  `https://7-zip.org/a/7z${project.extra.majorVersion}${project.extra.minorVersion}-src.tar.xz`,
+).unarchive("tar", "xz");
+
+export default function _7zip(): std.Recipe<std.Directory> {
+  return std.runBash`
+    cd CPP/7zip/Bundles/Alone2
+    make -j "$(nproc)" -f ../../cmpl_gcc.mak DISABLE_RAR_COMPRESS=1
+
+    # Manual installation
+    cp b/g/7zz "$BRIOCHE_OUTPUT/bin/7zz"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/7zz"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    7zz | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(_7zip)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `7-Zip (z) ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://api.github.com/repos/ip7z/7zip/releases/latest
+      | get tag_name
+
+    let parts = $version | split row '.'
+    let majorVersion = $parts | get 0
+    let minorVersion = $parts | get 1
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.majorVersion $majorVersion
+      | update extra.minorVersion $minorVersion
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
