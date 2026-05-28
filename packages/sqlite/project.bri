@@ -79,13 +79,12 @@ export function liveUpdate(): NushellRunnable {
           | parse --regex '^version-(?<version>\\d+\\.\\d+\\.\\d+)$'
           | into record
       }
-      | where (($it | get -o version) | is-not-empty)
+      | where ($it.version? | is-not-empty)
       | sort-by --natural version
 
     let latestTag = $tags
       | last
-    let version = $latestTag
-      | get version
+    let version = $latestTag.version
 
     # Extract the release year
     let tagRef = http get $'https://api.github.com/repos/sqlite/sqlite/git/ref/tags/version-($version)'
