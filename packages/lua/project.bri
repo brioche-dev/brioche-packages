@@ -16,7 +16,7 @@ export default function lua(): std.Recipe<std.Directory> {
   return std.runBash`
     make linux \\
       -j "$(nproc)" \\
-      MYCFLAGS="-DLUA_USE_READLINE" \\
+      MYCFLAGS="-DLUA_USE_READLINE -fPIC" \\
       MYLIBS="-lreadline"
     make install INSTALL_TOP="$BRIOCHE_OUTPUT"
   `
