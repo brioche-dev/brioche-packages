@@ -12,7 +12,6 @@ export const project = {
   },
 };
 
-// Ensure the version number matches the encoded version used for the download
 std.assert(
   encodeVersionNumber(project.version) === project.extra.filenameEncodedVersion,
   `sqlite version number ${encodeVersionNumber(

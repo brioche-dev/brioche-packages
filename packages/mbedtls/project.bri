@@ -18,7 +18,7 @@ std.assert(
   Object.keys(project.extra.otherVersions).some((version) =>
     project.version.startsWith(`${version}.`),
   ),
-  "MbedTLS package version not found in extra.otherVersions",
+  "Package version not found in extra.otherVersions",
 );
 
 /**

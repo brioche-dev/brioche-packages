@@ -20,7 +20,7 @@ std.assert(
   Object.keys(project.extra.otherVersions).some((version) =>
     project.version.startsWith(`${version}.`),
   ),
-  "Node.js package version not found in extra.minorVersions",
+  "Package version not found in extra.otherVersions",
 );
 
 /**

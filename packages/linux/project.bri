@@ -12,8 +12,10 @@ export const project = {
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
 
 /**
  * The Linux kernel source tree. Cleaned by running `make distclean`

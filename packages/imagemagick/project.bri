@@ -30,8 +30,10 @@ export const project = {
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
 
 const source = Brioche.download(
   `https://imagemagick.org/archive/releases/ImageMagick-${project.version}.tar.xz`,

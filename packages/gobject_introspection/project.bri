@@ -32,10 +32,14 @@ export const project = {
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
-// Ensure the minor version number matches the version
-std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
+std.assert(
+  project.version.split(".").at(1) === project.extra.minorVersion,
+  "Package version does not match extra.minorVersion",
+);
 
 const source = Brioche.download(
   `https://download.gnome.org/sources/gobject-introspection/${project.extra.majorVersion}.${project.extra.minorVersion}/gobject-introspection-${project.version}.tar.xz`,
