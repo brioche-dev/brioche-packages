@@ -23,7 +23,7 @@ import x265 from "x265";
 
 export const project = {
   name: "imagemagick",
-  version: "7.1.2-21",
+  version: "7.1.2-22",
   repository: "https://github.com/ImageMagick/ImageMagick",
   extra: {
     majorVersion: "7",
