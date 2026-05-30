@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/openSUSE/libsolv": {
+      "0.7.39": "2f58c6f86edd978d6bdbd87dce9c85388e9b9dcc"
+    }
+  }
+}
