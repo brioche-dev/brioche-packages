@@ -40,5 +40,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: std.LIVE_UPDATE_REGEX_CALVER_VERSION_MATCH,
+  });
 }
