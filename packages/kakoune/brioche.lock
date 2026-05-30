@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/mawww/kakoune/releases/download/v2022.10.31/kakoune-2022.10.31.tar.bz2": {
+    "https://github.com/mawww/kakoune/releases/download/v2026.05.21/kakoune-2026.05.21.tar.bz2": {
       "type": "sha256",
-      "value": "fb317b62c9048ddc7567fe83dfc409c252ef85778b24bd2863be2762d4e4e58b"
+      "value": "be1deb3fe9808a0733ab1057309da380bb757307e8fdbb22dc478b674b6bad34"
     }
   }
 }
