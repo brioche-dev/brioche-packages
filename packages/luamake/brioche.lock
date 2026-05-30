@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/actboy168/luamake": {
+      "v1.7": "66dffad0f8cd08affddeffc89ca5fdf2b6e92ad1"
+    }
+  }
+}

@@ -1,0 +1,66 @@
+import * as std from "std";
+import ninja from "ninja";
+
+export const project = {
+  name: "luamake",
+  version: "1.7",
+  repository: "https://github.com/actboy168/luamake",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+  options: {
+    submodules: true,
+  },
+});
+
+export default function luamake(): std.Recipe<std.Directory> {
+  // Compile the bootstrap interpreter, which gets copied to ./luamake.
+  const binary = std.runBash`
+    sh ./compile/build.sh luamake
+    cp luamake "$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, ninja)
+    .toFile();
+
+  // At runtime the binary loads main.lua and scripts/ from its own directory,
+  // so keep all three together under libexec.
+  return std
+    .directory({
+      "libexec/luamake": std.directory({
+        luamake: binary,
+        "main.lua": source.get("main.lua"),
+        scripts: source.get("scripts"),
+      }),
+    })
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/luamake", {
+        command: { relativePath: "libexec/luamake/luamake" },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    luamake version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(luamake)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
