@@ -18,6 +18,13 @@ export * from "./git_repository_global.bri";
 export const DEFAULT_LIVE_UPDATE_REGEX_VERSION_MATCH =
   /^v?(?<version>(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*))?(?:\+(?:[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/;
 
+// The regex used for matching calendar-based versions. Strips an optional "v"
+// prefix, then matches a four-digit year lead followed by one to three further
+// numeric segments where leading zeros are permitted, optionally ending in a
+// modifier.
+export const LIVE_UPDATE_REGEX_CALVER_VERSION_MATCH =
+  /^v?(?<version>\d{4}(?:\.\d+){1,3}(?:[-+][0-9A-Za-z.-]+)?)$/;
+
 // The extended regex used for matching versions (includes pre-release versions).
 // Strips an optional "v" prefix, then matches the rest if it looks like a
 // version number (either semver or a semver-like version)
