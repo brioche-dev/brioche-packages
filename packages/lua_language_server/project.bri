@@ -1,0 +1,93 @@
+import * as std from "std";
+import luamake from "luamake";
+import ninja from "ninja";
+
+export const project = {
+  name: "lua_language_server",
+  version: "3.18.2",
+  repository: "https://github.com/LuaLS/lua-language-server",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+  options: {
+    submodules: true,
+  },
+});
+
+export default function luaLanguageServer(): std.Recipe<std.Directory> {
+  // Build the language server binary with the external luamake.
+  const binary = std.runBash`
+    luamake rebuild -notest
+    cp bin/lua-language-server "$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(luamake, ninja, std.toolchain)
+    .toFile();
+
+  // Assemble the install tree from the binary and the Lua scripts and data
+  // shipped in the source.
+  return (
+    std
+      .directory({
+        "libexec/lua-language-server": std.directory({
+          "bin/lua-language-server": binary,
+          "bin/main.lua": source.get("make/bootstrap.lua"),
+          "main.lua": source.get("main.lua"),
+          "debugger.lua": source.get("debugger.lua"),
+          "changelog.md": source.get("changelog.md"),
+          locale: source.get("locale"),
+          meta: source.get("meta"),
+          script: source.get("script"),
+        }),
+      })
+      // Wrap to redirect the log and meta output into the user cache.
+      .pipe((recipe) =>
+        std.addRunnable(recipe, "bin/lua-language-server", {
+          command: std.tools().get("bin/bash"),
+          args: [
+            "-euo",
+            "pipefail",
+            "-c",
+            [
+              'exec "',
+              {
+                relativePath:
+                  "libexec/lua-language-server/bin/lua-language-server",
+              },
+              '" -E "',
+              { relativePath: "libexec/lua-language-server/main.lua" },
+              '" --logpath="${XDG_CACHE_HOME:-$HOME/.cache}/lua-language-server/log"',
+              ' --metapath="${XDG_CACHE_HOME:-$HOME/.cache}/lua-language-server/meta"',
+              ' "$@"',
+            ],
+            "lua-language-server",
+          ],
+        }),
+      )
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lua-language-server --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(luaLanguageServer)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
