@@ -264,7 +264,7 @@ function dartPubGet(
 ): std.Recipe<std.Directory> {
   return std
     .process({
-      command: std.tpl`${dart()}/bin/dart`,
+      command: std.tpl`${dart}/bin/dart`,
       args: ["pub", "get"],
       workDir: std.glob(source, ["**/pubspec.yaml", "**/pubspec.lock"]),
       currentDir: std.tpl`${std.workDir}/${currentDir}`,
