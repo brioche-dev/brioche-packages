@@ -1,0 +1,348 @@
+import * as std from "std";
+import icu from "icu";
+import openssl from "openssl";
+import zlib from "zlib";
+
+export const project = {
+  name: "dotnet",
+  version: "10.0.300",
+  repository: "https://github.com/dotnet/sdk",
+  extra: {
+    otherVersions: {
+      "10": "10.0.300",
+      "9": "9.0.314",
+      "8": "8.0.421",
+    },
+  },
+};
+
+std.assert(
+  Object.keys(project.extra.otherVersions).some((majorVersion) =>
+    project.version.startsWith(`${majorVersion}.`),
+  ),
+  "Package version not found in extra.otherVersions",
+);
+
+/**
+ * The .NET SDK version.
+ */
+export type DotnetVersion = keyof typeof project.extra.otherVersions;
+
+function getLatestVersion(): DotnetVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  versions.sort((a, b) => parseInt(b) - parseInt(a));
+
+  return versions[0] as DotnetVersion;
+}
+
+const prebuiltSdks: Record<
+  string,
+  Record<string, std.Recipe<std.Directory>>
+> = {
+  "10": {
+    "x86_64-linux": Brioche.download(
+      `https://builds.dotnet.microsoft.com/dotnet/Sdk/${project.extra.otherVersions["10"]}/dotnet-sdk-${project.extra.otherVersions["10"]}-linux-x64.tar.gz`,
+    ).unarchive("tar", "gzip"),
+    "aarch64-linux": Brioche.download(
+      `https://builds.dotnet.microsoft.com/dotnet/Sdk/${project.extra.otherVersions["10"]}/dotnet-sdk-${project.extra.otherVersions["10"]}-linux-arm64.tar.gz`,
+    ).unarchive("tar", "gzip"),
+  },
+  "9": {
+    "x86_64-linux": Brioche.download(
+      `https://builds.dotnet.microsoft.com/dotnet/Sdk/${project.extra.otherVersions["9"]}/dotnet-sdk-${project.extra.otherVersions["9"]}-linux-x64.tar.gz`,
+    ).unarchive("tar", "gzip"),
+    "aarch64-linux": Brioche.download(
+      `https://builds.dotnet.microsoft.com/dotnet/Sdk/${project.extra.otherVersions["9"]}/dotnet-sdk-${project.extra.otherVersions["9"]}-linux-arm64.tar.gz`,
+    ).unarchive("tar", "gzip"),
+  },
+  "8": {
+    "x86_64-linux": Brioche.download(
+      `https://builds.dotnet.microsoft.com/dotnet/Sdk/${project.extra.otherVersions["8"]}/dotnet-sdk-${project.extra.otherVersions["8"]}-linux-x64.tar.gz`,
+    ).unarchive("tar", "gzip"),
+    "aarch64-linux": Brioche.download(
+      `https://builds.dotnet.microsoft.com/dotnet/Sdk/${project.extra.otherVersions["8"]}/dotnet-sdk-${project.extra.otherVersions["8"]}-linux-arm64.tar.gz`,
+    ).unarchive("tar", "gzip"),
+  },
+};
+
+function prebuiltSdk(
+  version: DotnetVersion,
+  platform: std.Platform,
+): std.Recipe<std.Directory> {
+  const prebuiltSdksForVersion = prebuiltSdks[version];
+  std.assert(
+    prebuiltSdksForVersion != null,
+    `.NET version '${version}' is not supported, expected one of ${JSON.stringify(
+      Object.keys(prebuiltSdks),
+    )}`,
+  );
+
+  const prebuilt = prebuiltSdksForVersion[platform];
+  std.assert(
+    prebuilt != null,
+    `.NET ${version} is not supported for ${platform}, expected one of ${JSON.stringify(
+      Object.keys(prebuiltSdksForVersion),
+    )}`,
+  );
+
+  return prebuilt;
+}
+
+// Patch the executables and bundled native libraries so they run outside their
+// original system.
+function autopackRuntime(
+  recipe: std.Recipe<std.Directory>,
+  excludeGlobs?: string[],
+): std.Recipe<std.Directory> {
+  return std.autopack(recipe, {
+    globs: ["**"],
+    excludeGlobs,
+    linkDependencies: [std.toolchain, icu, openssl({ version: "3" }), zlib],
+    selfDependency: true,
+    dynamicBinaryConfig: {
+      // Force the libc-merged libraries needed by libcoreclr.so
+      extraLibraries: [
+        "librt.so.1",
+        "libpthread.so.0",
+        "libdl.so.2",
+        "libgcc_s.so.1",
+      ],
+      skipUnknownLibraries: true,
+    },
+    sharedLibraryConfig: {
+      skipUnknownLibraries: true,
+    },
+    scriptConfig: {
+      enabled: false,
+    },
+  });
+}
+
+/**
+ * Extra options for the .NET SDK.
+ *
+ * @param version - The major version of .NET to use. Defaults to the
+ *   latest supported release.
+ */
+interface DotnetOptions {
+  version?: DotnetVersion;
+}
+
+/**
+ * The .NET SDK.
+ *
+ * @param options - The options for installing the dotnet package.
+ *
+ * @returns a recipe containing the standard .NET tools, including:
+ *
+ * - `dotnet/dotnet`
+ * - `bin/dotnet` (wrapper around `dotnet/dotnet`)
+ *
+ * The directory `dotnet` is intended to be used as the `$DOTNET_ROOT` env var.
+ */
+export default function dotnet(
+  options: DotnetOptions = {},
+): std.Recipe<std.Directory> {
+  const { version = getLatestVersion() } = options;
+
+  return std
+    .directory({
+      // The `packs` templates keep their app-name placeholder bytes intact.
+      dotnet: prebuiltSdk(version, std.CURRENT_PLATFORM).pipe((recipe) =>
+        autopackRuntime(recipe, ["packs/**"]),
+      ),
+    })
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        DOTNET_ROOT: { fallback: { path: "dotnet" } },
+      }),
+    )
+    .pipe((recipe) =>
+      // Expose the dlopened ICU and OpenSSL libraries at runtime. The toolchain
+      // is left out so built executables keep the system glibc.
+      std.addRunnable(recipe, "bin/dotnet", {
+        command: { relativePath: "dotnet/dotnet" },
+        env: {
+          DOTNET_ROOT: { fallback: { relativePath: "dotnet" } },
+          LD_LIBRARY_PATH: {
+            append: [icu, "/lib", ":", openssl({ version: "3" }), "/lib"],
+            separator: ":",
+          },
+        },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/dotnet"));
+}
+
+export function test(): std.Recipe<std.Directory> {
+  const versions = Object.keys(project.extra.otherVersions) as DotnetVersion[];
+
+  const tests = versions.map(async (version) => {
+    const script = std.runBash`
+      dotnet --version | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(dotnet({ version }))
+      .toFile();
+
+    const result = (await script.read()).trim();
+
+    // Check that the result matches the expected version
+    const expected = project.extra.otherVersions[version];
+    std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
+
+/**
+ * Build parameters for a .NET project.
+ *
+ * @param config - The build configuration. Defaults to `Release`.
+ * @param invariantGlobalization - Build without ICU globalization support.
+ */
+interface DotnetBuildParameters {
+  config?: string;
+  invariantGlobalization?: boolean;
+}
+
+/**
+ * Options for building and publishing a .NET project.
+ *
+ * @param source - The project source. Should include the `.csproj` (or
+ *   solution) and a `packages.lock.json` when external packages are used.
+ * @param path - Optional project or solution path to publish, relative to
+ *   `source`. Useful for repositories holding more than one project.
+ * @param dependencies - Optionally add additional dependencies to the build.
+ * @param env - Optionally set environment variables for the build.
+ * @param buildParams - Optional build parameters.
+ * @param runnable - Optionally set a path to the binary to run by default
+ *   (e.g. `bin/foo`). Its basename must match the published executable.
+ */
+interface DotnetBuildOptions {
+  source: std.RecipeLike<std.Directory>;
+  path?: string;
+  dependencies?: std.RecipeLike<std.Directory>[];
+  env?: Record<string, std.ProcessTemplateLike>;
+  buildParams?: DotnetBuildParameters;
+  runnable?: string;
+}
+
+/**
+ * Build a .NET project as a self-contained executable. Defaults to the release
+ * configuration and bundles the .NET runtime, so the result runs without a
+ * separate .NET installation. Dependencies are restored in a networked step so
+ * the publish itself stays offline.
+ *
+ * @param options - Options for building the .NET project.
+ *
+ * @returns A recipe with the built .NET app stored under `libexec`
+ *
+ * @example
+ * ```typescript
+ * import { dotnetBuild } from "dotnet";
+ *
+ * export default function (): std.Recipe<std.Directory> {
+ *   return dotnetBuild({
+ *     source: Brioche.glob("**\/*.cs", "*.csproj", "packages.lock.json"),
+ *     runnable: "bin/myapp",
+ *   });
+ * }
+ * ```
+ */
+export function dotnetBuild(
+  options: DotnetBuildOptions,
+): std.Recipe<std.Directory> {
+  const runtimeIdentifier: Record<string, string> = {
+    "x86_64-linux": "linux-x64",
+    "aarch64-linux": "linux-arm64",
+  };
+  const rid = runtimeIdentifier[std.CURRENT_PLATFORM];
+  std.assert(
+    rid != null,
+    `.NET build is not supported for ${std.CURRENT_PLATFORM}`,
+  );
+
+  const config = options.buildParams?.config ?? "Release";
+  const nugetPackages = dotnetRestore(options, rid);
+
+  let recipe = std.runBash`
+    publish_args=(
+      --configuration "$config"
+      --runtime "$rid"
+      --self-contained
+      --output "$BRIOCHE_OUTPUT/libexec"
+    )
+    if [ "$invariant" = "true" ]; then
+      publish_args+=("-p:InvariantGlobalization=true")
+    fi
+    if [ -n "$project_path" ]; then
+      publish_args+=("$project_path")
+    fi
+
+    dotnet publish "\${publish_args[@]}"
+  `
+    .workDir(options.source)
+    .dependencies(dotnet, ...(options.dependencies ?? []))
+    .env({
+      NUGET_PACKAGES: nugetPackages,
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1",
+      DOTNET_NOLOGO: "1",
+      config,
+      rid,
+      invariant:
+        options.buildParams?.invariantGlobalization ?? false ? "true" : "false",
+      project_path: options.path ?? "",
+      ...options.env,
+    })
+    .toDirectory()
+    .pipe((recipe) => autopackRuntime(recipe));
+
+  const { runnable } = options;
+  if (runnable != null) {
+    const executable = runnable.split("/").at(-1) ?? runnable;
+    recipe = recipe
+      .pipe((recipe) =>
+        // Expose the dlopened ICU and OpenSSL libraries at runtime. The
+        // toolchain is left out so the executable keeps the system glibc.
+        std.addRunnable(recipe, runnable, {
+          command: { relativePath: `libexec/${executable}` },
+          env: {
+            LD_LIBRARY_PATH: {
+              append: [icu, "/lib", ":", openssl({ version: "3" }), "/lib"],
+              separator: ":",
+            },
+          },
+        }),
+      )
+      .pipe((recipe) => std.withRunnableLink(recipe, runnable));
+  }
+
+  return recipe;
+}
+
+function dotnetRestore(
+  options: DotnetBuildOptions,
+  rid: string,
+): std.Recipe<std.Directory> {
+  // Populate the NuGet package cache with networking enabled
+  return std
+    .process({
+      command: std.tpl`${dotnet}/bin/dotnet`,
+      args: ["restore", "--runtime", rid, std.tpl`${options.path ?? "."}`],
+      workDir: options.source,
+      env: {
+        NUGET_PACKAGES: std.outputPath,
+        DOTNET_CLI_TELEMETRY_OPTOUT: "1",
+        DOTNET_NOLOGO: "1",
+      },
+      outputScaffold: std.directory(),
+      unsafe: { networking: true },
+    })
+    .toDirectory();
+}
