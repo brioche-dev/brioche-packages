@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "gleam",
-  version: "1.15.4",
+  version: "1.16.0",
   repository: "https://github.com/gleam-lang/gleam.git",
 };
 
