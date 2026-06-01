@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/baresip/re": {
+      "v4.8.1": "89aed31f37449da32004ba608e5d1aa483b8bb21"
+    }
+  }
+}
