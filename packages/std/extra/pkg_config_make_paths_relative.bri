@@ -5,11 +5,12 @@ export const PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT = std.indoc`
   make_pkg_config_paths_relative () {
     local -r file="$1"
 
-    # Update prefix, exec_prefix, libdir and includedir variables
+    # Update prefix, exec_prefix, libdir and the include directory variables
     sed -i 's|^prefix[[:space:]]*=.*|prefix=\${pcfiledir}/../..|' "$file"
     sed -i 's|^exec_prefix[[:space:]]*=.*|exec_prefix=\${prefix}|' "$file"
     sed -i 's|^libdir[[:space:]]*=.*|libdir=\${prefix}/lib|' "$file"
     sed -i 's|^includedir[[:space:]]*=.*/include\\([^"]*\\)"\\?|includedir=\${prefix}/include\\1|' "$file"
+    sed -i 's|^includearchdir[[:space:]]*=.*/include\\([^"]*\\)"\\?|includearchdir=\${prefix}/include\\1|' "$file"
 
     # Find and replace common patterns in Libs and Cflags variables
     sed -i -e "/^Libs:/ s|-L/[^[:space:]]*/lib|-L\\\${libdir}|g" "$file"
