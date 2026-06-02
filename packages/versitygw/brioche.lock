@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/versity/versitygw/@v/v1.5.0.info": {
+      "type": "sha256",
+      "value": "50b7b7647400956c41ccf0860285837d2ab6bef7d05f93c79f9d2af95aef7d5f"
+    },
+    "https://proxy.golang.org/github.com/versity/versitygw/@v/v1.5.0.zip": {
+      "type": "sha256",
+      "value": "1fbdece28a7f3b5606f2ee29ef2b1dafba53a630e0a21d38aa7fa44d5eae6215"
+    }
+  }
+}
