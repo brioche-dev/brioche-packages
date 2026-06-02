@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/nitinbhat972/cwal": {
+      "v0.9.0": "6c634b40cd24cf5468a37d793bde837c8feb60a8"
+    }
+  }
+}
