@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "depot",
-  version: "2.101.42",
+  version: "2.101.62",
   repository: "https://github.com/depot/cli.git",
 };
 
