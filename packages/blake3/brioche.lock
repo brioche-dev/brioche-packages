@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/BLAKE3-team/BLAKE3.git": {
-      "1.8.4": "b97a24f8754819755ef78d8016c0391c65c943c5"
+      "1.8.5": "93a431c78a52d7ccf0f366f106467f5070e6075e"
     }
   }
 }
