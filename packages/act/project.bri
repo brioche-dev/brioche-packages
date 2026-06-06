@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "act",
-  version: "0.2.87",
+  version: "0.2.88",
   repository: "https://github.com/nektos/act",
   extra: {
     moduleName: "github.com/nektos/act",
