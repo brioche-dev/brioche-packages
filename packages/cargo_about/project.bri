@@ -16,6 +16,9 @@ export default function cargoAbout(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/cargo-about",
+    buildParams: {
+      features: ["cli"],
+    },
   });
 }
 
