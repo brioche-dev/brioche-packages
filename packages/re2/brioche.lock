@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/google/re2.git": {
+      "2025-11-05": "927f5d53caf8111721e734cf24724686bb745f55"
+    }
+  }
+}
