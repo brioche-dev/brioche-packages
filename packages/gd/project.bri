@@ -12,7 +12,6 @@ import libpng from "libpng";
 import libtiff from "libtiff";
 import libwebp from "libwebp";
 import rav1e from "rav1e";
-import zstd from "zstd";
 
 export const project = {
   name: "gd",
@@ -56,7 +55,6 @@ export default function gd(): std.Recipe<std.Directory> {
       libtiff,
       libwebp,
       rav1e,
-      zstd,
     )
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
