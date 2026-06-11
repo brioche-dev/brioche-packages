@@ -22,6 +22,7 @@ export default function protobuf(): std.Recipe<std.Directory> {
       protobuf_BUILD_CONFORMANCE: "OFF",
       protobuf_BUILD_EXAMPLES: "OFF",
       protobuf_WITH_ZLIB: "ON",
+      BUILD_SHARED_LIBS: "ON",
     },
     runnable: "bin/protoc",
   }).pipe((recipe) =>
