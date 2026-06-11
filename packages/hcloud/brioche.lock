@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/hetznercloud/cli/@v/v1.62.2.zip": {
+    "https://proxy.golang.org/github.com/hetznercloud/cli/@v/v1.64.1.zip": {
       "type": "sha256",
-      "value": "75f2c88777befe5f42a539440d9752fe241cb49ad7a8ac7793914125161f87fa"
+      "value": "e84c67f4e7331d57eb21ec69869c1475e0ee2447ab2bf7bfb55952ede42a4c2e"
     }
   }
 }

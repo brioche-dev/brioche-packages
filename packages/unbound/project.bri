@@ -6,7 +6,7 @@ import nghttp2 from "nghttp2";
 
 export const project = {
   name: "unbound",
-  version: "1.24.2",
+  version: "1.25.0",
   repository: "https://github.com/NLnetLabs/unbound",
 };
 

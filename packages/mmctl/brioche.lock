@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mattermost/mattermost.git": {
+      "v11.7.1": "de117ab1cc09f4114aa7cb716fe760946ae7696c"
+    }
+  }
+}

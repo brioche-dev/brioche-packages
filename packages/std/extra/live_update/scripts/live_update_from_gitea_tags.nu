@@ -7,7 +7,7 @@ let tags = http get $'($env.baseUrl)/api/v1/repos/($env.repoOwner)/($env.repoNam
       | parse --regex $env.matchTag
       | into record
   }
-  | where (($it | get -o version) | is-not-empty)
+  | where ($it.version? | is-not-empty)
   | sort-by --natural version
 
 if ($tags | is-empty) {
@@ -15,12 +15,11 @@ if ($tags | is-empty) {
 }
 
 # Get the latest tag
-mut latestTag = $tags
+let latestTag = $tags
   | last
 
 # Get the version
-mut version = $latestTag
-  | get version
+mut version = $latestTag.version
 
 if $env.normalizeVersion == "true" {
   $version = $version
@@ -34,7 +33,7 @@ mut project = $env.project
 $project = $project
   | update version $version
 
-if ($project | get extra?.versionDash?) != null {
+if $project.extra?.versionDash? != null {
   let $versionDash = $version
     | str replace --all "." "-"
 
@@ -42,7 +41,7 @@ if ($project | get extra?.versionDash?) != null {
     | update extra.versionDash $versionDash
 }
 
-if ($project | get extra?.versionUnderscore?) != null {
+if $project.extra?.versionUnderscore? != null {
   let $versionUnderscore = $version
     | str replace --all "." "_"
 

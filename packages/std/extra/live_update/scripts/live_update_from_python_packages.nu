@@ -1,11 +1,10 @@
 # Retrieve the latest release from PyPI registry
 let packageInfo = http get $'https://pypi.org/pypi/($env.packageName)/json'
 
-let parsedVersion = $packageInfo
-  | get info.version
+let parsedVersion = $packageInfo.info.version
   | parse --regex $env.matchVersion
   | into record
-if (($parsedVersion | get -o version) | is-empty) {
+if ($parsedVersion.version? | is-empty) {
   error make { msg: $'Latest release does not match regex ($env.matchVersion)' }
 }
 

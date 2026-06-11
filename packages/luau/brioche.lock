@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/luau-lang/luau": {
-      "0.716": "4ca11dbc3b31ddf27ee8ec1ab6c036676de9f240"
+      "0.720": "0c6cea0122242ed76528848cfe130e9820e7f122"
     }
   }
 }

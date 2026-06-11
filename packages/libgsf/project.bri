@@ -9,7 +9,7 @@ import pcre2 from "pcre2";
 
 export const project = {
   name: "libgsf",
-  version: "1.14.56",
+  version: "1.14.58",
   repository: "https://gitlab.gnome.org/GNOME/libgsf",
   extra: {
     majorVersion: "1",
@@ -17,10 +17,14 @@ export const project = {
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
-// Ensure the minor version number matches the version
-std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
+std.assert(
+  project.version.split(".").at(1) === project.extra.minorVersion,
+  "Package version does not match extra.minorVersion",
+);
 
 const source = Brioche.download(
   `https://download.gnome.org/sources/libgsf/${project.extra.majorVersion}.${project.extra.minorVersion}/libgsf-${project.version}.tar.xz`,

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://git.kernel.org/pub/scm/linux/kernel/git/dhowells/keyutils.git": {
+      "v1.6.3": "cb3bb194cca88211cbfcdde2f10c0f43c3fb8ec3"
+    }
+  }
+}

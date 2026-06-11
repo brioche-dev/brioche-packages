@@ -42,7 +42,7 @@ export function createProxy<T extends Artifact>(
 ): Recipe<T> {
   let serialized: Promise<runtime.ProxyRecipe> | undefined;
 
-  const serializeProxy = async (): Promise<runtime.ProxyRecipe> => {
+  async function serializeProxy(): Promise<runtime.ProxyRecipe> {
     serialized ??= (async () => {
       const recipeValue =
         typeof recipe === "function" ? await recipe() : await recipe;
@@ -55,7 +55,7 @@ export function createProxy<T extends Artifact>(
     })();
 
     return await serialized;
-  };
+  }
 
   return createRecipe(["file", "directory", "symlink"] as ArtifactType<T>[], {
     sourceDepth: 1,

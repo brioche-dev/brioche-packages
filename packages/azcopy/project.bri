@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "azcopy",
-  version: "10.32.3",
+  version: "10.32.4",
   extra: {
     moduleName: "github.com/!azure/azure-storage-azcopy/v10",
   },

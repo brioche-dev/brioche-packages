@@ -1,0 +1,51 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "cargo2junit",
+  version: "0.1.15",
+  extra: {
+    crateName: "cargo2junit",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cargo2junit(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/cargo2junit",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so a minimal suite
+  // event stream is piped in to verify the correct installation
+  const script = std.runBash`
+    printf '%s\n%s\n' \\
+      '{"type":"suite","event":"started","test_count":0}' \\
+      '{"type":"suite","event":"ok","passed":0,"failed":0,"allowed_fail":0,"ignored":0,"measured":0,"filtered_out":0,"exec_time":0.0}' \\
+      | cargo2junit | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(cargo2junit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = `<?xml version="1.0" encoding="UTF-8"?>`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

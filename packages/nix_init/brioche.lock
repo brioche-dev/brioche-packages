@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/nix-community/nix-init.git": {
-      "v0.3.4": "05bef09fbd44554f0c41cbb840985946d139db36"
+      "v0.3.5": "c179e91fb5f74bacc013eb37913d5abb726afd0a"
     },
     "https://github.com/spdx/license-list-data.git": {
       "v3.25.0": "d685a936bed3dbdd9b668c51f5e0f467ed5d1bd5"

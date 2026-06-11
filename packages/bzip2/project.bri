@@ -1,0 +1,80 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "bzip2",
+  version: "1.0.8",
+};
+
+const source = Brioche.download(
+  `https://sourceware.org/pub/bzip2/bzip2-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Drop the absolute $(PREFIX) prefix from install symlinks so they stay
+    // relative.
+    std.runBash`
+      sed -i 's@\\(ln -s -f \\)$(PREFIX)/bin/@\\1@' "$BRIOCHE_OUTPUT/Makefile"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function bzip2(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -f Makefile-libbz2_so
+    make clean
+
+    make -j "$(nproc)"
+    make install PREFIX="$BRIOCHE_OUTPUT"
+
+    cp -a libbz2.so.* "$BRIOCHE_OUTPUT/lib"
+    ln -s libbz2.so.${project.version} "$BRIOCHE_OUTPUT/lib/libbz2.so"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/bzip2"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    bzip2 --help 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(bzip2)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://sourceware.org/pub/bzip2/
+      | lines
+      | where ($it | str contains 'bzip2-') and ($it | str contains '.tar.gz') and (not ($it | str contains 'bzip2-latest'))
+      | parse --regex '<a href="bzip2-(?<version>\\d+\\.\\d+(?:\\.\\d+)?)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

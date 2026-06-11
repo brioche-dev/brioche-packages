@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "kakoune",
-  version: "2026.04.12",
+  version: "2026.05.21",
   repository: "https://github.com/mawww/kakoune",
 };
 
@@ -40,5 +40,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: std.LIVE_UPDATE_REGEX_CALVER_VERSION_MATCH,
+  });
 }

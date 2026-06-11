@@ -1,0 +1,72 @@
+import * as std from "std";
+
+export const project = {
+  name: "p7zip",
+  version: "17.06",
+  repository: "https://github.com/p7zip-project/p7zip",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    source.insert("makefile.machine", source.get("makefile.linux_any_cpu")),
+  )
+  .pipe((source) =>
+    // Upstream forgot to bump MY_VERSION
+    std.runBash`
+      # Fail if upstream has fixed the version (so we can remove this workaround)
+      grep -q '#define MY_VERSION "17.05"' "$BRIOCHE_OUTPUT/C/7zVersion.h"
+
+      sed -i 's/"17.05"/"${project.version}"/g; s/"17.05 beta"/"${project.version} beta"/g' "$BRIOCHE_OUTPUT/C/7zVersion.h"
+    `
+      .outputScaffold(source)
+      .dependencies(std.toolchain)
+      .toDirectory(),
+  );
+
+export default function p7zip(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)" 7za
+
+    # Manual installation
+    cp bin/7za "$BRIOCHE_OUTPUT/bin/7za"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/7za"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    7za | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(p7zip)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `p7zip Version ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^v(?<version>\d+\.\d+)$/,
+  });
+}

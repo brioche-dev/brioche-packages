@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://lttng.org/files/lttng-ust/lttng-ust-2.15.1.tar.bz2": {
+      "type": "sha256",
+      "value": "37c9b58ea7aa7bc47d6630b52ba1a48ebce095b9a196eab4ddd273d78301792d"
+    }
+  }
+}

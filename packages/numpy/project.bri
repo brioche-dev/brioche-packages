@@ -57,7 +57,6 @@ export default function numpy(): std.Recipe<std.Directory> {
     .dependencies(std.toolchain, meson, ninja, openblas, cython)
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
-      PIP_NO_INDEX: "1",
     })
     .outputScaffold(venv)
     .toDirectory();

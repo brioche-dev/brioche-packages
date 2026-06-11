@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/helm/helm.git": {
-      "v4.1.4": "05fa37973dc9e42b76e1d2883494c87174b6074f"
+      "v4.2.0": "06468084e85c244c712834933d25ea232a4c2093"
     }
   }
 }

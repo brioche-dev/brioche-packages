@@ -1,5 +1,5 @@
-import { File } from "./file.bri";
-import { Hash } from "./hash.bri";
+import type { File } from "./file.bri";
+import type { Hash } from "./hash.bri";
 import { type Recipe, createRecipe } from "./recipe.bri";
 
 /**

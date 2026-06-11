@@ -32,10 +32,14 @@ export const project = {
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
-// Ensure the minor version number matches the version
-std.assert(project.version.split(".").at(1) === project.extra.minorVersion);
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
+std.assert(
+  project.version.split(".").at(1) === project.extra.minorVersion,
+  "Package version does not match extra.minorVersion",
+);
 
 const source = Brioche.download(
   `https://download.gnome.org/sources/gobject-introspection/${project.extra.majorVersion}.${project.extra.minorVersion}/gobject-introspection-${project.version}.tar.xz`,
@@ -46,8 +50,8 @@ const source = Brioche.download(
 // Create a Python with setuptools installed
 function pythonWithSetuptools(): std.Recipe<std.Directory> {
   const pipDependencies = std.directory({
-    "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
-      "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+    "setuptools-82.0.1-py3-none-any.whl": Brioche.download(
+      "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl",
     ),
   });
 

@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "sesh",
-  version: "2.25.0",
+  version: "2.26.2",
   repository: "https://github.com/joshmedeski/sesh.git",
   extra: {
     moduleName: "github.com/joshmedeski/sesh/v2",

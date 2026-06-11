@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "tfswitch",
-  version: "1.16.0",
+  version: "1.18.0",
   extra: {
     moduleName: "github.com/warrensbox/terraform-switcher",
   },

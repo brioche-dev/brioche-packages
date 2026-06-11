@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-c/0.10.21+cargo-0.95.0/download": {
+    "https://crates.io/api/v1/crates/cargo-c/0.10.22+cargo-0.96.0/download": {
       "type": "sha256",
-      "value": "a458fad2489698dd392a624551644975b01f5684bd7721e09999fd37e0f26e91"
+      "value": "608749b7bc6c26638c676215e35603a8eeff40d87feb7d65375b0445a110a1c8"
     }
   }
 }

@@ -1,0 +1,135 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import elfutils from "elfutils";
+import file from "file";
+import libarchive from "libarchive";
+import libcap from "libcap";
+import libiconv from "libiconv";
+import lua from "lua";
+import openmp from "openmp";
+import openssl from "openssl";
+import popt from "popt";
+import rpmSequoia from "rpm_sequoia";
+import scdoc from "scdoc";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "rpm",
+  version: "6.0.1",
+  repository: "https://github.com/rpm-software-management/rpm",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `rpm-${project.version}-release`,
+});
+
+export default function rpm(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      elfutils,
+      file,
+      libarchive,
+      libcap,
+      libiconv,
+      lua,
+      openmp,
+      openssl,
+      popt,
+      rpmSequoia,
+      scdoc,
+      sqlite,
+    ],
+    set: {
+      WITH_OPENSSL: "ON",
+      WITH_SELINUX: "OFF",
+      WITH_DBUS: "OFF",
+      WITH_AUDIT: "OFF",
+      WITH_FAPOLICYD: "OFF",
+      ENABLE_PYTHON: "OFF",
+    },
+  })
+    .pipe(wrapBinaries)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+        RPM_CONFIGDIR: { fallback: { path: "lib/rpm" } },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/rpm"));
+}
+
+/**
+ * Wrap each rpm-family binary so `RPM_CONFIGDIR` points at the package's
+ * own `lib/rpm` directory at runtime. rpm bakes the build-time install
+ * prefix into its binaries, so they can't otherwise locate `lib/rpm/rpmrc`
+ * and friends when run from a different path.
+ *
+ * @param recipe - The recipe to wrap the binaries in.
+ *
+ * @returns The recipe with the binaries wrapped.
+ */
+function wrapBinaries(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  const binaries = [
+    "rpm",
+    "rpmbuild",
+    "rpmsign",
+    "rpmkeys",
+    "rpmspec",
+    "rpmdb",
+    "rpmlua",
+    "rpmgraph",
+    "rpmsort",
+    "rpm2archive",
+    "gendiff",
+  ];
+
+  let wrapped = std.recipe(recipe);
+
+  for (const name of binaries) {
+    wrapped = wrapped
+      .insert(`libexec/${name}`, wrapped.get(`bin/${name}`))
+      .remove(`bin/${name}`);
+    wrapped = std.addRunnable(wrapped, `bin/${name}`, {
+      command: { relativePath: `libexec/${name}` },
+      env: {
+        RPM_CONFIGDIR: { fallback: { relativePath: "lib/rpm" } },
+      },
+    });
+  }
+
+  return wrapped;
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    rpm --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rpm)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `RPM version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^rpm-(?<version>\d+\.\d+\.\d+)-release$/,
+  });
+}

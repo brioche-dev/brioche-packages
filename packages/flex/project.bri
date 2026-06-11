@@ -1,0 +1,85 @@
+import * as std from "std";
+
+export const project = {
+  name: "flex",
+  version: "2.6.4",
+  repository: "https://github.com/westes/flex",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/flex-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function flex(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      // flex pipes generated scanners through m4 at runtime, so bundle m4 and
+      // point flex at it via the M4 env var the wrappers set.
+      recipe.insert(
+        "libexec/m4",
+        std.castToDirectory(std.toolchain().get("bin")).get("m4"),
+      ),
+    )
+    .pipe((recipe) =>
+      // Move the real binary aside and drop the flex++ symlink, since wrappers
+      // can't preserve the argv[0]-based C++ detection bare flex++ relies on.
+      recipe
+        .insert("libexec/flex", recipe.get("bin/flex"))
+        .remove("bin/flex")
+        .remove("bin/flex++"),
+    )
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/flex", {
+        command: { relativePath: "libexec/flex" },
+        env: {
+          M4: { fallback: { relativePath: "libexec/m4" } },
+        },
+      }),
+    )
+    .pipe((recipe) =>
+      // flex++ is just flex with C++ scanner output, so pass --c++ explicitly.
+      std.addRunnable(recipe, "bin/flex++", {
+        command: { relativePath: "libexec/flex" },
+        args: ["--c++"],
+        env: {
+          M4: { fallback: { relativePath: "libexec/m4" } },
+        },
+      }),
+    )
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/flex"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    flex --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(flex())
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `flex ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

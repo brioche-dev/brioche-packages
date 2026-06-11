@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "victoriametrics",
-  version: "1.140.0",
+  version: "1.143.0",
   repository: "https://github.com/VictoriaMetrics/VictoriaMetrics.git",
 };
 

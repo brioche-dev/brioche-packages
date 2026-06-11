@@ -3,9 +3,9 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "rqlite",
-  version: "9.4.1",
+  version: "10.0.5",
   extra: {
-    moduleName: "github.com/rqlite/rqlite/v9",
+    moduleName: "github.com/rqlite/rqlite/v10",
   },
 };
 

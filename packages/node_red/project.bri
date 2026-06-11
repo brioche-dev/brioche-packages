@@ -1,0 +1,40 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+
+export const project = {
+  name: "node_red",
+  version: "5.0.0",
+  extra: {
+    packageName: "node-red",
+  },
+};
+
+export default function nodeRed(): std.Recipe<std.Directory> {
+  return npmInstallGlobal({
+    packageName: project.extra.packageName,
+    version: project.version,
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/node-red"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    node-red --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nodeRed)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Node-RED v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromNpmPackages({ project });
+}

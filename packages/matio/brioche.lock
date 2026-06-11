@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/tbeu/matio/releases/download/v1.5.30/matio-1.5.30.tar.gz": {
+      "type": "sha256",
+      "value": "8bd3b9477042ecc00dd71c04762fa58468e14cccc32fd8c6826c2da1e8bc3107"
+    }
+  }
+}

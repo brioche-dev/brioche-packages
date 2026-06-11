@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/dloebl/cgif/archive/refs/tags/v0.5.3.tar.gz": {
+      "type": "sha256",
+      "value": "dcc7731e974ee77db75df26c99aca4d95f11ca2d267d870d42bce1e0d1e1e75f"
+    }
+  }
+}

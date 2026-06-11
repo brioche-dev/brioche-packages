@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "highway",
-  version: "1.3.0",
+  version: "1.4.0",
   repository: "https://github.com/google/highway",
 };
 

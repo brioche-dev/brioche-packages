@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/csmith-project/csmith.git": {
+      "csmith-2.3.0": "30dccd73b78652c4719f36572994778a5b233a4e"
+    }
+  }
+}

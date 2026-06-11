@@ -6,7 +6,7 @@ ls bin/**/*
       | path relative-to (pwd --physical)
 
     let firstLine = open $bin.name --raw
-      | split row -r '\n'
+      | lines
       | first
 
     { name: $bin.name, target: $target, firstLine: $firstLine }
