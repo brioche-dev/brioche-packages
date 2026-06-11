@@ -2,6 +2,8 @@ import * as std from "std";
 import { cmakeBuild } from "cmake";
 import lz4 from "lz4";
 import zlibNg from "zlib_ng";
+import zfp from "zfp";
+import zstd from "zstd";
 
 export const project = {
   name: "c_blosc2",
@@ -17,15 +19,13 @@ const source = Brioche.gitCheckout({
 export default function cBlosc2(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, lz4, zlibNg],
+    dependencies: [std.toolchain, lz4, zlibNg, zstd, zfp],
     set: {
       BUILD_TESTS: "OFF",
       BUILD_FUZZERS: "OFF",
       BUILD_BENCHMARKS: "OFF",
       BUILD_EXAMPLES: "OFF",
-      PREFER_EXTERNAL_LZ4: "ON",
-      PREFER_EXTERNAL_ZLIB: "ON",
-      PREFER_EXTERNAL_ZSTD: "ON",
+      BLOSC_DEPENDENCY_MODE: "EXTERNAL",
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
