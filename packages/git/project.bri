@@ -123,9 +123,12 @@ export function gitCheckout(
     const { commit, repository, options: initOptions } = await init;
     options = { ...initOptions, ...options };
 
+    const isSha1Hash = /^[0-9a-f]{40}$/.test(commit);
+    const isSha256Hash = !isSha1Hash && /^[0-9a-f]{64}$/.test(commit);
+
     // Validate that the commit is a hash
     std.assert(
-      /^[0-9a-f]{40}$/.test(commit),
+      isSha1Hash || isSha256Hash,
       `Invalid git commit hash: ${commit}`,
     );
 
@@ -134,27 +137,50 @@ export function gitCheckout(
       "Cannot use 'tag' without 'keepGitDir' enabled",
     );
 
-    // Clone and fetch only the specified commit. See this article:
-    // https://about.gitlab.com/blog/whats-new-in-git-2-49-0/#thin-clone-using---revision
-    let repo = std
-      .process({
-        command: "git",
-        args: [
-          "-c",
-          "advice.detachedHead=false",
-          "clone",
-          "--depth",
-          "1",
-          "--revision",
-          commit,
-          repository,
-          // Clone into the output directory
-          std.outputPath,
-        ],
-        dependencies: [git],
-        unsafe: { networking: true },
-      })
-      .toDirectory();
+    let repo: std.Recipe<std.Directory>;
+    if (isSha1Hash) {
+      // Clone and fetch the specified commit using `git clone --revision`:
+      // https://about.gitlab.com/blog/whats-new-in-git-2-49-0/#thin-clone-using---revision
+      repo = std
+        .process({
+          command: "git",
+          args: [
+            "-c",
+            "advice.detachedHead=false",
+            "clone",
+            "--depth",
+            "1",
+            "--revision",
+            commit,
+            repository,
+            // Clone into the output directory
+            std.outputPath,
+          ],
+          dependencies: [git],
+          unsafe: { networking: true },
+        })
+        .toDirectory();
+    } else {
+      // Clone and fetch the specified commit using the method described in
+      // this article:
+      // https://blog.hartwork.org/posts/clone-arbitrary-single-git-commit/
+      //
+      // NOTE: As of git v2.53, `git clone --revision` doesn't seem to work
+      // with SHA-256 commit hashes (or maybe it's dependent on the remote?),
+      // so we fallback to this older method instead.
+      repo = std.runBash`
+        git -c init.defaultBranch=main init --object-format=sha256
+        git remote add origin "$repository"
+        git fetch --depth 1 origin "$commit"
+        git -c advice.detachedHead=false checkout FETCH_HEAD
+      `
+        .env({ commit, repository })
+        .dependencies(git)
+        .currentDir(std.outputPath)
+        .outputScaffold(std.directory())
+        .unsafe({ networking: true })
+        .toDirectory();
+    }
 
     if (options.tag != null) {
       repo = std
