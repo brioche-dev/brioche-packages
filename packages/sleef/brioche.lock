@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/shibatch/sleef.git": {
+      "3.9.0": "906ca7512ee483296780a81a21b9ca715d40dfe1"
+    }
+  }
+}
