@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/lv2/lv2/archive/refs/tags/v1.18.10.tar.gz": {
+      "type": "sha256",
+      "value": "250a9a213551795f7f11ea44ae1013a1a9ee2dbb910dc2616a954797bd0e272f"
+    }
+  }
+}
