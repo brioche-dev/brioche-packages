@@ -1,11 +1,10 @@
 import * as std from "std";
-import abseilCpp from "abseil_cpp";
-import { cmakeBuild } from "cmake";
+import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
-  name: "protobuf",
-  version: "35.0",
-  repository: "https://github.com/protocolbuffers/protobuf.git",
+  name: "kubazip",
+  version: "0.3.11",
+  repository: "https://github.com/kuba--/zip",
 };
 
 const source = Brioche.gitCheckout({
@@ -13,40 +12,50 @@ const source = Brioche.gitCheckout({
   ref: `v${project.version}`,
 });
 
-export default function protobuf(): std.Recipe<std.Directory> {
+export default function kubazip(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, abseilCpp],
+    dependencies: [std.toolchain],
     set: {
-      protobuf_BUILD_TESTS: "OFF",
-      protobuf_BUILD_CONFORMANCE: "OFF",
-      protobuf_BUILD_EXAMPLES: "OFF",
-      protobuf_WITH_ZLIB: "ON",
+      CMAKE_DISABLE_TESTING: "ON",
+      ZIP_BUILD_TOOLS: "OFF",
       BUILD_SHARED_LIBS: "ON",
     },
-    runnable: "bin/protoc",
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       CPATH: { append: [{ path: "include" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
-      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
     }),
   );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
+
+      find_package(zip REQUIRED CONFIG)
+      message(STATUS "zip version: \${zip_VERSION}")
+    `),
+  });
+
   const script = std.runBash`
-    protoc --version | tee "$BRIOCHE_OUTPUT"
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(std.toolchain, protobuf)
+    .workDir(src)
+    .dependencies(std.toolchain, cmake, kubazip)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `libprotoc ${project.version}`;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  const expected = `zip version: ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }

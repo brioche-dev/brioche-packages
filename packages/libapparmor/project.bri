@@ -51,8 +51,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGitlabReleases({
-    gitlabUrl: "https://gitlab.com",
-    project,
-  });
+  return std.liveUpdateFromGitlabReleases({ project });
 }

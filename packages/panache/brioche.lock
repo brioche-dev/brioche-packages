@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jolars/panache.git": {
+      "v2.53.0": "6c50cedb4b7514c923d27799bd9f16e3779398e2"
+    }
+  }
+}

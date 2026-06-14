@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/drobilla/zix/archive/refs/tags/v0.8.2.tar.gz": {
+      "type": "sha256",
+      "value": "9b92244d475cf695d19b643d509791288ba826734202ca53bbe6aa457810cee5"
+    }
+  }
+}
