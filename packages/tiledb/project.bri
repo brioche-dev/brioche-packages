@@ -5,6 +5,7 @@ import lz4 from "lz4";
 import nlohmannJson from "nlohmann_json";
 import openssl from "openssl";
 import spdlog from "spdlog";
+import zfp from "zfp";
 import zlibNg from "zlib_ng";
 import zstd from "zstd";
 import { cmakeBuild } from "cmake";
@@ -31,6 +32,7 @@ export default function tiledb(): std.Recipe<std.Directory> {
       nlohmannJson,
       openssl,
       spdlog,
+      zfp,
       zlibNg,
       zstd, // unlike std.toolchain's libzstd, this one ships cmake config files
     ],
