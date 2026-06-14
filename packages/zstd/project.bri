@@ -20,6 +20,7 @@ export default function zstd(): std.Recipe<std.Directory> {
     path: "build/cmake",
     dependencies: [std.toolchain, lz4, xz],
     set: {
+      BUILD_SHARED_LIBS: "ON",
       ZSTD_LZ4_SUPPORT: "ON",
       ZSTD_LZMA_SUPPORT: "ON",
       ZSTD_ZLIB_SUPPORT: "ON",
@@ -37,19 +38,16 @@ export default function zstd(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    zstd --version | tee "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libzstd | tee "$BRIOCHE_OUTPUT"
   `
-    .dependencies(zstd)
+    .dependencies(std.toolchain, zstd)
     .toFile();
 
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `v${project.version}`;
-  std.assert(
-    result.includes(expected),
-    `expected '${expected}', got '${result}'`,
-  );
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
