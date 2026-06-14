@@ -1,0 +1,87 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "minicom",
+  version: "2.11.1",
+  repository: "https://salsa.debian.org/minicom-team/minicom",
+};
+
+const source = Brioche.download(
+  `https://deb.debian.org/debian/pool/main/m/minicom/minicom_${project.version}.orig.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function minicom(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-lock-dir=/var/lock
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .insert(
+      "share/terminfo",
+      std.castToDirectory(std.toolchain().get("share/terminfo")),
+    )
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        TERMINFO_DIRS: { append: [{ path: "share/terminfo" }] },
+      }),
+    )
+    .pipe((recipe) =>
+      recipe
+        .insert("libexec/minicom", recipe.get("bin/minicom"))
+        .remove("bin/minicom"),
+    )
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/minicom", {
+        command: { relativePath: "libexec/minicom" },
+        env: {
+          TERMINFO_DIRS: {
+            fallback: { relativePath: "share/terminfo" },
+          },
+        },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/minicom"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    minicom -v | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(minicom)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `minicom version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://deb.debian.org/debian/pool/main/m/minicom/
+      | lines
+      | where ($it | str contains "minicom_") and ($it | str contains ".orig.tar.bz2")
+      | parse --regex 'href="minicom_(?<version>[0-9.]+)\\.orig\\.tar\\.bz2"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
