@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/jonas/tig/releases/download/tig-2.6.1/tig-2.6.1.tar.gz": {
+      "type": "sha256",
+      "value": "5adeabdcd93aa0423d618da8b878b53482bef6e0e9e1fe224acc0f18031fe91e"
+    }
+  }
+}
