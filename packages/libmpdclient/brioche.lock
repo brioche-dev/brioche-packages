@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/MusicPlayerDaemon/libmpdclient/archive/refs/tags/v2.24.tar.gz": {
+      "type": "sha256",
+      "value": "b19ec4c10314f5b55e1bca2a34c299effbbb2f1f9b5113b331b7ba789f0c17d1"
+    }
+  }
+}

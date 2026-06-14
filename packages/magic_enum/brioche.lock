@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Neargye/magic_enum.git": {
+      "v0.9.8": "1384769c66bd16ec9bb1353f45fe8ec8ccc12dbd"
+    }
+  }
+}

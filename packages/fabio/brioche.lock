@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/fabiolb/fabio/@v/v1.6.11.zip": {
+    "https://proxy.golang.org/github.com/fabiolb/fabio/@v/v1.7.1.zip": {
       "type": "sha256",
-      "value": "cdc6718d98dc4836944daf2dd015dee3d8d4d198cd7a1f7c1c723096630a20d1"
+      "value": "50fb48562b0923fa25cd65ad577307f41d254794500394a756524eeaade45656"
     }
   }
 }

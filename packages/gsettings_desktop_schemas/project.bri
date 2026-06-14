@@ -17,8 +17,10 @@ export const project = {
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
 
 const source = Brioche.download(
   `https://download.gnome.org/sources/gsettings-desktop-schemas/${project.extra.majorVersion}/gsettings-desktop-schemas-${project.version}.tar.xz`,

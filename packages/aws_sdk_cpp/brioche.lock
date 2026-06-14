@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/aws/aws-sdk-cpp": {
-      "1.11.769": "d3185f95dc6432a36b1665145059085cda0a1d1b"
+      "1.11.807": "1910be99b2b5547c946fbdd479cc94d01b30b0d3"
     }
   }
 }

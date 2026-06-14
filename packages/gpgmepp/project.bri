@@ -1,0 +1,74 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import gpgme from "gpgme";
+import libgpgError from "libgpg_error";
+
+export const project = {
+  name: "gpgmepp",
+  version: "2.1.0",
+  repository: "https://www.gnupg.org/",
+};
+
+const source = Brioche.download(
+  `https://gnupg.org/ftp/gcrypt/gpgmepp/gpgmepp-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel()
+  .pipe((source) =>
+    // Drop the "-unknown" suffix appended when no git tag is present.
+    std.runBash`
+      sed -i 's|version}-unknown|version}|' "$BRIOCHE_OUTPUT/cmake/modules/G10GetFullVersion.cmake"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function gpgmepp(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, gpgme, libgpgError],
+    set: {
+      BUILD_TESTING: "OFF",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion gpgmepp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, gpgmepp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://gnupg.org/ftp/gcrypt/gpgmepp/
+      | lines
+      | where ($it | str contains "gpgmepp-") and ($it | str contains ".tar.xz") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="gpgmepp-(?<version>\\d+\\.\\d+\\.\\d+)\\.tar\\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

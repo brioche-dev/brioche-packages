@@ -5,16 +5,47 @@ import nushell from "nushell";
 
 export const project = {
   name: "pnpm",
-  version: "10.32.1",
+  version: "11.1.2",
   repository: "https://github.com/pnpm/pnpm",
-};
+  extra: {
+    otherVersions: {
+      "11": "11.1.2",
+      "10": "10.33.4",
+    },
+  },
+} as const;
+
+std.assert(
+  Object.keys(project.extra.otherVersions).some((version) =>
+    project.version.startsWith(`${version}.`),
+  ),
+  "Package version not found in extra.otherVersions",
+);
 
 /**
+ * The pnpm major version.
+ */
+type PnpmVersion = keyof typeof project.extra.otherVersions;
+
+function getLatestVersion(): PnpmVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  versions.sort((a, b) => parseInt(b) - parseInt(a));
+
+  return versions[0] as PnpmVersion;
+}
+
+/**
+ * Extra options for pnpm.
+ *
  * @param nodejs - The Node.js version used when running pnpm. Can be used to
  *   pick a different Node.js version.
+ * @param version - The major version of pnpm to use. Defaults to the
+ *   current stable release (at the time the `pnpm` Brioche package was
+ *   last updated).
  */
 export interface PnpmOptions {
   nodejs?: std.RecipeLike<std.Directory>;
+  version?: PnpmVersion;
 }
 
 /**
@@ -25,27 +56,37 @@ export interface PnpmOptions {
 export default function pnpm(
   options: PnpmOptions = {},
 ): std.Recipe<std.Directory> {
+  const { version = getLatestVersion() } = options;
+
   return npmInstallGlobal({
     packageName: project.name,
-    version: project.version,
+    version: project.extra.otherVersions[version],
     nodejs: options.nodejs,
   }).pipe((recipe) => std.withRunnableLink(recipe, "bin/pnpm"));
 }
 
-export async function test(): Promise<std.Recipe<std.File>> {
-  const script = std.runBash`
-    pnpm --version | tee "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(pnpm)
-    .toFile();
+export function test(): std.Recipe<std.Directory> {
+  const pnpmVersions = Object.keys(
+    project.extra.otherVersions,
+  ) as PnpmVersion[];
 
-  const result = (await script.read()).trim();
+  const tests = pnpmVersions.map(async (version) => {
+    const script = std.runBash`
+      pnpm --version | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(pnpm({ version }))
+      .toFile();
 
-  // Check that the result contains the expected version
-  const expected = project.version;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+    const result = (await script.read()).trim();
 
-  return script;
+    // Check that the result contains the expected version
+    const expected = project.extra.otherVersions[version];
+    std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
@@ -60,11 +101,14 @@ export function liveUpdate(): std.Recipe<std.Directory> {
  *   such as build dependencies used for postinstall scripts.
  * @param nodejs - The Node.js recipe to use when installing packages. This
  *   can be used to pick a different Node.js version.
+ * @param version - The major version of pnpm to use. Defaults to the
+ *   current stable release.
  */
 interface PnpmInstallOptions {
   source: std.RecipeLike<std.Directory>;
   dependencies?: std.RecipeLike<std.Directory>[];
   nodejs?: std.RecipeLike<std.Directory>;
+  version?: PnpmVersion;
 }
 
 /**
@@ -86,6 +130,7 @@ export function pnpmInstall(
         std.toolchain,
         pnpm({
           nodejs: options.nodejs,
+          version: options.version,
         }),
         ...(options.dependencies ?? []),
       ],

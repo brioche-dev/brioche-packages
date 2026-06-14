@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libde265",
-  version: "1.0.16",
+  version: "1.0.18",
   repository: "https://github.com/strukturag/libde265",
 };
 

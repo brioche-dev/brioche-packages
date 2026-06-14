@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/schrodinger/maeparser": {
+      "v1.3.3": "da0679ef5a41a33a238f823c43603a319337a866"
+    }
+  }
+}

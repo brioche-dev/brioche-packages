@@ -1,0 +1,79 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import openssl from "openssl";
+import libogg from "libogg";
+import libvorbis from "libvorbis";
+import libtheora from "libtheora";
+import speex from "speex";
+
+export const project = {
+  name: "libshout",
+  version: "2.4.6",
+  repository: "https://github.com/xiph/Icecast-libshout",
+};
+
+const source = Brioche.download(
+  `https://downloads.xiph.org/releases/libshout/libshout-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libshout(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --with-openssl \\
+      --with-ogg \\
+      --with-vorbis \\
+      --with-theora \\
+      --with-speex
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, openssl, libogg, libvorbis, libtheora, speex)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+        ACLOCAL_PATH: { append: [{ path: "share/aclocal" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/shout"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion shout | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libshout)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://downloads.xiph.org/releases/libshout/
+      | lines
+      | where ($it | str contains 'libshout-') and ($it | str contains '.tar.gz')
+      | parse --regex '<a href="libshout-(?<version>[\\d.]+)\\.tar\\.gz"'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

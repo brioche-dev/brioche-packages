@@ -2,15 +2,17 @@ import * as std from "std";
 
 export const project = {
   name: "perl",
-  version: "5.42.1",
+  version: "5.42.2",
   repository: "https://github.com/Perl/perl5",
   extra: {
     majorVersion: "5",
   },
 };
 
-// Ensure the major version number matches the version
-std.assert(project.version.startsWith(`${project.extra.majorVersion}.`));
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
 
 const source = Brioche.download(
   `https://www.cpan.org/src/${project.extra.majorVersion}.0/perl-${project.version}.tar.gz`,

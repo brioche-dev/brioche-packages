@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-mqtt": {
-      "v0.15.0": "dc2fe7be81070f7c5095ad386d9a23c180a4276b"
+      "v0.15.2": "3c2ceee52b66db42228053a4fb55210c8f8433a0"
     }
   }
 }

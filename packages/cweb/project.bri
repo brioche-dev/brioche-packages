@@ -1,0 +1,72 @@
+import * as std from "std";
+
+export const project = {
+  name: "cweb",
+  version: "4.12.2",
+  repository: "https://github.com/ascherer/cweb",
+};
+
+const source = Brioche.download(
+  `https://github.com/ascherer/cweb/archive/refs/tags/cweb-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cweb(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make all \\
+      CC=gcc \\
+      CWEBINPUTS="$BRIOCHE_OUTPUT/lib/cweb"
+
+    # Manual installation
+    cp ctangle cweave "$BRIOCHE_OUTPUT/bin/"
+    cp c++lib.w iso_types.w "$BRIOCHE_OUTPUT/lib/cweb/"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+        lib: std.directory({
+          cweb: std.directory(),
+        }),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ctangle"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "test.w": std.file(std.indoc`
+      @* Test.
+      @c
+      int main(void) { return 0; }
+    `),
+  });
+
+  const script = std.runBash`
+    ctangle test.w | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(cweb)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `(Version ${project.version})`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^cweb-(?<version>\d+\.\d+(?:\.\d+)?)$/,
+  });
+}

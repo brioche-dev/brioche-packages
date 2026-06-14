@@ -1,0 +1,48 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "git_codereview",
+  version: "1.20.0",
+  extra: {
+    moduleName: "golang.org/x/review",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(3);
+
+export default function gitCodereview(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    path: "./git-codereview",
+    buildParams: {
+      ldflags: ["-s", "-w"],
+    },
+    runnable: "bin/git-codereview",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    git-codereview help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gitCodereview)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

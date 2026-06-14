@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/volta-cli/volta.git": {
+      "v2.0.2": "e83f04ccd79be994c0e65c0bb56838fbcda6fcf9"
+    }
+  }
+}

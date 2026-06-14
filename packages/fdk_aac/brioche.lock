@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-2.0.3.tar.gz": {
+      "type": "sha256",
+      "value": "829b6b89eef382409cda6857fd82af84fabb63417b08ede9ea7a553f811cb79e"
+    }
+  }
+}

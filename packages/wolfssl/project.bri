@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "wolfssl",
-  version: "5.9.0",
+  version: "5.9.1",
   repository: "https://github.com/wolfSSL/wolfssl",
 };
 

@@ -1,0 +1,57 @@
+import * as std from "std";
+import { source as gitSource } from "git";
+import openssl from "openssl";
+import zlib from "zlib";
+
+export const project = {
+  name: "cgit",
+  version: "1.3.1",
+  repository: "https://github.com/zx2c4/cgit",
+};
+
+const source = Brioche.download(
+  `https://git.zx2c4.com/cgit/snapshot/cgit-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function cgit(): std.Recipe<std.Directory> {
+  const sourceWithGit = source.insert("git", gitSource);
+
+  return std.runBash`
+    make -j "$(nproc)"
+    make \\
+      prefix=/ \\
+      CGIT_SCRIPT_PATH=/share/webapps/cgit \\
+      CGIT_DATA_PATH=/share/webapps/cgit \\
+      install \\
+      DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(sourceWithGit)
+    .dependencies(std.toolchain, openssl({ version: "3" }), zlib)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    "$cgit_dir/share/webapps/cgit/cgit.cgi" \\
+      | grep -oE "cgit v[0-9]+(\\.[0-9]+)+" \\
+      | head -1 \\
+      | tee "$BRIOCHE_OUTPUT"
+  `
+    .env({ cgit_dir: cgit })
+    .dependencies(std.toolchain)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cgit v${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

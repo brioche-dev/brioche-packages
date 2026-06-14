@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/stefanberger/libtpms": {
+      "v0.10.2": "03ff2481e133540be3b3ffe3daa1483d2a73d967"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/syncthing/syncthing/@v/v1.30.0.info": {
+      "type": "sha256",
+      "value": "0e1c21d0272fa60b33e8718988251da563b3dc73dac7bbb98baa75db9c61f053"
+    },
+    "https://proxy.golang.org/github.com/syncthing/syncthing/@v/v1.30.0.zip": {
+      "type": "sha256",
+      "value": "0711e0002e15fcf3004593ce6777fb2ca909c892cb56e9cc6f612a8a15e42398"
+    }
+  }
+}

@@ -4,7 +4,6 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "giflib",
   version: "5.2.2",
-  repository: "https://sourceforge.net/projects/giflib",
 };
 
 const source = Brioche.download(

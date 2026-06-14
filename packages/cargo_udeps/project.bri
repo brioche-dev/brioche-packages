@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_udeps",
-  version: "0.1.60",
+  version: "0.1.61",
   repository: "https://github.com/est31/cargo-udeps.git",
 };
 
@@ -17,7 +17,7 @@ export default function cargoUdeps(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/cargo-udeps",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 

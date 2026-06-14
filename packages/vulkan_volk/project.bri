@@ -1,0 +1,64 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import vulkanHeaders from "vulkan_headers";
+
+export const project = {
+  name: "vulkan_volk",
+  version: "1.4.350",
+  repository: "https://github.com/zeux/volk",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+});
+
+export default function vulkanVolk(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, vulkanHeaders],
+    set: {
+      VOLK_INSTALL: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryVersion)
+
+      find_package(volk REQUIRED CONFIG)
+      message(STATUS "volk version: \${volk_VERSION}")
+    `),
+  });
+
+  const script = std.runBash`
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, cmake, vulkanVolk)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `volk version: ${project.version.split(".").at(-1)}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

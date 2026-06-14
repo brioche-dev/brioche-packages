@@ -1,5 +1,6 @@
 import * as std from "/core";
 import stage2 from "/toolchain/stage2";
+import glibc from "./glibc.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
   const source = Brioche.download(
@@ -27,6 +28,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       env: {
         source,
         PATH: std.tpl`${stage2}/bin`,
+        GCONV_PATH: std.tpl`${glibc}/lib/gconv`,
       },
       workDir: source,
     })

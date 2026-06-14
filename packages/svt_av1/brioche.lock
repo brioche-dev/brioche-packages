@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://gitlab.com/AOMediaCodec/SVT-AV1/-/archive/v4.1.0/SVT-AV1-v4.1.0.tar.bz2": {
+      "type": "sha256",
+      "value": "184162d3db3a4448882b17230413b4938ca252eef6b3c5e2f1236b2fcf497881"
+    }
+  }
+}

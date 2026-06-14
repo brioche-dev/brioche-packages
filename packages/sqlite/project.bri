@@ -4,15 +4,14 @@ import readline from "readline";
 
 export const project = {
   name: "sqlite",
-  version: "3.52.0",
+  version: "3.53.1",
   repository: "https://github.com/sqlite/sqlite",
   extra: {
     releaseYear: "2026",
-    filenameEncodedVersion: "3520000",
+    filenameEncodedVersion: "3530100",
   },
 };
 
-// Ensure the version number matches the encoded version used for the download
 std.assert(
   encodeVersionNumber(project.version) === project.extra.filenameEncodedVersion,
   `sqlite version number ${encodeVersionNumber(
@@ -79,13 +78,12 @@ export function liveUpdate(): NushellRunnable {
           | parse --regex '^version-(?<version>\\d+\\.\\d+\\.\\d+)$'
           | into record
       }
-      | where (($it | get -o version) | is-not-empty)
+      | where ($it.version? | is-not-empty)
       | sort-by --natural version
 
     let latestTag = $tags
       | last
-    let version = $latestTag
-      | get version
+    let version = $latestTag.version
 
     # Extract the release year
     let tagRef = http get $'https://api.github.com/repos/sqlite/sqlite/git/ref/tags/version-($version)'

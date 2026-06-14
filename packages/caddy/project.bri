@@ -4,7 +4,7 @@ import xcaddy from "xcaddy";
 
 export const project = {
   name: "caddy",
-  version: "2.11.2",
+  version: "2.11.3",
   repository: "https://github.com/caddyserver/caddy.git",
 };
 

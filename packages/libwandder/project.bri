@@ -4,7 +4,7 @@ import uthash from "uthash";
 
 export const project = {
   name: "libwandder",
-  version: "2.0.18-1",
+  version: "2.0.19-1",
   repository: "https://github.com/LibtraceTeam/libwandder",
 };
 

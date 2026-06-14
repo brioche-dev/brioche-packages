@@ -3,14 +3,25 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "ngt",
-  version: "2.7.1",
+  version: "2.7.4",
   repository: "https://github.com/yahoojapan/NGT",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-});
+}).pipe((source) =>
+  // Fall back to the NoArch comparator on x86_64 when AVX is unavailable,
+  // otherwise sum128 is used before declaration in PrimitiveComparatorX86.h.
+  // https://github.com/yahoojapan/NGT/pull/194
+  std.applyPatch({
+    source,
+    patch: Brioche.download(
+      `${project.repository}/commit/ddb97ff021bab08b3bae6144d5971a1616e1477c.patch`,
+    ),
+    strip: 1,
+  }),
+);
 
 export default function ngt(): std.Recipe<std.Directory> {
   return cmakeBuild({

@@ -6,7 +6,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "libdrm",
-  version: "2.4.131",
+  version: "2.4.133",
   repository: "https://gitlab.freedesktop.org/mesa/drm",
 };
 

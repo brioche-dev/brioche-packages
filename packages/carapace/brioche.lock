@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/carapace-sh/carapace-bin/@v/v1.6.3.zip": {
+    "https://proxy.golang.org/github.com/carapace-sh/carapace-bin/@v/v1.6.6.zip": {
       "type": "sha256",
-      "value": "c2ee3b2e30ec473110d97bbd14e33ececb366a63251c07c96fd5239e45b695f3"
+      "value": "d59b804a5c844892c6e40a2e99cb3e1baeab7bd864acfd28ea7e29d567fefd0c"
     }
   }
 }

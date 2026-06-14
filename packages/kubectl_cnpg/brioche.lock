@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/cloudnative-pg/cloudnative-pg/@v/v1.29.1.info": {
+      "type": "sha256",
+      "value": "cb9f733d35250d1d1a8ecd7ff22ed4e96f2030892949e8db7e7b209da605549b"
+    },
+    "https://proxy.golang.org/github.com/cloudnative-pg/cloudnative-pg/@v/v1.29.1.zip": {
+      "type": "sha256",
+      "value": "3cb1014ee8746f605b9a29466b924a3514077ca99ed6be1a17119e61a1c846b6"
+    }
+  }
+}

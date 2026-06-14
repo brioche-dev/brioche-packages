@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/htop-dev/htop/releases/download/3.4.1/htop-3.4.1.tar.xz": {
+    "https://github.com/htop-dev/htop/releases/download/3.5.1/htop-3.5.1.tar.xz": {
       "type": "sha256",
-      "value": "904f7d4580fc11cffc7e0f06895a4789e0c1c054435752c151e812fead9f6220"
+      "value": "526cecd62870aa8d14d2a79a35ea197e4e2b5317d275b567cee0574b2ddb2e9a"
     }
   }
 }

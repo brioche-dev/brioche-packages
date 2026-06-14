@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "cfitsio",
-  version: "4.6.3",
+  version: "4.6.4",
   repository: "https://github.com/HEASARC/cfitsio",
 };
 

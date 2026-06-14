@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "caligula",
-  version: "0.4.10",
+  version: "0.4.11",
   repository: "https://github.com/ifd3f/caligula.git",
 };
 

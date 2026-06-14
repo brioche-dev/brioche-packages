@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/LLNL/zfp.git": {
+      "1.0.1": "f40868a6a1c190c802e7d8b5987064f044bf7812"
+    }
+  }
+}

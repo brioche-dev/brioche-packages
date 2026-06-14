@@ -1,5 +1,6 @@
 import * as std from "std";
 import cmake, { cmakeSanitizePaths } from "cmake";
+import icu from "icu";
 
 export const project = {
   name: "boost",
@@ -7,7 +8,7 @@ export const project = {
   repository: "https://github.com/boostorg/boost",
 };
 
-const source = Brioche.download(
+export const source = Brioche.download(
   `${project.repository}/releases/download/boost-${project.version}/boost-${project.version}-b2-nodocs.tar.xz`,
 )
   .unarchive("tar", "xz")
@@ -15,16 +16,17 @@ const source = Brioche.download(
 
 export default function boost(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./bootstrap.sh
+    ./bootstrap.sh \\
+      --with-icu
     ./b2 \\
       --prefix="$BRIOCHE_OUTPUT" \\
       -j8 \\
-      --layout=system \\
       install \\
       variant=release \\
-      threading=multi
+      threading=multi \\
+      link=shared,static
   `
-    .dependencies(std.toolchain)
+    .dependencies(std.toolchain, icu)
     .workDir(source)
     .toDirectory()
     .pipe(cmakeSanitizePaths)

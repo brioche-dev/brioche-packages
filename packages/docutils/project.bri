@@ -24,15 +24,25 @@ const pipDependencies = std.directory({
 export default function docutils(): std.Recipe<std.Directory> {
   let venv = std.recipe(python);
 
-  // Install the application into the venv
+  // Install build dependencies (flit-core)
   venv = std.runBash`
-    pip install .
+    pip install flit-core
   `
-    .workDir(source)
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
       PIP_FIND_LINKS: pipDependencies,
       PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Install the application into the venv
+  venv = std.runBash`
+    pip install --no-build-isolation .
+  `
+    .workDir(source)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
     })
     .outputScaffold(venv)
     .toDirectory();

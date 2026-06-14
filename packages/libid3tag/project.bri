@@ -1,0 +1,52 @@
+import * as std from "std";
+import gperf from "gperf";
+import { cmakeBuild } from "cmake";
+
+export const project = {
+  name: "libid3tag",
+  version: "0.16.4",
+  repository: "https://codeberg.org/tenacityteam/libid3tag",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/id3tag-${project.version}-source.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libid3tag(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, gperf],
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion id3tag | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libid3tag)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromForgejoReleases({
+    forgejoUrl: "https://codeberg.org",
+    project,
+  });
+}

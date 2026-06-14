@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "md4c",
-  version: "0.5.2",
+  version: "0.5.3",
   repository: "https://github.com/mity/md4c",
 };
 

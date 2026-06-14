@@ -1,0 +1,58 @@
+import * as std from "std";
+import glib from "glib";
+import libffi from "libffi";
+import libselinux from "libselinux";
+import libsepol from "libsepol";
+import pcre2 from "pcre2";
+
+export const project = {
+  name: "liblqr",
+  version: "0.4.3",
+  repository: "https://github.com/carlobaldassi/liblqr",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function liblqr(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, glib, libffi, libselinux, libsepol, pcre2)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion lqr-1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, liblqr)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

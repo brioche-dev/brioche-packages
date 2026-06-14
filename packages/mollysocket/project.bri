@@ -5,7 +5,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "mollysocket",
-  version: "1.7.0",
+  version: "1.7.1",
   repository: "https://github.com/mollyim/mollysocket.git",
 };
 
@@ -17,7 +17,7 @@ const source = Brioche.gitCheckout({
 export default function mollysocket(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl, sqlite],
+    dependencies: [openssl({ version: "3" }), sqlite],
     runnable: "bin/mollysocket",
   });
 }

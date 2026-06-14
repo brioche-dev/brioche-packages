@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/zchunk/zchunk.git": {
+      "1.5.3": "366cf22e725fc273abe0e082c707753cce76c453"
+    }
+  }
+}

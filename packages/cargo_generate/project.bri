@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_generate",
-  version: "0.23.7",
+  version: "0.23.8",
   extra: {
     crateName: "cargo-generate",
   },
@@ -19,7 +19,7 @@ const source = Brioche.download(
 export default function cargoGenerate(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
     runnable: "bin/cargo-generate",
   });
 }

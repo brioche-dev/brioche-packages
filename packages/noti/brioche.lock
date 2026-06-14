@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/variadico/noti.git": {
+      "3.8.0": "1245c69097d5e910dd50a6b5e1086676634400a5"
+    }
+  }
+}

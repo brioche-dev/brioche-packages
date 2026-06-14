@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/drobilla/serd/archive/refs/tags/v0.32.10.tar.gz": {
+      "type": "sha256",
+      "value": "3d754863c4910205f126aa031a409b678ee0cd51fe2b5b3b9b9eb7fdfebab74d"
+    }
+  }
+}

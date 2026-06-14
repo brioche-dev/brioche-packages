@@ -2,7 +2,7 @@ import * as std from "std";
 import { cmakeBuild } from "cmake";
 
 export const project = {
-  name: "",
+  name: "nbytes",
   version: "0.1.4",
   repository: "https://github.com/nodejs/nbytes.git",
 };

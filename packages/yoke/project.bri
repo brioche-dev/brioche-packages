@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "yoke",
-  version: "0.20.6",
+  version: "0.20.14",
   extra: {
     moduleName: "github.com/yokecd/yoke",
   },
@@ -31,7 +31,7 @@ export default function yoke(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `${project.extra.moduleName}/internal.buildVersion=v${project.version}`,
+        `${project.extra.moduleName}/internal.buildVersion=${project.version}`,
       ],
     },
     path: "./cmd/yoke",

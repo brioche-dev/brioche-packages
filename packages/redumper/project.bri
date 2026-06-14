@@ -5,14 +5,25 @@ import ninja from "ninja";
 
 export const project = {
   name: "redumper",
-  version: "706",
+  version: "720",
   repository: "https://github.com/superg/redumper.git",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `b${project.version}`,
-});
+}).pipe((source) =>
+  // Drop the tests subdirectory: it pulls googletest via FetchContent at
+  // configure time. There is no test running guard.
+  std.runBash`
+    sed -i \\
+      -e '/add_subdirectory("tests")/d' \\
+      -e '/get_property(_tidy_gtest_targets/d' \\
+      "$BRIOCHE_OUTPUT/CMakeLists.txt"
+  `
+    .outputScaffold(source)
+    .toDirectory(),
+);
 
 export default function redumper(): std.Recipe<std.Directory> {
   return cmakeBuild({

@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/age-plugin-yubikey/0.5.0/download": {
+    "https://crates.io/api/v1/crates/age-plugin-yubikey/0.5.1/download": {
       "type": "sha256",
-      "value": "3f49858bc97ddfc3f93fa8debbb49af51d959cd7924584fcbf09a934dc2ae86e"
+      "value": "ba2acef0b201cfe0b3f3c5dcef63495449b3ee9f2c8ad6a32f6530231fbc9209"
     }
   }
 }

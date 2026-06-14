@@ -10,7 +10,7 @@ import readline from "readline";
 
 export const project = {
   name: "fluidsynth",
-  version: "2.5.3",
+  version: "2.5.4",
   repository: "https://github.com/FluidSynth/fluidsynth",
 };
 

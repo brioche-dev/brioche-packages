@@ -8,7 +8,6 @@ import * as std from "std";
 export const project = {
   name: "avfs",
   version: "1.3.0",
-  repository: "https://sourceforge.net/projects/avf",
 };
 
 const source = Brioche.download(

@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/ros/urdfdom_headers.git": {
+      "3.0.0": "9152266da22072e56ace2256509ef4c34917e7ee"
+    }
+  }
+}

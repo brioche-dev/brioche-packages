@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/mattn/jvgrep/v5/@v/v5.8.15.zip": {
+    "https://proxy.golang.org/github.com/mattn/jvgrep/v5/@v/v5.8.16.zip": {
       "type": "sha256",
-      "value": "20af8b87812571483324c64cc64bbf906830732f19d1a150e5a21006488b62f9"
+      "value": "b7cf62bb648cc399524abf76c0475271e158f55db652630473d155dc9f285fd2"
     }
   }
 }

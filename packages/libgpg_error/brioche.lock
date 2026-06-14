@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.59.tar.bz2": {
+    "https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.61.tar.bz2": {
       "type": "sha256",
-      "value": "a19bc5087fd97026d93cb4b45d51638d1a25202a5e1fbc3905799f424cfa6134"
+      "value": "7a85413f2bc354f4f8aa832b718af122e48965e9e0eb9012ee659c13c6385c93"
     }
   }
 }

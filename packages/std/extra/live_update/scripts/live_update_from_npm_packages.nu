@@ -1,11 +1,10 @@
 # Retrieve the latest release from npm registry
 let latestReleaseInfo = http get $'https://registry.npmjs.org/($env.packageName)/latest'
 
-let parsedVersion = $latestReleaseInfo
-  | get version
+let parsedVersion = $latestReleaseInfo.version
   | parse --regex $env.matchVersion
   | into record
-if (($parsedVersion | get -o version) | is-empty) {
+if ($parsedVersion.version? | is-empty) {
   error make { msg: $'Latest release does not match regex ($env.matchVersion)' }
 }
 

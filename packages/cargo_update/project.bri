@@ -22,7 +22,7 @@ const source = Brioche.download(
 export default function cargoUpdate(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl, libgit2, libssh2, curl],
+    dependencies: [openssl({ version: "3" }), libgit2, libssh2, curl],
     runnable: "bin/cargo-install-update",
   });
 }

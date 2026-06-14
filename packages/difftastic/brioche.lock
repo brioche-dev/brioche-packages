@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/Wilfred/difftastic.git": {
-      "0.67.0": "7d8175dccfdde3a9046acd389980f7240ca58d96"
+      "0.69.0": "90a0f1b6aa88401170405a87be139cbabe00b12a"
     }
   }
 }

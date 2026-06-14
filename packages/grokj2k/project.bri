@@ -5,12 +5,10 @@ import lcms2 from "lcms2";
 import libjpegTurbo from "libjpeg_turbo";
 import libpng from "libpng";
 import libtiff from "libtiff";
-import xz from "xz";
-import zstd from "zstd";
 
 export const project = {
   name: "grokj2k",
-  version: "20.2.7",
+  version: "20.3.3",
   repository: "https://github.com/GrokImageCompression/grok",
 };
 
@@ -23,16 +21,7 @@ const source = Brioche.download(
 export default function grokj2k(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [
-      std.toolchain,
-      fmt,
-      lcms2,
-      libjpegTurbo,
-      libpng,
-      libtiff,
-      xz,
-      zstd,
-    ],
+    dependencies: [std.toolchain, fmt, lcms2, libjpegTurbo, libpng, libtiff],
     set: {
       BUILD_TESTING: "OFF",
       GRK_BUILD_CODEC: "ON",

@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/carlobaldassi/liblqr/archive/refs/tags/v0.4.3.tar.gz": {
+      "type": "sha256",
+      "value": "64b0c4ac76d39cca79501b3f53544af3fc5f72b536ac0f28d2928319bfab6def"
+    }
+  }
+}

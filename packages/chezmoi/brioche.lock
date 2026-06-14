@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/twpayne/chezmoi.git": {
-      "v2.70.0": "6624b49786a9f039f05b4d929c35fd4f4bf17337"
+      "v2.70.3": "ff6317e356645f92976ac8695424735cadbd5a3b"
     }
   }
 }

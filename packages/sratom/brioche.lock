@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://gitlab.com/lv2/sratom/-/archive/v0.6.22/sratom-v0.6.22.tar.bz2": {
+      "type": "sha256",
+      "value": "fbcb3bdde9352b2eea09c05641e226c2d04569ddd98fd3764b862e8a09e6d773"
+    }
+  }
+}

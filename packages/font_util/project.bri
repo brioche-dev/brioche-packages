@@ -4,7 +4,7 @@ import util_macros from "util_macros";
 
 export const project = {
   name: "font_util",
-  version: "1.4.1",
+  version: "1.4.2",
 };
 
 const source = Brioche.download(

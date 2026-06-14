@@ -7,7 +7,7 @@ let releases = http get $'($env.baseUrl)/api/v1/repos/($env.repoOwner)/($env.rep
       | into record
       | insert created_at $release.created_at
   }
-  | where (($it | get -o version) | is-not-empty)
+  | where ($it.version? | is-not-empty)
   | sort-by --natural version
 
 if ($releases | is-empty) {
@@ -33,7 +33,7 @@ mut project = $env.project
 $project = $project
   | update version $version
 
-if ($project | get extra?.versionDash?) != null {
+if $project.extra?.versionDash? != null {
   let $versionDash = $version
     | str replace --all "." "-"
 
@@ -41,7 +41,7 @@ if ($project | get extra?.versionDash?) != null {
     | update extra.versionDash $versionDash
 }
 
-if ($project | get extra?.versionUnderscore?) != null {
+if $project.extra?.versionUnderscore? != null {
   let $versionUnderscore = $version
     | str replace --all "." "_"
 
@@ -50,7 +50,7 @@ if ($project | get extra?.versionUnderscore?) != null {
 }
 
 # Extract the release date (if needed by the project)
-if ($project | get extra?.releaseDate?) != null {
+if $project.extra?.releaseDate? != null {
   let $createdDate = $latestReleaseInfo
     | get created_at
     | into datetime

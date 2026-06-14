@@ -20,9 +20,6 @@ export default function xkeyboardConfig(): std.Recipe<std.Directory> {
   return mesonBuild({
     source,
     dependencies: [std.toolchain, ninja, python],
-    set: {
-      nls: "false",
-    },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
       PKG_CONFIG_PATH: { append: [{ path: "share/pkgconfig" }] },

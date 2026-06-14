@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "helmify",
-  version: "0.4.19",
+  version: "0.4.20",
   extra: {
     moduleName: "github.com/arttor/helmify",
   },

@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "sccache",
-  version: "0.14.0",
+  version: "0.15.0",
   repository: "https://github.com/mozilla/sccache.git",
 };
 
@@ -17,7 +17,7 @@ export default function sccache(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/sccache",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 

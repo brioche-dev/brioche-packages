@@ -1,0 +1,37 @@
+import * as std from "std";
+import { npmInstallGlobal } from "nodejs";
+
+export const project = {
+  name: "coffeescript",
+  version: "2.7.0",
+  extra: {
+    packageName: "coffeescript",
+  },
+};
+
+export default function coffeescript(): std.Recipe<std.Directory> {
+  return npmInstallGlobal({
+    packageName: project.extra.packageName,
+    version: project.version,
+  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/coffee"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    coffee --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(coffeescript)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `CoffeeScript version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromNpmPackages({ project });
+}

@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/prek/0.3.5/download": {
+    "https://crates.io/api/v1/crates/prek/0.4.0/download": {
       "type": "sha256",
-      "value": "4354007818679ac76610f58453da8b6ba798a08edf05d2840e0792b0d55f7577"
+      "value": "cd1ae65794ba97b36161346ad2f67edcad8c610cc8a69179589b1fc98bc3087a"
     }
   }
 }

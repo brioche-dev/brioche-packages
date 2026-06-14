@@ -23,7 +23,7 @@ export default function wget(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain, openssl, libidn2)
+    .dependencies(std.toolchain, openssl({ version: "3" }), libidn2)
     .toDirectory()
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/wget"));
 }

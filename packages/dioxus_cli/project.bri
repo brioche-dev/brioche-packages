@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "dioxus_cli",
-  version: "0.7.3",
+  version: "0.7.9",
   extra: {
     crateName: "dioxus-cli",
   },
@@ -20,7 +20,7 @@ export default function dioxusCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/dx",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 

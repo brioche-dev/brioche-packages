@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/google/cpu_features.git": {
+      "v0.10.1": "d3b2440fcfc25fe8e6d0d4a85f06d68e98312f5b"
+    }
+  }
+}

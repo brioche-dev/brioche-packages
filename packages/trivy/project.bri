@@ -27,8 +27,7 @@ export default function trivy(): std.Recipe<std.Directory> {
       ],
     },
     env: {
-      // Trivy makes use of the new experimental JSON encoding feature available in Go 1.25
-      // See: https://github.com/aquasecurity/trivy/pull/9422
+      // Uses the new experimental JSON encoding feature available in Go 1.25
       GOEXPERIMENT: "jsonv2",
     },
     path: "./cmd/trivy",

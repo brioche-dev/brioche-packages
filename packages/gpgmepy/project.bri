@@ -1,0 +1,124 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import gpgme from "gpgme";
+import libassuan from "libassuan";
+import libgpgError from "libgpg_error";
+import python from "python";
+import swig from "swig";
+
+export const project = {
+  name: "gpgmepy",
+  version: "2.0.0",
+  repository: "https://www.gnupg.org/",
+};
+
+const source = Brioche.download(
+  `https://gnupg.org/ftp/gcrypt/gpgmepy/gpgmepy-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+const pipDependencies = std.directory({
+  "setuptools-82.0.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl",
+  ),
+});
+
+export default function gpgmepy(): std.Recipe<std.Directory> {
+  let venv = std.recipe(python);
+
+  // Install build dependencies (setuptools)
+  venv = std.runBash`
+    pip install setuptools
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Stand in for ./configure: substitute the setup.py.in / version.py.in
+  // placeholders and rename src/ to gpg/ (the upstream Makefile does both).
+  venv = std.runBash`
+    GPGME_PREFIX="$(pkg-config --variable=prefix gpgme)"
+    sed \\
+      -e "s|@VERSION@|$pkg_version|g" \\
+      -e "s|@GPGME_LIBS@|-lgpgme|g" \\
+      -e "s|@GPG_ERROR_LIBS@|-lgpg-error|g" \\
+      -e "s|@GPGME_CFLAGS@||g" \\
+      -e "s|@GPG_ERROR_CFLAGS@||g" \\
+      -e "s|@prefix@|$GPGME_PREFIX|g" \\
+      setup.py.in > setup.py
+    sed -e "s|@VERSION@|$pkg_version|g" version.py.in > version.py
+    mv src gpg
+
+    pip install --no-build-isolation .
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, swig, gpgme, libassuan, libgpgError)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      pkg_version: project.version,
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Wrap python so the C extension's dlopen finds libgpgme and friends.
+  return std
+    .directory({ venv })
+    .insert("brioche-run.d/gpgme", gpgme)
+    .insert("brioche-run.d/libassuan", libassuan)
+    .insert("brioche-run.d/libgpg_error", libgpgError)
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/python", {
+        command: { relativePath: "venv/bin/python" },
+        env: {
+          LD_LIBRARY_PATH: {
+            prepend: [
+              { relativePath: "brioche-run.d/gpgme/lib" },
+              ":",
+              { relativePath: "brioche-run.d/libassuan/lib" },
+              ":",
+              { relativePath: "brioche-run.d/libgpg_error/lib" },
+            ],
+            separator: ":",
+          },
+        },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/python"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    python -c 'import gpg; print(gpg.version.versionstr)' | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(gpgmepy)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://gnupg.org/ftp/gcrypt/gpgmepy/
+      | lines
+      | where ($it | str contains "gpgmepy-") and ($it | str contains ".tar.bz2") and (not ($it | str contains ".sig"))
+      | parse --regex '<a href="gpgmepy-(?<version>\\d+\\.\\d+\\.\\d+)\\.tar\\.bz2">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

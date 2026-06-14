@@ -1,0 +1,88 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "libreplaygain",
+  version: "r475",
+};
+
+const source = Brioche.download(
+  `https://files.musepack.net/source/libreplaygain_${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Add missing header installation
+    std.runBash`
+      sed -i '/install(TARGETS/a\\install(DIRECTORY \${libreplaygain_SOURCE_DIR}/include/replaygain DESTINATION include)' "$BRIOCHE_OUTPUT/src/CMakeLists.txt"
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function libreplaygain(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      // Required for building with CMake 3.5 or later
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <replaygain/gain_analysis.h>
+
+      int main(void)
+      {
+          int result = gain_init_analysis(44100);
+          printf("%d", result);
+          return 0;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -lreplaygain -lm -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libreplaygain)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "1";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.musepack.net/index.php?pg=src
+      | lines
+      | where ($it | str contains 'libreplaygain')
+      | parse --regex 'libreplaygain[._-](?<version>r\\d+)\\.t'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

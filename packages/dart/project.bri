@@ -2,13 +2,13 @@ import * as std from "std";
 
 export const project = {
   name: "dart",
-  version: "3.11.2",
+  version: "3.11.4",
   repository: "https://github.com/dart-lang/sdk",
   extra: {
     otherVersions: {
       "3.6": "3.6.2",
       "3.5": "3.5.4",
-      "3.11": "3.11.2",
+      "3.11": "3.11.4",
       "3.10": "3.10.9",
     },
   },
@@ -18,7 +18,7 @@ std.assert(
   Object.keys(project.extra.otherVersions).some((minorVersion) =>
     project.version.startsWith(`${minorVersion}.`),
   ),
-  "Dart package version not found in extra.otherVersions",
+  "Package version not found in extra.otherVersions",
 );
 
 /**
@@ -264,7 +264,7 @@ function dartPubGet(
 ): std.Recipe<std.Directory> {
   return std
     .process({
-      command: std.tpl`${dart()}/bin/dart`,
+      command: std.tpl`${dart}/bin/dart`,
       args: ["pub", "get"],
       workDir: std.glob(source, ["**/pubspec.yaml", "**/pubspec.lock"]),
       currentDir: std.tpl`${std.workDir}/${currentDir}`,

@@ -4,7 +4,6 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 export const project = {
   name: "xlslib",
   version: "2.5.0",
-  repository: "https://sourceforge.net/projects/xlslib",
 };
 
 const source = std.castToDirectory(

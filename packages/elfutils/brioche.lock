@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://sourceware.org/elfutils/ftp/0.194/elfutils-0.194.tar.bz2": {
+    "https://sourceware.org/elfutils/ftp/0.195/elfutils-0.195.tar.bz2": {
       "type": "sha256",
-      "value": "09e2ff033d39baa8b388a2d7fbc5390bfde99ae3b7c67c7daaf7433fbcf0f01e"
+      "value": "37629fdf7f1f3dc2818e138fca2b8094177d6c2d0f701d3bb650a561218dc026"
     }
   }
 }

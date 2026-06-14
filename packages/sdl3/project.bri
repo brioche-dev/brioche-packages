@@ -12,7 +12,7 @@ import wayland from "wayland";
 
 export const project = {
   name: "sdl3",
-  version: "3.4.4",
+  version: "3.4.8",
   repository: "https://github.com/libsdl-org/SDL",
 };
 

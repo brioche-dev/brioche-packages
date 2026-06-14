@@ -6,12 +6,12 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "python",
-  version: "3.14.3",
+  version: "3.14.5",
   repository: "https://github.com/python/cpython",
   extra: {
     otherVersions: {
-      "3.14": "3.14.3",
-      "3.13": "3.13.12",
+      "3.14": "3.14.5",
+      "3.13": "3.13.13",
       "3.12": "3.12.13",
     },
   },
@@ -21,7 +21,7 @@ std.assert(
   Object.keys(project.extra.otherVersions).some((minorVersion) =>
     project.version.startsWith(`${minorVersion}.`),
   ),
-  "Python package version not found in extra.otherVersions",
+  "Package version not found in extra.otherVersions",
 );
 
 /**
@@ -57,7 +57,9 @@ interface PythonOptions {
   version?: PythonVersion;
 }
 
-export default async function python(options: PythonOptions = {}) {
+export default async function python(
+  options: PythonOptions = {},
+): Promise<std.Recipe<std.Directory>> {
   const { version = getLatestVersion() } = options;
 
   // Get the Python source for the selected version
@@ -87,7 +89,13 @@ export default async function python(options: PythonOptions = {}) {
     python3 -m ensurepip --default-pip
   `
     .workDir(source)
-    .dependencies(std.toolchain, libffi, mpdecimal, openssl, sqlite)
+    .dependencies(
+      std.toolchain,
+      libffi,
+      mpdecimal,
+      openssl({ version: "3" }),
+      sqlite,
+    )
     .toDirectory();
 
   // Get all the native Python modules
@@ -362,4 +370,63 @@ export function wrapVenvScripts(
       fixVenvScripts(recipe, options),
     )
     .pipe((recipe) => addVenvRunnable(recipe, options));
+}
+
+/**
+ * A Python package to inject into a venv.
+ *
+ * @param recipe - A pre-built Python package recipe.
+ * @param name - The distribution name under `site-packages`.
+ * @param version - The distribution version.
+ */
+export interface VenvPackageSource {
+  recipe: std.Recipe<std.Directory>;
+  name: string;
+  version: string;
+}
+
+/**
+ * Options for {@link injectVenvPackages}.
+ *
+ * @param pythonVersion - The Python minor version shared by the source
+ *   and target venvs.
+ */
+interface InjectVenvPackagesOptions {
+  pythonVersion?: PythonVersion;
+}
+
+/**
+ * Inject the installed contents of pre-built Python packages into a
+ * venv, so `pip install` treats them as already satisfied.
+ *
+ * @remarks The target recipe must be the venv root.
+ *
+ * @param recipe - The target venv recipe.
+ * @param packages - The source packages to inject.
+ * @param options - Additional options.
+ *
+ * @returns The venv recipe with the source packages merged in.
+ */
+export function injectVenvPackages(
+  recipe: std.Recipe<std.Directory>,
+  packages: VenvPackageSource[],
+  options: InjectVenvPackagesOptions = {},
+): std.Recipe<std.Directory> {
+  const { pythonVersion = getLatestVersion() } = options;
+  const sitePackages = `lib/python${pythonVersion}/site-packages`;
+
+  return packages.reduce((target, pkg) => {
+    const module = std.castToDirectory(
+      pkg.recipe.get(`venv/${sitePackages}/${pkg.name}`),
+    );
+    const distInfo = std.castToDirectory(
+      pkg.recipe.get(
+        `venv/${sitePackages}/${pkg.name}-${pkg.version}.dist-info`,
+      ),
+    );
+
+    return target
+      .insert(`${sitePackages}/${pkg.name}`, module)
+      .insert(`${sitePackages}/${pkg.name}-${pkg.version}.dist-info`, distInfo);
+  }, recipe);
 }

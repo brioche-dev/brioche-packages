@@ -20,7 +20,7 @@ const source = Brioche.download(
 export default function leetcodeCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl, sqlite],
+    dependencies: [openssl({ version: "3" }), sqlite],
     runnable: "bin/leetcode",
   });
 }

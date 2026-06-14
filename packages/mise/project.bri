@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "mise",
-  version: "2026.3.9",
+  version: "2026.5.8",
   repository: "https://github.com/jdx/mise.git",
 };
 
@@ -17,7 +17,7 @@ export default function mise(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/mise",
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
   });
 }
 
@@ -41,5 +41,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: std.LIVE_UPDATE_REGEX_CALVER_VERSION_MATCH,
+  });
 }

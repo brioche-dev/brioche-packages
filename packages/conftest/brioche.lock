@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/open-policy-agent/conftest/@v/v0.68.2.zip": {
+      "type": "sha256",
+      "value": "76f7335b9c2398a0c56895a957a088b69fa2cf3d3fbce12b209cf7ae55ce3072"
+    }
+  }
+}

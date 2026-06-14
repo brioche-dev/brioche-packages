@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/extrawurst/gitui": {
-      "v0.28.0": "5527160424c76fba0d8d608af28301e603908db0"
+      "v0.28.1": "e24fb45df1584ee8d8ebdc4258531b4a91ca975d"
     }
   }
 }

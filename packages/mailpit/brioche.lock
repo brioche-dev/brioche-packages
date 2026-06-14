@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/axllent/mailpit/@v/v1.29.3.zip": {
+    "https://proxy.golang.org/github.com/axllent/mailpit/@v/v1.30.0.zip": {
       "type": "sha256",
-      "value": "56243facef49eb9e5e756357bbb0ca80d94d47dda66862be45fab6aead0f4398"
+      "value": "dd54b9f213f658fcb8fde7bb0099c334363f923ab06efefd1f3e0d63627e3435"
     }
   }
 }

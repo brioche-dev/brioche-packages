@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_outdated",
-  version: "0.17.0",
+  version: "0.19.0",
   extra: {
     crateName: "cargo-outdated",
   },
@@ -19,7 +19,7 @@ const source = Brioche.download(
 export default function cargoOutdated(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl],
+    dependencies: [openssl({ version: "3" })],
     runnable: "bin/cargo-outdated",
   });
 }

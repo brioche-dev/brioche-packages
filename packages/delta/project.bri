@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "delta",
-  version: "0.18.2",
+  version: "0.19.2",
   repository: "https://github.com/dandavison/delta",
 };
 

@@ -1,0 +1,53 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import python from "python";
+
+export const project = {
+  name: "ladybug",
+  version: "0.16.1",
+  repository: "https://github.com/LadybugDB/ladybug.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function ladybug(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain, python],
+    set: {
+      BUILD_SHELL: "ON",
+      BUILD_TESTS: "OFF",
+      BUILD_BENCHMARK: "OFF",
+      BUILD_EXAMPLES: "OFF",
+    },
+    runnable: "bin/lbug",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lbug --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ladybug)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Lbug ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
