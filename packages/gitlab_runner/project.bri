@@ -47,7 +47,7 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
   const result = (await script.read()).trim();
 
-  // Output format: "Version:      18.7.0"
+  // Check that the result contains the expected version
   const versionLine = result
     .split("\n")
     .find((line) => line.startsWith("Version:"));
@@ -63,8 +63,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGitlabReleases({
-    gitlabUrl: "https://gitlab.com",
-    project,
-  });
+  return std.liveUpdateFromGitlabReleases({ project });
 }
