@@ -3,10 +3,11 @@ import { cmakeBuild } from "cmake";
 import lz4 from "lz4";
 import zlibNg from "zlib_ng";
 import zfp from "zfp";
+import zstd from "zstd";
 
 export const project = {
   name: "c_blosc2",
-  version: "3.0.3",
+  version: "3.1.3",
   repository: "https://github.com/Blosc/c-blosc2",
 };
 
@@ -18,7 +19,13 @@ const source = Brioche.gitCheckout({
 export default function cBlosc2(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, lz4, zlibNg, zfp],
+    dependencies: [
+      std.toolchain,
+      lz4,
+      zlibNg,
+      zfp,
+      zstd, // unlike std.toolchain's libzstd, this one ships cmake config files
+    ],
     set: {
       BUILD_TESTS: "OFF",
       BUILD_FUZZERS: "OFF",
