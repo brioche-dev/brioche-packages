@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/codebook-lsp/0.3.39/download": {
+    "https://crates.io/api/v1/crates/codebook-lsp/0.3.41/download": {
       "type": "sha256",
-      "value": "900aee36097d88ee97a21c2878a023e4277d61cff53a700d015dbd2d9d56f5b5"
+      "value": "7c4efec75991692fe95c10c88d5d73038cd82c4846d7d9ac85a86d3c3180b473"
     }
   }
 }
