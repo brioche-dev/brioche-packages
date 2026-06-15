@@ -4,7 +4,7 @@ import bctoolbox from "bctoolbox";
 
 export const project = {
   name: "ortp",
-  version: "5.4.115",
+  version: "5.4.121",
   repository: "https://github.com/BelledonneCommunications/ortp.git",
 };
 
