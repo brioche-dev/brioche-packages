@@ -3,9 +3,9 @@ import { goBuild } from "go";
 
 export const project = {
   name: "restish",
-  version: "0.21.2",
+  version: "2.2.0",
   extra: {
-    moduleName: "github.com/rest-sh/restish",
+    moduleName: "github.com/rest-sh/restish/v2",
   },
 };
 
