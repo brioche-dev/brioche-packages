@@ -12,7 +12,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxkbcommon",
-  version: "1.13.1",
+  version: "1.13.2",
   repository: "https://github.com/xkbcommon/libxkbcommon",
 };
 
