@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "libudev_zero",
-  version: "1.0.3",
+  version: "1.0.4",
   repository: "https://github.com/illiliti/libudev-zero",
 };
 
