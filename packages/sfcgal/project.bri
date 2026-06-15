@@ -5,7 +5,7 @@ import cgal from "cgal";
 
 export const project = {
   name: "sfcgal",
-  version: "2.2.0",
+  version: "2.3.0",
   repository: "https://gitlab.com/sfcgal/SFCGAL",
 };
 
