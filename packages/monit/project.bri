@@ -5,7 +5,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "monit",
-  version: "5.35.2",
+  version: "6.0.0",
   repository: "https://bitbucket.org/tildeslash/monit",
 };
 
