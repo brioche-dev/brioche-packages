@@ -5,9 +5,9 @@
       "type": "sha256",
       "value": "a59e362652f08dcd477c78bb6e7bd9d80a7995bc73ce773050228a348ce2e5bb"
     },
-    "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.5/llvm-project-22.1.5.src.tar.xz": {
+    "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.7/llvm-project-22.1.7.src.tar.xz": {
       "type": "sha256",
-      "value": "7972b87b705a003ce70ab55f9f0fb495d156887cba0eb296d284731139118e2c"
+      "value": "5cc4a3f12bba50b6bdfb4b61bdc852117a0ff2517807c3902fc13267fb93562e"
     }
   }
 }
