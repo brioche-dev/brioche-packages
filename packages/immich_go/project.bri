@@ -1,0 +1,59 @@
+import * as std from "std";
+import git from "git";
+import { goBuild } from "go";
+
+export const project = {
+  name: "immich_go",
+  version: "0.31.0",
+  repository: "https://github.com/simulot/immich-go.git",
+  extra: {
+    moduleName: "github.com/simulot/immich-go",
+  },
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+  options: {
+    keepGitDir: true,
+    tag: true,
+  },
+});
+
+export default function immichGo(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    dependencies: [git],
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/app.Version=${project.version}`,
+      ],
+    },
+    runnable: "bin/immich-go",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    immich-go version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(immichGo)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  const expected = `immich-go version:${project.version},`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
