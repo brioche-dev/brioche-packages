@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/zubanls/zuban.git": {
-      "v0.7.2": "98605cfae4d1cd453ca0b8110d824488edafb6cb"
+      "v0.8.2": "eb1aaf55eb1b4d8e17917ec436af416b413052c8"
     }
   }
 }
