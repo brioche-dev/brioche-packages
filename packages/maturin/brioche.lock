@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/maturin/1.13.3/download": {
+    "https://crates.io/api/v1/crates/maturin/1.14.0/download": {
       "type": "sha256",
-      "value": "8b4e123c32db7b76ff7ad0d3b5c9795ef9d4f013cb75bc0baaa5c17a70995ed3"
+      "value": "758c1a1668f43fba9a2a284660deabeac7edd5c89257f6a1dad8f863d37a7d84"
     }
   }
 }
