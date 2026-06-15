@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/zizmor/1.25.0/download": {
+    "https://crates.io/api/v1/crates/zizmor/1.25.2/download": {
       "type": "sha256",
-      "value": "03c9e379d3dafe8fbe6cab4cb6d24dfcaea3702cd6681af9ef96e39afb66dba5"
+      "value": "6999c19d3d78253abcfbe3bd233ce0a0fcddcc28a74a960b2dea00d3b71e06fc"
     }
   }
 }
