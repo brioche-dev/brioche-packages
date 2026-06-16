@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/tklauser/libtar.git": {
+      "v1.2.20": "0907a9034eaf2a57e8e4a9439f793f3f05d446cd"
+    }
+  }
+}
