@@ -1,7 +1,7 @@
 import * as std from "std";
 
 // This recipe only supports aarch64 Linux
-// @brioche-packages skip-platform x86-64-linux
+// @brioche-packages skip-platform x86_64-linux
 export const project = {
   name: "sse2neon",
   version: "1.9.1",
