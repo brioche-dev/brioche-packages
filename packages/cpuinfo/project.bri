@@ -7,11 +7,11 @@ export const project = {
   version: "2026-06-12",
   repository: "https://github.com/pytorch/cpuinfo.git",
   extra: {
-    // No tags or releases published, pin to the latest commit on main.
     gitRef: "4628dc060ce4e82345dc166bbac875609db4ff69",
   },
 };
 
+// No tags or releases published, pin to the latest commit on main.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.extra.gitRef,

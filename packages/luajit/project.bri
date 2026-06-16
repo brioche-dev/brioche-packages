@@ -6,11 +6,11 @@ export const project = {
   version: "2.1.1780076327",
   repository: "https://github.com/LuaJIT/LuaJIT",
   extra: {
-    // No recent tags or releases published, pin to the latest commit on the v2.1 branch.
     gitRef: "b925b3e3fc6771171602323b45fbe9fb8fc90369",
   },
 };
 
+// No recent tags or releases published, pin to the latest commit on the v2.1 branch.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.extra.gitRef,
