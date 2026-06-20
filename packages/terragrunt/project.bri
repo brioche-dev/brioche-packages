@@ -23,7 +23,7 @@ export default function terragrunt(): std.Recipe<std.Directory> {
         "-s",
         "-w",
         "-X",
-        `github.com/gruntwork-io/go-commons/version.Version=${project.version}`,
+        `github.com/gruntwork-io/terragrunt/internal/version.Version=${project.version}`,
       ],
     },
     runnable: "bin/terragrunt",
