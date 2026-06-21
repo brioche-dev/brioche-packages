@@ -1,8 +1,9 @@
 {
   "dependencies": {},
-  "git_refs": {
-    "https://github.com/launchbadge/sqlx": {
-      "v0.9.0": "75bc0487eb661da811bb7a3c5d158f1bd463fef4"
+  "downloads": {
+    "https://crates.io/api/v1/crates/sqlx-cli/0.9.0/download": {
+      "type": "sha256",
+      "value": "93ef3857a4a0b48fcbf536b77a9122a35c7631686f2ccfbc75e616335771e8d0"
     }
   }
 }
