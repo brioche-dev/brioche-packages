@@ -6,7 +6,7 @@ import python from "python";
 
 export const project = {
   name: "onnx",
-  version: "1.21.0",
+  version: "1.22.0",
   repository: "https://github.com/onnx/onnx.git",
 };
 
