@@ -7,11 +7,11 @@ export const project = {
   version: "0.1.4",
   repository: "https://github.com/nushell/nufmt.git",
   extra: {
-    // No tags or releases published yet, pin to the latest commit.
     gitRef: "a24c2b1bc7f573b1a8b2c4a453e989407a4d29c8",
   },
 };
 
+// No tags or releases published yet, pin to the latest commit.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.extra.gitRef,

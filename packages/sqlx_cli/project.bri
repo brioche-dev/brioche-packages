@@ -4,20 +4,22 @@ import openssl from "openssl";
 
 export const project = {
   name: "sqlx_cli",
-  version: "0.8.6",
-  repository: "https://github.com/launchbadge/sqlx",
+  version: "0.9.0",
+  extra: {
+    crateName: "sqlx-cli",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function sqlxCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    dependencies: [openssl({ version: "3" })],
-    path: "sqlx-cli",
+    dependencies: [openssl],
     runnable: "bin/sqlx",
   });
 }
@@ -39,5 +41,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubTags({ project });
+  return std.liveUpdateFromRustCrates({ project });
 }

@@ -10,6 +10,7 @@ export const project = {
   },
 };
 
+// No recent tags or releases published, pin to the latest commit on the v2.1 branch.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.extra.gitRef,

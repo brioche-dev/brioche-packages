@@ -65,6 +65,9 @@ export default function onnxruntime(): std.Recipe<std.Directory> {
       onnxruntime_RUN_ONNX_TESTS: "OFF",
       onnxruntime_USE_FULL_PROTOBUF: "OFF",
       onnxruntime_USE_COREML: "OFF",
+      // Redirect FetchContent declarations to find_package() so declared
+      // dependencies are resolved from the build environment instead of
+      // being downloaded at configure time.
       FETCHCONTENT_FULLY_DISCONNECTED: "ON",
       FETCHCONTENT_TRY_FIND_PACKAGE_MODE: "ALWAYS",
       FETCHCONTENT_SOURCE_DIR_MP11: std.tpl`${boost}`,
