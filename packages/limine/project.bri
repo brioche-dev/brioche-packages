@@ -5,7 +5,7 @@ import nasm from "nasm";
 
 export const project = {
   name: "limine",
-  version: "12.2.0",
+  version: "12.3.3",
   repository: "https://github.com/limine-bootloader/limine",
 };
 
