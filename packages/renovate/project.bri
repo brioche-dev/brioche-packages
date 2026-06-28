@@ -19,8 +19,8 @@ export default function renovate(): std.Recipe<std.Directory> {
   // Pin to Node.js v24
   const nodejs = nodejsRecipe({ version: "24" });
 
-  // Pin pnpm to v10 since Renovate's `engines.pnpm` requires `^10.0.0`.
-  const pnpm = pnpmRecipe({ nodejs, version: "10" });
+  // Use pinned version of Node.js in pnpm
+  const pnpm = pnpmRecipe({ nodejs });
 
   // Install dependencies using pnpm
   // TODO: Can we get rid of dev dependencies (at least for the final output)?
@@ -28,7 +28,6 @@ export default function renovate(): std.Recipe<std.Directory> {
     source,
     dependencies: [python],
     nodejs,
-    version: "10",
   });
 
   // Run the Renovate build. We explicitly update the config to use the
