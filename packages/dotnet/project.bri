@@ -296,7 +296,9 @@ export function dotnetBuild(
       config,
       rid,
       invariant:
-        options.buildParams?.invariantGlobalization ?? false ? "true" : "false",
+        (options.buildParams?.invariantGlobalization ?? false)
+          ? "true"
+          : "false",
       project_path: options.path ?? "",
       ...options.env,
     })

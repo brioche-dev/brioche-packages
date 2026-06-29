@@ -238,17 +238,17 @@ export function cargoCBuild(
     })
     .toDirectory()
     .pipe((recipe) =>
-      options.disablePostBuildSteps ?? false
+      (options.disablePostBuildSteps ?? false)
         ? recipe
         : std.libtoolSanitizeDependencies(recipe),
     )
     .pipe((recipe) =>
-      options.disablePostBuildSteps ?? false
+      (options.disablePostBuildSteps ?? false)
         ? recipe
         : std.linkerScriptMakePathsRelative(recipe),
     )
     .pipe((recipe) =>
-      options.disablePostBuildSteps ?? false
+      (options.disablePostBuildSteps ?? false)
         ? recipe
         : std.pkgConfigMakePathsRelative(recipe),
     )
