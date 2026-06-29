@@ -48,9 +48,8 @@ export interface LiteralChecker<T> extends Checker<T> {
   [literalSymbol]: T;
 }
 
-export type Type<T extends Checker<unknown>> = T extends Checker<infer U>
-  ? U
-  : never;
+export type Type<T extends Checker<unknown>> =
+  T extends Checker<infer U> ? U : never;
 
 function createChecker<T>(f: (value: unknown) => CheckResult<T>): Checker<T> {
   return {

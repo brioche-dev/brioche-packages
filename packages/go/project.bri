@@ -267,9 +267,9 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
     .env({
       GOMODCACHE: modules,
       GOBIN: std.tpl`${std.outputPath}/bin`,
-      go_generate: options.buildParams?.generate ?? false ? "true" : "false",
+      go_generate: (options.buildParams?.generate ?? false) ? "true" : "false",
       ldflags: ldflagsWrapper(options.buildParams?.ldflags ?? []),
-      trimpath: options.buildParams?.trimpath ?? false ? "true" : "false",
+      trimpath: (options.buildParams?.trimpath ?? false) ? "true" : "false",
       mod: options.buildParams?.mod ?? "",
       package_path: options.path ?? ".",
       ...options.env,
