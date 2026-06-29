@@ -1,38 +1,28 @@
 import * as std from "std";
-import { goBuild } from "go";
+import { cargoBuild } from "rust";
 
 export const project = {
   name: "mcap",
-  version: "0.0.62",
+  version: "0.2.0",
   repository: "https://github.com/foxglove/mcap.git",
 };
 
-// Retrieve the source directly from the GitHub repository and not from the Go
-// proxy. Since, the one from Go proxy doesn't follow the same tagging scheme.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `releases/mcap-cli/v${project.version}`,
 });
 
 export default function mcap(): std.Recipe<std.Directory> {
-  return goBuild({
+  return cargoBuild({
     source,
-    currentDir: "go/cli/mcap",
-    buildParams: {
-      ldflags: [
-        "-s",
-        "-w",
-        "-X",
-        `github.com/foxglove/mcap/go/cli/mcap/cmd.Version=${project.version}`,
-      ],
-    },
+    path: "rust/cli",
     runnable: "bin/mcap",
   });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    mcap version | tee "$BRIOCHE_OUTPUT"
+    mcap --version | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(mcap)
     .toFile();
@@ -40,8 +30,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  const expected = `mcap ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }
