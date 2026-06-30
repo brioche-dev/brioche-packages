@@ -8,7 +8,7 @@ import libtiff from "libtiff";
 
 export const project = {
   name: "grokj2k",
-  version: "20.3.3",
+  version: "20.3.4",
   repository: "https://github.com/GrokImageCompression/grok",
 };
 
