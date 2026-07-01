@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "restish",
-  version: "2.2.0",
+  version: "2.3.0",
   extra: {
     moduleName: "github.com/rest-sh/restish/v2",
   },
@@ -13,15 +13,23 @@ const source = Brioche.download(
   `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
 )
   .unarchive("zip")
-  .peel(3);
+  .peel(4);
 
 export default function restish(): std.Recipe<std.Directory> {
   return goBuild({
     source,
-    dependencies: [std.toolchain],
-    buildParams: {
-      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    env: {
+      CGO_ENABLED: "0",
     },
+    buildParams: {
+      ldflags: [
+        "-s",
+        "-w",
+        "-X",
+        `${project.extra.moduleName}/internal/cli.Version=${project.version}`,
+      ],
+    },
+    path: "./cmd/restish",
     runnable: "bin/restish",
   });
 }
