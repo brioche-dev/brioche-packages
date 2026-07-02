@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-io": {
-      "v0.26.3": "1ec8081f208ef8d51381889eda3bda9756fd5bb5"
+      "v0.27.2": "9156a8f7970d615cbb689900f7adef70f2366c88"
     }
   }
 }
