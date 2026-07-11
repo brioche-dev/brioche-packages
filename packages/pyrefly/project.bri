@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "pyrefly",
-  version: "0.62.0",
+  version: "1.1.1",
   repository: "https://github.com/facebook/pyrefly.git",
 };
 
@@ -15,10 +15,6 @@ const source = Brioche.gitCheckout({
 export default function pyrefly(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    env: {
-      // Requires unstable features on stable Rust
-      RUSTC_BOOTSTRAP: "1",
-    },
     path: "pyrefly",
     runnable: "bin/pyrefly",
   });
