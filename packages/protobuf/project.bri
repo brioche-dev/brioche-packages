@@ -4,7 +4,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "protobuf",
-  version: "35.0",
+  version: "35.1",
   repository: "https://github.com/protocolbuffers/protobuf.git",
 };
 

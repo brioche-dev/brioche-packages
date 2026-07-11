@@ -2,10 +2,11 @@ import * as std from "std";
 import { cmakeBuild } from "cmake";
 import boost from "boost";
 import cgal from "cgal";
+import nlohmannJson from "nlohmann_json";
 
 export const project = {
   name: "sfcgal",
-  version: "2.2.0",
+  version: "2.3.0",
   repository: "https://gitlab.com/sfcgal/SFCGAL",
 };
 
@@ -25,7 +26,7 @@ const source = Brioche.gitCheckout({
 export default function sfcgal(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, boost, cgal],
+    dependencies: [std.toolchain, boost, cgal, nlohmannJson],
     set: {
       BUILD_TESTING: "OFF",
       SFCGAL_BUILD_TESTS: "OFF",

@@ -4,7 +4,7 @@ import fonttools from "fonttools";
 export const project = {
   name: "font_iosevka",
   repository: "https://github.com/be5invis/Iosevka",
-  version: "34.5.0",
+  version: "34.6.3",
 };
 
 export const source = Brioche.download(

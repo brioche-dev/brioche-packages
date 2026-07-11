@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/ngtcp2/ngtcp2/releases/download/v1.22.1/ngtcp2-1.22.1.tar.xz": {
+    "https://github.com/ngtcp2/ngtcp2/releases/download/v1.23.0/ngtcp2-1.23.0.tar.xz": {
       "type": "sha256",
-      "value": "dfd2c68bd64b89847c611425b9487105c46e8447b5c21e6aeb00642c8fbe2ca8"
+      "value": "59d5b4211e96970f2d3d5e6876f73dce03414800ba04aa56835b132fce8de730"
     }
   }
 }

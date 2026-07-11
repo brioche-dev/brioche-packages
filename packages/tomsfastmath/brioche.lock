@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/libtom/tomsfastmath/releases/download/v0.13.1/tfm-0.13.1.tar.xz": {
+      "type": "sha256",
+      "value": "47c97a1ada3ccc9fcbd2a8a922d5859a84b4ba53778c84c1d509c1a955ac1738"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "dagu",
+  version: "2.8.2",
+  repository: "https://github.com/dagucloud/dagu",
+};
+
+// Retrieve the source directly from the GitHub repository and not from the Go
+// proxy. The Go module path lacks the required `/v2` suffix for v2.x
+// releases, so the Go proxy rejects the versioned zip archives.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function dagu(): std.Recipe<std.Directory> {
+  return goBuild({
+    source,
+    env: {
+      CGO_ENABLED: "0",
+    },
+    buildParams: {
+      ldflags: ["-s", "-w", "-X", `main.version=${project.version}`],
+    },
+    path: "./cmd",
+  })
+    .pipe(
+      // Rename binary file
+      (recipe) =>
+        recipe.insert("bin/dagu", recipe.get("bin/cmd")).remove("bin/cmd"),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/dagu"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    dagu version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(dagu)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

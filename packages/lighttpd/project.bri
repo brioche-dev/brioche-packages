@@ -1,0 +1,116 @@
+import * as std from "std";
+import brotli from "brotli";
+import cyrusSasl from "cyrus_sasl";
+import gnutls from "gnutls";
+import krb5 from "krb5";
+import libiconv from "libiconv";
+import libidn2 from "libidn2";
+import libtasn1 from "libtasn1";
+import libunistring from "libunistring";
+import libxml2 from "libxml2";
+import nettle from "nettle";
+import openldap from "openldap";
+import openssl from "openssl";
+import p11Kit from "p11_kit";
+import pcre2 from "pcre2";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "lighttpd",
+  version: "1.4.83",
+  repository: "https://github.com/lighttpd/lighttpd1.4",
+};
+
+const source = Brioche.download(
+  `https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function lighttpd(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./autogen.sh
+    ./configure \\
+      --prefix=/ \\
+      --with-pcre2 \\
+      --with-openssl \\
+      --with-brotli \\
+      --with-zstd \\
+      --with-bzip2 \\
+      --with-webdav-props \\
+      --with-krb5 \\
+      --with-ldap
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      brotli,
+      cyrusSasl,
+      gnutls,
+      krb5,
+      libiconv,
+      libidn2,
+      libtasn1,
+      libunistring,
+      libxml2,
+      nettle,
+      openldap,
+      openssl,
+      p11Kit,
+      pcre2,
+      sqlite,
+    )
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        PATH: { append: [{ path: "sbin" }] },
+      }),
+    )
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "brioche-run", {
+        command: { relativePath: "sbin/lighttpd" },
+        args: ["-m", { relativePath: "lib" }],
+        env: {
+          LD_LIBRARY_PATH: {
+            append: [
+              std.toolchain,
+              cyrusSasl,
+              libiconv,
+              nettle,
+              openssl,
+              libxml2,
+            ].flatMap((lib) => [lib, "/lib", ":"]),
+            separator: ":",
+          },
+        },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lighttpd -v | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(lighttpd)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `lighttpd/${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({
+    project,
+    matchTag: /^lighttpd-(?<version>\d+\.\d+\.\d+)$/,
+  });
+}

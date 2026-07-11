@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/web-infra-dev/oxc.git": {
-      "apps_v1.64.0": "fb2a970feffe6e1c60b3720354d43c6403489e83"
+      "apps_v1.70.0": "aa79b5be9915068f60bc361febf2e7496b92fc24"
     }
   }
 }

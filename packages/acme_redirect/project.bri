@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "acme_redirect",
-  version: "0.7.1",
+  version: "0.8.1",
   extra: {
     crateName: "acme-redirect",
   },

@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_llvm_lines",
-  version: "0.4.45",
+  version: "0.4.46",
   extra: {
     crateName: "cargo-llvm-lines",
   },

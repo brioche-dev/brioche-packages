@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://nlnetlabs.nl/downloads/unbound/unbound-1.25.0.tar.gz": {
+    "https://nlnetlabs.nl/downloads/unbound/unbound-1.25.1.tar.gz": {
       "type": "sha256",
-      "value": "062a6eda723fe2f041bee4079b76981569f1d12e066bbd74800242fc1ebddec7"
+      "value": "0fe8b6277b0959cfd17562debac0aa5f71e0b02dc4ffa9c60271c583edab586f"
     }
   }
 }

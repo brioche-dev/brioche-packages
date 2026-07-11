@@ -2,11 +2,11 @@ import * as std from "std";
 import libunwind from "libunwind";
 import { cargoBuild } from "rust";
 
-// Currently, BugStalker only support x86-64 Linux
+// Currently, this recipe only supports x86-64 Linux
 // @brioche-packages skip-platform aarch64-linux
 export const project = {
   name: "bugstalker",
-  version: "0.4.5",
+  version: "0.4.6",
   repository: "https://github.com/godzie44/BugStalker.git",
 };
 

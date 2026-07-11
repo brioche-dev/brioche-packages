@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/junegunn/fzf/@v/v0.72.0.info": {
+    "https://proxy.golang.org/github.com/junegunn/fzf/@v/v0.73.1.info": {
       "type": "sha256",
-      "value": "6a7f1b3c14f394bf9132643033d87eea6768269aa9b77fc276e6f69a2f06552f"
+      "value": "93075fe631b9a9a003adfbe63f55e940ec44389bee7df57c612e133297bd3eb3"
     },
-    "https://proxy.golang.org/github.com/junegunn/fzf/@v/v0.72.0.zip": {
+    "https://proxy.golang.org/github.com/junegunn/fzf/@v/v0.73.1.zip": {
       "type": "sha256",
-      "value": "e31eac956891ad26ed03abce8fadee4e12bd7a4b29b6d66e5d8d3498bc561066"
+      "value": "3c0d97b0cc91d2462ddde21129e1c448f5cc8ce9a37f244520537a5e19e57353"
     }
   }
 }

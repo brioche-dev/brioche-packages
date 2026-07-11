@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.83.tar.xz": {
+      "type": "sha256",
+      "value": "b3f878156480079f8a93903bd24d456074a0fbedb9b4d99fcd65df33b1f566f0"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "stb",
+  version: "2026-04-15",
+  repository: "https://github.com/nothings/stb.git",
+  extra: {
+    gitRef: "31c1ad37456438565541f4919958214b6e762fb4",
+  },
+};
+
+// No tags or releases published yet, pin to the latest commit.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.extra.gitRef,
+});
+
+export default function stb(): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Manual installation
+    cp *.h "$BRIOCHE_OUTPUT/include/stb/"
+    cp *.c "$BRIOCHE_OUTPUT/include/stb/"
+    install -Dm644 LICENSE "$BRIOCHE_OUTPUT/share/licenses/stb/LICENSE"
+  `
+    .workDir(source)
+    .outputScaffold(
+      std.directory({
+        "include/stb": std.directory(),
+        "share/licenses/stb": std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+
+      #define STB_IMAGE_IMPLEMENTATION
+      #include <stb/stb_image.h>
+
+      int main(void)
+      {
+          int width = 0;
+          int height = 0;
+          int channels = 0;
+          unsigned char *pixels = stbi_load_from_memory(
+              (const unsigned char *)"", 0, &width, &height, &channels, 0);
+          if (pixels == NULL) {
+              puts("ok");
+          } else {
+              stbi_image_free(pixels);
+          }
+
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    gcc main.c -o main -lm
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, stb)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "ok";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let response = http get https://api.github.com/repos/nothings/stb/commits/master
+    let gitRef = $response.sha
+    let date = $response.commit.committer.date
+      | into datetime
+      | format date "%Y-%m-%d"
+    let version = $date
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.gitRef $gitRef
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
