@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://static.rust-lang.org/dist/channel-rust-1.96.0.toml": {
+    "https://static.rust-lang.org/dist/channel-rust-1.97.0.toml": {
       "type": "sha256",
-      "value": "9af50610e1d82699f78a40b985c9277ae1a2c5a0bec86ae430cfe58832038285"
+      "value": "3804d2666f7c12ce64205baa69b6be52f910b45b158091013264beb7aa1de7f5"
     }
   }
 }
