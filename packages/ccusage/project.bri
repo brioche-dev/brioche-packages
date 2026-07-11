@@ -1,20 +1,23 @@
 import * as std from "std";
-import { pnpmInstallGlobal } from "pnpm";
+import { cargoBuild } from "rust";
 
 export const project = {
   name: "ccusage",
   version: "20.0.17",
-  extra: {
-    packageName: "ccusage",
-  },
+  repository: "https://github.com/ccusage/ccusage.git",
 };
 
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
 export default function ccusage(): std.Recipe<std.Directory> {
-  return pnpmInstallGlobal({
-    packageName: project.extra.packageName,
-    version: project.version,
-    wrapBins: false,
-  }).pipe((recipe) => std.withRunnableLink(recipe, ".bin/ccusage"));
+  return cargoBuild({
+    source,
+    path: "rust/crates/ccusage",
+    runnable: "bin/ccusage",
+  });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -34,5 +37,8 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromNpmPackages({ project });
+  return std.liveUpdateFromGithubReleases({
+    project,
+    matchTag: /^v(?<version>\d+\.\d+\.\d+)$/,
+  });
 }
