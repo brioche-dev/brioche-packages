@@ -1,19 +1,20 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
+import { pnpmInstallGlobal } from "pnpm";
 
 export const project = {
   name: "ccusage",
-  version: "20.0.13",
+  version: "20.0.17",
   extra: {
     packageName: "ccusage",
   },
 };
 
 export default function ccusage(): std.Recipe<std.Directory> {
-  return npmInstallGlobal({
+  return pnpmInstallGlobal({
     packageName: project.extra.packageName,
     version: project.version,
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/ccusage"));
+    wrapBins: false,
+  }).pipe((recipe) => std.withRunnableLink(recipe, ".bin/ccusage"));
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
