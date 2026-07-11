@@ -15,10 +15,6 @@ const source = Brioche.gitCheckout({
 export default function pyrefly(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    env: {
-      // Requires unstable features on stable Rust
-      RUSTC_BOOTSTRAP: "1",
-    },
     path: "pyrefly",
     runnable: "bin/pyrefly",
   });
