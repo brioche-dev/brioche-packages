@@ -1,0 +1,68 @@
+import * as std from "std";
+import brotli from "brotli";
+import curl from "curl";
+import libpsl from "libpsl";
+import libssh2 from "libssh2";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import openssl from "openssl";
+
+export const project = {
+  name: "zchunk",
+  version: "1.5.3",
+  repository: "https://github.com/zchunk/zchunk",
+};
+
+const source = Brioche.gitCheckout({
+  repository: `${project.repository}.git`,
+  ref: project.version,
+});
+
+export default function zchunk(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [
+      std.toolchain,
+      ninja,
+      openssl,
+      curl,
+      brotli,
+      libpsl,
+      libssh2,
+    ],
+    set: {
+      docs: "false",
+      tests: "false",
+    },
+    runnable: "bin/zck",
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    zck --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(zchunk)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `zchunk ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

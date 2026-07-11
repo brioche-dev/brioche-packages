@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/swc-project/swc": {
-      "v1.15.26": "fb92c493c2977cecd01b8d5481eb0de267e0fc10"
+      "v1.15.41": "7a72340b21d080cc61e109296ff083bb2cfc91d5"
     }
   }
 }

@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/!use-!tusk/fence/@v/v0.1.47.info": {
+    "https://proxy.golang.org/github.com/!use-!tusk/fence/@v/v0.1.60.info": {
       "type": "sha256",
-      "value": "8d78589beac0dcfd078738bffb85df2a50fa057d5b5c340d16525cf5e4c075c8"
+      "value": "a7d805ddf6878856f2a3d01cc116762ba4b7e6a9bf216266136ce05cd2c8fe4b"
     },
-    "https://proxy.golang.org/github.com/!use-!tusk/fence/@v/v0.1.47.zip": {
+    "https://proxy.golang.org/github.com/!use-!tusk/fence/@v/v0.1.60.zip": {
       "type": "sha256",
-      "value": "146e213266228e6b2fe4cebb4f167080333ba2044fb7dff7143eed264a9e2c05"
+      "value": "03c10f42618df133b14cdc31297d185246cdbf687807db9deb10cbef6e473f09"
     }
   }
 }

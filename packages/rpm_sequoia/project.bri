@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "rpm_sequoia",
-  version: "1.10.1",
+  version: "1.10.2",
   extra: {
     crateName: "rpm-sequoia",
   },

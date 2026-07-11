@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/gitea.com/gitea/runner/@v/v1.0.1.zip": {
+    "https://proxy.golang.org/gitea.com/gitea/runner/@v/v1.0.8.zip": {
       "type": "sha256",
-      "value": "9737ab49f8e42551146dcb322f1c2da94107fe82358365840d267b74ff20334b"
+      "value": "6e056bed3845531f968686f563a66ad7ae7638f3d8cf2315ee0ba66c9b7e987e"
     }
   }
 }

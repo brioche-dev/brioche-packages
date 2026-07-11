@@ -8,7 +8,7 @@ let versions = http get $'https://crates.io/api/v1/crates/($env.crateName)'
       | parse --regex $env.matchVersion
       | into record
   }
-  | where (($it | get -o version) | is-not-empty)
+  | where ($it.version? | is-not-empty)
   | sort-by --natural version
 
 if ($versions | is-empty) {

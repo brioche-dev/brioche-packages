@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/docker/buildx/@v/v0.33.0.info": {
+    "https://proxy.golang.org/github.com/docker/buildx/@v/v0.34.1.info": {
       "type": "sha256",
-      "value": "c7a7bc1ade968bff6d9e453c7e9651b17897088a574d91256cb3c80a2ed416fd"
+      "value": "2a581aa6cb3c7f943f7d60772d419a2188ce2c490a0feb47127bfe06609188d9"
     },
-    "https://proxy.golang.org/github.com/docker/buildx/@v/v0.33.0.zip": {
+    "https://proxy.golang.org/github.com/docker/buildx/@v/v0.34.1.zip": {
       "type": "sha256",
-      "value": "678ba20a027bec0fc4347567de07249d0935062a7d1ecaaa45f921e20c0b9dd9"
+      "value": "556ea0efd10c936962d6cc1464c3528067b2015683b18ecc284d16943937e1c4"
     }
   }
 }

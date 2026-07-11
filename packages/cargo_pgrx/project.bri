@@ -1,0 +1,45 @@
+import * as std from "std";
+import rust, { cargoBuild } from "rust";
+import openssl from "openssl";
+
+export const project = {
+  name: "cargo_pgrx",
+  version: "0.18.1",
+  extra: {
+    crateName: "cargo-pgrx",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function cargoPgrx(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    dependencies: [openssl],
+    runnable: "bin/cargo-pgrx",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    cargo pgrx --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rust, cargoPgrx)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `cargo-pgrx ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

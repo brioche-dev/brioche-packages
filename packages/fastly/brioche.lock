@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/fastly/cli.git": {
-      "v14.3.1": "9ea87068a41560776d718fc5b5d63ba4756ad7dd"
+      "v15.2.0": "93b8846decbfa240e9d821b5505e859f303a93db"
     }
   }
 }

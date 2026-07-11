@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/assimp/assimp.git": {
+      "v6.0.5": "392a658f9c271be965271f45e7521a1b80ea4392"
+    }
+  }
+}

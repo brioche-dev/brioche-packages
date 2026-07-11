@@ -1,10 +1,16 @@
 import * as std from "std";
+import abseilCpp from "abseil_cpp";
+import cpuinfo from "cpuinfo";
+import onnx from "onnx";
+import onnxruntime from "onnxruntime";
 import openssl from "openssl";
+import protobuf from "protobuf";
+import re2 from "re2";
 import { cargoBuild } from "rust";
 
 export const project = {
   name: "bkmr",
-  version: "6.5.0",
+  version: "7.6.5",
   extra: {
     crateName: "bkmr",
   },
@@ -17,11 +23,43 @@ const source = Brioche.download(
   .peel();
 
 export default function bkmr(): std.Recipe<std.Directory> {
+  // Native libraries needed at runtime so the dynamic linker can find the
+  // shared libraries transitively required by libonnxruntime.
+  const dlopenLibs = [
+    std.toolchain,
+    onnxruntime,
+    onnx,
+    protobuf,
+    re2,
+    cpuinfo,
+    abseilCpp,
+  ];
+
   return cargoBuild({
     source,
     dependencies: [openssl({ version: "3" })],
-    runnable: "bin/bkmr",
-  });
+    env: {
+      ORT_LIB_LOCATION: std.tpl`${onnxruntime}/lib`,
+    },
+    buildParams: {
+      defaultFeatures: false,
+      features: ["system-ort"],
+    },
+  })
+    .pipe((recipe) => recipe.insert("libexec/bkmr", recipe.get("bin/bkmr")))
+    .pipe((recipe) => recipe.remove("bin/bkmr"))
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/bkmr", {
+        command: { relativePath: "libexec/bkmr" },
+        env: {
+          // Help the dynamic linker to find shared libraries at runtime.
+          LD_LIBRARY_PATH: {
+            append: dlopenLibs.flatMap((lib) => [lib, "/lib", ":"]),
+            separator: ":",
+          },
+        },
+      }),
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

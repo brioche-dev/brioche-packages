@@ -4,7 +4,7 @@ import pnpm from "pnpm";
 
 export const project = {
   name: "kubetail",
-  version: "0.13.0",
+  version: "0.17.0",
   repository: "https://github.com/kubetail-org/kubetail",
 };
 

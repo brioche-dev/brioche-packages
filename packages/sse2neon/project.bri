@@ -1,0 +1,76 @@
+import * as std from "std";
+
+// This recipe only supports aarch64 Linux
+// @brioche-packages skip-platform x86_64-linux
+export const project = {
+  name: "sse2neon",
+  version: "1.9.1",
+  repository: "https://github.com/DLTcollab/sse2neon",
+};
+
+const source = Brioche.download(
+  `${project.repository}/archive/refs/tags/v${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function sse2neon(): std.Recipe<std.Directory> {
+  return std.runBash`
+    # Manual installation
+    cp sse2neon.h "$BRIOCHE_OUTPUT/include/"
+  `
+    .workDir(source)
+    .outputScaffold(
+      std.directory({
+        include: std.directory(),
+      }),
+    )
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so we just
+  // build a simple program to ensure it works
+  const src = std.directory({
+    "main.cpp": std.file(std.indoc`
+      #include <sse2neon.h>
+      #include <cstdlib>
+      #include <iostream>
+
+      int main()
+      {
+          __m128 a = _mm_setzero_ps();
+          float v = _mm_cvtss_f32(a);
+          std::cout << v;
+
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    g++ main.cpp -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, sse2neon)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  const expected = "0";
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

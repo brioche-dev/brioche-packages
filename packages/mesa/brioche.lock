@@ -17,17 +17,17 @@
       "type": "sha256",
       "value": "501a031947e3a9025ed4405a168e6ef5ae3126c59f90ce0cd6f2bfc477be31b7"
     },
-    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl": {
+    "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl": {
       "type": "sha256",
-      "value": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"
+      "value": "a59e362652f08dcd477c78bb6e7bd9d80a7995bc73ce773050228a348ce2e5bb"
     },
     "https://files.pythonhosted.org/packages/da/ef/e648bfd021127bef5fa12e1720ffed0c6cbb8310c8d9bea7266337ff06de/markupsafe-3.0.3-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl": {
       "type": "sha256",
       "value": "f34c41761022dd093b4b6896d4810782ffbabe30f2d443ff5f083e0cbbb8c737"
     },
-    "https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.0.4/mesa-mesa-26.0.4.tar.bz2": {
+    "https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.1.2/mesa-mesa-26.1.2.tar.bz2": {
       "type": "sha256",
-      "value": "dd4283517e412cb038683b724377da8ffb51c17ce8812e6bbcfe05c6a3eea84f"
+      "value": "34b51e8971cdf4dc35c103fe297ff590fe5b30b243cc31515b8c4c5345f05802"
     }
   }
 }

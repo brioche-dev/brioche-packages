@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/daveshanley/vacuum/@v/v0.25.8.info": {
+    "https://proxy.golang.org/github.com/daveshanley/vacuum/@v/v0.29.2.info": {
       "type": "sha256",
-      "value": "e297f50214fa6c89968546c5927434e0442a9fb3a35f7f12ab428299d3180eef"
+      "value": "0b2df126c6c39abca9be5f813eb27eb5e5920e3100e090f5504df2c2bb2e1136"
     },
-    "https://proxy.golang.org/github.com/daveshanley/vacuum/@v/v0.25.8.zip": {
+    "https://proxy.golang.org/github.com/daveshanley/vacuum/@v/v0.29.2.zip": {
       "type": "sha256",
-      "value": "31c190f2be24d1d6aaa4179807d6a42f7bc2bcf6aa018f2f285c8b2befdd2023"
+      "value": "4cf526f2a1446e7d3090b3743ed548f2eccad953d4a5baedfdc13cd4011ea435"
     }
   }
 }

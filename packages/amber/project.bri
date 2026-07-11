@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "amber",
-  version: "0.5.1-alpha",
+  version: "0.6.0-alpha",
   repository: "https://github.com/amber-lang/amber.git",
 };
 

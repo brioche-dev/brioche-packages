@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/litehtml/litehtml.git": {
+      "v0.10": "9bc84b8b8d15a4e50f18b327aa30955048b441c2"
+    }
+  }
+}

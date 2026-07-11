@@ -3,45 +3,117 @@ import { goBuild } from "go";
 
 export const project = {
   name: "go_mockery",
-  version: "3.7.0",
+  version: "3.7.1",
   repository: "https://github.com/vektra/mockery.git",
+  extra: {
+    otherVersions: {
+      "3": "3.7.1",
+      "2": "2.53.6",
+    },
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: `v${project.version}`,
-});
+std.assert(
+  Object.keys(project.extra.otherVersions).some((version) =>
+    project.version.startsWith(`${version}.`),
+  ),
+  "Package version not found in extra.otherVersions",
+);
 
-export default function goMockery(): std.Recipe<std.Directory> {
+/**
+ * The go-mockery major version.
+ */
+export type MockeryVersion = keyof typeof project.extra.otherVersions;
+
+/**
+ * Get the latest major version of go-mockery.
+ *
+ * @returns The latest major version of go-mockery.
+ */
+export function getLatestVersion(): MockeryVersion {
+  const versions = Object.keys(project.extra.otherVersions);
+  versions.sort((a, b) => parseInt(b) - parseInt(a));
+
+  return versions[0] as MockeryVersion;
+}
+
+const sources: { [version: string]: std.Recipe<std.Directory> } = {
+  "3": Brioche.gitCheckout({
+    repository: project.repository,
+    ref: `v${project.extra.otherVersions["3"]}`,
+  }),
+  "2": Brioche.gitCheckout({
+    repository: project.repository,
+    ref: `v${project.extra.otherVersions["2"]}`,
+  }),
+} satisfies Record<MockeryVersion, std.Recipe<std.Directory>>;
+
+/**
+ * Extra options for go-mockery.
+ *
+ * @param version - The major version of go-mockery to use. Defaults to the
+ *   latest stable major release.
+ */
+interface MockeryOptions {
+  version?: MockeryVersion;
+}
+
+export default function goMockery(
+  options: MockeryOptions = {},
+): std.Recipe<std.Directory> {
+  const { version = getLatestVersion() } = options;
+
+  const source = sources[version];
+  std.assert(
+    source != null,
+    `Expected go-mockery version ${JSON.stringify(
+      version,
+    )} to be one of ${JSON.stringify(Object.keys(sources))}`,
+  );
+
+  const semVerPaths = {
+    "3": "github.com/vektra/mockery/v3/internal/logging.SemVer",
+    "2": "github.com/vektra/mockery/v2/pkg/logging.SemVer",
+  } satisfies Record<MockeryVersion, string>;
+  const fullVersion = project.extra.otherVersions[version];
+
   return goBuild({
     source,
     buildParams: {
       generate: true,
-      ldflags: [
-        "-s",
-        "-w",
-        "-X",
-        `github.com/vektra/mockery/v3/internal/logging.SemVer=${project.version}`,
-      ],
+      ldflags: ["-s", "-w", "-X", `${semVerPaths[version]}=${fullVersion}`],
     },
     runnable: "bin/mockery",
   });
 }
 
-export async function test(): Promise<std.Recipe<std.File>> {
-  const script = std.runBash`
-    mockery version | tee "$BRIOCHE_OUTPUT"
-  `
-    .dependencies(goMockery)
-    .toFile();
+export function test(): std.Recipe<std.Directory> {
+  const versionCommands = {
+    "3": "version",
+    "2": "--version",
+  } satisfies Record<MockeryVersion, string>;
 
-  const result = (await script.read()).trim();
+  const mockeryVersions = Object.keys(
+    project.extra.otherVersions,
+  ) as MockeryVersion[];
 
-  // Check that the result contains the expected version
-  const expected = project.version;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  const tests = mockeryVersions.map(async (version) => {
+    const script = std.runBash`
+      mockery ${versionCommands[version]} | tee "$BRIOCHE_OUTPUT"
+    `
+      .dependencies(goMockery({ version }))
+      .toFile();
 
-  return script;
+    const result = (await script.read()).trim();
+
+    // Check that the result contains the expected version
+    const expected = project.extra.otherVersions[version];
+    std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+    return std.directory().insert(version, script);
+  });
+
+  return std.merge(...tests);
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {

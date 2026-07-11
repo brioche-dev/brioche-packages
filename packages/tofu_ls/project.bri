@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "tofu_ls",
-  version: "0.4.2",
+  version: "0.5.0",
   extra: {
     moduleName: "github.com/opentofu/tofu-ls",
   },

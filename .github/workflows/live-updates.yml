@@ -18,7 +18,7 @@ jobs:
           private-key: ${{ secrets.LIVE_UPDATE_PRIVATE_KEY }}
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
@@ -77,7 +77,7 @@ jobs:
                 git clean -ffdx 2>/dev/null
               fi
 
-              if ! brioche live-update "$package" --locked; then
+              if ! brioche live-update "$package" --locked 2>&1; then
                 echo "🔴 Failed to update $package"
                 echo "::error file=$package/project.bri::Failed to update $package"
                 failed_packages+=("$package")

@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/kubie/0.27.0/download": {
+    "https://crates.io/api/v1/crates/kubie/0.28.0/download": {
       "type": "sha256",
-      "value": "bef11d425d6cda3fe0f5d1b71ccb5de723d203e4946669f4d2e942334b60402c"
+      "value": "de8c301204118c12df1c5a0f8f86eea7ae6f561e9d9201d0f46a42ef6c4e4f22"
     }
   }
 }

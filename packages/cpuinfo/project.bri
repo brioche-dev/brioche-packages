@@ -1,0 +1,90 @@
+import * as std from "std";
+import cmake, { cmakeBuild } from "cmake";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "cpuinfo",
+  version: "2026-06-12",
+  repository: "https://github.com/pytorch/cpuinfo.git",
+  extra: {
+    gitRef: "4628dc060ce4e82345dc166bbac875609db4ff69",
+  },
+};
+
+// No tags or releases published, pin to the latest commit on main.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.extra.gitRef,
+});
+
+export default function cpuinfo(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    dependencies: [std.toolchain],
+    set: {
+      CPUINFO_BUILD_UNIT_TESTS: "OFF",
+      CPUINFO_BUILD_MOCK_TESTS: "OFF",
+      CPUINFO_BUILD_BENCHMARKS: "OFF",
+      CPUINFO_BUILD_TOOLS: "OFF",
+      CPUINFO_LIBRARY_TYPE: "shared",
+      USE_SYSTEM_LIBS: "ON",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // The library does not export a version in its CMake config
+  const src = std.directory({
+    "CMakeLists.txt": std.file(std.indoc`
+      cmake_minimum_required(VERSION 4.0)
+      project(QueryLibrary)
+
+      find_package(cpuinfo REQUIRED CONFIG)
+      message(STATUS "cpuinfo found: TRUE")
+    `),
+  });
+
+  const script = std.runBash`
+    cmake -S . -B tmp | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, cmake, cpuinfo)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that cpuinfo was found
+  const expected = "cpuinfo found: TRUE";
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let gitRef = ^git ls-remote ${project.repository} refs/heads/main
+      | lines
+      | parse --regex '(?<hash>[0-9a-f]+)\\s+'
+      | get 0.hash
+
+    let version = http get $"https://api.github.com/repos/pytorch/cpuinfo/commits/($gitRef)"
+      | get commit.author.date
+      | format date '%Y-%m-%d'
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.gitRef $gitRef
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

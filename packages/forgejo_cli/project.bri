@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "forgejo_cli",
-  version: "0.4.1",
+  version: "0.5.0",
   repository: "https://codeberg.org/forgejo-contrib/forgejo-cli",
 };
 

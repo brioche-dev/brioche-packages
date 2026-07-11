@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/n0-computer/dumbpipe.git": {
-      "v0.35.0": "9bf9f8bffb481a51c7a62145de08f658a4a06ec2"
+      "v0.39.0": "6c4990dc0c49f3c93947ef6ebeafcf846a6532e0"
     }
   }
 }

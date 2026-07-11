@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "erlang",
-  version: "28.4.2",
+  version: "29.0.2",
   repository: "https://github.com/erlang/otp",
 };
 
@@ -59,12 +59,10 @@ export function liveUpdate(): std.Recipe<std.Directory> {
 }
 
 /**
- * Fix hardcoded absolute paths in Erlang shell scripts so they use
- * relative paths and work inside Brioche's sandbox.
- *
- * With `--prefix=/`, the `dyn_erl` lookup path and the ROOTDIR
- * fallback in `bin/` scripts point to wrong absolute locations.
- * This fixes both to use correct relative paths.
+ * Fix ROOTDIR fallbacks in Erlang shell scripts so they resolve to
+ * `lib/erlang/` relative to the script's own location. The
+ * `--prefix=/` build puts an absolute path that does not exist in
+ * a relocatable install.
  *
  * @param recipe - The recipe to fix.
  *
@@ -74,17 +72,16 @@ function fixRootDir(
   recipe: std.Recipe<std.Directory>,
 ): std.Recipe<std.Directory> {
   return std.runBash`
-    # Fix scripts in bin/ — adjust dyn_erl lookup and ROOTDIR fallback
     for f in "$BRIOCHE_OUTPUT"/bin/*; do
       if [ -f "$f" ] && grep -q 'ROOTDIR' "$f" 2>/dev/null; then
-        sed -i 's|"\${progdir}/../erts-|"\${progdir}/../lib/erlang/erts-|' "$f"
+        sed -i 's|find_rootdir "$0" "//lib/erlang"|find_rootdir "$0" "$(dirname "$0")/../lib/erlang"|' "$f"
         sed -i 's|ROOTDIR="//lib/erlang"|ROOTDIR="$(dirname "$0")/../lib/erlang"|' "$f"
       fi
     done
 
-    # Fix scripts in lib/erlang/bin/ — only the ROOTDIR fallback
     for f in "$BRIOCHE_OUTPUT"/lib/erlang/bin/*; do
       if [ -f "$f" ] && grep -q 'ROOTDIR' "$f" 2>/dev/null; then
+        sed -i 's|find_rootdir "$0" "//lib/erlang"|find_rootdir "$0" "$(dirname "$0")/.."|' "$f"
         sed -i 's|ROOTDIR="//lib/erlang"|ROOTDIR="$(dirname "$0")/.."|' "$f"
       fi
     done

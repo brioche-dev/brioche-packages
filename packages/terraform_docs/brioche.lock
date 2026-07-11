@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/terraform-docs/terraform-docs/@v/v0.22.0.zip": {
+    "https://proxy.golang.org/github.com/terraform-docs/terraform-docs/@v/v0.24.0.zip": {
       "type": "sha256",
-      "value": "c4530e442b22bf0be5201eeb8d971b7283508b1a9ef1bafc5a13713c5f5e14f9"
+      "value": "8562442209eda76e8dd0971b2b2781c2446abf7fca007d01754cdc0218b105d4"
     }
   }
 }

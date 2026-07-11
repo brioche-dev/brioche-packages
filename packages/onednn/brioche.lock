@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/uxlfoundation/oneDNN.git": {
-      "v3.11.2": "03c022d3ffdcee958cfacbe720048e725fdf644c"
+      "v3.12.1": "c8c37fdbecb5aa4dcf5ea7e77fba0fd1a98bd16f"
     }
   }
 }

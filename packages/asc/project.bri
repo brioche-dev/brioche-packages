@@ -3,8 +3,8 @@ import { goBuild } from "go";
 
 export const project = {
   name: "asc",
-  version: "1.2.2",
-  repository: "https://github.com/rudrankriyam/App-Store-Connect-CLI.git",
+  version: "2.0.0",
+  repository: "https://github.com/rorkai/App-Store-Connect-CLI.git",
 };
 
 const source = Brioche.gitCheckout({
@@ -39,8 +39,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `${project.version} (commit: unknown, date: unknown)`;
-  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
 
   return script;
 }

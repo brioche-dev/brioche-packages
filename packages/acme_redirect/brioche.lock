@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/acme-redirect/0.7.1/download": {
+    "https://crates.io/api/v1/crates/acme-redirect/0.8.1/download": {
       "type": "sha256",
-      "value": "8058ab1fef6a72d5019b67aea8b175e3a1503cea2da2f8582ebac409d61387a9"
+      "value": "14c734749d906d409b2fab1399bbd7a4b6eeb0e4b078dc204efbbcf6a549e66f"
     }
   }
 }

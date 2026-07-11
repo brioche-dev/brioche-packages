@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/mongodb/mongo-c-driver": {
-      "2.2.4": "104e2f8337168126848db06b7e15f4c142a7426e"
+      "2.3.1": "e44471f5dbc74e4c2ac9090a633e55491dfc1fa4"
     }
   }
 }

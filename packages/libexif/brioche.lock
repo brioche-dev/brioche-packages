@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/libexif/libexif/releases/download/v0.6.26/libexif-0.6.26.tar.xz": {
+      "type": "sha256",
+      "value": "4a055ed6575e61ca46c3172be3c753cc16c9becd0f99ec71d58dd0e471476c0c"
+    }
+  }
+}

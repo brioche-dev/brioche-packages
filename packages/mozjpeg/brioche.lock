@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/mozilla/mozjpeg.git": {
+      "v4.1.5": "6c9f0897afa1c2738d7222a0a9ab49e8b536a267"
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/g-plane/wasm-language-tools.git": {
-      "v0.10.4": "cf9dc77f4ae15652e265be25718dfe927b841011"
+      "v0.11.0": "c70d75c478c4c9aaff55a3479290bc5ba9757233"
     }
   }
 }

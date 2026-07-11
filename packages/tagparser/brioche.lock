@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/Martchus/tagparser": {
+      "v12.5.3": "8e7f0ffb0eea4c3c07e1d39f9ed0a25765826780"
+    }
+  }
+}

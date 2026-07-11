@@ -1,0 +1,105 @@
+import * as std from "std";
+import { cmakeBuild } from "cmake";
+import abseilCpp from "abseil_cpp";
+import boost from "boost";
+import cpuinfo from "cpuinfo";
+import eigen from "eigen";
+import flatbuffers from "flatbuffers";
+import howardHinnantDate from "howard_hinnant_date";
+import microsoftGsl from "microsoft_gsl";
+import nlohmannJson from "nlohmann_json";
+import onnx from "onnx";
+import protobuf from "protobuf";
+import python from "python";
+import re2 from "re2";
+import safeint from "safeint";
+
+export const project = {
+  name: "onnxruntime",
+  version: "1.26.0",
+  repository: "https://github.com/microsoft/onnxruntime.git",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Recompile schema to make sure it is compatible with latest version
+  // of flatbuffers
+  std.runBash`
+    python "$BRIOCHE_OUTPUT/onnxruntime/core/flatbuffers/schema/compile_schema.py" --flatc "$FLATC"
+    python "$BRIOCHE_OUTPUT/onnxruntime/lora/adapter_format/compile_schema.py" --flatc "$FLATC"
+  `
+    .dependencies(std.toolchain, python)
+    .env({
+      FLATC: std.tpl`${flatbuffers}/bin/flatc`,
+    })
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function onnxruntime(): std.Recipe<std.Directory> {
+  return cmakeBuild({
+    source,
+    path: "cmake",
+    dependencies: [
+      std.toolchain,
+      abseilCpp,
+      boost,
+      cpuinfo,
+      eigen,
+      flatbuffers,
+      howardHinnantDate,
+      microsoftGsl,
+      nlohmannJson,
+      onnx,
+      protobuf,
+      python,
+      re2,
+      safeint,
+    ],
+    set: {
+      onnxruntime_BUILD_SHARED_LIB: "ON",
+      onnxruntime_BUILD_UNIT_TESTS: "OFF",
+      onnxruntime_GENERATE_TEST_REPORTS: "OFF",
+      onnxruntime_RUN_ONNX_TESTS: "OFF",
+      onnxruntime_USE_FULL_PROTOBUF: "OFF",
+      onnxruntime_USE_COREML: "OFF",
+      // Redirect FetchContent declarations to find_package() so declared
+      // dependencies are resolved from the build environment instead of
+      // being downloaded at configure time.
+      FETCHCONTENT_FULLY_DISCONNECTED: "ON",
+      FETCHCONTENT_TRY_FIND_PACKAGE_MODE: "ALWAYS",
+      FETCHCONTENT_SOURCE_DIR_MP11: std.tpl`${boost}`,
+      // Disable some warnings that are treated as errors
+      CMAKE_CXX_FLAGS: "-Wno-error=unused-variable -Wno-error=unused-result",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      CMAKE_PREFIX_PATH: { append: [{ path: "." }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libonnxruntime | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, onnxruntime)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

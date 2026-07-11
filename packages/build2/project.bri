@@ -4,7 +4,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "build2",
-  version: "0.17.0",
+  version: "0.18.1",
   repository: "https://github.com/build2/build2",
 };
 

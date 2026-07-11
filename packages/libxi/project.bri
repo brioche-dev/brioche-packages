@@ -9,7 +9,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxi",
-  version: "1.8.2",
+  version: "1.8.3",
 };
 
 const source = Brioche.download(

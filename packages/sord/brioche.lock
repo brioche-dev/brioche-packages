@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/drobilla/sord/archive/refs/tags/v0.16.22.tar.gz": {
+      "type": "sha256",
+      "value": "00a70c2b10b668599f5298ac6c1fff714cc83be02aa34c8643cdd995b411b8ae"
+    }
+  }
+}

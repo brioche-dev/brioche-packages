@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/pybind/pybind11.git": {
+      "v3.0.4": "d03662f0984f652b60e7ddce53d3868002275197"
+    }
+  }
+}

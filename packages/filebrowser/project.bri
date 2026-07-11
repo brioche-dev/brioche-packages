@@ -4,7 +4,7 @@ import pnpm, { pnpmInstall } from "pnpm";
 
 export const project = {
   name: "filebrowser",
-  version: "2.63.2",
+  version: "2.63.15",
   extra: {
     moduleName: "github.com/filebrowser/filebrowser/v2",
   },
@@ -20,19 +20,20 @@ export default function filebrowser(): std.Recipe<std.Directory> {
   // Install frontend dependencies and build the frontend
   const frontendWithDeps = pnpmInstall({
     source: std.castToDirectory(source.get("frontend")),
+    version: "10",
   });
 
   const frontendDist = std.runBash`
+    pnpm --config.manage-package-manager-versions=false config set manage-package-manager-versions=false
     pnpm run build
     mv dist "$BRIOCHE_OUTPUT"
   `
     .workDir(frontendWithDeps)
-    .dependencies(std.toolchain, pnpm)
+    .dependencies(std.toolchain, pnpm({ version: "10" }))
     .env({
       // Help the dynamic linker to find shared libraries at runtime.
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
     })
-    .unsafe({ networking: true })
     .toDirectory();
 
   // Build the Go binary with embedded frontend

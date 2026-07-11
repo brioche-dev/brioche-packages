@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/awesomized/libmemcached.git": {
+      "1.1.4": "92d18858b417309f6bdee6bce464a4f3d6a375fd"
+    }
+  }
+}

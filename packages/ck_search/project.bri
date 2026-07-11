@@ -1,40 +1,74 @@
 import * as std from "std";
+import abseilCpp from "abseil_cpp";
+import cpuinfo from "cpuinfo";
+import onnx from "onnx";
+import onnxruntime from "onnxruntime";
 import openssl from "openssl";
-import { cargoBuild } from "rust";
+import protobuf from "protobuf";
+import re2 from "re2";
+import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "ck_search",
-  version: "0.7.4",
+  version: "0.7.11",
   repository: "https://github.com/BeaconBay/ck.git",
 };
 
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.version,
-});
-
-// HACK: Disable the embedding features on aarch64-linux so that ort is not pulled
-// in, mirroring upstream's handling for platforms where ort cannot link
-// (https://github.com/BeaconBay/ck/commit/ed43e058). Semantic search is
-// unavailable there, but regex/lexical search still works.
-const embeddingFeaturesSupported = std.CURRENT_PLATFORM === "x86_64-linux";
+}).pipe((source) =>
+  // Patch the workspace's `fastembed` and `ort` deps to load the onnxruntime
+  // shared library at runtime via dlopen, instead of downloading prebuilt
+  // binaries at build time.
+  std.runBash`
+    sed -i \\
+      -e 's|ort-download-binaries|ort-load-dynamic|g' \\
+      -e 's|"download-binaries", "tls-native"|"load-dynamic", "tls-native"|g' \\
+      "$BRIOCHE_OUTPUT/Cargo.toml"
+    cargo update -p fastembed -p ort --manifest-path "$BRIOCHE_OUTPUT/Cargo.toml"
+  `
+    .dependencies(rust)
+    .unsafe({ networking: true })
+    .outputScaffold(source)
+    .toDirectory(),
+);
 
 export default function ckSearch(): std.Recipe<std.Directory> {
+  // Native libraries needed at runtime so the dynamic linker can find the
+  // shared libraries transitively required by libonnxruntime.
+  const dlopenLibs = [
+    std.toolchain,
+    onnxruntime,
+    onnx,
+    protobuf,
+    re2,
+    cpuinfo,
+    abseilCpp,
+  ];
+
   return cargoBuild({
     source,
     path: "ck-cli",
     dependencies: [openssl({ version: "3" })],
-    unsafe: embeddingFeaturesSupported
-      ? {
-          // Needed to run custom build command for 'ort-sys'
-          networking: true,
-        }
-      : undefined,
-    buildParams: embeddingFeaturesSupported
-      ? undefined
-      : { defaultFeatures: false },
-    runnable: "bin/ck",
-  });
+    env: {
+      ORT_LIB_LOCATION: std.tpl`${onnxruntime}/lib`,
+    },
+  })
+    .pipe((recipe) => recipe.insert("libexec/ck", recipe.get("bin/ck")))
+    .pipe((recipe) => recipe.remove("bin/ck"))
+    .pipe((recipe) =>
+      std.addRunnable(recipe, "bin/ck", {
+        command: { relativePath: "libexec/ck" },
+        env: {
+          // Help the dynamic linker to find shared libraries at runtime.
+          LD_LIBRARY_PATH: {
+            append: dlopenLibs.flatMap((lib) => [lib, "/lib", ":"]),
+            separator: ":",
+          },
+        },
+      }),
+    );
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {

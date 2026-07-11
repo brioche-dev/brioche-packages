@@ -46,7 +46,7 @@ let releases = http get --pool $'https://proxy.golang.org/($moduleName)/@v/list'
       | parse --regex $env.matchVersion
       | into record
   }
-  | where (($it | get -o version) | is-not-empty)
+  | where ($it.version? | is-not-empty)
   | sort-by --natural version
 
 if ($releases | is-empty) {

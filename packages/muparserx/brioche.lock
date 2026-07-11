@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/beltoforion/muparserx": {
+      "v4.0.12": "e1bdc2947e71ec8b30891749c1d807a3335ebd6d"
+    }
+  }
+}

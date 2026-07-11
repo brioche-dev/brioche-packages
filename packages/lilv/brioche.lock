@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://gitlab.com/lv2/lilv/-/archive/v0.28.0/lilv-v0.28.0.tar.bz2": {
+      "type": "sha256",
+      "value": "209452fc8b10c742e315d6309a0dcb95dcdaefc7fdd5e6e0ddd07c0326481794"
+    }
+  }
+}

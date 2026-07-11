@@ -163,7 +163,7 @@ function stringifyTable(obj: any, prefix = "") {
   return `${preamble}\n${tables}`.trim();
 }
 
-export function stringify(obj: any) {
+export function stringify(obj: unknown): string {
   if (extendedTypeOf(obj) !== "object") {
     throw new TypeError("stringify can only be called with an object");
   }

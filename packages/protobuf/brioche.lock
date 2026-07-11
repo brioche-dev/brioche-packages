@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/protocolbuffers/protobuf.git": {
+      "v35.1": "35cd01f9fe9afbeea38cc7b979a3b6bfcde82c03"
+    }
+  }
+}

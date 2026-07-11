@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://ftp.indexdata.com/pub/yaz/yaz-5.37.3.tar.gz": {
+      "type": "sha256",
+      "value": "975d7878b272cc999e5acbd02dc272a46607f95e6ee4f35ac655e8e4d333bf2b"
+    }
+  }
+}

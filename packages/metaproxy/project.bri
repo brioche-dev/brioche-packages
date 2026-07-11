@@ -1,0 +1,85 @@
+import * as std from "std";
+import boost from "boost";
+import gnutls from "gnutls";
+import libiconv from "libiconv";
+import libidn2 from "libidn2";
+import libmemcached from "libmemcached";
+import libtasn1 from "libtasn1";
+import libunistring from "libunistring";
+import libxml2 from "libxml2";
+import libxslt from "libxslt";
+import nettle from "nettle";
+import p11Kit from "p11_kit";
+import yaz from "yaz";
+import yazpp from "yazpp";
+
+export const project = {
+  name: "metaproxy",
+  version: "1.22.4",
+  repository: "https://github.com/indexdata/metaproxy",
+};
+
+const source = Brioche.download(
+  `https://ftp.indexdata.com/pub/metaproxy/metaproxy-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function metaproxy(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      boost,
+      gnutls,
+      libiconv,
+      libidn2,
+      libmemcached,
+      libtasn1,
+      libunistring,
+      libxml2,
+      libxslt,
+      nettle,
+      p11Kit,
+      yaz,
+      yazpp,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/metaproxy"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    metaproxy -V | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(metaproxy)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

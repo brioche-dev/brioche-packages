@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://deb.debian.org/debian/pool/main/m/minicom/minicom_2.11.1.orig.tar.bz2": {
+      "type": "sha256",
+      "value": "87cf0da91af0531357cd61b8e1906b907edd2c9ef82f9ae74c277e1893d0f98c"
+    }
+  }
+}
