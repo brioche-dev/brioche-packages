@@ -7,7 +7,7 @@ export { runNushell } from "./run_nushell.bri";
 
 export const project = {
   name: "nushell",
-  version: "0.113.1",
+  version: "0.114.1",
   repository: "https://github.com/nushell/nushell.git",
 };
 
@@ -36,7 +36,7 @@ function buildNushellPlugins(): std.Recipe<std.Directory>[] {
     },
     {
       name: "nu_plugin_gstat",
-      dependencies: [openssl({ version: "3" })],
+      dependencies: [openssl],
     },
     {
       name: "nu_plugin_inc",
@@ -46,17 +46,26 @@ function buildNushellPlugins(): std.Recipe<std.Directory>[] {
     },
     {
       name: "nu_plugin_query",
-      dependencies: [openssl({ version: "3" })],
+      dependencies: [openssl],
     },
   ];
 
-  return nushellPlugins.map((plugin: NushellPlugin) =>
-    cargoBuild({
-      source,
+  return nushellPlugins.map((plugin: NushellPlugin) => {
+    // HACK: Regenerate Cargo.lock to solve upstream issue with Rust 1.97+, see https://github.com/nlordell/ethnum-rs/pull/58
+    let pluginSource = source;
+    let unsafeGenerateLockfile = false;
+    if (plugin.name === "nu_plugin_polars") {
+      pluginSource = source.remove("Cargo.lock");
+      unsafeGenerateLockfile = true;
+    }
+
+    return cargoBuild({
+      source: pluginSource,
       path: `crates/${plugin.name}`,
       dependencies: plugin.dependencies ?? [],
-    }),
-  );
+      unsafeGenerateLockfile,
+    });
+  });
 }
 
 export default function nushell(): std.Recipe<std.Directory> {
