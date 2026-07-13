@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "traefik",
-  version: "3.7.1",
+  version: "3.7.5",
   repository: "https://github.com/traefik/traefik.git",
 };
 

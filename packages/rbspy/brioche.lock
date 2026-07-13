@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/rbspy/0.47.0/download": {
+    "https://crates.io/api/v1/crates/rbspy/0.48.0/download": {
       "type": "sha256",
-      "value": "b6ec6d06da00c4e2be52258c4ca95aee1be88f28c6f952ac70f10ab911eaa2cd"
+      "value": "0a4e1bb1e6a96fb6c99bb00e8e90e35b86289463a0d4b2103d2badda4df92267"
     }
   }
 }

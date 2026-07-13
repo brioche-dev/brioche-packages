@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-common": {
-      "v0.13.0": "7f18168e834b2abf276c6f92ae3b27af494fcca1"
+      "v0.14.0": "48dd6cdff7bac0005a9c6b49c15a0765622c0e70"
     }
   }
 }

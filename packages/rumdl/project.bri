@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "rumdl",
-  version: "0.1.92",
+  version: "0.2.16",
   repository: "https://github.com/rvben/rumdl.git",
 };
 

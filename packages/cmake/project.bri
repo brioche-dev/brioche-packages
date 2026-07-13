@@ -4,7 +4,7 @@ import curl from "curl";
 
 export const project = {
   name: "cmake",
-  version: "4.3.2",
+  version: "4.3.3",
   repository: "https://github.com/Kitware/CMake",
 };
 
@@ -412,7 +412,7 @@ const CMAKE_SANITIZE_PATHS_SCRIPT = std.indoc`
 /**
  * Create a recipe that replaces absolute paths in CMake config files.
  *
- * This performs three transformations:
+ * This performs these transformations:
  * - Replaces absolute library paths in `INTERFACE_LINK_LIBRARIES`,
  *   `IMPORTED_LINK_INTERFACE_LIBRARIES`, and
  *   `IMPORTED_LINK_DEPENDENT_LIBRARIES` with library names the linker

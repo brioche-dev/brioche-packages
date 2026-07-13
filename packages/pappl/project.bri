@@ -9,7 +9,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "pappl",
-  version: "1.4.10",
+  version: "1.4.11",
   repository: "https://github.com/michaelrsweet/pappl",
 };
 

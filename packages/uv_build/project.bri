@@ -1,0 +1,44 @@
+import * as std from "std";
+import { cargoBuild } from "rust";
+
+export const project = {
+  name: "uv_build",
+  version: "0.11.28",
+  extra: {
+    crateName: "uv-build",
+  },
+};
+
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function uvBuild(): std.Recipe<std.Directory> {
+  return cargoBuild({
+    source,
+    runnable: "bin/uv-build",
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    uv-build --help 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(uvBuild)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromRustCrates({ project });
+}

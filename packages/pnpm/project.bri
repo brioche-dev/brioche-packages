@@ -5,12 +5,12 @@ import nushell from "nushell";
 
 export const project = {
   name: "pnpm",
-  version: "11.1.2",
+  version: "11.7.0",
   repository: "https://github.com/pnpm/pnpm",
   extra: {
     otherVersions: {
-      "11": "11.1.2",
-      "10": "10.33.4",
+      "11": "11.7.0",
+      "10": "10.34.3",
     },
   },
 } as const;

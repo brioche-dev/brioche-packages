@@ -22,9 +22,9 @@ const source = Brioche.gitCheckout({
   // shared library at runtime via dlopen, instead of downloading prebuilt
   // binaries at build time.
   std.runBash`
-    sed -i \
-      -e 's|ort-download-binaries|ort-load-dynamic|g' \
-      -e 's|"download-binaries", "tls-native"|"load-dynamic", "tls-native"|g' \
+    sed -i \\
+      -e 's|ort-download-binaries|ort-load-dynamic|g' \\
+      -e 's|"download-binaries", "tls-native"|"load-dynamic", "tls-native"|g' \\
       "$BRIOCHE_OUTPUT/Cargo.toml"
     cargo update -p fastembed -p ort --manifest-path "$BRIOCHE_OUTPUT/Cargo.toml"
   `

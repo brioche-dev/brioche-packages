@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/pngquant/3.0.3/download": {
+      "type": "sha256",
+      "value": "68a12bdd8825f9989f4ee9a6ab0b42727dae57728b939ef63453366697a07232"
+    }
+  }
+}

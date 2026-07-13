@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/michaelrsweet/pappl/releases/download/v1.4.10/pappl-1.4.10.tar.gz": {
+    "https://github.com/michaelrsweet/pappl/releases/download/v1.4.11/pappl-1.4.11.tar.gz": {
       "type": "sha256",
-      "value": "d4322244093e6db8268cd1157219a017b530032b6c32fb803efc8278ac639d98"
+      "value": "8d944a3adab1d19d70148037aaf14edb22be2234a2d2eaef20557f0ba66b5e6a"
     }
   }
 }

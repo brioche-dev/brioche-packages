@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/danmar/cppcheck.git": {
-      "2.20.0": "502c802a69c78f3d8cfd9973aa2108ae169c73b5"
+      "2.21.0": "e73bf44c3e49686b7495fab352d03a6c6075516b"
     }
   }
 }

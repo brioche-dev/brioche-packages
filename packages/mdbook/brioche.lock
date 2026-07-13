@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/mdbook/0.5.2/download": {
+    "https://crates.io/api/v1/crates/mdbook/0.5.3/download": {
       "type": "sha256",
-      "value": "380f0dd1c54930692986cfe33221a2d34dbfb39c9e9325923c0f6bf7aee119a5"
+      "value": "742264af649df2323b283a4c1a8abc21b6f6880cf030d642500ef85c2ce81598"
     }
   }
 }

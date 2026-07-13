@@ -4,10 +4,10 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "nss",
-  version: "3.123.1",
+  version: "3.125",
   repository: "https://github.com/nss-dev/nss",
   extra: {
-    versionUnderscore: "3_123_1",
+    versionUnderscore: "3_125",
   },
 };
 
@@ -48,8 +48,7 @@ export default function nss(): std.Recipe<std.Directory> {
     cp -RL public/nss/* "$BRIOCHE_OUTPUT/include/nss/"
     cp -RL public/dbm/* "$BRIOCHE_OUTPUT/include/nss/"
     cp "$build_dir"/lib/*.so "$BRIOCHE_OUTPUT/lib/"
-    cp "$build_dir"/lib/*.chk "$BRIOCHE_OUTPUT/lib/" 2>/dev/null || true
-    cp "$build_dir"/lib/libcrmf.a "$BRIOCHE_OUTPUT/lib/"
+    cp "$build_dir"/lib/*.chk "$BRIOCHE_OUTPUT/lib/"
 
     # Generate nss-config from upstream template
     IFS='.' read -r major minor patch <<< "$nss_version"
