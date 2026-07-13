@@ -23,7 +23,7 @@ import x265 from "x265";
 
 export const project = {
   name: "imagemagick",
-  version: "7.1.2-25",
+  version: "7.1.2-27",
   repository: "https://github.com/ImageMagick/ImageMagick",
   extra: {
     majorVersion: "7",
@@ -36,7 +36,7 @@ std.assert(
 );
 
 const source = Brioche.download(
-  `https://imagemagick.org/archive/releases/ImageMagick-${project.version}.tar.xz`,
+  `https://download.imagemagick.org/archive/releases/ImageMagick-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
   .peel();

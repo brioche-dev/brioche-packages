@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://imagemagick.org/archive/releases/ImageMagick-7.1.2-25.tar.xz": {
+    "https://download.imagemagick.org/archive/releases/ImageMagick-7.1.2-27.tar.xz": {
       "type": "sha256",
-      "value": "2b2070802de374871737ff1a516b3d9d1e66643779b7ed9c52e2534db7772006"
+      "value": "005b177dd25f46c2458b543164f296d66ce97e6a7be1084529d25df527984813"
     }
   }
 }
