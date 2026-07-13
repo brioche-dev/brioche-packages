@@ -12,14 +12,14 @@ export const project = {
 };
 
 const pipDependencies = std.directory({
-  "setuptools-82.0.1-py3-none-any.whl": Brioche.download(
-    "https://files.pythonhosted.org/packages/9d/76/f789f7a86709c6b087c5a2f52f911838cad707cc613162401badc665acfe/setuptools-82.0.1-py3-none-any.whl",
+  "setuptools-83.0.0-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl`,
   ),
-  "setuptools_rust-1.12.1-py3-none-any.whl": Brioche.download(
-    "https://files.pythonhosted.org/packages/b7/29/c12876926be20e100527f541c792731ea09b995139aee9676eaacd1b751e/setuptools_rust-1.12.1-py3-none-any.whl",
+  "setuptools_rust-1.13.0-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/0b/80/909e46e684e47b116ed145bf2a1a8f5f7c9d90e8c3f8f7fce6a529c0068d/setuptools_rust-1.13.0-py3-none-any.whl`,
   ),
   "semantic_version-2.10.0-py2.py3-none-any.whl": Brioche.download(
-    "https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl",
+    `https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl`,
   ),
 });
 
