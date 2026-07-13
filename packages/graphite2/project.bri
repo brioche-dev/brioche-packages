@@ -18,9 +18,7 @@ export default function graphite2(): std.Recipe<std.Directory> {
     source,
     dependencies: [std.toolchain],
     set: {
-      // Required for building with CMake 3.5 or later
-      CMAKE_POLICY_VERSION_MINIMUM: "3.5",
-      GRAPHITE2_TESTS: "OFF",
+      BUILD_TESTING: "OFF",
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
