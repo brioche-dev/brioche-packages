@@ -5,12 +5,12 @@ import nushell from "nushell";
 
 export const project = {
   name: "pnpm",
-  version: "11.7.0",
+  version: "11.13.0",
   repository: "https://github.com/pnpm/pnpm",
   extra: {
     otherVersions: {
-      "11": "11.7.0",
-      "10": "10.34.3",
+      "11": "11.13.0",
+      "10": "10.34.5",
     },
   },
 } as const;
@@ -134,6 +134,10 @@ export function pnpmInstall(
         }),
         ...(options.dependencies ?? []),
       ],
+      env: {
+        // Ignore package manager version mismatches
+        pnpm_config_pm_on_fail: "ignore",
+      },
       currentDir: std.outputPath,
       outputScaffold: options.source,
       unsafe: { networking: true },

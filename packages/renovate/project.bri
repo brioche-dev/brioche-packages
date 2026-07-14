@@ -6,7 +6,7 @@ import { runNushell } from "nushell";
 
 export const project = {
   name: "renovate",
-  version: "43.180.1",
+  version: "43.263.0",
   repository: "https://github.com/renovatebot/renovate.git",
 };
 
@@ -19,8 +19,8 @@ export default function renovate(): std.Recipe<std.Directory> {
   // Pin to Node.js v24
   const nodejs = nodejsRecipe({ version: "24" });
 
-  // Pin pnpm to v10 since Renovate's `engines.pnpm` requires `^10.0.0`.
-  const pnpm = pnpmRecipe({ nodejs, version: "10" });
+  // Use pinned version of Node.js in pnpm
+  const pnpm = pnpmRecipe({ nodejs });
 
   // Install dependencies using pnpm
   // TODO: Can we get rid of dev dependencies (at least for the final output)?
@@ -28,23 +28,25 @@ export default function renovate(): std.Recipe<std.Directory> {
     source,
     dependencies: [python],
     nodejs,
-    version: "10",
   });
 
-  // Run the Renovate build. We explicitly update the config to use the
-  // provided version of pnpm instead of trying to download Renovate's
-  // pinned version.
+  // Run the build
   const dist = std.runBash`
     export LD_LIBRARY_PATH="$LIBRARY_PATH"
 
-    pnpm --config.manage-package-manager-versions=false config set manage-package-manager-versions=false
-    pnpm build
+    pnpm run build
     mv dist "$BRIOCHE_OUTPUT"
   `
     .workDir(npmPackage)
     // Rolldown (used by tsdown) dynamically loads `librt.so.1`, which
     // needs the toolchain libraries on the dynamic linker search path.
     .dependencies(std.toolchain, pnpm)
+    .env({
+      // Ignore package manager version mismatches
+      pnpm_config_pm_on_fail: "ignore",
+      // Disable auto-install before scripts
+      pnpm_config_verify_deps_before_run: "false",
+    })
     .toDirectory();
 
   // Set the release version number in `package.json`.
