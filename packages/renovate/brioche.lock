@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/renovatebot/renovate.git": {
-      "43.260.3": "0ca9a9703e13d587df997f69cefec33b31f0a5bb"
+      "43.263.0": "6e227979f73a6ab1d571eb98c8cf31e184e37344"
     }
   }
 }
