@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "texlab",
-  version: "5.25.1",
+  version: "5.26.0",
   repository: "https://github.com/latex-lsp/texlab.git",
 };
 
