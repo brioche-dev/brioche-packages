@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/tristanpenman/valijson.git": {
-      "v1.1.0": "b12841e3fa23a8cc477179face0a5ce5f80b64ab"
+      "v1.1.1": "a955b93d03706cff20ea8d05b188aca9432b5fc3"
     }
   }
 }
