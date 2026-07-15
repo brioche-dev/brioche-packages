@@ -16,7 +16,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_crt_cpp",
-  version: "0.40.1",
+  version: "0.41.0",
   repository: "https://github.com/awslabs/aws-crt-cpp",
 };
 
