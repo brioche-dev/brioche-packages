@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/kuba--/zip": {
-      "v0.3.11": "66d5a4098ffe0a859238fd3b2e6c6d772884fd8c"
+      "v0.3.14+miniz.3.1.1": "0230fd900b9f18c770b02c887d0395aebf1d8ea5"
     }
   }
 }
