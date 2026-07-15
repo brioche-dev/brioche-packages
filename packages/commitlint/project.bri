@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "commitlint",
-  version: "21.0.2",
+  version: "21.2.1",
   extra: {
     packageName: "@commitlint/cli",
   },
