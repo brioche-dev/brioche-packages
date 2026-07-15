@@ -3,11 +3,11 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "7zip",
-  version: "26.01",
+  version: "26.02",
   repository: "https://github.com/ip7z/7zip",
   extra: {
     majorVersion: "26",
-    minorVersion: "01",
+    minorVersion: "02",
   },
 };
 
