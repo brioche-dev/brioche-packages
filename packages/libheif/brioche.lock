@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/strukturag/libheif/releases/download/v1.23.0/libheif-1.23.0.tar.gz": {
+    "https://github.com/strukturag/libheif/releases/download/v1.23.1/libheif-1.23.1.tar.gz": {
       "type": "sha256",
-      "value": "4c9182b18897617182eed12ab5eb9f9d855b3aa3a736d6bdb31abc034ec7d393"
+      "value": "0de0327f60fcd47de90d5654c6fe152232738d60d84fe084ec3e0f35e03b166a"
     }
   }
 }
