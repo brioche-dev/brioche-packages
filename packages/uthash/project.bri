@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "uthash",
-  version: "2.3.0",
+  version: "2.4.0",
   repository: "https://github.com/troydhanson/uthash",
 };
 
