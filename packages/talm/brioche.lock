@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/cozystack/talm/@v/v0.31.0.zip": {
+    "https://proxy.golang.org/github.com/cozystack/talm/@v/v0.33.1.zip": {
       "type": "sha256",
-      "value": "8407d8cb163bceb7f6ff2ab4996689c5dd742291e0f18ddd7828f99531705c30"
+      "value": "36437b260be344b66ba2acf1818b2e73b55143240b15823ed7a7f48373cf92a3"
     }
   }
 }
