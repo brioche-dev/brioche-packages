@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-sdkutils": {
-      "v0.2.5": "c70418c17d8f970ff1d80d88d08beeccd425a887"
+      "v0.2.7": "cb14fea362c82c995eebd34e2e96590ab4e0ed58"
     }
   }
 }
