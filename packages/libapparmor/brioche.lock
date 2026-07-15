@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://gitlab.com/apparmor/apparmor": {
-      "v5.0.1": "13b33b8dc203760dd5f17dbffc583cc4eee85666"
+      "v5.0.2": "909affc32a13d14ae3a7ccf44d325ae63ce11baf"
     }
   }
 }
