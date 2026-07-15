@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/imessage-exporter/4.1.0/download": {
+    "https://crates.io/api/v1/crates/imessage-exporter/4.2.0/download": {
       "type": "sha256",
-      "value": "2a2b52b96497eedd8393c1665175eb11608d12bb9253b863e85905989c349c5b"
+      "value": "05ef3af8141630615d09ef84b0fe8098394661cf188bf5a986eab9513af7b545"
     }
   }
 }
