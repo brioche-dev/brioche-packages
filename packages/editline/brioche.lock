@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/troglobit/editline": {
-      "1.17.1": "ecabef273ebf4193c5d6aff196de1c204169bc52"
+      "2.1.0": "79c39d2756d02db6887b4669c45cce0eae05f9c8"
     }
   }
 }

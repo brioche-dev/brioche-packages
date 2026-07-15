@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "editline",
-  version: "1.17.1",
+  version: "2.1.0",
   repository: "https://github.com/troglobit/editline",
 };
 
