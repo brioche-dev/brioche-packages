@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/facebook/mvfst/archive/refs/tags/v2026.06.15.00.tar.gz": {
+    "https://github.com/facebook/mvfst/archive/refs/tags/v2026.07.13.00.tar.gz": {
       "type": "sha256",
-      "value": "647934c11a5f6eb5276870ef31985f13088df234a51ea6561440e9c990ae53a1"
+      "value": "ee7273a219317f992551ef9f4b0f05ec826288720aa2fe08154f192e2ce32ed9"
     }
   }
 }
