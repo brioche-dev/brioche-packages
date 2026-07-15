@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/hatoo/oha.git": {
-      "v1.14.0": "9766ca2b725b69b7606b99861d01c779b4aeb65d"
+      "v1.15.0": "b8cd846806b4ddefdd447f5f9f95a66ac22146a4"
     }
   }
 }
