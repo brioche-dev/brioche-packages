@@ -5,7 +5,7 @@ import python from "python";
 
 export const project = {
   name: "ocaml",
-  version: "5.4.1",
+  version: "5.5.0",
   repository: "https://github.com/ocaml/ocaml",
 };
 
