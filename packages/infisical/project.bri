@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "infisical",
-  version: "0.43.93",
+  version: "0.43.106",
   repository: "https://github.com/Infisical/cli.git",
 };
 
