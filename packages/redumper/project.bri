@@ -5,7 +5,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "redumper",
-  version: "724",
+  version: "732",
   repository: "https://github.com/superg/redumper.git",
 };
 
