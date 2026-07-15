@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "libseccomp",
-  version: "2.6.0",
+  version: "2.6.1",
   repository: "https://github.com/seccomp/libseccomp",
 };
 
