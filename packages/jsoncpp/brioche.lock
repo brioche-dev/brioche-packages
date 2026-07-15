@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/open-source-parsers/jsoncpp": {
-      "1.9.7": "3455302847cf1e4671f1d8f5fa953fd46a7b1404"
+      "1.9.8": "8519b8381f3c741ad1421f88237b1deda0b11412"
     }
   }
 }
