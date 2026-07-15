@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "yoke",
-  version: "0.20.18",
+  version: "0.20.21",
   extra: {
     moduleName: "github.com/yokecd/yoke",
   },
