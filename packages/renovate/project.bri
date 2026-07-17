@@ -6,7 +6,7 @@ import { runNushell } from "nushell";
 
 export const project = {
   name: "renovate",
-  version: "43.263.0",
+  version: "43.263.7",
   repository: "https://github.com/renovatebot/renovate.git",
 };
 
