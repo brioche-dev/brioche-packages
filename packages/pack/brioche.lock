@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/buildpacks/pack/@v/v0.40.6.zip": {
+    "https://proxy.golang.org/github.com/buildpacks/pack/@v/v0.40.8.zip": {
       "type": "sha256",
-      "value": "a764982f519d610f9c6febea2343e569e704983a78e6c333b0d7a9384cb2f5b7"
+      "value": "cc64e768002145de2eed06566f962de240029ae6c6f11756fdf2482f5fe3abe6"
     }
   }
 }
