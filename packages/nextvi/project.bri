@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "nextvi",
-  version: "5.3",
+  version: "7.0",
   repository: "https://github.com/kyx0r/nextvi",
 };
 
