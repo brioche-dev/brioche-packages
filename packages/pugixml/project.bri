@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "pugixml",
-  version: "1.15",
+  version: "1.16",
   repository: "https://github.com/zeux/pugixml",
 };
 
