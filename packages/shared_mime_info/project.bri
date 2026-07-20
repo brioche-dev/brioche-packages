@@ -24,6 +24,7 @@ export default function sharedMimeInfo(): std.Recipe<std.Directory> {
     set: {
       "build-tools": "true",
       "build-tests": "false",
+      "build-spec": "false",
       "update-mimedb": "false",
     },
     runnable: "bin/update-mime-database",
