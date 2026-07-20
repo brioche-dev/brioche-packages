@@ -17,6 +17,10 @@ export default function oxlint(): std.Recipe<std.Directory> {
     source,
     path: "apps/oxlint",
     runnable: "bin/oxlint",
+
+    // cargo-chef makes the lockfile out-of-date, see this issue:
+    // https://github.com/LukeMathWalker/cargo-chef/issues/305
+    cargoChefPrepare: false,
   });
 }
 
