@@ -7,7 +7,7 @@ import pcre2 from "pcre2";
 
 export const project = {
   name: "shared_mime_info",
-  version: "2.4",
+  version: "2.5.1",
   repository: "https://gitlab.freedesktop.org/xdg/shared-mime-info",
 };
 
@@ -24,6 +24,7 @@ export default function sharedMimeInfo(): std.Recipe<std.Directory> {
     set: {
       "build-tools": "true",
       "build-tests": "false",
+      "build-spec": "false",
       "update-mimedb": "false",
     },
     runnable: "bin/update-mime-database",
