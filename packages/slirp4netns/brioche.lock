@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/rootless-containers/slirp4netns/archive/refs/tags/v1.3.4.tar.gz": {
+      "type": "sha256",
+      "value": "c8e445deded09c5e777af3c599f808b3d0cbfeab482d9e76746df0926234200d"
+    }
+  }
+}
