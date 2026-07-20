@@ -1,0 +1,66 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libmnl from "libmnl";
+
+export const project = {
+  name: "libnftnl",
+  version: "1.3.1",
+};
+
+const source = Brioche.download(
+  `https://netfilter.org/pub/libnftnl/libnftnl-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function libnftnl(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libmnl)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libnftnl | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libnftnl)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/libnftnl
+      | lines
+      | where ($it | str contains "libnftnl") and (not ($it | str contains "sig")) and (not ($it | str contains "md5sum")) and (not ($it | str contains "sha1sum"))
+      | parse --regex '<a href="libnftnl-(?<version>.+)\\.tar\\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
