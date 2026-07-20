@@ -16,7 +16,7 @@ import safeint from "safeint";
 
 export const project = {
   name: "onnxruntime",
-  version: "1.26.0",
+  version: "1.27.1",
   repository: "https://github.com/microsoft/onnxruntime.git",
 };
 
