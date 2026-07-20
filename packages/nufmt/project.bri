@@ -7,7 +7,7 @@ export const project = {
   version: "0.1.4",
   repository: "https://github.com/nushell/nufmt.git",
   extra: {
-    gitRef: "a24c2b1bc7f573b1a8b2c4a453e989407a4d29c8",
+    gitRef: "1a43bfdf209288c0683e3c1e5a047511e1d7f8b3",
   },
 };
 
