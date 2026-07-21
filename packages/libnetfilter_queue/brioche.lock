@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://netfilter.org/pub/libnetfilter_queue/libnetfilter_queue-1.0.5.tar.bz2": {
+      "type": "sha256",
+      "value": "f9ff3c11305d6e03d81405957bdc11aea18e0d315c3e3f48da53a24ba251b9f5"
+    }
+  }
+}
