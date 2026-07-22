@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/libbpf/libbpf": {
+      "v1.7.0": "f5dcbae736e5d7f83a35718e01be1a8e3010fa39"
+    }
+  }
+}
