@@ -17,7 +17,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "lighttpd",
-  version: "1.4.83",
+  version: "1.4.85",
   repository: "https://github.com/lighttpd/lighttpd1.4",
 };
 
