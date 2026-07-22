@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://monkeysaudio.com/files/MAC_1304_SDK.zip": {
+    "https://monkeysaudio.com/files/MAC_1318_SDK.zip": {
       "type": "sha256",
-      "value": "5082cc873dce3b77cdf294e2ccf9e54a326aa6e9f0c3fc8a05cfaacab5744afc"
+      "value": "39cbcdbaf7f3e47cde7cfcb671b7a52ba05ee04c91a986d3eca6a653489c6954"
     }
   }
 }
