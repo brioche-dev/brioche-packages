@@ -4,12 +4,12 @@ import python from "python";
 
 export const project = {
   name: "mbedtls",
-  version: "4.1.0",
+  version: "4.2.0",
   repository: "https://github.com/Mbed-TLS/mbedtls",
   extra: {
     otherVersions: {
-      "4": "4.1.0",
-      "3": "3.6.6",
+      "4": "4.2.0",
+      "3": "3.6.7",
     },
   },
 } as const;
