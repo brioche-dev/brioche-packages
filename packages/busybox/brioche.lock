@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://busybox.net/downloads/busybox-1.38.0.tar.bz2": {
+      "type": "sha256",
+      "value": "34f9ea6ff8636f2c9241153b9114eefa9e65674a45318ae1ef95bb5f31c53bb2"
+    }
+  }
+}
