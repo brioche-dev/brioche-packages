@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/KhronosGroup/glslang": {
-      "16.3.0": "275822a6261ee689aadb1da5f09a0ec2f058685c"
+      "16.4.0": "168d452a4f460d24b588fed08477a81c44ee27a1"
     }
   }
 }
