@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "kubazip",
-  version: "0.3.11",
+  version: "0.3.14+miniz.3.1.1",
   repository: "https://github.com/kuba--/zip",
 };
 
