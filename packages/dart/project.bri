@@ -244,7 +244,7 @@ export function dartBuild(
     .dependencies(dart, ...(options.dependencies ?? []))
     .env({
       PUB_CACHE: pubCache,
-      verbose: options.buildParams?.verbose ?? false ? "true" : "false",
+      verbose: (options.buildParams?.verbose ?? false) ? "true" : "false",
       DEFINES_ARGS: definesWrapper(options.buildParams?.defines ?? {}),
       entrypoint,
       output,
