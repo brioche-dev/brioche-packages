@@ -13,7 +13,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libjxl",
-  version: "0.11.2",
+  version: "0.12.0",
   repository: "https://github.com/libjxl/libjxl",
 };
 
