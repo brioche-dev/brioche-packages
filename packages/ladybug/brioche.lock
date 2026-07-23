@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/LadybugDB/ladybug.git": {
-      "v0.17.1": "bbaada1ea84dd5f60ecadbafd1b9aceb30d053a0"
+      "v0.18.1": "1354081eb5528b3ca12e38dd4402cdd47215e57a"
     }
   }
 }
