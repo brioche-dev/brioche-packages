@@ -6,7 +6,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "mongo_cxx_driver",
-  version: "4.4.0",
+  version: "4.4.1",
   repository: "https://github.com/mongodb/mongo-cxx-driver",
 };
 
@@ -37,7 +37,7 @@ export default function mongoCxxDriver(): std.Recipe<std.Directory> {
 
 export async function test(): Promise<std.Recipe<std.File>> {
   const script = std.runBash`
-    pkg-config --modversion libmongocxx | tee "$BRIOCHE_OUTPUT"
+    pkg-config --modversion libmongocxx1 | tee "$BRIOCHE_OUTPUT"
   `
     .dependencies(std.toolchain, mongoCxxDriver)
     .toFile();
