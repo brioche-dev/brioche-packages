@@ -5,7 +5,7 @@ import libudevZero from "libudev_zero";
 
 export const project = {
   name: "fnox",
-  version: "1.26.0",
+  version: "1.30.0",
   repository: "https://github.com/jdx/fnox.git",
 };
 
