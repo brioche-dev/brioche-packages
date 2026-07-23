@@ -266,8 +266,6 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
     .dependencies(go, ...(options.dependencies ?? []))
     .env({
       GOMODCACHE: modules,
-      GOPROXY: "off",
-      GOSUMDB: "off",
       GOBIN: std.tpl`${std.outputPath}/bin`,
       go_generate: options.buildParams?.generate ?? false ? "true" : "false",
       ldflags: ldflagsWrapper(options.buildParams?.ldflags ?? []),
@@ -280,51 +278,32 @@ export function goBuild(options: GoBuildOptions): std.Recipe<std.Directory> {
     .pipe((recipe) => std.withRunnableLink(recipe, options.runnable));
 }
 
-/**
- * Download the full module closure for a Go module into a module cache.
- */
 function goModDownload(
   goModule: std.RecipeLike<std.Directory>,
   currentDir: string | undefined,
 ): std.Recipe<std.Directory> {
   // Includes all the modules in the specified directory and its subdirectories
   // If a workspace file exists also include it
-  const workDir = std.glob(goModule, [
-    "**/go.mod",
-    "**/go.sum",
-    "**/go.work",
-    "**/go.work.sum",
-  ]);
-
-  // `go mod graph` reads .mod files for the full module graph from the
-  // network on a fresh build.
-  const moduleListFile = std.runBash`
-      go mod graph | tr ' ' '\n' | sort -u | grep -vE '^(go@|toolchain@|golang\.org/toolchain@)' > "$BRIOCHE_OUTPUT"
-    `
-    .workDir(workDir)
-    .currentDir(std.tpl`${std.workDir}/${currentDir}`)
-    .dependencies(go)
-    .unsafe({ networking: true })
-    .toFile();
-
-  return (
-    std.runBash`
-      xargs go mod download < "$module_list"
-      go mod download all
-    `
-      .workDir(workDir)
-      .currentDir(std.tpl`${std.workDir}/${currentDir}`)
-      .dependencies(go)
-      .env({
+  return std
+    .process({
+      command: std.tpl`${go}/bin/go`,
+      args: ["mod", "download", "all"],
+      workDir: std.glob(goModule, [
+        "**/go.mod",
+        "**/go.sum",
+        "**/go.work",
+        "**/go.work.sum",
+      ]),
+      currentDir: std.tpl`${std.workDir}/${currentDir}`,
+      env: {
         GOMODCACHE: std.outputPath,
-        module_list: moduleListFile,
-      })
+      },
       // Ensure the output directory exists even when there are no dependencies,
       // as `go mod download` would not create it
-      .outputScaffold(std.directory())
-      .unsafe({ networking: true })
-      .toDirectory()
-  );
+      outputScaffold: std.directory(),
+      unsafe: { networking: true },
+    })
+    .toDirectory();
 }
 
 /**
