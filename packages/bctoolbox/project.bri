@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "bctoolbox",
-  version: "5.4.121",
+  version: "5.4.124",
   repository: "https://github.com/BelledonneCommunications/bctoolbox.git",
 };
 
