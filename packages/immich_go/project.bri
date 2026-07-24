@@ -4,7 +4,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "immich_go",
-  version: "0.31.0",
+  version: "0.32.0",
   repository: "https://github.com/simulot/immich-go.git",
   extra: {
     moduleName: "github.com/simulot/immich-go",
