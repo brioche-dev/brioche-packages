@@ -15,7 +15,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libva",
-  version: "2.23.0",
+  version: "2.24.1",
   repository: "https://github.com/intel/libva",
 };
 
