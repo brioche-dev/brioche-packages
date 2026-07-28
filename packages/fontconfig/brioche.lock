@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/archive/2.18.1/fontconfig-2.18.1.tar.bz2": {
+    "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/archive/2.18.2/fontconfig-2.18.2.tar.bz2": {
       "type": "sha256",
-      "value": "200e01dec62e94adde5a0d221b0fa21fde06110c814701046c101655bb61363e"
+      "value": "34d612edc4a1ed7aa032fc0b9ab7ca52803032f94b1a47e37ee5d49a1db4cbeb"
     }
   }
 }
