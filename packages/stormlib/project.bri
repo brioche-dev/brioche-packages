@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "stormlib",
-  version: "9.31",
+  version: "9.40",
   repository: "https://github.com/ladislav-zezula/StormLib",
 };
 

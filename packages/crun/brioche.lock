@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/containers/crun/releases/download/1.28/crun-1.28.tar.gz": {
+      "type": "sha256",
+      "value": "eb8fe73ffe44d868b14bb94fa6c295bd57e8bf023de43b61579da826c07cc406"
+    }
+  }
+}

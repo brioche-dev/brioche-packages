@@ -1,0 +1,77 @@
+import * as std from "std";
+import libtommath from "libtommath";
+
+export const project = {
+  name: "libtomcrypt",
+  version: "1.18.2",
+  repository: "https://github.com/libtom/libtomcrypt",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
+export default function libtomcrypt(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make \\
+      CFLAGS="-DUSE_LTM -DLTM_DESC" \\
+      EXTRALIBS="-ltommath" \\
+      -j "$(nproc)"
+
+    # Manual installation
+    cp libtomcrypt.a "$BRIOCHE_OUTPUT/lib/libtomcrypt.a"
+    cp src/headers/tomcrypt*.h "$BRIOCHE_OUTPUT/include/"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libtommath)
+    .outputScaffold(
+      std.directory({
+        lib: std.directory(),
+        include: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <tomcrypt.h>
+
+      int main(void)
+      {
+          printf("%s", SCRYPT);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -ltomcrypt -ltommath -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libtomcrypt, libtommath)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

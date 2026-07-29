@@ -1,0 +1,95 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "lodepng",
+  version: "20260119",
+  repository: "https://github.com/lvandeve/lodepng",
+  extra: {
+    gitRef: "ed6fe5825c6a4fbb7f58ab35a4231c7543cd452a",
+  },
+};
+
+// No tags or releases published yet, pin to the latest commit.
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.extra.gitRef,
+});
+
+export default function lodepng(): std.Recipe<std.Directory> {
+  return std.runBash`
+    c++ -I. -ansi -pedantic -O2 -fPIC -c lodepng.cpp -o lodepng.o
+    ar rcs liblodepng.a lodepng.o
+    c++ -shared -Wl,-soname,liblodepng.so -o liblodepng.so lodepng.o
+
+    # Manual installation
+    cp lodepng.h "$BRIOCHE_OUTPUT/include/"
+    cp liblodepng.a liblodepng.so "$BRIOCHE_OUTPUT/lib/"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .outputScaffold(
+      std.directory({
+        include: std.directory(),
+        lib: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <lodepng.h>
+
+      int main(void)
+      {
+          printf("%s", LODEPNG_VERSION_STRING);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    c++ main.c -llodepng -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, lodepng)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let response = http get https://api.github.com/repos/lvandeve/lodepng/commits/master
+    let gitRef = $response.sha
+    let url = $"https://raw.githubusercontent.com/lvandeve/lodepng/($gitRef)/lodepng.h"
+    let version = http get $url
+      | lines
+      | where ($it | str contains "LodePNG version")
+      | parse --regex 'LodePNG version (?<version>\\d+)'
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.gitRef $gitRef
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

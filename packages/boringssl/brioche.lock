@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/google/boringssl/releases/download/0.20260616.0/boringssl-0.20260616.0.tar.gz": {
+      "type": "sha256",
+      "value": "d1c599485fd1919d75ea2925af5fff81c1d5b21ab2f0d41fee1f788b1d917159"
+    }
+  }
+}

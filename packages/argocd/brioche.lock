@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/argoproj/argo-cd": {
-      "v3.4.2": "0dc6b1b57dd5bb925d5b03c3d09419ab9fb4225e"
+      "v3.4.3": "1801122b4391cad4961301f787006dc9a88c2dd3"
     }
   }
 }

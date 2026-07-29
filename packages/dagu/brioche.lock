@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/dagucloud/dagu": {
+      "v2.8.2": "9b6a7ff13010b1253cb9b161bf901eb6f24ece71"
+    }
+  }
+}

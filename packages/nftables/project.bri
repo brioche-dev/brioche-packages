@@ -1,0 +1,79 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import jansson from "jansson";
+import libedit from "libedit";
+import libmnl from "libmnl";
+import libnftnl from "libnftnl";
+
+export const project = {
+  name: "nftables",
+  version: "1.1.6",
+};
+
+const source = Brioche.download(
+  `https://www.netfilter.org/pub/nftables/nftables-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function nftables(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, jansson, libedit, libmnl, libnftnl)
+    .env({
+      // Fix a syntax error 'Bad for loop variable' in configure script
+      CONFIG_SHELL: "bash",
+    })
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nft"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    nft --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nftables)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `nftables v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/nftables
+      | lines
+      | where ($it | str contains "nftables") and (not ($it | str contains "sig")) and (not ($it | str contains "md5sum")) and (not ($it | str contains "sha1sum"))
+      | parse --regex '<a href="nftables-(?<version>.+)\.tar\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

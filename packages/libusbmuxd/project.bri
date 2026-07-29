@@ -1,0 +1,58 @@
+import * as std from "std";
+import libimobiledeviceGlue from "libimobiledevice_glue";
+import libplist from "libplist";
+
+export const project = {
+  name: "libusbmuxd",
+  version: "2.1.1",
+  repository: "https://github.com/libimobiledevice/libusbmuxd",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/libusbmuxd-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function libusbmuxd(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libplist, libimobiledeviceGlue)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libusbmuxd-2.0 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libusbmuxd)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

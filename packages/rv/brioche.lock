@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/spinel-coop/rv.git": {
-      "v0.5.3": "649a873df3afd1b4c3f10ebea8fed03a3f20582b"
+      "v0.6.0": "af9ebbd71418397cc4e709fafccc44586a91f2e4"
     }
   }
 }

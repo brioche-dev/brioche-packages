@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/rest-sh/restish/@v/v0.21.2.zip": {
+    "https://proxy.golang.org/github.com/rest-sh/restish/v2/@v/v2.3.0.zip": {
       "type": "sha256",
-      "value": "efec03a480bf96a767f1918cf0b612cbdebcb1bfedfec0fc9629de85182993e0"
+      "value": "a36f7dad3075c281b2bf8a534256b7841c664e96ed200c340cd05560b873772c"
     }
   }
 }

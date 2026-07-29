@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/depot/cli.git": {
-      "v2.101.62": "e984dcf6e498c29edc0451fb3070f69e9693d808"
+      "v2.101.65": "e62545c7f15a151c698e325af38b4fa07edcbea7"
     }
   }
 }

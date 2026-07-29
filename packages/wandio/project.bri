@@ -9,7 +9,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "wandio",
-  version: "4.2.6-1",
+  version: "4.2.7-1",
   repository: "https://github.com/LibtraceTeam/wandio",
 };
 

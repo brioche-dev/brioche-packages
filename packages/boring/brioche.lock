@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/alebeck/boring/@v/v0.16.0.info": {
+      "type": "sha256",
+      "value": "393900853176df2c3021d11d7c19dd8213f7e0ae95c16a3b085e7293e18f78af"
+    },
+    "https://proxy.golang.org/github.com/alebeck/boring/@v/v0.16.0.zip": {
+      "type": "sha256",
+      "value": "4b8d3c8c6dd9e20cdf7dfada944ba86b00998525691780f05b9d0ac62ac3fdfd"
+    }
+  }
+}

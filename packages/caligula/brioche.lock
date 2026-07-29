@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/ifd3f/caligula.git": {
-      "v0.4.11": "dc67e58cdb6ea2bdb95c4e410d07087b67682374"
+      "v0.5.0": "4babf06a448a890a36cd2a473dd4197edc36a2cd"
     }
   }
 }

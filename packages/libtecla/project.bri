@@ -1,0 +1,119 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "libtecla",
+  version: "1.6.3",
+};
+
+const source = Brioche.download(
+  `https://www.astro.caltech.edu/~mcs/tecla/libtecla-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel()
+  .pipe((source) =>
+    // Bundled config.guess does not recognize aarch64
+    std.runBash`
+      cp "$(automake --print-libdir)/config.guess" "$BRIOCHE_OUTPUT/config.guess"
+      cp "$(automake --print-libdir)/config.sub" "$BRIOCHE_OUTPUT/config.sub"
+    `
+      .dependencies(std.toolchain)
+      .outputScaffold(source)
+      .toDirectory(),
+  )
+  .pipe((source) =>
+    // Switch from bare $LD to $CC and route linker-only flags through
+    // -Wl, so the compiler driver handles them.
+    std.runBash`
+      sed -i "$BRIOCHE_OUTPUT/configure" \\
+        -e 's|--version-script=|-Wl,--version-script=|g' \\
+        -e 's| -soname | -Wl,-soname |g' \\
+        -e 's|LINK_SHARED="$LD"|LINK_SHARED="$CC"|'
+    `
+      .dependencies(std.toolchain)
+      .outputScaffold(source)
+      .toDirectory(),
+  )
+  .pipe((source) =>
+    // Point the install paths at $(DESTDIR) so make install writes
+    // under the brioche output directory.
+    std.runBash`
+      sed -i "$BRIOCHE_OUTPUT/Makefile.in" \\
+        -e 's|^prefix=.*|prefix=\$(DESTDIR)|' \\
+        -e 's|^exec_prefix=.*|exec_prefix=\$(DESTDIR)|' \\
+        -e 's|^LIBDIR=.*|LIBDIR=\$(DESTDIR)/lib|' \\
+        -e 's|^INCDIR=.*|INCDIR=\$(DESTDIR)/include|' \\
+        -e 's|^MANDIR=.*|MANDIR=\$(DESTDIR)/share/man|' \\
+        -e 's|^BINDIR=.*|BINDIR=\$(DESTDIR)/bin|'
+    `
+      .dependencies(std.toolchain)
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function libtecla(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure --prefix=/
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/enhance"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const src = std.directory({
+    "main.c": std.file(std.indoc`
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include "libtecla.h"
+
+      int main(void)
+      {
+          int major, minor, micro;
+          libtecla_version(&major, &minor, &micro);
+          printf("%d.%d.%d", major, minor, micro);
+          return EXIT_SUCCESS;
+      }
+    `),
+  });
+
+  const script = std.runBash`
+    cc main.c -ltecla -o main
+    ./main | tee "$BRIOCHE_OUTPUT"
+  `
+    .workDir(src)
+    .dependencies(std.toolchain, libtecla)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://www.astro.caltech.edu/~mcs/tecla/
+      | lines
+      | parse --regex '<a href="libtecla-(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

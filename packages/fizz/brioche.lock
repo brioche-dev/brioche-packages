@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/facebookincubator/fizz/archive/refs/tags/v2026.05.11.00.tar.gz": {
+    "https://github.com/facebookincubator/fizz/archive/refs/tags/v2026.06.15.00.tar.gz": {
       "type": "sha256",
-      "value": "61268243fd017ddfc956627950783e2d2aa2aa21f253cd8d40c84340b0bb8e9e"
+      "value": "6f14e7c83ae846eb9f99f242cf1b6a89a9e065fac6982d06990523e7a2e10d6b"
     }
   }
 }

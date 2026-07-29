@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "typst",
-  version: "0.14.2",
+  version: "0.15.0",
   extra: {
     crateName: "typst-cli",
   },

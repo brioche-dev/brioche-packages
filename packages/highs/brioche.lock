@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/ERGO-Code/HiGHS.git": {
-      "v1.14.0": "7df0786de3088c832297e5ed821db236d8fab281"
+      "v1.15.1": "04024d701f79feb8e2f18bc3df0dffc04ef05088"
     }
   }
 }

@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/securego/gosec/v2/@v/v2.26.1.info": {
+    "https://proxy.golang.org/github.com/securego/gosec/v2/@v/v2.27.1.info": {
       "type": "sha256",
-      "value": "bd2f2f5ba1873031b64917e0255c2bd7683fcbe6b37de2aa0d3a4cfb12b69bb6"
+      "value": "01f60cb33bc86f2ad05c9dc248a824f1b136ad8b9e6baa2e86ace16ad7c01a9c"
     },
-    "https://proxy.golang.org/github.com/securego/gosec/v2/@v/v2.26.1.zip": {
+    "https://proxy.golang.org/github.com/securego/gosec/v2/@v/v2.27.1.zip": {
       "type": "sha256",
-      "value": "b5bb601a781e59d69b635ee8b452dbf4311e05c07e9e75653e3826b8a5f4bc99"
+      "value": "b00694e995b879b0fe33ce2e173bcc27fc4ca27e6cb9a478b8ad0eb22598e222"
     }
   }
 }

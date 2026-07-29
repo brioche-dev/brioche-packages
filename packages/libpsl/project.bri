@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "libpsl",
-  version: "0.21.5",
+  version: "0.23.0",
   repository: "https://github.com/rockdaboot/libpsl",
 };
 

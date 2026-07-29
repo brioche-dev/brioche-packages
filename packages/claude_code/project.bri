@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "claude_code",
-  version: "2.1.142",
+  version: "2.1.177",
   extra: {
     packageName: "@anthropic-ai/claude-code",
   },

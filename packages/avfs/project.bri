@@ -18,12 +18,12 @@ const source = Brioche.download(
 
 export default function avfs(): std.Recipe<std.Directory> {
   return std.runBash`
-    ./configure \
-      --prefix=/ \
-      --enable-fuse \
-      --enable-library \
-      --with-system-zlib \
-      --with-system-bzlib \
+    ./configure \\
+      --prefix=/ \\
+      --enable-fuse \\
+      --enable-library \\
+      --with-system-zlib \\
+      --with-system-bzlib \\
       --with-xz
     make -j "$(nproc)"
     make install DESTDIR="$BRIOCHE_OUTPUT"

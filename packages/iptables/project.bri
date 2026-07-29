@@ -1,0 +1,82 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libmnl from "libmnl";
+import libnetfilter_conntrack from "libnetfilter_conntrack";
+import libnfnetlink from "libnfnetlink";
+import libnftnl from "libnftnl";
+
+export const project = {
+  name: "iptables",
+  version: "1.8.13",
+};
+
+const source = Brioche.download(
+  `https://netfilter.org/pub/iptables/iptables-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function iptables(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin \\
+      --with-xtables=nft
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      libmnl,
+      libnetfilter_conntrack,
+      libnfnetlink,
+      libnftnl,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/iptables"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    iptables --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(iptables)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `v${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected ${expected}, got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/iptables
+      | lines
+      | where ($it | str contains "iptables-") and (not ($it | str contains "sig")) and (not ($it | str contains "md5sum")) and (not ($it | str contains "sha1sum")) and (not ($it | str contains "alpha")) and (not ($it | str contains "beta"))
+      | parse --regex '<a href="iptables-(?<version>[\\d.]+)\.tar\\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
