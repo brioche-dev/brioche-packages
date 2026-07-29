@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/microsoft/onnxruntime.git": {
-      "v1.27.1": "df2ba1cf8108aa63627cf4cdf8f807880b938616"
+      "v1.28.0": "da9b5e364c465de65c49d91e696cd6485270757f"
     }
   }
 }
