@@ -3,7 +3,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "libevent",
-  version: "2.1.12",
+  version: "2.1.13",
   repository: "https://github.com/libevent/libevent",
 };
 
