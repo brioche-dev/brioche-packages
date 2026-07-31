@@ -1,4 +1,5 @@
 import { nushellRunnable, type NushellRunnable } from "nushell";
+import mpg123 from "mpg123";
 import * as std from "std";
 
 export const project = {
@@ -22,13 +23,14 @@ export default function lame(): std.Recipe<std.Directory> {
     make install DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(std.toolchain)
+    .dependencies(std.toolchain, mpg123)
     .toDirectory()
     .pipe(std.libtoolSanitizeDependencies)
     .pipe((recipe) =>
       std.setEnv(recipe, {
         CPATH: { append: [{ path: "include" }] },
         LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
       }),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/lame"));
