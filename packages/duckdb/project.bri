@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "duckdb",
-  version: "1.5.3",
+  version: "1.5.4",
   repository: "https://github.com/duckdb/duckdb.git",
 };
 
