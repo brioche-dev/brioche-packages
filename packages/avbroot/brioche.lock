@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/chenxiaolong/avbroot.git": {
-      "v3.30.2": "f95ef1f8c14a4f3032b9656d04316bfbf3a483cf"
+      "v3.31.0": "6344a927eb2661df7770a7247c75860bf82246e4"
     }
   }
 }
