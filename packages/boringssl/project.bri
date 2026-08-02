@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "boringssl",
-  version: "0.20260616.0",
+  version: "0.20260713.0",
   repository: "https://github.com/google/boringssl",
 };
 
