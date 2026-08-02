@@ -1,10 +1,11 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
+import openssl from "openssl";
 import python from "python";
 
 export const project = {
   name: "ladybug",
-  version: "0.18.1",
+  version: "0.19.0",
   repository: "https://github.com/LadybugDB/ladybug.git",
 };
 
@@ -16,7 +17,7 @@ const source = Brioche.gitCheckout({
 export default function ladybug(): std.Recipe<std.Directory> {
   return cmakeBuild({
     source,
-    dependencies: [std.toolchain, python],
+    dependencies: [std.toolchain, openssl, python],
     set: {
       BUILD_SHELL: "ON",
       BUILD_TESTS: "OFF",
