@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/pranshuparmar/witr/@v/v0.3.2.info": {
+    "https://proxy.golang.org/github.com/pranshuparmar/witr/@v/v0.3.3.info": {
       "type": "sha256",
-      "value": "aadddcb0cfab2462522ee76f1bacf8a9f03a9829d120a05f770c5f99dc990e9b"
+      "value": "54455240e8a907f5d0972aaeef15a38ab5d399ade8b724cca00aaf8ba9920ba9"
     },
-    "https://proxy.golang.org/github.com/pranshuparmar/witr/@v/v0.3.2.zip": {
+    "https://proxy.golang.org/github.com/pranshuparmar/witr/@v/v0.3.3.zip": {
       "type": "sha256",
-      "value": "abbbec912adc4f164e23c26aa7ed66f807acb7bcf41ef15b45e26e50b61caace"
+      "value": "83d95531ee7168aa4d2994e250d25258cd52271052b7bdd7d02f2f8232b3a190"
     }
   }
 }

@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "httpx",
-  version: "1.9.0",
+  version: "1.10.0",
   extra: {
     moduleName: "github.com/projectdiscovery/httpx",
   },

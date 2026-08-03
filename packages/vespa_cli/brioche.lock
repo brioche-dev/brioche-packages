@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/vespa-engine/vespa.git": {
-      "v8.703.17": "b88a1a6dbdbe1dcd1cb461ff4faf490673b181e3"
+      "v8.719.5": "4842683a2aa9a92f3c383a219a3fbfd31500ed46"
     }
   }
 }

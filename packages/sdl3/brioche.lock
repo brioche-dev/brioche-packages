@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/libsdl-org/SDL/releases/download/release-3.4.10/SDL3-3.4.10.tar.gz": {
+    "https://github.com/libsdl-org/SDL/releases/download/release-3.4.12/SDL3-3.4.12.tar.gz": {
       "type": "sha256",
-      "value": "12b34280415ec8418c864408b93d008a20a6530687ee613d60bfbd20411f2785"
+      "value": "f07b958a9ac5020fb7a44cadb957f658b2149c3c8abb4f63145fac9303249db7"
     }
   }
 }

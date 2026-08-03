@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "highs",
-  version: "1.14.0",
+  version: "1.15.1",
   repository: "https://github.com/ERGO-Code/HiGHS.git",
 };
 

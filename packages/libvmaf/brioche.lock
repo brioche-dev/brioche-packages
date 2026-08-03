@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/Netflix/vmaf/archive/refs/tags/v3.1.0.tar.gz": {
+    "https://github.com/Netflix/vmaf/archive/refs/tags/v3.2.0.tar.gz": {
       "type": "sha256",
-      "value": "80090e29d7fd0db472ddc663513f5be89bc936815e62b767e630c1d627279fe2"
+      "value": "a28f93f3b4fa65601be324587072e32a6a704a304ba7b1aec9b70b3f709bc1dc"
     }
   }
 }

@@ -6,11 +6,11 @@ import python from "python";
 
 export const project = {
   name: "onnx",
-  version: "1.21.0",
+  version: "1.22.0",
   repository: "https://github.com/onnx/onnx.git",
 };
 
-const source = Brioche.gitCheckout({
+export const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
 });
