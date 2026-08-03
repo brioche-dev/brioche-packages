@@ -17,21 +17,13 @@
       "type": "sha256",
       "value": "ea0ff2396ea5af402ba3598a9139a0f4b1b3471d9d7e834882d1559622760add"
     },
-    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.5.4/sdk/dartsdk-linux-arm64-release.zip": {
+    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.12.2/sdk/dartsdk-linux-arm64-release.zip": {
       "type": "sha256",
-      "value": "a91d64dd3173349cee58c82f5ebf18bb9670f65eecc26d5684124c3def3f83ec"
+      "value": "f82c83ece7d168047550dfd4a664e4071ac7c488bddb72dc43102c22d7e0b518"
     },
-    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.5.4/sdk/dartsdk-linux-x64-release.zip": {
+    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.12.2/sdk/dartsdk-linux-x64-release.zip": {
       "type": "sha256",
-      "value": "8d0c5e34f2a9d6b9f5ebf05252ae1703893f6087d547c631b390aef2d0cd6967"
-    },
-    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.6.2/sdk/dartsdk-linux-arm64-release.zip": {
-      "type": "sha256",
-      "value": "f475db0944922d9925b4a4266c31f8fafd39b01a3cc130422e785c8276eb13e5"
-    },
-    "https://storage.googleapis.com/dart-archive/channels/stable/release/3.6.2/sdk/dartsdk-linux-x64-release.zip": {
-      "type": "sha256",
-      "value": "5a2953ec76c8139cd73d0c0b482de26d0b86a5a7e37579167bbd33493063408d"
+      "value": "28e47b44cf075f36771046c068bb0d174201cf9c7608744aed1cc23204299c2d"
     }
   }
 }
