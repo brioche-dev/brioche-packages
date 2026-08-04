@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "scdoc",
-  version: "1.11.4",
+  version: "1.11.5",
   repository: "https://git.sr.ht/~sircmpwn/scdoc",
 };
 

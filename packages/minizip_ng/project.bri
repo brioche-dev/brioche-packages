@@ -6,7 +6,7 @@ import libiconv from "libiconv";
 
 export const project = {
   name: "minizip_ng",
-  version: "4.2.1",
+  version: "4.2.2",
   repository: "https://github.com/zlib-ng/minizip-ng",
 };
 

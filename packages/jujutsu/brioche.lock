@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/jj-vcs/jj.git": {
-      "v0.41.0": "413f539283e5a87f0a2c64dec54a5258a1bee78f"
+      "v0.43.0": "89f62ede8c1c611eaf134c0c49252efd65c7945d"
     }
   }
 }

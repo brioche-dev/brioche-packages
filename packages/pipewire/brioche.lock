@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.6.5/pipewire-1.6.5.tar.bz2": {
+    "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.6.8/pipewire-1.6.8.tar.bz2": {
       "type": "sha256",
-      "value": "ec372634c09dbf928472f4886de76b11f46bca993bb005b4f3248fea16bd5e4f"
+      "value": "efbaedf80450e5b08bb3196a4ca7ea17850d4a71ec1a8ae321e8937a7c95779e"
     }
   }
 }

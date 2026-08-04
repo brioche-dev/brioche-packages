@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://proxy.golang.org/github.com/google/go-containerregistry/@v/v0.21.7.zip": {
+      "type": "sha256",
+      "value": "70c92eaefc68579adcd49cd95cdfab663b6fd82bf83ea40eb0e2c8ce09c0b8e6"
+    }
+  }
+}

@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "litehtml",
-  version: "0.9",
+  version: "0.10",
   repository: "https://github.com/litehtml/litehtml",
 };
 

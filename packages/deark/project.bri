@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "deark",
-  version: "1.7.2",
+  version: "1.7.3",
   repository: "https://github.com/jsummers/deark",
 };
 

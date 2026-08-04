@@ -13,12 +13,15 @@ const source = Brioche.download(
   `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
 )
   .unarchive("tar", "gzip")
-  .peel();
+  .peel()
+  // HACK: Regenerate Cargo.lock to solve upstream issue with Rust 1.97+, see https://github.com/nlordell/ethnum-rs/pull/58
+  .remove("Cargo.lock");
 
 export default function parqeye(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/parqeye",
+    unsafeGenerateLockfile: true,
   });
 }
 

@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "spicedb",
-  version: "1.53.0",
+  version: "1.54.0",
   repository: "https://github.com/authzed/spicedb",
   extra: {
     moduleName: "github.com/authzed/spicedb",

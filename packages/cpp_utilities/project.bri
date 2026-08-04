@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "cpp_utilities",
-  version: "5.34.1",
+  version: "5.34.2",
   repository: "https://github.com/Martchus/cpp-utilities",
 };
 

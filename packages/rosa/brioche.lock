@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/openshift/rosa/@v/v1.2.62.zip": {
+    "https://proxy.golang.org/github.com/openshift/rosa/@v/v1.2.64.zip": {
       "type": "sha256",
-      "value": "6839bbc092f0222e461b20d176b2fe4246d2441150aaca06d4005b51b04ddb8f"
+      "value": "dd3a7b0827b8dfea85e3c5c07bea18a8c8637c5821428464de58794918798cca"
     }
   }
 }

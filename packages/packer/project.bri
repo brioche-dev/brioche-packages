@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "packer",
-  version: "1.15.3",
+  version: "1.15.4",
   extra: {
     moduleName: "github.com/hashicorp/packer",
   },

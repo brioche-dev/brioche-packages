@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "biome",
-  version: "2.4.15",
+  version: "2.5.3",
   repository: "https://github.com/biomejs/biome.git",
 };
 
@@ -17,6 +17,9 @@ export default function biome(): std.Recipe<std.Directory> {
     source,
     runnable: "bin/biome",
     path: "crates/biome_cli",
+
+    // cargo-chef cannot parse multi-line inline tables in Cargo.toml
+    cargoChefPrepare: false,
     env: {
       BIOME_VERSION: project.version,
     },

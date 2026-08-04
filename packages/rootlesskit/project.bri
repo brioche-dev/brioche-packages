@@ -1,0 +1,56 @@
+import * as std from "std";
+import { goBuild } from "go";
+
+export const project = {
+  name: "rootlesskit",
+  version: "3.0.2",
+  extra: {
+    moduleName: "github.com/rootless-containers/rootlesskit/v3",
+  },
+};
+
+const source = Brioche.download(
+  `https://proxy.golang.org/${project.extra.moduleName}/@v/v${project.version}.zip`,
+)
+  .unarchive("zip")
+  .peel(4);
+
+export default function rootlesskit(): std.Recipe<std.Directory> {
+  // List of binaries to build
+  const binaries = ["rootlesskit", "rootlessctl", "rootlesskit-docker-proxy"];
+
+  // Build all
+  const builds = binaries.map((binary) =>
+    goBuild({
+      source,
+      path: `./cmd/${binary}`,
+      buildParams: {
+        ldflags: ["-s", "-w"],
+      },
+    }),
+  );
+
+  return std
+    .merge(...builds)
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/rootlesskit"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    rootlesskit --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(rootlesskit)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `rootlesskit version ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGoModules({ project });
+}

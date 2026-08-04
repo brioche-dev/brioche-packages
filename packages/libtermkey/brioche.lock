@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/neovim/libtermkey/archive/refs/tags/v0.22.tar.gz": {
+      "type": "sha256",
+      "value": "81cac2b685c9ada4ead4ea788fb69ff74fc1947ad188ed0264c646fe12b496ba"
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/LibtraceTeam/wandio": {
-      "4.2.6-1": "d8bcc61fe45774019996d796c8d2cd55857f1c7f"
+      "4.2.7-1": "6adb5085a56608b0ed18ed4c01a35d39f8f87e69"
     }
   }
 }
