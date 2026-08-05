@@ -1,6 +1,7 @@
 import * as std from "std";
-import openssl from "openssl";
 import curl from "curl";
+import openssl from "openssl";
+import rust from "rust";
 
 export const project = {
   name: "git",
@@ -26,11 +27,7 @@ export default function git(): std.Recipe<std.Directory> {
       DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
-    .dependencies(
-      std.toolchain,
-      openssl({ version: "3" }),
-      curl({ minimal: true }),
-    )
+    .dependencies(std.toolchain, curl({ minimal: true }), openssl, rust)
     .toDirectory()
     .pipe((recipe) =>
       std.setEnv(recipe, {
