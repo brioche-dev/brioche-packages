@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/coturn/coturn.git": {
-      "4.14.0": "8cd19518d31a70f340185b6bbd629b28947148aa"
+      "4.17.0": "54ef76cebfff2bb99b35438858a4ef412d84128d"
     }
   }
 }
