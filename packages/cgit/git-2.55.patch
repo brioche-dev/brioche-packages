@@ -1,0 +1,36 @@
+From 932dc064573a62e195956881f9a5282192ba9525 Mon Sep 17 00:00:00 2001
+From: Christian Hesse <mail@eworm.de>
+Date: Wed, 17 Jun 2026 21:44:45 +0200
+Subject: git: update to v2.55.0
+
+---
+ Makefile | 2 +-
+ cgit.c   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 9d39bf4..d039293 100644
+--- a/Makefile
++++ b/Makefile
+@@ -14,7 +14,7 @@ htmldir = $(docdir)
+ pdfdir = $(docdir)
+ mandir = $(prefix)/share/man
+ SHA1_HEADER = <openssl/sha.h>
+-GIT_VER = 2.54.0
++GIT_VER = 2.55.0
+ GIT_URL = https://www.kernel.org/pub/software/scm/git/git-$(GIT_VER).tar.xz
+ INSTALL = install
+ COPYTREE = cp -r
+
+diff --git a/cgit.c b/cgit.c
+index ca318e8..3b9d3aa 100644
+--- a/cgit.c
++++ b/cgit.c
+@@ -588,7 +588,7 @@ static void prepare_repo_env(int *nongit)
+ 	/* Setup the git directory and initialize the notes system. Both of these
+ 	 * load local configuration from the git repository, so we do them both while
+ 	 * the HOME variables are unset. */
+-	setup_git_directory_gently(nongit);
++	setup_git_directory_gently(the_repository, nongit);
+ 	load_display_notes(NULL);
+ }

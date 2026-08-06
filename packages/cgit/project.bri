@@ -13,7 +13,15 @@ const source = Brioche.download(
   `https://git.zx2c4.com/cgit/snapshot/cgit-${project.version}.tar.xz`,
 )
   .unarchive("tar", "xz")
-  .peel();
+  .peel()
+  .pipe((source) =>
+    std.applyPatch({
+      source,
+      // Apply the Git 2.55 compatibility patch from https://git.zx2c4.com/cgit/commit/?h=ch/git-2-55&id=932dc064573a62e195956881f9a5282192ba9525.
+      patch: Brioche.includeFile("git-2.55.patch"),
+      strip: 1,
+    }),
+  );
 
 export default function cgit(): std.Recipe<std.Directory> {
   const sourceWithGit = source.insert("git", gitSource);
