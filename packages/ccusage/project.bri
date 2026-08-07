@@ -1,19 +1,24 @@
 import * as std from "std";
-import { npmInstallGlobal } from "nodejs";
+import { cargoBuild } from "rust";
 
 export const project = {
   name: "ccusage",
-  version: "18.0.11",
-  extra: {
-    packageName: "ccusage",
-  },
+  version: "20.0.19",
+  repository: "https://github.com/ccusage/ccusage.git",
 };
 
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+});
+
 export default function ccusage(): std.Recipe<std.Directory> {
-  return npmInstallGlobal({
-    packageName: project.extra.packageName,
-    version: project.version,
-  }).pipe((recipe) => std.withRunnableLink(recipe, "bin/ccusage"));
+  return cargoBuild({
+    source,
+    currentDir: "rust",
+    path: "crates/ccusage",
+    runnable: "bin/ccusage",
+  });
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
@@ -26,12 +31,12 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = project.version;
+  const expected = `ccusage ${project.version}`;
   std.assert(result === expected, `expected '${expected}', got '${result}'`);
 
   return script;
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromNpmPackages({ project });
+  return std.liveUpdateFromGithubReleases({ project });
 }
