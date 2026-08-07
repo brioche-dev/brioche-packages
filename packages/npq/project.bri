@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "npq",
-  version: "3.19.6",
+  version: "3.21.0",
   extra: {
     packageName: "npq",
   },

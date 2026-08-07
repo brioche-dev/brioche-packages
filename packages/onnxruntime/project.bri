@@ -8,7 +8,7 @@ import flatbuffers from "flatbuffers";
 import howardHinnantDate from "howard_hinnant_date";
 import microsoftGsl from "microsoft_gsl";
 import nlohmannJson from "nlohmann_json";
-import onnx from "onnx";
+import { source as onnxSource } from "onnx";
 import protobuf from "protobuf";
 import python from "python";
 import re2 from "re2";
@@ -16,7 +16,7 @@ import safeint from "safeint";
 
 export const project = {
   name: "onnxruntime",
-  version: "1.26.0",
+  version: "1.28.0",
   repository: "https://github.com/microsoft/onnxruntime.git",
 };
 
@@ -52,7 +52,6 @@ export default function onnxruntime(): std.Recipe<std.Directory> {
       howardHinnantDate,
       microsoftGsl,
       nlohmannJson,
-      onnx,
       protobuf,
       python,
       re2,
@@ -71,6 +70,7 @@ export default function onnxruntime(): std.Recipe<std.Directory> {
       FETCHCONTENT_FULLY_DISCONNECTED: "ON",
       FETCHCONTENT_TRY_FIND_PACKAGE_MODE: "ALWAYS",
       FETCHCONTENT_SOURCE_DIR_MP11: std.tpl`${boost}`,
+      FETCHCONTENT_SOURCE_DIR_ONNX: std.tpl`${onnxSource}`,
       // Disable some warnings that are treated as errors
       CMAKE_CXX_FLAGS: "-Wno-error=unused-variable -Wno-error=unused-result",
     },

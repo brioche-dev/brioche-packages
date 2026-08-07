@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/FluidSynth/fluidsynth": {
-      "v2.5.5": "013c23dc10286ebb547b167cc47d181a49c48764"
+      "v2.5.6": "e5b11058a619246cea42976dacb76ca54be3d45d"
     }
   }
 }

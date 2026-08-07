@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/rvben/rumdl.git": {
-      "v0.2.16": "a2da0e5a1321281402d4c65f5b735696a7f5f73f"
+      "v0.2.34": "460ba739bf72499fcc237a99c571a9116f23b205"
     }
   }
 }

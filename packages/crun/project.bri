@@ -1,0 +1,61 @@
+import * as std from "std";
+import blake3 from "blake3";
+import jsonC from "json_c";
+import libcap from "libcap";
+import libseccomp from "libseccomp";
+import python from "python";
+
+export const project = {
+  name: "crun",
+  version: "1.28",
+  repository: "https://github.com/containers/crun",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/crun-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function crun(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --disable-systemd
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, blake3, jsonC, libcap, libseccomp, python)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/crun"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    crun --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(crun)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `crun version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

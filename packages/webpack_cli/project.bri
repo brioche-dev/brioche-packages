@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "webpack_cli",
-  version: "7.0.3",
+  version: "7.2.1",
   extra: {
     packageName: "webpack-cli",
   },

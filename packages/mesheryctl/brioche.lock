@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/meshery/meshery.git": {
-      "v1.0.43": "8dd34747d42ec339669a1618e7f1dd34038c21bc"
+      "v1.0.56": "c3cf2306a883ff226b58df66f7870345725b30c4"
     }
   }
 }

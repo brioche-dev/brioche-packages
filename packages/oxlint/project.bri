@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "oxlint",
-  version: "1.70.0",
+  version: "1.74.0",
   repository: "https://github.com/web-infra-dev/oxc.git",
 };
 
@@ -17,6 +17,10 @@ export default function oxlint(): std.Recipe<std.Directory> {
     source,
     path: "apps/oxlint",
     runnable: "bin/oxlint",
+
+    // cargo-chef makes the lockfile out-of-date, see this issue:
+    // https://github.com/LukeMathWalker/cargo-chef/issues/305
+    cargoChefPrepare: false,
   });
 }
 

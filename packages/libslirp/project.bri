@@ -1,0 +1,56 @@
+import * as std from "std";
+import glib from "glib";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import pcre2 from "pcre2";
+
+export const project = {
+  name: "libslirp",
+  version: "4.9.3",
+  repository: "https://gitlab.freedesktop.org/slirp/libslirp",
+};
+
+const source = Brioche.download(
+  `${project.repository}/-/archive/v${project.version}/libslirp-v${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function libslirp(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, glib, ninja, pcre2],
+    set: {
+      default_library: "both",
+    },
+  }).pipe((recipe) =>
+    std.setEnv(recipe, {
+      CPATH: { append: [{ path: "include" }] },
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+      PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+    }),
+  );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion slirp | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libslirp)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabReleases({
+    gitlabUrl: "https://gitlab.freedesktop.org",
+    project,
+  });
+}

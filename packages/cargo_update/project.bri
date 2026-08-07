@@ -7,7 +7,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "cargo_update",
-  version: "20.0.2",
+  version: "22.0.0",
   extra: {
     crateName: "cargo-update",
   },
