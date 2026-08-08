@@ -1,0 +1,51 @@
+import * as std from "std";
+
+export const project = {
+  name: "dosfstools",
+  version: "4.2",
+  repository: "https://github.com/dosfstools/dosfstools",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/v${project.version}/dosfstools-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function dosfstools(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --bindir=/bin \\
+      --sbindir=/bin \\
+      --enable-compat-symlinks
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory();
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    mkfs.fat --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(dosfstools)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `mkfs.fat ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}
