@@ -1,0 +1,68 @@
+import * as std from "std";
+import libarchive from "libarchive";
+import libfuse from "libfuse";
+import liburing from "liburing";
+import openssl from "openssl";
+import numactl from "numactl";
+
+export const project = {
+  name: "e2fsprogs",
+  version: "1.47.4",
+  repository: "https://github.com/tytso/e2fsprogs",
+};
+
+const source = Brioche.download(
+  `https://kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v${project.version}/e2fsprogs-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function e2fsprogs(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin \\
+      --enable-elf-shlibs
+    make -j "$(nproc)"
+    make install install-libs DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      libarchive,
+      libfuse,
+      liburing,
+      openssl,
+      numactl,
+    )
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/mke2fs"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion ext2fs | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, e2fsprogs)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
