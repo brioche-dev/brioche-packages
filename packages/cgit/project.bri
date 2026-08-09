@@ -1,6 +1,7 @@
 import * as std from "std";
 import { source as gitSource } from "git";
 import openssl from "openssl";
+import rust from "rust";
 import zlib from "zlib";
 
 export const project = {
@@ -36,7 +37,7 @@ export default function cgit(): std.Recipe<std.Directory> {
       DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(sourceWithGit)
-    .dependencies(std.toolchain, openssl({ version: "3" }), zlib)
+    .dependencies(std.toolchain, openssl, rust, zlib)
     .toDirectory();
 }
 
