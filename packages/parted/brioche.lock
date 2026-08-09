@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://ftpmirror.gnu.org/gnu/parted/parted-3.7.tar.xz": {
+      "type": "sha256",
+      "value": "008de57561a4f3c25a0648e66ed11e7b30be493889b64334a6d70f2c1951ef7b"
+    }
+  }
+}

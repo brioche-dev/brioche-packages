@@ -1,0 +1,74 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import lvm2 from "lvm2";
+
+export const project = {
+  name: "parted",
+  version: "3.7",
+  repository: "https://git.savannah.gnu.org/git/parted.git",
+};
+
+const source = Brioche.download(
+  `https://ftpmirror.gnu.org/gnu/parted/parted-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function parted(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --bindir=/bin \\
+      --sbindir=/bin \\
+      --with-readline
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, lvm2)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/parted"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    parted --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(parted)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `parted (GNU parted) ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://ftpmirror.gnu.org/gnu/parted
+      | lines
+      | where ($it | str contains "parted-") and (not ($it | str contains ".sig"))
+      | parse --regex '.*parted-(?<version>[\\d.]+)\\.tar\\.xz'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
