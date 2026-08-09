@@ -1,0 +1,67 @@
+import * as std from "std";
+import libaio from "libaio";
+
+export const project = {
+  name: "lvm2",
+  version: "2.03.42",
+  repository: "https://gitlab.com/lvmteam/lvm2",
+};
+
+const source = Brioche.download(
+  `https://sourceware.org/pub/lvm2/releases/LVM2.${project.version}.tgz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function lvm2(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin \\
+      --with-usrsbindir=/bin \\
+      --sysconfdir=/etc/lvm \\
+      --localstatedir=/var \\
+      --without-systemd \\
+      --without-udev \\
+      --enable-pkgconfig
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libaio)
+    .toDirectory()
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/lvm"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lvm version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(lvm2)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGitlabTags({
+    project,
+    matchTag: /^v(?<version>2_[0-9]+_[0-9]+)$/,
+  });
+}
