@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://crates.io/api/v1/crates/websocat/1.14.1/download": {
+      "type": "sha256",
+      "value": "edd6d85a7412ed52d7ae8a2b85c91925e80b5bbb5ee615b5f36b36b751f1e486"
+    }
+  }
+}
