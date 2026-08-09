@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://salsa.debian.org/debian/netcat-openbsd": {
+      "debian/1.238-1": "664275e483ed0e7f875a8d64c656d4c2625c3646"
+    }
+  }
+}
