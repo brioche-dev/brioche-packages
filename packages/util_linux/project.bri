@@ -1,0 +1,139 @@
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import * as std from "std";
+
+export const project = {
+  name: "util_linux",
+  version: "2.42.2",
+  repository: "https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git",
+  extra: {
+    majorVersion: "2",
+    minorVersion: "42",
+  },
+};
+
+std.assert(
+  project.version.startsWith(`${project.extra.majorVersion}.`),
+  "Package version does not match extra.majorVersion",
+);
+std.assert(
+  project.version.split(".").at(1) === project.extra.minorVersion,
+  "Package version does not match extra.minorVersion",
+);
+
+// Avoid embedding the older util-linux libraries from std.toolchain.
+const buildToolchain = std
+  .toolchain()
+  .remove("lib/libblkid.so")
+  .remove("lib/libblkid.so.1")
+  .remove("lib/libblkid.so.1.1.0")
+  .remove("lib/libfdisk.so")
+  .remove("lib/libfdisk.so.1")
+  .remove("lib/libfdisk.so.1.1.0")
+  .remove("lib/libmount.so")
+  .remove("lib/libmount.so.1")
+  .remove("lib/libmount.so.1.1.0")
+  .remove("lib/libsmartcols.so")
+  .remove("lib/libsmartcols.so.1")
+  .remove("lib/libsmartcols.so.1.1.0")
+  .remove("lib/libuuid.so")
+  .remove("lib/libuuid.so.1")
+  .remove("lib/libuuid.so.1.3.0")
+  .remove("lib/pkgconfig/blkid.pc")
+  .remove("lib/pkgconfig/fdisk.pc")
+  .remove("lib/pkgconfig/mount.pc")
+  .remove("lib/pkgconfig/smartcols.pc")
+  .remove("lib/pkgconfig/uuid.pc");
+
+const source = Brioche.download(
+  `https://www.kernel.org/pub/linux/utils/util-linux/v${project.extra.majorVersion}.${project.extra.minorVersion}/util-linux-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel()
+  .pipe((source) =>
+    // Patch tool scripts to use a shell available in the sandbox.
+    std.runBash`
+      for file in tools/all_errnos tools/all_syscalls; do
+        if [ -f "$BRIOCHE_OUTPUT/$file" ]; then
+          sed -i '1s|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT/$file"
+        fi
+      done
+    `
+      .outputScaffold(source)
+      .toDirectory(),
+  );
+
+export default function utilLinux(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --bindir=/bin \\
+      --libdir=/lib \\
+      --runstatedir=/run \\
+      --sbindir=/bin \\
+      --disable-asciidoc \\
+      --disable-chfn-chsh \\
+      --disable-kill \\
+      --disable-login \\
+      --disable-makeinstall-chown \\
+      --disable-makeinstall-setuid \\
+      --disable-runuser \\
+      --disable-silent-rules \\
+      --disable-su \\
+      --disable-use-tty-group \\
+      --without-python \\
+      --without-systemd \\
+      ADJTIME_PATH=/var/lib/hwclock/adjtime
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(buildToolchain)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        LD_LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/lsblk"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    lsblk --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(utilLinux)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `lsblk from util-linux ${project.version}`;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = ^git ls-remote --tags ${project.repository}
+      | lines
+      | parse --regex 'refs/tags/v(?<version>[\\d.]+)$'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    let parts = $version | split row '.'
+    let majorVersion = $parts | get 0
+    let minorVersion = $parts | get 1
+
+    $env.project
+      | from json
+      | update version $version
+      | update extra.majorVersion $majorVersion
+      | update extra.minorVersion $minorVersion
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
