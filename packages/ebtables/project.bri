@@ -1,0 +1,81 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "ebtables",
+  version: "2.0.11",
+  repository: "https://git.netfilter.org/ebtables",
+};
+
+const source = Brioche.download(
+  `https://netfilter.org/pub/ebtables/ebtables-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function ebtables(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) =>
+      recipe
+        .insert("bin/ebtables", std.symlink({ target: "ebtables-legacy" }))
+        .insert(
+          "bin/ebtables-restore",
+          std.symlink({ target: "ebtables-legacy-restore" }),
+        )
+        .insert(
+          "bin/ebtables-save",
+          std.symlink({ target: "ebtables-legacy-save" }),
+        ),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ebtables"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ebtables --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ebtables)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ebtables v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/ebtables
+      | lines
+      | where ($it | str contains "ebtables-") and (not ($it | str contains "sig")) and (not ($it | str contains "sha"))
+      | parse --regex '<a href="ebtables-(?:v)?(?<version>[\\d.-]+)\\.tar\\.gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

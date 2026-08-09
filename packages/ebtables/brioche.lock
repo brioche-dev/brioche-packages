@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://netfilter.org/pub/ebtables/ebtables-2.0.11.tar.gz": {
+      "type": "sha256",
+      "value": "b71f654784a726329f88b412ef7b96b4e5d786ed2bd28193ed7b4c0d677dfd2a"
+    }
+  }
+}
