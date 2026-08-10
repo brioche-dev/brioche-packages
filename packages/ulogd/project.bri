@@ -1,0 +1,94 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libmnl from "libmnl";
+import libnetfilter_acct from "libnetfilter_acct";
+import libnetfilter_conntrack from "libnetfilter_conntrack";
+import libnetfilter_log from "libnetfilter_log";
+import libnfnetlink from "libnfnetlink";
+import jansson from "jansson";
+import libpcap from "libpcap";
+import sqlite from "sqlite";
+
+export const project = {
+  name: "ulogd",
+  version: "2.0.9",
+  repository: "https://git.netfilter.org/ulogd",
+};
+
+const source = Brioche.download(
+  `https://netfilter.org/pub/ulogd/ulogd-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function ulogd(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin \\
+      --sysconfdir=/etc \\
+      --enable-pcap \\
+      --enable-sqlite3 \\
+      --enable-json \\
+      --disable-pgsql \\
+      --disable-mysql \\
+      --disable-dbi
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      libmnl,
+      libnetfilter_acct,
+      libnetfilter_conntrack,
+      libnetfilter_log,
+      libnfnetlink,
+      jansson,
+      libpcap,
+      sqlite,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ulogd"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ulogd --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ulogd)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ulogd Version ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/ulogd
+      | lines
+      | where ($it | str contains "ulogd-") and (not ($it | str contains "sig")) and (not ($it | str contains "md5sum")) and (not ($it | str contains "sha1sum"))
+      | parse --regex '<a href="ulogd-(?<version>[\\d.]+)\.tar\\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
