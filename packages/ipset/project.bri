@@ -1,0 +1,72 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libmnl from "libmnl";
+
+export const project = {
+  name: "ipset",
+  version: "7.24",
+};
+
+const source = Brioche.download(
+  `https://ipset.netfilter.org/ipset-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function ipset(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin \\
+      --with-kmod=no
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libmnl)
+    .toDirectory()
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/ipset"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    ipset --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(ipset)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `ipset v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/ipset
+      | lines
+      | where ($it | str contains "ipset-") and (not ($it | str contains "sig")) and (not ($it | str contains "md5sum")) and (not ($it | str contains "sha1sum")) and (not ($it | str contains "sha512sum"))
+      | parse --regex '<a href="ipset-(?<version>[\\d.]+)\.tar\\.bz2">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}
