@@ -101,6 +101,12 @@ export default function litellm(): std.Recipe<std.Directory> {
     venv,
   });
 
+  // Add the model prices JSON file to the share directory
+  recipe = recipe.insert(
+    "share/model_prices_and_context_window.json",
+    source.get("model_prices_and_context_window.json"),
+  );
+
   // Add toolchain for runtime libraries
   recipe = recipe.insert("brioche-run.d/toolchain", std.toolchain);
 
