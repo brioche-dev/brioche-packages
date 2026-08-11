@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://netfilter.org/pub/nfacct/nfacct-1.0.2.tar.bz2": {
+      "type": "sha256",
+      "value": "ecff2218754be318bce3c3a5d1775bab93bf4168b2c4aac465785de5655fbd69"
+    }
+  }
+}

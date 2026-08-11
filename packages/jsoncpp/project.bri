@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "jsoncpp",
-  version: "1.9.7",
+  version: "1.9.8",
   repository: "https://github.com/open-source-parsers/jsoncpp",
 };
 
@@ -18,6 +18,9 @@ export default function jsoncpp(): std.Recipe<std.Directory> {
     dependencies: [std.toolchain],
     set: {
       BUILD_OBJECT_LIBS: "OFF",
+      // Build with position-independent code so static libraries can be
+      // linked into shared objects.
+      CMAKE_POSITION_INDEPENDENT_CODE: "ON",
       JSONCPP_WITH_TESTS: "OFF",
       JSONCPP_WITH_POST_BUILD_UNITTEST: "OFF",
     },

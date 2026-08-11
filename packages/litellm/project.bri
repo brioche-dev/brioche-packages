@@ -1,0 +1,154 @@
+import * as std from "std";
+import python, { getLatestVersion as getPythonVersion } from "python";
+import rust from "rust";
+import uv from "uv";
+
+export const project = {
+  name: "litellm",
+  version: "1.95.0",
+  repository: "https://github.com/BerriAI/litellm",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `v${project.version}`,
+}).pipe((source) =>
+  // Keep LiteLLM compatible with FastAPI's dependency API.
+  std.applyPatch({
+    source,
+    patch: Brioche.includeFile("fastapi-compat.patch"),
+    strip: 1,
+  }),
+);
+
+const pipDependencies = std.directory({
+  "setuptools-80.9.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl",
+  ),
+  "wheel-0.45.1-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/0b/2c/87f3254fd8ffd29e4c02732eee68a83a1d3c346ae39bc6822dcbcb697f2b/wheel-0.45.1-py3-none-any.whl",
+  ),
+  "setuptools_rust-1.12.0-py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/f9/7b/d05b1778f2d4e354d103e3421c6267d923032fefcc5ca5b7df0cb21cefd0/setuptools_rust-1.12.0-py3-none-any.whl",
+  ),
+  "semantic_version-2.10.0-py2.py3-none-any.whl": Brioche.download(
+    "https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl",
+  ),
+  "uv_build-0.11.8.tar.gz": Brioche.download(
+    "https://files.pythonhosted.org/packages/ca/f9/2be83a4b40e9353536dfd15e17550102947b3e10b729a018df3e66bf9b73/uv_build-0.11.8.tar.gz",
+  ),
+  "maturin-1.9.4.tar.gz": Brioche.download(
+    "https://files.pythonhosted.org/packages/13/7c/b11b870fc4fd84de2099906314ce45488ae17be32ff5493519a6cddc518a/maturin-1.9.4.tar.gz",
+  ),
+});
+
+export default function litellm(): std.Recipe<std.Directory> {
+  const managedPython = python();
+
+  // Create a venv
+  let venv = std.recipe(managedPython);
+
+  // Install build dependencies
+  venv = std.runBash`
+    pip install setuptools wheel setuptools-rust semantic-version
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .toDirectory();
+
+  // Build maturin and uv-build
+  venv = std.runBash`
+    pip install --no-build-isolation maturin
+    pip install --no-build-isolation uv-build
+  `
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      PIP_FIND_LINKS: pipDependencies,
+      PIP_NO_INDEX: "1",
+    })
+    .outputScaffold(venv)
+    .dependencies(rust, std.toolchain)
+    .unsafe({ networking: true })
+    .toDirectory();
+
+  // Install litellm with proxy dependencies
+  venv = std.runBash`
+    uv tool install --no-build-isolation '.[proxy,extra_proxy,proxy-runtime]'
+  `
+    .workDir(source)
+    .dependencies(uv, rust, std.toolchain)
+    .env({
+      PATH: std.tpl`${std.outputPath}/bin`,
+      UV_NO_MANAGED_PYTHON: "1",
+      UV_LINK_MODE: "copy",
+      UV_LOCKED: "1",
+      UV_TOOL_DIR: std.outputPath,
+      UV_TOOL_BIN_DIR: std.tpl`${std.outputPath}/bin`,
+      PYTHONPATH: std.tpl`${
+        std.outputPath
+      }/lib/python${getPythonVersion()}/site-packages`,
+    })
+    .outputScaffold(venv)
+    .unsafe({ networking: true })
+    .toDirectory();
+
+  // Create the final recipe with the venv under `venv`
+  let recipe = std.directory({
+    venv,
+  });
+
+  // Add toolchain for runtime libraries
+  recipe = recipe.insert("brioche-run.d/toolchain", std.toolchain);
+
+  // Create runnable wrappers
+  const binaries = ["litellm", "lite", "litellm-proxy"];
+  for (const binary of binaries) {
+    recipe = std.addRunnable(recipe, `bin/${binary}`, {
+      command: { relativePath: "venv/bin/python" },
+      args: [{ relativePath: `venv/litellm/bin/${binary}` }],
+      env: {
+        PYTHONPATH: {
+          prepend: {
+            relativePath: `venv/litellm/lib/python${getPythonVersion()}/site-packages`,
+          },
+          separator: ":",
+        },
+        LD_LIBRARY_PATH: {
+          prepend: {
+            relativePath: "brioche-run.d/toolchain/lib",
+          },
+          separator: ":",
+        },
+      },
+    });
+  }
+
+  return recipe.pipe((recipe) => std.withRunnableLink(recipe, "bin/litellm"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    litellm --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(litellm)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `LiteLLM: Current Version = ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

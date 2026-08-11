@@ -9,9 +9,9 @@ export const project = {
   repository: "https://github.com/dotnet/sdk",
   extra: {
     otherVersions: {
+      "10": "10.0.302",
       "9": "9.0.316",
       "8": "8.0.423",
-      "10": "10.0.302",
     },
   },
 };

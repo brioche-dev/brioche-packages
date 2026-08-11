@@ -1,0 +1,84 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libmnl from "libmnl";
+import libnetfilter_conntrack from "libnetfilter_conntrack";
+import libnetfilter_cthelper from "libnetfilter_cthelper";
+import libnetfilter_cttimeout from "libnetfilter_cttimeout";
+import libnetfilter_queue from "libnetfilter_queue";
+import libnfnetlink from "libnfnetlink";
+import libtirpc from "libtirpc";
+
+export const project = {
+  name: "conntrack_tools",
+  version: "1.4.9",
+};
+
+const source = Brioche.download(
+  `https://netfilter.org/pub/conntrack-tools/conntrack-tools-${project.version}.tar.xz`,
+)
+  .unarchive("tar", "xz")
+  .peel();
+
+export default function conntrackTools(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      libmnl,
+      libnetfilter_conntrack,
+      libnetfilter_cthelper,
+      libnetfilter_cttimeout,
+      libnetfilter_queue,
+      libnfnetlink,
+      libtirpc,
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      }),
+    )
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/conntrack"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    conntrack --help | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(conntrackTools)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `Version ${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/conntrack-tools
+      | lines
+      | where ($it | str contains "conntrack-tools-") and (not ($it | str contains "sig")) and (not ($it | str contains "md5sum")) and (not ($it | str contains "sha1sum"))
+      | parse --regex '<a href="conntrack-tools-(?<version>[\\d.]+)\.tar\\.xz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

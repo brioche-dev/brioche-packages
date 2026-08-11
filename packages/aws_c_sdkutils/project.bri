@@ -4,7 +4,7 @@ import awsCCommon from "aws_c_common";
 
 export const project = {
   name: "aws_c_sdkutils",
-  version: "0.2.5",
+  version: "0.2.7",
   repository: "https://github.com/awslabs/aws-c-sdkutils",
 };
 

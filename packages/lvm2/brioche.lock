@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://sourceware.org/pub/lvm2/releases/LVM2.2.03.42.tgz": {
+      "type": "sha256",
+      "value": "352703ef5b72ebb22d4f250284a29b89fe64d4049c6bf64c693f9af486c8081e"
+    }
+  }
+}

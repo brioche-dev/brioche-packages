@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/dosfstools/dosfstools/releases/download/v4.2/dosfstools-4.2.tar.gz": {
+      "type": "sha256",
+      "value": "64926eebf90092dca21b14259a5301b7b98e7b1943e8a201c7d726084809b527"
+    }
+  }
+}

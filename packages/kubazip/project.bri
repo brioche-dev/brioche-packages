@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "kubazip",
-  version: "0.3.11",
+  version: "0.3.15+miniz.3.1.2",
   repository: "https://github.com/kuba--/zip",
 };
 
@@ -51,7 +51,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expected = `zip version: ${project.version}`;
+  // HACK: the CMakeLists.txt version differs from the release tag version
+  const expected =
+    project.version === "0.3.15+miniz.3.1.2"
+      ? "zip version: 0.3.14"
+      : `zip version: ${project.version}`;
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,

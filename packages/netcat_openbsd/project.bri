@@ -1,0 +1,75 @@
+import * as std from "std";
+import libbsd from "libbsd";
+import libmd from "libmd";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "netcat_openbsd",
+  version: "1.238-1",
+  repository: "https://salsa.debian.org/debian/netcat-openbsd",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: `debian/${project.version}`,
+}).pipe((source) =>
+  // Apply Debian's Linux portability patches.
+  std.runBash`
+    while read -r patch_file; do
+      patch -d "$BRIOCHE_OUTPUT" -p1 < "$BRIOCHE_OUTPUT/debian/patches/$patch_file"
+    done < "$BRIOCHE_OUTPUT/debian/patches/series"
+  `
+    .dependencies(std.toolchain)
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function netcatOpenbsd(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+
+    # Manual installation
+    cp nc "$BRIOCHE_OUTPUT/bin/nc"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libbsd, libmd)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nc"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  // There is no way to print the package's version, so the help command
+  // is used to verify the correct installation
+  const script = std.runBash`
+    nc -h 2>&1 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(netcatOpenbsd)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected output
+  std.assert(result !== "", `'${result}' should not be empty`);
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get 'https://salsa.debian.org/api/v4/projects/debian%2Fnetcat-openbsd/repository/tags?per_page=100'
+      | where name =~ '^debian/[0-9]+\\.[0-9]+-[0-9]+$'
+      | each { |tag| $tag.name | str replace 'debian/' '' }
+      | sort --natural --reverse
+      | first
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

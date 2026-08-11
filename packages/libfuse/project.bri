@@ -29,7 +29,7 @@ export default function libfuse(): std.Recipe<std.Directory> {
     },
   }).pipe((recipe) =>
     std.setEnv(recipe, {
-      CPATH: { append: [{ path: "include" }] },
+      CPATH: { append: [{ path: "include" }, { path: "include/fuse3" }] },
       LIBRARY_PATH: { append: [{ path: "lib" }] },
       PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
     }),
