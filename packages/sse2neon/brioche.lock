@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/DLTcollab/sse2neon/archive/refs/tags/v1.9.1.tar.gz": {
+      "type": "sha256",
+      "value": "6b70e7cb8c5ce4641002b85deaafe97efdf9ade9b49884edeaf678b35f0e132f"
+    }
+  }
+}

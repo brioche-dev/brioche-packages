@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/simulot/immich-go.git": {
+      "v0.32.0": "f7d19fce34acd4884ea2c02fc3025706a060afdf"
+    }
+  }
+}

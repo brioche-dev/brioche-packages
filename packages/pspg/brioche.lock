@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://github.com/okbob/pspg/archive/refs/tags/5.8.16.tar.gz": {
+      "type": "sha256",
+      "value": "3dcfb810cc6675cac6e3ea53775a6f819e0e12e0d2bde8122e3136b740f38ae5"
+    }
+  }
+}

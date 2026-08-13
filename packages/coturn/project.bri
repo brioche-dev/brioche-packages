@@ -1,11 +1,12 @@
 import * as std from "std";
 import { cmakeBuild } from "cmake";
 import libevent from "libevent";
+import libmicrohttpd from "libmicrohttpd";
 import openssl from "openssl";
 
 export const project = {
   name: "coturn",
-  version: "4.11.0",
+  version: "4.17.0",
   repository: "https://github.com/coturn/coturn.git",
 };
 
@@ -18,7 +19,7 @@ export default function coturn(): std.Recipe<std.Directory> {
   return (
     cmakeBuild({
       source,
-      dependencies: [std.toolchain, libevent, openssl],
+      dependencies: [std.toolchain, libevent, libmicrohttpd, openssl],
     })
       // Fix broken absolute-path symlink
       .insert("bin/turnadmin", std.symlink({ target: "turnserver" }))

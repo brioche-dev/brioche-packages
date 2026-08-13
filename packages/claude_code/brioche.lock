@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.142/linux-arm64/claude": {
+    "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.210/linux-arm64/claude": {
       "type": "sha256",
-      "value": "767b13fc28763ca9d663b00f90e501f134b356f1b72dcf0eea59b7e3bed86411"
+      "value": "84feb193c1d91f3b5eba836ed47c0e4dee953195abba950917c3e101eff174e8"
     },
-    "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.142/linux-x64/claude": {
+    "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.210/linux-x64/claude": {
       "type": "sha256",
-      "value": "1249a1dadfe2d48f320bd4e1b657a1a0d82435da76deb11ce509822407cf24ec"
+      "value": "e7d2ceb53ed4c2ced1fe7fc1c6331c98dc5f7b4c9b2722d9c5fa3dd5dff6f719"
     }
   }
 }

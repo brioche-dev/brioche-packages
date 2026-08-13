@@ -1,0 +1,56 @@
+import * as std from "std";
+
+export const project = {
+  name: "toybox",
+  version: "0.8.14",
+  repository: "https://github.com/landley/toybox",
+};
+
+const source = Brioche.gitCheckout({
+  repository: project.repository,
+  ref: project.version,
+}).pipe((source) =>
+  // Normalize bundled shell scripts.
+  std.runBash`
+    chmod +x "$BRIOCHE_OUTPUT"/scripts/*.sh
+    sed -i '1s|#!/bin/bash|#!/usr/bin/env bash|' "$BRIOCHE_OUTPUT"/scripts/*.sh
+  `
+    .dependencies(std.toolchain)
+    .outputScaffold(source)
+    .toDirectory(),
+);
+
+export default function toybox(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make defconfig
+    make -j "$(nproc)"
+    PREFIX="$BRIOCHE_OUTPUT" make install
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/toybox"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    toybox --version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(toybox)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `toybox ${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}

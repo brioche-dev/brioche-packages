@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "binaryen",
-  version: "129",
+  version: "130",
   repository: "https://github.com/WebAssembly/binaryen.git",
 };
 

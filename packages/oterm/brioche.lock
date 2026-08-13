@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/ggozad/oterm.git": {
-      "0.17.2": "6f429e9caf65764cd20f8f3f881735f2fa594215"
+      "0.20.0": "aac9672510bf153976f98adc13ceec919d05e563"
     }
   }
 }

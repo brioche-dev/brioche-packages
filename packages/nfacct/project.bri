@@ -1,0 +1,65 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+import libmnl from "libmnl";
+import libnetfilter_acct from "libnetfilter_acct";
+
+export const project = {
+  name: "nfacct",
+  version: "1.0.2",
+  repository: "https://git.netfilter.org/nfacct",
+};
+
+const source = Brioche.download(
+  `https://netfilter.org/pub/nfacct/nfacct-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function nfacct(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --sbindir=/bin
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain, libmnl, libnetfilter_acct)
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/nfacct"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    nfacct version | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(nfacct)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `nfacct v${project.version}`;
+  std.assert(
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/nfacct
+      | lines
+      | where ($it | str contains "nfacct-") and (not ($it | str contains "sig")) and (not ($it | str contains "md5sum")) and (not ($it | str contains "sha1sum"))
+      | parse --regex '<a href="nfacct-(?<version>[\\d.]+)\.tar\\.bz2">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

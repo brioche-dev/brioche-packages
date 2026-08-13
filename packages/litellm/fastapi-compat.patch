@@ -1,0 +1,30 @@
+diff --git a/litellm/proxy/management_endpoints/management_v1/common.py b/litellm/proxy/management_endpoints/management_v1/common.py
+--- a/litellm/proxy/management_endpoints/management_v1/common.py
++++ b/litellm/proxy/management_endpoints/management_v1/common.py
+@@ -5,3 +5,2 @@
+ from fastapi import Request
+-from fastapi.dependencies.utils import get_flat_dependant
+ from fastapi.responses import JSONResponse
+@@ -20,1 +20,17 @@
+ PROBLEM_TYPE_BASE = "urn:litellm:error:"
++
++def _query_params_from_dependant(
++    dependant: object, visited: set[int] | None = None
++) -> frozenset[str]:
++    if visited is None:
++        visited = set()
++    marker = id(dependant)
++    if marker in visited:
++        return frozenset()
++    visited.add(marker)
++
++    fields = {field.alias for field in getattr(dependant, "query_params", ())}
++    for dependency in getattr(dependant, "dependencies", ()):
++        fields.update(_query_params_from_dependant(dependency, visited))
++    return frozenset(fields)
++
+@@ -41,3 +56,3 @@
+     if dependant is None:
+         return frozenset()
+-    return frozenset(field.alias for field in get_flat_dependant(dependant, skip_repeats=True).query_params)
++    return _query_params_from_dependant(dependant)

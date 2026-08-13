@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/jtv/libpqxx": {
+      "8.0.2": "92e7d64a3ee91abcecbd5182096a8d8d36de12c0"
+    }
+  }
+}

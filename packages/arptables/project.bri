@@ -1,0 +1,69 @@
+import * as std from "std";
+import { nushellRunnable, type NushellRunnable } from "nushell";
+
+export const project = {
+  name: "arptables",
+  version: "0.0.5",
+  repository: "https://git.netfilter.org/arptables",
+};
+
+const source = Brioche.download(
+  `https://www.netfilter.org/pub/arptables/arptables-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function arptables(): std.Recipe<std.Directory> {
+  return std.runBash`
+    make -j "$(nproc)"
+    make install PREFIX=/ DESTDIR="$BRIOCHE_OUTPUT"
+
+    # Manual installation
+    cp "$BRIOCHE_OUTPUT/sbin/arptables-legacy" "$BRIOCHE_OUTPUT/bin/arptables-legacy"
+    cp "$BRIOCHE_OUTPUT/sbin/arptables-save" "$BRIOCHE_OUTPUT/bin/arptables-save"
+    cp "$BRIOCHE_OUTPUT/sbin/arptables-restore" "$BRIOCHE_OUTPUT/bin/arptables-restore"
+  `
+    .workDir(source)
+    .dependencies(std.toolchain)
+    .outputScaffold(
+      std.directory({
+        bin: std.directory(),
+      }),
+    )
+    .toDirectory()
+    .pipe((recipe) => std.withRunnableLink(recipe, "bin/arptables-legacy"));
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    (arptables-legacy 2>&1 || true) | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(arptables)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = `arptables v${project.version}`;
+  std.assert(
+    result.includes(expected),
+    `expected '${expected}', got '${result}'`,
+  );
+
+  return script;
+}
+
+export function liveUpdate(): NushellRunnable {
+  return nushellRunnable`
+    let version = http get https://netfilter.org/pub/arptables
+      | lines
+      | parse --regex '<a href="arptables-(?<version>[0-9.]+)[.]tar[.]gz">'
+      | sort-by --natural --reverse version
+      | get 0.version
+
+    $env.project
+      | from json
+      | update version $version
+      | to json
+  `.env({ project: JSON.stringify(project) });
+}

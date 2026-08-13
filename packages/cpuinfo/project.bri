@@ -4,14 +4,14 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "cpuinfo",
-  version: "2026-06-12",
+  version: "2026-07-14",
   repository: "https://github.com/pytorch/cpuinfo.git",
   extra: {
-    // No tags or releases published, pin to the latest commit on main.
-    gitRef: "4628dc060ce4e82345dc166bbac875609db4ff69",
+    gitRef: "9c6d24853efbb689a500507693e12c1fe540aa57",
   },
 };
 
+// No tags or releases published, pin to the latest commit on main.
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: project.extra.gitRef,

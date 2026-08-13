@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "json_c",
-  version: "0.18-20240915",
+  version: "0.19-20260627",
   repository: "https://github.com/json-c/json-c.git",
 };
 

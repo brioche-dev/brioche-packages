@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/rorkai/App-Store-Connect-CLI.git": {
-      "1.5.4": "a29ab9402a5c1b016a138a90956750e0d7e33d59"
+      "2.8.2": "d445c4d27404596531949d28e3a4d18482178bd8"
     }
   }
 }

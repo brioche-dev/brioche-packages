@@ -1,0 +1,8 @@
+{
+  "dependencies": {},
+  "git_refs": {
+    "https://github.com/landley/toybox": {
+      "0.8.14": "b7ec52ac35e075caffca5d330995d44e8dbfc8c3"
+    }
+  }
+}

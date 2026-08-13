@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.netfilter.org/pub/arptables/arptables-0.0.5.tar.gz": {
+      "type": "sha256",
+      "value": "4f9a0656ce5c90868f551cd4deeb2d04f33899667e1fb2818b64e432fe8f629c"
+    }
+  }
+}

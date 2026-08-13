@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://download.samba.org/pub/rsync/src/rsync-3.4.2.tar.gz": {
+    "https://download.samba.org/pub/rsync/src/rsync-3.4.4.tar.gz": {
       "type": "sha256",
-      "value": "ff10aa2c151cd4b2dbbe6135126dbc854046113d2dfb49572a348233267eb315"
+      "value": "bd88cf82fa653da32314fb229136407c5c90f80d1758d8f4b091767877d8fa96"
     }
   }
 }

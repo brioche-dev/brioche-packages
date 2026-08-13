@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://netfilter.org/pub/libnetfilter_conntrack/libnetfilter_conntrack-1.1.1.tar.xz": {
+      "type": "sha256",
+      "value": "769d3eaf57fa4fbdb05dd12873b6cb9a5be7844d8937e222b647381d44284820"
+    }
+  }
+}

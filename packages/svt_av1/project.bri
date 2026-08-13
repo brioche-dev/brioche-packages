@@ -4,7 +4,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "svt_av1",
-  version: "4.1.0",
+  version: "4.2.0",
   repository: "https://gitlab.com/AOMediaCodec/SVT-AV1",
 };
 

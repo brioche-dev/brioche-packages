@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://www.astro.caltech.edu/~mcs/tecla/libtecla-1.6.3.tar.gz": {
+      "type": "sha256",
+      "value": "f2757cc55040859fcf8f59a0b7b26e0184a22bece44ed9568a4534a478c1ee1a"
+    }
+  }
+}

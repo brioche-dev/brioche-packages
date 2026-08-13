@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://dri.freedesktop.org/libdrm/libdrm-2.4.133.tar.xz": {
+    "https://dri.freedesktop.org/libdrm/libdrm-2.4.134.tar.xz": {
       "type": "sha256",
-      "value": "fc68f9d0ba2ea63c9432a299e14fea09fad7a8a66e8039fcd7802ca59f77b4f5"
+      "value": "ac5e74d157830eb8bee44c6a6bf3ad49774ef0dd2a72bdad74a8f20308b52a95"
     }
   }
 }

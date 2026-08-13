@@ -4,7 +4,7 @@ import libudevZero from "libudev_zero";
 
 export const project = {
   name: "libusb",
-  version: "1.0.29",
+  version: "1.0.30",
   repository: "https://github.com/libusb/libusb",
 };
 

@@ -3,9 +3,9 @@ import { goBuild } from "go";
 
 export const project = {
   name: "pinact",
-  version: "3.10.0",
+  version: "4.1.0",
   extra: {
-    moduleName: "github.com/suzuki-shunsuke/pinact/v3",
+    moduleName: "github.com/suzuki-shunsuke/pinact/v4",
   },
 };
 

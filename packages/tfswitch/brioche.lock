@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/warrensbox/terraform-switcher/@v/v1.18.0.zip": {
+    "https://proxy.golang.org/github.com/warrensbox/terraform-switcher/@v/v1.19.0.zip": {
       "type": "sha256",
-      "value": "3a3bdcd345dcb907c8a8393ac69a8c1853a95d6647a99e945a502c10b7ff537f"
+      "value": "b185b58d01624d21cb68d1c72f30b6ba0338ed2bfe703664580a56b8155c967c"
     }
   }
 }

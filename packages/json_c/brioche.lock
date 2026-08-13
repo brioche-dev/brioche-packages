@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/json-c/json-c.git": {
-      "json-c-0.18-20240915": "41a55cfcedb54d9c1874f2f0eb07b504091d7e37"
+      "json-c-0.19-20260627": "aa716cd8d663c976b99b0f30f102ee1d8ef63146"
     }
   }
 }

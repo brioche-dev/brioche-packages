@@ -3,24 +3,22 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "uv",
-  version: "0.11.14",
-  repository: "https://github.com/astral-sh/uv.git",
+  version: "0.11.28",
+  extra: {
+    crateName: "uv",
+  },
 };
 
-const source = Brioche.gitCheckout({
-  repository: project.repository,
-  ref: project.version,
-});
+const source = Brioche.download(
+  `https://crates.io/api/v1/crates/${project.extra.crateName}/${project.version}/download`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
 
 export default function uv(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
-    path: "crates/uv",
     runnable: "bin/uv",
-
-    // cargo-chef makes the lockfile out-of-date, see this issue:
-    // https://github.com/LukeMathWalker/cargo-chef/issues/305
-    cargoChefPrepare: false,
   });
 }
 
@@ -44,5 +42,5 @@ export async function test(): Promise<std.Recipe<std.File>> {
 }
 
 export function liveUpdate(): std.Recipe<std.Directory> {
-  return std.liveUpdateFromGithubReleases({ project });
+  return std.liveUpdateFromRustCrates({ project });
 }

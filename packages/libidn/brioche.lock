@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftpmirror.gnu.org/gnu/libidn/libidn-1.43.tar.gz": {
+    "https://ftpmirror.gnu.org/gnu/libidn/libidn-1.44.tar.gz": {
       "type": "sha256",
-      "value": "bdc662c12d041b2539d0e638f3a6e741130cdb33a644ef3496963a443482d164"
+      "value": "499608bab3a65650a0ea52888c13a8deebe3f71408e319acd9ec52e02eb13959"
     }
   }
 }

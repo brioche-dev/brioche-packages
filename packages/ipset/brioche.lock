@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://ipset.netfilter.org/ipset-7.24.tar.bz2": {
+      "type": "sha256",
+      "value": "fbe3424dff222c1cb5e5c34d38b64524b2217ce80226c14fdcbb13b29ea36112"
+    }
+  }
+}

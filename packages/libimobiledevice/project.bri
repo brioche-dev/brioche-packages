@@ -1,0 +1,71 @@
+import * as std from "std";
+import curl from "curl";
+import libimobiledeviceGlue from "libimobiledevice_glue";
+import libplist from "libplist";
+import libtatsu from "libtatsu";
+import libusbmuxd from "libusbmuxd";
+import openssl from "openssl";
+
+export const project = {
+  name: "libimobiledevice",
+  version: "1.4.0",
+  repository: "https://github.com/libimobiledevice/libimobiledevice",
+};
+
+const source = Brioche.download(
+  `${project.repository}/releases/download/${project.version}/libimobiledevice-${project.version}.tar.bz2`,
+)
+  .unarchive("tar", "bzip2")
+  .peel();
+
+export default function libimobiledevice(): std.Recipe<std.Directory> {
+  return std.runBash`
+    ./configure \\
+      --prefix=/ \\
+      --without-cython \\
+      --enable-static \\
+      --enable-shared
+    make -j "$(nproc)"
+    make install DESTDIR="$BRIOCHE_OUTPUT"
+  `
+    .workDir(source)
+    .dependencies(
+      std.toolchain,
+      libimobiledeviceGlue,
+      libplist,
+      libtatsu,
+      libusbmuxd,
+      openssl,
+      curl({ minimal: true }),
+    )
+    .toDirectory()
+    .pipe(std.libtoolSanitizeDependencies)
+    .pipe(std.pkgConfigMakePathsRelative)
+    .pipe((recipe) =>
+      std.setEnv(recipe, {
+        CPATH: { append: [{ path: "include" }] },
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+        PKG_CONFIG_PATH: { append: [{ path: "lib/pkgconfig" }] },
+      }),
+    );
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const script = std.runBash`
+    pkg-config --modversion libimobiledevice-1.0 | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libimobiledevice)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that the result contains the expected version
+  const expected = project.version;
+  std.assert(result === expected, `expected '${expected}', got '${result}'`);
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubReleases({ project });
+}

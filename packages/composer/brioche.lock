@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/composer/composer/releases/download/2.10.0/composer.phar": {
+    "https://github.com/composer/composer/releases/download/2.10.2/composer.phar": {
       "type": "sha256",
-      "value": "a346538851988ead111d11e3cbd7d372eeba44abd0af412e09890d3c21ea6c31"
+      "value": "5ee7125f8a30a34d246cefdc0bc85b8a783b28f2aec968994118512350d28027"
     }
   }
 }
