@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/KhronosGroup/SPIRV-LLVM-Translator": {
-      "v22.1.4": "c88a2e4a1ec77f7adc8916940afd9754c3a30fab"
+      "v23.1.0": "19a29d4376ab470909ba43ca014ae668fb1156c9"
     }
   }
 }
