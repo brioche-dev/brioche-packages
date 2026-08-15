@@ -3,7 +3,7 @@ import * as std from "std";
 
 export const project = {
   name: "elfutils",
-  version: "0.195",
+  version: "0.196",
   repository: "https://github.com/sourceware-org/elfutils",
 };
 
