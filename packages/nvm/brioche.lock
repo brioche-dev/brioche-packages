@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/nvm-sh/nvm/archive/refs/tags/v0.40.5.tar.gz": {
+    "https://github.com/nvm-sh/nvm/archive/refs/tags/v0.40.6.tar.gz": {
       "type": "sha256",
-      "value": "9f350650afc5e4cfcc6af9fc327b2a6112c5700ad848bbe517254db64aee5061"
+      "value": "17302cad7feedb1ad33ba738f93d2176a90970724f22de119603624fcbdec1a2"
     }
   }
 }
