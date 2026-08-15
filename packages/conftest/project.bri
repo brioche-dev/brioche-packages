@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "conftest",
-  version: "0.68.2",
+  version: "0.69.0",
   extra: {
     moduleName: "github.com/open-policy-agent/conftest",
   },
