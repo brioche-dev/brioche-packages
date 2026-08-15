@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "vite",
-  version: "8.1.4",
+  version: "8.2.1",
   extra: {
     packageName: "vite",
   },
