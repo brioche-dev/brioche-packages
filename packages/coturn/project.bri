@@ -6,7 +6,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "coturn",
-  version: "4.17.0",
+  version: "4.17.2",
   repository: "https://github.com/coturn/coturn.git",
 };
 
