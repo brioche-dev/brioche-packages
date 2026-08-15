@@ -5,7 +5,7 @@ import python from "python";
 
 export const project = {
   name: "ladybug",
-  version: "0.19.0",
+  version: "0.19.1",
   repository: "https://github.com/LadybugDB/ladybug.git",
 };
 
