@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/llmfit/1.1.3/download": {
+    "https://crates.io/api/v1/crates/llmfit/1.1.9/download": {
       "type": "sha256",
-      "value": "925ec5264aefb4fc5f4bb1f9b5395d4810e35606810b1209089504bc0134c773"
+      "value": "db646a20cefaa6a870dbf2f7fb325cfa4e311b234d90ec64192b9f6b681e0b90"
     }
   }
 }
