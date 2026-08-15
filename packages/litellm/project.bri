@@ -5,7 +5,7 @@ import uv from "uv";
 
 export const project = {
   name: "litellm",
-  version: "1.95.0",
+  version: "1.96.2",
   repository: "https://github.com/BerriAI/litellm",
 };
 
