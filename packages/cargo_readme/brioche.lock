@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-readme/3.3.3/download": {
+    "https://crates.io/api/v1/crates/cargo-readme/3.4.0/download": {
       "type": "sha256",
-      "value": "1eb6777157f3f996589c9f4d008e14a4b4af43d793eae635f287439ebd471819"
+      "value": "5398c75501d20aaca64c64c8cdcffe23603a80f270587b3f6f91829ec8474a83"
     }
   }
 }
