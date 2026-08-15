@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "quickjs_ng",
-  version: "0.15.1",
+  version: "0.16.1",
   repository: "https://github.com/quickjs-ng/quickjs",
 };
 
