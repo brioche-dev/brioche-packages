@@ -4,7 +4,7 @@ import pnpm, { pnpmInstall } from "pnpm";
 
 export const project = {
   name: "filebrowser",
-  version: "2.63.18",
+  version: "2.63.23",
   extra: {
     moduleName: "github.com/filebrowser/filebrowser/v2",
   },
