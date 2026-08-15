@@ -5,9 +5,9 @@
       "type": "sha256",
       "value": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3"
     },
-    "https://files.pythonhosted.org/packages/source/c/cython/cython-3.2.8.tar.gz": {
+    "https://files.pythonhosted.org/packages/source/c/cython/cython-3.2.9.tar.gz": {
       "type": "sha256",
-      "value": "f4f23a56b25221a06f91817fe8f3114ab8b48a4fac73187dbb64bc2c4a87961f"
+      "value": "d249c9022ab13286b17bd66f30609e800c5f95efeecb06168990c7a66cecde6c"
     }
   }
 }
