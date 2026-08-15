@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/gleam-lang/gleam.git": {
-      "v1.17.0": "afc1b7d956b433e638d52dbd06470f53a0b26f6a"
+      "v1.18.1": "4a83802ca33a8a96227a1b332768725f232f9779"
     }
   }
 }
