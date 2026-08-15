@@ -3,7 +3,7 @@ import python, { fixScriptShebangs } from "python";
 
 export const project = {
   name: "krr",
-  version: "1.28.0",
+  version: "1.29.0",
   repository: "https://github.com/robusta-dev/krr",
 };
 
