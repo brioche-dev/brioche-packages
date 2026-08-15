@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/!zxilly/go-size-analyzer/@v/v1.13.0.info": {
+    "https://proxy.golang.org/github.com/!zxilly/go-size-analyzer/@v/v1.13.1.info": {
       "type": "sha256",
-      "value": "d7718753acb890f2e9081403620bc13ab5eff4bd08c9a45e31b33ef9e80e84ff"
+      "value": "a0e5e6667dd81758e17df3de28a56963d20151d97a8cb358c03a3ab2cabfbaee"
     },
-    "https://proxy.golang.org/github.com/!zxilly/go-size-analyzer/@v/v1.13.0.zip": {
+    "https://proxy.golang.org/github.com/!zxilly/go-size-analyzer/@v/v1.13.1.zip": {
       "type": "sha256",
-      "value": "98d2319700c5f090f0e0d0b46e46f2478b0ad1c180b99c9ac297887e82c6a740"
+      "value": "c8fb73513ffa2a96903613e09fb265bcd23303e2714f26faa551ff6bdc5d865a"
     }
   }
 }
