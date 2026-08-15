@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/streamnative/pulsarctl": {
-      "v4.2.1.7": "08e3f3d47540b105e7117cb513414b378fb5605d"
+      "v4.2.1.11": "de854cb62b33a435056eb1ba43200e8e80571d8c"
     }
   }
 }
