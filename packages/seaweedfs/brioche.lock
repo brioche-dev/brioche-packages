@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/seaweedfs/seaweedfs.git": {
-      "4.39": "db42bb49757b459551607939807017d7a9d5a94a"
+      "4.41": "de34a1a87c02893507f961cda9574172ee5064e9"
     }
   }
 }
