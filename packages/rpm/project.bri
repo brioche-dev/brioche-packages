@@ -15,7 +15,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "rpm",
-  version: "6.0.1",
+  version: "6.0.2",
   repository: "https://github.com/rpm-software-management/rpm",
 };
 
