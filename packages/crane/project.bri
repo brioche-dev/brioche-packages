@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "crane",
-  version: "0.21.7",
+  version: "0.21.9",
   extra: {
     moduleName: "github.com/google/go-containerregistry",
   },
