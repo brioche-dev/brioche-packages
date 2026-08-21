@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "cython",
-  version: "3.2.8",
+  version: "3.2.9",
   extra: {
     packageName: "Cython",
   },
