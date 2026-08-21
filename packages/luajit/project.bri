@@ -3,10 +3,10 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "luajit",
-  version: "2.1.1783773675",
+  version: "2.1.1785763465",
   repository: "https://github.com/LuaJIT/LuaJIT",
   extra: {
-    gitRef: "3c4f9fe2052b8d08a917ac0d5f38563f0297b5a3",
+    gitRef: "1edc3e52b67eaf6ce5f809be8e17d6862594b8bc",
   },
 };
 
