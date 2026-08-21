@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/aquasecurity/trivy/@v/v0.72.0.zip": {
+    "https://proxy.golang.org/github.com/aquasecurity/trivy/@v/v0.74.0.zip": {
       "type": "sha256",
-      "value": "27ff7fc7ca0a05547399652e1d41910b487e46bd0ea85188a59e394bbffba56b"
+      "value": "80ae39b9cbe1ba83a94577df415036084a3b5a54a35e57c091544743c8bc2043"
     }
   }
 }
