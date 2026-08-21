@@ -5,30 +5,30 @@
       "type": "sha256",
       "value": "708e7481cc80179af0e556bbf0cc00b8444c7321e2700b8d8580231d13017248"
     },
-    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl": {
-      "type": "sha256",
-      "value": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"
-    },
     "https://files.pythonhosted.org/packages/13/7c/b11b870fc4fd84de2099906314ce45488ae17be32ff5493519a6cddc518a/maturin-1.9.4.tar.gz": {
       "type": "sha256",
       "value": "235163a0c99bc6f380fb8786c04fd14dcf6cd622ff295ea3de525015e6ac40cf"
-    },
-    "https://files.pythonhosted.org/packages/f9/7b/d05b1778f2d4e354d103e3421c6267d923032fefcc5ca5b7df0cb21cefd0/setuptools_rust-1.12.0-py3-none-any.whl": {
-      "type": "sha256",
-      "value": "7e7db90547f224a835b45f5ad90c983340828a345554a9a660bdb2de8605dcdd"
     },
     "https://files.pythonhosted.org/packages/6a/23/8146aad7d88f4fcb3a6218f41a60f6c2d4e3a72de72da1825dc7c8f7877c/semantic_version-2.10.0-py2.py3-none-any.whl": {
       "type": "sha256",
       "value": "de78a3b8e0feda74cabc54aab2da702113e33ac9d9eb9d2389bcf1f58b7d9177"
     },
+    "https://files.pythonhosted.org/packages/a3/dc/17031897dae0efacfea57dfd3a82fdd2a2aeb58e0ff71b77b87e44edc772/setuptools-80.9.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"
+    },
     "https://files.pythonhosted.org/packages/ca/f9/2be83a4b40e9353536dfd15e17550102947b3e10b729a018df3e66bf9b73/uv_build-0.11.8.tar.gz": {
       "type": "sha256",
       "value": "77c7f1eb47f4fa76b0848e1d8838255f75f5777bdbfbf06d4aa66bac19aad82e"
+    },
+    "https://files.pythonhosted.org/packages/f9/7b/d05b1778f2d4e354d103e3421c6267d923032fefcc5ca5b7df0cb21cefd0/setuptools_rust-1.12.0-py3-none-any.whl": {
+      "type": "sha256",
+      "value": "7e7db90547f224a835b45f5ad90c983340828a345554a9a660bdb2de8605dcdd"
     }
   },
   "git_refs": {
     "https://github.com/BerriAI/litellm": {
-      "v1.95.0": "72a4a55f43ea7266de589f005d0d33624fe5d555"
+      "v1.96.2": "83d6d84bfb7abbbff70d456bc89028d426db8c33"
     }
   }
 }
