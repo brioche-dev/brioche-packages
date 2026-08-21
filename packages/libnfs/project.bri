@@ -4,7 +4,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libnfs",
-  version: "6.0.2",
+  version: "7.0.0",
   repository: "https://github.com/sahlberg/libnfs.git",
 };
 
