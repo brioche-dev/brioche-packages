@@ -15,7 +15,7 @@ import snappy from "snappy";
 
 export const project = {
   name: "folly",
-  version: "2026.08.03.00",
+  version: "2026.08.10.00",
   repository: "https://github.com/facebook/folly",
 };
 
