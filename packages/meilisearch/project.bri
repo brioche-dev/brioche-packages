@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "meilisearch",
-  version: "1.49.0",
+  version: "1.53.1",
   repository: "https://github.com/meilisearch/meilisearch.git",
 };
 
