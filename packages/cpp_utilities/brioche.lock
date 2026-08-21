@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/Martchus/cpp-utilities": {
-      "v5.34.2": "80e69b9294a704c506ac965edd9eea677d71f353"
+      "v5.35.0": "b3ee1f523f483460ce802a92774eec645ad4d38a"
     }
   }
 }
