@@ -4,7 +4,7 @@ import icu from "icu";
 
 export const project = {
   name: "boost",
-  version: "1.90.0",
+  version: "1.92.0",
   repository: "https://github.com/boostorg/boost",
 };
 
