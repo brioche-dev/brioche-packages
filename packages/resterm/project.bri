@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "resterm",
-  version: "0.46.4",
+  version: "1.1.0",
   extra: {
     moduleName: "github.com/unkn0wn-root/resterm",
   },
