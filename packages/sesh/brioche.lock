@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/joshmedeski/sesh/v2/@v/v2.27.0.zip": {
+    "https://proxy.golang.org/github.com/joshmedeski/sesh/v2/@v/v2.28.0.zip": {
       "type": "sha256",
-      "value": "08bf10d8eeb85fd6dd1258f0396e6072b36b9f7bdfe469eebc3ba29e7241fc3d"
+      "value": "7485fa465d66fea3ac445e6fb754f822f374e92a7858b740af330bc2f35182aa"
     }
   }
 }
