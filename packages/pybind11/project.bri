@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "pybind11",
-  version: "3.0.4",
+  version: "3.1.0",
   repository: "https://github.com/pybind/pybind11.git",
 };
 
