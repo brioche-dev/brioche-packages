@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "wasmtime",
-  version: "46.0.1",
+  version: "47.0.3",
   repository: "https://github.com/bytecodealliance/wasmtime.git",
 };
 
@@ -16,6 +16,10 @@ export default function wasmtime(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/wasmtime",
+
+    // cargo-chef makes the lockfile out-of-date, see this issue:
+    // https://github.com/LukeMathWalker/cargo-chef/issues/305
+    cargoChefPrepare: false,
   });
 }
 
