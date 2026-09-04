@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/monocle/1.3.0/download": {
+    "https://crates.io/api/v1/crates/monocle/1.4.0/download": {
       "type": "sha256",
-      "value": "e8f97f88e16bfba376ed7844db8366f96b7c2e0e8bd191383099f666e97ac3ba"
+      "value": "662dc14d823ca1fca17a8836d65660cb1f3c890d40cbe331bfed12b298435ad0"
     }
   }
 }
