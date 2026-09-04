@@ -10,10 +10,10 @@ import p11Kit from "p11_kit";
 
 export const project = {
   name: "openldap",
-  version: "2.6.13",
+  version: "2.7.0",
   repository: "https://github.com/openldap/openldap",
   extra: {
-    versionUnderscore: "2_6_13",
+    versionUnderscore: "2_7_0",
   },
 };
 
