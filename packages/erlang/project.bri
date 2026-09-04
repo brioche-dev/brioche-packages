@@ -4,7 +4,7 @@ import python from "python";
 
 export const project = {
   name: "erlang",
-  version: "29.0.3",
+  version: "29.0.5",
   repository: "https://github.com/erlang/otp",
 };
 
