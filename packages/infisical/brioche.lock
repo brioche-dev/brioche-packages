@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/Infisical/cli.git": {
-      "v0.43.106": "b63a3b523ef1addbddd9da2e81b667e9cbb0dc81"
+      "v0.43.121": "242df555bcbef217c288ca7df5e7ce5389830d82"
     }
   }
 }
