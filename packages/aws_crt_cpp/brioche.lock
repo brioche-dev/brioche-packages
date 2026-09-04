@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-crt-cpp": {
-      "v0.41.0": "d8ee6b6912c196e574be10f207868721117dd397"
+      "v0.43.5": "1f333376b2b2801bb3844ce5c315d3a87ecacd4b"
     }
   }
 }
