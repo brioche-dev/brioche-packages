@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/pupnp/pupnp": {
-      "release-22.0.4": "4145da68112f61660c8e55ed61fae1bb07d0e3d8"
+      "release-22.0.6": "837c6e4401de68deca1aef6254475326a8b87b2a"
     }
   }
 }
