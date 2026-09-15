@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.1.8.tar.xz": {
+    "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.2.6.tar.xz": {
       "type": "sha256",
-      "value": "ff01dcb449279d5b4cfccdb01fee639cf5ff1803f1749a77844dd33915422c49"
+      "value": "039aef84f2b0994aeda3f4fcfc3d02ec9d7a9bbb9020ea264c43f446c860f606"
     }
   }
 }
