@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/sharkdp/fd.git": {
-      "v10.4.2": "7027d45303b412be6fa9c09d689cc6276748fb38"
+      "v10.5.0": "4f81778774463bf414a184cbe6d5219ad2229646"
     }
   }
 }
