@@ -4,7 +4,7 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "php",
-  version: "8.5.9",
+  version: "8.5.10",
   repository: "https://github.com/php/php-src",
 };
 
