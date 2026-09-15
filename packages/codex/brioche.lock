@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/openai/codex/releases/download/rust-v0.144.4/codex-aarch64-unknown-linux-musl.tar.gz": {
+    "https://github.com/openai/codex/releases/download/rust-v0.154.0/codex-aarch64-unknown-linux-musl.tar.gz": {
       "type": "sha256",
-      "value": "4d07243ef4ae6786b8b321d7aea3f9be4e1d2c597ae5407e7c1b9873334082b2"
+      "value": "583b48df32804213bdcd338c2e5adb06b34340821fa757a726cc0a524fa33c27"
     },
-    "https://github.com/openai/codex/releases/download/rust-v0.144.4/codex-x86_64-unknown-linux-musl.tar.gz": {
+    "https://github.com/openai/codex/releases/download/rust-v0.154.0/codex-x86_64-unknown-linux-musl.tar.gz": {
       "type": "sha256",
-      "value": "37c985be9d89e8c4f43b3aa0594c1213eac212d30ae2b95221f08fec807515d1"
+      "value": "d7e18b2597ae8f242f5f31ee9e90deef48dbc9edd634d9868fb6435d08c07f02"
     }
   }
 }
