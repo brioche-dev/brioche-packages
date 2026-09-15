@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/mongodb/mongo-cxx-driver": {
-      "r4.4.1": "dbc37e0006be9d85960818a8960b3c427dae4d39"
+      "r4.5.3": "6ec1aa548944a14ef899116332aa79a5c30d209f"
     }
   }
 }
