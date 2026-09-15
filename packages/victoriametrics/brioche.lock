@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/VictoriaMetrics/VictoriaMetrics.git": {
-      "v1.149.0": "a8759a539c199849ead239c79ba4df04ade089bb"
+      "v1.152.0": "540b91da031aa8b7d53d3784693bb451e2be980a"
     }
   }
 }
