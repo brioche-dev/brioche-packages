@@ -3,7 +3,7 @@ import python, { wrapVenvScripts } from "python";
 
 export const project = {
   name: "fonttools",
-  version: "4.63.0",
+  version: "4.65.0",
   repository: "https://github.com/fonttools/fonttools.git",
 };
 
