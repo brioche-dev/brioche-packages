@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "fd",
-  version: "10.4.2",
+  version: "10.5.0",
   repository: "https://github.com/sharkdp/fd.git",
 };
 
