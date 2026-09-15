@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/wolfcw/libfaketime": {
-      "v0.9.12": "3ccdd344aadf1e317156fa5fb7c881f2c4404778"
+      "v0.9.13": "86b37fde2fed7336ea2d0c17928e3015a55d9b4a"
     }
   }
 }
