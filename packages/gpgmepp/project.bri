@@ -6,7 +6,7 @@ import libgpgError from "libgpg_error";
 
 export const project = {
   name: "gpgmepp",
-  version: "2.1.0",
+  version: "2.2.0",
   repository: "https://www.gnupg.org/",
 };
 
