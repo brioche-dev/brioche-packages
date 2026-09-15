@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "fastly",
-  version: "16.0.0",
+  version: "16.1.0",
   repository: "https://github.com/fastly/cli.git",
 };
 
