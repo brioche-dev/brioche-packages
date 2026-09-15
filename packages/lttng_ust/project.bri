@@ -4,7 +4,7 @@ import userspaceRcu from "userspace_rcu";
 
 export const project = {
   name: "lttng_ust",
-  version: "2.15.1",
+  version: "2.16.0",
   repository: "https://github.com/lttng/lttng-ust",
 };
 
