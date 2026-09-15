@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "panache",
-  version: "3.4.0",
+  version: "3.10.0",
   repository: "https://github.com/jolars/panache.git",
 };
 
