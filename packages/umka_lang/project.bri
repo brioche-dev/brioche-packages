@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "umka_lang",
-  version: "1.5.6",
+  version: "1.5.7",
   repository: "https://github.com/vtereshkov/umka-lang",
 };
 
