@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/docker/compose/v5/@v/v5.3.1.zip": {
+    "https://proxy.golang.org/github.com/docker/compose/v5/@v/v5.5.1.zip": {
       "type": "sha256",
-      "value": "ac25cb08de9382aa5a894ed5aac0540248cc85419dfbfad698002884d78d4153"
+      "value": "948c896ecf0d8d02941251560175f36261714723208dafdf6908efb510820182"
     }
   }
 }
