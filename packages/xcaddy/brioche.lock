@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/caddyserver/xcaddy": {
-      "v0.4.6": "f0b95317e7c814612e6f8cf28f06b3f816eadbbe"
+      "v0.4.7": "e0e8f68a0f4bef11bfd04c4fb3091052ad36132f"
     }
   }
 }
