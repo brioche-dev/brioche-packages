@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/kyx0r/nextvi/archive/refs/tags/7.3.tar.gz": {
+    "https://github.com/kyx0r/nextvi/archive/refs/tags/7.5.tar.gz": {
       "type": "sha256",
-      "value": "0211704b11809b09cb737038a78b1fa637362a402da8f9e7879554496eb585de"
+      "value": "e21564d2bf54632f23935c8bb3b0ee47e3fe5abd9a4b2f8258f71a1b69d33fdb"
     }
   }
 }
