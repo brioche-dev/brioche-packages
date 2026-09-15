@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/uv-build/0.12.5/download": {
+    "https://crates.io/api/v1/crates/uv-build/0.12.14/download": {
       "type": "sha256",
-      "value": "c8e4559338294197e408ce166d515ddc09d2f672852e3ca7f6257ec80e772348"
+      "value": "8892247c8d5c361190c4fa1f60f01ec6b22b26e8ce29cad55e0a8133209b4cdf"
     }
   }
 }
