@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/jumppad-labs/jumppad.git": {
-      "0.27.1": "e162d476f6d97818f48ed242e0bf4feae25115ea"
+      "0.28.1": "34289ffa45136505e3c37365240c1103650f7db3"
     }
   }
 }
