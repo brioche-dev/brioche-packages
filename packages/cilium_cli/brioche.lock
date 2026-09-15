@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/cilium/cilium-cli/@v/v0.19.6.zip": {
+    "https://proxy.golang.org/github.com/cilium/cilium-cli/@v/v0.20.0.zip": {
       "type": "sha256",
-      "value": "3ddcd848287b6f10717d82c445d4c7248ccd9f78adc21f8a387df9675ce35c4b"
+      "value": "c3d39fee7a46fe45609680ce709a857b25a6185e85bc23b536013e19f43e7922"
     }
   }
 }
