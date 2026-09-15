@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/baresip/re": {
-      "v4.10.0": "57beb068cd7944c829102710fd416749c3e694d9"
+      "v4.11.0": "ceefe9ff499aa1bcfb6255aff1737434dd385322"
     }
   }
 }
