@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libdeflate",
-  version: "1.25",
+  version: "1.26",
   repository: "https://github.com/ebiggers/libdeflate",
 };
 
