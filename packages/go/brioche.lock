@@ -1,21 +1,21 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://go.dev/dl/go1.25.13.linux-amd64.tar.gz": {
+    "https://go.dev/dl/go1.25.14.linux-amd64.tar.gz": {
       "type": "sha256",
-      "value": "39042a078ea9ceebe3ecda4a7188f0f5b96e14a071d27923ba7f40b456e85ae3"
+      "value": "a21ae5633a269bcd7e90cf767e48225633795e99d831742cbf3397064fee7712"
     },
-    "https://go.dev/dl/go1.25.13.linux-arm64.tar.gz": {
+    "https://go.dev/dl/go1.25.14.linux-arm64.tar.gz": {
       "type": "sha256",
-      "value": "adad240fcb6bd180cf973b4b7c747baf4ec81d08b7d40ca35940ee4531971490"
+      "value": "9bf234ea70ffec9347fdf6b22ce4add51717d3386a38a441e8c8743fceb5eaee"
     },
-    "https://go.dev/dl/go1.26.6.linux-amd64.tar.gz": {
+    "https://go.dev/dl/go1.26.8.linux-amd64.tar.gz": {
       "type": "sha256",
-      "value": "708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89"
+      "value": "d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b"
     },
-    "https://go.dev/dl/go1.26.6.linux-arm64.tar.gz": {
+    "https://go.dev/dl/go1.26.8.linux-arm64.tar.gz": {
       "type": "sha256",
-      "value": "d0507e9e9d7fe012aae570108cbd76c15de879e17130ab8cb90d4d7445cb1f2e"
+      "value": "211ffced9dcb9633a55eac6364816ec0ddd951389a740e88fa8b3337971bdda0"
     }
   }
 }
