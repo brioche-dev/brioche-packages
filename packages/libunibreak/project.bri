@@ -2,10 +2,10 @@ import * as std from "std";
 
 export const project = {
   name: "libunibreak",
-  version: "7.0",
+  version: "8.0",
   repository: "https://github.com/adah1972/libunibreak",
   extra: {
-    versionUnderscore: "7_0",
+    versionUnderscore: "8_0",
   },
 };
 
