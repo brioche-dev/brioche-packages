@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/dysk/3.6.1/download": {
+    "https://crates.io/api/v1/crates/dysk/3.7.0/download": {
       "type": "sha256",
-      "value": "5f966a375864c42b45657be0d90ef89e881db09b16ac713df32adbcf4539a668"
+      "value": "9f79b51cf0f2aa73d844be87e8aaf3bc62bfabaa828cf752edeb68d609a5f66c"
     }
   }
 }
