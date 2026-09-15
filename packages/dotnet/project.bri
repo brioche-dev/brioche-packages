@@ -5,13 +5,13 @@ import zlib from "zlib";
 
 export const project = {
   name: "dotnet",
-  version: "10.0.400",
+  version: "10.0.401",
   repository: "https://github.com/dotnet/sdk",
   extra: {
     otherVersions: {
-      "9": "9.0.317",
-      "8": "8.0.424",
-      "10": "10.0.400",
+      "9": "9.0.318",
+      "8": "8.0.425",
+      "10": "10.0.401",
     },
   },
 };
