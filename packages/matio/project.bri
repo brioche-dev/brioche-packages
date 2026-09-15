@@ -3,7 +3,7 @@ import hdf5 from "hdf5";
 
 export const project = {
   name: "matio",
-  version: "1.5.30",
+  version: "1.6.0",
   repository: "https://github.com/tbeu/matio",
 };
 
