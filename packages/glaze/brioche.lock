@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/stephenberry/glaze.git": {
-      "v8.0.0": "be4481f4b106fc82f0b7bc85f6a92202f8c0dd59"
+      "v8.4.0": "2518e7570d95c88a8622ed48cd7f80ce7290ce5b"
     }
   }
 }
