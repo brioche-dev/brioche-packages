@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-cal": {
-      "v0.9.15": "8aa2a48a09f93c65d4cf06388e143a6584de6321"
+      "v1.0.0": "2441187f3bdbe0f0fe7fa5dd1736be98227ad556"
     }
   }
 }
