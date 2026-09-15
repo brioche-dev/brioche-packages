@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/gohugoio/hugo/@v/v0.164.0.info": {
+    "https://proxy.golang.org/github.com/gohugoio/hugo/@v/v0.166.0.info": {
       "type": "sha256",
-      "value": "507ce08bad74a1d43e183b2ff1d1ceab1c77d82c583fb9e3430986571de4ded8"
+      "value": "a03a944171711d98018b361fb75826867cb495ce2802c4024c48ccaad2e6376d"
     },
-    "https://proxy.golang.org/github.com/gohugoio/hugo/@v/v0.164.0.zip": {
+    "https://proxy.golang.org/github.com/gohugoio/hugo/@v/v0.166.0.zip": {
       "type": "sha256",
-      "value": "5a3bd8600d702478610fac38ebaef47d486f0946d8922db2ae4a297a835ba3a8"
+      "value": "e03ae472e2c9f5aed28deb6d94b362da11153b3157282e06e879f522842b33df"
     }
   }
 }
