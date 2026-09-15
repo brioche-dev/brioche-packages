@@ -4,7 +4,7 @@ import tcl from "tcl";
 
 export const project = {
   name: "sqlcipher",
-  version: "4.17.0",
+  version: "4.19.0",
   repository: "https://github.com/sqlcipher/sqlcipher",
 };
 
