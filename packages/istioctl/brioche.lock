@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/istio/istio.git": {
-      "1.30.3": "56df41f63e513f834c9a3af33d8aed82d1d961f2"
+      "1.31.0": "eed52ebb66ade45214088877b0f82855d954060d"
     }
   }
 }
