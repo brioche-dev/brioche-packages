@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/pocketbase/pocketbase/@v/v0.39.11.zip": {
+    "https://proxy.golang.org/github.com/pocketbase/pocketbase/@v/v0.40.4.zip": {
       "type": "sha256",
-      "value": "44ff5e3d534f716690ddf3f202870f3eeb267ff1e9a7b1c1b91a961926706f6f"
+      "value": "b332d97581e0a3017bdb6591b7093b42f2b7647e80976227e7bb558a07dc0188"
     }
   }
 }
