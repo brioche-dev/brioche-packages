@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "asc",
-  version: "4.3.0",
+  version: "5.3.3",
   repository: "https://github.com/rorkai/App-Store-Connect-CLI.git",
 };
 
