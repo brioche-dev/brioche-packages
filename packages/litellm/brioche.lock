@@ -28,7 +28,7 @@
   },
   "git_refs": {
     "https://github.com/BerriAI/litellm": {
-      "v1.96.2": "83d6d84bfb7abbbff70d456bc89028d426db8c33"
+      "v1.101.0": "18243cd7af4c3325165ba68b21379e2719e051c7"
     }
   }
 }
