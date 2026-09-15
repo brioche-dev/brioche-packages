@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libxmp",
-  version: "4.7.2",
+  version: "4.7.3",
   repository: "https://github.com/libxmp/libxmp",
 };
 
