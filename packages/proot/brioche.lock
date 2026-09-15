@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/proot-me/proot.git": {
-      "v5.4.0": "bd5a5f63d72f8210d8cee76195eb9f0749e5bd70"
+      "v5.4.1": "d4b49e2243dee34e41c13dfeca6a3d07e9cf0f00"
     }
   }
 }
