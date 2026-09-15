@@ -7,7 +7,7 @@ import libtirpc from "libtirpc";
 
 export const project = {
   name: "iproute2",
-  version: "7.1.0",
+  version: "7.2.0",
   repository: "https://github.com/iproute2/iproute2",
 };
 
