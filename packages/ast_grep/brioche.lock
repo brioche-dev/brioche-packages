@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/ast-grep/ast-grep.git": {
-      "0.44.1": "26f784516b4a9a07f6969b1d5c3020ce42dbf7ed"
+      "0.45.3": "979c143639e3588c31f563091e69398683ed34f0"
     }
   }
 }
