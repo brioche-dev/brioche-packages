@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/rpm-software-management/rpm": {
-      "rpm-6.0.2-release": "a7f89afb57a98f6419d0eff35ca792198293b682"
+      "rpm-6.1.0-release": "f832c7e69945248dd5bcfcacfd10c176ee300fa2"
     }
   }
 }
