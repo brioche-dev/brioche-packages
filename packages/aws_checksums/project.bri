@@ -4,7 +4,7 @@ import awsCCommon from "aws_c_common";
 
 export const project = {
   name: "aws_checksums",
-  version: "0.2.10",
+  version: "1.0.0",
   repository: "https://github.com/awslabs/aws-checksums",
 };
 
