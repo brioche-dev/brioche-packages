@@ -14,7 +14,7 @@ import p11Kit from "p11_kit";
 
 export const project = {
   name: "yaz",
-  version: "5.37.3",
+  version: "5.38.0",
   repository: "https://github.com/indexdata/yaz",
 };
 
