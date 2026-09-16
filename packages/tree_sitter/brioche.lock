@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/tree-sitter/tree-sitter": {
-      "v0.26.12": "808e4b1fc06e269a107c4bd8bd936cc6fde18b00"
+      "v0.27.0": "6070dbfefd326bd735e5683eb128cc1b57dad0c0"
     }
   }
 }
