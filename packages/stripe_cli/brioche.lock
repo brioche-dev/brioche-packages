@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/stripe/stripe-cli/@v/v1.50.1.zip": {
+    "https://proxy.golang.org/github.com/stripe/stripe-cli/@v/v1.50.11.zip": {
       "type": "sha256",
-      "value": "122caa3ca9d9ebb9a981acf48d39f4e01ca92cb2312ec675a8bf5c2bc2b2d2d6"
+      "value": "c80358e7d667a539aee1aa88fa306cf4ae09d9e033b196f06300ec8c65f5556b"
     }
   }
 }
