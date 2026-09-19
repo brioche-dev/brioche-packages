@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/superseedr/1.0.13/download": {
+    "https://crates.io/api/v1/crates/superseedr/1.0.14/download": {
       "type": "sha256",
-      "value": "1ba6e2efc0a47e5494609781221c751d343f949ebf58df0c797c4bbd7e6a93bf"
+      "value": "58dd6ff3a7ae9e38aa894b29efa140e020fe91791ca2fc94a9d539a5e1392757"
     }
   }
 }
