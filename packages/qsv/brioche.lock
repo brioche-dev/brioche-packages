@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/dathere/qsv": {
-      "22.0.1": "0dbd4c50252c5a33686a0fae0a7cce9e7b65036d"
+      "23.0.1": "7c43b6bc77b22556220328eef22f29b9fac6d24b"
     }
   }
 }
