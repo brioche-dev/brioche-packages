@@ -127,7 +127,7 @@ export function bootstrapRun(
       export work_dir="$(pwd)/work"
       cd "$(pwd)/rootfs"
       "$BUSYBOX/bin/busybox" pivot_root . "$(pwd)/hostfs"
-      exec "$BUSYBOX/bin/busybox" chroot . /bin/bash -c 'cd $work_dir && /bin/bash -euo pipefail /bootstrap.sh'
+      exec "$BUSYBOX/bin/busybox" chroot . /bin/bash -c 'export TMPDIR=/tmp; cd $work_dir && /bin/bash -euo pipefail /bootstrap.sh'
     `)
     .withPermissions({ executable: true });
 
