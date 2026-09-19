@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "symfony_cli",
-  version: "5.17.1",
+  version: "5.20.0",
   repository: "https://github.com/symfony-cli/symfony-cli.git",
 };
 
