@@ -6,7 +6,7 @@ import uthash from "uthash";
 
 export const project = {
   name: "proot",
-  version: "5.4.0",
+  version: "5.4.1",
   repository: "https://github.com/proot-me/proot.git",
 };
 
