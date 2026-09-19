@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "sass",
-  version: "1.102.0",
+  version: "1.104.1",
   extra: {
     packageName: "sass",
   },
