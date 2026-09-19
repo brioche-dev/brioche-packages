@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/simdjson/simdjson.git": {
-      "v4.6.6": "9392a55f76ad9838efd1cdc1529f2607b3d613fb"
+      "v4.6.11": "f5de14f09256982933af2849beb43778bd421ca7"
     }
   }
 }
