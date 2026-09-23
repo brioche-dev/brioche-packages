@@ -1,0 +1,61 @@
+import * as std from "std";
+import { mesonBuild } from "meson";
+import ninja from "ninja";
+import python from "python";
+
+export const project = {
+  name: "libgpiod",
+  version: "2.3.1",
+  repository: "https://github.com/brgl/libgpiod.git",
+};
+
+const source = Brioche.download(
+  `https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-${project.version}.tar.gz`,
+)
+  .unarchive("tar", "gzip")
+  .peel();
+
+export default function libgpiod(): std.Recipe<std.Directory> {
+  return mesonBuild({
+    source,
+    dependencies: [std.toolchain, ninja, python],
+    set: {
+      tools: "enabled",
+      tests: "disabled",
+      examples: "disabled",
+      default_library: "static",
+      "bindings-python": "enabled",
+    },
+  });
+}
+
+export async function test(): Promise<std.Recipe<std.File>> {
+  const tools = ["gpiodetect", "gpioinfo", "gpioget", "gpioset", "gpiomon", "gpionotify"];
+
+  const script = std.runBash`
+    for tool in ${tools.join(" ")}; do
+      "$tool" --version || exit 1
+    done | tee "$BRIOCHE_OUTPUT"
+  `
+    .dependencies(std.toolchain, libgpiod)
+    .toFile();
+
+  const result = (await script.read()).trim();
+
+  // Check that every tool reports the expected version
+  const expected = `v${project.version}`;
+  const matches = result.split(expected).length - 1;
+  std.assert(
+    matches === tools.length,
+    `expected ${tools.length} '${expected}' occurrences (one per tool), got ${matches}`,
+  );
+  for (const tool of tools) {
+    std.assert(result.includes(tool), `expected '${tool}' in output`);
+  }
+
+  return script;
+}
+
+export function liveUpdate(): std.Recipe<std.Directory> {
+  return std.liveUpdateFromGithubTags({ project });
+}
