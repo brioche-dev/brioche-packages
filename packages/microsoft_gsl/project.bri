@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "microsoft_gsl",
-  version: "4.2.2",
+  version: "5.0.0",
   repository: "https://github.com/Microsoft/GSL.git",
 };
 
