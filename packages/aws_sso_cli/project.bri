@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "aws_sso_cli",
-  version: "2.3.1",
+  version: "2.3.2",
   repository: "https://github.com/synfinatic/aws-sso-cli.git",
 };
 

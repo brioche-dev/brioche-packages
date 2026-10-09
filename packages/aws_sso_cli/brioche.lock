@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/synfinatic/aws-sso-cli.git": {
-      "v2.3.1": "36a09df6a76bf0a02aa02a39a36fb2b655154626"
+      "v2.3.2": "b332ce5591f3c782755569d176d476fc0fe469cc"
     }
   }
 }
