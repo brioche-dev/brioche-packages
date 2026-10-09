@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "basedpyright",
-  version: "1.39.9",
+  version: "1.40.1",
   extra: {
     packageName: "basedpyright",
   },
