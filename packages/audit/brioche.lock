@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/linux-audit/audit-userspace": {
-      "v4.1.4": "07eea50408d28c953d4048dfef3da6556ce4b569"
+      "v4.2.1": "00659601cc23dc243bb0f451977636ff77fcf80f"
     }
   }
 }
