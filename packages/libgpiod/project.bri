@@ -30,7 +30,14 @@ export default function libgpiod(): std.Recipe<std.Directory> {
 }
 
 export async function test(): Promise<std.Recipe<std.File>> {
-  const tools = ["gpiodetect", "gpioinfo", "gpioget", "gpioset", "gpiomon", "gpionotify"];
+  const tools = [
+    "gpiodetect",
+    "gpioinfo",
+    "gpioget",
+    "gpioset",
+    "gpiomon",
+    "gpionotify",
+  ];
 
   const script = std.runBash`
     for tool in ${tools.join(" ")}; do
