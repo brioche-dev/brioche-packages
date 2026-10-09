@@ -1,0 +1,9 @@
+{
+  "dependencies": {},
+  "downloads": {
+    "https://mirrors.edge.kernel.org/pub/software/libs/libgpiod/libgpiod-2.3.1.tar.gz": {
+      "type": "sha256",
+      "value": "0733e1868e4579c169c820def8388173f000387c9fedcce9265dab65e60819aa"
+    }
+  }
+}
