@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "libfaketime",
-  version: "0.9.12",
+  version: "0.9.13",
   repository: "https://github.com/wolfcw/libfaketime",
 };
 
