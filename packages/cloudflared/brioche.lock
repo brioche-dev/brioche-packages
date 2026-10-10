@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/cloudflare/cloudflared": {
-      "2026.7.2": "8679787525edc8575b2948a7c4a50b6292c6d426"
+      "2026.9.1": "f11dea9cb7079e90a982c1a2d5548ab40847fdcf"
     }
   }
 }
