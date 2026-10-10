@@ -25,9 +25,9 @@
       "type": "sha256",
       "value": "f34c41761022dd093b4b6896d4810782ffbabe30f2d443ff5f083e0cbbb8c737"
     },
-    "https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.1.4/mesa-mesa-26.1.4.tar.bz2": {
+    "https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.2.2/mesa-mesa-26.2.2.tar.bz2": {
       "type": "sha256",
-      "value": "941c80d502537cbd0f1a21087eb0fa4d8ae7a80bc11ecce9c08d24471b706436"
+      "value": "3375d14d9ec0570890c11d627973e1ed0101edbe71cde251a52a06235620da14"
     }
   }
 }
