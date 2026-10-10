@@ -3,7 +3,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_readme",
-  version: "3.3.3",
+  version: "3.4.0",
   extra: {
     crateName: "cargo-readme",
   },
