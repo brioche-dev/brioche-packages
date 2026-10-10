@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.netfilter.org/pub/nftables/nftables-1.1.6.tar.xz": {
+    "https://www.netfilter.org/pub/nftables/nftables-1.1.7.tar.xz": {
       "type": "sha256",
-      "value": "372931bda8556b310636a2f9020adc710f9bab66f47efe0ce90bff800ac2530c"
+      "value": "a6fbf060d8d4fff001517a2b94f356bb4366bfbf0ba366366f9d27cc38caa58f"
     }
   }
 }

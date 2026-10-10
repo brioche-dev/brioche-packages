@@ -7,7 +7,7 @@ import libnftnl from "libnftnl";
 
 export const project = {
   name: "nftables",
-  version: "1.1.6",
+  version: "1.1.7",
 };
 
 const source = Brioche.download(
