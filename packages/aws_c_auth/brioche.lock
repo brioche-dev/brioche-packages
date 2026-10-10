@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/awslabs/aws-c-auth": {
-      "v0.10.4": "4b5d524bf1a511b05e0fffe5bdc51800770b9427"
+      "v1.0.0": "055e822f021d1cab11d608b94ac34de250986134"
     }
   }
 }
