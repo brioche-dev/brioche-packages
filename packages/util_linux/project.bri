@@ -3,7 +3,7 @@ import * as std from "std";
 
 export const project = {
   name: "util_linux",
-  version: "2.42.2",
+  version: "2.42.3",
   repository: "https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git",
   extra: {
     majorVersion: "2",
