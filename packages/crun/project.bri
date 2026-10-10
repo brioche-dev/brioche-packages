@@ -7,7 +7,7 @@ import python from "python";
 
 export const project = {
   name: "crun",
-  version: "1.28",
+  version: "1.29.1",
   repository: "https://github.com/containers/crun",
 };
 
