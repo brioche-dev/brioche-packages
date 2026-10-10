@@ -4,7 +4,7 @@ import litellm from "litellm";
 
 export const project = {
   name: "ccusage",
-  version: "20.0.19",
+  version: "20.0.20",
   repository: "https://github.com/ccusage/ccusage.git",
 };
 
