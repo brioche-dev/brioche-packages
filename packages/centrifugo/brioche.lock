@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/centrifugal/centrifugo/v6/@v/v6.9.1.zip": {
+    "https://proxy.golang.org/github.com/centrifugal/centrifugo/v6/@v/v6.9.6.zip": {
       "type": "sha256",
-      "value": "23e66a5ffcd876dc9eb3020c7a6a9eebd43a8c53d379e758dcf92550e13decc2"
+      "value": "798cabcedddcc98e02f68b1a93651b09f99ca79bbde4c7691d662139e7aab864"
     }
   }
 }
