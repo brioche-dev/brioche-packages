@@ -4,7 +4,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "cgif",
-  version: "0.5.3",
+  version: "0.5.4",
   repository: "https://github.com/dloebl/cgif",
 };
 
