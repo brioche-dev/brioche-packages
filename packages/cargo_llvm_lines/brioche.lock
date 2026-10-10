@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-llvm-lines/0.4.46/download": {
+    "https://crates.io/api/v1/crates/cargo-llvm-lines/0.4.48/download": {
       "type": "sha256",
-      "value": "0a2ce50da4a46d19a9b58cb8dbceecfcda9741bc8be91b50159df020dd4342c9"
+      "value": "9e55b5486943f5842313e04e3a22ee51c301784dec1101087a88cc5c145930eb"
     }
   }
 }
