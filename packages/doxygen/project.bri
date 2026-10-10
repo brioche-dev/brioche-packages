@@ -4,10 +4,10 @@ import python from "python";
 
 export const project = {
   name: "doxygen",
-  version: "1.17.0",
+  version: "1.18.0",
   repository: "https://github.com/doxygen/doxygen.git",
   extra: {
-    versionUnderscore: "1_17_0",
+    versionUnderscore: "1_18_0",
   },
 };
 
