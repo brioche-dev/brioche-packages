@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/libxmp/libxmp": {
-      "libxmp-4.7.1": "12f76e4bf1dd6765e3bf46cbc1ff35c4a4551671"
+      "libxmp-4.7.3": "1e0812137e4f9e15cc026c0c75af82d71d3cb5ad"
     }
   }
 }
