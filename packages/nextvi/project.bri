@@ -22,9 +22,7 @@ export default function nextvi(): std.Recipe<std.Directory> {
     .toDirectory()
     .pipe((recipe) =>
       // Rename binary file
-      recipe
-        .insert("bin/nextvi", recipe.get("bin/vi"))
-        .remove("bin/vi"),
+      recipe.insert("bin/nextvi", recipe.get("bin/vi")).remove("bin/vi"),
     )
     .pipe((recipe) => std.withRunnableLink(recipe, "bin/nextvi"));
 }
