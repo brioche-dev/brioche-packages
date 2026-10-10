@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/gitlogue/0.9.0/download": {
+    "https://crates.io/api/v1/crates/gitlogue/0.11.0/download": {
       "type": "sha256",
-      "value": "84641273e14688fd9fc134e4d30d77646a8e90582c8795a520b1432ecf178512"
+      "value": "682a5c54495794152c0eb47055937b60bd23750eeed035f20571f9d8181bc61d"
     }
   }
 }
