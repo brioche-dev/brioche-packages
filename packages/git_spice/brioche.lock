@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/abhinav/git-spice/@v/v0.31.0.zip": {
+    "https://proxy.golang.org/github.com/abhinav/git-spice/@v/v0.31.2.zip": {
       "type": "sha256",
-      "value": "a66372fb46e6cd8b2285861abd82d2b27d9feba205d9abb0f5476b28f25abc3b"
+      "value": "4529f90b5f009d651aea3f25e6f5f5a8ea0413ab462f0f5c6971f02543666f4b"
     }
   }
 }
