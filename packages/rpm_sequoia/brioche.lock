@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/rpm-sequoia/1.10.2/download": {
+    "https://crates.io/api/v1/crates/rpm-sequoia/1.10.3/download": {
       "type": "sha256",
-      "value": "b168e5081662d1df99f96c34b249796f2ee60c3a31d2fb31086c06a5b1a4b70a"
+      "value": "ab7c3f5d4ee3bf5472d4d23707a6903d03544586827385340220a89e4f32904a"
     }
   }
 }
