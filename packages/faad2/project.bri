@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "faad2",
-  version: "2.11.2",
+  version: "2.11.3",
   repository: "https://github.com/knik0/faad2",
 };
 
