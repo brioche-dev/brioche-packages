@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/safedep/vet/@v/v1.17.5.info": {
+    "https://proxy.golang.org/github.com/safedep/vet/@v/v1.19.0.info": {
       "type": "sha256",
-      "value": "33c0d642c6eb1abeda375b1b6b4d2577dbf0007b2fba18b21f44bc52031f3faa"
+      "value": "4860170947f4eec022f0a2bdf0ceeedccfb8d346448b9c1b636f83cfbd5d8034"
     },
-    "https://proxy.golang.org/github.com/safedep/vet/@v/v1.17.5.zip": {
+    "https://proxy.golang.org/github.com/safedep/vet/@v/v1.19.0.zip": {
       "type": "sha256",
-      "value": "81f4bc66620c41fc41f6c2d5e3cd4df0e571d137092731a82c75d48a2cb6f62b"
+      "value": "db96fa9800902fedb9c5b7bdd47ea404266b5c660f379de85d104f7582691494"
     }
   }
 }
