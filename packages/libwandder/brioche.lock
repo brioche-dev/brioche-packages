@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/LibtraceTeam/libwandder": {
-      "2.0.21-1": "ce2106f98de4026ed1b66c2742374faa380439b4"
+      "2.0.22-1": "e52aeb3e4e60a593326f77cdbbaf7c72c6e27965"
     }
   }
 }
