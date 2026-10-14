@@ -14,7 +14,7 @@ import pcre2 from "pcre2";
 
 export const project = {
   name: "libraqm",
-  version: "0.10.5",
+  version: "0.11.0",
   repository: "https://github.com/HOST-Oman/libraqm",
 };
 
