@@ -3,7 +3,7 @@ import cmake, { cmakeBuild } from "cmake";
 
 export const project = {
   name: "howard_hinnant_date",
-  version: "3.0.4",
+  version: "3.0.5",
   repository: "https://github.com/HowardHinnant/date.git",
 };
 
