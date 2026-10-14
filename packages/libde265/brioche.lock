@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/strukturag/libde265": {
-      "v1.1.1": "4dd701fffac01632ffd5cabc5ef10deb56accba1"
+      "v1.1.3": "ba62bf4cfb3242f3bf0a45617ff09e35236e4d82"
     }
   }
 }
