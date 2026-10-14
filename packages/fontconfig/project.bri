@@ -9,7 +9,7 @@ import python from "python";
 
 export const project = {
   name: "fontconfig",
-  version: "2.18.2",
+  version: "2.18.3",
   repository: "https://gitlab.freedesktop.org/fontconfig/fontconfig",
 };
 
