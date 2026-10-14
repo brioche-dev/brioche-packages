@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.10.tar.gz": {
+    "https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.11.tar.gz": {
       "type": "sha256",
-      "value": "5692cc80554a7117c99eaa725d35100edd8bbf73423a5e265ff867979192df7d"
+      "value": "c60af221a9ce59f467d9f5937d5dc281cee85c7bfbfa6654d05d7197b04e83e1"
     }
   }
 }
