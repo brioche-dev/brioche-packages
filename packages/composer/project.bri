@@ -3,7 +3,7 @@ import php from "php";
 
 export const project = {
   name: "composer",
-  version: "2.10.2",
+  version: "2.10.3",
   repository: "https://github.com/composer/composer",
 };
 
