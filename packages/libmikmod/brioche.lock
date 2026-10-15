@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/sezero/mikmod": {
-      "libmikmod-3.3.14": "8de19eef766d9ba30a74c19e566edfcd61851dba"
+      "libmikmod-3.3.15": "6e658155f7e6b394a288dac796ba572634553fad"
     }
   }
 }
