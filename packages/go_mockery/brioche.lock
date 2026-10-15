@@ -3,7 +3,7 @@
   "git_refs": {
     "https://github.com/vektra/mockery.git": {
       "v2.53.7": "c760db67a9568657545db0182148e0c6ea5ff8a8",
-      "v3.8.0": "9269f146f5697abefa0a7eee9fde752e5e9eb4e8"
+      "v3.8.1": "0ddc8e48058a948e0c085b5d929ef93b8172d0fd"
     }
   }
 }
