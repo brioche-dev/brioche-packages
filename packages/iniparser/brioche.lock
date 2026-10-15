@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/ndevilla/iniparser": {
-      "v4.2.6": "4bef811283e0ec1658c60e09950bd5a1ddc92e4b"
+      "v4.3.2": "4fff3f22b63819d30ad5c2e4d7c7df9ec272cffc"
     }
   }
 }
