@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/hunspell/hunspell/releases/download/v1.7.3/hunspell-1.7.3.tar.gz": {
+    "https://github.com/hunspell/hunspell/releases/download/v1.7.5/hunspell-1.7.5.tar.gz": {
       "type": "sha256",
-      "value": "433274dac0619cb00c2e18b43a3dd3a9d50da5b5613fa9b5c21781e35dd76bc1"
+      "value": "2e559f0c2a592ba48e421477f58e9bf7e01062277a4a7821afb52fc9401010ae"
     }
   }
 }
