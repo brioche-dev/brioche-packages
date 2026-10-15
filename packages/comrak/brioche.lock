@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/comrak/0.55.0/download": {
+    "https://crates.io/api/v1/crates/comrak/0.56.0/download": {
       "type": "sha256",
-      "value": "daa3d1ea6b01ce72405fa3f826768f51c7a44917527c89b37856ffdd17ee57e4"
+      "value": "2544c4d6b6da7d54e95ac2833b464bf3dffa0666237868f2bf4ec5e11c9ba8cc"
     }
   }
 }
