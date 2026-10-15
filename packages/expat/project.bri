@@ -3,10 +3,10 @@ import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "expat",
-  version: "2.8.4",
+  version: "2.9.0",
   repository: "https://github.com/libexpat/libexpat",
   extra: {
-    versionUnderscore: "2_8_4",
+    versionUnderscore: "2_9_0",
   },
 };
 
