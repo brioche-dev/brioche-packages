@@ -4,7 +4,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "faac",
-  version: "2.1",
+  version: "2.2",
   repository: "https://github.com/knik0/faac",
 };
 

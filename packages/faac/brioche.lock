@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/knik0/faac": {
-      "faac-2.1": "028707109fe62da278870138e152ac664f9c6a4f"
+      "faac-2.2": "6acbe23ac9318d8f731ef38e0a56365f70af4797"
     }
   }
 }
