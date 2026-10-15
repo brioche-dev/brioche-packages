@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/biomejs/biome.git": {
-      "@biomejs/biome@2.5.13": "810ea565b87dc639b64805ebadb2e7d68b9d7cc7"
+      "@biomejs/biome@2.5.15": "0b4c11f553a7e702f9851af139662e1de45dc131"
     }
   }
 }
