@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libressl",
-  version: "4.3.2",
+  version: "4.3.3",
   repository: "https://github.com/libressl/portable",
 };
 
