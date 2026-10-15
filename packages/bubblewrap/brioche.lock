@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/containers/bubblewrap/releases/download/v0.12.0/bubblewrap-0.12.0.tar.xz": {
+    "https://github.com/containers/bubblewrap/releases/download/v0.13.1/bubblewrap-0.13.1.tar.xz": {
       "type": "sha256",
-      "value": "9760d007363e3abba7c747489910f9f82d9fca53ba3bd3282e396fa3c97a3314"
+      "value": "0e85c8702248b8dd64144f594147553650cdd0e4c951690345faace79c217c4d"
     }
   }
 }
