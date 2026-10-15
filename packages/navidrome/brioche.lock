@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/navidrome/navidrome/@v/v0.64.0.info": {
+    "https://proxy.golang.org/github.com/navidrome/navidrome/@v/v0.64.2.info": {
       "type": "sha256",
-      "value": "4f32ac6ac1b17a86b172afd8140a5c6858ec77b69b3edfe0196926cce5a1da6d"
+      "value": "50d0cce531cfbb9a6c33d9e30daca2f55c90021a88e4c06c530a43dadc71d128"
     },
-    "https://proxy.golang.org/github.com/navidrome/navidrome/@v/v0.64.0.zip": {
+    "https://proxy.golang.org/github.com/navidrome/navidrome/@v/v0.64.2.zip": {
       "type": "sha256",
-      "value": "8b01a5be1899d53a94d204cf9a5804a0803b68b51590f9fad7044f1863f25378"
+      "value": "bbb5e17afa183689e17007fb6af3cf655264bd9f2767f5d2b19481d6ca39a8d3"
     }
   }
 }
