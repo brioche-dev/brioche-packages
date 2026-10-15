@@ -6,10 +6,10 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "libyuv",
-  version: "1971",
+  version: "1974",
   repository: "https://chromium.googlesource.com/libyuv/libyuv.git",
   extra: {
-    gitRef: "2dd4257364d39c38d79465c4ddc4b93137fe729b",
+    gitRef: "0b9e5c922deec7c9921ae385f6242a9a27754d6e",
   },
 };
 
