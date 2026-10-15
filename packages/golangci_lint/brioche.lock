@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/golangci/golangci-lint/v2/@v/v2.12.2.info": {
+    "https://proxy.golang.org/github.com/golangci/golangci-lint/v2/@v/v2.14.0.info": {
       "type": "sha256",
-      "value": "10c50781e99e25565c77c4bdb3163705e00d28567787c6a1ebfda1d0adf3d1df"
+      "value": "f422467f9aaec5ffe48a7854692d1858d96016ded026b8c29e90dcf04ab50fc2"
     },
-    "https://proxy.golang.org/github.com/golangci/golangci-lint/v2/@v/v2.12.2.zip": {
+    "https://proxy.golang.org/github.com/golangci/golangci-lint/v2/@v/v2.14.0.zip": {
       "type": "sha256",
-      "value": "198f7a6df3fd55f3980b72c838b81773ac9eaa28da15b083a374815ac1223f33"
+      "value": "654f34e1031fd4947ee7adb2d1dc6abf889ea24e07c0c01a14f3e5d754e6bf92"
     }
   }
 }
