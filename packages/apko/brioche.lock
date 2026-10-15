@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/chainguard.dev/apko/@v/v1.4.1.info": {
+    "https://proxy.golang.org/chainguard.dev/apko/@v/v1.4.11.info": {
       "type": "sha256",
-      "value": "e2cbc23b011c6faef2a8aad1742b523b8f22ead31ea4e5b96d8afd5099289339"
+      "value": "0e323bd6bde6c04324d7eb6e4994f0f78490311a92d0fcf1a0e62f4bdd680f71"
     },
-    "https://proxy.golang.org/chainguard.dev/apko/@v/v1.4.1.zip": {
+    "https://proxy.golang.org/chainguard.dev/apko/@v/v1.4.11.zip": {
       "type": "sha256",
-      "value": "e6620858e7c6a5f4f999c3591921e677e442673d1140f4f584e817aeb12c4e9a"
+      "value": "a600833883c0636b013d69bd58a65e2654426ebf2d51074389dd74ca8ad684bf"
     }
   }
 }
