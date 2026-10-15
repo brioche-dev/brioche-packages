@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "dagu",
-  version: "2.16.6",
+  version: "2.20.1",
   repository: "https://github.com/dagucloud/dagu",
 };
 
