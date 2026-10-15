@@ -4,7 +4,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "cargo_pgrx",
-  version: "0.19.2",
+  version: "0.19.3",
   extra: {
     crateName: "cargo-pgrx",
   },
