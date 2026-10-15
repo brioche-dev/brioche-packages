@@ -3,10 +3,10 @@ import * as std from "std";
 
 export const project = {
   name: "lodepng",
-  version: "20260119",
+  version: "20261006",
   repository: "https://github.com/lvandeve/lodepng",
   extra: {
-    gitRef: "ed6fe5825c6a4fbb7f58ab35a4231c7543cd452a",
+    gitRef: "e584a8490db1b76b81bf298c11c09d3b55d9c270",
   },
 };
 
