@@ -10,7 +10,7 @@ import s2n from "s2n";
 
 export const project = {
   name: "aws_c_mqtt",
-  version: "1.0.0",
+  version: "1.1.1",
   repository: "https://github.com/awslabs/aws-c-mqtt",
 };
 
