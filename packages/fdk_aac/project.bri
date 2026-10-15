@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "fdk_aac",
-  version: "2.0.3",
+  version: "3.0.0",
   repository: "https://github.com/mstorsjo/fdk-aac",
 };
 
