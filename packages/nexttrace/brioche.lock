@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/nxtrace/!n!trace-core/@v/v1.7.3.info": {
+    "https://proxy.golang.org/github.com/nxtrace/!n!trace-core/@v/v1.7.4.info": {
       "type": "sha256",
-      "value": "2a4149e58427d3e79f4e6d07d5fa5f1ca3a7f25e7d88ab570cbe4bfc0f4d13ee"
+      "value": "8c48f6c9c4da8c156b5f4eca9068317900a7e77010926b0281d25ca8300620ab"
     },
-    "https://proxy.golang.org/github.com/nxtrace/!n!trace-core/@v/v1.7.3.zip": {
+    "https://proxy.golang.org/github.com/nxtrace/!n!trace-core/@v/v1.7.4.zip": {
       "type": "sha256",
-      "value": "17137feed7b6a6e13c9360b9649ac9dba42ac4823a748757a0666b8804287c09"
+      "value": "45df3531bec06b0915975d3b0f5e62b2234677d130ab6372d29cc7e75c37ad53"
     }
   }
 }
