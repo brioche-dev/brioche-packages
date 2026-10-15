@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/Microsoft/GSL.git": {
-      "v5.0.0": "417ef685eafd626db765f0027b7fc5a0057e0770"
+      "v5.0.1": "fbd20b8e8c52cba04dbc869cc9068a7800a5665d"
     }
   }
 }
