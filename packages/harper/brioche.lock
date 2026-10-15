@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/harper-ls/2.10.0/download": {
+    "https://crates.io/api/v1/crates/harper-ls/2.11.0/download": {
       "type": "sha256",
-      "value": "28206c5defd186254a604ad54733acacdc4da89023948f13b14e7d47ae35bd1b"
+      "value": "d0102604f96a1099bd9e7c0bdd1c705b9c6bd0f97461abd023450915a4ea0ebf"
     }
   }
 }
