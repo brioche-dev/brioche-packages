@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/knik0/faad2.git": {
-      "2.11.3": "6918ebb51b8f7e86278da15884bd7114e4b9661e"
+      "2.11.4": "e8e76f0a44db45aed773a3f62fe35a63c867a738"
     }
   }
 }
