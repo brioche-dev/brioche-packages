@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://7-zip.org/a/7z2603-src.tar.xz": {
+    "https://7-zip.org/a/7z2604-src.tar.xz": {
       "type": "sha256",
-      "value": "9cbde5099c6deb73691b0579063da5827522ccbbcba3f0020fd04e8c8c16c0d4"
+      "value": "9691944c0fe0d01bb49373a704fb983fd33bc98b1738695179dfbf99ac1734f6"
     }
   }
 }
