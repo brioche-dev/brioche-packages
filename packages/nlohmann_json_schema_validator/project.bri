@@ -4,7 +4,7 @@ import nlohmannJson from "nlohmann_json";
 
 export const project = {
   name: "nlohmann_json_schema_validator",
-  version: "2.4.0",
+  version: "2.4.1",
   repository: "https://github.com/pboettch/json-schema-validator",
 };
 
