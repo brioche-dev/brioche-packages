@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/aliyun/aliyun-cli": {
-      "v3.5.0": "f1abad5be684af82bdb976da059887b20d10aa65"
+      "v3.5.1": "88286fe59c1ef7e787ddb51faaa2c260b2c30333"
     }
   }
 }
