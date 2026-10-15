@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-2.5.21.tar.bz2": {
+    "https://gnupg.org/ftp/gcrypt/gnupg/gnupg-2.5.24.tar.bz2": {
       "type": "sha256",
-      "value": "e3af2c8caa46a66a9329fa7c6880af260451914d819595beabc2c26597b31352"
+      "value": "bf149d01a2b9fcc0e4589b8ae8697d3d5c557ea48ed95a3fa55dd3b1187e6039"
     }
   }
 }
