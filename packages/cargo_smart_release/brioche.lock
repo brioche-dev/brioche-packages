@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-smart-release/0.21.13/download": {
+    "https://crates.io/api/v1/crates/cargo-smart-release/0.21.14/download": {
       "type": "sha256",
-      "value": "f9bd9cb9f3677f1e0fd13323dd97fa81b4b0af37fd9ad2f3587af24f48c7a362"
+      "value": "4a0539051888390ecd94e992adf1b9ae45e7da56dc2fb493ee7055ed288ee516"
     }
   }
 }
