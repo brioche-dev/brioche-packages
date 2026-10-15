@@ -3,7 +3,7 @@ import libplist from "libplist";
 
 export const project = {
   name: "libimobiledevice_glue",
-  version: "1.3.2",
+  version: "1.3.3",
   repository: "https://github.com/libimobiledevice/libimobiledevice-glue",
 };
 
