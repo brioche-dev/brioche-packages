@@ -3,7 +3,7 @@ import python, { wrapVenvScripts } from "python";
 
 export const project = {
   name: "fypp",
-  version: "3.2",
+  version: "3.3",
   repository: "https://github.com/aradi/fypp",
   extra: {
     packageName: "fypp",
