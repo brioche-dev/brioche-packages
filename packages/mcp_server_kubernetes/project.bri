@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "mcp_server_kubernetes",
-  version: "4.1.7",
+  version: "4.1.9",
   extra: {
     packageName: "mcp-server-kubernetes",
   },
