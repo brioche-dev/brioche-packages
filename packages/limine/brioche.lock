@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/limine-bootloader/limine/releases/download/v12.9.0/limine-12.9.0.tar.xz": {
+    "https://github.com/limine-bootloader/limine/releases/download/v12.9.3/limine-12.9.3.tar.xz": {
       "type": "sha256",
-      "value": "86107e8754365124b1871479f766697461f16ce9d847b3c23bb269335588c565"
+      "value": "95f456a204ce4855a9b5bd72e2cc170080f217edf5e7edf8ded9bb9f3dd4e995"
     }
   }
 }
