@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.libarchive.org/downloads/libarchive-3.8.9.tar.xz": {
+    "https://www.libarchive.org/downloads/libarchive-3.8.10.tar.xz": {
       "type": "sha256",
-      "value": "888c934f9d95648ecb9163dc8e23ab80a476ecb81a8f1154704a227b5b676dde"
+      "value": "56cad765459d5ee25a3b761f90c47d99379d28297fbfb72d908880d6b875fb96"
     }
   }
 }
