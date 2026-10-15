@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/charmbracelet/gum/v2/@v/v2.0.1.info": {
+    "https://proxy.golang.org/github.com/charmbracelet/gum/v2/@v/v2.0.2.info": {
       "type": "sha256",
-      "value": "0a0856e8aecc22d130608bdb2c8670f946936fa218ebfd2bf03ed1eb5e7dc1d5"
+      "value": "1ad1bb34ee5af020309b5779b3cabd9bd5b7a14dc4d26ddae39e5c5620342ffc"
     },
-    "https://proxy.golang.org/github.com/charmbracelet/gum/v2/@v/v2.0.1.zip": {
+    "https://proxy.golang.org/github.com/charmbracelet/gum/v2/@v/v2.0.2.zip": {
       "type": "sha256",
-      "value": "0e82dcd0a947aac468bca9e8f983c9d670962c60a354c6a980da753849905214"
+      "value": "22dbbd64647c7c7f85bf2bc7261606c6b69ac2291acb2662650bde3093d0dd8f"
     }
   }
 }
