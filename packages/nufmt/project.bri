@@ -4,10 +4,10 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "nufmt",
-  version: "0.1.4",
+  version: "0.1.5",
   repository: "https://github.com/nushell/nufmt.git",
   extra: {
-    gitRef: "08f332ba7abe915575dd0588e7a528a774906b92",
+    gitRef: "ce67377fb9131218a9319e57ede252cec60bf033",
   },
 };
 
