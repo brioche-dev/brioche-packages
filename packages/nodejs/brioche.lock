@@ -1,29 +1,29 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "fff4078c5def658577f92c88db7db3bc0072924bfb93fe52c1e744a54e94abb8"
+      "value": "a44aeb94849a299b22df10b9e622ec2f605c2183501bc40590705131de7c740f"
     },
-    "https://nodejs.org/dist/v22.23.2/node-v22.23.2-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "d60acfe00a2932254bb0ad20e01b0d74397a0875595de719654b214f4b03f307"
+      "value": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de"
     },
-    "https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v24.22.0/node-v24.22.0-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "6ad1325edbdb5649c379b75a237147a666c95d4f9ae8d340fef2d1575d289ad2"
+      "value": "fef00bb4d36e1c50104a9775a10359beee98f162b4104dd12472c75065c6a143"
     },
-    "https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v24.22.0/node-v24.22.0-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6"
+      "value": "cc2f601cee82d9a5a233302fe307abc600727035fd7d2c3a3571755989e95008"
     },
-    "https://nodejs.org/dist/v26.8.2/node-v26.8.2-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "81d8f0fdea9dcd3bfdcfeafc5f8359c151f097e9880b0007c0645ca670d07971"
+      "value": "fd6cc729fa4448c2ac27c3fca5606019ced63c65a15c152c8df03e0cbce7f4c5"
     },
-    "https://nodejs.org/dist/v26.8.2/node-v26.8.2-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "40e1d3225c1c9ae9a2671c98ecb9857e4d5555026394f348645676798840d5c5"
+      "value": "fd47865ecd6391ebb431fc815e01b9135bf83ded5cf373247e9331e196b7aded"
     }
   }
 }
