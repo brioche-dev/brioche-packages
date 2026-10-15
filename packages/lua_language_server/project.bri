@@ -4,7 +4,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "lua_language_server",
-  version: "3.19.1",
+  version: "3.19.2",
   repository: "https://github.com/LuaLS/lua-language-server",
 };
 

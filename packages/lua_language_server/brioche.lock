@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/LuaLS/lua-language-server": {
-      "3.19.1": "d11e79dc2745b5bfe654490eff234c6be2f6606f"
+      "3.19.2": "b144c872f081373a893b55979142fed651e4425a"
     }
   }
 }
