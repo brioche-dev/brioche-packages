@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/erlang/otp/releases/download/OTP-29.0.6/otp_src_29.0.6.tar.gz": {
+    "https://github.com/erlang/otp/releases/download/OTP-29.1.2/otp_src_29.1.2.tar.gz": {
       "type": "sha256",
-      "value": "36c89ffdac9d7531c19be0cee34355b167ea95188625d32bee61ebf49ac82afa"
+      "value": "c79966661e35fe4aff8ec003db63682e3b33b10b672220d51bf93c0a9244b049"
     }
   }
 }
