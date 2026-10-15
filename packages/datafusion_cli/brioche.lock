@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/datafusion-cli/55.1.0/download": {
+    "https://crates.io/api/v1/crates/datafusion-cli/55.2.0/download": {
       "type": "sha256",
-      "value": "ffb9833a102f01a257994de966c73fbf7441d8347207d8676c821b7318c03ee6"
+      "value": "8d3baca97eeb6be2a942affda86bf512f1c97b82b41475ac98505d8e7ba8fabe"
     }
   }
 }
