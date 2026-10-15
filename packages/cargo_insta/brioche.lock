@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-insta/1.48.0/download": {
+    "https://crates.io/api/v1/crates/cargo-insta/1.49.0/download": {
       "type": "sha256",
-      "value": "dfada4746541fa507f6063558527611fa285a37c1f5d0f72a6c3b6b8a6832e51"
+      "value": "5ab76c24f134684a6f702d14de45b0f09ec5206a2dbdacee5ef286c6064a331e"
     }
   }
 }
