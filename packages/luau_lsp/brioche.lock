@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/JohnnyMorganz/luau-lsp": {
-      "1.69.0": "2f42ede46764cfcc6ad569a395c38bbfd3878342"
+      "1.70.1": "0382dc76ca9b73df3c8e7c9cd85a8dd493cbd0ae"
     }
   }
 }
