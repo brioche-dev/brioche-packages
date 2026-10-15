@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_psp",
-  version: "0.2.9",
+  version: "0.2.10",
   extra: {
     crateName: "cargo-psp",
   },
