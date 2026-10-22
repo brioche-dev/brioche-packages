@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/libimobiledevice/libplist/releases/download/2.7.0/libplist-2.7.0.tar.bz2": {
+    "https://github.com/libimobiledevice/libplist/releases/download/2.8.0/libplist-2.8.0.tar.bz2": {
       "type": "sha256",
-      "value": "7ac42301e896b1ebe3c654634780c82baa7cb70df8554e683ff89f7c2643eb8b"
+      "value": "b1f59f7634c58b2481325a23ff4e3bf51574a42d868cbe466d2b39b04550752a"
     }
   }
 }
