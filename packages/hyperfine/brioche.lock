@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/sharkdp/hyperfine.git": {
-      "v1.20.0": "975fe108c4ee7bd2600d10758207b44ca3dae738"
+      "v2.0.0": "b33755fe1fca8bcc1f182c773ca3ab040bfe517d"
     }
   }
 }
