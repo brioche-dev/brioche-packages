@@ -40,7 +40,7 @@ export default function fypp(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(python);
 
-  // Install the PEP 517 build backend
+  // Install build dependencies
   venv = std.runBash`
     pip install hatchling
   `
