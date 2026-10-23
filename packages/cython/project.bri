@@ -27,7 +27,7 @@ export default function cython(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(managedPython);
 
-  // Install build dependencies (setuptools)
+  // Install build dependencies
   venv = std.runBash`
     pip install setuptools
   `

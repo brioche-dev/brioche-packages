@@ -27,7 +27,7 @@ const pipDependencies = std.directory({
 export default function gpgmepy(): std.Recipe<std.Directory> {
   let venv = std.recipe(python);
 
-  // Install build dependencies (setuptools)
+  // Install build dependencies
   venv = std.runBash`
     pip install setuptools
   `

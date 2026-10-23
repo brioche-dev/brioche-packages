@@ -87,7 +87,7 @@ const pipDependencies = (() => {
 function pythonWithBuildDeps(): std.Recipe<std.Directory> {
   let venv = std.recipe(python);
 
-  // Install build dependencies (setuptools, markupsafe, mako, pyyaml)
+  // Install build dependencies
   venv = std.runBash`
     pip install setuptools markupsafe mako pyyaml
   `
