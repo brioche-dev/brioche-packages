@@ -4,7 +4,7 @@ import icu from "icu";
 
 export const project = {
   name: "dolt",
-  version: "2.3.4",
+  version: "2.4.2",
   repository: "https://github.com/dolthub/dolt.git",
 };
 
