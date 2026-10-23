@@ -27,7 +27,7 @@ export default function gersemi(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(python);
 
-  // Install build dependencies (setuptools, setuptools-rust)
+  // Install build dependencies
   venv = std.runBash`
     pip install setuptools setuptools-rust semantic-version
   `

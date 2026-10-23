@@ -3,7 +3,7 @@ import python, { wrapVenvScripts } from "python";
 
 export const project = {
   name: "fypp",
-  version: "3.2",
+  version: "3.3",
   repository: "https://github.com/aradi/fypp",
   extra: {
     packageName: "fypp",
@@ -16,8 +16,23 @@ const source = Brioche.gitCheckout({
 });
 
 const pipDependencies = std.directory({
-  "setuptools-83.0.0-py3-none-any.whl": Brioche.download(
-    `https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl`,
+  "hatchling-1.32.4-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/5f/80/91f51f439c05d4ec4623c22928ce16a938d6d793bf709477830823497859/hatchling-1.32.4-py3-none-any.whl`,
+  ),
+  "packaging-26.3-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl`,
+  ),
+  "pathspec-1.1.1-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/f1/d9/7fb5aa316bc299258e68c73ba3bddbc499654a07f151cba08f6153988714/pathspec-1.1.1-py3-none-any.whl`,
+  ),
+  "pluggy-1.7.0-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/40/9e/2b38731e0fc536806f16490e1a12d7f0dc2a1235aa8cc07bcc75416a7daa/pluggy-1.7.0-py3-none-any.whl`,
+  ),
+  "tomlkit-0.15.2-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/da/46/7d84138a60a8bd796825b2d38ebe92d0d16501ca57d501b7c5d677401bbc/tomlkit-0.15.2-py3-none-any.whl`,
+  ),
+  "trove_classifiers-2026.9.21.13-py3-none-any.whl": Brioche.download(
+    `https://files.pythonhosted.org/packages/30/81/0da8afb52a71d0a4f2bd3152357b1a441e393b286374802b9d3addab4ab5/trove_classifiers-2026.9.21.13-py3-none-any.whl`,
   ),
 });
 
@@ -25,9 +40,9 @@ export default function fypp(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(python);
 
-  // Install build dependencies (setuptools)
+  // Install build dependencies
   venv = std.runBash`
-    pip install setuptools
+    pip install hatchling
   `
     .env({
       PATH: std.tpl`${std.outputPath}/bin`,
