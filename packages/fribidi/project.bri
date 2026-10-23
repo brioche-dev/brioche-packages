@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "fribidi",
-  version: "1.0.16",
+  version: "1.0.17",
   repository: "https://github.com/fribidi/fribidi",
 };
 
@@ -17,8 +17,8 @@ export default function fribidi(): std.Recipe<std.Directory> {
     ./configure \\
       --prefix=/ \\
       --enable-static
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
+    make -j "$(nproc)" dist_man_MANS=
+    make install dist_man_MANS= DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
