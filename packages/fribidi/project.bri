@@ -17,8 +17,8 @@ export default function fribidi(): std.Recipe<std.Directory> {
     ./configure \\
       --prefix=/ \\
       --enable-static
-    make -j "$(nproc)"
-    make install DESTDIR="$BRIOCHE_OUTPUT"
+    make -j "$(nproc)" dist_man_MANS=
+    make install dist_man_MANS= DESTDIR="$BRIOCHE_OUTPUT"
   `
     .workDir(source)
     .dependencies(std.toolchain)
