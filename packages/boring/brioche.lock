@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/alebeck/boring/@v/v0.16.1.info": {
+    "https://proxy.golang.org/github.com/alebeck/boring/@v/v0.17.0.info": {
       "type": "sha256",
-      "value": "77d1c248eadfcfee6fe0ca97991b43b93ab4f55b175c226fadb300f5d9dd2a85"
+      "value": "5a306742cd5a8617747e6b846b97eb28e4999a05652a4a68e8676750b1aaf566"
     },
-    "https://proxy.golang.org/github.com/alebeck/boring/@v/v0.16.1.zip": {
+    "https://proxy.golang.org/github.com/alebeck/boring/@v/v0.17.0.zip": {
       "type": "sha256",
-      "value": "e7391cfba78d22239378e9d5fdadf8d6a31543a25275a5b07ba45296637dd479"
+      "value": "1f020329c2afc500bf6888f900aca5c2531be1fef6fcb329803c46c63680a6c9"
     }
   }
 }
