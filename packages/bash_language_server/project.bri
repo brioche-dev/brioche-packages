@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "bash_language_server",
-  version: "5.6.0",
+  version: "5.8.1",
   extra: {
     packageName: "bash-language-server",
   },
