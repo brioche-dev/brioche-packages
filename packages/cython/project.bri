@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "cython",
-  version: "3.2.8",
+  version: "3.3.0",
   extra: {
     packageName: "Cython",
   },
@@ -27,7 +27,7 @@ export default function cython(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(managedPython);
 
-  // Install build dependencies (setuptools)
+  // Install build dependencies
   venv = std.runBash`
     pip install setuptools
   `

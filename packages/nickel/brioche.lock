@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/nickel-lang-cli/1.17.0/download": {
+    "https://crates.io/api/v1/crates/nickel-lang-cli/1.18.0/download": {
       "type": "sha256",
-      "value": "82b5cc5b052b7f367f0dfc9bd4f6f26d232efdc6e4273e7b0d536a0d80ab2259"
+      "value": "77b48001f95d9b3ecd76460dc51aab9513a12d59fa17fbee171c95cdaef60f23"
     }
   }
 }

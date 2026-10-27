@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/brandonyoungdev/tldx/@v/v1.5.0.zip": {
+    "https://proxy.golang.org/github.com/brandonyoungdev/tldx/@v/v1.6.0.zip": {
       "type": "sha256",
-      "value": "dce4ce0badf8c0f251fe3224af5db759c3d01904c6994d74aafa74ec2ed55418"
+      "value": "7e35358b95179fd531f76a9940a0fd3a61c88d84e0021f4a7a7adc9d863f2a49"
     }
   }
 }

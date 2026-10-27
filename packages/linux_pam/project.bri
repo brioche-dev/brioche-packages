@@ -9,7 +9,7 @@ import pcre2 from "pcre2";
 
 export const project = {
   name: "linux_pam",
-  version: "1.7.2",
+  version: "1.7.3",
   repository: "https://github.com/linux-pam/linux-pam",
 };
 

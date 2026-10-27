@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/wasm-bindgen-cli/0.2.126/download": {
+    "https://crates.io/api/v1/crates/wasm-bindgen-cli/0.2.128/download": {
       "type": "sha256",
-      "value": "8e2ebf6eef87c34e662347f1dddfbea541304bb7294711ed2c2acd8746cc5b50"
+      "value": "2e29140c04e81832902b70e5d37b9ce1bfa811c8fe4563bea08f76df8388cf20"
     }
   }
 }

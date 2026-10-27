@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://curl.se/ca/cacert-2026-05-14.pem": {
+    "https://curl.se/ca/cacert-2026-10-20.pem": {
       "type": "sha256",
-      "value": "86a1f3366afac7c6f8ae9f3c779ac221129328c43f0ab2b8817eb2f362a5025c"
+      "value": "796f1389bfea13c0ed78f663b765baaff54a508e5483786bd6ece73c5e3e3cbe"
     }
   }
 }

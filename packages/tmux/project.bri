@@ -4,7 +4,7 @@ import utf8proc from "utf8proc";
 
 export const project = {
   name: "tmux",
-  version: "3.7b",
+  version: "3.7c",
   repository: "https://github.com/tmux/tmux",
 };
 

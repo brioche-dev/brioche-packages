@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-psp/0.2.9/download": {
+    "https://crates.io/api/v1/crates/cargo-psp/0.2.10/download": {
       "type": "sha256",
-      "value": "acf9360909360d639034fc22f1c1957b3e2a507d8a04804c20508c8024d4a1ae"
+      "value": "3f31de6f125bcb3628146ff85953ef5ecd8e8949ad3f49dfdd65d813fcb1919b"
     }
   }
 }

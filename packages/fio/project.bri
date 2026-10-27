@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "fio",
-  version: "3.42",
+  version: "3.43",
   repository: "https://github.com/axboe/fio",
 };
 

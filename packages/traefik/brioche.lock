@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/traefik/traefik.git": {
-      "v3.7.7": "b2c18b1e39fbe2099e4dce927e4e6e56674ede0f"
+      "v3.7.13": "fc92cc118a0557a029c7019d5ee06665127b0f13"
     }
   }
 }

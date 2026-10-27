@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "iniparser",
-  version: "4.2.6",
+  version: "4.3.2",
   repository: "https://github.com/ndevilla/iniparser",
 };
 

@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "unibilium",
-  version: "2.1.2",
+  version: "2.1.4",
   repository: "https://github.com/neovim/unibilium",
 };
 

@@ -3,7 +3,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "qsv",
-  version: "21.1.0",
+  version: "22.0.1",
   repository: "https://github.com/dathere/qsv",
 };
 

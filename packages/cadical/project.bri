@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "cadical",
-  version: "3.0.0",
+  version: "3.0.1",
   repository: "https://github.com/arminbiere/cadical.git",
 };
 

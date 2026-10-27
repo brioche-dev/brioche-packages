@@ -3,7 +3,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "ragel",
-  version: "6.10",
+  version: "6.11",
 };
 
 const source = Brioche.download(

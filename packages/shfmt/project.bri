@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "shfmt",
-  version: "3.13.1",
+  version: "3.14.1",
   extra: {
     moduleName: "mvdan.cc/sh/v3",
   },

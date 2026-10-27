@@ -5,7 +5,7 @@ import pycparser, { project as pycparserProject } from "pycparser";
 
 export const project = {
   name: "cffi",
-  version: "2.1.0",
+  version: "2.1.1",
   extra: {
     packageName: "cffi",
   },
@@ -27,7 +27,7 @@ export default function cffi(): std.Recipe<std.Directory> {
   // Create a venv
   let venv = std.recipe(python);
 
-  // Install build dependencies (setuptools)
+  // Install build dependencies
   venv = std.runBash`
     pip install setuptools
   `

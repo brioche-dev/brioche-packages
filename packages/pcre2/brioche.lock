@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/PCRE2Project/pcre2.git": {
-      "pcre2-10.47": "f454e231fe5006dd7ff8f4693fd2b8eb94333429"
+      "pcre2-10.48": "7978954dbd2efc6f2196869290553cf1871b4ce6"
     }
   }
 }

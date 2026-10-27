@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/xtensor-stack/xsimd": {
-      "14.2.0": "80c23624ce008d937da7e845e528e82ce0cbf4e0"
+      "14.3.0": "e88a72831858123924f7118f345dfe5d70d95991"
     }
   }
 }

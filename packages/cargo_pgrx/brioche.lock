@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-pgrx/0.19.1/download": {
+    "https://crates.io/api/v1/crates/cargo-pgrx/0.19.3/download": {
       "type": "sha256",
-      "value": "b3fd1a972a3be63b53e96a58e771c11b2a8046baaeef235e1cba2f02d7202b6d"
+      "value": "63418c536503020a9e79c20fd8a33c1b84814fbcb262f684d1b11b9adc7e628a"
     }
   }
 }

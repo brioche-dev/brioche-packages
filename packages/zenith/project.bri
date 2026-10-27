@@ -4,7 +4,7 @@ import { cargoBuild } from "rust";
 
 export const project = {
   name: "zenith",
-  version: "0.15.0",
+  version: "0.15.1",
   repository: "https://github.com/bvaisvil/zenith.git",
 };
 

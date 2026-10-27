@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/rusq/slackdump/v4/@v/v4.4.1.info": {
+    "https://proxy.golang.org/github.com/rusq/slackdump/v4/@v/v4.4.3.info": {
       "type": "sha256",
-      "value": "307bc0d06170e0dfd9eebe86e56919e73dc0cb7563c08210b8e2ed67183f33cb"
+      "value": "45c9005750f1f4112a996c89da3547338f2c84ec665a6962f97156b3fff621dd"
     },
-    "https://proxy.golang.org/github.com/rusq/slackdump/v4/@v/v4.4.1.zip": {
+    "https://proxy.golang.org/github.com/rusq/slackdump/v4/@v/v4.4.3.zip": {
       "type": "sha256",
-      "value": "01391c441d125bcdff765cb8f74bce0671fd9bc73f294677ac77936309327846"
+      "value": "6bffdb1403f8042eaf4994f7c7610574c931e7097e12f1dd94fed0ba46db32cf"
     }
   }
 }

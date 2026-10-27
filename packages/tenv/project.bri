@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "tenv",
-  version: "4.14.8",
+  version: "4.15.1",
   extra: {
     moduleName: "github.com/tofuutils/tenv/v4",
   },

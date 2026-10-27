@@ -9,7 +9,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "zchunk",
-  version: "1.5.3",
+  version: "1.5.4",
   repository: "https://github.com/zchunk/zchunk",
 };
 
