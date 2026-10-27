@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/AcademySoftwareFoundation/openapv": {
-      "v0.3.0.0": "9f6fd2a7369db90acec67d99fc57724f1136fb84"
+      "v1.1.1.0": "9cd81ac7b99b5149580460c259bdfff73157607e"
     }
   }
 }
