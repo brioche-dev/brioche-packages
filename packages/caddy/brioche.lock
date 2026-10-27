@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/caddyserver/caddy.git": {
-      "v2.11.4": "e2eee6a7fce366321294c9c2a79f3146891dcbdf"
+      "v2.11.7": "72dd0fb067f6d7826c7f79907670ba4a713bfe37"
     }
   }
 }
