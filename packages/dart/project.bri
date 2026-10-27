@@ -6,9 +6,9 @@ export const project = {
   repository: "https://github.com/dart-lang/sdk",
   extra: {
     otherVersions: {
+      "3.13": "3.13.5",
       "3.12": "3.12.2",
       "3.11": "3.11.6",
-      "3.10": "3.10.9",
     },
   },
 };
@@ -37,6 +37,18 @@ const prebuiltSdks: Record<
   DartVersion,
   Record<std.Platform, std.Recipe<std.Directory>>
 > = {
+  "3.13": {
+    "x86_64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.13"]}/sdk/dartsdk-linux-x64-release.zip`,
+    )
+      .unarchive("zip")
+      .peel(),
+    "aarch64-linux": Brioche.download(
+      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.13"]}/sdk/dartsdk-linux-arm64-release.zip`,
+    )
+      .unarchive("zip")
+      .peel(),
+  },
   "3.12": {
     "x86_64-linux": Brioche.download(
       `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.12"]}/sdk/dartsdk-linux-x64-release.zip`,
@@ -57,18 +69,6 @@ const prebuiltSdks: Record<
       .peel(),
     "aarch64-linux": Brioche.download(
       `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.11"]}/sdk/dartsdk-linux-arm64-release.zip`,
-    )
-      .unarchive("zip")
-      .peel(),
-  },
-  "3.10": {
-    "x86_64-linux": Brioche.download(
-      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-x64-release.zip`,
-    )
-      .unarchive("zip")
-      .peel(),
-    "aarch64-linux": Brioche.download(
-      `https://storage.googleapis.com/dart-archive/channels/stable/release/${project.extra.otherVersions["3.10"]}/sdk/dartsdk-linux-arm64-release.zip`,
     )
       .unarchive("zip")
       .peel(),
