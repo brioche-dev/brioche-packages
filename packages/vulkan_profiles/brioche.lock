@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/KhronosGroup/Vulkan-Profiles": {
-      "v1.4.356": "a80d99c36254271f1655833f59076338a661c5f1"
+      "v1.4.360": "6c1d0b544b1a432bc33d7fb4c8a6a0a71c01dcfd"
     }
   }
 }
