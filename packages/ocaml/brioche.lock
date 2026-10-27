@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/ocaml/ocaml/releases/download/5.5.0/ocaml-5.5.0.tar.gz": {
+    "https://github.com/ocaml/ocaml/releases/download/5.5.1/ocaml-5.5.1.tar.gz": {
       "type": "sha256",
-      "value": "c018052c8264a3791a8f54f84179e6bcc78ed82eb889bacc2773df445259aed3"
+      "value": "ae47728d0a876665ccc7b745e3a8d8c9ca5ba63c4f7a11d4db6cdbd1dbeef4bb"
     }
   }
 }
