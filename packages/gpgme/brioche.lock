@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://gnupg.org/ftp/gcrypt/gpgme/gpgme-2.1.2.tar.bz2": {
+    "https://gnupg.org/ftp/gcrypt/gpgme/gpgme-2.2.0.tar.bz2": {
       "type": "sha256",
-      "value": "0687a95b299871c4141f507c0f740de6b429c9ac067d0fa4e062e3264df5fb77"
+      "value": "7160e80e84dafd00d956c84891c533bb7ab16a6a54fbe1574b2f3acf0496977b"
     }
   }
 }
