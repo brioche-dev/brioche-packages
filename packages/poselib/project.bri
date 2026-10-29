@@ -51,10 +51,11 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  // Note: v2.0.5 has incorrect version in CMakeLists.txt (reports 2.0.4)
-  const expectedVersion =
-    project.version === "2.0.5" ? "2.0.4" : project.version;
-  const expected = `PoseLib version: ${expectedVersion}`;
+  // HACK: The CMakeLists.txt version differs from the release tag version.
+  const expected =
+    project.version === "2.0.5"
+      ? "PoseLib version: 2.0.4"
+      : `PoseLib version: ${project.version}`;
   std.assert(
     result.includes(expected),
     `expected '${expected}', got '${result}'`,
