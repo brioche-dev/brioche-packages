@@ -19,7 +19,9 @@ export default function rv(): std.Recipe<std.Directory> {
     path: "crates/rv",
     dependencies: [llvm],
     env: {
+      // Keep system libraries available when loading libclang.
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      // Let bindgen find the standard C headers.
       CPATH: std.tpl`${std.toolchain}/include`,
     },
     runnable: "bin/rv",
