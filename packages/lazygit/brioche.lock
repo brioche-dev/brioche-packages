@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/jesseduffield/lazygit/@v/v0.63.1.info": {
+    "https://proxy.golang.org/github.com/jesseduffield/lazygit/@v/v0.66.1.info": {
       "type": "sha256",
-      "value": "c8791820f9ffd9959158061642aad22ae0bbee0bfe4c8478636a7a63b83da4db"
+      "value": "c79ffddf27721785f4ae3b30649db6e6124f8c3f228c22d615a8b6efa587dbe5"
     },
-    "https://proxy.golang.org/github.com/jesseduffield/lazygit/@v/v0.63.1.zip": {
+    "https://proxy.golang.org/github.com/jesseduffield/lazygit/@v/v0.66.1.zip": {
       "type": "sha256",
-      "value": "205681ffbc11b9729c8145316480aa3a9666fd888c3a29f0996c51043e65ee30"
+      "value": "e8edbdab59198dcbafd3373aaae76a7f5ac980bf9a3880aaef40c1b0257701bb"
     }
   }
 }
