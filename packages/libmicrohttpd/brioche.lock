@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-1.0.6.tar.gz": {
+    "https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-1.0.10.tar.gz": {
       "type": "sha256",
-      "value": "bb5cfcadfc52dbd5eb512d6e2995e0361351c33e97a87aba426d3a4a7ba6cf70"
+      "value": "04bfe8ef75db7d629a33de767599765cecadc56274a39822d5d081030d577685"
     }
   }
 }
