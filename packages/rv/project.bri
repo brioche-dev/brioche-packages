@@ -1,5 +1,6 @@
 import * as std from "std";
 import { cargoBuild } from "rust";
+import llvm from "llvm";
 
 export const project = {
   name: "rv",
@@ -16,6 +17,11 @@ export default function rv(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     path: "crates/rv",
+    dependencies: [llvm],
+    env: {
+      LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
+      CPATH: std.tpl`${std.toolchain}/include`,
+    },
     runnable: "bin/rv",
   });
 }
