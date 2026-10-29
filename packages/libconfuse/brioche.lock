@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/libconfuse/libconfuse/releases/download/v3.3/confuse-3.3.tar.gz": {
+    "https://github.com/libconfuse/libconfuse/releases/download/v3.4/confuse-3.4.tar.gz": {
       "type": "sha256",
-      "value": "3a59ded20bc652eaa8e6261ab46f7e483bc13dad79263c15af42ecbb329707b8"
+      "value": "d98a793f4cafc1b3c18e2509ba54f6cb9ac6291b181bcda152dc987cb78f43ec"
     }
   }
 }
