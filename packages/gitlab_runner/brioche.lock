@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://gitlab.com/gitlab-org/gitlab-runner.git": {
-      "v19.1.1": "24b9b726e614dab77eee89b001745cf9f890e0ce"
+      "v19.5.0": "70f5c12dad80bfd8ab426843f38cae72fddc4e75"
     }
   }
 }
