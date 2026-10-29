@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "lerc",
-  version: "4.1.1",
+  version: "4.2.0",
   repository: "https://github.com/esri/lerc",
 };
 
