@@ -22,11 +22,9 @@ export default function zenith(): std.Recipe<std.Directory> {
     source,
     dependencies: [llvm],
     env: {
-      // Build-time scripts dynamically load `libclang`, so ensure the standard
-      // system libraries can be dynamically loaded
+      // Keep system libraries available when loading libclang.
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
-      // bindgen uses clang to parse C headers; tell clang where to find
-      // the standard C library headers (stdio.h, etc.)
+      // Let bindgen find the standard C headers.
       CPATH: std.tpl`${std.toolchain}/include`,
     },
     runnable: "bin/zenith",
