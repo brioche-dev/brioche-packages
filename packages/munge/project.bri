@@ -50,10 +50,10 @@ export async function test(): Promise<std.Recipe<std.File>> {
   const result = (await script.read()).trim();
 
   // Check that the result contains the expected version
-  const expectedVersion = `munge-${project.version}`;
+  const expected = `munge-${project.version}`;
   std.assert(
-    result.startsWith(expectedVersion),
-    `expected '${expectedVersion}', got '${result}'`,
+    result.startsWith(expected),
+    `expected '${expected}', got '${result}'`,
   );
 
   return script;
