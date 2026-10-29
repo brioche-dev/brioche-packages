@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://gitlab.com/libxc/libxc.git": {
-      "7.0.0": "7bd5bb41415968db94c499a2f093309c9a2dcf53"
+      "7.1.2": "f1eb21e8d6743ed5ba519b8950c1ae02c3f5acd9"
     }
   }
 }
