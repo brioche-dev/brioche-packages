@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/HDFGroup/hdf5/releases/download/2.1.1/hdf5-2.1.1.tar.gz": {
+    "https://github.com/HDFGroup/hdf5/releases/download/2.2.0/hdf5-2.2.0.tar.gz": {
       "type": "sha256",
-      "value": "efff93b5a904d66e8f626d7da60b5eedc9faf544be27dbabbaa87967b8ad798b"
+      "value": "1a1ab8209b35586fbc1aa279ba76d102130b95badcb20ca329587219112d8c16"
     }
   }
 }
