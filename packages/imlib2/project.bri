@@ -16,7 +16,7 @@ import * as std from "std";
 
 export const project = {
   name: "imlib2",
-  version: "1.12.6",
+  version: "1.12.7",
 };
 
 const source = Brioche.download(
