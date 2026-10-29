@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "pvetui",
-  version: "1.4.2",
+  version: "1.4.3",
   extra: {
     moduleName: "github.com/devnullvoid/pvetui",
   },
