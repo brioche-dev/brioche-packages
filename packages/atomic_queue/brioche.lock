@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/max0x7ba/atomic_queue/archive/refs/tags/v1.9.2.tar.gz": {
+    "https://github.com/max0x7ba/atomic_queue/archive/refs/tags/v1.9.4.tar.gz": {
       "type": "sha256",
-      "value": "7c3606f23cea69d39c3872996ffb83587bd4ab08da3c0c4c45aba7aa15eea9f8"
+      "value": "fecfa9ca12fc203e40fd967c2bfa8033f77d0bde0e3b21c8ca5f5f9eeeabe022"
     }
   }
 }
