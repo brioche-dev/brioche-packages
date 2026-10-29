@@ -3,7 +3,7 @@ import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "openblas",
-  version: "0.3.33",
+  version: "0.3.34",
   repository: "https://github.com/OpenMathLib/OpenBLAS",
 };
 
