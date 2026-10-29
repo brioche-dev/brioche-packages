@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/filebrowser/filebrowser/v2/@v/v2.63.18.zip": {
+    "https://proxy.golang.org/github.com/filebrowser/filebrowser/v2/@v/v2.63.23.zip": {
       "type": "sha256",
-      "value": "dbcddef11b0731f3c3c70c50837902765528cd81cb0f67799325ca807c6fea54"
+      "value": "b8d36e25c75fb2f93243b7d9cee11c3d94888eaa9a9191d82f471c3d36d161bc"
     }
   }
 }
