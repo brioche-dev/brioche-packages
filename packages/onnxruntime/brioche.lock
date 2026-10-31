@@ -1,5 +1,15 @@
 {
   "dependencies": {},
+  "downloads": {
+    "https://github.com/microsoft/onnxruntime/commit/104dab38fc7913f13448f4ef2b54256357ba9374.patch": {
+      "type": "sha256",
+      "value": "93dc4012e6c528747ecb6e3557686b95bac3c8647022dfde1d6b6a97934b021d"
+    },
+    "https://github.com/microsoft/onnxruntime/commit/2cd92c0364f1ff22823220e300a53d414e45d3e9.patch": {
+      "type": "sha256",
+      "value": "40f227f12f2a32dd312ea6b3285e51d4244875d8ae0425edeb32f24ac9510b60"
+    }
+  },
   "git_refs": {
     "https://github.com/microsoft/onnxruntime.git": {
       "v1.28.0": "da9b5e364c465de65c49d91e696cd6485270757f"

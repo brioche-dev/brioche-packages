@@ -23,20 +23,40 @@ export const project = {
 const source = Brioche.gitCheckout({
   repository: project.repository,
   ref: `v${project.version}`,
-}).pipe((source) =>
-  // Recompile schema to make sure it is compatible with latest version
-  // of flatbuffers
-  std.runBash`
+})
+  .pipe((source) =>
+    // Apply the GSL 5 compatibility fix proposed in https://github.com/microsoft/onnxruntime/pull/33302.
+    std.applyPatch({
+      source,
+      patch: Brioche.download(
+        "https://github.com/microsoft/onnxruntime/commit/2cd92c0364f1ff22823220e300a53d414e45d3e9.patch",
+      ),
+      strip: 1,
+    }),
+  )
+  .pipe((source) =>
+    std.applyPatch({
+      source,
+      patch: Brioche.download(
+        "https://github.com/microsoft/onnxruntime/commit/104dab38fc7913f13448f4ef2b54256357ba9374.patch",
+      ),
+      strip: 1,
+    }),
+  )
+  .pipe((source) =>
+    // Recompile schema to make sure it is compatible with latest version
+    // of flatbuffers
+    std.runBash`
     python "$BRIOCHE_OUTPUT/onnxruntime/core/flatbuffers/schema/compile_schema.py" --flatc "$FLATC"
     python "$BRIOCHE_OUTPUT/onnxruntime/lora/adapter_format/compile_schema.py" --flatc "$FLATC"
   `
-    .dependencies(std.toolchain, python)
-    .env({
-      FLATC: std.tpl`${flatbuffers}/bin/flatc`,
-    })
-    .outputScaffold(source)
-    .toDirectory(),
-);
+      .dependencies(std.toolchain, python)
+      .env({
+        FLATC: std.tpl`${flatbuffers}/bin/flatc`,
+      })
+      .outputScaffold(source)
+      .toDirectory(),
+  );
 
 export default function onnxruntime(): std.Recipe<std.Directory> {
   return cmakeBuild({
