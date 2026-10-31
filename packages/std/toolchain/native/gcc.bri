@@ -1,5 +1,7 @@
 import * as std from "/core";
+import { setEnv } from "/extra/set_env.bri";
 import { useBriocheCc } from "../utils.bri";
+import { autopackNativeBfdLinker } from "./autopack.bri";
 import { currentPlatformInfo } from "../stage0";
 import linuxHeaders from "./linux_headers.bri";
 import stage2 from "/toolchain/stage2";
@@ -39,18 +41,25 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
-  const buildSysroot = std.merge(
-    linuxHeaders(),
-    glibc(),
-    binutils(),
-    libxcrypt(),
-    std.directory({
-      usr: std.directory({
-        lib: std.symlink({ target: "../lib" }),
-        lib64: std.symlink({ target: "../lib64" }),
-        include: std.symlink({ target: "../include" }),
-      }),
-    }),
+  const buildSysroot = autopackNativeBfdLinker(
+    setEnv(
+      std.merge(
+        linuxHeaders(),
+        glibc(),
+        binutils(),
+        libxcrypt(),
+        std.directory({
+          usr: std.directory({
+            lib: std.symlink({ target: "../lib" }),
+            lib64: std.symlink({ target: "../lib64" }),
+            include: std.symlink({ target: "../include" }),
+          }),
+        }),
+      ),
+      {
+        LIBRARY_PATH: { append: [{ path: "lib" }] },
+      },
+    ),
   );
 
   let gcc = std
