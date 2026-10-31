@@ -27,12 +27,6 @@ export default function deno(): std.Recipe<std.Directory> {
 
       // Tell bindgen where to find standard C headers
       BINDGEN_EXTRA_CLANG_ARGS: std.tpl`--sysroot=${std.toolchain}`,
-
-      // Deno currently uses the linker flag `--export-dynamic-symbol-list`, so
-      // ensure we use ld.bfd since ld.gold doesn't support this flag (at
-      // the time of writing)
-      [`CARGO_TARGET_${cargoTargetTripleEnvVar()}_RUSTFLAGS`]:
-        "-Clink-arg=-fuse-ld=bfd",
     },
     buildParams: {
       // The `release` profile builds with full LTO, which uses more memory
