@@ -1,4 +1,5 @@
 import * as std from "/core";
+import { setEnv } from "/extra/set_env.bri";
 import stage2 from "/toolchain/stage2";
 import glibc from "./glibc.bri";
 import binutils from "./binutils.bri";
@@ -6,9 +7,14 @@ import linuxHeaders from "./linux_headers.bri";
 import gcc from "./gcc.bri";
 import bzip2 from "./bzip2.bri";
 import zlib from "./zlib.bri";
+import { autopackNativeBfdLinker } from "./autopack.bri";
 
 export default std.memo((): std.Recipe<std.Directory> => {
-  const toolchain = std.merge(glibc(), binutils(), gcc(), linuxHeaders());
+  const toolchain = autopackNativeBfdLinker(
+    setEnv(std.merge(glibc(), binutils(), gcc(), linuxHeaders()), {
+      LIBRARY_PATH: { append: [{ path: "lib" }] },
+    }),
+  );
 
   const source = Brioche.download(
     "https://development-content.brioche.dev/linuxfromscratch.org/v12.0/packages/elfutils-0.189.tar.bz2",
@@ -38,7 +44,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
       ],
       env: {
         PATH: std.tpl`${toolchain}/bin:${bzip2}/bin:${stage2}/bin`,
-        LDFLAGS: std.tpl`-L${zlib}/lib`,
+        LDFLAGS: std.tpl`-L${zlib}/lib -Wl,-rpath-link,${zlib}/lib`,
         CPPFLAGS: std.tpl`-I${zlib}/include`,
       },
       workDir: source,

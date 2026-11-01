@@ -49,7 +49,7 @@ export function linuxDefconfig(
     make defconfig
   `
     .workDir(source)
-    .dependencies(...dependencies, ldWrapper, std.toolchain)
+    .dependencies(...dependencies, std.toolchain)
     .env({
       ...env,
       KCONFIG_CONFIG: std.outputPath,
@@ -119,7 +119,6 @@ export default function linux(
       kmod,
       openssl,
       python,
-      ldWrapper,
       std.toolchain,
     )
     .env({
@@ -295,18 +294,4 @@ function distClean(
       currentDir: std.outputPath,
     })
     .toDirectory();
-}
-
-function ldWrapper(): std.Recipe<std.Directory> {
-  // Create a custom wrapper to use `ld.bfd` instead of gold when linking.
-  return std.directory({
-    "bin/ld": std
-      .file(
-        std.indoc`
-        #!/usr/bin/env sh
-        exec ld.bfd "$@"
-      `,
-      )
-      .withPermissions({ executable: true }),
-  });
 }

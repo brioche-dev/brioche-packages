@@ -1,0 +1,72 @@
+import * as std from "/core";
+import { buildAutopackConfig, type AutopackOptions } from "/extra/autopack.bri";
+import { runtimeUtils } from "/toolchain/utils.bri";
+
+export function autopackNativeToolchain(
+  recipe: std.RecipeLike<std.Directory>,
+  options: AutopackOptions,
+): std.Recipe<std.Directory> {
+  const runtimeUtilsRecipe = runtimeUtils();
+  const { config, variables } = buildAutopackConfig({
+    options,
+    defaultLinkDependencies: [],
+    runtimeUtils: runtimeUtilsRecipe,
+  });
+
+  const variableArgs: std.ProcessTemplateLike[] = Object.entries(
+    variables,
+  ).flatMap(([name, value]) => ["--var", std.tpl`${name}=path:${value.value}`]);
+
+  return std
+    .process({
+      command: std.tpl`${runtimeUtilsRecipe}/bin/brioche-packer`,
+      args: [
+        "autopack",
+        std.outputPath,
+        "--config",
+        JSON.stringify(config),
+        ...variableArgs,
+      ],
+      outputScaffold: recipe,
+    })
+    .toDirectory();
+}
+
+export function autopackNativeBfdLinker(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return autopackNativeLtoBinaries(recipe, {
+    paths: ["bin/.brioche-ld-orig-ld.bfd"],
+  });
+}
+
+export function autopackNativeLtoTools(
+  recipe: std.RecipeLike<std.Directory>,
+): std.Recipe<std.Directory> {
+  return autopackNativeLtoBinaries(recipe, {
+    globs: ["bin/.brioche-ld-orig-*", "bin/ar", "bin/ranlib", "bin/nm"],
+  });
+}
+
+function autopackNativeLtoBinaries(
+  recipe: std.RecipeLike<std.Directory>,
+  selection: { paths?: string[]; globs?: string[] },
+): std.Recipe<std.Directory> {
+  return autopackNativeToolchain(recipe, {
+    ...selection,
+    selfDependency: true,
+    dynamicBinaryConfig: {
+      enabled: true,
+      extraLibraries: ["libm.so.6"],
+    },
+    sharedLibraryConfig: {
+      enabled: true,
+    },
+    scriptConfig: {
+      enabled: false,
+    },
+    repackConfig: {
+      enabled: true,
+    },
+  });
+}
