@@ -21,12 +21,11 @@ export default function deno(): std.Recipe<std.Directory> {
     source,
     path: "cli",
     env: {
-      // Build-time scripts dynamically load `libclang`, so ensure the standard
-      // system libraries can be dynamically loaded
+      // Keep system libraries available when loading libclang.
       LD_LIBRARY_PATH: std.tpl`${std.toolchain}/lib`,
 
-      // Tell bindgen where to find standard C headers
-      BINDGEN_EXTRA_CLANG_ARGS: std.tpl`--sysroot=${std.toolchain}`,
+      // Let bindgen find the standard C headers.
+      CPATH: std.tpl`${std.toolchain}/include`,
     },
     buildParams: {
       // The `release` profile builds with full LTO, which uses more memory
