@@ -8,7 +8,7 @@ import curl from "curl";
 
 export const project = {
   name: "postgresql",
-  version: "18.4",
+  version: "18.6",
 };
 
 const source = Brioche.download(
