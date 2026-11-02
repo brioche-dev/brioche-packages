@@ -114,13 +114,7 @@ export default function linux(
         boot: std.directory(),
       }),
     )
-    .dependencies(
-      ...dependencies,
-      kmod,
-      openssl,
-      python,
-      std.toolchain,
-    )
+    .dependencies(...dependencies, kmod, openssl, python, std.toolchain)
     .env({
       // Set the number of threads to use during compilation
       OMP_NUM_THREADS: "16",
