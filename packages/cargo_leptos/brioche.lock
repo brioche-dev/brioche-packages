@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/cargo-leptos/0.3.7/download": {
+    "https://crates.io/api/v1/crates/cargo-leptos/0.3.11/download": {
       "type": "sha256",
-      "value": "e327ec89b787be9b9a041205067498657e06e28df721edbd108c364e7b473ccb"
+      "value": "2d8cab2c1d4397b3275fd234757d6467c3db7b2fde13377ef9d543a5e80b0be0"
     }
   }
 }
