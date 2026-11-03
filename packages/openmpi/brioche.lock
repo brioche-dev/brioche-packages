@@ -3,7 +3,7 @@
   "downloads": {
     "https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.11.tar.gz": {
       "type": "sha256",
-      "value": "c60af221a9ce59f467d9f5937d5dc281cee85c7bfbfa6654d05d7197b04e83e1"
+      "value": "77a402c64c22f1bd8a504f76fd411df23e36e168eedce6c9bcd12c8c0cd0619a"
     }
   }
 }
