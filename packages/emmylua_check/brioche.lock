@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/emmylua_check/0.24.0/download": {
+    "https://crates.io/api/v1/crates/emmylua_check/0.25.1/download": {
       "type": "sha256",
-      "value": "4b74f4faf4d24da69a4492b0f82484fd9e6cdd7d306bde8f8dc6d1fab7339c48"
+      "value": "4170aa8cbbca1fb34defcdaeea9fe5c4fa07f444c0ffe9ff1cc8ec8ab1c40992"
     }
   }
 }
