@@ -6,13 +6,13 @@ import sqlite from "sqlite";
 
 export const project = {
   name: "python",
-  version: "3.14.6",
+  version: "3.14.7",
   repository: "https://github.com/python/cpython",
   extra: {
     otherVersions: {
-      "3.14": "3.14.6",
-      "3.13": "3.13.14",
-      "3.12": "3.12.13",
+      "3.14": "3.14.7",
+      "3.13": "3.13.15",
+      "3.12": "3.12.14",
     },
   },
 };
