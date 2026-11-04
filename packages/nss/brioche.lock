@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_125_RTM/src/nss-3.125.tar.gz": {
+    "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_131_RTM/src/nss-3.131.tar.gz": {
       "type": "sha256",
-      "value": "1ad541f10da7c58dec01f540ecc44d28cbbc033f741a57473de5a0893d91606d"
+      "value": "ca0005bc77e9255d9942103e6f9756cfe311a3df72afa99860709e386eb3c167"
     }
   }
 }
