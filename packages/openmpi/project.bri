@@ -11,7 +11,7 @@ import prrte from "prrte";
 
 export const project = {
   name: "openmpi",
-  version: "5.0.10",
+  version: "5.0.11",
   repository: "https://github.com/open-mpi/ompi",
   extra: {
     majorVersion: "5",
