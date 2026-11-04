@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/gfold/2026.3.0/download": {
+    "https://crates.io/api/v1/crates/gfold/2026.9.0/download": {
       "type": "sha256",
-      "value": "34b603676303c9955ede927326341fc490c5810d838666050cad146f85a32ba8"
+      "value": "99be0e64178a0b98b3c67160746f021eec1293c3628488f3e772cab6c0e4bcc9"
     }
   }
 }
