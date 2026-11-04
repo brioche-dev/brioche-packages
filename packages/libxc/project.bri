@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "libxc",
-  version: "7.0.0",
+  version: "7.1.2",
   repository: "https://gitlab.com/libxc/libxc.git",
 };
 
