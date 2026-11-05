@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/hoene/libmysofa.git": {
-      "v1.3.4": "7a0c07111a3d7230ec534e08925c24a7525f33c0"
+      "v1.3.5": "6cc5b15a73e9bd97810d03767082edda7f315881"
     }
   }
 }
