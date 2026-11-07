@@ -47,7 +47,7 @@ export default std.memo((): std.Recipe<std.Directory> => {
     })
     .toDirectory();
 
-  binutils = binutils.insert("bin/ld", std.symlink({ target: "ld.gold" }));
+  binutils = binutils.insert("bin/ld", std.symlink({ target: "ld.bfd" }));
 
   binutils = useBriocheLd(binutils, {
     ldPaths: ["bin/ld.bfd", "bin/ld.gold"],

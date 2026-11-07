@@ -49,7 +49,7 @@ export function linuxDefconfig(
     make defconfig
   `
     .workDir(source)
-    .dependencies(...dependencies, ldWrapper, std.toolchain)
+    .dependencies(...dependencies, std.toolchain)
     .env({
       ...env,
       KCONFIG_CONFIG: std.outputPath,
@@ -114,14 +114,7 @@ export default function linux(
         boot: std.directory(),
       }),
     )
-    .dependencies(
-      ...dependencies,
-      kmod,
-      openssl,
-      python,
-      ldWrapper,
-      std.toolchain,
-    )
+    .dependencies(...dependencies, kmod, openssl, python, std.toolchain)
     .env({
       // Set the number of threads to use during compilation
       OMP_NUM_THREADS: "16",
@@ -295,18 +288,4 @@ function distClean(
       currentDir: std.outputPath,
     })
     .toDirectory();
-}
-
-function ldWrapper(): std.Recipe<std.Directory> {
-  // Create a custom wrapper to use `ld.bfd` instead of gold when linking.
-  return std.directory({
-    "bin/ld": std
-      .file(
-        std.indoc`
-        #!/usr/bin/env sh
-        exec ld.bfd "$@"
-      `,
-      )
-      .withPermissions({ executable: true }),
-  });
 }

@@ -130,7 +130,7 @@ function addLibraryAliases(
 
 /**
  * Replace a library's `.so` dev link with a linker script that pulls in
- * extra dependencies. This works around the gold linker not following
+ * extra dependencies. This works around the linker not following
  * transitive DT_NEEDED entries.
  *
  * @param recipe - The directory recipe to insert the linker script into.

@@ -1,11 +1,10 @@
 import * as std from "/core";
 import { setEnv } from "/extra/set_env.bri";
 import stage2 from "/toolchain/stage2";
-import { buildAutopackConfig, type AutopackOptions } from "/extra/autopack.bri";
 import { PKG_CONFIG_MAKE_PATHS_RELATIVE_SCRIPT } from "/extra/pkg_config_make_paths_relative.bri";
 import { LIBTOOL_SANITIZE_DEPENDENCIES_SCRIPT } from "/extra/libtool_sanitize_dependencies.bri";
 import { LINKER_SCRIPT_MAKE_PATHS_RELATIVE_SCRIPT } from "/extra/linker_script_make_paths_relative.bri";
-import { runtimeUtils, useBriocheStrip } from "/toolchain/utils.bri";
+import { useBriocheStrip } from "/toolchain/utils.bri";
 import linuxHeaders from "./linux_headers.bri";
 import glibc from "./glibc.bri";
 import zlib from "./zlib.bri";
@@ -61,6 +60,10 @@ import procpsNg from "./procps_ng.bri";
 import utilLinux from "./util_linux.bri";
 import which from "./which.bri";
 import patchelf from "./patchelf.bri";
+import {
+  autopackNativeLtoTools,
+  autopackNativeToolchain,
+} from "./autopack.bri";
 
 export { bash };
 
@@ -132,7 +135,7 @@ export const tools = std.memo(async (): Promise<std.Recipe<std.Directory>> => {
   let tools = std.merge(...toolPackages);
 
   // Pack binaries and scripts
-  tools = autopack(tools, {
+  tools = autopackNativeToolchain(tools, {
     globs: ["bin/**"],
     linkDependencies: [toolchain],
     dynamicBinaryConfig: {
@@ -279,7 +282,7 @@ export const toolchain = std.memo(
     });
 
     // Re-pack all dynamic binaries and shared libraries
-    toolchain = autopack(toolchain, {
+    toolchain = autopackNativeToolchain(toolchain, {
       globs: ["**"],
       excludeGlobs: ["lib/libc.so*", "bin/.brioche-ld-orig*"],
       selfDependency: true,
@@ -297,26 +300,8 @@ export const toolchain = std.memo(
       },
     });
 
-    // Repack `ld` and friends to include `libm`. These tools
-    // don't depend on `libm` directly, so we need to manually
-    // include it in their packs.
-    toolchain = autopack(toolchain, {
-      globs: ["bin/.brioche-ld-orig-*", "bin/ar", "bin/ranlib", "bin/nm"],
-      selfDependency: true,
-      dynamicBinaryConfig: {
-        enabled: true,
-        extraLibraries: ["libm.so.6"],
-      },
-      sharedLibraryConfig: {
-        enabled: true,
-      },
-      scriptConfig: {
-        enabled: false,
-      },
-      repackConfig: {
-        enabled: true,
-      },
-    });
+    // Include runtime dependencies needed by plugin loading.
+    toolchain = autopackNativeLtoTools(toolchain);
 
     toolchain = useBriocheStrip(toolchain, {
       stripPaths: ["bin/strip"],
@@ -332,41 +317,6 @@ export const toolchain = std.memo(
     return toolchain;
   },
 );
-
-function autopack(
-  recipe: std.RecipeLike<std.Directory>,
-  options: AutopackOptions,
-): std.Recipe<std.Directory> {
-  const { config, variables } = buildAutopackConfig({
-    options,
-    defaultLinkDependencies: [],
-    runtimeUtils: runtimeUtils(),
-  });
-
-  const variableArgs: std.ProcessTemplateLike[] = Object.entries(
-    variables,
-  ).flatMap(([name, value]) => {
-    switch (value.type) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      case "path":
-        return ["--var", std.tpl`${name}=path:${value.value}`];
-    }
-  });
-
-  return std
-    .process({
-      command: std.tpl`${runtimeUtils}/bin/brioche-packer`,
-      args: [
-        "autopack",
-        std.outputPath,
-        "--config",
-        JSON.stringify(config),
-        ...variableArgs,
-      ],
-      outputScaffold: recipe,
-    })
-    .toDirectory();
-}
 
 function fixShebangs(
   recipe: std.RecipeLike<std.Directory>,
