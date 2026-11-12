@@ -26,12 +26,6 @@ export default function deno(): std.Recipe<std.Directory> {
 
       // Let bindgen find the standard C headers.
       CPATH: std.tpl`${std.toolchain}/include`,
-
-      // Deno currently uses the linker flag `--export-dynamic-symbol-list`, so
-      // ensure we use ld.bfd since ld.gold doesn't support this flag (at
-      // the time of writing)
-      [`CARGO_TARGET_${cargoTargetTripleEnvVar()}_RUSTFLAGS`]:
-        "-Clink-arg=-fuse-ld=bfd",
     },
     buildParams: {
       // The `release` profile builds with full LTO, which uses more memory
@@ -69,21 +63,4 @@ export async function test(): Promise<std.Recipe<std.File>> {
 
 export function liveUpdate(): std.Recipe<std.Directory> {
   return std.liveUpdateFromGithubReleases({ project });
-}
-
-/**
- * Return the current platform's target triple in `SCREAMING_SNAKE_CASE`, which
- * Cargo uses for target-specific environment variables.
- */
-function cargoTargetTripleEnvVar(): string {
-  switch (std.CURRENT_PLATFORM) {
-    case "x86_64-linux":
-      return "X86_64_UNKNOWN_LINUX_GNU";
-    case "aarch64-linux":
-      return "AARCH64_UNKNOWN_LINUX_GNU";
-    default:
-      throw new Error(
-        `The platform '${std.CURRENT_PLATFORM}' is currently not supported by this version of the deno package`,
-      );
-  }
 }

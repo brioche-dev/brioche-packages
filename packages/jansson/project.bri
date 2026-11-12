@@ -10,16 +10,7 @@ const source = Brioche.download(
   `${project.repository}/releases/download/v${project.version}/jansson-${project.version}.tar.gz`,
 )
   .unarchive("tar", "gzip")
-  .peel()
-  .pipe((source) =>
-    // Remove unsupported --default-symver linker flag for ld.gold
-    std.runBash`
-      sed -i 's/-Wl,--default-symver//g' "$BRIOCHE_OUTPUT/configure"
-    `
-      .dependencies(std.toolchain)
-      .outputScaffold(source)
-      .toDirectory(),
-  );
+  .peel();
 
 export default function jansson(): std.Recipe<std.Directory> {
   return std.runBash`
