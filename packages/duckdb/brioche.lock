@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/duckdb/duckdb.git": {
-      "v1.5.4": "08e34c447bae34eaee3723cac61f2878b6bdf787"
+      "v1.5.6": "069cc9f9b5be802405797faecc284961b07c70ef"
     }
   }
 }
