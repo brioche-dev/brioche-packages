@@ -20,6 +20,11 @@ export default function dioxusCli(): std.Recipe<std.Directory> {
   return cargoBuild({
     source,
     runnable: "bin/dx",
+    env: {
+      // Use ld.bfd because GNU gold crashes while linking this crate on aarch64.
+      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS:
+        "-Clink-arg=-fuse-ld=bfd",
+    },
     dependencies: [openssl({ version: "3" })],
   });
 }
