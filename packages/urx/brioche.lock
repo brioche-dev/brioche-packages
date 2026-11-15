@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/hahwul/urx.git": {
-      "0.10.0": "9c6003d1a41732cc048f06b74934e1c8a38c7b51"
+      "0.11.0": "84070824c8f8138caa4e5fd732a7f1eb774d3361"
     }
   }
 }
