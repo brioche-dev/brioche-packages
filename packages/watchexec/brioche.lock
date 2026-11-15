@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/watchexec-cli/2.7.3/download": {
+    "https://crates.io/api/v1/crates/watchexec-cli/2.8.0/download": {
       "type": "sha256",
-      "value": "b07397185fc1b97b41ecf761bd8134abffeb1444f21c9e2465a64cac1907bd9b"
+      "value": "a9e73398f1d43104592c8b3aed966fac990773962dc3fd11939ba4cee1d23745"
     }
   }
 }
