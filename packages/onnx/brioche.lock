@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/onnx/onnx.git": {
-      "v1.22.0": "2bb50465112feca9003e1ed654d77f01ff1415ca"
+      "v1.23.2": "e1ac8e74b620bbdc7ba07f0440806bd93f651a28"
     }
   }
 }
