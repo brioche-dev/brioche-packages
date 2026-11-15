@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/BelledonneCommunications/ortp.git": {
-      "5.4.126": "298490d88d7e531631a69fde96b4856272feb378"
+      "5.4.130": "d2707d3bde47ef29ad78db6a53b661008559e65e"
     }
   }
 }
