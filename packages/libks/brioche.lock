@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/signalwire/libks": {
-      "v2.0.11": "bae185d56da5b36807b539af0388403e85379305"
+      "v2.1.0": "e0d99b6cce169718903753fb183a9e3bff6700b6"
     }
   }
 }
