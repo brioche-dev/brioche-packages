@@ -1,29 +1,29 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.402/dotnet-sdk-10.0.402-linux-arm64.tar.gz": {
+    "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.404/dotnet-sdk-10.0.404-linux-arm64.tar.gz": {
       "type": "sha256",
-      "value": "5c33483bf8af611524301afe0200fef2b44bfd93d2cf792da5404ca73e7bb8cb"
+      "value": "dcc820a4277ab6bb3f648c609d86f2a7912ba9a3d166545e7b95dff419c12f0f"
     },
-    "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.402/dotnet-sdk-10.0.402-linux-x64.tar.gz": {
+    "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.404/dotnet-sdk-10.0.404-linux-x64.tar.gz": {
       "type": "sha256",
-      "value": "a131496fe7dac21dceea13354e50a3636126fac05d6e5ccf5fb250829c6e9b6a"
+      "value": "c0610757a818fde4b960d27a0ac421f273068a05dc5ec7abafc01dbf84e9cb4d"
     },
-    "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.426/dotnet-sdk-8.0.426-linux-arm64.tar.gz": {
+    "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.428/dotnet-sdk-8.0.428-linux-arm64.tar.gz": {
       "type": "sha256",
-      "value": "efed09de05d15406aecd8f60da389fb436103171923c67c28b42b7285c2af818"
+      "value": "37fc9f2c95e02162d11dd5c9994c9bb2a12c5317b1a1a129ee5968205cc94285"
     },
-    "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.426/dotnet-sdk-8.0.426-linux-x64.tar.gz": {
+    "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.428/dotnet-sdk-8.0.428-linux-x64.tar.gz": {
       "type": "sha256",
-      "value": "bb691c98abc8797eedbd48d3a766bc734214aed746e52e2691d8bbb268c60764"
+      "value": "6f8b64ef9644b11bcab6748ebfec088d2ae4868df26204bb2354c3ada0f09cbe"
     },
-    "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.319/dotnet-sdk-9.0.319-linux-arm64.tar.gz": {
+    "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.321/dotnet-sdk-9.0.321-linux-arm64.tar.gz": {
       "type": "sha256",
-      "value": "5fcd8149d5cdd3364c1727454e641b5f73e353b85ec9379d951c4a71dfef7601"
+      "value": "e24ce106c1b72993be5800364852740af75ef85556b0cf5755e71ebb3f39223f"
     },
-    "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.319/dotnet-sdk-9.0.319-linux-x64.tar.gz": {
+    "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.321/dotnet-sdk-9.0.321-linux-x64.tar.gz": {
       "type": "sha256",
-      "value": "13da1dc8296dd1fc12067923a3e3e333dd928a87fbfe72846c65546a5416508b"
+      "value": "67f2b75c347b0fda115fa6c0d72f6ba4e05b9e96824ccc5ce835879a3f053875"
     }
   }
 }
