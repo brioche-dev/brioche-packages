@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/valkey-io/valkey": {
-      "9.1.2": "7f1dffedff6de73058b2c2a389422b6ecd56c8fb"
+      "9.1.3": "29173b67508b2de4c0f0ed551f3b47cf19fc3ca8"
     }
   }
 }
