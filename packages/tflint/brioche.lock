@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/terraform-linters/tflint/@v/v0.64.0.zip": {
+    "https://proxy.golang.org/github.com/terraform-linters/tflint/@v/v0.66.0.zip": {
       "type": "sha256",
-      "value": "892abad4688c7d90a058806cd9e406a79ea6b85019391c125d4cf10fff01e68d"
+      "value": "79b71d3fbd04ab08c3a72e361b801778bac74f0cc2a079ae6bd119f32bde6a37"
     }
   }
 }
