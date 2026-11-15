@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/jaq/3.1.1/download": {
+    "https://crates.io/api/v1/crates/jaq/3.1.2/download": {
       "type": "sha256",
-      "value": "e1cb2dc59f15c78d3ad513134f6ba9f2c2fae3389b0482c31eccf34ef24a54cc"
+      "value": "f686343ddd30a3cb6028299b080fb135480532e74b5f6628362c11fdb52f7d22"
     }
   }
 }
