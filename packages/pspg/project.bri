@@ -3,7 +3,7 @@ import postgresql from "postgresql";
 
 export const project = {
   name: "pspg",
-  version: "5.8.16",
+  version: "5.9.1",
   repository: "https://github.com/okbob/pspg",
 };
 
