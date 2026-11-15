@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "coffeescript",
-  version: "2.7.0",
+  version: "2.7.1",
   extra: {
     packageName: "coffeescript",
   },
