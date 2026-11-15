@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "flex",
-  version: "2.6.4",
+  version: "2.6.15",
   repository: "https://github.com/westes/flex",
 };
 
