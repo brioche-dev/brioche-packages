@@ -2,7 +2,7 @@ import * as std from "std";
 
 export const project = {
   name: "fribidi",
-  version: "1.0.17",
+  version: "1.0.18",
   repository: "https://github.com/fribidi/fribidi",
 };
 
