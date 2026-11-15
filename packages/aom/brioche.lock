@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://storage.googleapis.com/aom-releases/libaom-3.15.2.tar.gz": {
+    "https://storage.googleapis.com/aom-releases/libaom-3.15.3.tar.gz": {
       "type": "sha256",
-      "value": "67bb54b245f33ed98600e08269e6139986e48114e14042474ddd8885801dfddc"
+      "value": "12c01dc731ed7b5a999e28120b45bf58a002ba3435a4ba2cfbc1e084a27c9c04"
     }
   }
 }
