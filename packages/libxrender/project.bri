@@ -7,7 +7,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxrender",
-  version: "0.9.12",
+  version: "0.9.13",
 };
 
 const source = Brioche.download(
