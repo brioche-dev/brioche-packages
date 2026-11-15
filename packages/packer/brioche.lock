@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/hashicorp/packer/@v/v1.16.0.info": {
+    "https://proxy.golang.org/github.com/hashicorp/packer/@v/v1.16.2.info": {
       "type": "sha256",
-      "value": "0e5cfcf9e006219090fe55bac04080de847603180e40fde4646720a66308b152"
+      "value": "d28488c611c8ac650fb5f60a78cc1bf21846631a630ca1e12f1286febd83a488"
     },
-    "https://proxy.golang.org/github.com/hashicorp/packer/@v/v1.16.0.zip": {
+    "https://proxy.golang.org/github.com/hashicorp/packer/@v/v1.16.2.zip": {
       "type": "sha256",
-      "value": "99983a3acc8ffe88dd667832ca434d0649ce4962ca3af3ff3ec199d52f935e4e"
+      "value": "d3761109eaaec22c03320c3ff2954cddf28950dcabc050f2f70285c51c28b942"
     }
   }
 }
