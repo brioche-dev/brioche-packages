@@ -5,9 +5,9 @@
       "type": "sha256",
       "value": "29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3"
     },
-    "https://files.pythonhosted.org/packages/source/p/pycparser/pycparser-3.0.tar.gz": {
+    "https://files.pythonhosted.org/packages/source/p/pycparser/pycparser-3.12.tar.gz": {
       "type": "sha256",
-      "value": "600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"
+      "value": "f03387877eab82ce01bbdfd0ba7252ee55a90b1c708d5129e2ce915475cf1db6"
     }
   }
 }
