@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "pulsarctl",
-  version: "4.2.1.15",
+  version: "5.0.0.110",
   repository: "https://github.com/streamnative/pulsarctl",
 };
 
