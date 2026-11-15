@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/authzed/spicedb/@v/v1.56.2.zip": {
+    "https://proxy.golang.org/github.com/authzed/spicedb/@v/v1.57.1.zip": {
       "type": "sha256",
-      "value": "32fb5646d68b01a4f271f1bf90cee089d4ec31a2eaa4f442b00fb80e165b9509"
+      "value": "096795c7395c6aefca49d3758239be68bfcfc0b8f04ea4f8789539a30f644629"
     }
   }
 }
