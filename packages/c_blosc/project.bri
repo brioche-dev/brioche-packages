@@ -5,7 +5,7 @@ import snappy from "snappy";
 
 export const project = {
   name: "c_blosc",
-  version: "1.21.6",
+  version: "1.21.7",
   repository: "https://github.com/Blosc/c-blosc",
 };
 
