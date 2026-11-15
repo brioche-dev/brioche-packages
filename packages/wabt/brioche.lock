@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/webassembly/wabt.git": {
-      "1.0.41": "03a00a1334e6121fb0cce4fccbd6bb109b68acaa"
+      "1.0.42": "ff0ef7e0009402740c805a9744c09b05be063e48"
     }
   }
 }
