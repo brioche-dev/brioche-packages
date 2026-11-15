@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/gitlab.com/gitlab-org/cli/@v/v1.123.0.zip": {
+    "https://proxy.golang.org/gitlab.com/gitlab-org/cli/@v/v1.130.0.zip": {
       "type": "sha256",
-      "value": "385a80768768948225c9b3e220c2d933e304973d551ae79b079f0ef78e88a936"
+      "value": "27cb3bf1913f1d409c93a5981fdd7d29695805270b617f529b5d2643ab977f03"
     }
   }
 }
