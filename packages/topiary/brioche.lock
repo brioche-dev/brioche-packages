@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/topiary-cli/0.7.3/download": {
+    "https://crates.io/api/v1/crates/topiary-cli/0.8.0/download": {
       "type": "sha256",
-      "value": "5ff971bbf53006bb6bd20953705148b8846fe56d409d575c03ab1c061dc75e9b"
+      "value": "1345d830cd249b194aec9a9722f342861eee7bf847f51c22b52361f9bd0d3673"
     }
   }
 }
