@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/parqeye/0.1.0/download": {
+    "https://crates.io/api/v1/crates/parqeye/0.2.0/download": {
       "type": "sha256",
-      "value": "4de322faf979a9b7ccb2fffabb6b3174a6fa74a9a1946400239d40d98eb3dd5e"
+      "value": "ecb8f9a009b2fdaee8e37296a98324330c691da9ba4471bbdd0c4042e49be6d5"
     }
   }
 }
