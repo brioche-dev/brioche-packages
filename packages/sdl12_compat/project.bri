@@ -4,7 +4,7 @@ import sdl2 from "sdl2";
 
 export const project = {
   name: "sdl12_compat",
-  version: "1.2.76",
+  version: "1.2.78",
   repository: "https://github.com/libsdl-org/sdl12-compat",
 };
 
