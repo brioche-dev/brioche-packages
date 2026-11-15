@@ -5,7 +5,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "netcat_openbsd",
-  version: "1.238-1",
+  version: "1.239-1",
   repository: "https://salsa.debian.org/debian/netcat-openbsd",
 };
 
