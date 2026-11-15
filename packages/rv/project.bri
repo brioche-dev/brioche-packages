@@ -4,7 +4,7 @@ import llvm from "llvm";
 
 export const project = {
   name: "rv",
-  version: "0.7.0",
+  version: "0.7.2",
   repository: "https://github.com/spinel-coop/rv.git",
 };
 
