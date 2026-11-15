@@ -3,7 +3,7 @@ import { npmInstallGlobal } from "nodejs";
 
 export const project = {
   name: "autoprefixer",
-  version: "10.6.1",
+  version: "10.6.2",
   extra: {
     packageName: "autoprefixer",
   },
