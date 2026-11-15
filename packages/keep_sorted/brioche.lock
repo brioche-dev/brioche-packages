@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/google/keep-sorted.git": {
-      "v0.10.0": "b225c42a9a8f480d760cf967d1e3a839060b242c"
+      "v0.11.0": "167f8ca836e2a3639087849ce0a2f702f8835f88"
     }
   }
 }
