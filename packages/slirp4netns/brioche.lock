@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/rootless-containers/slirp4netns/archive/refs/tags/v1.3.5.tar.gz": {
+    "https://github.com/rootless-containers/slirp4netns/archive/refs/tags/v1.3.7.tar.gz": {
       "type": "sha256",
-      "value": "a27ed4c7311616516b56015cc74fa06c6431f5c8ebadaf331c0e08150d1a84ce"
+      "value": "79079c69149c9d7ec81f5f5a7e705951dc788bc5e300849e3adfef69f8232836"
     }
   }
 }
