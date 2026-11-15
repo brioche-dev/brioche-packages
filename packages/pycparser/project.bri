@@ -3,7 +3,7 @@ import python from "python";
 
 export const project = {
   name: "pycparser",
-  version: "3.0",
+  version: "3.12",
   extra: {
     packageName: "pycparser",
   },
