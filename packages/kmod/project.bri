@@ -8,7 +8,7 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "kmod",
-  version: "34.2",
+  version: "34.3",
 };
 
 const source = Brioche.download(
