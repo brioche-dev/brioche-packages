@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/open-policy-agent/opa/@v/v1.19.0.info": {
+    "https://proxy.golang.org/github.com/open-policy-agent/opa/@v/v1.22.4.info": {
       "type": "sha256",
-      "value": "3e518a13f9a4bccbd7785a8901862b7061945120ae84446926684e90b2bd326d"
+      "value": "0df95004a461202e6e2d38dae6c1d0e6fe7abecfc753694a54828e3e249c1210"
     },
-    "https://proxy.golang.org/github.com/open-policy-agent/opa/@v/v1.19.0.zip": {
+    "https://proxy.golang.org/github.com/open-policy-agent/opa/@v/v1.22.4.zip": {
       "type": "sha256",
-      "value": "70d07bec2c2da760f389d0daa930c19319d873513387861db77d1aef766182dd"
+      "value": "27b9423fb67b29665778fd366af83a9d1523bcf1eca2b118e29a1a69d2eb25f8"
     }
   }
 }
