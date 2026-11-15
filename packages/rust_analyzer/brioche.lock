@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/rust-lang/rust-analyzer.git": {
-      "2026-08-10.1": "f938641be53c2e4bacd7dc46bddb74825a3e9d28"
+      "2026-11-09": "e5e7830640558e323e89c831488a3172b58dc66d"
     }
   }
 }
