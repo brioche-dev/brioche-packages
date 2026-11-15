@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/nu-lint/1.7.1/download": {
+    "https://crates.io/api/v1/crates/nu-lint/1.9.2/download": {
       "type": "sha256",
-      "value": "616ed00be44e9a3d03cce19729ae3dfa533519ae6f9f3ab839deb73383c36deb"
+      "value": "7af735d5f476b4c3fead0c0c762b64175bdec99a0d43bcbd332138812dddaa2e"
     }
   }
 }
