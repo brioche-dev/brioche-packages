@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/rootless-containers/rootlesskit/v3/@v/v3.1.0.zip": {
+    "https://proxy.golang.org/github.com/rootless-containers/rootlesskit/v3/@v/v3.3.0.zip": {
       "type": "sha256",
-      "value": "72afcc71fcf1f4907142d188f1a5a317f27f1c6152770d222f41f70de9e1522f"
+      "value": "56d677b07e49933061d528841ccc109afec08e5e50b1e80615011dd215881e48"
     }
   }
 }
