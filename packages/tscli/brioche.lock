@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/jaxxstorm/tscli/@v/v0.10.0.zip": {
+    "https://proxy.golang.org/github.com/jaxxstorm/tscli/@v/v0.12.0.zip": {
       "type": "sha256",
-      "value": "66c0cb99f92a99ef93d40a976cfdef71d43e58aab7e28f18d12d5fb458ef2e5b"
+      "value": "3978db9dd1a4b2491a3d8eba28e92a170cbfaed4e75463b1e96c6687ebd3b049"
     }
   }
 }
