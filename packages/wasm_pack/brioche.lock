@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/rustwasm/wasm-pack.git": {
-      "v0.15.0": "8320269d4b1d7a3a06da0fcc67cf5b176699ebe3"
+      "v0.15.1": "b9ac5e48b71e0523c1ed2f100ec6681ca374db23"
     }
   }
 }
