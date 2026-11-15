@@ -3,10 +3,10 @@ import * as std from "std";
 
 export const project = {
   name: "stb",
-  version: "2026-08-02",
+  version: "2026-11-12",
   repository: "https://github.com/nothings/stb.git",
   extra: {
-    gitRef: "2c980bb59875b0d32144a71867fbdebb2f77cd20",
+    gitRef: "9600522de53973336fa033a289858a4354cbb04c",
   },
 };
 
