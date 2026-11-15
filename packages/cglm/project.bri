@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "cglm",
-  version: "0.9.6",
+  version: "0.9.7",
   repository: "https://github.com/recp/cglm.git",
 };
 
