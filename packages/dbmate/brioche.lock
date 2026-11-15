@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/amacneil/dbmate/v2/@v/v2.36.0.zip": {
+    "https://proxy.golang.org/github.com/amacneil/dbmate/v2/@v/v2.38.1.zip": {
       "type": "sha256",
-      "value": "14ed84be4dfad71c22e95b092d86f17d018ee581c873c08228df7fdd43b41614"
+      "value": "1f573f35c2942c2856e6fcabd97afe36a58cfba30b7541af108645e6ba66bbe7"
     }
   }
 }
