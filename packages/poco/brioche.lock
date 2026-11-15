@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/pocoproject/poco.git": {
-      "poco-1.15.3-release": "e8c711ce5a58006272b3950c293eb92c849caea3"
+      "poco-1.15.4-release": "6a5667f432e1c5fe5591025ab03a2f8df37116b4"
     }
   }
 }
