@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/walles/moor/v2/@v/v2.19.4.zip": {
+    "https://proxy.golang.org/github.com/walles/moor/v2/@v/v2.19.7.zip": {
       "type": "sha256",
-      "value": "d7fd629007e0dce21ea3c57bb1a16d7af17291487c2c2e74eb9fa48fab84e669"
+      "value": "7edc9e26fe536fd08ecac39b2c56b22ca4404c1a61c8f4100a0348a8c724d517"
     }
   }
 }
