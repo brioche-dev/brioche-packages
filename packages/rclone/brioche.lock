@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/rclone/rclone/@v/v1.75.1.zip": {
+    "https://proxy.golang.org/github.com/rclone/rclone/@v/v1.76.0.zip": {
       "type": "sha256",
-      "value": "320d44899277ef0d3b0fc02aa8cce9371cf5217dec83aba9023196fa7ad2d1dc"
+      "value": "a816befe2ce61320053bc88207ed2cdc1f12c668df3d037f2f08b5942113d5e9"
     }
   }
 }
