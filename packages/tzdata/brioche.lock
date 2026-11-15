@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://data.iana.org/time-zones/releases/tzcode2026d.tar.gz": {
+    "https://data.iana.org/time-zones/releases/tzcode2026f.tar.gz": {
       "type": "sha256",
-      "value": "2f5c9f7fe29e6b8cb863583667884b8ce17b0a485355a054b591c6bdfcd81791"
+      "value": "5a18da01393679ef2559214dc687563f7f3d05691f6f58b7fbc0166f3e796cd6"
     },
-    "https://data.iana.org/time-zones/releases/tzdata2026d.tar.gz": {
+    "https://data.iana.org/time-zones/releases/tzdata2026f.tar.gz": {
       "type": "sha256",
-      "value": "0cb2aa8e333c3dc049badc42a0c61f21987b8cd44e107fa900bad764aacc7767"
+      "value": "01b4a91cec5167ed48c11e8ab78f2048cead78ce94b0cafcad0ae8c5a3044d3d"
     }
   }
 }
