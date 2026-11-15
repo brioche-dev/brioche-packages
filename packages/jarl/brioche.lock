@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/etiennebacher/jarl.git": {
-      "0.6.0": "7ac3b8d0b510abbb51102d74263e639c2ea2aad6"
+      "0.7.1": "2c340b851897b7974f85489bde433bf9b4508124"
     }
   }
 }
