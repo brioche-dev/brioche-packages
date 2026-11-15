@@ -4,10 +4,10 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "cpuinfo",
-  version: "2026-07-30",
+  version: "2026-11-11",
   repository: "https://github.com/pytorch/cpuinfo.git",
   extra: {
-    gitRef: "66ee79c038d70dad9f08705b2c9b3e58f6d8f512",
+    gitRef: "3ce3d87adef69f04e196e25b7f754028d12750c4",
   },
 };
 
