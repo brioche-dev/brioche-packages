@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://crates.io/api/v1/crates/topgrade/17.11.0/download": {
+    "https://crates.io/api/v1/crates/topgrade/17.16.0/download": {
       "type": "sha256",
-      "value": "0449309462314b87d2d2c99cad1591bad3fa04c0e50c4b5af674c0cd89ff6c4e"
+      "value": "3619da024b8f4ae9b633e8d182c9d65c9395971297373904d49b025a1872ceb2"
     }
   }
 }
