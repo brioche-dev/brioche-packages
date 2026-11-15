@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.x.org/archive/individual/lib/libXrender-0.9.12.tar.xz": {
+    "https://www.x.org/archive/individual/lib/libXrender-0.9.13.tar.xz": {
       "type": "sha256",
-      "value": "b832128da48b39c8d608224481743403ad1691bf4e554e4be9c174df171d1b97"
+      "value": "3fe88c609df6782e1e7af2e4de36b2563d70cd70ff7dcb1cda561ad64912bb64"
     }
   }
 }
