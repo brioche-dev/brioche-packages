@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/foresterre/cargo-msrv.git": {
-      "v0.19.3": "bf4c1db5969b572eb84cf775ebe36ab790d3ba9f"
+      "v0.19.6": "367c5283c087587cd83706821804aa312f58199f"
     }
   }
 }
