@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/linux-rdma/rdma-core": {
-      "v65.0": "58e40801bfed5a8befc0881594820fa0a0baa4a1"
+      "v66.0": "0fa90c60fbc274edb3495f30c1afd02b3f5fd38e"
     }
   }
 }
