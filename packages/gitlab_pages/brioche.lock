@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://gitlab.com/gitlab-org/gitlab-pages.git": {
-      "v19.5.0": "adb4248dd56c2decfb9d87c71d112c3eaed0f1ef"
+      "v19.5.5": "af6406225f542b744f98b18e0df2508979e093fa"
     }
   }
 }
