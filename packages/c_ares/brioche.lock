@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/c-ares/c-ares": {
-      "v1.34.8": "c7a3138dcfe3bb0eaaf10c0c24c36dc66dc790ab"
+      "v1.34.9": "bc91829cce983a35ec01f5dbc05465858a3df469"
     }
   }
 }
