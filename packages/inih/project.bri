@@ -4,7 +4,7 @@ import ninja from "ninja";
 
 export const project = {
   name: "inih",
-  version: "62",
+  version: "63",
   repository: "https://github.com/benhoyt/inih",
 };
 
