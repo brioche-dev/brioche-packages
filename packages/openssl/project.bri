@@ -3,12 +3,12 @@ import { cmakeSanitizePaths } from "cmake";
 
 export const project = {
   name: "openssl",
-  version: "4.0.2",
+  version: "4.1.0",
   repository: "https://github.com/openssl/openssl",
   extra: {
     otherVersions: {
-      "4": "4.0.2",
-      "3": "3.6.4",
+      "4": "4.1.0",
+      "3": "3.6.5",
     },
   },
 } as const;
