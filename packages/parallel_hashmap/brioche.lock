@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/greg7mdp/parallel-hashmap": {
-      "v2.0.0": "2ec799017610ef831f4dc29c21fb3cce7e4a19b9"
+      "v2.1.0": "2a6e2aca3b129b907d3a108ecc562ef9ddc478b4"
     }
   }
 }
