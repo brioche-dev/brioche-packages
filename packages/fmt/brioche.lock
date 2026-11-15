@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/fmtlib/fmt.git": {
-      "12.2.0": "1be298e1bd68957e4cd352e1f676f00e07dcfb57"
+      "12.2.1": "208219daff58f2a7438f6931cc2ddc358acf33ef"
     }
   }
 }
