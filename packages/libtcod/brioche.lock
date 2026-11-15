@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/libtcod/libtcod": {
-      "2.2.2": "27c2dbc9d97bacb18b9fd43a5c7f070dc34339ed"
+      "2.3.2": "54638761f70b7c4b9804a2f9e1b3795bc4ea3630"
     }
   }
 }

@@ -5,7 +5,7 @@ import utf8proc from "utf8proc";
 
 export const project = {
   name: "libtcod",
-  version: "2.2.2",
+  version: "2.3.2",
   repository: "https://github.com/libtcod/libtcod",
 };
 
