@@ -10,7 +10,7 @@ import xorgproto from "xorgproto";
 
 export const project = {
   name: "libxtst",
-  version: "1.2.5",
+  version: "1.2.6",
 };
 
 const source = Brioche.download(
