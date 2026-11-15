@@ -4,9 +4,9 @@ import { nushellRunnable, type NushellRunnable } from "nushell";
 
 export const project = {
   name: "monkeys_audio",
-  version: "13.28",
+  version: "13.47",
   extra: {
-    versionCompact: "1328",
+    versionCompact: "1347",
   },
 };
 
