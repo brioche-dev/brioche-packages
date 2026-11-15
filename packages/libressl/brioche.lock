@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-4.3.3.tar.gz": {
+    "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-4.4.1.tar.gz": {
       "type": "sha256",
-      "value": "ff97c432457f349e6ba3d416ab903bc7468f1436f0f32efe5fff808de292c7b8"
+      "value": "290cdf1b53c086255dc302f118b98602a444e9ae6d11e9bfdd8c9b1b60aa3a22"
     }
   }
 }
