@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://gitlab.freedesktop.org/wayland/wayland-protocols": {
-      "1.49": "ee78491a237eaff9389a0ccf8680521d074407d3"
+      "1.50": "3eab2dccf4bfdd85c16d312a6c8c8fbc2a6e73a8"
     }
   }
 }
