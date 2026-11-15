@@ -8,7 +8,7 @@
   },
   "git_refs": {
     "https://github.com/robotframework/robotframework.git": {
-      "v7.5": "bef418cd60302b5796277ee9c9c1702181d1b23e"
+      "v7.5.1": "327ad2d38b0d468f03dbca97c7607b6b923730e0"
     }
   }
 }
