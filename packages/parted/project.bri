@@ -4,7 +4,7 @@ import lvm2 from "lvm2";
 
 export const project = {
   name: "parted",
-  version: "3.7",
+  version: "3.8",
   repository: "https://git.savannah.gnu.org/git/parted.git",
 };
 
