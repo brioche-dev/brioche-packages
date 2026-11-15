@@ -5,7 +5,7 @@ import openssl from "openssl";
 
 export const project = {
   name: "libtatsu",
-  version: "1.0.5",
+  version: "1.1.1",
   repository: "https://github.com/libimobiledevice/libtatsu",
 };
 
