@@ -1,17 +1,17 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.python.org/ftp/python/3.12.13/Python-3.12.13.tar.xz": {
+    "https://www.python.org/ftp/python/3.12.16/Python-3.12.16.tar.xz": {
       "type": "sha256",
-      "value": "c08bc65a81971c1dd5783182826503369466c7e67374d1646519adf05207b684"
+      "value": "b5796915dc45ff745cfb4e990a7e7c93d6f546328a102ce31448d69ebc37575c"
     },
-    "https://www.python.org/ftp/python/3.13.14/Python-3.13.14.tar.xz": {
+    "https://www.python.org/ftp/python/3.13.18/Python-3.13.18.tar.xz": {
       "type": "sha256",
-      "value": "639e43243c620a308f968213df9e00f2f8f62332f7adbaa7a7eeb9783057c690"
+      "value": "abb0102e6d4ae027509bcb82327d9dd85515b44a3ba8ad538cfc5e9847029f68"
     },
-    "https://www.python.org/ftp/python/3.14.6/Python-3.14.6.tar.xz": {
+    "https://www.python.org/ftp/python/3.14.10/Python-3.14.10.tar.xz": {
       "type": "sha256",
-      "value": "143b1dddefaec3bd2e21e3b839b34a2b7fb9842272883c576420d605e9f30c63"
+      "value": "de414a57119abef52784d8993e341d53aed635fc2b05c2607d9f98a2c5b72032"
     }
   }
 }
