@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/apernet/hysteria.git": {
-      "app/v2.13.0": "ca8fbd874fd6ca82413948de6dc5924405e103e1"
+      "app/v2.14.0": "c2b181e0b0e72b077e4b0b7297735af14d1f9929"
     }
   }
 }
