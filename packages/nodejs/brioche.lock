@@ -1,29 +1,29 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v22.23.5/node-v22.23.5-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "a44aeb94849a299b22df10b9e622ec2f605c2183501bc40590705131de7c740f"
+      "value": "2babb9eb5264860d540849f4b064a6fbdebcdc323657d9d382ce23d313fd5e09"
     },
-    "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v22.23.5/node-v22.23.5-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de"
+      "value": "cdeb8670a0c81f51b4dc4ac61919f9b1ad917b304bf8221eb939570663d240f8"
     },
-    "https://nodejs.org/dist/v24.22.0/node-v24.22.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "fef00bb4d36e1c50104a9775a10359beee98f162b4104dd12472c75065c6a143"
+      "value": "6e51a2ada00f0011cc266f65d98922b403d7ad88f809ca2aa615a5fe1ce6e86c"
     },
-    "https://nodejs.org/dist/v24.22.0/node-v24.22.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "cc2f601cee82d9a5a233302fe307abc600727035fd7d2c3a3571755989e95008"
+      "value": "4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb"
     },
-    "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-arm64.tar.xz": {
+    "https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-arm64.tar.xz": {
       "type": "sha256",
-      "value": "fd6cc729fa4448c2ac27c3fca5606019ced63c65a15c152c8df03e0cbce7f4c5"
+      "value": "89e1853138db51e8b82d3e98ba9c0d3f2956a28e5e55ea1b7e12d25aae92d5dd"
     },
-    "https://nodejs.org/dist/v26.12.0/node-v26.12.0-linux-x64.tar.xz": {
+    "https://nodejs.org/dist/v26.13.1/node-v26.13.1-linux-x64.tar.xz": {
       "type": "sha256",
-      "value": "fd47865ecd6391ebb431fc815e01b9135bf83ded5cf373247e9331e196b7aded"
+      "value": "5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864"
     }
   }
 }
