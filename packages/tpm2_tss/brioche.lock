@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/tpm2-software/tpm2-tss/releases/download/4.2.0/tpm2-tss-4.2.0.tar.gz": {
+    "https://github.com/tpm2-software/tpm2-tss/releases/download/4.2.2/tpm2-tss-4.2.2.tar.gz": {
       "type": "sha256",
-      "value": "b53f0c5c8c4ce17f05701a410ca9688f725ca380c9bc4640eacd0eadb1fea124"
+      "value": "bd4efc89ee01aca8ff771cae268d84333b7594c2d4afee50bb13b859f1113c3f"
     }
   }
 }
