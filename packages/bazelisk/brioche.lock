@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/bazelbuild/bazelisk/@v/v1.29.0.zip": {
+    "https://proxy.golang.org/github.com/bazelbuild/bazelisk/@v/v1.30.0.zip": {
       "type": "sha256",
-      "value": "8ddc88d9618b8f3f480907fb3ea19e65062b7b0735436bd592965b995eec8c72"
+      "value": "7443c12782305bd245cef27b0268a59795abb5b7df7bf0f2f3f9861a5ed07a8e"
     }
   }
 }
