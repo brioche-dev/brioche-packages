@@ -15,7 +15,7 @@ import yazpp from "yazpp";
 
 export const project = {
   name: "metaproxy",
-  version: "1.22.4",
+  version: "1.22.6",
   repository: "https://github.com/indexdata/metaproxy",
 };
 
