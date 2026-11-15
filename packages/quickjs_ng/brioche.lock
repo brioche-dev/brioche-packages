@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/quickjs-ng/quickjs": {
-      "v0.16.2": "1ab8676f4b6d6d669baeb5f21790fb9734636a20"
+      "v0.18.0": "d7215b0ad3fc2c562e8317fd9bca058fd4863804"
     }
   }
 }
