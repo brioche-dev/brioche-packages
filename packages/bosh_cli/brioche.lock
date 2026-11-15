@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/cloudfoundry/bosh-cli/v7/@v/v7.11.1.zip": {
+    "https://proxy.golang.org/github.com/cloudfoundry/bosh-cli/v7/@v/v7.11.2.zip": {
       "type": "sha256",
-      "value": "c9e25a1ac5df4b6738705c2f8006c1d34ab3b199c655c2fc4593b76fc8b71de0"
+      "value": "52174ba05d72d9e781c61a0379d6f024be936f39c780bea2a83c5a1c58d2a987"
     }
   }
 }
