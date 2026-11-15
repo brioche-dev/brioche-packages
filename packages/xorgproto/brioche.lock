@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.x.org/archive/individual/proto/xorgproto-2025.1.tar.xz": {
+    "https://www.x.org/archive/individual/proto/xorgproto-2026.1.tar.xz": {
       "type": "sha256",
-      "value": "56898c716c0578df8a2d828c9c3e5c528277705c0484381a81960fe1a67668e8"
+      "value": "f9bfe4a9ed8c8ab9d2a3b0d49797f046052dadd06b7a8b45dbffaffb137e8290"
     }
   }
 }
