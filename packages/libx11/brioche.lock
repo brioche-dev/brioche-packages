@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.x.org/archive/individual/lib/libX11-1.8.13.tar.xz": {
+    "https://www.x.org/archive/individual/lib/libX11-1.8.14.tar.xz": {
       "type": "sha256",
-      "value": "69606f485c2c07c14ef64f75b7bb326d48587af33795d9ab3e607c0b5f94f11c"
+      "value": "bbc78c46217174655c2b32b138ad119f3ac15f50808b4d0b3a2677a4b1afc950"
     }
   }
 }
