@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/go-gost/gost.git": {
-      "v3.3.0": "cb76f63754768c7b5d68895a0d51635b0141b80f"
+      "v3.3.3": "3d514c57230bfa524aa89087da5580b314f1cd36"
     }
   }
 }
