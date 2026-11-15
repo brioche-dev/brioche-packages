@@ -3,7 +3,7 @@ import { goBuild, goModuleManifest } from "go";
 
 export const project = {
   name: "rqlite",
-  version: "10.3.3",
+  version: "10.7.1",
   extra: {
     moduleName: "github.com/rqlite/rqlite/v10",
   },
