@@ -4,7 +4,7 @@ import rust, { cargoBuild } from "rust";
 
 export const project = {
   name: "cargo_smart_release",
-  version: "0.21.14",
+  version: "0.22.0",
   extra: {
     crateName: "cargo-smart-release",
   },
