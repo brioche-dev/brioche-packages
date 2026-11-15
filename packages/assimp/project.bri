@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "assimp",
-  version: "6.0.5",
+  version: "6.0.6",
   repository: "https://github.com/assimp/assimp.git",
 };
 
