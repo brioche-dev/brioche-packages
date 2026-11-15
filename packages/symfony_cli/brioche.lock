@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/symfony-cli/symfony-cli.git": {
-      "v5.20.0": "df275bf5925c27643615787b880ccc587e3f22e9"
+      "v5.22.2": "055740548fc12f2e1ab5cd9fab5759bc981aaced"
     }
   }
 }
