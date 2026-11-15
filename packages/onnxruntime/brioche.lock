@@ -12,7 +12,7 @@
   },
   "git_refs": {
     "https://github.com/microsoft/onnxruntime.git": {
-      "v1.28.0": "da9b5e364c465de65c49d91e696cd6485270757f"
+      "v1.32.0": "fab30a46491a40f5e4c968b80e8a59acbbb91b53"
     }
   }
 }
