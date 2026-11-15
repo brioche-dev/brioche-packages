@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/kubescape/kubescape.git": {
-      "v4.0.16": "d0ea07bcd9d7ab1640dcd6527d0e68a34f10da0e"
+      "v4.0.21": "42df4e161a97a8a0f4e656d45bba3d60cffb08f7"
     }
   }
 }
