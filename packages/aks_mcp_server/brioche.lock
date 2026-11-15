@@ -1,13 +1,13 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/!azure/aks-mcp/@v/v0.0.20.info": {
+    "https://proxy.golang.org/github.com/!azure/aks-mcp/@v/v0.0.22.info": {
       "type": "sha256",
-      "value": "039ee5d445709eed23da80ab0f873f196e1893d421c8f9f8ea5007e4895f9d7d"
+      "value": "42188700afe7e654173284d9bbf145d9d68dc682015727c0e42f052aee783029"
     },
-    "https://proxy.golang.org/github.com/!azure/aks-mcp/@v/v0.0.20.zip": {
+    "https://proxy.golang.org/github.com/!azure/aks-mcp/@v/v0.0.22.zip": {
       "type": "sha256",
-      "value": "0623094e4e482a2d069adc1844a60158f7eb42fb89000b30b51be5331ba0e990"
+      "value": "15bb7e759bef3a226aa2bc6e80fcf908ebcca535227963b0acc9fc6bebf4ae0d"
     }
   }
 }
