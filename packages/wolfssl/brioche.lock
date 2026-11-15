@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/wolfSSL/wolfssl/archive/refs/tags/v5.9.2-stable.tar.gz": {
+    "https://github.com/wolfSSL/wolfssl/archive/refs/tags/v5.9.4-stable.tar.gz": {
       "type": "sha256",
-      "value": "2f4ef3d4fd387a9b3191d36a6316d69116c46ff69bb9583b6c82b36d7b8ca114"
+      "value": "7256bfc89b183a75183806c7debfa203443873b0b4a562e1b80d68e01b45ac57"
     }
   }
 }
