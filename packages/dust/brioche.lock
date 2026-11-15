@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/bootandy/dust.git": {
-      "v1.2.6": "5cc5828d3b6b1c70c8ed6b952fda127639da4d7b"
+      "v1.2.7": "079c55266917387e416e0f871c97c06da52df12d"
     }
   }
 }
