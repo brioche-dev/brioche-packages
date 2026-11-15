@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.x.org/archive/individual/lib/libXi-1.8.3.tar.xz": {
+    "https://www.x.org/archive/individual/lib/libXi-1.8.4.tar.xz": {
       "type": "sha256",
-      "value": "7ad60056f01af4f786cfe93b3a7707447711626fc8da2637bec71a90409babe5"
+      "value": "ddd6057b89a91903bc2f884d55c8467440906945e482c36547260dff28661afc"
     }
   }
 }
