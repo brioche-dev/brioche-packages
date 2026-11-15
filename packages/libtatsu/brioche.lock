@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/libimobiledevice/libtatsu/releases/download/1.0.5/libtatsu-1.0.5.tar.bz2": {
+    "https://github.com/libimobiledevice/libtatsu/releases/download/1.1.1/libtatsu-1.1.1.tar.bz2": {
       "type": "sha256",
-      "value": "536fa228b14f156258e801a7f4d25a3a9dd91bb936bf6344e23171403c57e440"
+      "value": "18f471f131c1d55ccc02fa09565d870030c6ce92f737b89fe1b3849941ebb303"
     }
   }
 }
