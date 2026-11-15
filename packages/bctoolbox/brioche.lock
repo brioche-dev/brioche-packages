@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/BelledonneCommunications/bctoolbox.git": {
-      "5.4.128": "0fbb4ad2dda2bd62ffbad9928272b52a6aeba41f"
+      "5.4.130": "4f5e9f537f665a56e94b724acc8577ce845edea3"
     }
   }
 }
