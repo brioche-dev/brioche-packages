@@ -3,7 +3,7 @@ import { goBuild } from "go";
 
 export const project = {
   name: "bazelisk",
-  version: "1.29.0",
+  version: "1.30.0",
   extra: {
     moduleName: "github.com/bazelbuild/bazelisk",
   },
