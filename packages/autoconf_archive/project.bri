@@ -3,7 +3,7 @@ import * as std from "std";
 
 export const project = {
   name: "autoconf_archive",
-  version: "2024.10.16",
+  version: "2026.11.11",
 };
 
 const source = Brioche.download(
