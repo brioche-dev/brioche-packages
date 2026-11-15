@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.x.org/archive/individual/lib/libXtst-1.2.5.tar.xz": {
+    "https://www.x.org/archive/individual/lib/libXtst-1.2.6.tar.xz": {
       "type": "sha256",
-      "value": "b50d4c25b97009a744706c1039c598f4d8e64910c9fde381994e1cae235d9242"
+      "value": "f94f0b37c07d80d877f3eda2c2405cc7e62aa9842f6310354aa349e3d66a4fe5"
     }
   }
 }
