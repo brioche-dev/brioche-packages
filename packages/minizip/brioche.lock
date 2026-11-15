@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://github.com/madler/zlib/archive/refs/tags/v1.3.2.tar.gz": {
+    "https://github.com/madler/zlib/archive/refs/tags/v1.4.tar.gz": {
       "type": "sha256",
-      "value": "b99a0b86c0ba9360ec7e78c4f1e43b1cbdf1e6936c8fa0f6835c0cd694a495a1"
+      "value": "4331355048e286908260fdbeaa0b8cf75ceaf2907c75855a093a6487c7032aaa"
     }
   }
 }
