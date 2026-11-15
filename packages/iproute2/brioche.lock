@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-7.2.0.tar.xz": {
+    "https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-7.3.0.tar.xz": {
       "type": "sha256",
-      "value": "4c2fa124c2cf0afd7ca34d1eeacba6ba048a56f6374e2aab93dafbdbd4eea9c0"
+      "value": "5c1789d290bba048a6135ed1ab81b0402dd0fb528d1f1421765c42b1fc3d6289"
     }
   }
 }
