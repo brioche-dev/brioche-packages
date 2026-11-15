@@ -1,9 +1,9 @@
 {
   "dependencies": {},
   "downloads": {
-    "https://proxy.golang.org/github.com/hashicorp/terraform-ls/@v/v0.39.0.zip": {
+    "https://proxy.golang.org/github.com/hashicorp/terraform-ls/@v/v0.39.1.zip": {
       "type": "sha256",
-      "value": "7ac775b112c025aa426f4ae107b7632e7553270e76f136a7b09cfeff4108dda5"
+      "value": "346fb271323ec8e0606ecfbfac459582e1011ba60a88666bde467c1af5ccbafd"
     }
   }
 }
