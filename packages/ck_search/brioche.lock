@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/BeaconBay/ck.git": {
-      "0.7.11": "23215108e4a3a36c8731a85429c4562ff4cbac2e"
+      "0.8.1": "6cc5c7b68bf8856cf4f57e7b31579dc60376919f"
     }
   }
 }
