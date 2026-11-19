@@ -2,7 +2,7 @@
   "dependencies": {},
   "git_refs": {
     "https://github.com/google/libultrahdr.git": {
-      "v1.4.0": "d52a0d13814ca399fc8a07e23de1d2c63f0e8404"
+      "v2.0.2": "e5f5a022fe96fc4dc2ee35c19f733a50df807abe"
     }
   }
 }
