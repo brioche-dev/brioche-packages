@@ -3,7 +3,7 @@ import { cmakeBuild } from "cmake";
 
 export const project = {
   name: "abseil_cpp",
-  version: "20260526.0",
+  version: "20260817.0",
   repository: "https://github.com/abseil/abseil-cpp.git",
 };
 
